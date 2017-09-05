@@ -297,7 +297,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="ncoSampleRateLayout">
+    <layout class="QHBoxLayout" name="decimationLayout">
      <property name="topMargin">
       <number>2</number>
      </property>
@@ -399,14 +399,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="fcPosLabel">
        <property name="text">
         <string>Fc</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="fcPos">
        <property name="maximumSize">
         <size>
          <width>55</width>
@@ -446,6 +446,10 @@
        </property>
       </spacer>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="sampleRateLayout">
      <item>
       <widget class="QLabel" name="samplerateLabel">
        <property name="sizePolicy">
@@ -496,23 +500,19 @@
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_freq">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="lpfLayout">
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item>
       <widget class="QLabel" name="lpfLabel">
        <property name="text">
@@ -548,6 +548,7 @@
        <property name="toolTip">
         <string>Analog lowpass filer bandwidth (kHz)</string>
        </property>
+       <zorder>lpfUnits</zorder>
       </widget>
      </item>
      <item>
@@ -557,6 +558,23 @@
        </property>
       </widget>
      </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_freq">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="firLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
      <item>
       <widget class="ButtonSwitch" name="lpFIREnable">
        <property name="toolTip">
@@ -596,7 +614,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lpFIRUnits">
+      <widget class="QLabel" name="lpfUnits_2">
        <property name="text">
         <string>kHz</string>
        </property>
@@ -662,6 +680,19 @@
         </property>
        </item>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

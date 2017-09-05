@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include "device/devicesourceapi.h"
+#include "plutosdrinput.h"
 #include "ui_plutosdrinputgui.h"
 #include "plutosdrinputgui.h"
 
@@ -24,8 +25,40 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     QWidget(parent),
     ui(new Ui::PlutoSDRInputGUI),
     m_deviceAPI(deviceAPI),
-    m_settings()
+    m_settings(),
+    m_forceSettings(true),
+    m_sampleSource(NULL),
+    m_sampleRate(0),
+    m_deviceCenterFrequency(0),
+    m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
+    m_sampleSource = new PlutoSDRInput(m_deviceAPI);
+    m_deviceAPI->setSource(m_sampleSource);
+
+    float minF, maxF, stepF;
+    // TODO: call device core to get values
+    minF = 100000;
+    maxF = 4000000;
+    stepF = 1000;
+
+    ui->setupUi(this);
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(7, 325000U, 3800000U);
+
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
+    ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
+
+    ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
+
+    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->lpFIR->setValueRange(5, 1U, 56000U);
+
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    m_statusTimer.start(500);
+
+    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 PlutoSDRInputGui::~PlutoSDRInputGui()

@@ -17,13 +17,16 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include <QObject>
 #include <QWidget>
+#include <QTimer>
+
+#include <plugin/plugininstanceui.h>
 
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;
+class DeviceSampleSource;
 
 namespace Ui {
     class PlutoSDRInputGUI;
@@ -50,6 +53,13 @@ private:
     Ui::PlutoSDRInputGUI* ui;
     DeviceSourceAPI* m_deviceAPI;
     PlutoSDRInputSettings m_settings;
+    bool m_forceSettings;
+    QTimer m_updateTimer;
+    QTimer m_statusTimer;
+    DeviceSampleSource* m_sampleSource;
+    int m_sampleRate;
+    quint64 m_deviceCenterFrequency; //!< Center frequency in device
+    int m_lastEngineState;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */
