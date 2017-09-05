@@ -67,8 +67,12 @@ public:
     QString m_deviceDescription;
     PlutoSDRInputSettings m_settings;
     bool m_running;
-
     QMutex m_mutex;
+
+    bool openDevice();
+    void closeDevice();
+    void suspendBuddies();
+    void resumeBuddies();
 };
 
 

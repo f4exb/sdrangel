@@ -87,3 +87,23 @@ bool PlutoSDRInput::handleMessage(const Message& message)
         return false;
     }
 }
+
+bool PlutoSDRInput::openDevice()
+{
+
+}
+
+void PlutoSDRInput::closeDevice()
+{
+
+}
+
+void PlutoSDRInput::suspendBuddies()
+{
+
+}
+
+void PlutoSDRInput::resumeBuddies()
+{
+
+}

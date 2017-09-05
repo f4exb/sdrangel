@@ -6,12 +6,16 @@ set(plutosdrdevice_SOURCES
     deviceplutosdr.cpp
     deviceplutosdrbox.cpp
     deviceplutosdrscan.cpp
+    deviceplutosdrparams.cpp
+    deviceplutosdrshared.cpp
 )
 
 set(plutosdrdevice_HEADERS
     deviceplutosdr.h
     deviceplutsdrobox.h
     deviceplutosdrscan.h
+    deviceplutosdrparams.h
+    deviceplutosdrshared.h
 )
 
 if (BUILD_DEBIAN)
