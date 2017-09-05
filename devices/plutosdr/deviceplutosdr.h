@@ -17,6 +17,8 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDR_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDR_H_
 
+#include <stdint.h>
+
 #include "deviceplutosdrscan.h"
 #include "deviceplutosdrbox.h"
 
@@ -31,6 +33,15 @@ public:
     const std::string* getSerialAt(unsigned int index) const { return m_scan.getSerialAt(index); }
     DevicePlutoSDRBox* getDeviceFromURI(const std::string& uri);
     DevicePlutoSDRBox* getDeviceFromSerial(const std::string& serial);
+
+    static const uint64_t loLowLimitFreq;  //!< LO lower frequency limit (Hz)
+    static const uint64_t loHighLimitFreq; //!< LO lower frequency limit (Hz)
+    static const uint32_t srLowLimitFreq;  //!< Device sample rate lower limit in S/s
+    static const uint32_t srHighLimitFreq; //!< Device sample rate higher limit in S/s
+    static const uint32_t bbLPRxLowLimitFreq;   //!< Analog base band Rx low pass filter lower frequency limit (Hz)
+    static const uint32_t bbLPRxHighLimitFreq;  //!< Analog base band Rx high pass filter lower frequency limit (Hz)
+    static const uint32_t bbLPTxLowLimitFreq;   //!< Analog base band Tx low pass filter lower frequency limit (Hz)
+    static const uint32_t bbLPTxHighLimitFreq;  //!< Analog base band Tx high pass filter lower frequency limit (Hz)
 
 protected:
     DevicePlutoSDR();

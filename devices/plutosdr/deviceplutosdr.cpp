@@ -16,6 +16,17 @@
 
 #include "deviceplutosdr.h"
 
+const uint64_t DevicePlutoSDR::loLowLimitFreq  =   70000000UL; // 70 MHz: take AD9364 specs
+const uint64_t DevicePlutoSDR::loHighLimitFreq = 6000000000UL; //  6 GHz: take AD9364 specs
+
+const uint32_t DevicePlutoSDR::srLowLimitFreq  =  200000; // 200 kS/s
+const uint32_t DevicePlutoSDR::srHighLimitFreq = 2000000; // 20 MS/s: take AD9363 speces
+
+const uint32_t DevicePlutoSDR::bbLPRxLowLimitFreq  =   200000; // 200 kHz
+const uint32_t DevicePlutoSDR::bbLPRxHighLimitFreq = 14000000; // 14 MHz
+const uint32_t DevicePlutoSDR::bbLPTxLowLimitFreq  =   625000; // 625 kHz
+const uint32_t DevicePlutoSDR::bbLPTxHighLimitFreq = 16000000; // 16 MHz
+
 DevicePlutoSDR::DevicePlutoSDR()
 {
 }
