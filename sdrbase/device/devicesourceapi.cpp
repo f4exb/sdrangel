@@ -70,6 +70,11 @@ void DeviceSourceAPI::setSource(DeviceSampleSource* source)
     m_deviceSourceEngine->setSource(source);
 }
 
+DeviceSampleSource *DeviceSourceAPI::getSource()
+{
+    return m_deviceSourceEngine->getSource();
+}
+
 bool DeviceSourceAPI::initAcquisition()
 {
     return m_deviceSourceEngine->initAcquisition();

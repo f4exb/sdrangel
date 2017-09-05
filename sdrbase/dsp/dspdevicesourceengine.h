@@ -61,6 +61,7 @@ public:
 
 	void setSource(DeviceSampleSource* source); //!< Set the sample source type
 	void setSourceSequence(int sequence); //!< Set the sample source sequence in type
+	DeviceSampleSource *getSource() { return m_deviceSampleSource; }
 
 	void addSink(BasebandSampleSink* sink); //!< Add a sample sink
 	void removeSink(BasebandSampleSink* sink); //!< Remove a sample sink
