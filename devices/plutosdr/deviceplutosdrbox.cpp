@@ -106,6 +106,42 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
     }
 }
 
+bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, std::string &value)
+{
+    struct iio_channel *chn = 0;
+    const char *attr = 0;
+    char valuestr[256];
+    int ret;
+    ssize_t nchars;
+
+    ret = iio_device_identify_filename(dev, param.c_str(), &chn, &attr);
+
+    if (ret)
+    {
+        std::cerr << "PlutoSDRDevice::get_param: Parameter not recognized: " << param << std::endl;
+        return false;
+    }
+
+    if (chn) {
+        nchars = iio_channel_attr_read(chn, attr, valuestr, 256);
+    } else if (iio_device_find_attr(dev, attr)) {
+        nchars = iio_device_attr_read(dev, attr, valuestr, 256);
+    } else {
+        nchars = iio_device_debug_attr_read(dev, attr, valuestr, 256);
+    }
+
+    if (nchars < 0)
+    {
+        std::cerr << "PlutoSDRDevice::get_param: Unable to read attribute " << param <<  ": " << nchars << std::endl;
+        return false;
+    }
+    else
+    {
+        value.assign(valuestr);
+        return true;
+    }
+}
+
 bool DevicePlutoSDRBox::openRx()
 {
     if (!m_chnRx0) {
