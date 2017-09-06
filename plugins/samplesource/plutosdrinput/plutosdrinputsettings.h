@@ -58,18 +58,21 @@ struct PlutoSDRInputSettings {
         RATEGOV_END
     } RateGovernor;
 
+    // global settings to be saved
 	quint64 m_centerFrequency;
-    fcPos_t m_fcPos;
-    qint32  m_LOppmTenths;
-    quint32 m_log2Decim;
     quint64 m_devSampleRate;
     RateGovernor m_rateGovernor;
+    // channel settings
+    fcPos_t m_fcPos;
+    qint32  m_LOppmTenths;
     bool    m_dcBlock;
     bool    m_iqCorrection;
-    float   m_lpfBW;        //!< analog lowpass filter bandwidth (Hz)
-    bool    m_lpfFIREnable; //!< enable digital lowpass FIR filter
-    float   m_lpfFIRBW;     //!< digital lowpass FIR filter bandwidth (Hz)
-    uint32_t m_gain;        //!< "hardware" gain
+    quint32 m_log2Decim;
+    float   m_lpfBW;           //!< analog lowpass filter bandwidth (Hz)
+    bool    m_lpfFIREnable;    //!< enable digital lowpass FIR filter
+    float   m_lpfFIRBW;        //!< digital lowpass FIR filter bandwidth (Hz)
+    quint32 m_lpfFIRlog2Decim; //!< digital lowpass FIR filter log2 of decimation factor (0..2)
+    uint32_t m_gain;           //!< "hardware" gain
     RFPath  m_antennaPath;
     GainMode m_gainMode;
 

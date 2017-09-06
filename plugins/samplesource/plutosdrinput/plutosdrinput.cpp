@@ -23,6 +23,7 @@
 #include "plutosdr/deviceplutosdrbox.h"
 
 #include "plutosdrinput.h"
+#include "plutosdrinputthread.h"
 
 #define PLUTOSDR_BLOCKSIZE (1024*1024) //complex samples per buffer
 
@@ -33,7 +34,8 @@ PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     m_fileSink(0),
     m_deviceDescription("PlutoSDR"),
     m_running(false),
-    m_plutoRxBuffer(0)
+    m_plutoRxBuffer(0),
+    m_plutoSDRInputThread(0)
 {
     char recFileNameCStr[30];
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
@@ -60,29 +62,37 @@ bool PlutoSDRInput::start()
 
     // start / stop streaming is done in the thread.
 
-//    if ((m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo)) == 0)
-//    {
-//        qFatal("LimeSDRInput::start: cannot create thread");
-//        stop();
-//        return false;
-//    }
-//    else
-//    {
-//        qDebug("LimeSDRInput::start: thread created");
-//    }
-//
-//    m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
-//
-//    m_limeSDRInputThread->startWork();
-//
-//    m_deviceShared.m_thread = m_limeSDRInputThread;
-//    m_running = true;
+    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
+    {
+        qFatal("PlutoSDRInput::start: cannot create thread");
+        stop();
+        return false;
+    }
+    else
+    {
+        qDebug("PlutoSDRInput::start: thread created");
+    }
+
+    m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_plutoSDRInputThread->startWork();
+
+    m_deviceShared.m_thread = m_plutoSDRInputThread;
+    m_running = true;
 
     return true;
 }
 
 void PlutoSDRInput::stop()
 {
+    if (m_plutoSDRInputThread != 0)
+    {
+        m_plutoSDRInputThread->stopWork();
+        delete m_plutoSDRInputThread;
+        m_plutoSDRInputThread = 0;
+    }
+
+    m_deviceShared.m_thread = 0;
+    m_running = false;
 }
 
 const QString& PlutoSDRInput::getDeviceDescription() const
@@ -102,7 +112,19 @@ quint64 PlutoSDRInput::getCenterFrequency() const
 
 bool PlutoSDRInput::handleMessage(const Message& message)
 {
-    if (MsgFileRecord::match(message))
+    if (MsgConfigurePlutoSDR::match(message))
+    {
+        MsgConfigurePlutoSDR& conf = (MsgConfigurePlutoSDR&) message;
+        qDebug() << "PlutoSDRInput::handleMessage: MsgConfigurePlutoSDR";
+
+        if (!applySettings(conf.getSettings(), conf.getForce()))
+        {
+            qDebug("PlutoSDRInput::handleMessage config error");
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "PlutoSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
@@ -219,5 +241,91 @@ void PlutoSDRInput::resumeBuddies()
 
 bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool force)
 {
+    bool forwardChangeOwnDSP    = false;
+    bool forwardChangeAllDSP    = false;
+    bool suspendOwnThread       = false;
+    bool ownThreadWasRunning    = false;
+    bool suspendAllOtherThreads = false; // All others means Tx in fact
+    bool doCalibration = false;
+
+    // determine if buddies threads or own thread need to be suspended
+
+    // change of global baseband sample rate affecting all buddies can occur if
+    //   - device to host sample rate is changed
+    //   - rate governor is changed
+    //   - FIR filter decimation is changed
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+        (m_settings.m_rateGovernor != settings.m_rateGovernor) ||
+        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) || force)
+    {
+        suspendAllOtherThreads = true;
+        suspendOwnThread = true;
+    }
+    else
+    {
+        suspendOwnThread = true;
+    }
+
+    if (suspendAllOtherThreads)
+    {
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSink)->getBuddySharedPtr();
+
+            if (buddySharedPtr->m_thread) {
+                buddySharedPtr->m_thread->stopWork();
+                buddySharedPtr->m_threadWasRunning = true;
+            }
+            else
+            {
+                buddySharedPtr->m_threadWasRunning = false;
+            }
+        }
+    }
+
+    if (suspendOwnThread)
+    {
+        if (m_plutoSDRInputThread && m_plutoSDRInputThread->isRunning())
+        {
+            m_plutoSDRInputThread->stopWork();
+            ownThreadWasRunning = true;
+        }
+    }
+
+    // TODO: apply settings (all cases)
+
+    // Change affecting device baseband sample rate potentially affecting all buddies device/host sample rate
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+        (m_settings.m_rateGovernor != settings.m_rateGovernor) ||
+        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) || force)
+    {
+        forwardChangeAllDSP = true;
+    }
+
+    if (suspendAllOtherThreads)
+    {
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSink)->getBuddySharedPtr();
+
+            if (buddySharedPtr->m_threadWasRunning) {
+                buddySharedPtr->m_thread->startWork();
+            }
+        }
+    }
+
+    if (suspendOwnThread)
+    {
+        if (ownThreadWasRunning) {
+            m_plutoSDRInputThread->startWork();
+        }
+    }
+
     return false;
 }

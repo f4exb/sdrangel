@@ -27,9 +27,33 @@
 
 class DeviceSourceAPI;
 class FileRecord;
+class PlutoSDRInputThread;
 
 class PlutoSDRInput : public DeviceSampleSource {
 public:
+    class MsgConfigurePlutoSDR : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PlutoSDRInputSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigurePlutoSDR* create(const PlutoSDRInputSettings& settings, bool force)
+        {
+            return new MsgConfigurePlutoSDR(settings, force);
+        }
+
+    private:
+        MsgConfigurePlutoSDR m_settings;
+        bool m_force;
+
+        MsgConfigurePlutoSDR(const PlutoSDRInputSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     class MsgFileRecord : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -70,6 +94,7 @@ public:
     bool m_running;
     DevicePlutoSDRShared m_deviceShared;
     struct iio_buffer *m_plutoRxBuffer;
+    PlutoSDRInputThread *m_plutoSDRInputThread;
     QMutex m_mutex;
 
     bool openDevice();

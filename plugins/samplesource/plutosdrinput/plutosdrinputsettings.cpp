@@ -38,6 +38,7 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_lpfBW = 1500000.0f;
 	m_lpfFIREnable = false;
 	m_lpfFIRBW = 500000.0f;
+	m_lpfFIRlog2Decim = 0;
 	m_gain = 40;
 	m_antennaPath = RFPATH_A_BAL;
 	m_gainMode = GAIN_MANUAL;
@@ -48,6 +49,7 @@ QByteArray PlutoSDRInputSettings::serialize() const
 	SimpleSerializer s(1);
 
     s.writeS32(1, m_LOppmTenths);
+    s.writeU32(3, m_lpfFIRlog2Decim);
     s.writeU32(4, m_log2Decim);
 	s.writeS32(5, m_fcPos);
 	s.writeS32(6, m_rateGovernor);
@@ -77,8 +79,15 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		uint32_t uintval;
 
         d.readS32(1, &m_LOppmTenths, 0);
+        d.readU32(3, &uintval, 0);
+        if (uintval > 2) {
+            m_lpfFIRlog2Decim = 2;
+        } else {
+            m_lpfFIRlog2Decim = uintval;
+        }
         d.readU32(4, &m_log2Decim, 0);
 		d.readS32(5, &intval, 0);
 		if ((intval < 0) || (intval > 2)) {

@@ -19,6 +19,7 @@
 #include <cstring>
 #include <regex>
 #include <iio.h>
+#include <boost/lexical_cast.hpp>
 
 #include "deviceplutosdrbox.h"
 
@@ -327,7 +328,38 @@ char* DevicePlutoSDRBox::txBufferFirst()
     }
 }
 
+bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates& sampleRates)
+{
+    // Rx: "BBPLL:983040000 ADC:245760000 R2:122880000 R1:61440000 RF:30720000 RXSAMP:30720000"
+    // Tx: "BBPLL:983040000 DAC:122880000 T2:122880000 T1:61440000 TF:30720000 TXSAMP:30720000"
+    std::regex desc_regex("BBPLL:(.+) ..C:(.+) .2:(.+) .1:(.+) .F:(.+) .XSAMP:(.+)");
+    std::smatch desc_match;
+    std::regex_search(rateStr, desc_match, desc_regex);
+    std::string valueStr;
 
+    if (desc_match.size() == 7)
+    {
+        try
+        {
+            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]);
+            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]);
+            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]);
+            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]);
+            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]);
+            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]);
+            return true;
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            qWarning("DevicePlutoSDRBox::parseSampleRates: bad conversion to numeric");
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
 
 
 
