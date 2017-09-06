@@ -24,6 +24,8 @@
 
 #include "plutosdrinput.h"
 
+#define PLUTOSDR_BLOCKSIZE (1024*1024) //complex samples per buffer
+
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
 
 PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
@@ -166,7 +168,7 @@ bool PlutoSDRInput::openDevice()
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openRx();
-    m_plutoRxBuffer = plutoBox->createRxBuffer(1024*1024, false);
+    m_plutoRxBuffer = plutoBox->createRxBuffer(PLUTOSDR_BLOCKSIZE, false);
 
     return true;
 }

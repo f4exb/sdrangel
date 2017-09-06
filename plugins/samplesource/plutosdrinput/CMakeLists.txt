@@ -5,7 +5,7 @@ set(plutosdrinput_SOURCES
     plutosdrinput.cpp
     plutosdrinputplugin.cpp
     plutosdrinputsettings.cpp
-#    plutosdrinputthread.cpp
+    plutosdrinputthread.cpp
 )
 
 set(plutosdrinput_HEADERS
@@ -13,7 +13,7 @@ set(plutosdrinput_HEADERS
     plutosdrinput.h
     plutosdrinputplugin.h
     plutosdrinputsettings.h
-#    plutosdrinputthread.h
+    plutosdrinputthread.h
 )
 
 set(plutosdrinput_FORMS

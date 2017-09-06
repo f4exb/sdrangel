@@ -17,6 +17,8 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_
 
+#include <stdint.h>
+#include <sys/types.h>
 #include "deviceplutosdrscan.h"
 
 class DevicePlutoSDRBox
