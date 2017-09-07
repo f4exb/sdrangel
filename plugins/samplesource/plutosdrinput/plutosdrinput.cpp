@@ -254,9 +254,11 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     //   - device to host sample rate is changed
     //   - rate governor is changed
     //   - FIR filter decimation is changed
+    //   - FIR filter is enabled or disabled
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_rateGovernor != settings.m_rateGovernor) ||
-        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) || force)
+        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) ||
+        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
         suspendAllOtherThreads = true;
         suspendOwnThread = true;
@@ -300,8 +302,15 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     // Change affecting device baseband sample rate potentially affecting all buddies device/host sample rate
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_rateGovernor != settings.m_rateGovernor) ||
-        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) || force)
+        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) ||
+        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
+        std::vector<std::string> params;
+        params.push_back(QString(tr("in_voltage_sampling_frequency=%1").arg(settings.m_devSampleRate)).toStdString());
+        QString rateGovStr;
+        PlutoSDRInputSettings::translateGovernor(settings.m_rateGovernor, rateGovStr);
+        params.push_back(QString(tr("trx_rate_governor=%1").arg(rateGovStr)).toStdString());
+        params.push_back(QString(tr("in_voltage_filter_fir_en=%1").arg(settings.m_lpfFIREnable ? 1 : 0)).toStdString());
         forwardChangeAllDSP = true;
     }
 

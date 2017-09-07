@@ -20,6 +20,7 @@
 #include <regex>
 #include <iio.h>
 #include <boost/lexical_cast.hpp>
+#include <QtGlobal>
 
 #include "deviceplutosdrbox.h"
 
@@ -77,7 +78,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
         if (pos == std::string::npos)
         {
-            std::cerr << "PlutoSDRDevice::set_params: Misformed line: " << *it << std::endl;
+            std::cerr << "DevicePlutoSDRBox::set_params: Misformed line: " << *it << std::endl;
             continue;
         }
 
@@ -88,7 +89,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
         if (ret)
         {
-            std::cerr << "PlutoSDRDevice::set_params: Parameter not recognized: " << key << std::endl;
+            std::cerr << "DevicePlutoSDRBox::set_params: Parameter not recognized: " << key << std::endl;
             continue;
         }
 
@@ -102,7 +103,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
         if (ret < 0)
         {
-            std::cerr << "PlutoSDRDevice::set_params: Unable to write attribute " << key <<  ": " << ret << std::endl;
+            std::cerr << "DevicePlutoSDRBox::set_params: Unable to write attribute " << key <<  ": " << ret << std::endl;
         }
     }
 }
@@ -136,7 +137,7 @@ bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, 
 
     if (ret)
     {
-        std::cerr << "PlutoSDRDevice::get_param: Parameter not recognized: " << param << std::endl;
+        std::cerr << "DevicePlutoSDRBox::get_param: Parameter not recognized: " << param << std::endl;
         return false;
     }
 
@@ -150,13 +151,25 @@ bool DevicePlutoSDRBox::get_param(DeviceType devType, const std::string &param, 
 
     if (nchars < 0)
     {
-        std::cerr << "PlutoSDRDevice::get_param: Unable to read attribute " << param <<  ": " << nchars << std::endl;
+        std::cerr << "DevicePlutoSDRBox::get_param: Unable to read attribute " << param <<  ": " << nchars << std::endl;
         return false;
     }
     else
     {
         value.assign(valuestr);
         return true;
+    }
+}
+
+void DevicePlutoSDRBox::set_filter(const std::string &filterConfigStr)
+{
+    int ret;
+
+    ret = iio_device_attr_write_raw(m_devPhy, "filter_fir_config", filterConfigStr.c_str(), filterConfigStr.size());
+
+    if (ret < 0)
+    {
+        std::cerr << "DevicePlutoSDRBox::set_filter: Unable to set: " <<  filterConfigStr <<  ": " << ret << std::endl;
     }
 }
 
@@ -170,7 +183,7 @@ bool DevicePlutoSDRBox::openRx()
         iio_channel_enable(m_chnRx0);
         return true;
     } else {
-        std::cerr << "PlutoSDRDevice::openRx: failed" << std::endl;
+        std::cerr << "DevicePlutoSDRBox::openRx: failed" << std::endl;
         return false;
     }
 }
@@ -185,7 +198,7 @@ bool DevicePlutoSDRBox::openTx()
         iio_channel_enable(m_chnTx0);
         return true;
     } else {
-        std::cerr << "PlutoSDRDevice::openTx: failed" << std::endl;
+        std::cerr << "DevicePlutoSDRBox::openTx: failed" << std::endl;
         return false;
     }
 }
@@ -328,6 +341,28 @@ char* DevicePlutoSDRBox::txBufferFirst()
     }
 }
 
+bool DevicePlutoSDRBox::getRxSampleRates(SampleRates& sampleRates)
+{
+    std::string srStr;
+
+    if (get_param(DEVICE_PHY, "rx_path_rates", srStr)) {
+        return parseSampleRates(srStr, sampleRates);
+    } else {
+        return false;
+    }
+}
+
+bool DevicePlutoSDRBox::getTxSampleRates(SampleRates& sampleRates)
+{
+    std::string srStr;
+
+    if (get_param(DEVICE_PHY, "tx_path_rates", srStr)) {
+        return parseSampleRates(srStr, sampleRates);
+    } else {
+        return false;
+    }
+}
+
 bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates& sampleRates)
 {
     // Rx: "BBPLL:983040000 ADC:245760000 R2:122880000 R1:61440000 RF:30720000 RXSAMP:30720000"
@@ -341,12 +376,12 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     {
         try
         {
-            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]);
-            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]);
-            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]);
-            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]);
-            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]);
-            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]);
+            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]) + 1;
+            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]) + 1;
+            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]) + 1;
+            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]) + 1;
+            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]) + 1;
+            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]) + 1;
             return true;
         }
         catch (const boost::bad_lexical_cast &e)

@@ -51,6 +51,7 @@ public:
 
     void set_params(DeviceType devType, const std::vector<std::string> &params);
     bool get_param(DeviceType devType, const std::string &param, std::string &value);
+    void set_filter(const std::string &filterConfigStr);
     bool openRx();
     bool openTx();
     void closeRx();

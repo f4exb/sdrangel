@@ -129,3 +129,19 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void PlutoSDRInputSettings::translateGovernor(RateGovernor gov, QString& s)
+{
+    switch(gov)
+    {
+    case RATEGOV_NORMAL:
+        s = "normal";
+        break;
+    case RATEGOV_HIGHOSR:
+        s = "highest_osr";
+        break;
+    default:
+        s = "highest_osr";
+        break;
+    }
+}

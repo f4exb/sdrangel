@@ -44,7 +44,7 @@ public:
         }
 
     private:
-        MsgConfigurePlutoSDR m_settings;
+        PlutoSDRInputSettings m_settings;
         bool m_force;
 
         MsgConfigurePlutoSDR(const PlutoSDRInputSettings& settings, bool force) :
