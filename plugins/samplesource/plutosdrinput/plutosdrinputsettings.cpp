@@ -49,6 +49,7 @@ QByteArray PlutoSDRInputSettings::serialize() const
 	SimpleSerializer s(1);
 
     s.writeS32(1, m_LOppmTenths);
+    s.writeS32(2, m_lpfFIRGain);
     s.writeU32(3, m_lpfFIRlog2Decim);
     s.writeU32(4, m_log2Decim);
 	s.writeS32(5, m_fcPos);
@@ -82,6 +83,7 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
 		uint32_t uintval;
 
         d.readS32(1, &m_LOppmTenths, 0);
+        d.readS32(2, &m_lpfFIRGain, 0);
         d.readU32(3, &uintval, 0);
         if (uintval > 2) {
             m_lpfFIRlog2Decim = 2;

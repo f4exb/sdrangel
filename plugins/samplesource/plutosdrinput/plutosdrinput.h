@@ -86,6 +86,8 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    uint32_t getADCSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
+
  private:
     DeviceSourceAPI *m_deviceAPI;
     FileRecord *m_fileSink;
@@ -95,6 +97,7 @@ public:
     DevicePlutoSDRShared m_deviceShared;
     struct iio_buffer *m_plutoRxBuffer;
     PlutoSDRInputThread *m_plutoSDRInputThread;
+    DevicePlutoSDRBox::SampleRates m_deviceSampleRates;
     QMutex m_mutex;
 
     bool openDevice();

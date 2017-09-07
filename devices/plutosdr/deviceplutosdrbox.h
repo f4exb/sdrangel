@@ -17,6 +17,7 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_
 
+#include <sstream>
 #include <stdint.h>
 #include <sys/types.h>
 #include "deviceplutosdrscan.h"
@@ -79,7 +80,7 @@ public:
     char* txBufferFirst();
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
-    void set_filterBW(DeviceUse use, uint32_t intdec, uint32_t bw);
+    void setFIR(DeviceUse use, uint32_t intdec, uint32_t bw, int gain);
 
 private:
     struct iio_context *m_ctx;
@@ -93,7 +94,9 @@ private:
     bool m_valid;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
-    void set_filter(const std::string &filterConfigStr);
+    void set_filter(const std::string& filterConfigStr);
+    void formatFIRHeader(std::ostringstream& str, DeviceUse use, uint32_t intdec, int32_t gain);
+    void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
 };
 
 #endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_ */

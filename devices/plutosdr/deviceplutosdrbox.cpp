@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include <sstream>
 #include <cstdio>
 #include <cstring>
 #include <regex>
@@ -23,6 +22,7 @@
 #include <boost/lexical_cast.hpp>
 #include <QtGlobal>
 
+#include "dsp/wfir.h"
 #include "deviceplutosdrbox.h"
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
@@ -397,13 +397,20 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     }
 }
 
-void DevicePlutoSDRBox::set_filterBW(DeviceUse use, uint32_t intdec, uint32_t bw)
+void DevicePlutoSDRBox::setFIR(DeviceUse use, uint32_t intdec, uint32_t bw, int gain)
 {
     SampleRates sampleRates;
     std::ostringstream ostr;
 
     uint32_t nbTaps;
-    float normalizedBW;
+    double normalizedBW;
+
+    // set a dummy minimal filter first to get the sample rates right
+
+    formatFIRHeader(ostr, use, intdec, gain);
+    formatFIRCoefficients(ostr, 16, 0.5);
+    setFilter(ostr.str());
+    ostr.str(""); // reset string stream
 
     if (use == USE_RX)
     {
@@ -428,7 +435,27 @@ void DevicePlutoSDRBox::set_filterBW(DeviceUse use, uint32_t intdec, uint32_t bw
         normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
         normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
     }
+
+    // set the right filter
+
+    formatFIRHeader(ostr, use, intdec, gain);
+    formatFIRCoefficients(ostr, nbTaps, normalizedBW);
+    setFilter(ostr.str());
 }
 
+void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr, DeviceUse use, uint32_t intdec, int32_t gain)
+{
+    ostr << use == USE_RX ? "RX 1" : "TX 1" << " GAIN " << gain << " DEC " << intdec << std::endl;
+}
+
+void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t nbTaps, double normalizedBW)
+{
+    double fcoeffs = new double[nbTaps];
+    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, 0.0, normalizedBW, WFIR::wtBLACKMAN_HARRIS, 0.0);
+
+    for (int i = 0; i < nbTaps; i++) {
+        ostr << (uint16_t) (fcoeffs[i] * 32768.0) << std::endl;
+    }
+}
 
 

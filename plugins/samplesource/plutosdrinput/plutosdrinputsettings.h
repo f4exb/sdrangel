@@ -72,6 +72,7 @@ struct PlutoSDRInputSettings {
     bool    m_lpfFIREnable;    //!< enable digital lowpass FIR filter
     float   m_lpfFIRBW;        //!< digital lowpass FIR filter bandwidth (Hz)
     quint32 m_lpfFIRlog2Decim; //!< digital lowpass FIR filter log2 of decimation factor (0..2)
+    int     m_lpfFIRGain;      //!< digital lowpass FIR filter gain (dB)
     uint32_t m_gain;           //!< "hardware" gain
     RFPath  m_antennaPath;
     GainMode m_gainMode;

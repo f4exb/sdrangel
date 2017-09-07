@@ -242,11 +242,13 @@ void PlutoSDRInput::resumeBuddies()
 bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool force)
 {
     bool forwardChangeOwnDSP    = false;
-    bool forwardChangeAllDSP    = false;
+    bool forwardChangeOtherDSP  = false;
     bool suspendOwnThread       = false;
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
     bool doCalibration = false;
+    bool firFilterSet = false;
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
     // determine if buddies threads or own thread need to be suspended
 
@@ -299,7 +301,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     // TODO: apply settings (all cases)
 
-    // Change affecting device baseband sample rate potentially affecting all buddies device/host sample rate
+    // Change affecting device sample rate chain potentially affecting other buddies device/host sample rate
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_rateGovernor != settings.m_rateGovernor) ||
         (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) ||
@@ -310,9 +312,70 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         QString rateGovStr;
         PlutoSDRInputSettings::translateGovernor(settings.m_rateGovernor, rateGovStr);
         params.push_back(QString(tr("trx_rate_governor=%1").arg(rateGovStr)).toStdString());
-        params.push_back(QString(tr("in_voltage_filter_fir_en=%1").arg(settings.m_lpfFIREnable ? 1 : 0)).toStdString());
-        forwardChangeAllDSP = true;
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params); // set end point frequency and rate governor first
+
+        // Unless unconditionally forced to change settings change FIR settings if FIR is enabled AND
+        //   - FIR was not enabled before OR
+        //   - Host interface sample rate has changed OR
+        //   - Decimation chain rate governor has changed OR
+        //   - FIR decimation has changed
+        if ((settings.m_lpfFIREnable && (!m_settings.m_lpfFIREnable
+                || (m_settings.m_devSampleRate != settings.m_devSampleRate)
+                || (m_settings.m_rateGovernor != settings.m_rateGovernor)
+                || (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim))) || force)
+        {
+            plutoBox->set_filterBW(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
+            firFilterSet = true;
+        }
+
+        // Reset the filter if gain or bandwidth changes without change to any of the sample rates and not done at previous step
+        if (((settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
+             (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain)) && !firFilterSet)
+        {
+            plutoBox->set_filterBW(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
+            firFilterSet = true;
+        }
+
+        if ((m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
+        {
+            params.clear();
+            params.push_back(QString(tr("in_voltage_filter_fir_en=%1").arg(settings.m_lpfFIREnable ? 1 : 0)).toStdString());
+            plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params); // eventually enable/disable FIR
+        }
+
+        plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
+        qDebug() << "PlutoSDRInput::applySettings: BBPLL: " << m_deviceSampleRates.m_bbRate
+                 << " ADC: " << m_deviceSampleRates.m_addaConnvRate
+                 << " -HB3-> " << m_deviceSampleRates.m_hb3Rate
+                 << " -HB2-> " << m_deviceSampleRates.m_hb2Rate
+                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate
+                 << " -FIR-> " << m_deviceSampleRates.m_firRate;
+
+        forwardChangeOtherDSP = true;
+        forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);
     }
+
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        if (m_plutoSDRInputThread != 0)
+        {
+            m_plutoSDRInputThread->setLog2Decimation(settings.m_log2Decim);
+            qDebug() << "PlutoSDRInput::applySettings: set soft decimation to " << (1<<m_settings.m_log2Decim);
+        }
+
+        forwardChangeOwnDSP = true;
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
+        std::vector<std::string> params;
+        params.push_back(QString(tr("in_voltage_sampling_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+
+        forwardChangeOwnDSP = true;
+    }
+
+    m_settings = settings;
 
     if (suspendAllOtherThreads)
     {
@@ -334,6 +397,18 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         if (ownThreadWasRunning) {
             m_plutoSDRInputThread->startWork();
         }
+    }
+
+    // TODO: forward changes to other (Tx) DSP
+
+    if (forwardChangeOwnDSP)
+    {
+        qDebug("PlutoSDRInput::applySettings: forward change to self");
+
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
     }
 
     return false;
