@@ -31,6 +31,12 @@ public:
         DEVICE_TX
     } DeviceType;
 
+    typedef enum
+    {
+        USE_RX,
+        USE_TX
+    } DeviceUse;
+
     struct Sample {
         int16_t i;
         int16_t q;
@@ -51,7 +57,6 @@ public:
 
     void set_params(DeviceType devType, const std::vector<std::string> &params);
     bool get_param(DeviceType devType, const std::string &param, std::string &value);
-    void set_filter(const std::string &filterConfigStr);
     bool openRx();
     bool openTx();
     void closeRx();
@@ -74,6 +79,7 @@ public:
     char* txBufferFirst();
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
+    void set_filterBW(DeviceUse use, uint32_t intdec, uint32_t bw);
 
 private:
     struct iio_context *m_ctx;
@@ -87,6 +93,7 @@ private:
     bool m_valid;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
+    void set_filter(const std::string &filterConfigStr);
 };
 
 #endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_ */

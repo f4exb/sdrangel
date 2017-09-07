@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <cstring>
 #include <regex>
@@ -393,6 +394,39 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     else
     {
         return false;
+    }
+}
+
+void DevicePlutoSDRBox::set_filterBW(DeviceUse use, uint32_t intdec, uint32_t bw)
+{
+    SampleRates sampleRates;
+    std::ostringstream ostr;
+
+    uint32_t nbTaps;
+    float normalizedBW;
+
+    if (use == USE_RX)
+    {
+        if (!getRxSampleRates(sampleRates)) {
+            return;
+        }
+
+        uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
+        nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
+        normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
+        normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
+    }
+    else
+    {
+        if (!getTxSampleRates(sampleRates)) {
+            return;
+        }
+
+        uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
+        nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
+        nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
+        normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
+        normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
     }
 }
 
