@@ -247,7 +247,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     bool suspendOwnThread       = false;
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
-    bool doCalibration = false;
     bool firFilterSet = false;
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
@@ -301,6 +300,12 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     }
 
     // TODO: apply settings (all cases)
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, m_settings.m_iqCorrection);
+    }
 
     // Change affecting device sample rate chain potentially affecting other buddies device/host sample rate
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
@@ -361,28 +366,71 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         if (m_plutoSDRInputThread != 0)
         {
             m_plutoSDRInputThread->setLog2Decimation(settings.m_log2Decim);
-            qDebug() << "PlutoSDRInput::applySettings: set soft decimation to " << (1<<m_settings.m_log2Decim);
+            qDebug() << "PlutoSDRInput::applySettings: set soft decimation to " << (1<<settings.m_log2Decim);
         }
 
         forwardChangeOwnDSP = true;
     }
 
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    {
+        if (m_plutoSDRInputThread != 0)
+        {
+            m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
+            qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << (1<<settings.m_fcPos);
+        }
+    }
+
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    {
+        int64_t newXO = plutoBox->getInitialXO() + ((plutoBox->getInitialXO()*settings.m_LOppmTenths) / 10000000L);
+        std::vector<std::string> params;
+        params.push_back(QString(tr("xo_correction=%1").arg(newXO)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+    }
+
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         std::vector<std::string> params;
-        params.push_back(QString(tr("in_voltage_sampling_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
+        params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
         plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
 
         forwardChangeOwnDSP = true;
     }
 
-    m_settings = settings;
-
-    // TODO: calibration
-    if (doCalibration)
+    if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
     {
-        qDebug("PlutoSDRInput::applySettings: doCalibration");
+        std::vector<std::string> params;
+        params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
     }
+
+    if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+    {
+        std::vector<std::string> params;
+        QString rfPortStr;
+        PlutoSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
+        params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+    }
+
+    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+    {
+        std::vector<std::string> params;
+        QString gainModeStr;
+        PlutoSDRInputSettings::translateGainMode(settings.m_gainMode, gainModeStr);
+        params.push_back(QString(tr("in_voltage0_gain_control_mode=%1").arg(gainModeStr)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+    }
+
+    if ((m_settings.m_gain != settings.m_gain) || force)
+    {
+        std::vector<std::string> params;
+        params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_gain)).toStdString());
+        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+    }
+
+    m_settings = settings;
 
     if (suspendAllOtherThreads)
     {

@@ -83,6 +83,8 @@ struct PlutoSDRInputSettings {
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	static void translateGovernor(RateGovernor gov, QString& s);
+    static void translateRFPath(RFPath path, QString& s);
+    static void translateGainMode(GainMode mod, QString& s);
 };
 
 #endif /* _PLUTOSDR_PLUTOSDRINPUTSETTINGS_H_ */

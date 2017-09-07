@@ -29,13 +29,18 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_chnRx0(0),
         m_chnTx0(0),
         m_rxBuf(0),
-        m_txBuf(0)
+        m_txBuf(0),
+        m_xoInitial(0)
 {
     m_ctx = iio_create_context_from_uri(uri.c_str());
     m_devPhy = iio_context_find_device(m_ctx, "ad9361-phy");
     m_devRx = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
     m_devTx = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
     m_valid = m_ctx && m_devPhy && m_devRx && m_devTx;
+
+    if (m_valid) {
+        getXO();
+    }
 }
 
 DevicePlutoSDRBox::~DevicePlutoSDRBox()
@@ -455,6 +460,20 @@ void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t
 
     for (unsigned int i = 0; i < nbTaps; i++) {
         ostr << (uint16_t) (fcoeffs[i] * 32768.0) << std::endl;
+    }
+}
+
+void DevicePlutoSDRBox::getXO()
+{
+    std::string valueStr;
+    get_param(DEVICE_PHY, "xo_correction", valueStr);
+    try
+    {
+        m_xoInitial = boost::lexical_cast<int64_t>(valueStr);
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        qWarning("DevicePlutoSDRBox::getXO: cannot get initial XO correction");
     }
 }
 

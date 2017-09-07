@@ -81,6 +81,7 @@ public:
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setFIR(DeviceUse use, uint32_t intdec, uint32_t bw, int gain);
+    int64_t getInitialXO() const { return m_xoInitial; }
 
 private:
     struct iio_context *m_ctx;
@@ -92,11 +93,13 @@ private:
     struct iio_buffer  *m_rxBuf;
     struct iio_buffer  *m_txBuf;
     bool m_valid;
+    int64_t m_xoInitial;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
     void setFilter(const std::string& filterConfigStr);
     void formatFIRHeader(std::ostringstream& str, DeviceUse use, uint32_t intdec, int32_t gain);
     void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
+    void getXO();
 };
 
 #endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_ */

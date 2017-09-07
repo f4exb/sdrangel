@@ -147,3 +147,71 @@ void PlutoSDRInputSettings::translateGovernor(RateGovernor gov, QString& s)
         break;
     }
 }
+
+void PlutoSDRInputSettings::translateRFPath(RFPath path, QString& s)
+{
+    switch(path)
+    {
+    case RFPATH_A_BAL:
+        s = "A_BALANCED";
+        break;
+    case RFPATH_B_BAL:
+        s = "B_BALANCED";
+        break;
+    case RFPATH_C_BAL:
+        s = "C_BALANCED";
+        break;
+    case RFPATH_A_NEG:
+        s = "A_N";
+        break;
+    case RFPATH_A_POS:
+        s = "A_P";
+        break;
+    case RFPATH_B_NEG:
+        s = "B_N";
+        break;
+    case RFPATH_B_POS:
+        s = "B_P";
+        break;
+    case RFPATH_C_NEG:
+        s = "C_N";
+        break;
+    case RFPATH_C_POS:
+        s = "C_P";
+        break;
+    case RFPATH_TX1MON:
+        s = "TX_MONITOR1";
+        break;
+    case RFPATH_TX2MON:
+        s = "TX_MONITOR2";
+        break;
+    case RFPATH_TX3MON:
+        s = "TX_MONITOR3";
+        break;
+    default:
+        s = "A_BALANCED";
+        break;
+    }
+}
+
+void PlutoSDRInputSettings::translateGainMode(GainMode mode, QString& s)
+{
+    switch(mode)
+    {
+    case GAIN_MANUAL:
+        s = "manual";
+        break;
+    case GAIN_AGC_SLOW:
+        s = "slow_attack";
+        break;
+    case GAIN_AGC_FAST:
+        s = "fast_attack";
+        break;
+    case GAIN_HYBRID:
+        s = "hybrid";
+        break;
+    default:
+        s = "manual";
+        break;
+    }
+}
