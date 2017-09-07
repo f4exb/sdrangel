@@ -17,6 +17,7 @@
 #include <QDebug>
 
 #include "dsp/filerecord.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "plutosdr/deviceplutosdrparams.h"
@@ -324,7 +325,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
                 || (m_settings.m_rateGovernor != settings.m_rateGovernor)
                 || (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim))) || force)
         {
-            plutoBox->set_filterBW(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
+            plutoBox->setFIR(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
             firFilterSet = true;
         }
 
@@ -332,7 +333,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         if (((settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
              (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain)) && !firFilterSet)
         {
-            plutoBox->set_filterBW(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
+            plutoBox->setFIR(DevicePlutoSDRBox::USE_RX, (1<<settings.m_lpfFIRlog2Decim), settings.m_lpfFIRBW, settings.m_lpfFIRGain);
             firFilterSet = true;
         }
 
@@ -377,6 +378,12 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     m_settings = settings;
 
+    // TODO: calibration
+    if (doCalibration)
+    {
+        qDebug("PlutoSDRInput::applySettings: doCalibration");
+    }
+
     if (suspendAllOtherThreads)
     {
         const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -400,6 +407,10 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     }
 
     // TODO: forward changes to other (Tx) DSP
+    if (forwardChangeOtherDSP)
+    {
+        qDebug("PlutoSDRInput::applySettings: forwardChangeOtherDSP");
+    }
 
     if (forwardChangeOwnDSP)
     {

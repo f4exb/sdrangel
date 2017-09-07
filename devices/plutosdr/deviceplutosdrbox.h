@@ -94,7 +94,7 @@ private:
     bool m_valid;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
-    void set_filter(const std::string& filterConfigStr);
+    void setFilter(const std::string& filterConfigStr);
     void formatFIRHeader(std::ostringstream& str, DeviceUse use, uint32_t intdec, int32_t gain);
     void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
 };
