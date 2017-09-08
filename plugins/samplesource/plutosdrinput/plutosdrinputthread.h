@@ -52,6 +52,7 @@ private:
     uint32_t m_blockSize;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
+    SampleVector::iterator m_convertIt;
 
     unsigned int m_log2Decim; // soft decimation
     int m_fcPos;

@@ -26,7 +26,7 @@
 #include "plutosdrinput.h"
 #include "plutosdrinputthread.h"
 
-#define PLUTOSDR_BLOCKSIZE (1024*1024) //complex samples per buffer
+#define PLUTOSDR_BLOCKSIZE (1024*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
 
@@ -381,20 +381,21 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
+    std::vector<std::string> params;
+    bool paramsToSet = false;
+
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         int64_t newXO = plutoBox->getInitialXO() + ((plutoBox->getInitialXO()*settings.m_LOppmTenths) / 10000000L);
-        std::vector<std::string> params;
         params.push_back(QString(tr("xo_correction=%1").arg(newXO)).toStdString());
-        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+        paramsToSet = true;
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         std::vector<std::string> params;
         params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
-        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
-
+        paramsToSet = true;
         forwardChangeOwnDSP = true;
     }
 
@@ -402,7 +403,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     {
         std::vector<std::string> params;
         params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
-        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+        paramsToSet = true;
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
@@ -411,7 +412,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         QString rfPortStr;
         PlutoSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
         params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
-        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+        paramsToSet = true;
     }
 
     if ((m_settings.m_gainMode != settings.m_gainMode) || force)
@@ -420,13 +421,18 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         QString gainModeStr;
         PlutoSDRInputSettings::translateGainMode(settings.m_gainMode, gainModeStr);
         params.push_back(QString(tr("in_voltage0_gain_control_mode=%1").arg(gainModeStr)).toStdString());
-        plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
+        paramsToSet = true;
     }
 
     if ((m_settings.m_gain != settings.m_gain) || force)
     {
         std::vector<std::string> params;
         params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_gain)).toStdString());
+        paramsToSet = true;
+    }
+
+    if (paramsToSet)
+    {
         plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
     }
 
