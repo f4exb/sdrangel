@@ -60,7 +60,7 @@ private:
     Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 
     void run();
-    void convert(const qint16* buf, qint32 len);
+    void convert();
 
 };
 

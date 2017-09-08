@@ -95,7 +95,7 @@ void PlutoSDRInputThread::run()
 
             if (is == ((1<<m_log2Decim) - 1))
             {
-                convert(m_buf, 2*(1<<m_log2Decim)); // I+Q -> 2
+                convert(); // I+Q -> 2
                 is = 0;
             }
             else
@@ -109,11 +109,11 @@ void PlutoSDRInputThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
+void PlutoSDRInputThread::convert()
 {
     if (m_log2Decim == 0)
     {
-        m_decimators.decimate1(&m_convertIt, buf, len);
+        m_decimators.decimate1(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
     }
     else
     {
@@ -122,22 +122,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_inf(&m_convertIt, buf, len);
+                m_decimators.decimate2_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 2:
-                m_decimators.decimate4_inf(&m_convertIt, buf, len);
+                m_decimators.decimate4_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 3:
-                m_decimators.decimate8_inf(&m_convertIt, buf, len);
+                m_decimators.decimate8_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 4:
-                m_decimators.decimate16_inf(&m_convertIt, buf, len);
+                m_decimators.decimate16_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 5:
-                m_decimators.decimate32_inf(&m_convertIt, buf, len);
+                m_decimators.decimate32_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 6:
-                m_decimators.decimate64_inf(&m_convertIt, buf, len);
+                m_decimators.decimate64_inf(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             default:
                 break;
@@ -148,22 +148,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_sup(&m_convertIt, buf, len);
+                m_decimators.decimate2_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 2:
-                m_decimators.decimate4_sup(&m_convertIt, buf, len);
+                m_decimators.decimate4_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 3:
-                m_decimators.decimate8_sup(&m_convertIt, buf, len);
+                m_decimators.decimate8_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 4:
-                m_decimators.decimate16_sup(&m_convertIt, buf, len);
+                m_decimators.decimate16_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 5:
-                m_decimators.decimate32_sup(&m_convertIt, buf, len);
+                m_decimators.decimate32_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 6:
-                m_decimators.decimate64_sup(&m_convertIt, buf, len);
+                m_decimators.decimate64_sup(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             default:
                 break;
@@ -174,22 +174,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_cen(&m_convertIt, buf, len);
+                m_decimators.decimate2_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 2:
-                m_decimators.decimate4_cen(&m_convertIt, buf, len);
+                m_decimators.decimate4_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 3:
-                m_decimators.decimate8_cen(&m_convertIt, buf, len);
+                m_decimators.decimate8_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 4:
-                m_decimators.decimate16_cen(&m_convertIt, buf, len);
+                m_decimators.decimate16_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 5:
-                m_decimators.decimate32_cen(&m_convertIt, buf, len);
+                m_decimators.decimate32_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             case 6:
-                m_decimators.decimate64_cen(&m_convertIt, buf, len);
+                m_decimators.decimate64_cen(&m_convertIt, m_buf, 2*(1<<m_log2Decim));
                 break;
             default:
                 break;
