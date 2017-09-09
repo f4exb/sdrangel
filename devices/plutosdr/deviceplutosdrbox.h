@@ -44,12 +44,19 @@ public:
     };
 
     struct SampleRates {
-        uint32_t m_bbRate;        //!< Baseband PLL rate (Hz) - used internally
-        uint32_t m_addaConnvRate; //!< A/D or D/A converter rate (Hz) - this is the HB3 working sample rate
-        uint32_t m_hb3Rate;       //!< Rate of the HB3/(DEC3 or INT3) filter (Rx: out, Tx: in) - this is the HB2 working sample rate
-        uint32_t m_hb2Rate;       //!< Rate of the HB2 filter (Rx: out, Tx: in) - this is the HB1 working sample rate
-        uint32_t m_hb1Rate;       //!< Rate of the HB1 filter (Rx: out, Tx: in) - this is the FIR working sample rate
-        uint32_t m_firRate;       //!< Rate of FIR filter (Rx: out, Tx: in) - this is the host/device communication sample rate
+        uint32_t m_bbRateHz;         //!< Baseband PLL rate (Hz) - used internally
+        // bytes per second
+        uint32_t m_addaConnvRateBPS; //!< A/D or D/A converter rat - this is the HB3 working sample rate
+        uint32_t m_hb3RateBPS;       //!< Rate of the HB3/(DEC3 or INT3) filter (Rx: out, Tx: in) - this is the HB2 working sample rate
+        uint32_t m_hb2RateBPS;       //!< Rate of the HB2 filter (Rx: out, Tx: in) - this is the HB1 working sample rate
+        uint32_t m_hb1RateBPS;       //!< Rate of the HB1 filter (Rx: out, Tx: in) - this is the FIR working sample rate
+        uint32_t m_firRateBPS;       //!< Rate of FIR filter (Rx: out, Tx: in) - this is the host/device communication sample rate
+        // samples per second
+        uint32_t m_addaConnvRateSS;  //!< A/D or D/A converter rat - this is the HB3 working sample rate
+        uint32_t m_hb3RateSS;        //!< Rate of the HB3/(DEC3 or INT3) filter (Rx: out, Tx: in) - this is the HB2 working sample rate
+        uint32_t m_hb2RateSS;        //!< Rate of the HB2 filter (Rx: out, Tx: in) - this is the HB1 working sample rate
+        uint32_t m_hb1RateSS;        //!< Rate of the HB1 filter (Rx: out, Tx: in) - this is the FIR working sample rate
+        uint32_t m_firRateSS;        //!< Rate of FIR filter (Rx: out, Tx: in) - this is the host/device communication sample rate
     };
 
     uint64_t m_devSampleRate;      //!< Host interface sample rate

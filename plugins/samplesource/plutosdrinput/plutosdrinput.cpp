@@ -327,12 +327,12 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         plutoBox->setFIREnable(settings.m_lpfFIREnable); // eventually enable/disable FIR
 
         plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
-        qDebug() << "PlutoSDRInput::applySettings: BBPLL: " << m_deviceSampleRates.m_bbRate
-                 << " ADC: " << m_deviceSampleRates.m_addaConnvRate
-                 << " -HB3-> " << m_deviceSampleRates.m_hb3Rate
-                 << " -HB2-> " << m_deviceSampleRates.m_hb2Rate
-                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate
-                 << " -FIR-> " << m_deviceSampleRates.m_firRate;
+        qDebug() << "PlutoSDRInput::applySettings: BBPLL(Hz): " << m_deviceSampleRates.m_bbRateHz
+                 << " ADC: " << m_deviceSampleRates.m_addaConnvRateSS
+                 << " -HB3-> " << m_deviceSampleRates.m_hb3RateSS
+                 << " -HB2-> " << m_deviceSampleRates.m_hb2RateSS
+                 << " -HB1-> " << m_deviceSampleRates.m_hb1RateSS
+                 << " -FIR-> " << m_deviceSampleRates.m_firRateSS;
 
         forwardChangeOtherDSP = true;
         forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);

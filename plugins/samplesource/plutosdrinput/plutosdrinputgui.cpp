@@ -240,6 +240,7 @@ void PlutoSDRInputGui::on_gainMode_currentIndexChanged(int index)
 
 void PlutoSDRInputGui::on_gain_valueChanged(int value)
 {
+    ui->gainText->setText(tr("%1").arg(value));
     m_settings.m_gain = value;
     sendSettings();
 }

@@ -19,13 +19,13 @@
 const uint64_t DevicePlutoSDR::loLowLimitFreq  =   70000000UL; // 70 MHz: take AD9364 specs
 const uint64_t DevicePlutoSDR::loHighLimitFreq = 6000000000UL; //  6 GHz: take AD9364 specs
 
-const uint32_t DevicePlutoSDR::srLowLimitFreq  =  2100000; // 2.1 MS/s empirical
-const uint32_t DevicePlutoSDR::srHighLimitFreq = 20000000; // 20 MS/s: take AD9363 speces
+const uint32_t DevicePlutoSDR::srLowLimitFreq  =   521000U; // 521 kS/s
+const uint32_t DevicePlutoSDR::srHighLimitFreq = 20000000U; // 20 MS/s: take AD9363 speces
 
-const uint32_t DevicePlutoSDR::bbLPRxLowLimitFreq  =   200000; // 200 kHz
-const uint32_t DevicePlutoSDR::bbLPRxHighLimitFreq = 14000000; // 14 MHz
-const uint32_t DevicePlutoSDR::bbLPTxLowLimitFreq  =   625000; // 625 kHz
-const uint32_t DevicePlutoSDR::bbLPTxHighLimitFreq = 16000000; // 16 MHz
+const uint32_t DevicePlutoSDR::bbLPRxLowLimitFreq  =   200000U; // 200 kHz
+const uint32_t DevicePlutoSDR::bbLPRxHighLimitFreq = 14000000U; // 14 MHz
+const uint32_t DevicePlutoSDR::bbLPTxLowLimitFreq  =   625000U; // 625 kHz
+const uint32_t DevicePlutoSDR::bbLPTxHighLimitFreq = 16000000U; // 16 MHz
 
 DevicePlutoSDR::DevicePlutoSDR()
 {

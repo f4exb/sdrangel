@@ -701,8 +701,11 @@
        <property name="toolTip">
         <string>Gain setting (dB)</string>
        </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
-        <number>70</number>
+        <number>77</number>
        </property>
        <property name="pageStep">
         <number>1</number>

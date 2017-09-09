@@ -408,12 +408,17 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     {
         try
         {
-            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]);
-            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]);
-            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]);
-            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]);
-            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]);
-            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]);
+            sampleRates.m_bbRateHz = boost::lexical_cast<uint32_t>(desc_match[1]);
+            sampleRates.m_addaConnvRateBPS = boost::lexical_cast<uint32_t>(desc_match[2]);
+            sampleRates.m_hb3RateBPS = boost::lexical_cast<uint32_t>(desc_match[3]);
+            sampleRates.m_hb2RateBPS = boost::lexical_cast<uint32_t>(desc_match[4]);
+            sampleRates.m_hb1RateBPS = boost::lexical_cast<uint32_t>(desc_match[5]);
+            sampleRates.m_firRateBPS = boost::lexical_cast<uint32_t>(desc_match[6]);
+            sampleRates.m_addaConnvRateSS = sampleRates.m_addaConnvRateBPS / 4;
+            sampleRates.m_hb3RateSS = sampleRates.m_hb3RateBPS / 4;
+            sampleRates.m_hb2RateSS = sampleRates.m_hb2RateBPS / 4;
+            sampleRates.m_hb1RateSS = sampleRates.m_hb1RateBPS / 4;
+            sampleRates.m_firRateSS = sampleRates.m_firRateBPS / 4;
             return true;
         }
         catch (const boost::bad_lexical_cast &e)
@@ -432,9 +437,9 @@ void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
 {
     char buff[100];
     std::vector<std::string> params;
-    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate*4);  // expressed in bytes per second
     params.push_back(std::string(buff));
-    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate*4); // expressed in bytes per second
     params.push_back(std::string(buff));
     set_params(DEVICE_PHY, params); // set end point frequency first
     m_devSampleRate = sampleRate;
@@ -466,10 +471,10 @@ void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
 
     setFIREnable(false); // disable again
 
-    uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
+    uint32_t nbGroups = sampleRates.m_addaConnvRateBPS / 16;
     nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
     nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
-    normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
+    normalizedBW = ((float) bw) / sampleRates.m_hb1RateBPS;
     normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
 
     qDebug("DevicePlutoSDRBox::setFIR: intdec: %u gain: %d nbTaps: %u BWin: %u BW: %f (%f)",
@@ -477,7 +482,7 @@ void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
             gain,
             nbTaps,
             bw,
-            normalizedBW*sampleRates.m_hb1Rate,
+            normalizedBW*sampleRates.m_hb1RateBPS,
             normalizedBW);
 
     // set the right filter
