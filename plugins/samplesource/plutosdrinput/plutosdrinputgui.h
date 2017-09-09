@@ -60,6 +60,35 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
+    bool m_doApplySettings;
+    uint32_t m_statusCounter;
+
+    void displaySettings();
+    void sendSettings(bool forceSettings = false);
+    void blockApplySettings(bool block);
+    void updateSampleRateAndFrequency();
+
+private slots:
+    void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
+    void on_centerFrequency_changed(quint64 value);
+    void on_loPPM_valueChanged(int value);
+    void on_dcOffset_toggled(bool checked);
+    void on_iqImbalance_toggled(bool checked);
+    void on_swDecim_currentIndexChanged(int index);
+    void on_fcPos_currentIndexChanged(int index);
+    void on_sampleRate_changed(quint64 value);
+    void on_lpf_changed(quint64 value);
+    void on_lpFIREnable_toggled(bool checked);
+    void on_lpFIR_changed(quint64 value);
+    void on_lpFIRDecimation_currentIndexChanged(int index);
+    void on_lpFIRGain_currentIndexChanged(int index);
+    void on_gainMode_currentIndexChanged(int index);
+    void on_gain_valueChanged(int value);
+    void on_antenna_currentIndexChanged(int index);
+    void updateHardware();
+    void updateStatus();
+    void handleDSPMessages();
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */

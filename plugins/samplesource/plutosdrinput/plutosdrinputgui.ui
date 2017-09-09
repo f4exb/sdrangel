@@ -302,42 +302,6 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QLabel" name="hwDecimLabel">
-       <property name="text">
-        <string>Hw</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="hwDecim">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Hardware decimation governor</string>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>3</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="swDecimLabel">
        <property name="text">
         <string>Sw</string>
@@ -613,14 +577,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lpfUnits_2">
+      <widget class="QLabel" name="lpfFIRUnits">
        <property name="text">
         <string>kHz</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="firDecimation">
+      <widget class="QComboBox" name="lpFIRDecimation">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -648,7 +612,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="firGain">
+      <widget class="QComboBox" name="lpFIRGain">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -660,22 +624,12 @@
        </property>
        <item>
         <property name="text">
-         <string>-12</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string>-6</string>
         </property>
        </item>
        <item>
         <property name="text">
          <string>0</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>+6</string>
         </property>
        </item>
       </widget>
@@ -704,7 +658,7 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QComboBox" name="gainCtlMode">
+      <widget class="QComboBox" name="gainMode">
        <property name="maximumSize">
         <size>
          <width>54</width>
@@ -922,8 +876,17 @@
      </item>
      <item>
       <widget class="QLabel" name="rssiText">
+       <property name="minimumSize">
+        <size>
+         <width>65</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>-100.0 dB</string>
+        <string>100.00 dB</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

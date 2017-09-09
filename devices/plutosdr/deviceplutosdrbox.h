@@ -52,6 +52,13 @@ public:
         uint32_t m_firRate;       //!< Rate of FIR filter (Rx: out, Tx: in) - this is the host/device communication sample rate
     };
 
+    uint64_t m_devSampleRate;      //!< Host interface sample rate
+    int32_t  m_LOppmTenths;        //!< XO correction
+    bool     m_lpfFIREnable;       //!< enable digital lowpass FIR filter
+    float    m_lpfFIRBW;           //!< digital lowpass FIR filter bandwidth (Hz)
+    uint32_t m_lpfFIRlog2Decim;    //!< digital lowpass FIR filter log2 of decimation factor (0..2)
+    int      m_lpfFIRGain;         //!< digital lowpass FIR filter gain (dB)
+
     DevicePlutoSDRBox(const std::string& uri);
     ~DevicePlutoSDRBox();
     bool isValid() const { return m_valid; }
@@ -80,8 +87,14 @@ public:
     char* txBufferFirst();
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
-    void setFIR(DeviceUse use, uint32_t intdec, uint32_t bw, int gain);
-    int64_t getInitialXO() const { return m_xoInitial; }
+    void setSampleRate(uint32_t sampleRate);
+    void setFIR(uint32_t intdec, uint32_t bw, int gain);
+    void setFIREnable(bool enable);
+    void setLOPPMTenths(int ppmTenths);
+    bool getRSSI(std::string& rssiStr, unsigned int chan);
+    bool fetchTemp();
+    float getTemp() const { return m_temp; }
+    bool getRateGovernors(std::string& rateGovernors);
 
 private:
     struct iio_context *m_ctx;
@@ -94,10 +107,11 @@ private:
     struct iio_buffer  *m_txBuf;
     bool m_valid;
     int64_t m_xoInitial;
+    float m_temp;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
     void setFilter(const std::string& filterConfigStr);
-    void formatFIRHeader(std::ostringstream& str, DeviceUse use, uint32_t intdec, int32_t gain);
+    void formatFIRHeader(std::ostringstream& str, uint32_t intdec, int32_t gain);
     void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
     void getXO();
 };

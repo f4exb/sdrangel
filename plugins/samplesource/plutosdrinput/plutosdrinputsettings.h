@@ -52,27 +52,21 @@ struct PlutoSDRInputSettings {
         GAIN_END
     } GainMode;
 
-    typedef enum {
-        RATEGOV_NORMAL,
-        RATEGOV_HIGHOSR,
-        RATEGOV_END
-    } RateGovernor;
-
     // global settings to be saved
 	quint64 m_centerFrequency;
-    quint64 m_devSampleRate;
-    RateGovernor m_rateGovernor;
-    // channel settings
+	// common device settings
+    quint64 m_devSampleRate;      //!< Host interface sample rate
+    qint32  m_LOppmTenths;        //!< XO correction
+    bool    m_lpfFIREnable;       //!< enable digital lowpass FIR filter
+    quint32 m_lpfFIRBW;           //!< digital lowpass FIR filter bandwidth (Hz)
+    quint32 m_lpfFIRlog2Decim;    //!< digital lowpass FIR filter log2 of decimation factor (0..2)
+    int     m_lpfFIRGain;         //!< digital lowpass FIR filter gain (dB)
+    // individual channel settings
     fcPos_t m_fcPos;
-    qint32  m_LOppmTenths;
     bool    m_dcBlock;
     bool    m_iqCorrection;
     quint32 m_log2Decim;
     float   m_lpfBW;           //!< analog lowpass filter bandwidth (Hz)
-    bool    m_lpfFIREnable;    //!< enable digital lowpass FIR filter
-    float   m_lpfFIRBW;        //!< digital lowpass FIR filter bandwidth (Hz)
-    quint32 m_lpfFIRlog2Decim; //!< digital lowpass FIR filter log2 of decimation factor (0..2)
-    int     m_lpfFIRGain;      //!< digital lowpass FIR filter gain (dB)
     uint32_t m_gain;           //!< "hardware" gain
     RFPath  m_antennaPath;
     GainMode m_gainMode;
@@ -82,7 +76,6 @@ struct PlutoSDRInputSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-	static void translateGovernor(RateGovernor gov, QString& s);
     static void translateRFPath(RFPath path, QString& s);
     static void translateGainMode(GainMode mod, QString& s);
 };

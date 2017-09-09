@@ -79,6 +79,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
         const char *attr = 0;
         std::size_t pos;
         int ret;
+        int type;
 
         pos = it->find('=');
 
@@ -101,15 +102,35 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
         if (chn) {
             ret = iio_channel_attr_write(chn, attr, val.c_str());
+            type = 0;
         } else if (iio_device_find_attr(dev, attr)) {
             ret = iio_device_attr_write(dev, attr, val.c_str());
+            type = 1;
         } else {
             ret = iio_device_debug_attr_write(dev, attr, val.c_str());
+            type = 2;
         }
 
         if (ret < 0)
         {
-            std::cerr << "DevicePlutoSDRBox::set_params: Unable to write attribute " << key <<  ": " << ret << std::endl;
+            std::string item;
+
+            switch (type)
+            {
+            case 0:
+                item = "channel";
+                break;
+            case 1:
+                item = "device";
+                break;
+            case 2:
+                item = "debug";
+                break;
+            default:
+                item = "unknown";
+                break;
+            }
+            std::cerr << "DevicePlutoSDRBox::set_params: Unable to write " << item << " attribute " << key << "=" << val << ": " << ret << std::endl;
         }
     }
 }
@@ -352,6 +373,7 @@ bool DevicePlutoSDRBox::getRxSampleRates(SampleRates& sampleRates)
     std::string srStr;
 
     if (get_param(DEVICE_PHY, "rx_path_rates", srStr)) {
+        qDebug("DevicePlutoSDRBox::getRxSampleRates: %s", srStr.c_str());
         return parseSampleRates(srStr, sampleRates);
     } else {
         return false;
@@ -382,12 +404,12 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     {
         try
         {
-            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]) + 1;
-            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]) + 1;
-            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]) + 1;
-            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]) + 1;
-            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]) + 1;
-            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]) + 1;
+            sampleRates.m_bbRate = boost::lexical_cast<uint32_t>(desc_match[1]);
+            sampleRates.m_addaConnvRate = boost::lexical_cast<uint32_t>(desc_match[2]);
+            sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]);
+            sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]);
+            sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]);
+            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]);
             return true;
         }
         catch (const boost::bad_lexical_cast &e)
@@ -402,65 +424,106 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
     }
 }
 
-void DevicePlutoSDRBox::setFIR(DeviceUse use, uint32_t intdec, uint32_t bw, int gain)
+void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
+{
+    char buff[100];
+    std::vector<std::string> params;
+    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
+    params.push_back(std::string(buff));
+    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
+    params.push_back(std::string(buff));
+    set_params(DEVICE_PHY, params); // set end point frequency first
+    m_devSampleRate = sampleRate;
+}
+
+void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
 {
     SampleRates sampleRates;
     std::ostringstream ostr;
 
     uint32_t nbTaps;
     double normalizedBW;
+    uint32_t intdec = 1<<(log2IntDec > 2 ? 2 : log2IntDec);
 
     // set a dummy minimal filter first to get the sample rates right
 
-    formatFIRHeader(ostr, use, intdec, gain);
+    setFIREnable(false); // disable first
+
+    formatFIRHeader(ostr, intdec, gain);
     formatFIRCoefficients(ostr, 16, 0.5);
     setFilter(ostr.str());
     ostr.str(""); // reset string stream
 
-    if (use == USE_RX)
-    {
-        if (!getRxSampleRates(sampleRates)) {
-            return;
-        }
+    setFIREnable(true); // re-enable
 
-        uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
-        nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
-        normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
-        normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
+    if (!getRxSampleRates(sampleRates)) {
+        return;
     }
-    else
-    {
-        if (!getTxSampleRates(sampleRates)) {
-            return;
-        }
 
-        uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
-        nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
-        nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
-        normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
-        normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
-    }
+    setFIREnable(false); // disable again
+
+    uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
+    nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
+    nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
+    normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
+    normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
+
+    qDebug("DevicePlutoSDRBox::setFIR: intdec: %u gain: %d nbTaps: %u BWin: %u BW: %f (%f)",
+            intdec,
+            gain,
+            nbTaps,
+            bw,
+            normalizedBW*sampleRates.m_hb1Rate,
+            normalizedBW);
 
     // set the right filter
 
-    formatFIRHeader(ostr, use, intdec, gain);
+    formatFIRHeader(ostr, intdec, gain);
     formatFIRCoefficients(ostr, nbTaps, normalizedBW);
     setFilter(ostr.str());
+
+    m_lpfFIRlog2Decim = log2IntDec;
+    m_lpfFIRBW = bw;
+    m_lpfFIRGain = gain;
 }
 
-void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr, DeviceUse use, uint32_t intdec, int32_t gain)
+void DevicePlutoSDRBox::setFIREnable(bool enable)
 {
-    ostr << (use == USE_RX ? "RX 1" : "TX 1") << " GAIN " << gain << " DEC " << intdec << std::endl;
+    char buff[100];
+    std::vector<std::string> params;
+    snprintf(buff, sizeof(buff), "in_out_voltage_filter_fir_en=%d", enable ? 1 : 0);
+    params.push_back(std::string(buff));
+    set_params(DEVICE_PHY, params);
+    m_lpfFIREnable = enable;
+}
+
+void DevicePlutoSDRBox::setLOPPMTenths(int ppmTenths)
+{
+    char buff[100];
+    std::vector<std::string> params;
+    int64_t newXO = m_xoInitial + ((m_xoInitial*ppmTenths) / 10000000L);
+    snprintf(buff, sizeof(buff), "xo_correction=%ld", newXO);
+    params.push_back(std::string(buff));
+    set_params(DEVICE_PHY, params);
+    m_LOppmTenths = ppmTenths;
+}
+
+void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr,uint32_t intdec, int32_t gain)
+{
+    ostr << "RX 3 GAIN " << gain << " DEC " << intdec << std::endl;
+    ostr << "TX 3 GAIN " << gain << " INT " << intdec << std::endl;
 }
 
 void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t nbTaps, double normalizedBW)
 {
     double *fcoeffs = new double[nbTaps];
-    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, 0.0, normalizedBW, WFIR::wtBLACKMAN_HARRIS, 0.0);
+    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, normalizedBW, 0.0, WFIR::wtBLACKMAN_HARRIS, 0.0);
 
     for (unsigned int i = 0; i < nbTaps; i++) {
-        ostr << (uint16_t) (fcoeffs[i] * 32768.0) << std::endl;
+        ostr << (int16_t) (fcoeffs[i] * 32768.0) << ", " <<  (int16_t) (fcoeffs[i] * 32768.0) << std::endl;
     }
+
+    delete[] fcoeffs;
 }
 
 void DevicePlutoSDRBox::getXO()
@@ -475,6 +538,43 @@ void DevicePlutoSDRBox::getXO()
     {
         qWarning("DevicePlutoSDRBox::getXO: cannot get initial XO correction");
     }
+}
+
+bool DevicePlutoSDRBox::getRSSI(std::string& rssiStr, unsigned int chan)
+{
+    chan = chan % 2;
+    char buff[20];
+    snprintf(buff, sizeof(buff), "in_voltage%d_rssi", chan);
+    return get_param(DEVICE_PHY, buff, rssiStr);
+}
+
+bool DevicePlutoSDRBox::fetchTemp()
+{
+    std::string temp_mC_str;
+
+    if (get_param(DEVICE_PHY, "in_temp0_input", temp_mC_str))
+    {
+        try
+        {
+            uint32_t temp_mC = boost::lexical_cast<uint32_t>(temp_mC_str);
+            m_temp = temp_mC / 1000.0;
+            return true;
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            std::cerr << "PlutoSDRDevice::getTemp: bad conversion to numeric" << std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool DevicePlutoSDRBox::getRateGovernors(std::string& rateGovernors)
+{
+    return get_param(DEVICE_PHY, "trx_rate_governor", rateGovernors);
 }
 
 

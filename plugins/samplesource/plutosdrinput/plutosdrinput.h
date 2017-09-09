@@ -87,6 +87,9 @@ public:
     virtual bool handleMessage(const Message& message);
 
     uint32_t getADCSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
+    void getRSSI(std::string& rssiStr);
+    bool fetchTemperature();
+    float getTemperature();
 
  private:
     DeviceSourceAPI *m_deviceAPI;
