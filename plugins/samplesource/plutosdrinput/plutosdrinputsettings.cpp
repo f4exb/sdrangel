@@ -34,7 +34,7 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_devSampleRate = 2500 * 1000;
 	m_dcBlock = false;
 	m_iqCorrection = false;
-	m_lpfBW = 1500000.0f;
+	m_lpfBW = 1500000;
 	m_lpfFIREnable = false;
 	m_lpfFIRBW = 500000U;
 	m_lpfFIRlog2Decim = 0;
@@ -54,7 +54,7 @@ QByteArray PlutoSDRInputSettings::serialize() const
 	s.writeS32(5, m_fcPos);
 	s.writeBool(7, m_dcBlock);
     s.writeBool(8, m_iqCorrection);
-    s.writeFloat(9, m_lpfBW);
+    s.writeU32(9, m_lpfBW);
     s.writeBool(10, m_lpfFIREnable);
     s.writeU32(11, m_lpfFIRBW);
     s.writeU64(12, m_devSampleRate);
@@ -97,7 +97,7 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
 		}
         d.readBool(7, &m_dcBlock, false);
         d.readBool(8, &m_iqCorrection, false);
-        d.readFloat(9, &m_lpfBW, 1500000.0f);
+        d.readU32(9, &m_lpfBW, 1500000);
         d.readBool(10, &m_lpfFIREnable, false);
         d.readU32(11, &m_lpfFIRBW, 500000U);
         d.readU64(12, &m_devSampleRate, 1536000U);

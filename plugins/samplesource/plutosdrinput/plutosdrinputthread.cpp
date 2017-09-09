@@ -23,7 +23,7 @@ PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksize, DevicePlutoSDRBox* 
     m_running(false),
     m_plutoBox(plutoBox),
     m_blockSize(blocksize),
-    m_convertBuffer(blocksize),
+    m_convertBuffer(1<<15),
     m_sampleFifo(sampleFifo),
     m_convertIt(m_convertBuffer.begin()),
     m_log2Decim(0),
@@ -81,7 +81,7 @@ void PlutoSDRInputThread::run()
 
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
-        if (nbytes_rx < 0) { qWarning("Error refilling buf %d\n",(int) nbytes_rx); break; }
+        if (nbytes_rx < 0) { qWarning("PlutoSDRInputThread::run: error refilling buf %d\n",(int) nbytes_rx); break; }
 
         // READ: Get pointers to RX buf and read IQ from RX buf port 0
         p_inc = m_plutoBox->rxBufferStep();
@@ -93,15 +93,25 @@ void PlutoSDRInputThread::run()
             m_buf[2*is]   = ((int16_t*)p_dat)[0]; // Real (I)
             m_buf[2*is+1] = ((int16_t*)p_dat)[1]; // Imag (Q)
 
-            if (is == ((1<<m_log2Decim) - 1))
+            if (is == 32768-1)
             {
-                convert(); // I+Q -> 2
+                m_sampleFifo->write((unsigned char *) m_buf, 32768*4);
                 is = 0;
             }
             else
             {
                 is++;
             }
+
+//            if (is == ((1<<m_log2Decim) - 1))
+//            {
+//                convert(); // I+Q -> 2
+//                is = 0;
+//            }
+//            else
+//            {
+//                is++;
+//            }
         }
     }
 

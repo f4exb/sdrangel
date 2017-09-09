@@ -153,7 +153,7 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
 bool PlutoSDRInput::openDevice()
 {
-    if (!m_sampleFifo.setSize(96000 * 4))
+    if (!m_sampleFifo.setSize(1<<19))
     {
         qCritical("PlutoSDRInput::openDevice: could not allocate SampleFifo");
         return false;
@@ -368,7 +368,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
-        std::vector<std::string> params;
         params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
         paramsToSet = true;
         forwardChangeOwnDSP = true;
@@ -376,14 +375,12 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
     {
-        std::vector<std::string> params;
         params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
         paramsToSet = true;
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
-        std::vector<std::string> params;
         QString rfPortStr;
         PlutoSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
         params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
@@ -392,7 +389,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if ((m_settings.m_gainMode != settings.m_gainMode) || force)
     {
-        std::vector<std::string> params;
         QString gainModeStr;
         PlutoSDRInputSettings::translateGainMode(settings.m_gainMode, gainModeStr);
         params.push_back(QString(tr("in_voltage0_gain_control_mode=%1").arg(gainModeStr)).toStdString());
@@ -401,7 +397,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if ((m_settings.m_gain != settings.m_gain) || force)
     {
-        std::vector<std::string> params;
         params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_gain)).toStdString());
         paramsToSet = true;
     }
