@@ -40,6 +40,7 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
 
     if (m_valid) {
         getXO();
+        setTracking();
     }
 }
 
@@ -430,33 +431,13 @@ bool DevicePlutoSDRBox::parseSampleRates(const std::string& rateStr, SampleRates
 
 void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
 {
-//    char buff[100];
-//    std::vector<std::string> params;
-//    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
-//    params.push_back(std::string(buff));
-//    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
-//    params.push_back(std::string(buff));
-//    set_params(DEVICE_PHY, params);
-
-    int ret = iio_channel_attr_write_longlong(m_chnRx0, "sampling_frequency", sampleRate);
-
-    if (ret < 0) {
-        qWarning("DevicePlutoSDRBox::setSampleRate: cannot set Rx sample rate to %u: %d", sampleRate, ret);
-    } else {
-        qDebug("DevicePlutoSDRBox::setSampleRate: Rx sample rate set to %u: %d", sampleRate, ret);
-    }
-
-    if (m_chnTx0) // Tx is opened at the same time
-    {
-        ret = iio_channel_attr_write_longlong(m_chnTx0, "sampling_frequency", sampleRate);
-
-        if (ret < 0) {
-            qWarning("DevicePlutoSDRBox::setSampleRate: cannot set Tx sample rate to %u: %d", sampleRate, ret);
-        } else {
-            qDebug("DevicePlutoSDRBox::setSampleRate: Tx sample rate set to %u: %d", sampleRate, ret);
-        }
-    }
-
+    char buff[100];
+    std::vector<std::string> params;
+    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
+    params.push_back(std::string(buff));
+    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
+    params.push_back(std::string(buff));
+    set_params(DEVICE_PHY, params);
     m_devSampleRate = sampleRate;
 }
 
@@ -602,4 +583,17 @@ bool DevicePlutoSDRBox::getRateGovernors(std::string& rateGovernors)
     return get_param(DEVICE_PHY, "trx_rate_governor", rateGovernors);
 }
 
+void DevicePlutoSDRBox::setTracking()
+{
+    // in_voltage_quadrature_tracking_en
+    char buff[100];
+    std::vector<std::string> params;
+    snprintf(buff, sizeof(buff), "in_voltage_quadrature_tracking_en=1");
+    params.push_back(std::string(buff));
+    snprintf(buff, sizeof(buff), "in_voltage_bb_dc_offset_tracking_en=1");
+    params.push_back(std::string(buff));
+    snprintf(buff, sizeof(buff), "in_voltage_rf_dc_offset_tracking_en=1");
+    params.push_back(std::string(buff));
+    set_params(DEVICE_PHY, params);
+}
 
