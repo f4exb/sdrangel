@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>374</width>
-    <height>290</height>
+    <width>350</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>350</width>
-    <height>290</height>
+    <height>260</height>
    </size>
   </property>
   <property name="font">
@@ -211,6 +211,13 @@
       <number>2</number>
      </property>
      <item>
+      <widget class="QLabel" name="loPPMLabel">
+       <property name="text">
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QSlider" name="loPPM">
        <property name="toolTip">
         <string>Local oscillator correction (ppm)</string>
@@ -390,6 +397,92 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="antennaLabel">
+       <property name="pixmap">
+        <pixmap resource="../../../sdrbase/resources/res.qrc">:/antenna.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="antenna">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Input path</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Abal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bbal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cbal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>An</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Ap</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bp</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cp</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tx3</string>
+        </property>
+       </item>
+      </widget>
      </item>
     </layout>
    </item>
@@ -763,116 +856,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="antennaLabel">
-       <property name="pixmap">
-        <pixmap resource="../../../sdrbase/resources/res.qrc">:/antenna.png</pixmap>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="antenna">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Input path</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Abal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Bbal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Cbal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>An</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Ap</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Bn</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Bp</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Cn</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Cp</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Tx1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Tx2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Tx3</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="statusLayout">
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
-     <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="rssiText">
        <property name="minimumSize">
         <size>
@@ -917,27 +900,7 @@
        </property>
       </widget>
      </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_vga2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="padLayout">
