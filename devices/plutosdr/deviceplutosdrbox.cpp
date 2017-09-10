@@ -469,7 +469,7 @@ void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
     m_devSampleRate = sampleRate;
 }
 
-void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
+void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, uint32_t bw, int gain)
 {
     SampleRates sampleRates;
     std::ostringstream ostr;
@@ -487,7 +487,8 @@ void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
     setFilter(ostr.str());
     ostr.str(""); // reset string stream
 
-    setFIREnable(true); // re-enable
+    setFIREnable(true);        // re-enable
+    setSampleRate(sampleRate); // set to new sample rate
 
     if (!getRxSampleRates(sampleRates)) {
         return;
@@ -518,6 +519,8 @@ void DevicePlutoSDRBox::setFIR(uint32_t log2IntDec, uint32_t bw, int gain)
     m_lpfFIRlog2Decim = log2IntDec;
     m_lpfFIRBW = bw;
     m_lpfFIRGain = gain;
+
+    // enable and set sample rate will be done by the caller
 }
 
 void DevicePlutoSDRBox::setFIREnable(bool enable)

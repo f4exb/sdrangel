@@ -307,7 +307,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
-    // TODO: apply settings (all cases)
+    // apply settings
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
         (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
@@ -322,9 +322,9 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         (settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
         (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain) || force)
     {
-        plutoBox->setSampleRate(settings.m_devSampleRate); // set end point frequency first
-        //plutoBox->setFIR(settings.m_lpfFIRlog2Decim, settings.m_lpfFIRBW, settings.m_lpfFIRGain); // don't bother with the FIR at this point
-        //plutoBox->setFIREnable(settings.m_lpfFIREnable); // eventually enable/disable FIR
+        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Decim, settings.m_lpfFIRBW, settings.m_lpfFIRGain); // don't bother with the FIR at this point
+        plutoBox->setFIREnable(settings.m_lpfFIREnable);   // eventually enable/disable FIR
+        plutoBox->setSampleRate(settings.m_devSampleRate); // and set end point sample rate
 
         plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
         qDebug() << "PlutoSDRInput::applySettings: BBPLL(Hz): " << m_deviceSampleRates.m_bbRateHz

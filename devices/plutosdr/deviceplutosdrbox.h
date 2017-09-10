@@ -88,7 +88,7 @@ public:
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setSampleRate(uint32_t sampleRate);
-    void setFIR(uint32_t intdec, uint32_t bw, int gain);
+    void setFIR(uint32_t sampleRate, uint32_t intdec, uint32_t bw, int gain);
     void setFIREnable(bool enable);
     void setLOPPMTenths(int ppmTenths);
     bool getRSSI(std::string& rssiStr, unsigned int chan);
