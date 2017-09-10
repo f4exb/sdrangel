@@ -26,7 +26,7 @@
 #include "plutosdrinput.h"
 #include "plutosdrinputthread.h"
 
-#define PLUTOSDR_BLOCKSIZE (1024*1024) //complex samples per buffer (must be multiple of 64)
+#define PLUTOSDR_BLOCKSIZE (128*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
@@ -358,13 +358,13 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
+//    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+//    {
+//        plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
+//    }
+
     std::vector<std::string> params;
     bool paramsToSet = false;
-
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
-    {
-        plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
-    }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
