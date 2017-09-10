@@ -237,6 +237,7 @@ void PlutoSDRInputGui::on_lpFIRGain_currentIndexChanged(int index)
 void PlutoSDRInputGui::on_gainMode_currentIndexChanged(int index)
 {
     m_settings.m_gainMode = (PlutoSDRInputSettings::GainMode) (index < PlutoSDRInputSettings::GAIN_END ? index : 0);
+    ui->gain->setEnabled(m_settings.m_gainMode == PlutoSDRInputSettings::GAIN_MANUAL);
     sendSettings();
 }
 
