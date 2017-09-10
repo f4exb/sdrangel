@@ -358,10 +358,10 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
-//    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
-//    {
-//        plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
-//    }
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    {
+        plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
+    }
 
     std::vector<std::string> params;
     bool paramsToSet = false;

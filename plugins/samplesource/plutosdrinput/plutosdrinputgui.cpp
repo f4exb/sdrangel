@@ -168,6 +168,7 @@ void PlutoSDRInputGui::on_centerFrequency_changed(quint64 value)
 
 void PlutoSDRInputGui::on_loPPM_valueChanged(int value)
 {
+    ui->loPPMText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
     m_settings.m_LOppmTenths = value;
     sendSettings();
 }
@@ -258,6 +259,7 @@ void PlutoSDRInputGui::displaySettings()
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->loPPMText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2Decim);
 
