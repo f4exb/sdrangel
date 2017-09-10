@@ -41,14 +41,14 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
     if (m_valid) {
         getXO();
         setTracking();
-//        int nb_channels = iio_device_get_channels_count(m_devRx);
-//        for (int i = 0; i < nb_channels; i++) {
-//            iio_channel_disable(iio_device_get_channel(m_devRx, i));
-//        }
-//        nb_channels = iio_device_get_channels_count(m_devTx);
-//        for (int i = 0; i < nb_channels; i++) {
-//            iio_channel_disable(iio_device_get_channel(m_devTx, i));
-//        }
+        int nb_channels = iio_device_get_channels_count(m_devRx);
+        for (int i = 0; i < nb_channels; i++) {
+            iio_channel_disable(iio_device_get_channel(m_devRx, i));
+        }
+        nb_channels = iio_device_get_channels_count(m_devTx);
+        for (int i = 0; i < nb_channels; i++) {
+            iio_channel_disable(iio_device_get_channel(m_devTx, i));
+        }
     }
 }
 

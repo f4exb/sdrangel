@@ -92,24 +92,19 @@ void PlutoSDRInputThread::run()
         p_end = m_plutoBox->rxBufferEnd();
         ihs = 0;
 
-//        qDebug("PlutoSDRInputThread::run: %ld samples read step: %ld", nbytes_rx / p_inc, p_inc);
         // p_inc is 2 on a char* buffer therefore each iteration processes only the I or Q sample
-        // I and Q samples are processed one at a time
+        // I and Q samples are processed one after the other
         // conversion is not needed as samples are little endian
 
         for (p_dat = m_plutoBox->rxBufferFirst(); p_dat < p_end; p_dat += p_inc)
         {
-//            m_buf[2*is] = ((int16_t *) p_dat)[0];
-//            m_buf[2*is+1] = ((int16_t *) p_dat)[1];
-//            memcpy(&m_buf[2*ihs], p_dat, 2*sizeof(int16_t));
             m_buf[ihs] = *((int16_t *) p_dat);
-//            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[2*ihs], (const void *) &m_buf[2*ihs]);
 //            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
             ihs++;
         }
 
-        m_sampleFifo->write((unsigned char *) m_buf, ihs*sizeof(int16_t));
-        //convert(m_bufConv, 2 * m_blockSize);
+        //m_sampleFifo->write((unsigned char *) m_buf, ihs*sizeof(int16_t));
+        convert(m_buf, 2*m_blockSizeSamples); // size given in number of int16_t (I and Q interleaved)
     }
 
     m_running = false;
