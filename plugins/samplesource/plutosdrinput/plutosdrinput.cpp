@@ -26,7 +26,7 @@
 #include "plutosdrinput.h"
 #include "plutosdrinputthread.h"
 
-#define PLUTOSDR_BLOCKSIZE_SAMPLES (128*1024) //complex samples per buffer (must be multiple of 64)
+#define PLUTOSDR_BLOCKSIZE_SAMPLES (32*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)

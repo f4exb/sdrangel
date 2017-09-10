@@ -373,12 +373,14 @@ void PlutoSDRInputGui::setFIRBWLimits()
     float high = DevicePlutoSDR::firBWHighLimitFactor * ((PlutoSDRInput *) m_sampleSource)->getFIRSampleRate();
     float low = DevicePlutoSDR::firBWLowLimitFactor * ((PlutoSDRInput *) m_sampleSource)->getFIRSampleRate();
     ui->lpFIR->setValueRange(5, (int(low)/1000)+1, (int(high)/1000)+1);
+    ui->lpFIR->setValue(m_settings.m_lpfFIRBW/1000);
 }
 
 void PlutoSDRInputGui::setSampleRateLimits()
 {
     uint32_t low = ui->lpFIREnable->isChecked() ? DevicePlutoSDR::srLowLimitFreq / (1<<ui->lpFIRDecimation->currentIndex()) : DevicePlutoSDR::srLowLimitFreq;
     ui->sampleRate->setValueRange(8, low, DevicePlutoSDR::srHighLimitFreq);
+    ui->sampleRate->setValue(m_settings.m_devSampleRate);
 }
 
 void PlutoSDRInputGui::handleDSPMessages()
