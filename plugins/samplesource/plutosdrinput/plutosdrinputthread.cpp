@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <unistd.h>
+
 #include "plutosdr/deviceplutosdrbox.h"
 #include "plutosdrinputsettings.h"
 #include "plutosdrinputthread.h"
@@ -85,7 +87,13 @@ void PlutoSDRInputThread::run()
 
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
-        if (nbytes_rx < 0) { qWarning("PlutoSDRInputThread::run: error refilling buf %d\n",(int) nbytes_rx); break; }
+
+        if (nbytes_rx < 0)
+        {
+            qWarning("PlutoSDRInputThread::run: error refilling buf %d\n",(int) nbytes_rx);
+            usleep(200000);
+            continue;
+        }
 
         // READ: Get pointers to RX buf and read IQ from RX buf port 0
         p_inc = m_plutoBox->rxBufferStep();

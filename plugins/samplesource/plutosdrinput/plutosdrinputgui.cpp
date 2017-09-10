@@ -343,7 +343,7 @@ void PlutoSDRInputGui::updateStatus()
     {
         std::string rssiStr;
         ((PlutoSDRInput *) m_sampleSource)->getRSSI(rssiStr);
-        ui->rssiText->setText(QString::fromStdString(rssiStr));
+        ui->rssiText->setText(tr("-%1").arg(QString::fromStdString(rssiStr)));
     }
 
     if (m_statusCounter % 10 == 0) // 5s

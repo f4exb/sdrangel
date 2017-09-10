@@ -176,25 +176,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QLabel" name="channelNumberText">
-           <property name="minimumSize">
-            <size>
-             <width>20</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Channel number</string>
-           </property>
-           <property name="text">
-            <string>#0</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -584,6 +565,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>D</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="lpFIRDecimation">
        <property name="maximumSize">
         <size>
@@ -609,6 +597,13 @@
          <string>4</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lpFIRGainLabel">
+       <property name="text">
+        <string>G</string>
+       </property>
       </widget>
      </item>
      <item>
