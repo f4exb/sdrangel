@@ -1,6 +1,6 @@
-sdrangel (3.6.2-1) unstable; urgency=medium
+sdrangel (3.7.0-1) unstable; urgency=medium
 
-  * PlutoSDR failed attempt at supporting 
+  * PlutoSDR: Rx support 
   * GUI segregation: preliminary works
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 17 Sep 2017 23:14:18 +0200

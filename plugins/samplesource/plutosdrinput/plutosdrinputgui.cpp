@@ -57,6 +57,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     ui->lpFIR->setValueRange(5, 1U, 56000U); // will be dynamically recalculated
 
     ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
+    ui->lpFIRDecimationLabel->setText(QString::fromUtf8("\u2193"));
 
     blockApplySettings(true);
     displaySettings();

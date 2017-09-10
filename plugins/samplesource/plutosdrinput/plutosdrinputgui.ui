@@ -553,7 +553,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Digital FIR lowpass filers bandwidth (kHz)</string>
+        <string>Digital FIR lowpass filers bandwidth (kHz) @ ~-6dB</string>
        </property>
       </widget>
      </item>
@@ -565,7 +565,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="lpFIRDecimationLabel">
        <property name="text">
         <string>D</string>
        </property>
