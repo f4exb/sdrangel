@@ -153,7 +153,7 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
 bool PlutoSDRInput::openDevice()
 {
-    if (!m_sampleFifo.setSize(1<<19))
+    if (!m_sampleFifo.setSize(PLUTOSDR_BLOCKSIZE))
     {
         qCritical("PlutoSDRInput::openDevice: could not allocate SampleFifo");
         return false;
@@ -323,16 +323,16 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain) || force)
     {
         plutoBox->setSampleRate(settings.m_devSampleRate); // set end point frequency first
-        plutoBox->setFIR(settings.m_lpfFIRlog2Decim, settings.m_lpfFIRBW, settings.m_lpfFIRGain);
-        plutoBox->setFIREnable(settings.m_lpfFIREnable); // eventually enable/disable FIR
+        //plutoBox->setFIR(settings.m_lpfFIRlog2Decim, settings.m_lpfFIRBW, settings.m_lpfFIRGain); // don't bother with the FIR at this point
+        //plutoBox->setFIREnable(settings.m_lpfFIREnable); // eventually enable/disable FIR
 
         plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
         qDebug() << "PlutoSDRInput::applySettings: BBPLL(Hz): " << m_deviceSampleRates.m_bbRateHz
-                 << " ADC: " << m_deviceSampleRates.m_addaConnvRateSS
-                 << " -HB3-> " << m_deviceSampleRates.m_hb3RateSS
-                 << " -HB2-> " << m_deviceSampleRates.m_hb2RateSS
-                 << " -HB1-> " << m_deviceSampleRates.m_hb1RateSS
-                 << " -FIR-> " << m_deviceSampleRates.m_firRateSS;
+                 << " ADC: " << m_deviceSampleRates.m_addaConnvRate
+                 << " -HB3-> " << m_deviceSampleRates.m_hb3Rate
+                 << " -HB2-> " << m_deviceSampleRates.m_hb2Rate
+                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate
+                 << " -FIR-> " << m_deviceSampleRates.m_firRate;
 
         forwardChangeOtherDSP = true;
         forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);

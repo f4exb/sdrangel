@@ -27,7 +27,8 @@ PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksize, DevicePlutoSDRBox* 
     m_sampleFifo(sampleFifo),
     m_convertIt(m_convertBuffer.begin()),
     m_log2Decim(0),
-    m_fcPos(PlutoSDRInputSettings::FC_POS_CENTER)
+    m_fcPos(PlutoSDRInputSettings::FC_POS_CENTER),
+    m_phasor(0)
 {
     m_buf = new qint16[blocksize*(sizeof(Sample)/sizeof(qint16))];
 }
@@ -90,29 +91,11 @@ void PlutoSDRInputThread::run()
 
         for (p_dat = m_plutoBox->rxBufferFirst(); p_dat < p_end; p_dat += p_inc)
         {
-            m_buf[2*is]   = ((int16_t*)p_dat)[0]; // Real (I)
-            m_buf[2*is+1] = ((int16_t*)p_dat)[1]; // Imag (Q)
-
-            if (is == 32768-1)
-            {
-                m_sampleFifo->write((unsigned char *) m_buf, 32768*4);
-                is = 0;
-            }
-            else
-            {
-                is++;
-            }
-
-//            if (is == ((1<<m_log2Decim) - 1))
-//            {
-//                convert(); // I+Q -> 2
-//                is = 0;
-//            }
-//            else
-//            {
-//                is++;
-//            }
+            memcpy(&m_buf[2*is], p_dat, 2*sizeof(int16_t));
+            is++;
         }
+
+        m_sampleFifo->write((unsigned char *) m_buf, is*2*sizeof(int16_t));
     }
 
     m_running = false;

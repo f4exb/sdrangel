@@ -48,7 +48,7 @@ private:
     bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
-    qint16 *m_buf; // holds I+Q values of each sample
+    int16_t *m_buf; // holds I+Q values of each sample
     uint32_t m_blockSize;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
@@ -56,6 +56,7 @@ private:
 
     unsigned int m_log2Decim; // soft decimation
     int m_fcPos;
+    float m_phasor;
 
     Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 
