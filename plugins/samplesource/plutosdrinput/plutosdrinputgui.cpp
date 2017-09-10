@@ -103,6 +103,8 @@ qint64 PlutoSDRInputGui::getCenterFrequency() const
 void PlutoSDRInputGui::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
+    displaySettings();
+    sendSettings();
 }
 
 QByteArray PlutoSDRInputGui::serialize() const
@@ -264,6 +266,7 @@ void PlutoSDRInputGui::displaySettings()
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->loPPM->setValue(m_settings.m_LOppmTenths);
     ui->loPPMText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2Decim);

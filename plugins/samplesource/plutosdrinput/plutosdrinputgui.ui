@@ -216,10 +216,10 @@
         <string>Local oscillator correction (ppm)</string>
        </property>
        <property name="minimum">
-        <number>-100</number>
+        <number>-200</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>200</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -881,7 +881,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Device RSSI indication</string>
+        <string>Device RSSI indication (dB)</string>
        </property>
        <property name="text">
         <string>-100.00 dB</string>
