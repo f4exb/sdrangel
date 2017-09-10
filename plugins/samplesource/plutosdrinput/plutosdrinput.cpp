@@ -26,7 +26,7 @@
 #include "plutosdrinput.h"
 #include "plutosdrinputthread.h"
 
-#define PLUTOSDR_BLOCKSIZE (128*1024) //complex samples per buffer (must be multiple of 64)
+#define PLUTOSDR_BLOCKSIZE_SAMPLES (128*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
@@ -70,7 +70,7 @@ bool PlutoSDRInput::start()
 
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
+    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
     {
         qFatal("PlutoSDRInput::start: cannot create thread");
         stop();
@@ -153,7 +153,7 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
 bool PlutoSDRInput::openDevice()
 {
-    if (!m_sampleFifo.setSize(PLUTOSDR_BLOCKSIZE))
+    if (!m_sampleFifo.setSize(PLUTOSDR_BLOCKSIZE_SAMPLES))
     {
         qCritical("PlutoSDRInput::openDevice: could not allocate SampleFifo");
         return false;
@@ -198,7 +198,7 @@ bool PlutoSDRInput::openDevice()
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openRx();
-    m_plutoRxBuffer = plutoBox->createRxBuffer(PLUTOSDR_BLOCKSIZE, false);
+    m_plutoRxBuffer = plutoBox->createRxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES*2, false); // PlutoSDR buffer size is counted in number of I or Q samples not the combination
 
     return true;
 }

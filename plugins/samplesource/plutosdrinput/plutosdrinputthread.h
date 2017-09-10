@@ -48,11 +48,12 @@ private:
     bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
-    int16_t *m_buf; // holds I+Q values of each sample
-    uint32_t m_blockSize;
-    SampleVector m_convertBuffer;
-    SampleSinkFifo* m_sampleFifo;
+    int16_t *m_buf;               //!< holds I+Q values of each sample from devce
+    int16_t *m_bufConv;           //!< holds I+Q values of each sample converted to host format via iio_channel_convert
+    uint32_t m_blockSizeSamples;  //!< buffer sizes in number of (I,Q) samples
+    SampleVector m_convertBuffer; //!< vector of (I,Q) samples used for decimation and scaling conversion
     SampleVector::iterator m_convertIt;
+    SampleSinkFifo* m_sampleFifo; //!< DSP sample FIFO (I,Q)
 
     unsigned int m_log2Decim; // soft decimation
     int m_fcPos;

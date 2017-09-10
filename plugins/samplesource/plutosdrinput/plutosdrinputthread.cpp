@@ -18,19 +18,22 @@
 #include "plutosdrinputsettings.h"
 #include "plutosdrinputthread.h"
 
-PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksize, DevicePlutoSDRBox* plutoBox, SampleSinkFifo* sampleFifo, QObject* parent) :
+#include "iio.h"
+
+PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksizeSamples, DevicePlutoSDRBox* plutoBox, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_plutoBox(plutoBox),
-    m_blockSize(blocksize),
-    m_convertBuffer(blocksize),
-    m_sampleFifo(sampleFifo),
+    m_blockSizeSamples(blocksizeSamples),
+    m_convertBuffer(blocksizeSamples),
     m_convertIt(m_convertBuffer.begin()),
+    m_sampleFifo(sampleFifo),
     m_log2Decim(0),
     m_fcPos(PlutoSDRInputSettings::FC_POS_CENTER),
     m_phasor(0)
 {
-    m_buf = new qint16[blocksize*(sizeof(Sample)/sizeof(qint16))];
+    m_buf     = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
+    m_bufConv = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
 }
 
 PlutoSDRInputThread::~PlutoSDRInputThread()
@@ -78,7 +81,7 @@ void PlutoSDRInputThread::run()
         ssize_t nbytes_rx;
         char *p_dat, *p_end;
         std::ptrdiff_t p_inc;
-        int is;
+        int ihs; // half sample index (I then Q to make a sample)
 
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
@@ -87,16 +90,26 @@ void PlutoSDRInputThread::run()
         // READ: Get pointers to RX buf and read IQ from RX buf port 0
         p_inc = m_plutoBox->rxBufferStep();
         p_end = m_plutoBox->rxBufferEnd();
-        is = 0;
+        ihs = 0;
+
+//        qDebug("PlutoSDRInputThread::run: %ld samples read step: %ld", nbytes_rx / p_inc, p_inc);
+        // p_inc is 2 on a char* buffer therefore each iteration processes only the I or Q sample
+        // I and Q samples are processed one at a time
+        // conversion is not needed as samples are little endian
 
         for (p_dat = m_plutoBox->rxBufferFirst(); p_dat < p_end; p_dat += p_inc)
         {
-            memcpy(&m_buf[2*is], p_dat, 2*sizeof(int16_t));
-            is++;
+//            m_buf[2*is] = ((int16_t *) p_dat)[0];
+//            m_buf[2*is+1] = ((int16_t *) p_dat)[1];
+//            memcpy(&m_buf[2*ihs], p_dat, 2*sizeof(int16_t));
+            m_buf[ihs] = *((int16_t *) p_dat);
+//            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[2*ihs], (const void *) &m_buf[2*ihs]);
+//            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
+            ihs++;
         }
 
-        //m_sampleFifo->write((unsigned char *) m_buf, is*2*sizeof(int16_t));
-        convert(m_buf, 2 * m_blockSize);
+        m_sampleFifo->write((unsigned char *) m_buf, ihs*sizeof(int16_t));
+        //convert(m_bufConv, 2 * m_blockSize);
     }
 
     m_running = false;

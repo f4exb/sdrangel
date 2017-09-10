@@ -41,6 +41,14 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
     if (m_valid) {
         getXO();
         setTracking();
+//        int nb_channels = iio_device_get_channels_count(m_devRx);
+//        for (int i = 0; i < nb_channels; i++) {
+//            iio_channel_disable(iio_device_get_channel(m_devRx, i));
+//        }
+//        nb_channels = iio_device_get_channels_count(m_devTx);
+//        for (int i = 0; i < nb_channels; i++) {
+//            iio_channel_disable(iio_device_get_channel(m_devTx, i));
+//        }
     }
 }
 
@@ -213,6 +221,16 @@ bool DevicePlutoSDRBox::openRx()
 
     if (m_chnRx0) {
         iio_channel_enable(m_chnRx0);
+        const struct iio_data_format *df = iio_channel_get_data_format(m_chnRx0);
+        qDebug("DevicePlutoSDRBox::openRx: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
+                df->length,
+                df->bits,
+                df->shift,
+                df->is_signed ? "true" : "false",
+                df->is_be ? "true" : "false",
+                df->with_scale? "true" : "false",
+                df->scale,
+                df->repeat);
         return true;
     } else {
         std::cerr << "DevicePlutoSDRBox::openRx: failed" << std::endl;
@@ -228,6 +246,16 @@ bool DevicePlutoSDRBox::openTx()
 
     if (m_chnTx0) {
         iio_channel_enable(m_chnTx0);
+        const struct iio_data_format *df = iio_channel_get_data_format(m_chnTx0);
+        qDebug("DevicePlutoSDRBox::openTx: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
+                df->length,
+                df->bits,
+                df->shift,
+                df->is_signed ? "true" : "false",
+                df->is_be ? "true" : "false",
+                df->with_scale? "true" : "false",
+                df->scale,
+                df->repeat);
         return true;
     } else {
         std::cerr << "DevicePlutoSDRBox::openTx: failed" << std::endl;
