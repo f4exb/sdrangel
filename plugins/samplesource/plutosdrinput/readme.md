@@ -108,7 +108,7 @@ The maximum sample rate is fixed and set to 20 MS/s
 
 <h3>9: Rx analog filter bandwidth</h3>
 
-This is the Rx analog filter bandwidth in kHz in the AD9363 device. It can be varied from 625 kHz to 16 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+This is the Rx analog filter bandwidth in kHz in the AD9363 device. It can be varied from 200 kHz to 14 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
 <h3>10: Hardware FIR filter toggle</h3>
 
