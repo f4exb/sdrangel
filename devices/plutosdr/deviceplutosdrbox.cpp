@@ -23,6 +23,7 @@
 #include <QtGlobal>
 
 #include "dsp/wfir.h"
+#include "deviceplutosdr.h"
 #include "deviceplutosdrbox.h"
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
@@ -500,7 +501,9 @@ void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, uint32_
     nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
     nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
     normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
-    normalizedBW = normalizedBW < 0.1 ? 0.1 : normalizedBW > 0.9 ? 0.9 : normalizedBW;
+    normalizedBW = normalizedBW < DevicePlutoSDR::firBWLowLimitFactor ?
+            DevicePlutoSDR::firBWLowLimitFactor :
+            normalizedBW > DevicePlutoSDR::firBWHighLimitFactor ? DevicePlutoSDR::firBWHighLimitFactor : normalizedBW;
 
     qDebug("DevicePlutoSDRBox::setFIR: intdec: %u gain: %d nbTaps: %u BWin: %u BW: %f (%f)",
             intdec,

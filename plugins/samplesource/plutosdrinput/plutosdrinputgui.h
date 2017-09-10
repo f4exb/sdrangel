@@ -67,6 +67,8 @@ private:
     void sendSettings(bool forceSettings = false);
     void blockApplySettings(bool block);
     void updateSampleRateAndFrequency();
+    void setFIRBWLimits();
+    void setSampleRateLimits();
 
 private slots:
     void on_startStop_toggled(bool checked);

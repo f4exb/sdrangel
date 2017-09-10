@@ -213,6 +213,8 @@ void PlutoSDRInputGui::on_lpf_changed(quint64 value)
 void PlutoSDRInputGui::on_lpFIREnable_toggled(bool checked)
 {
     m_settings.m_lpfFIREnable = checked;
+    ui->lpFIRDecimation->setEnabled(checked);
+    ui->lpFIRGain->setEnabled(checked);
     sendSettings();
 }
 
@@ -225,6 +227,7 @@ void PlutoSDRInputGui::on_lpFIR_changed(quint64 value)
 void PlutoSDRInputGui::on_lpFIRDecimation_currentIndexChanged(int index)
 {
     m_settings.m_lpfFIRlog2Decim = index > 2 ? 2 : index;
+    setSampleRateLimits();
     sendSettings();
 }
 
@@ -271,12 +274,17 @@ void PlutoSDRInputGui::displaySettings()
     ui->lpFIR->setValue(m_settings.m_lpfFIRBW / 1000);
     ui->lpFIRDecimation->setCurrentIndex(m_settings.m_lpfFIRlog2Decim);
     ui->lpFIRGain->setCurrentIndex((m_settings.m_lpfFIRGain + 6)/6);
+    ui->lpFIRDecimation->setEnabled(m_settings.m_lpfFIREnable);
+    ui->lpFIRGain->setEnabled(m_settings.m_lpfFIREnable);
 
     ui->gainMode->setCurrentIndex((int) m_settings.m_gainMode);
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
 
     ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
+
+    setFIRBWLimits();
+    setSampleRateLimits();
 }
 
 void PlutoSDRInputGui::sendSettings(bool forceSettings)
@@ -360,6 +368,19 @@ void PlutoSDRInputGui::updateStatus()
     m_statusCounter++;
 }
 
+void PlutoSDRInputGui::setFIRBWLimits()
+{
+    float high = DevicePlutoSDR::firBWHighLimitFactor * ((PlutoSDRInput *) m_sampleSource)->getFIRSampleRate();
+    float low = DevicePlutoSDR::firBWLowLimitFactor * ((PlutoSDRInput *) m_sampleSource)->getFIRSampleRate();
+    ui->lpFIR->setValueRange(5, (int(low)/1000)+1, (int(high)/1000)+1);
+}
+
+void PlutoSDRInputGui::setSampleRateLimits()
+{
+    uint32_t low = ui->lpFIREnable->isChecked() ? DevicePlutoSDR::srLowLimitFreq / (1<<ui->lpFIRDecimation->currentIndex()) : DevicePlutoSDR::srLowLimitFreq;
+    ui->sampleRate->setValueRange(8, low, DevicePlutoSDR::srHighLimitFreq);
+}
+
 void PlutoSDRInputGui::handleDSPMessages()
 {
     Message* message;
@@ -374,6 +395,7 @@ void PlutoSDRInputGui::handleDSPMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("LimeSDRInputGUI::handleMessagesToGUI: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
+            setFIRBWLimits();
 
             delete message;
         }
