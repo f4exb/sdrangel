@@ -522,7 +522,7 @@
      <item>
       <widget class="ButtonSwitch" name="lpFIREnable">
        <property name="toolTip">
-        <string>Enable or disable TSP digital FIR lowpass filters</string>
+        <string>Enable or disable TSP digital FIR lowpass filter</string>
        </property>
        <property name="text">
         <string>FIR</string>
@@ -580,7 +580,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>FIR decimation</string>
+        <string>FIR decimation changes lower sample rate limit (see documentation)</string>
        </property>
        <item>
         <property name="text">
@@ -661,7 +661,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Gain control mode (Manual, Slow attack, Fast attack, Hybrid) </string>
+        <string>Gain control mode (Manual, Slow attack AGC, Fast attack AGC, Hybrid AGC) </string>
        </property>
        <item>
         <property name="text">
@@ -694,7 +694,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Gain setting (dB)</string>
+        <string>Gain setting (dB) in manual mode only</string>
        </property>
        <property name="minimum">
         <number>1</number>
@@ -876,12 +876,15 @@
       <widget class="QLabel" name="rssiText">
        <property name="minimumSize">
         <size>
-         <width>65</width>
+         <width>68</width>
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Device RSSI indication</string>
+       </property>
        <property name="text">
-        <string>100.00 dB</string>
+        <string>-100.00 dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
