@@ -22,7 +22,7 @@ set(plutosdrinput_FORMS
 
 if (BUILD_DEBIAN)
 include_directories(
-        .
+    .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBIIOSRC}

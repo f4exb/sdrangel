@@ -45,7 +45,7 @@ HEADERS = $$LIBIIOSRC/debug.h\
     $$LIBIIOSRC/iiod-client.h\
     $$LIBIIOSRC/iio-lock.h\
     $$LIBIIOSRC/iio-private.h\
-    $$PWD\include/iio-config.h
+    $$PWD\includemw/iio-config.h
     
 CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0

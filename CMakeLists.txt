@@ -589,6 +589,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(libbladerf)
     add_subdirectory(libmirisdr)
     add_subdirectory(liblimesuite)
+    add_subdirectory(libiio)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(httpserver)
