@@ -701,15 +701,14 @@
      </item>
      <item>
       <widget class="QComboBox" name="lpFIRGain">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="toolTip">
         <string>FIR gain (dB)</string>
        </property>
+       <item>
+        <property name="text">
+         <string>-12</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>-6</string>
@@ -718,6 +717,11 @@
        <item>
         <property name="text">
          <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>+6</string>
         </property>
        </item>
       </widget>

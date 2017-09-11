@@ -235,7 +235,7 @@ void PlutoSDRInputGui::on_lpFIRDecimation_currentIndexChanged(int index)
 
 void PlutoSDRInputGui::on_lpFIRGain_currentIndexChanged(int index)
 {
-    m_settings.m_lpfFIRGain = 6*(index > 1 ? 1 : index) - 6;
+    m_settings.m_lpfFIRGain = 6*(index > 3 ? 3 : index) - 12;
     sendSettings();
 }
 
@@ -276,7 +276,7 @@ void PlutoSDRInputGui::displaySettings()
     ui->lpFIREnable->setChecked(m_settings.m_lpfFIREnable);
     ui->lpFIR->setValue(m_settings.m_lpfFIRBW / 1000);
     ui->lpFIRDecimation->setCurrentIndex(m_settings.m_lpfFIRlog2Decim);
-    ui->lpFIRGain->setCurrentIndex((m_settings.m_lpfFIRGain + 6)/6);
+    ui->lpFIRGain->setCurrentIndex((m_settings.m_lpfFIRGain + 12)/6);
     ui->lpFIRDecimation->setEnabled(m_settings.m_lpfFIREnable);
     ui->lpFIRGain->setEnabled(m_settings.m_lpfFIREnable);
 

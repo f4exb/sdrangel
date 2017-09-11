@@ -27,6 +27,8 @@
 #include "deviceplutosdrbox.h"
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
+        m_lpfFIRRxGain(0),
+        m_lpfFIRTxGain(0),
         m_chnRx0(0),
         m_chnTx0(0),
         m_rxBuf(0),
@@ -470,7 +472,14 @@ void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
     m_devSampleRate = sampleRate;
 }
 
-void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, uint32_t bw, int gain)
+/**
+ * @param sampleRate baseband sample rate (S/s)
+ * @param log2IntDec FIR interpolation or decimation factor
+ * @param use Rx or Tx. Applies to the rest of the parameters
+ * @param bw FIR filter bandwidth at approximately -6 dB cutoff (Hz)
+ * @param gain FIR filter gain (dB)
+ */
+void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, DeviceUse use, uint32_t bw, int gain)
 {
     SampleRates sampleRates;
     std::ostringstream ostr;
@@ -479,11 +488,19 @@ void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, uint32_
     double normalizedBW;
     uint32_t intdec = 1<<(log2IntDec > 2 ? 2 : log2IntDec);
 
+    // update gain parameter
+
+    if (use == USE_RX) {
+        m_lpfFIRRxGain = gain;
+    } else {
+        m_lpfFIRTxGain = gain;
+    }
+
     // set a dummy minimal filter first to get the sample rates right
 
     setFIREnable(false); // disable first
 
-    formatFIRHeader(ostr, intdec, gain);
+    formatFIRHeader(ostr, intdec);
     formatFIRCoefficients(ostr, 16, 0.5);
     setFilter(ostr.str());
     ostr.str(""); // reset string stream
@@ -515,13 +532,12 @@ void DevicePlutoSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, uint32_
 
     // set the right filter
 
-    formatFIRHeader(ostr, intdec, gain);
+    formatFIRHeader(ostr, intdec);
     formatFIRCoefficients(ostr, nbTaps, normalizedBW);
     setFilter(ostr.str());
 
     m_lpfFIRlog2Decim = log2IntDec;
     m_lpfFIRBW = bw;
-    m_lpfFIRGain = gain;
 
     // enable and set sample rate will be done by the caller
 }
@@ -547,10 +563,10 @@ void DevicePlutoSDRBox::setLOPPMTenths(int ppmTenths)
     m_LOppmTenths = ppmTenths;
 }
 
-void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr,uint32_t intdec, int32_t gain)
+void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr,uint32_t intdec)
 {
-    ostr << "RX 3 GAIN " << gain << " DEC " << intdec << std::endl;
-    ostr << "TX 3 GAIN " << gain << " INT " << intdec << std::endl;
+    ostr << "RX 3 GAIN " << m_lpfFIRRxGain << " DEC " << intdec << std::endl;
+    ostr << "TX 3 GAIN " << m_lpfFIRTxGain << " INT " << intdec << std::endl;
 }
 
 void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t nbTaps, double normalizedBW)

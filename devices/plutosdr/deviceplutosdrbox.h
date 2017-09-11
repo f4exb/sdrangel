@@ -57,7 +57,8 @@ public:
     bool     m_lpfFIREnable;       //!< enable digital lowpass FIR filter
     float    m_lpfFIRBW;           //!< digital lowpass FIR filter bandwidth (Hz)
     uint32_t m_lpfFIRlog2Decim;    //!< digital lowpass FIR filter log2 of decimation factor (0..2)
-    int      m_lpfFIRGain;         //!< digital lowpass FIR filter gain (dB)
+    int      m_lpfFIRRxGain;       //!< digital lowpass FIR filter gain Rx side (dB)
+    int      m_lpfFIRTxGain;       //!< digital lowpass FIR filter gain Tx side (dB)
 
     DevicePlutoSDRBox(const std::string& uri);
     ~DevicePlutoSDRBox();
@@ -88,7 +89,7 @@ public:
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setSampleRate(uint32_t sampleRate);
-    void setFIR(uint32_t sampleRate, uint32_t intdec, uint32_t bw, int gain);
+    void setFIR(uint32_t sampleRate, uint32_t intdec, DeviceUse use, uint32_t bw, int gain);
     void setFIREnable(bool enable);
     void setLOPPMTenths(int ppmTenths);
     bool getRSSI(std::string& rssiStr, unsigned int chan);
@@ -111,7 +112,7 @@ private:
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
     void setFilter(const std::string& filterConfigStr);
-    void formatFIRHeader(std::ostringstream& str, uint32_t intdec, int32_t gain);
+    void formatFIRHeader(std::ostringstream& str, uint32_t intdec);
     void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
     void getXO();
     void setTracking();

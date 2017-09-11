@@ -322,7 +322,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         (settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
         (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain) || force)
     {
-        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Decim, settings.m_lpfFIRBW, settings.m_lpfFIRGain); // don't bother with the FIR at this point
+        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Decim, DevicePlutoSDRBox::USE_RX, settings.m_lpfFIRBW, settings.m_lpfFIRGain);
         plutoBox->setFIREnable(settings.m_lpfFIREnable);   // eventually enable/disable FIR
         plutoBox->setSampleRate(settings.m_devSampleRate); // and set end point sample rate
 
