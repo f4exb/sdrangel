@@ -6,8 +6,6 @@ This input sample source plugin gets its samples from a [PlutoSDR device](https:
 
 As you can see from the Wiki this is becoming a fairly popular SDR hardware platform. It does have interesting features but the library documentation and examples are poor when not misleading. Therefore while this implementation does work it should still be considered experimental.
 
-This is a Linux only plugin. There is no Windows support since the supporting libiio library does not compile in a Qt/MinGW toolchain.
-
 &#9758; PlutoSDR is physically implemented as a 1x1 SISO device although the AD9363 chip does have a second Rx and a second Tx channel. Revision C of the board claims to have pads to allow hackers connecting the second ports externally however for now only the first Rx channel is supported by this plugin.
 
 <h2>Build</h2>
@@ -26,10 +24,6 @@ The plugin will be built only if libiio is installed in your system. To build an
 Then add the following defines on `cmake` command line when compiling SDRangel:
 
 `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
-
-<h2>Installation from binary packages</h2>
-
-&#9758; libiio is built in the binary packages so there is no external dependency
 
 <h2>Interface</h2>
 

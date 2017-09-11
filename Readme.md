@@ -119,6 +119,14 @@ Then add the following defines on `cmake` command line:
 
 `-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
 
+<h2>PlutoSDR</h2>
+
+PlutoSDR is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
+
+If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
+
+Only the Rx part is supported at the moment.
+
 <h2>RTL-SDR</h2>
 
 RTL-SDR based dongles are supported through the librtlsdr library that should be installed in your system for proper build of the software and operation support. Add `librtlsdr-dev` to the list of dependencies to install.
