@@ -41,7 +41,7 @@ add_library(plutosdrdevice SHARED
 
 if (BUILD_DEBIAN)
 target_link_libraries(plutosdrdevice
-    libiio
+    iio
     sdrbase
 )
 else (BUILD_DEBIAN)
