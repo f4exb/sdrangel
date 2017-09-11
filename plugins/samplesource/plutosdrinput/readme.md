@@ -130,7 +130,7 @@ The FIR filter block can provide a decimation by 1 (no decimation), 2 or 4. This
 
 <h3>13: Hardware FIR gain</h3>
 
-The FIR filter can introduce a gain that can be set to -6 or 0 dB.
+The FIR filter can introduce a gain that can be set to -12, -6, 0 or 6 dB. The FIR has a fixed gain of 6 dB so to maximize dynamic range one would set the gain at -6 dB so that the overall gain is set at 0 dB.
 
 <h4>14: Gain mode</h2>
 
