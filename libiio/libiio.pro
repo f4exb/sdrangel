@@ -12,7 +12,9 @@ TARGET = libiio
 CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
 CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
-INCLUDEPATH += $$PWD/include
+DEFINES += LIBIIO_EXPORTS=1
+
+INCLUDEPATH += $$PWD/includemw
 INCLUDEPATH += $$LIBIIOSRC
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
@@ -45,7 +47,7 @@ HEADERS = $$LIBIIOSRC/debug.h\
     $$LIBIIOSRC/iiod-client.h\
     $$LIBIIOSRC/iio-lock.h\
     $$LIBIIOSRC/iio-private.h\
-    $$PWD\includemw/iio-config.h
+    $$PWD/includemw/iio-config.h
     
 CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0

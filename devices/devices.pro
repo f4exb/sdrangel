@@ -23,6 +23,8 @@ CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
+CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
+CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../sdrbase
@@ -40,6 +42,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
 INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
 INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
 INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
+INCLUDEPATH += $$LIBIIOSRC
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -55,6 +58,12 @@ SOURCES += hackrf/devicehackrf.cpp\
 SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
         limesdr/devicelimesdrshared.cpp
+        
+SOURCES += plutosdr/deviceplutosdr.cpp\
+        plutosdr/deviceplutosdrbox.cpp\
+        plutosdr/deviceplutosdrparams.cpp\
+        plutosdr/deviceplutosdrscan.cpp\
+        plutosdr/deviceplutosdrshared.cpp
 
 !macx:HEADERS -= bladerf/devicebladerf.h\
         bladerf/devicebladerfparam.h\
@@ -70,10 +79,17 @@ HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
         limesdr/devicelimesdrshared.h
 
+HEADERS += plutosdr/deviceplutosdr.h\
+        plutosdr/deviceplutosdrbox.h\
+        plutosdr/deviceplutosdrparams.h\
+        plutosdr/deviceplutosdrscan.h\
+        plutosdr/deviceplutosdrshared.h
+
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
 LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
+LIBS += -L../libiio/$${build_subdir} -llibiio
 
 macx {
     LIBS -= -L../libbladerf/$${build_subdir} -llibbladerf

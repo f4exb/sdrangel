@@ -28,6 +28,7 @@ copy libairspy\%1\libairspy.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
+copy libiio\%1\libiio.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
 copy %opencvdir%\opencv_ffmpeg2413_64.dll %2
 copy %opencvdir%\libopencv_imgproc2413.dll %2
@@ -63,6 +64,7 @@ copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
+copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
