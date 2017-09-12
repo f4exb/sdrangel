@@ -21,6 +21,7 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 #include <QMutex>
+#include <stdint.h>
 
 #include "dsp/dsptypes.h"
 #include "util/message.h"
