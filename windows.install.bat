@@ -1,5 +1,6 @@
 SET libusbdir="D:\softs\libusb-1.0.20\MinGW32"
 SET opencvdir="D:\softs\opencv\build\mw32\install\x86\mingw\bin"
+SET libxml2dir="D:\softs\libxml2-2.7.8.win32"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
@@ -16,6 +17,7 @@ copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
 copy libiio\%1\libiio.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
+copy %libxml2dir%\bin\libxml2.dll %2
 copy %opencvdir%\opencv_ffmpeg2413.dll %2
 copy %opencvdir%\libopencv_imgproc2413.dll %2
 copy %opencvdir%\libopencv_highgui2413.dll %2

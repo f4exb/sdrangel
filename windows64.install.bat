@@ -1,6 +1,7 @@
 SET libusbdir="D:\softs\libusb-1.0.20\MinGW64"
 SET msys2dir="D:\msys64"
 SET opencvdir="D:\softs\opencv\build\mw64\install\x64\mingw\bin"
+SET libxml2dir="D:\softs\libxml2-2.9.3-win32-x86_64"
 
 copy %msys2dir%\mingw64\bin\libbz2-1.dll %2
 copy %msys2dir%\mingw64\bin\libfreetype-6.dll %2
@@ -30,6 +31,7 @@ copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
 copy libiio\%1\libiio.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2
+copy %libxml2dir%\bin\libxml2-2.dll %2
 copy %opencvdir%\opencv_ffmpeg2413_64.dll %2
 copy %opencvdir%\libopencv_imgproc2413.dll %2
 copy %opencvdir%\libopencv_highgui2413.dll %2
