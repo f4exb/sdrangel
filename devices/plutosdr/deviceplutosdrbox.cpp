@@ -572,7 +572,7 @@ void DevicePlutoSDRBox::formatFIRHeader(std::ostringstream& ostr,uint32_t intdec
 void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t nbTaps, double normalizedBW)
 {
     double *fcoeffs = new double[nbTaps];
-    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, normalizedBW, 0.0, WFIR::wtBLACKMAN_HARRIS, 0.0);
+    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, normalizedBW, 0.0, normalizedBW < 0.2 ? WFIR::wtHAMMING : WFIR::wtBLACKMAN_HARRIS, 0.0);
 
     for (unsigned int i = 0; i < nbTaps; i++) {
         ostr << (int16_t) (fcoeffs[i] * 32768.0) << ", " <<  (int16_t) (fcoeffs[i] * 32768.0) << std::endl;
