@@ -91,6 +91,27 @@ You need to download the 1.5.1 version specifically that is found [here](https:/
   - `plugins\samplesource\bladerf\bladerf.pro`. Update the following line with the location of your BladeRF installation:
     - `CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"`
 
+<h4>Libiio library (libiio) for PlutoSDR</h4>
+
+This is needed for PlutoSDR support. It is found [here](https://github.com/analogdevicesinc/libiio) Clone it in `D:\softs` so that the source directory is `D:\softs\libiio`. The source path is declared in libiio.pro, devices.pro and plutosdrinput.pro:
+
+  - `CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"`
+  - `CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"`
+
+Libiio has specific dependencies that should be installed. Copy commands are part of the installation bat files. You will find archives of the needed files [here](http://xmlsoft.org/sources/win32/). Relevant files are:
+
+For win32:
+
+iconv-1.9.2.win32.zip, libxml2-2.7.8.win32.zip, zlib-1.2.5.win32.zip. Unzip them in `D:\softs` so that the dlls can be found by the installation script at:
+
+  - `D:\softs\iconv-1.9.2.win32\bin\iconv.dll`
+  - `D:\softs\libxml2-2.7.8.win32\bin\libxml2.dll`
+  - `D:\softs\zlib-1.2.5\bin\zlib1.dll`
+
+For win64:
+
+First cd to the `64bit` subdirectory. Then download `libxml2-2.9.3-win32-x86_64.7z` and unzip it in `D:\softs` so that the dlls can be found by the installation script at `D:\softs\libxml2-2.9.3-win32-x86_64\bin\libxml2-2.dll`
+
 <h3>Dependencies for DSD (Digital Speech Decoding) plugin</h3>
 
 <h4>mbelib</h4>
