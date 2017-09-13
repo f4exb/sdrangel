@@ -478,7 +478,7 @@ bool LimeSDROutput::handleMessage(const Message& message)
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-            (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
         }
 
         // send to sink buddies
@@ -918,9 +918,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             DSPSignalNotification *notif = new DSPSignalNotification(
                     m_settings.m_devSampleRate/(1<<buddyLog2SoftDecim),
                     buddyCenterFreq + buddyNCOFreq);
-            (*itSource)->getDeviceInputMessageQueue()->push(notif);
+            (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
             DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
-            (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeTxDSP)

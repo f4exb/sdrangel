@@ -395,7 +395,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
 

@@ -54,7 +54,7 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 AirspyGui::~AirspyGui()
@@ -134,7 +134,7 @@ void AirspyGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("AirspyGui::handleDSPMessages: message: %s", message->getIdentifier());
 

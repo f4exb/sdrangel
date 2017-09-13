@@ -103,7 +103,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
 
 	displaySettings();
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 
     m_eventsTime.start();
     displayEventCounts();
@@ -254,7 +254,7 @@ void SDRdaemonSourceGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("SDRdaemonGui::handleDSPMessages: message: %s", message->getIdentifier());
 

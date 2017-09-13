@@ -56,8 +56,8 @@ public:
     DSPDeviceSourceEngine::State state() const; //!< device engine state
     QString errorMessage();               //!< Return the current device engine error message
     uint getDeviceUID() const;            //!< Return the current device engine unique ID
-    MessageQueue *getDeviceInputMessageQueue();
-    MessageQueue *getDeviceOutputMessageQueue();
+    MessageQueue *getDeviceEngineInputMessageQueue();
+    MessageQueue *getDeviceEngineOutputMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
     // device related stuff

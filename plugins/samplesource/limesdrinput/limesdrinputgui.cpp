@@ -76,7 +76,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     displaySettings();
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToGUI()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToGUI()), Qt::QueuedConnection);
 }
 
 LimeSDRInputGUI::~LimeSDRInputGUI()
@@ -148,7 +148,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         if (DSPSignalNotification::match(*message))
         {

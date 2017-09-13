@@ -61,7 +61,7 @@ FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FCDProPlusGui::~FCDProPlusGui()
@@ -132,7 +132,7 @@ void FCDProPlusGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("RTLSDRGui::handleDSPMessages: message: %s", message->getIdentifier());
 

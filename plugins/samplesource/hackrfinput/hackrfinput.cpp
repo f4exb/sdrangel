@@ -464,7 +464,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
 	m_settings.m_linkTxFrequency = settings.m_linkTxFrequency;

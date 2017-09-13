@@ -422,7 +422,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
     return true;

@@ -105,12 +105,12 @@ uint DeviceSourceAPI::getDeviceUID() const
     return m_deviceSourceEngine->getUID();
 }
 
-MessageQueue *DeviceSourceAPI::getDeviceInputMessageQueue()
+MessageQueue *DeviceSourceAPI::getDeviceEngineInputMessageQueue()
 {
     return m_deviceSourceEngine->getInputMessageQueue();
 }
 
-MessageQueue *DeviceSourceAPI::getDeviceOutputMessageQueue()
+MessageQueue *DeviceSourceAPI::getDeviceEngineOutputMessageQueue()
 {
     return m_deviceSourceEngine->getOutputMessageQueue();
 }

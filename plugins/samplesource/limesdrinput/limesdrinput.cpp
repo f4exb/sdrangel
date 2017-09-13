@@ -432,7 +432,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
                     status.sampleRate,
                     status.linkRate,
                     status.timestamp);
-            m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+            m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
         }
         else
         {
@@ -447,7 +447,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
                     0,     // status.sampleRate,
                     0,     // status.linkRate,
                     0);    // status.timestamp);
-            m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+            m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
         }
 
         return true;
@@ -467,7 +467,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         // send to oneself
         DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-        m_deviceAPI->getDeviceOutputMessageQueue()->push(report);
+        m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
 
         // send to source buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -476,7 +476,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-            (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
         }
 
         // send to sink buddies
@@ -1045,7 +1045,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         DSPSignalNotification *notif = new DSPSignalNotification(
                 m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim),
                 m_settings.m_centerFrequency + ncoShift);
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         // send to source buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -1059,12 +1059,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             DSPSignalNotification *notif = new DSPSignalNotification(
                     m_settings.m_devSampleRate/(1<<buddyLog2Decim),
                     m_settings.m_centerFrequency + buddyNCOFreq);
-            (*itSource)->getDeviceInputMessageQueue()->push(notif);
+            (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
         }
 
         // send to sink buddies
@@ -1094,7 +1094,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         // send to self first
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         // send to source buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -1105,12 +1105,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
             int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + buddyNCOFreq);
-            (*itSource)->getDeviceInputMessageQueue()->push(notif);
+            (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
             MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
                     m_settings.m_centerFrequency,
                     m_settings.m_devSampleRate,
                     m_settings.m_log2HardDecim);
-            (*itSource)->getDeviceOutputMessageQueue()->push(report);
+            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeOwnDSP)
@@ -1121,7 +1121,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_fileSink->handleMessage(*notif); // forward to file sink
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"

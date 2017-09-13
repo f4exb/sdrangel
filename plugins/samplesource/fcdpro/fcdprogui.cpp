@@ -143,7 +143,7 @@ FCDProGui::FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FCDProGui::~FCDProGui()
@@ -214,7 +214,7 @@ void FCDProGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("FCDProGui::handleDSPMessages: message: %s", message->getIdentifier());
 

@@ -71,7 +71,7 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     displaySettings();
 
     connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 SDRPlayGui::~SDRPlayGui()
@@ -172,7 +172,7 @@ void SDRPlayGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("SDRPlayGui::handleDSPMessages: message: %s", message->getIdentifier());
 

@@ -70,7 +70,7 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	m_deviceAPI->setSource(m_sampleSource);
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -133,7 +133,7 @@ void FileSourceGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("FileSourceGui::handleDSPMessages: message: %s", message->getIdentifier());
 
