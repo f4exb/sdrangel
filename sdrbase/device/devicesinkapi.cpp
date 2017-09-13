@@ -114,12 +114,12 @@ uint DeviceSinkAPI::getDeviceUID() const
     return m_deviceSinkEngine->getUID();
 }
 
-MessageQueue *DeviceSinkAPI::getDeviceInputMessageQueue()
+MessageQueue *DeviceSinkAPI::getDeviceEngineInputMessageQueue()
 {
     return m_deviceSinkEngine->getInputMessageQueue();
 }
 
-MessageQueue *DeviceSinkAPI::getDeviceOutputMessageQueue()
+MessageQueue *DeviceSinkAPI::getDeviceEngineOutputMessageQueue()
 {
     return m_deviceSinkEngine->getOutputMessageQueue();
 }

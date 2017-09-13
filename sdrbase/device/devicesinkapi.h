@@ -56,8 +56,8 @@ public:
     DSPDeviceSinkEngine::State state() const;                      //!< device engine state
     QString errorMessage();                                        //!< Return the current device engine error message
     uint getDeviceUID() const;                                     //!< Return the current device engine unique ID
-    MessageQueue *getDeviceInputMessageQueue();
-    MessageQueue *getDeviceOutputMessageQueue();
+    MessageQueue *getDeviceEngineInputMessageQueue();
+    MessageQueue *getDeviceEngineOutputMessageQueue();
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum

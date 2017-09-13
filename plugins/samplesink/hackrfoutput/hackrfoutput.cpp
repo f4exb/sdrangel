@@ -376,7 +376,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 	{
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-		m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
 	return true;

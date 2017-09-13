@@ -234,7 +234,7 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
                 m_settings.m_sampleRate,
                 m_settings.m_log2Interp);
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
 }

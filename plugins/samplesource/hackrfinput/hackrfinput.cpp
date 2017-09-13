@@ -308,7 +308,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	    {
 	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
 	        DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(settings.m_centerFrequency - m_settings.m_centerFrequency);
-	        buddy->getDeviceOutputMessageQueue()->push(deltaMsg);
+	        buddy->getDeviceEngineOutputMessageQueue()->push(deltaMsg);
 	    }
 	}
 

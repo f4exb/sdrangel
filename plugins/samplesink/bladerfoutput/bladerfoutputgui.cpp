@@ -63,7 +63,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	char recFileNameCStr[30];
 	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
 
-    connect(m_deviceAPI->getDeviceOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }
 
 BladerfOutputGui::~BladerfOutputGui()
@@ -140,7 +140,7 @@ void BladerfOutputGui::handleDSPMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceOutputMessageQueue()->pop()) != 0)
+    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
     {
         qDebug("BladerfOutputGui::handleDSPMessages: message: %s", message->getIdentifier());
 

@@ -486,7 +486,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-            (*itSink)->getDeviceOutputMessageQueue()->push(report);
+            (*itSink)->getDeviceEngineOutputMessageQueue()->push(report);
         }
 
         return true;
@@ -1080,9 +1080,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             DSPSignalNotification *notif = new DSPSignalNotification(
                     m_settings.m_devSampleRate/(1<<buddyLog2Interp),
                     buddyCenterFreq + buddyNCOFreq); // do not change center frequency
-            (*itSink)->getDeviceInputMessageQueue()->push(notif);
+            (*itSink)->getDeviceEngineInputMessageQueue()->push(notif);
             DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
-            (*itSink)->getDeviceOutputMessageQueue()->push(report);
+            (*itSink)->getDeviceEngineOutputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeRxDSP)

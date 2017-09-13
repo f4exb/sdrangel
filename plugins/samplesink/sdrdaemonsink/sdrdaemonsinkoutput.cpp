@@ -263,7 +263,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     if (forwardChange)
     {
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
-        m_deviceAPI->getDeviceInputMessageQueue()->push(notif);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
 }
