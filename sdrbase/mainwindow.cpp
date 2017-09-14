@@ -140,6 +140,12 @@ MainWindow::MainWindow(QWidget* parent) :
         exit(0);
 	}
 
+    QWidget *gui;
+    PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+            m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setInputGUI(gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
+
 	m_deviceUIs.back()->m_deviceSourceAPI->setBuddyLeader(true); // the first device is always the leader
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);

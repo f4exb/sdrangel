@@ -390,11 +390,13 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
     deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
+    deviceAPI->setSampleSourceDisplayName(m_sampleSourceDevices[index].m_displayName);
+    deviceAPI->setSampleSourcePluginInterface(m_sampleSourceDevices[index].m_plugin);
 
-	QWidget *gui;
-	PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginInstanceGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
-	deviceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
-	deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
+//	QWidget *gui;
+//	PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginInstanceGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
+//	deviceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
+//	deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }
