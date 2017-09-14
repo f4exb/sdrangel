@@ -509,6 +509,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
     deviceAPI->setSampleSourceDisplayName(m_sampleSourceDevices[index].m_displayName);
+    deviceAPI->setSampleSourcePluginInterface(m_sampleSourceDevices[index].m_plugin);
 
 	return index;
 }
