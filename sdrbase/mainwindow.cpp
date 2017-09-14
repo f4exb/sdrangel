@@ -270,6 +270,12 @@ void MainWindow::addSinkDevice()
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
     m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
+
+    QWidget *gui;
+    PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInterface()->createSampleSinkPluginInstanceGUI(
+            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), &gui, m_deviceUIs.back()->m_deviceSinkAPI);
+    m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSinkAPI->setOutputGUI(gui, m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkDisplayName());
 }
 
 void MainWindow::removeLastDevice()

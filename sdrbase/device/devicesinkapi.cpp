@@ -36,6 +36,7 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_spectrum(glSpectrum),
     m_channelWindow(channelWindow),
     m_sampleSinkSequence(0),
+    m_pluginInterface(0),
     m_sampleSinkPluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false),
@@ -166,10 +167,20 @@ void DeviceSinkAPI::setSampleSinkSerial(const QString& serial)
     m_sampleSinkSerial = serial;
 }
 
+void DeviceSinkAPI::setSampleSinkDisplayName(const QString& name)
+{
+    m_sampleSinkDisplayName = name;
+}
+
 void DeviceSinkAPI::setSampleSinkSequence(int sequence)
 {
     m_sampleSinkSequence = sequence;
     m_deviceSinkEngine->setSinkSequence(sequence);
+}
+
+void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *interface)
+{
+    m_pluginInterface = interface;
 }
 
 void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)
