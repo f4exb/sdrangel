@@ -69,7 +69,7 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceUI* FileSourcePlugin::createSampleSourcePluginInstanceUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

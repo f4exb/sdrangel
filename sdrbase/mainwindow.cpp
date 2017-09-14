@@ -840,7 +840,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         // constructs new GUI and input object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
+        PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
 
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
         deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
@@ -910,7 +910,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         // constructs new GUI and output object
         QWidget *gui;
         PluginManager::SamplingDevice *sampleSinkDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginUI = sampleSinkDevice->m_plugin->createSampleSinkPluginInstanceUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
+        PluginInstanceUI *pluginUI = sampleSinkDevice->m_plugin->createSampleSinkPluginInstanceGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
 
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
         deviceUI->m_deviceSinkAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);

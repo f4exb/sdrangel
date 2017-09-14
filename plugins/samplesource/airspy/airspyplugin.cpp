@@ -119,7 +119,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceUI* AirspyPlugin::createSampleSourcePluginInstanceUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if (sourceId == m_deviceTypeID)
 	{
@@ -131,4 +131,17 @@ PluginInstanceUI* AirspyPlugin::createSampleSourcePluginInstanceUI(const QString
 	{
 		return 0;
 	}
+}
+
+DeviceSampleSource *AirspyPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        AirspyInput* input = new AirspyInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
 }

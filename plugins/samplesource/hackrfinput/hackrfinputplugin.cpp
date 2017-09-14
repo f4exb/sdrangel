@@ -117,7 +117,7 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceUI* HackRFInputPlugin::createSampleSourcePluginInstanceUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == m_deviceTypeID)
 	{

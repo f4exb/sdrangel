@@ -19,6 +19,8 @@ class DeviceSourceAPI;
 class DeviceSinkAPI;
 class PluginInstanceUI;
 class QWidget;
+class DeviceSampleSource;
+class DeviceSampleSink;
 
 class PluginInterface {
 public:
@@ -57,11 +59,13 @@ public:
 
 	// device source plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
-	virtual PluginInstanceUI* createSampleSourcePluginInstanceUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
+	virtual PluginInstanceUI* createSampleSourcePluginInstanceGUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
+	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the input "core"
 
 	// device sink plugins only
 	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
-	virtual PluginInstanceUI* createSampleSinkPluginInstanceUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
+	virtual PluginInstanceUI* createSampleSinkPluginInstanceGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
+    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the output "core"
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

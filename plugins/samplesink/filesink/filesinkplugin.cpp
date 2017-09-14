@@ -69,7 +69,7 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceUI* FileSinkPlugin::createSampleSinkPluginInstanceUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
 	if(sinkId == m_deviceTypeID)
 	{

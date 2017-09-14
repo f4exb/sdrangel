@@ -83,7 +83,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
     return result;
 }
 
-PluginInstanceUI* SDRPlayPlugin::createSampleSourcePluginInstanceUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
     if(sourceId == m_deviceTypeID)
     {
