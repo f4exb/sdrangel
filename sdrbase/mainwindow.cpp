@@ -212,7 +212,13 @@ void MainWindow::addSourceDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
-    m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
+    int deviceIndex = m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
+
+    QWidget *gui;
+    PluginInstanceUI *pluginGUI = m_pluginManager->getPluginInterfaceAt(deviceIndex)->createSampleSourcePluginInstanceGUI(
+            m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setInputGUI(gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
 }
 
 void MainWindow::addSinkDevice()

@@ -70,12 +70,14 @@ public:
     void setHardwareId(const QString& id);
     void setSampleSourceId(const QString& id);
     void setSampleSourceSerial(const QString& serial);
+    void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
     void setSampleSourcePluginInstanceUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
     const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
+    const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
 
     void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
@@ -144,6 +146,7 @@ protected:
     QString m_hardwareId;
     QString m_sampleSourceId;
     QString m_sampleSourceSerial;
+    QString m_sampleSourceDisplayName;
     uint32_t m_sampleSourceSequence;
     PluginInstanceUI* m_sampleSourcePluginInstanceUI;
 

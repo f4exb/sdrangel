@@ -69,6 +69,8 @@ public:
 	int selectSampleSinkBySerialOrSequence(const QString& sinkId, const QString& sinkSerial, uint32_t sinkSequence, DeviceSinkAPI *deviceAPI);
 	void selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *deviceAPI);
 
+	PluginInterface* getPluginInterfaceAt(int index);
+
 	void populateRxChannelComboBox(QComboBox *channels);
 	void createRxChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
 

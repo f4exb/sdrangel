@@ -508,11 +508,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
     deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
     deviceAPI->setSampleSourceId(m_sampleSourceDevices[index].m_deviceId);
     deviceAPI->setSampleSourceSerial(m_sampleSourceDevices[index].m_deviceSerial);
-
-    QWidget *gui;
-    PluginInstanceUI *pluginGUI = m_sampleSourceDevices[index].m_plugin->createSampleSourcePluginInstanceGUI(m_sampleSourceDevices[index].m_deviceId, &gui, deviceAPI);
-    deviceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
-    deviceAPI->setInputGUI(gui, m_sampleSourceDevices[index].m_displayName);
+    deviceAPI->setSampleSourceDisplayName(m_sampleSourceDevices[index].m_displayName);
 
 	return index;
 }
@@ -585,10 +581,10 @@ int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, con
     deviceAPI->setSampleSinkId(m_sampleSinkDevices[index].m_deviceId);
     deviceAPI->setSampleSinkSerial(m_sampleSinkDevices[index].m_deviceSerial);
 
-    QWidget *gui;
-    PluginInstanceUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginInstanceGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
-    deviceAPI->setSampleSinkPluginInstanceUI(pluginGUI);
-    deviceAPI->setOutputGUI(gui, m_sampleSinkDevices[index].m_displayName);
+//    QWidget *gui;
+//    PluginInstanceUI *pluginGUI = m_sampleSinkDevices[index].m_plugin->createSampleSinkPluginInstanceGUI(m_sampleSinkDevices[index].m_deviceId, &gui, deviceAPI);
+//    deviceAPI->setSampleSinkPluginInstanceUI(pluginGUI);
+//    deviceAPI->setOutputGUI(gui, m_sampleSinkDevices[index].m_displayName);
 
 	return index;
 }
@@ -668,6 +664,15 @@ void PluginManager::loadPlugins(const QDir& dir)
 	{
 		loadPlugins(pluginsDir.absoluteFilePath(dirName));
 	}
+}
+
+PluginInterface* PluginManager::getPluginInterfaceAt(int index)
+{
+    if (index < m_sampleSourceDevices.size()) {
+        return m_sampleSourceDevices[index].m_plugin;
+    } else {
+        return 0;
+    }
 }
 
 void PluginManager::populateRxChannelComboBox(QComboBox *channels)

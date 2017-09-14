@@ -162,6 +162,11 @@ void DeviceSourceAPI::setSampleSourceSerial(const QString& serial)
     m_sampleSourceSerial = serial;
 }
 
+void DeviceSourceAPI::setSampleSourceDisplayName(const QString& name)
+{
+    m_sampleSourceDisplayName = name;
+}
+
 void DeviceSourceAPI::setSampleSourceSequence(int sequence)
 {
     m_sampleSourceSequence = sequence;
