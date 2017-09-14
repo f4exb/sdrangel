@@ -21,11 +21,11 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/filerecord.h"
+#include "device/devicesourceapi.h"
+
 #include "filesourcegui.h"
 #include "filesourceinput.h"
-
-#include <dsp/filerecord.h>
-
 #include "filesourcethread.h"
 
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
@@ -72,7 +72,8 @@ bool FileSourceInput::Settings::deserialize(const QByteArray& data)
 	}
 }
 
-FileSourceInput::FileSourceInput(const QTimer& masterTimer) :
+FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSourceThread(NULL),
 	m_deviceDescription(),
@@ -80,8 +81,8 @@ FileSourceInput::FileSourceInput(const QTimer& masterTimer) :
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_recordLength(0),
-	m_startingTimeStamp(0),
-	m_masterTimer(masterTimer)
+    m_startingTimeStamp(0),
+    m_masterTimer(deviceAPI->getMasterTimer())
 {
 }
 

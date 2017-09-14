@@ -21,6 +21,7 @@
 #include "plutosdr/deviceplutosdr.h"
 
 #include "plutosdrinputgui.h"
+#include "plutosdrinput.h"
 #include "plutosdrinputplugin.h"
 
 class DeviceSourceAPI;
@@ -93,3 +94,17 @@ PluginInstanceUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(const
 		return 0;
 	}
 }
+
+DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        PlutoSDRInput* input = new PlutoSDRInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
+}
+

@@ -79,6 +79,20 @@ PluginInstanceUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(const QS
 	}
 	else
 	{
-		return NULL;
+		return 0;
 	}
 }
+
+DeviceSampleSource *FileSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        FileSourceInput* input = new FileSourceInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
+}
+

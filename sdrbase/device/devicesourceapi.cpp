@@ -24,6 +24,7 @@
 #include "mainwindow.h"
 #include "settings/preset.h"
 
+// TODO: extract GUI dependencies in a separate object
 DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
         int deviceTabIndex,
         DSPDeviceSourceEngine *deviceSourceEngine,
@@ -37,7 +38,8 @@ DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
     m_sampleSourceSequence(0),
     m_sampleSourcePluginInstanceUI(0),
     m_buddySharedPtr(0),
-    m_isBuddyLeader(false)
+    m_isBuddyLeader(false),
+    m_masterTimer(mainWindow->getMasterTimer()) // TODO: get master timer directly not from main window
 {
 }
 

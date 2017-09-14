@@ -69,6 +69,20 @@ PluginInstanceUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(const QStrin
 		*widget = gui;
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
 }
+
+DeviceSampleSource *RTLSDRPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        RTLSDRInput* input = new RTLSDRInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
+}
+

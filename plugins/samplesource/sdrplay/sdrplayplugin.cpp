@@ -96,3 +96,17 @@ PluginInstanceUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(const QStri
         return 0;
     }
 }
+
+DeviceSampleSource *SDRPlayPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        SDRPlayInput* input = new SDRPlayInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
+}
+

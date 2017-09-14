@@ -84,6 +84,19 @@ PluginInstanceUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(const QStrin
 	}
 	else
 	{
-		return NULL;
+		return 0;
 	}
+}
+
+DeviceSampleSource *FCDProPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == fcd_traits<Pro>::interfaceIID)
+    {
+        FCDProInput* input = new FCDProInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
 }

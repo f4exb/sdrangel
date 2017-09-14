@@ -23,7 +23,7 @@
 #include "util/simpleserializer.h"
 #include <device/devicesourceapi.h>
 
-#include "../bladerfinput/bladerfinputgui.h"
+#include "bladerfinputgui.h"
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
@@ -91,3 +91,17 @@ PluginInstanceUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(const Q
 		return 0;
 	}
 }
+
+DeviceSampleSource *BlderfInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        BladerfInput *input = new BladerfInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
+}
+

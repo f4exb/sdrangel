@@ -21,6 +21,7 @@
 #include "plugin/plugininterface.h"
 
 class PluginAPI;
+class DeviceSourceAPI;
 
 #define BLADERF_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf"
 
@@ -37,6 +38,7 @@ public:
 
 	virtual SamplingDevices enumSampleSources();
 	virtual PluginInstanceUI* createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI);
+	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

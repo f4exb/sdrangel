@@ -103,6 +103,8 @@ public:
     bool isBuddyLeader() const { return m_isBuddyLeader; }
     void setBuddyLeader(bool isBuddyLeader) { m_isBuddyLeader = isBuddyLeader; }
 
+    const QTimer& getMasterTimer() const { return m_masterTimer; }
+
 protected:
     struct ChannelInstanceRegistration
     {
@@ -151,6 +153,7 @@ protected:
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
     void *m_buddySharedPtr;
     bool m_isBuddyLeader;
+    const QTimer& m_masterTimer;
 
     friend class MainWindow;
     friend class DeviceSinkAPI;

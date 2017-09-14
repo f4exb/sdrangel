@@ -38,7 +38,7 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamDat
 MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgFileRecord, Message)
 
-SDRdaemonSourceInput::SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI) :
+SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_address("127.0.0.1"),
 	m_port(9090),
@@ -47,7 +47,7 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSour
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_startingTimeStamp(0),
-    m_masterTimer(masterTimer),
+    m_masterTimer(deviceAPI->getMasterTimer()),
     m_autoFollowRate(false),
     m_autoCorrBuffer(false)
 {

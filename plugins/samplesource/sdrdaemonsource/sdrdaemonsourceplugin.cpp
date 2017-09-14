@@ -80,6 +80,19 @@ PluginInstanceUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(con
 	}
 	else
 	{
-		return NULL;
+		return 0;
 	}
+}
+
+DeviceSampleSource *SDRdaemonSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+{
+    if (sourceId == m_deviceTypeID)
+    {
+        SDRdaemonSourceInput* input = new SDRdaemonSourceInput(deviceAPI);
+        return input;
+    }
+    else
+    {
+        return 0;
+    }
 }

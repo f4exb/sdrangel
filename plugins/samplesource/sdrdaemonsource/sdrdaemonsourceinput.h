@@ -303,7 +303,7 @@ public:
         { }
     };
 
-	SDRdaemonSourceInput(const QTimer& masterTimer, DeviceSourceAPI *deviceAPI);
+	SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonSourceInput();
 
 	virtual bool start();
