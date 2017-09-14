@@ -65,7 +65,6 @@ public:
 	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, uint32_t sourceSequence, DeviceSourceAPI *deviceAPI);
 	void selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI *deviceAPI);
 
-	int selectSampleSinkByIndex(int index, DeviceSinkAPI *deviceAPI);
 	int selectSampleSinkBySerialOrSequence(const QString& sinkId, const QString& sinkSerial, uint32_t sinkSequence, DeviceSinkAPI *deviceAPI);
 	void selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *deviceAPI);
 
