@@ -132,7 +132,7 @@ public:
 		{ }
 	};
 
-	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer);
+	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~SDRdaemonSinkOutput();
 
 	virtual bool start();

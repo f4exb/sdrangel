@@ -83,3 +83,17 @@ PluginInstanceUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(const Q
 		return 0;
 	}
 }
+
+DeviceSampleSink* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+{
+    if(sinkId == m_deviceTypeID)
+    {
+        SDRdaemonSinkOutput* output = new SDRdaemonSinkOutput(deviceAPI);
+        return output;
+    }
+    else
+    {
+        return 0;
+    }
+
+}

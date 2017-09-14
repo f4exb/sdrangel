@@ -129,3 +129,19 @@ PluginInstanceUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(const QS
 		return 0;
 	}
 }
+
+DeviceSampleSink* HackRFOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+{
+    if(sinkId == m_deviceTypeID)
+    {
+        HackRFOutput* output = new HackRFOutput(deviceAPI);
+        return output;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+
+

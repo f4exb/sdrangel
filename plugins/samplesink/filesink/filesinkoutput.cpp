@@ -36,14 +36,14 @@ MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Messa
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
 
-FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer) :
+FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSinkThread(0),
 	m_deviceDescription("FileSink"),
 	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
-	m_masterTimer(masterTimer)
+	m_masterTimer(deviceAPI->getMasterTimer())
 {
 }
 

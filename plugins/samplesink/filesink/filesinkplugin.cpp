@@ -82,3 +82,18 @@ PluginInstanceUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(const QStrin
 		return 0;
 	}
 }
+
+DeviceSampleSink* FileSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+{
+    if(sinkId == m_deviceTypeID)
+    {
+        FileSinkOutput* output = new FileSinkOutput(deviceAPI);
+        return output;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+

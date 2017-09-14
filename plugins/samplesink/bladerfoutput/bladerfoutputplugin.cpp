@@ -90,3 +90,17 @@ PluginInstanceUI* BladerfOutputPlugin::createSampleSinkPluginInstanceGUI(const Q
 		return 0;
 	}
 }
+
+DeviceSampleSink* BladerfOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+{
+    if(sinkId == m_deviceTypeID)
+    {
+        BladerfOutput* output = new BladerfOutput(deviceAPI);
+        return output;
+    }
+    else
+    {
+        return 0;
+    }
+
+}

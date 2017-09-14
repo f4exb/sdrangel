@@ -24,6 +24,7 @@
 #include "mainwindow.h"
 #include "settings/preset.h"
 
+// TODO: extract GUI dependencies in a separate object
 DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
         int deviceTabIndex,
         DSPDeviceSinkEngine *deviceSinkEngine,
@@ -37,7 +38,8 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_sampleSinkSequence(0),
     m_sampleSinkPluginInstanceUI(0),
     m_buddySharedPtr(0),
-    m_isBuddyLeader(false)
+    m_isBuddyLeader(false),
+    m_masterTimer(mainWindow->getMasterTimer()) // TODO: get master timer directly not from main window
 {
 }
 

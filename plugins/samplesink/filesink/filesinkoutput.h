@@ -148,7 +148,7 @@ public:
 		{ }
 	};
 
-	FileSinkOutput(DeviceSinkAPI *deviceAPI, const QTimer& masterTimer);
+	FileSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~FileSinkOutput();
 
 	virtual bool start();
