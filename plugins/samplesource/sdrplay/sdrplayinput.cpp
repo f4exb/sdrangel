@@ -58,6 +58,11 @@ SDRPlayInput::~SDRPlayInput()
     closeDevice();
 }
 
+void SDRPlayInput::destroy()
+{
+    delete this;
+}
+
 bool SDRPlayInput::openDevice()
 {
     m_devNumber = m_deviceAPI->getSampleSourceSequence();

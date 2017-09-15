@@ -91,6 +91,11 @@ FileSourceInput::~FileSourceInput()
 	stop();
 }
 
+void FileSourceInput::destroy()
+{
+    delete this;
+}
+
 void FileSourceInput::openFileStream()
 {
 	//stopInput();

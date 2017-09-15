@@ -58,6 +58,11 @@ PlutoSDRInput::~PlutoSDRInput()
     resumeBuddies();
 }
 
+void PlutoSDRInput::destroy()
+{
+    delete this;
+}
+
 bool PlutoSDRInput::start()
 {
     if (!m_deviceShared.m_deviceParams->getBox()) {

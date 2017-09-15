@@ -73,6 +73,7 @@ public:
 
 	BladerfInput(DeviceSourceAPI *deviceAPI);
 	virtual ~BladerfInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

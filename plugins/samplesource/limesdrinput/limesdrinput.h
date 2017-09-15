@@ -230,6 +230,7 @@ public:
 
     LimeSDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~LimeSDRInput();
+    virtual void destroy();
 
     virtual bool start();
     virtual void stop();

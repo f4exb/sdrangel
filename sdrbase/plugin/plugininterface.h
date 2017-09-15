@@ -4,6 +4,8 @@
 #include <QtPlugin>
 #include <QString>
 
+#include "plugininstanceui.h"
+
 struct PluginDescriptor {
 	// general plugin description
 	const QString displayedName;
@@ -61,11 +63,13 @@ public:
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
 	virtual PluginInstanceUI* createSampleSourcePluginInstanceGUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
 	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the input "core"
+	virtual void deleteSampleSourcePluginInstanceGUI(PluginInstanceUI *ui) { ui->destroy(); }
 
 	// device sink plugins only
 	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
 	virtual PluginInstanceUI* createSampleSinkPluginInstanceGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
     virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the output "core"
+    virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceUI *ui) { ui->destroy(); }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

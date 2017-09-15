@@ -93,6 +93,7 @@ public:
 
 	HackRFInput(DeviceSourceAPI *deviceAPI);
 	virtual ~HackRFInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

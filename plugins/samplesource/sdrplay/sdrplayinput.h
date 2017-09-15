@@ -100,6 +100,7 @@ public:
 
     SDRPlayInput(DeviceSourceAPI *deviceAPI);
     virtual ~SDRPlayInput();
+    virtual void destroy();
 
     virtual bool start();
     virtual void stop();

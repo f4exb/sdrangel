@@ -69,6 +69,11 @@ SDRdaemonSourceInput::~SDRdaemonSourceInput()
 	delete m_SDRdaemonUDPHandler;
 }
 
+void SDRdaemonSourceInput::destroy()
+{
+    delete this;
+}
+
 bool SDRdaemonSourceInput::start()
 {
 	qDebug() << "SDRdaemonInput::start";

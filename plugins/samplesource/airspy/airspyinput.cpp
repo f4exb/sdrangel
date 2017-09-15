@@ -56,6 +56,11 @@ AirspyInput::~AirspyInput()
     closeDevice();
 }
 
+void AirspyInput::destroy()
+{
+    delete this;
+}
+
 bool AirspyInput::openDevice()
 {
     if (m_dev != 0)

@@ -212,6 +212,7 @@ public:
 
 	FileSourceInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FileSourceInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

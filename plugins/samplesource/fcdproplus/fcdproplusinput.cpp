@@ -59,6 +59,11 @@ FCDProPlusInput::~FCDProPlusInput()
     closeDevice();
 }
 
+void FCDProPlusInput::destroy()
+{
+    delete this;
+}
+
 bool FCDProPlusInput::openDevice()
 {
     int device = m_deviceAPI->getSampleSourceSequence();

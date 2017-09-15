@@ -106,6 +106,7 @@ public:
 
 	RTLSDRInput(DeviceSourceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

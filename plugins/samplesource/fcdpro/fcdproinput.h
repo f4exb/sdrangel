@@ -77,6 +77,7 @@ public:
 
 	FCDProInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FCDProInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

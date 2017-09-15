@@ -67,6 +67,11 @@ LimeSDRInput::~LimeSDRInput()
     resumeBuddies();
 }
 
+void LimeSDRInput::destroy()
+{
+    delete this;
+}
+
 bool LimeSDRInput::openDevice()
 {
     if (!m_sampleFifo.setSize(96000 * 4))

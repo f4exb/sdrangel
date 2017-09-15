@@ -90,6 +90,7 @@ public:
 
 	AirspyInput(DeviceSourceAPI *deviceAPI);
 	virtual ~AirspyInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

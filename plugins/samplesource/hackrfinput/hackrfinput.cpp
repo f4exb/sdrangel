@@ -63,6 +63,11 @@ HackRFInput::~HackRFInput()
 	m_deviceAPI->setBuddySharedPtr(0);
 }
 
+void HackRFInput::destroy()
+{
+    delete this;
+}
+
 bool HackRFInput::openDevice()
 {
     if (m_dev != 0)

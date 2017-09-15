@@ -76,6 +76,7 @@ public:
 
     PlutoSDRInput(DeviceSourceAPI *deviceAPI);
     ~PlutoSDRInput();
+    virtual void destroy();
 
     virtual bool start();
     virtual void stop();

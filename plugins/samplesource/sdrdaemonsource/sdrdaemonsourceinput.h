@@ -305,6 +305,7 @@ public:
 
 	SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI);
 	virtual ~SDRdaemonSourceInput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

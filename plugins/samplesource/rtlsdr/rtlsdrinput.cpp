@@ -57,6 +57,11 @@ RTLSDRInput::~RTLSDRInput()
     closeDevice();
 }
 
+void RTLSDRInput::destroy()
+{
+    delete this;
+}
+
 bool RTLSDRInput::openDevice()
 {
     if (m_dev != 0)
