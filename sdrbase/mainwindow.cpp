@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget* parent) :
     QWidget *gui;
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
-    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
     setDeviceGUI(0, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
 
 	m_deviceUIs.back()->m_deviceSourceAPI->setBuddyLeader(true); // the first device is always the leader
@@ -223,7 +223,7 @@ void MainWindow::addSourceDevice()
     QWidget *gui;
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
-    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
 
 }
@@ -818,7 +818,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         deviceUI->m_deviceSourceAPI->stopAcquisition();
 
         // deletes old UI and input object
-        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceUI());
+        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         deviceUI->m_deviceSourceAPI->resetSampleSourceId();
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
 
@@ -861,7 +861,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         // constructs new GUI and input object
         QWidget *gui;
         PluginInstanceUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourceId(), &gui, deviceUI->m_deviceSourceAPI);
-        deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
+        deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginUI);
         setDeviceGUI(currentSourceTabIndex, gui, deviceUI->m_deviceSourceAPI->getSampleSourceDisplayName());
 
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings

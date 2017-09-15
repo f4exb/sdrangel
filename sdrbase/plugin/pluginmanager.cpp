@@ -384,7 +384,7 @@ int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceA
             << " seq: " << m_sampleSourceDevices[index].m_deviceSequence;
 
     deviceAPI->stopAcquisition();
-    deviceAPI->setSampleSourcePluginInstanceUI(0); // this effectively destroys the previous GUI if it exists
+    deviceAPI->setSampleSourcePluginInstanceGUI(0); // this effectively destroys the previous GUI if it exists
 
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);
     deviceAPI->setHardwareId(m_sampleSourceDevices[index].m_hadrwareId);
@@ -456,7 +456,7 @@ int PluginManager::selectSampleSourceBySerialOrSequence(const QString& sourceId,
             << " seq: " << m_sampleSourceDevices[index].m_deviceSequence;
 
     deviceAPI->stopAcquisition();
-    deviceAPI->setSampleSourcePluginInstanceUI(0); // this effectively destroys the previous GUI if it exists
+    deviceAPI->setSampleSourcePluginInstanceGUI(0); // this effectively destroys the previous GUI if it exists
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSourceSequence(m_sampleSourceDevices[index].m_deviceSequence);

@@ -179,7 +179,7 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *interface)
     m_pluginInterface = interface;
 }
 
-void DeviceSourceAPI::setSampleSourcePluginInstanceUI(PluginInstanceUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui)
 {
     m_sampleSourcePluginInstanceUI = gui;
 }
