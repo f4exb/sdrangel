@@ -64,7 +64,6 @@ public:
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     ChannelWindow *getChannelWindow();                   //!< Direct channel window getter
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
-    void setOutputGUI(QWidget* outputGUI, const QString& sinkDisplayName);
 
     void setHardwareId(const QString& id);
     void setSampleSinkId(const QString& id);

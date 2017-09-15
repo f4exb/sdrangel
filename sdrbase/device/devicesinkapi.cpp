@@ -147,11 +147,6 @@ void DeviceSinkAPI::addRollupWidget(QWidget *widget)
     m_channelWindow->addRollupWidget(widget);
 }
 
-void DeviceSinkAPI::setOutputGUI(QWidget* outputGUI, const QString& sinkDisplayName)
-{
-    m_mainWindow->setDeviceGUI(m_deviceTabIndex, outputGUI, sinkDisplayName, false);
-}
-
 void DeviceSinkAPI::setHardwareId(const QString& id)
 {
     m_hardwareId = id;

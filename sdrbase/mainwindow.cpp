@@ -276,7 +276,7 @@ void MainWindow::addSinkDevice()
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInterface()->createSampleSinkPluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), &gui, m_deviceUIs.back()->m_deviceSinkAPI);
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginGUI);
-    m_deviceUIs.back()->m_deviceSinkAPI->setOutputGUI(gui, m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkDisplayName());
+    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkDisplayName(), false);
 }
 
 void MainWindow::removeLastDevice()
@@ -932,7 +932,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         PluginInstanceUI *pluginUI = sampleSinkDevice->m_plugin->createSampleSinkPluginInstanceGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
 
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
-        deviceUI->m_deviceSinkAPI->setOutputGUI(gui, sampleSinkDevice->m_displayName);
+        setDeviceGUI(currentSinkTabIndex, gui, sampleSinkDevice->m_displayName, false);
 
         deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
     }
