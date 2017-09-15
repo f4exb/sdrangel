@@ -817,7 +817,9 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSourceAPI->stopAcquisition();
 
-        deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(0); // deletes old UI and input object
+        // deletes old UI and input object
+        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceUI());
+        deviceUI->m_deviceSourceAPI->resetSampleSourceId();
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
 
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API

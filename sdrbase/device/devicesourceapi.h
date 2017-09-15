@@ -69,6 +69,7 @@ public:
 
     void setHardwareId(const QString& id);
     void setSampleSourceId(const QString& id);
+    void resetSampleSourceId();
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
@@ -81,6 +82,7 @@ public:
     const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
+    PluginInstanceUI *getSampleSourcePluginInstanceUI() { return m_sampleSourcePluginInstanceUI; }
 
     void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
     void removeChannelInstance(PluginInstanceUI* pluginGUI);

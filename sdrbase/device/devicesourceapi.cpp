@@ -153,6 +153,11 @@ void DeviceSourceAPI::setSampleSourceId(const QString& id)
     m_sampleSourceId = id;
 }
 
+void DeviceSourceAPI::resetSampleSourceId()
+{
+    m_sampleSourceId.clear();
+}
+
 void DeviceSourceAPI::setSampleSourceSerial(const QString& serial)
 {
     m_sampleSourceSerial = serial;
@@ -176,12 +181,6 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *interface)
 
 void DeviceSourceAPI::setSampleSourcePluginInstanceUI(PluginInstanceUI *gui)
 {
-    if (m_sampleSourcePluginInstanceUI != 0)
-    {
-        m_sampleSourcePluginInstanceUI->destroy();
-        m_sampleSourceId.clear();
-    }
-
     m_sampleSourcePluginInstanceUI = gui;
 }
 
