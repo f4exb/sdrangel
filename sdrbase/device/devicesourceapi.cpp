@@ -68,12 +68,12 @@ void DeviceSourceAPI::removeThreadedSink(ThreadedBasebandSampleSink* sink)
     m_deviceSourceEngine->removeThreadedSink(sink);
 }
 
-void DeviceSourceAPI::setSource(DeviceSampleSource* source)
+void DeviceSourceAPI::setSampleSource(DeviceSampleSource* source)
 {
     m_deviceSourceEngine->setSource(source);
 }
 
-DeviceSampleSource *DeviceSourceAPI::getSource()
+DeviceSampleSource *DeviceSourceAPI::getSampleSource()
 {
     return m_deviceSourceEngine->getSource();
 }

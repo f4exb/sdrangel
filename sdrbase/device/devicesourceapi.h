@@ -49,8 +49,8 @@ public:
     void removeSink(BasebandSampleSink* sink);    //!< Remove a sample sink from device engine
     void addThreadedSink(ThreadedBasebandSampleSink* sink);     //!< Add a sample sink that will run on its own thread to device engine
     void removeThreadedSink(ThreadedBasebandSampleSink* sink);  //!< Remove a sample sink that runs on its own thread from device engine
-    void setSource(DeviceSampleSource* source); //!< Set device sample source
-    DeviceSampleSource *getSource();      //!< Return pointer to the device sample source
+    void setSampleSource(DeviceSampleSource* source); //!< Set device sample source
+    DeviceSampleSource *getSampleSource();      //!< Return pointer to the device sample source
     bool initAcquisition();               //!< Initialize device engine acquisition sequence
     bool startAcquisition();              //!< Start device engine acquisition sequence
     void stopAcquisition();               //!< Stop device engine acquisition sequence

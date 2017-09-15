@@ -68,7 +68,7 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     m_sampleSource = new FileSourceInput(m_deviceAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	m_deviceAPI->setSource(m_sampleSource);
+	m_deviceAPI->setSampleSource(m_sampleSource);
 
     connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

@@ -99,7 +99,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
 
     m_sampleSource = new SDRdaemonSourceInput(m_deviceAPI);
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	m_deviceAPI->setSource(m_sampleSource);
+	m_deviceAPI->setSampleSource(m_sampleSource);
 
 	displaySettings();
 

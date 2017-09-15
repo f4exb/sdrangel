@@ -42,7 +42,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 {
     m_limeSDRInput = new LimeSDRInput(m_deviceAPI);
     m_sampleSource = (DeviceSampleSource *) m_limeSDRInput;
-    m_deviceAPI->setSource(m_sampleSource);
+    m_deviceAPI->setSampleSource(m_sampleSource);
 
     ui->setupUi(this);
 

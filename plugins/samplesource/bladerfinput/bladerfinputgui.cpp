@@ -38,7 +38,7 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
     m_sampleSource = new BladerfInput(m_deviceAPI);
-    m_deviceAPI->setSource(m_sampleSource);
+    m_deviceAPI->setSampleSource(m_sampleSource);
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
