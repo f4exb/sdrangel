@@ -557,6 +557,8 @@ void PluginManager::selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI 
     deviceAPI->setHardwareId(sampleSourceDevice->m_hadrwareId);
     deviceAPI->setSampleSourceId(sampleSourceDevice->m_deviceId);
     deviceAPI->setSampleSourceSerial(sampleSourceDevice->m_deviceSerial);
+    deviceAPI->setSampleSourceDisplayName(sampleSourceDevice->m_displayName);
+    deviceAPI->setSampleSourcePluginInterface(sampleSourceDevice->m_plugin);
 }
 
 void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *deviceAPI)
@@ -574,6 +576,8 @@ void PluginManager::selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *dev
     deviceAPI->setHardwareId(sampleSinkDevice->m_hadrwareId);
     deviceAPI->setSampleSinkId(sampleSinkDevice->m_deviceId);
     deviceAPI->setSampleSinkSerial(sampleSinkDevice->m_deviceSerial);
+    deviceAPI->setSampleSinkDisplayName(sampleSinkDevice->m_displayName);
+    deviceAPI->setSampleSinkPluginInterface(sampleSinkDevice->m_plugin);
 }
 
 void PluginManager::loadPlugins(const QDir& dir)

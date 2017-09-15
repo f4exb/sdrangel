@@ -858,11 +858,9 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
 
         // constructs new GUI and input object
         QWidget *gui;
-        PluginManager::SamplingDevice *sampleSourceDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
-
+        PluginInstanceUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourceId(), &gui, deviceUI->m_deviceSourceAPI);
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
-        setDeviceGUI(currentSourceTabIndex, gui, sampleSourceDevice->m_displayName);
+        setDeviceGUI(currentSourceTabIndex, gui, deviceUI->m_deviceSourceAPI->getSampleSourceDisplayName());
 
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
