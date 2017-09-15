@@ -70,7 +70,7 @@ public:
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkDisplayName(const QString& serial);
     void setSampleSinkSequence(int sequence);
-    void setSampleSinkPluginInterface(PluginInterface *interface);
+    void setSampleSinkPluginInterface(PluginInterface *iface);
     void setSampleSinkPluginInstanceUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }

@@ -173,9 +173,9 @@ void DeviceSinkAPI::setSampleSinkSequence(int sequence)
     m_deviceSinkEngine->setSinkSequence(sequence);
 }
 
-void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *interface)
+void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)
 {
-    m_pluginInterface = interface;
+    m_pluginInterface = iface;
 }
 
 void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)

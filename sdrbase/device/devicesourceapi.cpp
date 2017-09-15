@@ -174,9 +174,9 @@ void DeviceSourceAPI::setSampleSourceSequence(int sequence)
     m_deviceSourceEngine->setSourceSequence(sequence);
 }
 
-void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *interface)
+void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)
 {
-    m_pluginInterface = interface;
+    m_pluginInterface = iface;
 }
 
 void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui)

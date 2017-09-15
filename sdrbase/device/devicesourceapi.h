@@ -73,7 +73,7 @@ public:
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
-    void setSampleSourcePluginInterface(PluginInterface *interface);
+    void setSampleSourcePluginInterface(PluginInterface *iface);
     void setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }

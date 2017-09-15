@@ -21,6 +21,8 @@ QMAKE_CXXFLAGS += -msse2
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 
+QMAKE_CXXFLAGS += -std=c++11
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
