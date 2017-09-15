@@ -66,7 +66,6 @@ public:
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     ChannelWindow *getChannelWindow();                   //!< Direct channel window getter
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
-    void setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName);
 
     void setHardwareId(const QString& id);
     void setSampleSourceId(const QString& id);

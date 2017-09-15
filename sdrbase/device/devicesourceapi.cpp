@@ -143,11 +143,6 @@ void DeviceSourceAPI::addRollupWidget(QWidget *widget)
     m_channelWindow->addRollupWidget(widget);
 }
 
-void DeviceSourceAPI::setInputGUI(QWidget* inputGUI, const QString& sourceDisplayName)
-{
-    m_mainWindow->setDeviceGUI(m_deviceTabIndex, inputGUI, sourceDisplayName);
-}
-
 void DeviceSourceAPI::setHardwareId(const QString& id)
 {
     m_hardwareId = id;

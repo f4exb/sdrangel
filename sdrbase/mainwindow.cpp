@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget* parent) :
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
-    m_deviceUIs.back()->m_deviceSourceAPI->setInputGUI(gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
+    setDeviceGUI(0, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
 
 	m_deviceUIs.back()->m_deviceSourceAPI->setBuddyLeader(true); // the first device is always the leader
 
@@ -224,7 +224,8 @@ void MainWindow::addSourceDevice()
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginGUI);
-    m_deviceUIs.back()->m_deviceSourceAPI->setInputGUI(gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
+    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
+
 }
 
 void MainWindow::addSinkDevice()
@@ -861,7 +862,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         PluginInstanceUI *pluginUI = sampleSourceDevice->m_plugin->createSampleSourcePluginInstanceGUI(sampleSourceDevice->m_deviceId, &gui, deviceUI->m_deviceSourceAPI);
 
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(pluginUI);
-        deviceUI->m_deviceSourceAPI->setInputGUI(gui, sampleSourceDevice->m_displayName);
+        setDeviceGUI(currentSourceTabIndex, gui, sampleSourceDevice->m_displayName);
 
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
