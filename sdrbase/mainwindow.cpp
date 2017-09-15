@@ -926,11 +926,10 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
 
         // constructs new GUI and output object
         QWidget *gui;
-        PluginManager::SamplingDevice *sampleSinkDevice = (PluginManager::SamplingDevice *) devicePtr;
-        PluginInstanceUI *pluginUI = sampleSinkDevice->m_plugin->createSampleSinkPluginInstanceGUI(sampleSinkDevice->m_deviceId, &gui, deviceUI->m_deviceSinkAPI);
-
+        PluginInstanceUI *pluginUI = deviceUI->m_deviceSinkAPI->getSampleSinkPluginInterface()->createSampleSinkPluginInstanceGUI(
+                deviceUI->m_deviceSinkAPI->getSampleSinkId(), &gui, deviceUI->m_deviceSinkAPI);
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
-        setDeviceGUI(currentSinkTabIndex, gui, sampleSinkDevice->m_displayName, false);
+        setDeviceGUI(currentSinkTabIndex, gui, deviceUI->m_deviceSinkAPI->getSampleSinkDisplayName(), false);
 
         deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
     }
