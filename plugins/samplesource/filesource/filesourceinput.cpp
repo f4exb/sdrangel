@@ -128,7 +128,10 @@ void FileSourceInput::openFileStream()
 			m_centerFrequency,
 			m_startingTimeStamp,
 			m_recordLength); // file stream data
-	getOutputMessageQueueToGUI()->push(report);
+
+	if (getMessageQueueToGUI()) {
+	    getMessageQueueToGUI()->push(report);
+	}
 }
 
 void FileSourceInput::seekFileStream(int seekPercentage)
@@ -178,7 +181,10 @@ bool FileSourceInput::start()
 	qDebug("FileSourceInput::startInput: started");
 
 	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
-	getOutputMessageQueueToGUI()->push(report);
+
+	if (getMessageQueueToGUI()) {
+        getMessageQueueToGUI()->push(report);
+	}
 
 	return true;
 }
@@ -198,7 +204,10 @@ void FileSourceInput::stop()
 	m_deviceDescription.clear();
 
 	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
-	getOutputMessageQueueToGUI()->push(report);
+
+	if (getMessageQueueToGUI()) {
+        getMessageQueueToGUI()->push(report);
+	}
 }
 
 const QString& FileSourceInput::getDeviceDescription() const
@@ -268,7 +277,10 @@ bool FileSourceInput::handleMessage(const Message& message)
 		if (m_fileSourceThread != 0)
 		{
 			report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-			getOutputMessageQueueToGUI()->push(report);
+
+			if (getMessageQueueToGUI()) {
+                getMessageQueueToGUI()->push(report);
+			}
 		}
 
 		return true;

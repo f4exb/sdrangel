@@ -319,7 +319,9 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                             mirisdr_get_tuner_gain(m_dev)
                     );
 
-                    getOutputMessageQueueToGUI()->push(message);
+                    if (getMessageQueueToGUI()) {
+                        getMessageQueueToGUI()->push(message);
+                    }
                 }
             }
         }
@@ -418,7 +420,10 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                     mirisdr_get_baseband_gain(m_dev),
                     mirisdr_get_tuner_gain(m_dev)
             );
-            getOutputMessageQueueToGUI()->push(message);
+
+            if (getMessageQueueToGUI()) {
+                getMessageQueueToGUI()->push(message);
+            }
         }
     }
 

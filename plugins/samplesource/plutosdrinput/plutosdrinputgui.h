@@ -93,7 +93,7 @@ private slots:
     void on_antenna_currentIndexChanged(int index);
     void updateHardware();
     void updateStatus();
-    void handleDSPMessages();
+    void handleInputMessages();
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */

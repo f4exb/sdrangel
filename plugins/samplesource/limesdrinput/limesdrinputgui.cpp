@@ -75,7 +75,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     displaySettings();
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleMessagesToGUI()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 LimeSDRInputGUI::~LimeSDRInputGUI()
@@ -142,26 +142,26 @@ bool LimeSDRInputGUI::handleMessage(const Message& message __attribute__((unused
     return false;
 }
 
-void LimeSDRInputGUI::handleMessagesToGUI()
+void LimeSDRInputGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
+        qDebug("LimeSDRInputGUI::handleInputMessages: message: %s", message->getIdentifier());
+
         if (DSPSignalNotification::match(*message))
         {
-            qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("LimeSDRInputGUI::handleMessagesToGUI: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("LimeSDRInputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
         }
         else if (LimeSDRInput::MsgReportLimeSDRToGUI::match(*message))
         {
-            qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
             LimeSDRInput::MsgReportLimeSDRToGUI *report = (LimeSDRInput::MsgReportLimeSDRToGUI *) message;
 
             m_settings.m_centerFrequency = report->getCenterFrequency();
@@ -173,7 +173,7 @@ void LimeSDRInputGUI::handleMessagesToGUI()
             blockApplySettings(false);
 
             LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
-            m_sampleSource->getInputMessageQueue()->push(conf);
+            m_sampleSource->getInputMessageQueue()->push(conf); // TODO: remove from here should be done device to device
 
             delete message;
         }

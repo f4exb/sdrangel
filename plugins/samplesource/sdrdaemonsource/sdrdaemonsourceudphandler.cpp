@@ -179,7 +179,10 @@ void SDRdaemonSourceUDPHandler::processData()
             m_centerFrequency * 1000, // Frequency in Hz for the GUI
             m_tv_sec,
             m_tv_usec);
-        m_outputMessageQueueToGUI->push(report);
+
+        if (m_outputMessageQueueToGUI) {
+            m_outputMessageQueueToGUI->push(report);
+        }
     }
 }
 
@@ -258,6 +261,9 @@ void SDRdaemonSourceUDPHandler::tick()
             m_sdrDaemonBuffer.getAvgNbRecovery(),
             nbOriginalBlocks,
             nbFECblocks);
-            m_outputMessageQueueToGUI->push(report);
+
+		    if (m_outputMessageQueueToGUI) {
+                m_outputMessageQueueToGUI->push(report);
+		    }
 	}
 }

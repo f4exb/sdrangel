@@ -66,7 +66,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 PlutoSDRInputGui::~PlutoSDRInputGui()
@@ -385,23 +385,31 @@ void PlutoSDRInputGui::setSampleRateLimits()
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 }
 
-void PlutoSDRInputGui::handleDSPMessages()
+void PlutoSDRInputGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
+        qDebug("LimeSDRInputGUI::handleInputMessages: message: %s", message->getIdentifier());
+
         if (DSPSignalNotification::match(*message))
         {
-            qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message->getIdentifier());
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("LimeSDRInputGUI::handleMessagesToGUI: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("LimeSDRInputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
             setFIRBWLimits();
 
             delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }

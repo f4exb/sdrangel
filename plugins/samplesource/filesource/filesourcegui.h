@@ -82,8 +82,7 @@ private:
 	void updateWithStreamTime();
 
 private slots:
-    void handleDSPMessages();
-	void handleSourceMessages();
+    void handleInputMessages();
 	void on_startStop_toggled(bool checked);
 	void on_playLoop_toggled(bool checked);
 	void on_play_toggled(bool checked);

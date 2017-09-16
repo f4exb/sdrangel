@@ -103,11 +103,10 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
     m_sampleSource = (SDRdaemonSourceInput*) m_deviceAPI->getSampleSource();
-	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
 	displaySettings();
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
     m_eventsTime.start();
     displayEventCounts();
@@ -253,42 +252,34 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonSourceGui::handleDSPMessages()
+void SDRdaemonSourceGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRdaemonGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("SDRdaemonGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_deviceSampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("SDRdaemonGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("SDRdaemonGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
             DSPSignalNotification *fwd = new DSPSignalNotification(*notif);
             m_sampleSource->getInputMessageQueue()->push(fwd);
 
             delete message;
         }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
     }
-}
-
-void SDRdaemonSourceGui::handleSourceMessages()
-{
-	Message* message;
-
-	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		//qDebug("SDRdaemonGui::handleSourceMessages: message: %s", message->getIdentifier());
-
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
 }
 
 void SDRdaemonSourceGui::updateSampleRateAndFrequency()

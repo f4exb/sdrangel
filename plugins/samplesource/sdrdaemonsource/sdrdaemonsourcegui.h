@@ -124,8 +124,7 @@ private:
     void displayEventTimer();
 
 private slots:
-    void handleDSPMessages();
-	void handleSourceMessages();
+    void handleInputMessages();
 	void on_applyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);

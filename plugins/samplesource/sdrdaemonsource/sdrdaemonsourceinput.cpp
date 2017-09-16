@@ -52,7 +52,7 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
     m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, getOutputMessageQueueToGUI(), m_deviceAPI);
+	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, getMessageQueueToGUI(), m_deviceAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 
     char recFileNameCStr[30];
@@ -179,5 +179,11 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+void SDRdaemonSourceInput::setMessageQueueToGUI(MessageQueue *queue)
+{
+    DeviceSampleSource::setMessageQueueToGUI(queue);
+    m_SDRdaemonUDPHandler->setMessageQueueToGUI(queue);
 }
 

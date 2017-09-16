@@ -44,7 +44,7 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-	MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; } // TODO: remove
+	//MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; } // TODO: remove
     SampleSinkFifo* getSampleFifo() { return &m_sampleFifo; }
 
 protected slots:

@@ -51,8 +51,7 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
     queryDeviceReport(); // will reply with MsgReportRTLSDR to report gain list
 }
@@ -144,40 +143,32 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	}
 }
 
-void RTLSDRGui::handleDSPMessages()
+void RTLSDRGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("RTLSDRGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("RTLSDRGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("RTLSDRGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("RTLSDRGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
         }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
     }
-}
-
-void RTLSDRGui::handleSourceMessages()
-{
-	Message* message;
-
-	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		qDebug("RTLSDRGui::HandleSourceMessages: message: %s", message->getIdentifier());
-
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
 }
 
 void RTLSDRGui::updateSampleRateAndFrequency()

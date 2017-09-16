@@ -72,7 +72,7 @@ private:
 	void updateSampleRateAndFrequency();
 
 private slots:
-    void handleDSPMessages();
+    void handleInputMessages();
 	void on_centerFrequency_changed(quint64 value);
 	void on_sampleRate_changed(quint64 value);
 	void on_lowSampleRate_toggled(bool checked);
@@ -89,7 +89,6 @@ private slots:
     void on_record_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
-	void handleSourceMessages();
 };
 
 #endif // INCLUDE_RTLSDRGUI_H

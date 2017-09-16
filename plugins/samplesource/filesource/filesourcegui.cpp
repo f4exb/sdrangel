@@ -67,9 +67,8 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->playLoop->setEnabled(false);
 
     m_sampleSource = m_deviceAPI->getSampleSource();
-	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -128,23 +127,30 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 	}
 }
 
-void FileSourceGui::handleDSPMessages()
+void FileSourceGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("FileSourceGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("FileSourceGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_deviceSampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("FileSourceGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("FileSourceGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }
@@ -175,21 +181,6 @@ bool FileSourceGui::handleMessage(const Message& message)
 	else
 	{
 		return false;
-	}
-}
-
-void FileSourceGui::handleSourceMessages()
-{
-	Message* message;
-
-	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		//qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
-
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
 	}
 }
 

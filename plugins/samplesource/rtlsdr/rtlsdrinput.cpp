@@ -256,7 +256,10 @@ bool RTLSDRInput::handleMessage(const Message& message)
         qDebug() << "RTLSDRInput::handleMessage: MsgQueryRTLSDR";
 
         MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);
-        getOutputMessageQueueToGUI()->push(message);
+
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(message);
+        }
 
         return true;
     }

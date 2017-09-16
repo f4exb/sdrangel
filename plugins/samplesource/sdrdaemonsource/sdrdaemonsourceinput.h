@@ -318,6 +318,8 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+	void setMessageQueueToGUI(MessageQueue *queue);
+
 private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

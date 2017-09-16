@@ -52,8 +52,7 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
-	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 AirspyGui::~AirspyGui()
@@ -128,40 +127,32 @@ bool AirspyGui::handleMessage(const Message& message __attribute__((unused)))
 //	}
 }
 
-void AirspyGui::handleDSPMessages()
+void AirspyGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("AirspyGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("AirspyGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("AirspyGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("AirspyGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
         }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
     }
-}
-
-void AirspyGui::handleSourceMessages()
-{
-	Message* message;
-
-	while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-	{
-		qDebug("AirspyGui::HandleSourceMessages: message: %s", message->getIdentifier());
-
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
 }
 
 void AirspyGui::updateSampleRateAndFrequency()

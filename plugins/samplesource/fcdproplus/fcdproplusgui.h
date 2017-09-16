@@ -69,7 +69,7 @@ private:
 	void updateSampleRateAndFrequency();
 
 private slots:
-    void handleDSPMessages();
+    void handleInputMessages();
 	void on_centerFrequency_changed(quint64 value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);

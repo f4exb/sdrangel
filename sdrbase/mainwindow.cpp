@@ -306,6 +306,7 @@ void MainWindow::removeLastDevice()
 
         // deletes old UI and input object
         m_deviceUIs.back()->m_deviceSourceAPI->freeChannels();      // destroys the channel instances
+        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         m_deviceUIs.back()->m_deviceSourceAPI->resetSampleSourceId();
@@ -844,6 +845,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         deviceUI->m_deviceSourceAPI->stopAcquisition();
 
         // deletes old UI and input object
+        deviceUI->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
         deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         deviceUI->m_deviceSourceAPI->resetSampleSourceId();
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
