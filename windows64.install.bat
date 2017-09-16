@@ -13,7 +13,15 @@ copy %msys2dir%\mingw64\bin\libpcre-1.dll %2
 copy %msys2dir%\mingw64\bin\libpcre16-0.dll %2
 copy %msys2dir%\mingw64\bin\libpng16-16.dll %2
 copy %msys2dir%\mingw64\bin\zlib1.dll %2
-move %2\icudt56.dll %2\libicudt56.dll
+REM move %2\icudt56.dll %2\libicudt56.dll
+copy %msys2dir%\mingw64\bin\libicuin58.dll %2
+copy %msys2dir%\mingw64\bin\libicuind58.dll %2
+copy %msys2dir%\mingw64\bin\libicuuc58.dll %2
+copy %msys2dir%\mingw64\bin\libicudt58.dll %2
+copy %msys2dir%\mingw64\bin\libgcc_s_seh-1.dll %2
+copy "%msys2dir%\mingw64\bin\libstdc++-6.dll" %2
+copy "%msys2dir%\mingw64\bin\libwinpthread-1.dll" %2
+copy %msys2dir%\mingw64\bin\libgraphite2.dll %2
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy devices\%1\devices.dll %2

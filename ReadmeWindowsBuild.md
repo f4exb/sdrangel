@@ -167,8 +167,12 @@ It is possible to use a MinGW64 tool-chain by following these steps:
   - Install MSys2 from [this page](http://msys2.github.io/). Follow all the steps.
   - Install Qt5 from MSys2 command line:
     - `pacman -Sy  mingw-w64-x86_64-qt5`
-  - Install gcc/g++ from MSys2 command line:
-    - `pacman -Sy mingw64/mingw-w64-x86_64-gcc`
+  - You cannot use the stock gcc/g++ because it is too new and not compatible with Qt 5.9. So you will have to fetch the 5.3.0 version from the archives:
+    - `wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gcc-libs-5.3.0-5-any.pkg.tar.xz`
+    - `wget http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gcc-5.3.0-5-any.pkg.tar.xz`
+  - Install them in this order from the .xz package files:
+    - `pacman -U mingw-w64-x86_64-gcc-libs-5.3.0-5-any.pkg.tar.xz`
+    - `pacman -U mingw-w64-x86_64-gcc-5.3.0-5-any.pkg.tar.xz`
   - Create a new "kit" in Qt Creator:
     - Go to "Projects" sub-menu from the left menu bar
     - Click on "Manage kits"
@@ -178,8 +182,19 @@ It is possible to use a MinGW64 tool-chain by following these steps:
       - In "Compiler" select the "MinGW64" compiler you created previously
       - In "Qt version" select the Qt version you created previously
     - You should now be able to use this "kit" for your build
-    - In the "Build steps" section add `CONFIG+=MINGW64` in the "Additional arguments"
+    - In the main "Build settings" panel:
+		- In the "Build steps" section add `CONFIG+=MINGW64` in the "Additional arguments"
+		- In the "Build steps" section in the "Make" subsection you will have to specify the same make as for the 32 bit build (ex: `D:\Qt\Tools\mingw530_32\bin\mingw32-make.exe`. The `make` provided by MSys2 does not work.
+  - Create a command console shortcut:
+    - Copy `D:\Qt\5.9.1\mingw53_32\bin\qtenv2.bat` to `D:\msys64\mingw64\bin`
+    - Edit it to match the MSys2 installation with these two active lines:
+      - `set PATH=D:\msys64\mingw64\bin;%PATH%`
+      - `cd /D D:\msys64\mingw64`
+	- Create a shortcut with target: `C:\Windows\System32\cmd.exe /A /Q /K D:\msys64\mingw64\bin\qtenv2.bat` 
 
-Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to your target installation directory in a similar way as this is done for MinGW32 (see above).
+Use the `windeployqt.exe` of the MSys2 distribution to copy the base files to your target installation directory in a similar way as this is done for MinGW32 (see above):
+
+  - Open the command console with the shortcut you created
+  - In this console type: `bin\windeployqt.exe --dir D:\Programs\sdrangel64 D:\development\build-sdrangel.windows-MinGW64-Release\app\release\sdrangel.exe D:\development\build-sdrangel.windows-MinGW64-Release\sdrbase\release\sdrbase.dll`
 
 The final packaging is done with the `windows64.install.bat` utility. Assuming `D:\development\sdrangel` is the root directory of your cloned source repository, `D:\msys64` is the installation directory of MSys2, `D:\softs\libusb-1.0.20\MinGW64` is your libusb installation directory and `D:\Programs\sdrangel64` is your target installation directory do: `D:\development\sdrangel\windows64.install.bat release D:\Programs\sdrangel`. Modify the script if your MSys2 and libusb locations are different.
