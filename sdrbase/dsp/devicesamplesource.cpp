@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015-2017 F4EXB                                                 //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,7 +17,8 @@
 
 #include <dsp/devicesamplesource.h>
 
-DeviceSampleSource::DeviceSampleSource()
+DeviceSampleSource::DeviceSampleSource() :
+    m_guiMessageQueue(0)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
