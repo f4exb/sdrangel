@@ -69,8 +69,9 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     displaySettings();
 
-    connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+//    connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+//    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 SDRPlayGui::~SDRPlayGui()
@@ -167,38 +168,30 @@ bool SDRPlayGui::handleMessage(const Message& message)
     }
 }
 
-void SDRPlayGui::handleDSPMessages()
+void SDRPlayGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRPlayGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("SDRPlayGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("SDRPlayGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("SDRPlayGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
         }
-    }
-}
-
-void SDRPlayGui::handleSourceMessages()
-{
-    Message* message;
-
-    while ((message = m_sampleSource->getOutputMessageQueueToGUI()->pop()) != 0)
-    {
-        qDebug("SDRPlayGui::HandleSourceMessages: message: %s", message->getIdentifier());
-
-        if (handleMessage(*message))
+        else
         {
-            delete message;
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }

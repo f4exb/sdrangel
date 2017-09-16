@@ -629,7 +629,7 @@ void DSPDeviceSourceEngine::handleInputMessages()
 
 			qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
 
-			// forward source changes to sinks with immediate execution
+			// forward source changes to channel sinks with immediate execution (no queuing)
 
 			for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
 			{
@@ -643,10 +643,16 @@ void DSPDeviceSourceEngine::handleInputMessages()
 				(*it)->handleSinkMessage(*message);
 			}
 
-			// forward changes to listeners on DSP output queue
+			// forward changes to source GUI input queue
 
-			DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
-			m_outputMessageQueue.push(rep);
+			MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
+
+			if (guiMessageQueue) {
+			    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
+                m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
+			}
+
+			//m_outputMessageQueue.push(rep);
 
 			delete message;
 		}
