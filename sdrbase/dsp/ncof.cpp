@@ -20,6 +20,9 @@
 #include <math.h>
 #include "dsp/ncof.h"
 
+#undef M_PI
+#define M_PI		3.14159265358979323846
+
 Real NCOF::m_table[NCOF::TableSize];
 bool NCOF::m_tableInitialized = false;
 

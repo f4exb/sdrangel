@@ -4,8 +4,11 @@
  *  Created on: Jun 16, 2015
  *      Author: f4exb
  */
-#include <cmath>
+#include <math.h>
 #include "dsp/ctcssdetector.h"
+
+#undef M_PI
+#define M_PI		3.14159265358979323846
 
 CTCSSDetector::CTCSSDetector() :
 			N(0),

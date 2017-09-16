@@ -26,8 +26,13 @@
 #include <QString>
 #include <QFileDialog>
 
+#ifdef _WIN32
+#include <nn.h>
+#include <pair.h>
+#else
 #include <nanomsg/nn.h>
 #include <nanomsg/pair.h>
+#endif
 
 #include "ui_sdrdaemonsourcegui.h"
 #include "gui/colormapper.h"

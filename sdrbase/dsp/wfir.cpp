@@ -10,7 +10,9 @@
 
 #include "wfir.h"
 
-#define M_2PI  6.28318530717958647692  // M_PI should be in the math.h file
+#undef M_PI
+#define M_PI   3.14159265358979323846
+#define M_2PI  6.28318530717958647692
 
 // This first calculates the impulse response for a rectangular window.
 // It then applies the windowing function of choice to the impulse response.
