@@ -18,10 +18,11 @@
 #ifndef INCLUDE_ATVDEMODGUI_H
 #define INCLUDE_ATVDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -52,7 +53,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
     bool deserialize(const QByteArray& arrData);
-
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& objMessage);
 
     static const QString m_strChannelID;
@@ -106,6 +107,7 @@ private:
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
+    MessageQueue m_inputMessageQueue;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
 	virtual ~ATVDemodGUI();

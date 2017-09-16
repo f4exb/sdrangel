@@ -18,10 +18,11 @@
 #ifndef INCLUDE_BFMDEMODGUI_H
 #define INCLUDE_BFMDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "rdsparser.h"
 
@@ -52,7 +53,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -96,6 +97,7 @@ private:
 	MovingAverage<double> m_channelPowerDbAvg;
 	int m_rate;
 	std::vector<unsigned int> m_g14ComboIndex;
+	MessageQueue m_inputMessageQueue;
 
 	static const int m_rfBW[];
 

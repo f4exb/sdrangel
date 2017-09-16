@@ -17,9 +17,11 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
+
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "limesdroutput.h"
 
@@ -46,6 +48,7 @@ public:
     virtual void setCenterFrequency(qint64 centerFrequency);
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
 private:
@@ -63,6 +66,7 @@ private:
     bool m_doApplySettings;
     int m_statusCounter;
     int m_deviceStatusCounter;
+    MessageQueue m_inputMessageQueue;
 
     void displaySettings();
     void setNCODisplay();

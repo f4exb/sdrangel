@@ -17,10 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
+
 #include "ammod.h"
 
 class PluginAPI;
@@ -49,7 +51,7 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
     static const QString m_channelID;
@@ -99,6 +101,7 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     AMMod::AMModInputAF m_modAFInput;
+    MessageQueue m_inputMessageQueue;
 
     explicit AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~AMModGUI();

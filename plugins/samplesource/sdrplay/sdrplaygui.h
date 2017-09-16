@@ -17,11 +17,13 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
-
 #include <vector>
+
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
+
 #include "sdrplayinput.h"
 #include "sdrplaysettings.h"
 
@@ -48,6 +50,7 @@ public:
     virtual void setCenterFrequency(qint64 centerFrequency);
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
 private:
@@ -61,6 +64,7 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
+    MessageQueue m_inputMessageQueue;
 
     void displaySettings();
     void sendSettings();

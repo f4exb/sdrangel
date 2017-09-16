@@ -17,10 +17,11 @@
 #ifndef PLUGINS_CHANNELTX_MODWFM_WFMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODWFM_WFMMODGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "wfmmod.h"
 
@@ -50,7 +51,7 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
     static const QString m_channelID;
@@ -101,6 +102,7 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     WFMMod::WFMModInputAF m_modAFInput;
+    MessageQueue m_inputMessageQueue;
 
     static const int m_rfBW[];
     static const int m_nbRfBW;

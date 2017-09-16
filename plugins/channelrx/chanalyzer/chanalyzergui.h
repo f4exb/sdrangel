@@ -17,10 +17,11 @@
 #ifndef INCLUDE_CHANNELANALYZERGUI_H
 #define INCLUDE_CHANNELANALYZERGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -51,7 +52,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -86,6 +87,7 @@ private:
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
+	MessageQueue m_inputMessageQueue;
 
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~ChannelAnalyzerGUI();

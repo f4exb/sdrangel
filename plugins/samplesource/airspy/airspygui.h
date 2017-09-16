@@ -17,10 +17,11 @@
 #ifndef INCLUDE_AIRSPYGUI_H
 #define INCLUDE_AIRSPYGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
 
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 #include "airspyinput.h"
 
 #define AIRSPY_MAX_DEVICE (32)
@@ -48,6 +49,7 @@ public:
 	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+	virtual MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 	uint32_t getDevSampleRate(unsigned int index);
 	int getDevSampleRateIndex(uint32_t sampleRate);
@@ -64,6 +66,7 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
+    MessageQueue m_inputMessageQueue;
 
 	void displaySettings();
 	void displaySampleRates();

@@ -17,10 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 #define PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
+
 #include "atvmod.h"
 
 class PluginAPI;
@@ -50,7 +52,7 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
     static const QString m_channelID;
@@ -118,6 +120,7 @@ private:
     bool m_enableNavTime;
     QMessageBox *m_camBusyFPSMessageBox;
     int m_rfSliderDivisor;
+    MessageQueue m_inputMessageQueue;
 
     explicit ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~ATVModGUI();

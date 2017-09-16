@@ -1,10 +1,11 @@
 #ifndef INCLUDE_SSBDEMODGUI_H
 #define INCLUDE_SSBDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -34,7 +35,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -79,6 +80,7 @@ private:
 	DownChannelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
+	MessageQueue m_inputMessageQueue;
 
 	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI* deviceAPI, QWidget* parent = NULL);
 	virtual ~SSBDemodGUI();

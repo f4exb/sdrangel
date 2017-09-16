@@ -18,11 +18,12 @@
 #ifndef INCLUDE_UDPSRCGUI_H
 #define INCLUDE_UDPSRCGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QHostAddress>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "udpsrc.h"
 
@@ -52,7 +53,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -99,6 +100,7 @@ private:
 	bool m_audioStereo;
 	int m_volume;
 	bool m_doApplySettings;
+	MessageQueue m_inputMessageQueue;
 
 	// RF path
 	ThreadedBasebandSampleSink* m_threadedChannelizer;

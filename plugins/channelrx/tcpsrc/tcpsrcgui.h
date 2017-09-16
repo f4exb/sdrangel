@@ -1,13 +1,15 @@
 #ifndef INCLUDE_TCPSRCGUI_H
 #define INCLUDE_TCPSRCGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QHostAddress>
+
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
-#include "../../channelrx/tcpsrc/tcpsrc.h"
+#include "tcpsrc.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -35,7 +37,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -74,6 +76,7 @@ private:
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
+	MessageQueue m_inputMessageQueue;
 
 	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);
 	virtual ~TCPSrcGUI();

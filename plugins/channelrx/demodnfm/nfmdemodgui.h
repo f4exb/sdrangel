@@ -1,11 +1,12 @@
 #ifndef INCLUDE_NFMDEMODGUI_H
 #define INCLUDE_NFMDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -33,7 +34,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 	void setCtcssFreq(Real ctcssFreq);
 
@@ -71,6 +72,7 @@ private:
 	bool m_audioMute;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
+	MessageQueue m_inputMessageQueue;
 
 	static const int m_rfBW[];
 	static const int m_fmDev[];

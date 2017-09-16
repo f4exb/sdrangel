@@ -17,10 +17,12 @@
 #ifndef INCLUDE_SDRDAEMONSINKGUI_H
 #define INCLUDE_SDRDAEMONSINKGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QTime>
 #include <QWidget>
+
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
@@ -49,6 +51,7 @@ public:
 	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 private:
@@ -78,6 +81,8 @@ private:
     QPalette m_paletteGreenText;
     QPalette m_paletteRedText;
     QPalette m_paletteWhiteText;
+
+    MessageQueue m_inputMessageQueue;
 
     void blockApplySettings(bool block);
 	void displaySettings();

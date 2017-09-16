@@ -21,7 +21,8 @@
 #include <QWidget>
 #include <QTimer>
 
-#include <plugin/plugininstanceui.h>
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "plutosdrinputsettings.h"
 
@@ -47,6 +48,7 @@ public:
     virtual void setCenterFrequency(qint64 centerFrequency);
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
 private:
@@ -62,6 +64,7 @@ private:
     int m_lastEngineState;
     bool m_doApplySettings;
     uint32_t m_statusCounter;
+    MessageQueue m_inputMessageQueue;
 
     void displaySettings();
     void sendSettings(bool forceSettings = false);

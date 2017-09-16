@@ -18,13 +18,14 @@
 #ifndef INCLUDE_DSDDEMODGUI_H
 #define INCLUDE_DSDDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QMenu>
 
 #include "gui/rollupwidget.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -53,7 +54,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -115,6 +116,8 @@ private:
 
 	float m_myLatitude;
 	float m_myLongitude;
+
+	MessageQueue m_inputMessageQueue;
 
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~DSDDemodGUI();

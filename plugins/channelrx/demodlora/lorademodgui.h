@@ -1,9 +1,10 @@
 #ifndef INCLUDE_LoRaDEMODGUI_H
 #define INCLUDE_LoRaDEMODGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #define BANDWIDTHSTRING {7813,15625,20833,31250,62500}
 
@@ -33,7 +34,7 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 	static const QString m_channelID;
@@ -57,6 +58,7 @@ private:
 	DownChannelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
+	MessageQueue m_inputMessageQueue;
 
 	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~LoRaDemodGUI();

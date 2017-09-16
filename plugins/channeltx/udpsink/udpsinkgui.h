@@ -17,11 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
 #define PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include <QObject>
 
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "udpsink.h"
 
@@ -50,6 +51,7 @@ public:
     virtual void resetToDefaults();
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
     static const QString m_channelID;
@@ -97,6 +99,7 @@ private:
     Real m_rfBandwidth;
     int m_fmDeviation;
     bool m_doApplySettings;
+    MessageQueue m_inputMessageQueue;
 
     explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~UDPSinkGUI();

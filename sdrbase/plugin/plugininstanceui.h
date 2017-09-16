@@ -8,6 +8,7 @@
 #include "util/export.h"
 
 class Message;
+class MessageQueue;
 
 class SDRANGEL_API PluginInstanceUI {
 public:
@@ -26,6 +27,8 @@ public:
 
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
+
+	virtual MessageQueue* getInputMessageQueue() = 0;
 
 	virtual bool handleMessage(const Message& message) = 0;
 };

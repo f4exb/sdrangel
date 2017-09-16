@@ -17,9 +17,11 @@
 #ifndef INCLUDE_FCDPROGUI_H
 #define INCLUDE_FCDPROGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
+
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
 
 #include "fcdproinput.h"
 
@@ -46,7 +48,7 @@ public:
 	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 private:
@@ -61,6 +63,7 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
+	MessageQueue m_inputMessageQueue;
 
 	void displaySettings();
 	void sendSettings();

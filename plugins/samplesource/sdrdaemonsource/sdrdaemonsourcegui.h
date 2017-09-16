@@ -17,11 +17,13 @@
 #ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
 #define INCLUDE_SDRDAEMONSOURCEGUI_H
 
-#include <plugin/plugininstanceui.h>
 #include <QTimer>
 #include <QWidget>
-
 #include <sys/time.h>
+
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
+
 #include "sdrdaemonsourceinput.h"
 
 class DeviceSourceAPI;
@@ -46,6 +48,7 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual qint64 getCenterFrequency() const;
 	virtual void setCenterFrequency(qint64 centerFrequency);
+	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
 private:
@@ -61,6 +64,7 @@ private:
     int m_deviceSampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
+    MessageQueue m_inputMessageQueue;
 
 	int m_sampleRate;
 	quint64 m_centerFrequency;

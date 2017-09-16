@@ -17,10 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 #define PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 
-#include <plugin/plugininstanceui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "plugin/plugininstanceui.h"
+#include "util/messagequeue.h"
+
 #include "ssbmod.h"
 
 class PluginAPI;
@@ -50,7 +52,7 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
     static const QString m_channelID;
@@ -113,6 +115,8 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     SSBMod::SSBModInputAF m_modAFInput;
+    MessageQueue m_inputMessageQueue;
+
     static const int m_agcTimeConstant[]; //!< time constant index to value in ms
 
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
