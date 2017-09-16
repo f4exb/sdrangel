@@ -37,8 +37,7 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
-    m_sampleSource = new BladerfInput(m_deviceAPI);
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = (BladerfInput*) m_deviceAPI->getSampleSource();
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -65,7 +64,6 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 BladerfInputGui::~BladerfInputGui()
 {
-	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
 

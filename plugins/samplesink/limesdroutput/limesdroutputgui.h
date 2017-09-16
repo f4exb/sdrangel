@@ -36,7 +36,7 @@ class LimeSDROutputGUI : public QWidget, public PluginInstanceUI {
 public:
     explicit LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent = 0);
     virtual ~LimeSDROutputGUI();
-    void destroy();
+    virtual void destroy();
 
     void setName(const QString& name);
     QString getName() const;

@@ -34,8 +34,7 @@ FCDProGui::FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
-    m_sampleSource = new FCDProInput(m_deviceAPI);
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = (FCDProInput*) m_deviceAPI->getSampleSource();
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

@@ -40,7 +40,7 @@ class SSBModGUI : public RollupWidget, public PluginInstanceUI {
 
 public:
     static SSBModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
-    void destroy();
+    virtual void destroy();
 
     void setName(const QString& name);
     QString getName() const;

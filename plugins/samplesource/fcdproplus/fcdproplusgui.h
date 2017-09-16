@@ -35,7 +35,7 @@ class FCDProPlusGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~FCDProPlusGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

@@ -36,7 +36,7 @@ class BladerfOutputGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BladerfOutputGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

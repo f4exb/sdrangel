@@ -35,7 +35,7 @@ class BladerfInputGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BladerfInputGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

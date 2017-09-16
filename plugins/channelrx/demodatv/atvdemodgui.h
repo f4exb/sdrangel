@@ -42,7 +42,7 @@ class ATVDemodGUI : public RollupWidget, public PluginInstanceUI
 
 public:
     static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI);
-	void destroy();
+	virtual void destroy();
 
     void setName(const QString& strName);
 	QString getName() const;

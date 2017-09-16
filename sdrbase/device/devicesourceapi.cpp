@@ -212,7 +212,7 @@ void DeviceSourceAPI::renameChannelInstances()
     }
 }
 
-void DeviceSourceAPI::freeAll()
+void DeviceSourceAPI::freeChannels()
 {
 //    while(!m_channelInstanceRegistrations.isEmpty())
 //    {
@@ -224,16 +224,6 @@ void DeviceSourceAPI::freeAll()
     {
         qDebug("DeviceSourceAPI::freeAll: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
         m_channelInstanceRegistrations[i].m_gui->destroy();
-    }
-
-
-    if(m_sampleSourcePluginInstanceUI != 0)
-    {
-        qDebug("DeviceSourceAPI::freeAll: destroying m_sampleSourcePluginGUI");
-        m_deviceSourceEngine->setSource(0);
-        m_sampleSourcePluginInstanceUI->destroy();
-        m_sampleSourcePluginInstanceUI = 0;
-        m_sampleSourceId.clear();
     }
 }
 

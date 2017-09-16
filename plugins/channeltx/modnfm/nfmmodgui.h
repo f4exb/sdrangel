@@ -40,7 +40,7 @@ class NFMModGUI : public RollupWidget, public PluginInstanceUI {
 
 public:
     static NFMModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
-    void destroy();
+    virtual void destroy();
 
     void setName(const QString& name);
     QString getName() const;

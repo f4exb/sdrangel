@@ -36,7 +36,7 @@ class SDRdaemonSourceGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~SDRdaemonSourceGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

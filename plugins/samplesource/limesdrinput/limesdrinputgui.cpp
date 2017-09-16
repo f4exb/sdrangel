@@ -40,9 +40,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_limeSDRInput = new LimeSDRInput(m_deviceAPI);
-    m_sampleSource = (DeviceSampleSource *) m_limeSDRInput;
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = m_deviceAPI->getSampleSource();
+    m_limeSDRInput = (LimeSDRInput*) m_sampleSource;
 
     ui->setupUi(this);
 
@@ -81,7 +80,6 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 LimeSDRInputGUI::~LimeSDRInputGUI()
 {
-    delete m_sampleSource; // Valgrind memcheck
     delete ui;
 }
 

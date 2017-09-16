@@ -40,8 +40,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
     m_doApplySettings(true),
     m_statusCounter(0)
 {
-    m_sampleSource = new PlutoSDRInput(m_deviceAPI);
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = (PlutoSDRInput*) m_deviceAPI->getSampleSource();
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

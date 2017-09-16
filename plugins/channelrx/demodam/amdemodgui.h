@@ -22,7 +22,7 @@ class AMDemodGUI : public RollupWidget, public PluginInstanceUI {
 
 public:
 	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

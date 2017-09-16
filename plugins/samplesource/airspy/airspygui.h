@@ -38,7 +38,7 @@ class AirspyGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~AirspyGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

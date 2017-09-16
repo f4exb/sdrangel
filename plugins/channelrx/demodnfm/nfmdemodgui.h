@@ -23,7 +23,7 @@ class NFMDemodGUI : public RollupWidget, public PluginInstanceUI {
 
 public:
 	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

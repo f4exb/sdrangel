@@ -140,6 +140,9 @@ MainWindow::MainWindow(QWidget* parent) :
         exit(0);
 	}
 
+	DeviceSampleSource *source = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+	        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
+	m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
     QWidget *gui;
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
@@ -218,8 +221,11 @@ void MainWindow::addSourceDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
+    // Create a file source instance by default
     m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
-
+    DeviceSampleSource *source = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+            m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
     QWidget *gui;
     PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
@@ -290,8 +296,14 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
-	    m_deviceUIs.back()->m_deviceSourceAPI->freeAll();
-        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // remove old API from buddies lists
+        // deletes old UI and input object
+        m_deviceUIs.back()->m_deviceSourceAPI->freeChannels();      // destroys the channel instances
+        m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
+        m_deviceUIs.back()->m_deviceSourceAPI->resetSampleSourceId();
+        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
+        m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
+                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource());
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -821,6 +833,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         deviceUI->m_deviceSourceAPI->resetSampleSourceId();
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
+        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUI->m_deviceSourceAPI->getSampleSource());
 
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
 
@@ -859,8 +872,12 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         }
 
         // constructs new GUI and input object
+        DeviceSampleSource *source = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+                deviceUI->m_deviceSourceAPI->getSampleSourceId(), deviceUI->m_deviceSourceAPI);
+        deviceUI->m_deviceSourceAPI->setSampleSource(source);
         QWidget *gui;
-        PluginInstanceUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourceId(), &gui, deviceUI->m_deviceSourceAPI);
+        PluginInstanceUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+                deviceUI->m_deviceSourceAPI->getSampleSourceId(), &gui, deviceUI->m_deviceSourceAPI);
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginUI);
         setDeviceGUI(currentSourceTabIndex, gui, deviceUI->m_deviceSourceAPI->getSampleSourceDisplayName());
 

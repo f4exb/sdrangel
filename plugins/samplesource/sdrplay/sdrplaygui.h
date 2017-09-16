@@ -38,7 +38,7 @@ class SDRPlayGui : public QWidget, public PluginInstanceUI {
 public:
     explicit SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SDRPlayGui();
-    void destroy();
+    virtual void destroy();
 
     void setName(const QString& name);
     QString getName() const;

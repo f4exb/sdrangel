@@ -33,8 +33,7 @@ SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui(new Ui::SDRPlayGui),
     m_deviceAPI(deviceAPI)
 {
-    m_sampleSource = new SDRPlayInput(m_deviceAPI);
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = (SDRPlayInput*) m_deviceAPI->getSampleSource();
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

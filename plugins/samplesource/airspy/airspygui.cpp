@@ -38,8 +38,7 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_sampleSource(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
-    m_sampleSource = new AirspyInput(m_deviceAPI);
-    m_deviceAPI->setSampleSource(m_sampleSource);
+    m_sampleSource = (AirspyInput*) m_deviceAPI->getSampleSource();
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -59,7 +58,6 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 AirspyGui::~AirspyGui()
 {
-	delete m_sampleSource; // Valgrind memcheck
 	delete ui;
 }
 

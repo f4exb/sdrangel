@@ -41,7 +41,7 @@ class ChannelAnalyzerNGGUI : public RollupWidget, public PluginInstanceUI {
 
 public:
 	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

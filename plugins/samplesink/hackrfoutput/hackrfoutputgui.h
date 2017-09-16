@@ -46,7 +46,7 @@ public:
 
 	explicit HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~HackRFOutputGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

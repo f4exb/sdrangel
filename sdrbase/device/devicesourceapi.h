@@ -87,7 +87,7 @@ public:
     void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
     void removeChannelInstance(PluginInstanceUI* pluginGUI);
 
-    void freeAll();
+    void freeChannels();
 
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);

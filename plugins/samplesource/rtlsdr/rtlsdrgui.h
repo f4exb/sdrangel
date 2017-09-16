@@ -36,7 +36,7 @@ class RTLSDRGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~RTLSDRGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

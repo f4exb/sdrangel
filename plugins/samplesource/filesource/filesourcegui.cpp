@@ -66,9 +66,8 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->playLoop->setChecked(true); // FIXME: always play in a loop
 	ui->playLoop->setEnabled(false);
 
-    m_sampleSource = new FileSourceInput(m_deviceAPI);
+    m_sampleSource = m_deviceAPI->getSampleSource();
 	connect(m_sampleSource->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	m_deviceAPI->setSampleSource(m_sampleSource);
 
     connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

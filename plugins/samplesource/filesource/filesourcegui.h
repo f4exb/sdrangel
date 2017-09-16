@@ -35,7 +35,7 @@ class FileSourceGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~FileSourceGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

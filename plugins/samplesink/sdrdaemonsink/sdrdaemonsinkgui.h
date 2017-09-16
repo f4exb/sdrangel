@@ -39,7 +39,7 @@ class SDRdaemonSinkGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~SDRdaemonSinkGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;

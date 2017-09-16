@@ -38,7 +38,7 @@ class FileSinkGui : public QWidget, public PluginInstanceUI {
 public:
 	explicit FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~FileSinkGui();
-	void destroy();
+	virtual void destroy();
 
 	void setName(const QString& name);
 	QString getName() const;
