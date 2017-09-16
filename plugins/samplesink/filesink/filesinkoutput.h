@@ -150,6 +150,7 @@ public:
 
 	FileSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~FileSinkOutput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

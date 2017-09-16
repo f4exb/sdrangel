@@ -52,6 +52,11 @@ FileSinkOutput::~FileSinkOutput()
 	stop();
 }
 
+void FileSinkOutput::destroy()
+{
+    delete this;
+}
+
 void FileSinkOutput::openFileStream()
 {
 	if (m_ofstream.is_open()) {

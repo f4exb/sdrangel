@@ -65,9 +65,8 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 
-    m_deviceSampleSink = new FileSinkOutput(m_deviceAPI);
+    m_deviceSampleSink = (FileSinkOutput*) m_deviceAPI->getSampleSink();
     connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
-	m_deviceAPI->setSink(m_deviceSampleSink);
 
     connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 }

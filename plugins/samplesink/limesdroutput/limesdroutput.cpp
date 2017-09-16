@@ -59,6 +59,11 @@ LimeSDROutput::~LimeSDROutput()
     resumeBuddies();
 }
 
+void LimeSDROutput::destroy()
+{
+    delete this;
+}
+
 bool LimeSDROutput::openDevice()
 {
     // look for Tx buddies and get reference to common parameters

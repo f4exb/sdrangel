@@ -64,6 +64,7 @@ public:
 	void stopGeneration();   //!< Stop generation sequence
 
 	void setSink(DeviceSampleSink* sink); //!< Set the sample sink type
+	DeviceSampleSink *getSink() { return m_deviceSampleSink; }
 	void setSinkSequence(int sequence); //!< Set the sample sink sequence in type
 
 	void addSource(BasebandSampleSource* source); //!< Add a baseband sample source

@@ -83,9 +83,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-	m_deviceSampleSink = new SDRdaemonSinkOutput(m_deviceAPI);
+	m_deviceSampleSink = (SDRdaemonSinkOutput*) m_deviceAPI->getSampleSink();
     connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
-	m_deviceAPI->setSink(m_deviceSampleSink);
 
     connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
 

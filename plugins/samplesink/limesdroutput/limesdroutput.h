@@ -210,6 +210,7 @@ public:
 
     LimeSDROutput(DeviceSinkAPI *deviceAPI);
     virtual ~LimeSDROutput();
+    virtual void destroy();
 
     virtual bool start();
     virtual void stop();

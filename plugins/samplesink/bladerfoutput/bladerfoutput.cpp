@@ -51,6 +51,11 @@ BladerfOutput::~BladerfOutput()
     m_deviceAPI->setBuddySharedPtr(0);
 }
 
+void BladerfOutput::destroy()
+{
+    delete this;
+}
+
 bool BladerfOutput::openDevice()
 {
     if (m_dev != 0)

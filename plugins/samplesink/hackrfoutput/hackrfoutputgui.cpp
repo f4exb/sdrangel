@@ -40,8 +40,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_deviceSampleSink(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
-    m_deviceSampleSink = new HackRFOutput(m_deviceAPI);
-    m_deviceAPI->setSink(m_deviceSampleSink);
+    m_deviceSampleSink = (HackRFOutput*) m_deviceAPI->getSampleSink();
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -62,7 +61,6 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 HackRFOutputGui::~HackRFOutputGui()
 {
-	delete m_deviceSampleSink; // Valgrind memcheck
 	delete ui;
 }
 

@@ -50,7 +50,8 @@ public:
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine
     void removeThreadedSource(ThreadedBasebandSampleSource* sink); //!< Remove a baseband sample source that runs on its own thread from device engine
     uint32_t getNumberOfSources();
-    void setSink(DeviceSampleSink* sink);                          //!< Set device engine sample sink type
+    void setSampleSink(DeviceSampleSink* sink);                    //!< Set device engine sample sink type
+    DeviceSampleSink *getSampleSink();                             //!< Return pointer to the device sample sink
     bool initGeneration();                                         //!< Initialize device engine generation sequence
     bool startGeneration();                                        //!< Start device engine generation sequence
     void stopGeneration();                                         //!< Stop device engine generation sequence
@@ -67,6 +68,7 @@ public:
 
     void setHardwareId(const QString& id);
     void setSampleSinkId(const QString& id);
+    void resetSampleSinkId();
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkDisplayName(const QString& serial);
     void setSampleSinkSequence(int sequence);
@@ -77,13 +79,14 @@ public:
     const QString& getSampleSinkId() const { return m_sampleSinkId; }
     const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
     const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
-    PluginInterface *getSampleSinkPluginInterface() { return m_pluginInterface; }
+    PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
+    PluginInstanceUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
     void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
     void removeChannelInstance(PluginInstanceUI* pluginGUI);
 
-    void freeAll();
+    void freeChannels();
 
     void loadSinkSettings(const Preset* preset);
     void saveSinkSettings(Preset* preset);

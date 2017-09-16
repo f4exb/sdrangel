@@ -134,6 +134,7 @@ public:
 
 	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~SDRdaemonSinkOutput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

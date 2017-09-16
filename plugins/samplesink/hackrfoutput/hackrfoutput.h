@@ -70,6 +70,7 @@ public:
 
 	HackRFOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~HackRFOutput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

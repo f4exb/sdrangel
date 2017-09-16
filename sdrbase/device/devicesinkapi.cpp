@@ -83,9 +83,14 @@ uint32_t DeviceSinkAPI::getNumberOfSources()
     return m_deviceSinkEngine->getNumberOfSources();
 }
 
-void DeviceSinkAPI::setSink(DeviceSampleSink* sink)
+void DeviceSinkAPI::setSampleSink(DeviceSampleSink* sink)
 {
     m_deviceSinkEngine->setSink(sink);
+}
+
+DeviceSampleSink *DeviceSinkAPI::getSampleSink()
+{
+    return m_deviceSinkEngine->getSink();
 }
 
 bool DeviceSinkAPI::initGeneration()
@@ -157,6 +162,11 @@ void DeviceSinkAPI::setSampleSinkId(const QString& id)
     m_sampleSinkId = id;
 }
 
+void DeviceSinkAPI::resetSampleSinkId()
+{
+    m_sampleSinkId.clear();
+}
+
 void DeviceSinkAPI::setSampleSinkSerial(const QString& serial)
 {
     m_sampleSinkSerial = serial;
@@ -180,12 +190,6 @@ void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)
 
 void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)
 {
-    if (m_sampleSinkPluginInstanceUI != 0)
-    {
-        m_sampleSinkPluginInstanceUI->destroy();
-        m_sampleSinkId.clear();
-    }
-
     m_sampleSinkPluginInstanceUI = gui;
 }
 
@@ -217,22 +221,12 @@ void DeviceSinkAPI::renameChannelInstances()
     }
 }
 
-void DeviceSinkAPI::freeAll()
+void DeviceSinkAPI::freeChannels()
 {
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
         qDebug("DeviceSinkAPI::freeAll: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
         m_channelInstanceRegistrations[i].m_gui->destroy();
-    }
-
-
-    if(m_sampleSinkPluginInstanceUI != 0)
-    {
-        qDebug("DeviceSinkAPI::freeAll: destroying m_sampleSourcePluginGUI");
-        m_deviceSinkEngine->setSink(0);
-        m_sampleSinkPluginInstanceUI->destroy();
-        m_sampleSinkPluginInstanceUI = 0;
-        m_sampleSinkId.clear();
     }
 }
 

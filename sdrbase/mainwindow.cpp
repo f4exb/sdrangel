@@ -276,12 +276,15 @@ void MainWindow::addSinkDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
+    // create a file sink by default
     m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
-
+    DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
+            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), m_deviceUIs.back()->m_deviceSinkAPI);
+    m_deviceUIs.back()->m_deviceSinkAPI->setSampleSink(sink);
     QWidget *gui;
-    PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInterface()->createSampleSinkPluginInstanceGUI(
+    PluginInstanceUI *pluginUI = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), &gui, m_deviceUIs.back()->m_deviceSinkAPI);
-    m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkDisplayName(), false);
 }
 
@@ -333,8 +336,14 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
-	    m_deviceUIs.back()->m_deviceSinkAPI->freeAll();
-        m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
+        // deletes old UI and output object
+        m_deviceUIs.back()->m_deviceSinkAPI->freeChannels();
+	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
+	    m_deviceUIs.back()->m_deviceSinkAPI->resetSampleSinkId();
+	    m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
+	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink());
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -904,8 +913,13 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         void *devicePtr = deviceUI->m_samplingDeviceControl->getDeviceSelector()->itemData(selectedComboIndex).value<void *>();
         deviceUI->m_deviceSinkAPI->stopGeneration();
 
-        deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(0); // deletes old GUI and input object
-        deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // remove old API from buddies lists
+        // deletes old UI and output object
+        deviceUI->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+                deviceUI->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
+        deviceUI->m_deviceSinkAPI->resetSampleSinkId();
+        deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
+        deviceUI->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+                deviceUI->m_deviceSinkAPI->getSampleSink());
 
         m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
 
@@ -944,8 +958,11 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         }
 
         // constructs new GUI and output object
+        DeviceSampleSink *sink = deviceUI->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
+                deviceUI->m_deviceSinkAPI->getSampleSinkId(), deviceUI->m_deviceSinkAPI);
+        deviceUI->m_deviceSinkAPI->setSampleSink(sink);
         QWidget *gui;
-        PluginInstanceUI *pluginUI = deviceUI->m_deviceSinkAPI->getSampleSinkPluginInterface()->createSampleSinkPluginInstanceGUI(
+        PluginInstanceUI *pluginUI = deviceUI->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
                 deviceUI->m_deviceSinkAPI->getSampleSinkId(), &gui, deviceUI->m_deviceSinkAPI);
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
         setDeviceGUI(currentSinkTabIndex, gui, deviceUI->m_deviceSinkAPI->getSampleSinkDisplayName(), false);

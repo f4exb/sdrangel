@@ -69,6 +69,7 @@ public:
 	virtual PluginInstanceUI* createSampleSinkPluginInstanceGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
     virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the output "core"
     virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceUI *ui);
+    virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

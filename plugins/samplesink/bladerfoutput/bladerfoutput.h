@@ -70,6 +70,7 @@ public:
 
 	BladerfOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~BladerfOutput();
+	virtual void destroy();
 
 	virtual bool start();
 	virtual void stop();

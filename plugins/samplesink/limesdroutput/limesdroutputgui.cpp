@@ -37,9 +37,8 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_limeSDROutput = new LimeSDROutput(m_deviceAPI);
-    m_sampleSink = (DeviceSampleSink *) m_limeSDROutput;
-    m_deviceAPI->setSink(m_sampleSink);
+    m_limeSDROutput = (LimeSDROutput*) m_deviceAPI->getSampleSink();
+    m_deviceAPI->setSampleSink(m_sampleSink);
 
     ui->setupUi(this);
 
@@ -81,7 +80,6 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 LimeSDROutputGUI::~LimeSDROutputGUI()
 {
-    delete m_sampleSink; // Valgrind memcheck
     delete ui;
 }
 

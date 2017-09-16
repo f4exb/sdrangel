@@ -37,8 +37,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
 {
-    m_deviceSampleSink = new BladerfOutput(m_deviceAPI);
-    m_deviceAPI->setSink(m_deviceSampleSink);
+    m_deviceSampleSink = (BladerfOutput*) m_deviceAPI->getSampleSink();
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -68,7 +67,6 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 BladerfOutputGui::~BladerfOutputGui()
 {
-	delete m_deviceSampleSink; // Valgrind memcheck
 	delete ui;
 }
 

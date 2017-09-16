@@ -30,6 +30,7 @@ class SDRANGEL_API DeviceSampleSink : public QObject {
 public:
 	DeviceSampleSink();
 	virtual ~DeviceSampleSink();
+	virtual void destroy() = 0;
 
 	virtual bool start() = 0;
 	virtual void stop() = 0;

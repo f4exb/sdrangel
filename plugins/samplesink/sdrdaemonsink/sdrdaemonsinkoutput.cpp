@@ -50,6 +50,11 @@ SDRdaemonSinkOutput::~SDRdaemonSinkOutput()
 	stop();
 }
 
+void SDRdaemonSinkOutput::destroy()
+{
+    delete this;
+}
+
 bool SDRdaemonSinkOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
