@@ -139,6 +139,7 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
 {
     if (LimeSDRInput::MsgReportLimeSDRToBuddy::match(message))
     {
+        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
         LimeSDRInput::MsgReportLimeSDRToBuddy& report = (LimeSDRInput::MsgReportLimeSDRToBuddy&) message;
 
         m_settings.m_centerFrequency = report.getCenterFrequency();
@@ -153,6 +154,7 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
     }
     else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
     {
+        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
         DeviceLimeSDRShared::MsgCrossReportToBuddy& report = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = report.getSampleRate(); // TODO: remove from here should be done device to device
 
@@ -216,8 +218,6 @@ void LimeSDRInputGUI::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("LimeSDRInputGUI::handleInputMessages: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;

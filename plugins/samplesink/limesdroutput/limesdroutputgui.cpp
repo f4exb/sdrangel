@@ -154,6 +154,7 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
     }
     else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
     {
+        qDebug("LimeSDROutputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
         DeviceLimeSDRShared::MsgCrossReportToBuddy& report = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = report.getSampleRate();
 
