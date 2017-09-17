@@ -52,26 +52,6 @@ public:
         { }
     };
 
-    class MsgSetReferenceConfig : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const LimeSDRInputSettings& getSettings() const { return m_settings; }
-
-        static MsgSetReferenceConfig* create(const LimeSDRInputSettings& settings)
-        {
-            return new MsgSetReferenceConfig(settings);
-        }
-
-    private:
-        LimeSDRInputSettings m_settings;
-
-        MsgSetReferenceConfig(const LimeSDRInputSettings& settings) :
-            Message(),
-            m_settings(settings)
-        { }
-    };
-
     class MsgGetStreamInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 

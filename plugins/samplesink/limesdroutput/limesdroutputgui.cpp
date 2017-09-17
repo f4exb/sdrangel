@@ -152,9 +152,6 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
         displaySettings();
         blockApplySettings(false);
 
-        LimeSDROutput::MsgSetReferenceConfig* conf = LimeSDROutput::MsgSetReferenceConfig::create(m_settings);
-        m_sampleSink->getInputMessageQueue()->push(conf); // TODO: remove from here should be done device to device
-
         return true;
     }
     else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
@@ -165,9 +162,6 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
-
-        LimeSDROutput::MsgSetReferenceConfig* conf = LimeSDROutput::MsgSetReferenceConfig::create(m_settings);
-        m_sampleSink->getInputMessageQueue()->push(conf); // TODO: remove from here should be done device to device
 
         return true;
     }
