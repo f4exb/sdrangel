@@ -187,11 +187,21 @@ bool HackRFOutput::handleMessage(const Message& message)
 
 		if (!success)
 		{
-			qDebug("HackRFOutput::handleMessage: config error");
+			qDebug("HackRFOutput::handleMessage: MsgConfigureHackRF: config error");
 		}
 
 		return true;
 	}
+    else if (DeviceHackRFShared::MsgConfigureFrequencyDelta::match(message))
+    {
+        DeviceHackRFShared::MsgConfigureFrequencyDelta& conf = (DeviceHackRFShared::MsgConfigureFrequencyDelta&) message;
+        HackRFOutputSettings newSettings = m_settings;
+        newSettings.m_centerFrequency = m_settings.m_centerFrequency + conf.getFrequencyDelta();
+        qDebug() << "HackRFOutput::handleMessage: DeviceHackRFShared::MsgConfigureFrequencyDelta: newFreq: " << newSettings.m_centerFrequency;
+        applySettings(newSettings, false);
+
+        return true;
+    }
 	else
 	{
 		return false;

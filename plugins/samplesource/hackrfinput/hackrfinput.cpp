@@ -312,13 +312,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	    if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
 	    {
 	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+            DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(
+                    settings.m_centerFrequency - m_settings.m_centerFrequency);
 
 	        if (buddy->getSampleSinkGUIMessageQueue())
 	        {
-                DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(settings.m_centerFrequency - m_settings.m_centerFrequency);
-                buddy->getSampleSinkGUIMessageQueue()->push(deltaMsg);
+	            DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsgToGUI = new DeviceHackRFShared::MsgConfigureFrequencyDelta(*deltaMsg);
+                buddy->getSampleSinkGUIMessageQueue()->push(deltaMsgToGUI);
 	        }
-	        // TODO: send to buddy sample sink
+
+	        buddy->getSampleSinkInputMessageQueue()->push(deltaMsg);
 	    }
 	}
 

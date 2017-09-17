@@ -38,7 +38,8 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_deviceSampleSink(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
+	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+	m_doApplySettings(true)
 {
     m_deviceSampleSink = (HackRFOutput*) m_deviceAPI->getSampleSink();
 
@@ -55,6 +56,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 
 	displaySettings();
 	displayBandwidths();
+	sendSettings();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -118,6 +120,12 @@ bool HackRFOutputGui::deserialize(const QByteArray& data)
 	}
 }
 
+void HackRFOutputGui::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
+}
+
+
 bool HackRFOutputGui::handleMessage(const Message& message)
 {
     if (HackRFOutput::MsgReportHackRF::match(message))
@@ -151,8 +159,10 @@ void HackRFOutputGui::handleInputMessages()
         }
         else if (DeviceHackRFShared::MsgConfigureFrequencyDelta::match(*message))
         {
+            blockApplySettings(true);
             DeviceHackRFShared::MsgConfigureFrequencyDelta* deltaMsg = (DeviceHackRFShared::MsgConfigureFrequencyDelta *) message;
             ui->centerFrequency->setValue(ui->centerFrequency->getValue() + (deltaMsg->getFrequencyDelta()/1000));
+            blockApplySettings(false);
 
             delete message;
         }
@@ -175,6 +185,7 @@ void HackRFOutputGui::updateSampleRateAndFrequency()
 
 void HackRFOutputGui::displaySettings()
 {
+    blockApplySettings(true);
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
@@ -192,10 +203,12 @@ void HackRFOutputGui::displaySettings()
 
     unsigned int bandwidthIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->setCurrentIndex(bandwidthIndex);
+	blockApplySettings(false);
 }
 
 void HackRFOutputGui::displayBandwidths()
 {
+    blockApplySettings(true);
 	unsigned int savedIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->blockSignals(true);
 	ui->bbFilter->clear();
@@ -215,6 +228,7 @@ void HackRFOutputGui::displayBandwidths()
 	{
 		ui->bbFilter->setCurrentIndex((int) HackRFBandwidths::m_nb_bw-1);
 	}
+	blockApplySettings(false);
 }
 
 void HackRFOutputGui::sendSettings()
@@ -305,10 +319,13 @@ void HackRFOutputGui::on_startStop_toggled(bool checked)
 
 void HackRFOutputGui::updateHardware()
 {
-	qDebug() << "HackRFOutputGui::updateHardware";
-	HackRFOutput::MsgConfigureHackRF* message = HackRFOutput::MsgConfigureHackRF::create(m_settings);
-    m_deviceSampleSink->getInputMessageQueue()->push(message);
-	m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "HackRFOutputGui::updateHardware";
+        HackRFOutput::MsgConfigureHackRF* message = HackRFOutput::MsgConfigureHackRF::create(m_settings);
+        m_deviceSampleSink->getInputMessageQueue()->push(message);
+        m_updateTimer.stop();
+    }
 }
 
 void HackRFOutputGui::updateStatus()

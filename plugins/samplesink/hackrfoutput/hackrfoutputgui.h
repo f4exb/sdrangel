@@ -73,11 +73,13 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
+    bool m_doApplySettings;
 
 	void displaySettings();
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void blockApplySettings(bool block);
 
 private slots:
     void handleInputMessages();
