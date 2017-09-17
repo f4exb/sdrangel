@@ -416,12 +416,20 @@ bool LimeSDRInput::handleMessage(const Message& message)
         m_settings.m_devSampleRate = conf.getSampleRate();
         m_settings.m_log2HardDecim = conf.getLog2HardDecim();
 
+        qDebug() << "LimeSDRInput::handleMessage: MsgReportLimeSDRToBuddy:"
+                << " m_centerFrequency: " << conf.getCenterFrequency()
+                << " m_devSampleRate: " << conf.getSampleRate()
+                << " m_log2HardDecim: " << conf.getLog2HardDecim();
+
         return true;
     }
     else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
     {
         DeviceLimeSDRShared::MsgCrossReportToBuddy& conf = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = conf.getSampleRate();
+
+        qDebug() << "LimeSDRInput::handleMessage: MsgCrossReportToBuddy:"
+                << " m_devSampleRate: " << conf.getSampleRate();
 
         return true;
     }
