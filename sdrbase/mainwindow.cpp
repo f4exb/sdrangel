@@ -310,9 +310,9 @@ void MainWindow::removeLastDevice()
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         m_deviceUIs.back()->m_deviceSourceAPI->resetSampleSourceId();
-        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource());
+        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -348,9 +348,9 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
 	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
 	    m_deviceUIs.back()->m_deviceSinkAPI->resetSampleSinkId();
-	    m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
 	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
 	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink());
+        m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -847,10 +847,12 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
 
         // deletes old UI and input object
         deviceUI->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
-        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
+        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+                deviceUI->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         deviceUI->m_deviceSourceAPI->resetSampleSourceId();
+        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
+                deviceUI->m_deviceSourceAPI->getSampleSource());
         deviceUI->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
-        deviceUI->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUI->m_deviceSourceAPI->getSampleSource());
 
         m_pluginManager->selectSampleSourceByDevice(devicePtr, deviceUI->m_deviceSourceAPI); // sets the new API
 
@@ -927,9 +929,9 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         deviceUI->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
         deviceUI->m_deviceSinkAPI->resetSampleSinkId();
-        deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
         deviceUI->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
                 deviceUI->m_deviceSinkAPI->getSampleSink());
+        deviceUI->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
 
         m_pluginManager->selectSampleSinkByDevice(devicePtr, deviceUI->m_deviceSinkAPI); // sets the new API
 
