@@ -111,7 +111,7 @@ You will need a minimal installation of LimeSuite:
   - `cd LimeSuite`
   - `mkdir builddir`
   - `cd builddir`
-  - `cmake -DCMAKE_INSTALL_PREFIX=/opt/install/LimeSuite`
+  - `cmake -DCMAKE_INSTALL_PREFIX=/opt/install/LimeSuite ..`
   - `make -j8`
   - `make install`
 
