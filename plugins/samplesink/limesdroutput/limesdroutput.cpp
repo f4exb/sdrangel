@@ -32,7 +32,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgSetReferenceConfig, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportLimeSDRToGUI, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportLimeSDRToBuddy, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportStreamInfo, Message)
 
 
@@ -920,7 +920,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
                         m_settings.m_centerFrequency,
                         m_settings.m_devSampleRate,
                         m_settings.m_log2HardInterp);
@@ -945,7 +945,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
+                DeviceLimeSDRShared::MsgCrossReportToBuddy *report = DeviceLimeSDRShared::MsgCrossReportToBuddy::create(m_settings.m_devSampleRate);
                 (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
             }
         }
@@ -975,7 +975,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
                         m_settings.m_centerFrequency,
                         m_settings.m_devSampleRate,
                         m_settings.m_log2HardInterp);

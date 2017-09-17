@@ -16,7 +16,7 @@
 
 #include "devicelimesdrshared.h"
 
-MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgCrossReportToGUI, Message)
+MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgCrossReportToBuddy, Message)
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportDeviceInfo, Message)
 
 const float  DeviceLimeSDRShared::m_sampleFifoLengthInSeconds = 0.25;

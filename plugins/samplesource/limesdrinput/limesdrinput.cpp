@@ -34,7 +34,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSetReferenceConfig, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToGUI, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportLimeSDRToBuddy, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgFileRecord, Message)
 
@@ -1082,7 +1082,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
                         m_settings.m_centerFrequency,
                         m_settings.m_devSampleRate,
                         m_settings.m_log2HardDecim);
@@ -1107,7 +1107,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
+                DeviceLimeSDRShared::MsgCrossReportToBuddy *report = DeviceLimeSDRShared::MsgCrossReportToBuddy::create(m_settings.m_devSampleRate);
                 (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
             }
         }
@@ -1136,7 +1136,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
                         m_settings.m_centerFrequency,
                         m_settings.m_devSampleRate,
                         m_settings.m_log2HardDecim);

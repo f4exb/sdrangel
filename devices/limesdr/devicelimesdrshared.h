@@ -27,21 +27,21 @@
 class DeviceLimeSDRShared
 {
 public:
-    class MsgCrossReportToGUI : public Message {
+    class MsgCrossReportToBuddy : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         int getSampleRate() const { return m_sampleRate; }
 
-        static MsgCrossReportToGUI* create(int sampleRate)
+        static MsgCrossReportToBuddy* create(int sampleRate)
         {
-            return new MsgCrossReportToGUI(sampleRate);
+            return new MsgCrossReportToBuddy(sampleRate);
         }
 
     private:
         int m_sampleRate;
 
-        MsgCrossReportToGUI(int sampleRate) :
+        MsgCrossReportToBuddy(int sampleRate) :
             Message(),
             m_sampleRate(sampleRate)
         { }

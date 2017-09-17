@@ -139,9 +139,9 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDRInputGUI::handleMessage(const Message& message)
 {
-    if (LimeSDRInput::MsgReportLimeSDRToGUI::match(message))
+    if (LimeSDRInput::MsgReportLimeSDRToBuddy::match(message))
     {
-        LimeSDRInput::MsgReportLimeSDRToGUI& report = (LimeSDRInput::MsgReportLimeSDRToGUI&) message;
+        LimeSDRInput::MsgReportLimeSDRToBuddy& report = (LimeSDRInput::MsgReportLimeSDRToBuddy&) message;
 
         m_settings.m_centerFrequency = report.getCenterFrequency();
         m_settings.m_devSampleRate = report.getSampleRate();
@@ -156,9 +156,9 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (DeviceLimeSDRShared::MsgCrossReportToGUI::match(message))
+    else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
     {
-        DeviceLimeSDRShared::MsgCrossReportToGUI& report = (DeviceLimeSDRShared::MsgCrossReportToGUI&) message;
+        DeviceLimeSDRShared::MsgCrossReportToBuddy& report = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = report.getSampleRate(); // TODO: remove from here should be done device to device
 
         blockApplySettings(true);
