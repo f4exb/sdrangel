@@ -33,15 +33,13 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     ui(new Ui::LimeSDRInputGUI),
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_sampleSource(0),
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
     m_doApplySettings(true),
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_sampleSource = m_deviceAPI->getSampleSource();
-    m_limeSDRInput = (LimeSDRInput*) m_sampleSource;
+    m_limeSDRInput = (LimeSDRInput*) m_deviceAPI->getSampleSource();
 
     ui->setupUi(this);
 
@@ -327,7 +325,7 @@ void LimeSDRInputGUI::updateHardware()
     {
         qDebug() << "LimeSDRInputGUI::updateHardware";
         LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
-        m_sampleSource->getInputMessageQueue()->push(message);
+        m_limeSDRInput->getInputMessageQueue()->push(message);
         m_updateTimer.stop();
     }
 }
@@ -367,7 +365,7 @@ void LimeSDRInputGUI::updateStatus()
     else
     {
         LimeSDRInput::MsgGetStreamInfo* message = LimeSDRInput::MsgGetStreamInfo::create();
-        m_sampleSource->getInputMessageQueue()->push(message);
+        m_limeSDRInput->getInputMessageQueue()->push(message);
         m_statusCounter = 0;
     }
 
@@ -380,7 +378,7 @@ void LimeSDRInputGUI::updateStatus()
         if (m_deviceAPI->isBuddyLeader())
         {
             LimeSDRInput::MsgGetDeviceInfo* message = LimeSDRInput::MsgGetDeviceInfo::create();
-            m_sampleSource->getInputMessageQueue()->push(message);
+            m_limeSDRInput->getInputMessageQueue()->push(message);
         }
 
         m_deviceStatusCounter = 0;
@@ -418,7 +416,7 @@ void LimeSDRInputGUI::on_record_toggled(bool checked)
     }
 
     LimeSDRInput::MsgFileRecord* message = LimeSDRInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
+    m_limeSDRInput->getInputMessageQueue()->push(message);
 }
 
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)

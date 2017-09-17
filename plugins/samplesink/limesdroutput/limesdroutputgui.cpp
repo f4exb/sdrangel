@@ -30,7 +30,6 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     ui(new Ui::LimeSDROutputGUI),
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_sampleSink(0),
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSinkEngine::State)-1),
     m_doApplySettings(true),
@@ -38,7 +37,6 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_deviceStatusCounter(0)
 {
     m_limeSDROutput = (LimeSDROutput*) m_deviceAPI->getSampleSink();
-    m_deviceAPI->setSampleSink(m_sampleSink);
 
     ui->setupUi(this);
 
@@ -304,7 +302,7 @@ void LimeSDROutputGUI::updateHardware()
     {
         qDebug() << "LimeSDROutputGUI::updateHardware";
         LimeSDROutput::MsgConfigureLimeSDR* message = LimeSDROutput::MsgConfigureLimeSDR::create(m_settings);
-        m_sampleSink->getInputMessageQueue()->push(message);
+        m_limeSDROutput->getInputMessageQueue()->push(message);
         m_updateTimer.stop();
     }
 }
@@ -344,7 +342,7 @@ void LimeSDROutputGUI::updateStatus()
     else
     {
         LimeSDROutput::MsgGetStreamInfo* message = LimeSDROutput::MsgGetStreamInfo::create();
-        m_sampleSink->getInputMessageQueue()->push(message);
+        m_limeSDROutput->getInputMessageQueue()->push(message);
         m_statusCounter = 0;
     }
 
@@ -357,7 +355,7 @@ void LimeSDROutputGUI::updateStatus()
         if (m_deviceAPI->isBuddyLeader())
         {
             LimeSDROutput::MsgGetDeviceInfo* message = LimeSDROutput::MsgGetDeviceInfo::create();
-            m_sampleSink->getInputMessageQueue()->push(message);
+            m_limeSDROutput->getInputMessageQueue()->push(message);
         }
 
         m_deviceStatusCounter = 0;

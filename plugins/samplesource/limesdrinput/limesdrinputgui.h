@@ -58,7 +58,6 @@ private:
     LimeSDRInputSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
-    DeviceSampleSource* m_sampleSource;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
