@@ -258,7 +258,7 @@ void SDRdaemonSourceGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRdaemonGui::handleInputMessages: message: %s", message->getIdentifier());
+        //qDebug("SDRdaemonGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {

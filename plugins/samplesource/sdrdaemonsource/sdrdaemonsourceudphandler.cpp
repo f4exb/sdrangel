@@ -180,9 +180,7 @@ void SDRdaemonSourceUDPHandler::processData()
             m_tv_sec,
             m_tv_usec);
 
-        if (m_outputMessageQueueToGUI) {
-            m_outputMessageQueueToGUI->push(report);
-        }
+        m_outputMessageQueueToGUI->push(report);
     }
 }
 
@@ -262,8 +260,6 @@ void SDRdaemonSourceUDPHandler::tick()
             nbOriginalBlocks,
             nbFECblocks);
 
-		    if (m_outputMessageQueueToGUI) {
-                m_outputMessageQueueToGUI->push(report);
-		    }
+            m_outputMessageQueueToGUI->push(report);
 	}
 }
