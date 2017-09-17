@@ -59,7 +59,8 @@ public:
     QString errorMessage();                                        //!< Return the current device engine error message
     uint getDeviceUID() const;                                     //!< Return the current device engine unique ID
     MessageQueue *getDeviceEngineInputMessageQueue();
-    MessageQueue *getDeviceEngineOutputMessageQueue();
+    MessageQueue *getSampleSinkInputMessageQueue();
+    MessageQueue *getSampleSinkGUIMessageQueue();
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum

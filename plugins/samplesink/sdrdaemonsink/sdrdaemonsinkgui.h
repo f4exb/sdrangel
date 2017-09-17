@@ -96,8 +96,7 @@ private:
     void displayEventTimer();
 
 private slots:
-    void handleDSPMessages();
-    void handleSinkMessages();
+    void handleInputMessages();
     void on_centerFrequency_changed(quint64 value);
     void on_sampleRate_changed(quint64 value);
     void on_interp_currentIndexChanged(int index);

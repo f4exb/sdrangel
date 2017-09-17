@@ -414,9 +414,11 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 	}
 
 	// pass data to listeners
-
-	DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
-	m_outputMessageQueue.push(rep);
+	if (m_deviceSampleSource->getMessageQueueToGUI())
+	{
+        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
+        m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
+	}
 
 	return StReady;
 }

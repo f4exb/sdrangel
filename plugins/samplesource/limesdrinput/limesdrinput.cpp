@@ -426,33 +426,39 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         if (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) == 0))
         {
-            MsgReportStreamInfo *report = MsgReportStreamInfo::create(
-                    true, // Success
-                    status.active,
-                    status.fifoFilledCount,
-                    status.fifoSize,
-                    status.underrun,
-                    status.overrun,
-                    status.droppedPackets,
-                    status.sampleRate,
-                    status.linkRate,
-                    status.timestamp);
-            m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
+            if (m_deviceAPI->getSampleSourceGUIMessageQueue())
+            {
+                MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                        true, // Success
+                        status.active,
+                        status.fifoFilledCount,
+                        status.fifoSize,
+                        status.underrun,
+                        status.overrun,
+                        status.droppedPackets,
+                        status.sampleRate,
+                        status.linkRate,
+                        status.timestamp);
+                m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
         else
         {
-            MsgReportStreamInfo *report = MsgReportStreamInfo::create(
-                    false, // Success
-                    false, // status.active,
-                    0,     // status.fifoFilledCount,
-                    16384, // status.fifoSize,
-                    0,     // status.underrun,
-                    0,     // status.overrun,
-                    0,     // status.droppedPackets,
-                    0,     // status.sampleRate,
-                    0,     // status.linkRate,
-                    0);    // status.timestamp);
-            m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
+            if (m_deviceAPI->getSampleSourceGUIMessageQueue())
+            {
+                MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                        false, // Success
+                        false, // status.active,
+                        0,     // status.fifoFilledCount,
+                        16384, // status.fifoSize,
+                        0,     // status.underrun,
+                        0,     // status.overrun,
+                        0,     // status.droppedPackets,
+                        0,     // status.sampleRate,
+                        0,     // status.linkRate,
+                        0);    // status.timestamp);
+                m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
 
         return true;
@@ -471,8 +477,10 @@ bool LimeSDRInput::handleMessage(const Message& message)
         }
 
         // send to oneself
-        DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-        m_deviceAPI->getDeviceEngineOutputMessageQueue()->push(report);
+        if (m_deviceAPI->getSampleSourceGUIMessageQueue()) {
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+            m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+        }
 
         // send to source buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -480,8 +488,11 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
+            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            {
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
 
         // send to sink buddies
@@ -490,8 +501,11 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
-            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
-            (*itSink)->getDeviceEngineOutputMessageQueue()->push(report);
+            if ((*itSink)->getSampleSinkGUIMessageQueue())
+            {
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
+            }
         }
 
         return true;
@@ -1065,11 +1079,15 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_devSampleRate/(1<<buddyLog2Decim),
                     m_settings.m_centerFrequency + buddyNCOFreq);
             (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
-            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
-                    m_settings.m_centerFrequency,
-                    m_settings.m_devSampleRate,
-                    m_settings.m_log2HardDecim);
-            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
+
+            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            {
+                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                        m_settings.m_centerFrequency,
+                        m_settings.m_devSampleRate,
+                        m_settings.m_log2HardDecim);
+                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
 
         // send to sink buddies
@@ -1086,8 +1104,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     m_settings.m_devSampleRate/(1<<buddyLog2Interp),
                     buddyCenterFreq + buddyNCOFreq); // do not change center frequency
             (*itSink)->getDeviceEngineInputMessageQueue()->push(notif);
-            DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
-            (*itSink)->getDeviceEngineOutputMessageQueue()->push(report);
+
+            if ((*itSink)->getSampleSinkGUIMessageQueue())
+            {
+                DeviceLimeSDRShared::MsgCrossReportToGUI *report = DeviceLimeSDRShared::MsgCrossReportToGUI::create(m_settings.m_devSampleRate);
+                (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
+            }
         }
     }
     else if (forwardChangeRxDSP)
@@ -1111,11 +1133,15 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + buddyNCOFreq);
             (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
-            MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
-                    m_settings.m_centerFrequency,
-                    m_settings.m_devSampleRate,
-                    m_settings.m_log2HardDecim);
-            (*itSource)->getDeviceEngineOutputMessageQueue()->push(report);
+
+            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            {
+                MsgReportLimeSDRToGUI *report = MsgReportLimeSDRToGUI::create(
+                        m_settings.m_centerFrequency,
+                        m_settings.m_devSampleRate,
+                        m_settings.m_log2HardDecim);
+                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
     }
     else if (forwardChangeOwnDSP)

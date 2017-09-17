@@ -54,7 +54,6 @@ public:
 	uint32_t getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-	MessageQueue* getOutputMessageQueue() { return &m_outputMessageQueue; }
 
 	void start(); //!< This thread start
 	void stop();  //!< This thread stop
@@ -87,7 +86,6 @@ private:
 	uint32_t m_uid; //!< unique ID
 
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
-	MessageQueue m_outputMessageQueue; //<! Output message queue. Listen here.
 	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
 
 	State m_state;

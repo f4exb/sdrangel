@@ -414,9 +414,11 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	m_spectrumSink->handleMessage(notif);
 
 	// pass data to listeners
-
-	DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
-	m_outputMessageQueue.push(rep);
+	if (m_deviceSampleSink->getMessageQueueToGUI())
+	{
+        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
+        m_deviceSampleSink->getMessageQueueToGUI()->push(rep);
+	}
 
 	return StReady;
 }
@@ -663,9 +665,11 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			}
 
 			// forward changes to listeners on DSP output queue
-
-			DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
-			m_outputMessageQueue.push(rep);
+			if (m_deviceSampleSink->getMessageQueueToGUI())
+			{
+                DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
+                m_deviceSampleSink->getMessageQueueToGUI()->push(rep);
+			}
 
 			delete message;
 		}

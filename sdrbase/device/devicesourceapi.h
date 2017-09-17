@@ -58,7 +58,8 @@ public:
     QString errorMessage();               //!< Return the current device engine error message
     uint getDeviceUID() const;            //!< Return the current device engine unique ID
     MessageQueue *getDeviceEngineInputMessageQueue();
-    MessageQueue *getDeviceEngineOutputMessageQueue();
+    MessageQueue *getSampleSourceInputMessageQueue();
+    MessageQueue *getSampleSourceGUIMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
     // device related stuff

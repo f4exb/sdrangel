@@ -76,8 +76,7 @@ private:
     void blockApplySettings(bool block);
 
 private slots:
-    void handleMessagesToGUI();
-
+    void handleInputMessages();
     void on_startStop_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_ncoFrequency_changed(quint64 value);

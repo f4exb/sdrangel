@@ -66,9 +66,7 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	displaySettings();
 
     m_deviceSampleSink = (FileSinkOutput*) m_deviceAPI->getSampleSink();
-    connect(m_deviceSampleSink->getOutputMessageQueueToGUI(), SIGNAL(messageEnqueued()), this, SLOT(handleSinkMessages()));
-
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 FileSinkGui::~FileSinkGui()
@@ -147,38 +145,30 @@ bool FileSinkGui::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkGui::handleDSPMessages()
+void FileSinkGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("FileSinkGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("FileSinkGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("FileSinkGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("FileSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             updateSampleRateAndFrequency();
 
             delete message;
         }
-    }
-}
-
-void FileSinkGui::handleSinkMessages()
-{
-    Message* message;
-
-    while ((message = m_deviceSampleSink->getOutputMessageQueueToGUI()->pop()) != 0)
-    {
-        //qDebug("FileSourceGui::handleSourceMessages: message: %s", message->getIdentifier());
-
-        if (handleMessage(*message))
+        else
         {
-            delete message;
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }

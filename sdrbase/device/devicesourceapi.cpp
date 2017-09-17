@@ -17,6 +17,7 @@
 #include <plugin/plugininstanceui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
+#include "dsp/devicesamplesource.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
@@ -113,10 +114,16 @@ MessageQueue *DeviceSourceAPI::getDeviceEngineInputMessageQueue()
     return m_deviceSourceEngine->getInputMessageQueue();
 }
 
-MessageQueue *DeviceSourceAPI::getDeviceEngineOutputMessageQueue()
+MessageQueue *DeviceSourceAPI::getSampleSourceInputMessageQueue()
 {
-    return m_deviceSourceEngine->getOutputMessageQueue();
+    return getSampleSource()->getInputMessageQueue();
 }
+
+MessageQueue *DeviceSourceAPI::getSampleSourceGUIMessageQueue()
+{
+    return getSampleSource()->getMessageQueueToGUI();
+}
+
 
 void DeviceSourceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {

@@ -80,7 +80,7 @@ private:
     void updateSampleRateAndFrequency();
 
 private slots:
-    void handleDSPMessages();
+    void handleInputMessages();
 	void on_centerFrequency_changed(quint64 value);
 	void on_sampleRate_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);

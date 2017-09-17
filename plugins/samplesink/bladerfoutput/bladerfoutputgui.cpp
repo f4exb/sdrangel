@@ -62,7 +62,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	char recFileNameCStr[30];
 	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 BladerfOutputGui::~BladerfOutputGui()
@@ -134,23 +134,30 @@ bool BladerfOutputGui::handleMessage(const Message& message)
 	}
 }
 
-void BladerfOutputGui::handleDSPMessages()
+void BladerfOutputGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("BladerfOutputGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("BladerfOutputGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("BladerfOutputGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("BladerfOutputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }

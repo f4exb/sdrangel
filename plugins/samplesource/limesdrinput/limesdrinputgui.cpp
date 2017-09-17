@@ -137,8 +137,84 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool LimeSDRInputGUI::handleMessage(const Message& message __attribute__((unused))) // TODO: does not seem to be really useful in any of the source (+sink?) plugins
+bool LimeSDRInputGUI::handleMessage(const Message& message)
 {
+    if (LimeSDRInput::MsgReportLimeSDRToGUI::match(message))
+    {
+        LimeSDRInput::MsgReportLimeSDRToGUI& report = (LimeSDRInput::MsgReportLimeSDRToGUI&) message;
+
+        m_settings.m_centerFrequency = report.getCenterFrequency();
+        m_settings.m_devSampleRate = report.getSampleRate();
+        m_settings.m_log2HardDecim = report.getLog2HardDecim();
+
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
+        m_sampleSource->getInputMessageQueue()->push(conf);  // TODO: remove from here should be done device to device
+
+        return true;
+    }
+    else if (DeviceLimeSDRShared::MsgCrossReportToGUI::match(message))
+    {
+        DeviceLimeSDRShared::MsgCrossReportToGUI& report = (DeviceLimeSDRShared::MsgCrossReportToGUI&) message;
+        m_settings.m_devSampleRate = report.getSampleRate(); // TODO: remove from here should be done device to device
+
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
+        m_sampleSource->getInputMessageQueue()->push(conf);
+
+        return true;
+    }
+    else if (LimeSDRInput::MsgReportStreamInfo::match(message))
+    {
+        LimeSDRInput::MsgReportStreamInfo& report = (LimeSDRInput::MsgReportStreamInfo&) message;
+
+        if (report.getSuccess())
+        {
+            ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+            ui->streamLinkRateText->setText(tr("%1 MB/s").arg(QString::number(report.getLinkRate() / 1000000.0f, 'f', 3)));
+
+            if (report.getUnderrun() > 0) {
+                ui->underrunLabel->setStyleSheet("QLabel { background-color : red; }");
+            } else {
+                ui->underrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            }
+
+            if (report.getOverrun() > 0) {
+                ui->overrunLabel->setStyleSheet("QLabel { background-color : red; }");
+            } else {
+                ui->overrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            }
+
+            if (report.getDroppedPackets() > 0) {
+                ui->droppedLabel->setStyleSheet("QLabel { background-color : red; }");
+            } else {
+                ui->droppedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            }
+
+            ui->fifoBar->setMaximum(report.getFifoSize());
+            ui->fifoBar->setValue(report.getFifoFilledCount());
+            ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 samples").arg(QString::number(report.getFifoFilledCount())).arg(QString::number(report.getFifoSize())));
+        }
+        else
+        {
+            ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        }
+
+        return true;
+    }
+    else if (DeviceLimeSDRShared::MsgReportDeviceInfo::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportDeviceInfo& report = (DeviceLimeSDRShared::MsgReportDeviceInfo&) message;
+        ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
+        return true;
+    }
+
     return false;
 }
 
@@ -160,77 +236,11 @@ void LimeSDRInputGUI::handleInputMessages()
 
             delete message;
         }
-        else if (LimeSDRInput::MsgReportLimeSDRToGUI::match(*message))
+        else
         {
-            LimeSDRInput::MsgReportLimeSDRToGUI *report = (LimeSDRInput::MsgReportLimeSDRToGUI *) message;
-
-            m_settings.m_centerFrequency = report->getCenterFrequency();
-            m_settings.m_devSampleRate = report->getSampleRate();
-            m_settings.m_log2HardDecim = report->getLog2HardDecim();
-
-            blockApplySettings(true);
-            displaySettings();
-            blockApplySettings(false);
-
-            LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
-            m_sampleSource->getInputMessageQueue()->push(conf); // TODO: remove from here should be done device to device
-
-            delete message;
-        }
-        else if (DeviceLimeSDRShared::MsgCrossReportToGUI::match(*message))
-        {
-            DeviceLimeSDRShared::MsgCrossReportToGUI *report = (DeviceLimeSDRShared::MsgCrossReportToGUI *) message;
-            m_settings.m_devSampleRate = report->getSampleRate();
-
-            blockApplySettings(true);
-            displaySettings();
-            blockApplySettings(false);
-
-            LimeSDRInput::MsgSetReferenceConfig* conf = LimeSDRInput::MsgSetReferenceConfig::create(m_settings);
-            m_sampleSource->getInputMessageQueue()->push(conf);
-
-            delete message;
-        }
-        else if (LimeSDRInput::MsgReportStreamInfo::match(*message))
-        {
-            LimeSDRInput::MsgReportStreamInfo *report = (LimeSDRInput::MsgReportStreamInfo *) message;
-
-            if (report->getSuccess())
-            {
-                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
-                ui->streamLinkRateText->setText(tr("%1 MB/s").arg(QString::number(report->getLinkRate() / 1000000.0f, 'f', 3)));
-
-                if (report->getUnderrun() > 0) {
-                    ui->underrunLabel->setStyleSheet("QLabel { background-color : red; }");
-                } else {
-                    ui->underrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-                }
-
-                if (report->getOverrun() > 0) {
-                    ui->overrunLabel->setStyleSheet("QLabel { background-color : red; }");
-                } else {
-                    ui->overrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-                }
-
-                if (report->getDroppedPackets() > 0) {
-                    ui->droppedLabel->setStyleSheet("QLabel { background-color : red; }");
-                } else {
-                    ui->droppedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-                }
-
-                ui->fifoBar->setMaximum(report->getFifoSize());
-                ui->fifoBar->setValue(report->getFifoFilledCount());
-                ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 samples").arg(QString::number(report->getFifoFilledCount())).arg(QString::number(report->getFifoSize())));
+            if (handleMessage(*message)) {
+                delete message;
             }
-            else
-            {
-                ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            }
-        }
-        else if (DeviceLimeSDRShared::MsgReportDeviceInfo::match(*message))
-        {
-            DeviceLimeSDRShared::MsgReportDeviceInfo *report = (DeviceLimeSDRShared::MsgReportDeviceInfo *) message;
-            ui->temperatureText->setText(tr("%1C").arg(QString::number(report->getTemperature(), 'f', 0)));
         }
     }
 }

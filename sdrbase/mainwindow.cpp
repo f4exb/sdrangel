@@ -344,6 +344,7 @@ void MainWindow::removeLastDevice()
 
         // deletes old UI and output object
         m_deviceUIs.back()->m_deviceSinkAPI->freeChannels();
+        m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
 	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
 	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
 	    m_deviceUIs.back()->m_deviceSinkAPI->resetSampleSinkId();
@@ -922,6 +923,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         deviceUI->m_deviceSinkAPI->stopGeneration();
 
         // deletes old UI and output object
+        deviceUI->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
         deviceUI->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
         deviceUI->m_deviceSinkAPI->resetSampleSinkId();

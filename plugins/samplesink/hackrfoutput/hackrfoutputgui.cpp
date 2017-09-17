@@ -56,7 +56,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	displaySettings();
 	displayBandwidths();
 
-    connect(m_deviceAPI->getDeviceEngineOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleDSPMessages()), Qt::QueuedConnection);
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 HackRFOutputGui::~HackRFOutputGui()
@@ -131,20 +131,20 @@ bool HackRFOutputGui::handleMessage(const Message& message)
     }
 }
 
-void HackRFOutputGui::handleDSPMessages()
+void HackRFOutputGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_deviceAPI->getDeviceEngineOutputMessageQueue()->pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("HackRFOutputGui::handleDSPMessages: message: %s", message->getIdentifier());
+        qDebug("HackRFOutputGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("HackRFOutputGui::handleDSPMessages: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("HackRFOutputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
@@ -155,6 +155,13 @@ void HackRFOutputGui::handleDSPMessages()
             ui->centerFrequency->setValue(ui->centerFrequency->getValue() + (deltaMsg->getFrequencyDelta()/1000));
 
             delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }

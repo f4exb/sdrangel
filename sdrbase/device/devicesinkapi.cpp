@@ -17,6 +17,7 @@
 #include <plugin/plugininstanceui.h>
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
+#include "dsp/devicesamplesink.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
@@ -127,9 +128,14 @@ MessageQueue *DeviceSinkAPI::getDeviceEngineInputMessageQueue()
     return m_deviceSinkEngine->getInputMessageQueue();
 }
 
-MessageQueue *DeviceSinkAPI::getDeviceEngineOutputMessageQueue()
+MessageQueue *DeviceSinkAPI::getSampleSinkInputMessageQueue()
 {
-    return m_deviceSinkEngine->getOutputMessageQueue();
+    return getSampleSink()->getInputMessageQueue();
+}
+
+MessageQueue *DeviceSinkAPI::getSampleSinkGUIMessageQueue()
+{
+    return getSampleSink()->getMessageQueueToGUI();
 }
 
 GLSpectrum *DeviceSinkAPI::getSpectrum()
