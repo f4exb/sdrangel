@@ -39,7 +39,7 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_limeSDROutputThread(0),
-    m_deviceDescription(),
+    m_deviceDescription("LimeSDROutput"),
     m_running(false),
     m_firstConfig(true),
     m_channelAcquired(false)

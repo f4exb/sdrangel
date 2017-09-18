@@ -41,7 +41,7 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_limeSDRInputThread(0),
-    m_deviceDescription(),
+    m_deviceDescription("LimeSDRInput"),
     m_running(false),
     m_firstConfig(true)
 {
