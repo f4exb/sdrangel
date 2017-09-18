@@ -16,54 +16,45 @@
 
 #include <QDebug>
 
-#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "plutosdr/deviceplutosdrparams.h"
 #include "plutosdr/deviceplutosdrbox.h"
 
-#include "plutosdrinput.h"
-#include "plutosdrinputthread.h"
+#include "plutosdroutput.h"
+#include "plutosdroutputthread.h"
 
 #define PLUTOSDR_BLOCKSIZE_SAMPLES (32*1024) //complex samples per buffer (must be multiple of 64)
 
-MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
-MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(PlutoSDROutput::MsgConfigurePlutoSDR, Message)
 
-PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
+PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(0),
-    m_deviceDescription("PlutoSDRInput"),
+    m_settings(),
+    m_deviceDescription("PlutoSDROutput"),
     m_running(false),
-    m_plutoRxBuffer(0),
-    m_plutoSDRInputThread(0)
+    m_plutoTxBuffer(0),
+    m_plutoSDROutputThread(0)
 {
     suspendBuddies();
     openDevice();
     resumeBuddies();
-
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
-    m_deviceAPI->addSink(m_fileSink);
 }
 
-PlutoSDRInput::~PlutoSDRInput()
+PlutoSDROutput::~PlutoSDROutput()
 {
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
     suspendBuddies();
     closeDevice();
     resumeBuddies();
 }
 
-void PlutoSDRInput::destroy()
+void PlutoSDROutput::destroy()
 {
     delete this;
 }
 
-bool PlutoSDRInput::start()
+bool PlutoSDROutput::start()
 {
     if (!m_deviceShared.m_deviceParams->getBox()) {
         return false;
@@ -75,77 +66,64 @@ bool PlutoSDRInput::start()
 
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
+    if ((m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo)) == 0)
     {
-        qFatal("PlutoSDRInput::start: cannot create thread");
+        qFatal("PlutoSDROutput::start: cannot create thread");
         stop();
         return false;
     }
     else
     {
-        qDebug("PlutoSDRInput::start: thread created");
+        qDebug("PlutoSDROutput::start: thread created");
     }
 
-    m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
-    m_plutoSDRInputThread->startWork();
+    m_plutoSDROutputThread->setLog2Interpolation(m_settings.m_log2Interp);
+    m_plutoSDROutputThread->startWork();
 
-    m_deviceShared.m_thread = m_plutoSDRInputThread;
+    m_deviceShared.m_thread = m_plutoSDROutputThread;
     m_running = true;
 
     return true;
 }
 
-void PlutoSDRInput::stop()
+void PlutoSDROutput::stop()
 {
-    if (m_plutoSDRInputThread != 0)
+    if (m_plutoSDROutputThread != 0)
     {
-        m_plutoSDRInputThread->stopWork();
-        delete m_plutoSDRInputThread;
-        m_plutoSDRInputThread = 0;
+        m_plutoSDROutputThread->stopWork();
+        delete m_plutoSDROutputThread;
+        m_plutoSDROutputThread = 0;
     }
 
     m_deviceShared.m_thread = 0;
     m_running = false;
 }
 
-const QString& PlutoSDRInput::getDeviceDescription() const
+const QString& PlutoSDROutput::getDeviceDescription() const
 {
     return m_deviceDescription;
 }
-int PlutoSDRInput::getSampleRate() const
+int PlutoSDROutput::getSampleRate() const
 {
-    return (m_settings.m_devSampleRate / (1<<m_settings.m_log2Decim));
+    return (m_settings.m_devSampleRate / (1<<m_settings.m_log2Interp));
 }
 
-quint64 PlutoSDRInput::getCenterFrequency() const
+quint64 PlutoSDROutput::getCenterFrequency() const
 {
     return m_settings.m_centerFrequency;
 }
 
 
-bool PlutoSDRInput::handleMessage(const Message& message)
+bool PlutoSDROutput::handleMessage(const Message& message)
 {
     if (MsgConfigurePlutoSDR::match(message))
     {
         MsgConfigurePlutoSDR& conf = (MsgConfigurePlutoSDR&) message;
-        qDebug() << "PlutoSDRInput::handleMessage: MsgConfigurePlutoSDR";
+        qDebug() << "PlutoSDROutput::handleMessage: MsgConfigurePlutoSDR";
 
         if (!applySettings(conf.getSettings(), conf.getForce()))
         {
-            qDebug("PlutoSDRInput::handleMessage config error");
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "PlutoSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop()) {
-            m_fileSink->startRecording();
-        } else {
-            m_fileSink->stopRecording();
+            qDebug("PlutoSDROutput::handleMessage config error");
         }
 
         return true;
@@ -156,45 +134,37 @@ bool PlutoSDRInput::handleMessage(const Message& message)
     }
 }
 
-bool PlutoSDRInput::openDevice()
+bool PlutoSDROutput::openDevice()
 {
-    if (!m_sampleFifo.setSize(PLUTOSDR_BLOCKSIZE_SAMPLES))
-    {
-        qCritical("PlutoSDRInput::openDevice: could not allocate SampleFifo");
-        return false;
-    }
-    else
-    {
-        qDebug("PlutoSDRInput::openDevice: allocated SampleFifo");
-    }
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
 
-    // look for Tx buddy and get reference to common parameters
-    if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
+    // look for Rx buddy and get reference to common parameters
+    if (m_deviceAPI->getSourceBuddies().size() > 0) // then sink
     {
-        qDebug("PlutoSDRInput::openDevice: look at Tx buddy");
+        qDebug("PlutoSDROutput::openDevice: look at Rx buddy");
 
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        m_deviceShared = *((DevicePlutoSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        m_deviceShared = *((DevicePlutoSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy parameters
 
         if (m_deviceShared.m_deviceParams == 0)
         {
-            qCritical("PlutoSDRInput::openDevice: cannot get device parameters from Tx buddy");
+            qCritical("PlutoSDROutput::openDevice: cannot get device parameters from Rx buddy");
             return false; // the device params should have been created by the buddy
         }
         else
         {
-            qDebug("PlutoSDRInput::openDevice: getting device parameters from Tx buddy");
+            qDebug("PlutoSDROutput::openDevice: getting device parameters from Rx buddy");
         }
     }
     // There is no buddy then create the first PlutoSDR common parameters
     // open the device this will also populate common fields
     else
     {
-        qDebug("PlutoSDRInput::openDevice: open device here");
+        qDebug("PlutoSDROutput::openDevice: open device here");
 
         m_deviceShared.m_deviceParams = new DevicePlutoSDRParams();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSampleSinkSerial()));
         m_deviceShared.m_deviceParams->open(serial);
     }
 
@@ -202,19 +172,19 @@ bool PlutoSDRInput::openDevice()
 
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
-    plutoBox->openRx();
-    m_plutoRxBuffer = plutoBox->createRxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES*2, false); // PlutoSDR buffer size is counted in number of I or Q samples not the combination
+    plutoBox->openTx();
+    m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES*2, false); // PlutoSDR buffer size is counted in number of I or Q samples not the combination
 
     return true;
 }
 
-void PlutoSDRInput::closeDevice()
+void PlutoSDROutput::closeDevice()
 {
     if (m_deviceShared.m_deviceParams->getBox() == 0) { // was never open
         return;
     }
 
-    if (m_deviceAPI->getSinkBuddies().size() == 0)
+    if (m_deviceAPI->getSourceBuddies().size() == 0)
     {
         m_deviceShared.m_deviceParams->close();
         delete m_deviceShared.m_deviceParams;
@@ -222,13 +192,13 @@ void PlutoSDRInput::closeDevice()
     }
 }
 
-void PlutoSDRInput::suspendBuddies()
+void PlutoSDROutput::suspendBuddies()
 {
-    // suspend Tx buddy's thread
+    // suspend Rx buddy's thread
 
-    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -237,13 +207,13 @@ void PlutoSDRInput::suspendBuddies()
     }
 }
 
-void PlutoSDRInput::resumeBuddies()
+void PlutoSDROutput::resumeBuddies()
 {
-    // resume Tx buddy's thread
+    // resume Rx buddy's thread
 
-    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -252,13 +222,13 @@ void PlutoSDRInput::resumeBuddies()
     }
 }
 
-bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool force)
+bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool force)
 {
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
     bool suspendOwnThread       = false;
     bool ownThreadWasRunning    = false;
-    bool suspendAllOtherThreads = false; // All others means Tx in fact
+    bool suspendAllOtherThreads = false; // All others means Rx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
     // determine if buddies threads or own thread need to be suspended
@@ -270,7 +240,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     //   - LO correction is changed
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) ||
+        (m_settings.m_lpfFIRlog2Interp != settings.m_lpfFIRlog2Interp) ||
         (settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
         (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain) ||
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
@@ -285,10 +255,10 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSink = sourceBuddies.begin();
 
-        for (; itSink != sinkBuddies.end(); ++itSink)
+        for (; itSink != sourceBuddies.end(); ++itSink)
         {
             DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSink)->getBuddySharedPtr();
 
@@ -305,68 +275,56 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if (suspendOwnThread)
     {
-        if (m_plutoSDRInputThread && m_plutoSDRInputThread->isRunning())
+        if (m_plutoSDROutputThread && m_plutoSDROutputThread->isRunning())
         {
-            m_plutoSDRInputThread->stopWork();
+            m_plutoSDROutputThread->stopWork();
             ownThreadWasRunning = true;
         }
     }
 
     // apply settings
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-    {
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, m_settings.m_iqCorrection);
-    }
-
     // Change affecting device sample rate chain and other buddies
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-        (m_settings.m_lpfFIRlog2Decim != settings.m_lpfFIRlog2Decim) ||
+        (m_settings.m_lpfFIRlog2Interp != settings.m_lpfFIRlog2Interp) ||
         (settings.m_lpfFIRBW != m_settings.m_lpfFIRBW) ||
         (settings.m_lpfFIRGain != m_settings.m_lpfFIRGain) || force)
     {
-        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Decim, DevicePlutoSDRBox::USE_RX, settings.m_lpfFIRBW, settings.m_lpfFIRGain);
+        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Interp, DevicePlutoSDRBox::USE_TX, settings.m_lpfFIRBW, settings.m_lpfFIRGain);
         plutoBox->setFIREnable(settings.m_lpfFIREnable);   // eventually enable/disable FIR
         plutoBox->setSampleRate(settings.m_devSampleRate); // and set end point sample rate
 
-        plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
+        plutoBox->getTxSampleRates(m_deviceSampleRates); // pick up possible new rates
         qDebug() << "PlutoSDRInput::applySettings: BBPLL(Hz): " << m_deviceSampleRates.m_bbRateHz
-                 << " ADC: " << m_deviceSampleRates.m_addaConnvRate
-                 << " -HB3-> " << m_deviceSampleRates.m_hb3Rate
-                 << " -HB2-> " << m_deviceSampleRates.m_hb2Rate
-                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate
-                 << " -FIR-> " << m_deviceSampleRates.m_firRate;
+                 << " DAC: " << m_deviceSampleRates.m_addaConnvRate
+                 << " <-HB3- " << m_deviceSampleRates.m_hb3Rate
+                 << " <-HB2- " << m_deviceSampleRates.m_hb2Rate
+                 << " <-HB1- " << m_deviceSampleRates.m_hb1Rate
+                 << " <-FIR- " << m_deviceSampleRates.m_firRate;
 
         forwardChangeOtherDSP = true;
         forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
-        if (m_plutoSDRInputThread != 0)
+        if (m_plutoSDROutputThread != 0)
         {
-            m_plutoSDRInputThread->setLog2Decimation(settings.m_log2Decim);
-            qDebug() << "PlutoSDRInput::applySettings: set soft decimation to " << (1<<settings.m_log2Decim);
+            m_plutoSDROutputThread->setLog2Interpolation(settings.m_log2Interp);
+            qDebug() << "PlutoSDROutput::applySettings: set soft interpolation to " << (1<<settings.m_log2Interp);
         }
 
         forwardChangeOwnDSP = true;
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-    {
-        if (m_plutoSDRInputThread != 0)
-        {
-            m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
-            qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << (1<<settings.m_fcPos);
-        }
-    }
-
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
+        // TODO: forward change to Rx
     }
+
+    // TODO: continue from  here
 
     std::vector<std::string> params;
     bool paramsToSet = false;
