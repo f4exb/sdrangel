@@ -79,3 +79,4 @@ copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
+copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
