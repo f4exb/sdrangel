@@ -44,6 +44,8 @@ void DevicePlutoSDRScan::scan()
         return;
     }
 
+    m_scans.clear();
+
     for (i = 0; i < num_contexts; i++)
     {
         const char *description = iio_context_info_get_description(info[i]);

@@ -35,7 +35,7 @@ const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString PlutoSDROutputPlugin::m_hardwareID = "PlutosDR";
+const QString PlutoSDROutputPlugin::m_hardwareID = "PlutoSDR";
 const QString PlutoSDROutputPlugin::m_deviceTypeID = PLUTOSDR_DEVICE_TYPE_ID;
 
 PlutoSDROutputPlugin::PlutoSDROutputPlugin(QObject* parent) :
