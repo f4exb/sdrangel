@@ -15,7 +15,7 @@ DEFINES += USE_SSSE3=1
 QMAKE_CXXFLAGS += -mssse3
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
-CONFIG(MINGW32):QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"

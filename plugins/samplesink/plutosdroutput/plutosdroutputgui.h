@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDRINPUTGUI_H_
-#define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDRINPUTGUI_H_
+#ifndef PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
+#define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
 
 #include <QObject>
 #include <QWidget>
@@ -91,4 +91,4 @@ private slots:
     void handleInputMessages();
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDRINPUTGUI_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_ */

@@ -241,7 +241,7 @@ void PlutoSDROutputGUI::displaySettings()
     ui->lpFIRGain->setEnabled(m_settings.m_lpfFIREnable);
 
     ui->att->setValue(m_settings.m_att);
-    ui->attText->setText(QString("%1").arg(QString::number(m_settings.m_gain*0.25, 'f', 2)));
+    ui->attText->setText(QString("%1").arg(QString::number(m_settings.m_att*0.25, 'f', 2)));
 
     ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
 
@@ -280,16 +280,16 @@ void PlutoSDROutputGUI::updateStatus()
     {
         switch(state)
         {
-            case DSPDeviceSourceEngine::StNotStarted:
+            case DSPDeviceSinkEngine::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSourceEngine::StIdle:
+            case DSPDeviceSinkEngine::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSourceEngine::StRunning:
+            case DSPDeviceSinkEngine::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSourceEngine::StError:
+            case DSPDeviceSinkEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
                 break;

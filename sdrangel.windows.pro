@@ -34,6 +34,7 @@ SUBDIRS += plugins/samplesink/filesink
 SUBDIRS += plugins/samplesink/bladerfoutput
 SUBDIRS += plugins/samplesink/hackrfoutput
 SUBDIRS += plugins/samplesink/limesdroutput
+SUBDIRS += plugins/samplesink/plutosdroutput
 SUBDIRS += plugins/channelrx/chanalyzer
 SUBDIRS += plugins/channelrx/chanalyzerng
 SUBDIRS += plugins/channelrx/demodam

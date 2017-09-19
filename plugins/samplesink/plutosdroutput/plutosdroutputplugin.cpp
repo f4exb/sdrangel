@@ -85,7 +85,7 @@ PluginInstanceUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const 
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		PlutoSDROutputGui* gui = new PlutoSDROutputGui(deviceAPI);
+        PlutoSDROutputGUI* gui = new PlutoSDROutputGUI(deviceAPI);
 		*widget = gui;
 		return gui;
 	}
@@ -95,7 +95,7 @@ PluginInstanceUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const 
 	}
 }
 
-DeviceSampleSink *PlutoSDROutputPlugin::createSampleSourcePluginInstanceInput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {
     if (sinkId == m_deviceTypeID)
     {
