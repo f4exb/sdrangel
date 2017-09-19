@@ -1,3 +1,11 @@
+sdrangel (3.7.1-1) unstable; urgency=medium
+
+  * PlutoSDR: Tx support 
+  * GUI segregation: remove device source or sink lifecycle from the GUI
+  * GUI segregation: handle GUI and device buddy updates separately
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 17 Sep 2017 23:14:18 +0200
+
 sdrangel (3.7.0-1) unstable; urgency=medium
 
   * PlutoSDR: Rx support 
