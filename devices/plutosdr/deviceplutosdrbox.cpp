@@ -596,11 +596,19 @@ void DevicePlutoSDRBox::getXO()
     }
 }
 
-bool DevicePlutoSDRBox::getRSSI(std::string& rssiStr, unsigned int chan)
+bool DevicePlutoSDRBox::getRxRSSI(std::string& rssiStr, unsigned int chan)
 {
     chan = chan % 2;
     char buff[20];
     snprintf(buff, sizeof(buff), "in_voltage%d_rssi", chan);
+    return get_param(DEVICE_PHY, buff, rssiStr);
+}
+
+bool DevicePlutoSDRBox::getTxRSSI(std::string& rssiStr, unsigned int chan)
+{
+    chan = chan % 2;
+    char buff[20];
+    snprintf(buff, sizeof(buff), "out_voltage%d_rssi", chan);
     return get_param(DEVICE_PHY, buff, rssiStr);
 }
 

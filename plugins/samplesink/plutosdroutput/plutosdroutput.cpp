@@ -321,46 +321,37 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
-        // TODO: forward change to Rx
+        forwardChangeOtherDSP = true;
     }
-
-    // TODO: continue from  here
 
     std::vector<std::string> params;
     bool paramsToSet = false;
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
-        params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
+        params.push_back(QString(tr("out_altvoltage1_TX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
         paramsToSet = true;
         forwardChangeOwnDSP = true;
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
     {
-        params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
+        params.push_back(QString(tr("out_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
         paramsToSet = true;
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
         QString rfPortStr;
-        PlutoSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
-        params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
+        PlutoSDROutputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
+        params.push_back(QString(tr("out_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+    if ((m_settings.m_att != settings.m_att) || force)
     {
-        QString gainModeStr;
-        PlutoSDRInputSettings::translateGainMode(settings.m_gainMode, gainModeStr);
-        params.push_back(QString(tr("in_voltage0_gain_control_mode=%1").arg(gainModeStr)).toStdString());
-        paramsToSet = true;
-    }
-
-    if ((m_settings.m_gain != settings.m_gain) || force)
-    {
-        params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_gain)).toStdString());
+        float attF = settings.m_att * 0.25f;
+        params.push_back(QString(tr("out_voltage0_hardwaregain=%1").arg(attF)).toStdString());
         paramsToSet = true;
     }
 
@@ -373,12 +364,12 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-        for (; itSink != sinkBuddies.end(); ++itSink)
+        for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSink)->getBuddySharedPtr();
+            DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSource)->getBuddySharedPtr();
 
             if (buddySharedPtr->m_threadWasRunning) {
                 buddySharedPtr->m_thread->startWork();
@@ -389,45 +380,44 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     if (suspendOwnThread)
     {
         if (ownThreadWasRunning) {
-            m_plutoSDRInputThread->startWork();
+            m_plutoSDROutputThread->startWork();
         }
     }
 
-    // TODO: forward changes to other (Tx) DSP
+    // TODO: forward changes to other (Rx) DSP
     if (forwardChangeOtherDSP)
     {
-        qDebug("PlutoSDRInput::applySettings: forwardChangeOtherDSP");
+        qDebug("PlutoSDROutput::applySettings: forwardChangeOtherDSP");
     }
 
     if (forwardChangeOwnDSP)
     {
-        qDebug("PlutoSDRInput::applySettings: forward change to self");
+        qDebug("PlutoSDROutput::applySettings: forward change to self");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
     return true;
 }
 
-void PlutoSDRInput::getRSSI(std::string& rssiStr)
+void PlutoSDROutput::getRSSI(std::string& rssiStr)
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
-    if (!plutoBox->getRSSI(rssiStr, 0)) {
+    if (!plutoBox->getTxRSSI(rssiStr, 0)) {
         rssiStr = "xxx dB";
     }
 }
 
-bool PlutoSDRInput::fetchTemperature()
+bool PlutoSDROutput::fetchTemperature()
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     return plutoBox->fetchTemp();
 }
 
-float PlutoSDRInput::getTemperature()
+float PlutoSDROutput::getTemperature()
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     return plutoBox->getTemp();

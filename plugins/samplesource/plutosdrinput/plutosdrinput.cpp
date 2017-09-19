@@ -458,7 +458,7 @@ void PlutoSDRInput::getRSSI(std::string& rssiStr)
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
-    if (!plutoBox->getRSSI(rssiStr, 0)) {
+    if (!plutoBox->getRxRSSI(rssiStr, 0)) {
         rssiStr = "xxx dB";
     }
 }

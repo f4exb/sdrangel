@@ -92,7 +92,8 @@ public:
     void setFIR(uint32_t sampleRate, uint32_t intdec, DeviceUse use, uint32_t bw, int gain);
     void setFIREnable(bool enable);
     void setLOPPMTenths(int ppmTenths);
-    bool getRSSI(std::string& rssiStr, unsigned int chan);
+    bool getRxRSSI(std::string& rssiStr, unsigned int chan);
+    bool getTxRSSI(std::string& rssiStr, unsigned int chan);
     bool fetchTemp();
     float getTemp() const { return m_temp; }
     bool getRateGovernors(std::string& rateGovernors);
