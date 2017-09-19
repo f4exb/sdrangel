@@ -55,8 +55,8 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) 
     ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpFIR->setValueRange(5, 1U, 56000U); // will be dynamically recalculated
 
-    ui->swInterpLabel->setText(QString::fromUtf8("S\u2193"));
-    ui->lpFIRInterpolationLabel->setText(QString::fromUtf8("\u2193"));
+    ui->swInterpLabel->setText(QString::fromUtf8("S\u2191"));
+    ui->lpFIRInterpolationLabel->setText(QString::fromUtf8("\u2191"));
 
     blockApplySettings(true);
     displaySettings();
