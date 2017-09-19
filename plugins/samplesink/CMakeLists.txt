@@ -19,7 +19,7 @@ endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
 
 find_package(LibIIO)
 if(LIBUSB_FOUND AND LIBIIO_FOUND)
-    add_subdirectory(plutosdrinput)
+    add_subdirectory(plutosdroutput)
 endif(LIBUSB_FOUND AND LIBIIO_FOUND)
 
 find_package(CM256cc)

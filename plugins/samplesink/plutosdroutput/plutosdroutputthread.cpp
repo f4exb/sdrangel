@@ -96,7 +96,7 @@ void PlutoSDROutputThread::run()
 
         if (nbytes_tx < 0)
         {
-            printf("PlutoSDRInputThread::run: error pushing buf %d\n", (int) nbytes_tx);
+            qDebug("PlutoSDROutputThread::run: error pushing buf %d\n", (int) nbytes_tx);
             usleep(200000);
             continue;
         }

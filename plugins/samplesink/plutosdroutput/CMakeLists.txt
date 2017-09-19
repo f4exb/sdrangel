@@ -38,28 +38,27 @@ endif (BUILD_DEBIAN)
 
 #include(${QT_USE_FILE})
 #add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBHACKRF_DYN_RATES")
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
 #qt4_wrap_cpp(plutosdroutput_HEADERS_MOC ${plutosdroutput_HEADERS})
 qt5_wrap_ui(plutosdroutput_FORMS_HEADERS ${plutosdroutput_FORMS})
 
-add_library(inputplutosdr SHARED
+add_library(outputplutosdr SHARED
     ${plutosdroutput_SOURCES}
     ${plutosdroutput_HEADERS_MOC}
     ${plutosdroutput_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(inputplutosdr
+target_link_libraries(outputplutosdr
     ${QT_LIBRARIES}
     iio
     sdrbase
     plutosdrdevice
 )
 else (BUILD_DEBIAN)
-target_link_libraries(inputplutosdr
+target_link_libraries(outputplutosdr
     ${QT_LIBRARIES}
     ${LIBIIO_LIBRARIES}
     sdrbase
@@ -67,6 +66,6 @@ target_link_libraries(inputplutosdr
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputplutosdr Core Widgets)
+qt5_use_modules(outputplutosdr Core Widgets)
 
-install(TARGETS inputplutosdr DESTINATION lib/plugins/samplesource)
+install(TARGETS outputplutosdr DESTINATION lib/plugins/sampleink)
