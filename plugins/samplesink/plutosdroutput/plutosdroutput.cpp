@@ -31,8 +31,8 @@ MESSAGE_CLASS_DEFINITION(PlutoSDROutput::MsgConfigurePlutoSDR, Message)
 
 PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_settings(),
     m_deviceDescription("PlutoSDROutput"),
+    m_settings(),
     m_running(false),
     m_plutoTxBuffer(0),
     m_plutoSDROutputThread(0)
@@ -136,7 +136,8 @@ bool PlutoSDROutput::handleMessage(const Message& message)
 
 bool PlutoSDROutput::openDevice()
 {
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    //m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    m_sampleSourceFifo.resize(32*PLUTOSDR_BLOCKSIZE_SAMPLES);
 
     // look for Rx buddy and get reference to common parameters
     if (m_deviceAPI->getSourceBuddies().size() > 0) // then sink
@@ -309,10 +310,12 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 
     if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
+        m_sampleSourceFifo.resize((32*PLUTOSDR_BLOCKSIZE_SAMPLES)/(1<<settings.m_log2Interp));
+
         if (m_plutoSDROutputThread != 0)
         {
             m_plutoSDROutputThread->setLog2Interpolation(settings.m_log2Interp);
-            qDebug() << "PlutoSDROutput::applySettings: set soft interpolation to " << (1<<settings.m_log2Interp);
+            qDebug() << "PlutoSDROutput::applySettings: set soft interpolation in thread to " << (1<<settings.m_log2Interp);
         }
 
         forwardChangeOwnDSP = true;
