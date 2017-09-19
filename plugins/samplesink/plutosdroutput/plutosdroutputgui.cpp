@@ -210,7 +210,7 @@ void PlutoSDROutputGUI::on_lpFIRGain_currentIndexChanged(int index)
 
 void PlutoSDROutputGUI::on_att_valueChanged(int value)
 {
-    ui->attText->setText(QString("%1").arg(QString::number(value*0.25, 'f', 2)));
+    ui->attText->setText(QString("%1 dB").arg(QString::number(value*0.25, 'f', 2)));
     m_settings.m_att = value;
     sendSettings();
 }
@@ -241,7 +241,7 @@ void PlutoSDROutputGUI::displaySettings()
     ui->lpFIRGain->setEnabled(m_settings.m_lpfFIREnable);
 
     ui->att->setValue(m_settings.m_att);
-    ui->attText->setText(QString("%1").arg(QString::number(m_settings.m_att*0.25, 'f', 2)));
+    ui->attText->setText(QString("%1 dB").arg(QString::number(m_settings.m_att*0.25, 'f', 2)));
 
     ui->antenna->setCurrentIndex((int) m_settings.m_antennaPath);
 

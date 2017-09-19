@@ -651,7 +651,7 @@
       <widget class="QLabel" name="attText">
        <property name="minimumSize">
         <size>
-         <width>40</width>
+         <width>60</width>
          <height>0</height>
         </size>
        </property>
@@ -659,7 +659,7 @@
         <string>Gain value (dB)</string>
        </property>
        <property name="text">
-        <string>-89.75</string>
+        <string>-89.75 dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
