@@ -26,7 +26,7 @@
 #include "plutosdrinput.h"
 #include "plutosdrinputthread.h"
 
-#define PLUTOSDR_BLOCKSIZE_SAMPLES (32*1024) //complex samples per buffer (must be multiple of 64)
+#define PLUTOSDR_BLOCKSIZE_SAMPLES (8*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
@@ -160,6 +160,8 @@ bool PlutoSDRInput::handleMessage(const Message& message)
         PlutoSDRInputSettings newSettings = m_settings;
         newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
         applySettings(newSettings);
+
+        return true;
     }
     else
     {

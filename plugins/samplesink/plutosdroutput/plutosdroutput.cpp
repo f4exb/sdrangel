@@ -138,6 +138,8 @@ bool PlutoSDROutput::handleMessage(const Message& message)
         PlutoSDROutputSettings newSettings = m_settings;
         newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
         applySettings(newSettings);
+
+        return true;
     }
     else
     {
