@@ -182,7 +182,7 @@ void PlutoSDROutputGUI::on_loPPM_valueChanged(int value)
 
 void PlutoSDROutputGUI::on_swInterp_currentIndexChanged(int index)
 {
-    m_settings.m_log2Interp = index > 6 ? 6 : index;
+    m_settings.m_log2Interp = index > 5 ? 5 : index;
     sendSettings();
 }
 
