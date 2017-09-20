@@ -16,5 +16,7 @@
 
 #include "deviceplutosdrshared.h"
 
+MESSAGE_CLASS_DEFINITION(DevicePlutoSDRShared::MsgCrossReportToBuddy, Message)
+
 const float  DevicePlutoSDRShared::m_sampleFifoLengthInSeconds = 0.25;
 const int    DevicePlutoSDRShared::m_sampleFifoMinSize = 48000; // 192kS/s knee

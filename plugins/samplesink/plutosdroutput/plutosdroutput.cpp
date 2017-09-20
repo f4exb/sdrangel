@@ -128,6 +128,17 @@ bool PlutoSDROutput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
+    {
+        DevicePlutoSDRShared::MsgCrossReportToBuddy& conf = (DevicePlutoSDRShared::MsgCrossReportToBuddy&) message;
+        m_settings.m_devSampleRate = conf.getDevSampleRate();
+        m_settings.m_lpfFIRlog2Interp = conf.getLpfFiRlog2IntDec();
+        m_settings.m_lpfFIRBW = conf.getLpfFirbw();
+        m_settings.m_LOppmTenths = conf.getLoPPMTenths();
+        PlutoSDROutputSettings newSettings = m_settings;
+        newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
+        applySettings(newSettings);
+    }
     else
     {
         return false;
@@ -391,6 +402,27 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     if (forwardChangeOtherDSP)
     {
         qDebug("PlutoSDROutput::applySettings: forwardChangeOtherDSP");
+
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DevicePlutoSDRShared::MsgCrossReportToBuddy *msg = DevicePlutoSDRShared::MsgCrossReportToBuddy::create(
+                    settings.m_devSampleRate,
+                    settings.m_lpfFIREnable,
+                    settings.m_lpfFIRlog2Interp,
+                    settings.m_lpfFIRBW,
+                    settings.m_LOppmTenths);
+
+            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            {
+                DevicePlutoSDRShared::MsgCrossReportToBuddy *msgToGUI = new DevicePlutoSDRShared::MsgCrossReportToBuddy(*msg);
+                (*itSource)->getSampleSourceGUIMessageQueue()->push(msgToGUI);
+            }
+
+            (*itSource)->getSampleSourceInputMessageQueue()->push(msg);
+        }
     }
 
     if (forwardChangeOwnDSP)

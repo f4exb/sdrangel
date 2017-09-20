@@ -150,6 +150,17 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
+    {
+        DevicePlutoSDRShared::MsgCrossReportToBuddy& conf = (DevicePlutoSDRShared::MsgCrossReportToBuddy&) message;
+        m_settings.m_devSampleRate = conf.getDevSampleRate();
+        m_settings.m_lpfFIRlog2Decim = conf.getLpfFiRlog2IntDec();
+        m_settings.m_lpfFIRBW = conf.getLpfFirbw();
+        m_settings.m_LOppmTenths = conf.getLoPPMTenths();
+        PlutoSDRInputSettings newSettings = m_settings;
+        newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
+        applySettings(newSettings);
+    }
     else
     {
         return false;
@@ -438,7 +449,29 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     // TODO: forward changes to other (Tx) DSP
     if (forwardChangeOtherDSP)
     {
+
         qDebug("PlutoSDRInput::applySettings: forwardChangeOtherDSP");
+
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DevicePlutoSDRShared::MsgCrossReportToBuddy *msg = DevicePlutoSDRShared::MsgCrossReportToBuddy::create(
+                    settings.m_devSampleRate,
+                    settings.m_lpfFIREnable,
+                    settings.m_lpfFIRlog2Decim,
+                    settings.m_lpfFIRBW,
+                    settings.m_LOppmTenths);
+
+            if ((*itSink)->getSampleSinkGUIMessageQueue())
+            {
+                DevicePlutoSDRShared::MsgCrossReportToBuddy *msgToGUI = new DevicePlutoSDRShared::MsgCrossReportToBuddy(*msg);
+                (*itSink)->getSampleSinkGUIMessageQueue()->push(msgToGUI);
+            }
+
+            (*itSink)->getSampleSinkInputMessageQueue()->push(msg);
+        }
     }
 
     if (forwardChangeOwnDSP)

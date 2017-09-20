@@ -130,7 +130,24 @@ bool PlutoSDRInputGui::deserialize(const QByteArray& data)
 
 bool PlutoSDRInputGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    return false;
+    if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
+    {
+        DevicePlutoSDRShared::MsgCrossReportToBuddy& conf = (DevicePlutoSDRShared::MsgCrossReportToBuddy&) message;
+        m_settings.m_devSampleRate = conf.getDevSampleRate();
+        m_settings.m_lpfFIRlog2Decim = conf.getLpfFiRlog2IntDec();
+        m_settings.m_lpfFIRBW = conf.getLpfFirbw();
+        m_settings.m_LOppmTenths = conf.getLoPPMTenths();
+        m_settings.m_lpfFIREnable = conf.isLpfFirEnable();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void PlutoSDRInputGui::on_startStop_toggled(bool checked)
