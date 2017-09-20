@@ -17,6 +17,10 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRSHARED_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDRSHARED_H_
 
+#include <stdint.h>
+
+#include "util/message.h"
+
 class DevicePlutoSDRParams;
 
 /**
@@ -35,6 +39,43 @@ public:
         virtual void stopWork() = 0;
         virtual void setDeviceSampleRate(int sampleRate) = 0;
         virtual bool isRunning() = 0;
+    };
+
+    class MsgCrossReportToBuddy : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        uint64_t getDevSampleRate() const { return m_devSampleRate; }
+        uint32_t getLpfFirbw() const { return m_lpfFIRBW; }
+        bool isLpfFirEnable() const { return m_lpfFIREnable; }
+        uint32_t getLpfFiRlog2IntDec() const { return m_lpfFIRlogIntDec; }
+
+        static MsgCrossReportToBuddy *create(uint64_t devSampleRate,
+                bool lpfFIREnable,
+                uint32_t lpfFIRlog2Interp,
+                uint32_t lpfFIRBW)
+        {
+            return new MsgCrossReportToBuddy(devSampleRate,
+                    lpfFIREnable,
+                    lpfFIRlog2Interp,
+                    lpfFIRBW);
+        }
+
+    private:
+        MsgCrossReportToBuddy(uint64_t devSampleRate,
+                bool lpfFIREnable,
+                uint32_t lpfFIRlog2IntDec,
+                uint32_t lpfFIRBW) :
+            Message(),
+            m_devSampleRate(devSampleRate),
+            m_lpfFIREnable(lpfFIREnable),
+            m_lpfFIRlogIntDec(lpfFIRlog2IntDec),
+            m_lpfFIRBW(lpfFIRBW)
+        { }
+
+        uint64_t m_devSampleRate;
+        bool m_lpfFIREnable;
+        uint32_t m_lpfFIRlogIntDec;
+        uint32_t m_lpfFIRBW;
     };
 
     DevicePlutoSDRParams *m_deviceParams;    //!< unique hardware device parameters
