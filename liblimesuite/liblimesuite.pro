@@ -11,8 +11,8 @@ TARGET = liblimesuite
 
 DEFINES += ENOLINK=21
 
-CONFIG(MINGW32):QMAKE_CXXFLAGS += -fpermissive
-CONFIG(MINGW32):QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -fpermissive
+QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
@@ -23,7 +23,6 @@ CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
 CONFIG(MINGW32):INCLUDEPATH += "..\libsqlite3\src"
 CONFIG(MINGW64):INCLUDEPATH += "..\libsqlite3\src"
 
-INCLUDEPATH += srcmw
 INCLUDEPATH += $$LIBLIMESUITESRC/src
 INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
 INCLUDEPATH += $$LIBLIMESUITESRC/src/ConnectionRegistry
@@ -43,13 +42,13 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/IConnection.cpp\
-    srcmw/ConnectionSTREAM/ConnectionSTREAM.cpp\
-    srcmw/ConnectionSTREAM/ConnectionSTREAMImages.cpp\
-    srcmw/ConnectionSTREAM/ConnectionSTREAMing.cpp\
-    srcmw/ConnectionSTREAM/ConnectionSTREAMEntry.cpp\
-    srcmw/Connection_uLimeSDR/Connection_uLimeSDR.cpp\
-    srcmw/Connection_uLimeSDR/Connection_uLimeSDRing.cpp\
-    srcmw/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
+    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAM.cpp\
+    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAMImages.cpp\
+    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAMing.cpp\
+    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAMEntry.cpp\
+    $$LIBLIMESUITESRC/src/Connection_uLimeSDR/Connection_uLimeSDR.cpp\
+    $$LIBLIMESUITESRC/src/Connection_uLimeSDR/Connection_uLimeSDRing.cpp\
+    $$LIBLIMESUITESRC/src/Connection_uLimeSDR/Connection_uLimeSDREntry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybus.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybusEntry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybusing.cpp\
@@ -63,18 +62,18 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/CalibrationCache.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/goert.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_BaseCalibrations.cpp\
-    srcmw/lms7002m/LMS7002M.cpp\
+    $$LIBLIMESUITESRC/src/lms7002m/LMS7002M.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_filtersCalibration.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_gainCalibrations.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_parameters.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_RegistersMap.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_RxTxCalibrations.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/mcu_dc_iq_calibration.cpp\
-    srcmw/lms7002m_mcu/MCU_BD.cpp\
+    $$LIBLIMESUITESRC/src/lms7002m_mcu/MCU_BD.cpp\
     $$LIBLIMESUITESRC/src/protocols/ILimeSDRStreaming.cpp\
     $$LIBLIMESUITESRC/src/protocols/LMS64CProtocol.cpp\
     $$LIBLIMESUITESRC/src/Si5351C/Si5351C.cpp\
-    srcmw/ErrorReporting.cpp\
+    $$LIBLIMESUITESRC/src/ErrorReporting.cpp\
     $$LIBLIMESUITESRC/src/Logger.cpp\
     src/SystemResources.cpp\
     src/VersionInfo.cpp
@@ -85,8 +84,8 @@ HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/IConnection.h\
-    srcmw/ConnectionSTREAM/ConnectionSTREAM.h\
-    srcmw/Connection_uLimeSDR/Connection_uLimeSDR.h\
+    $$LIBLIMESUITESRC/src/ConnectionSTREAM/ConnectionSTREAM.h\
+    $$LIBLIMESUITESRC/src/Connection_uLimeSDR/Connection_uLimeSDR.h\
     $$LIBLIMESUITESRC/src/Connection_uLimeSDR/DRV_DriverInterface.h\
     $$LIBLIMESUITESRC/src/Connection_uLimeSDR/FTD3XXLibrary/FTD3XX.h\
     $$LIBLIMESUITESRC/src/ConnectionXillybus/ConnectionXillybus.h\
@@ -103,7 +102,7 @@ HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_RegistersMap.h\
     $$LIBLIMESUITESRC/src/lms7002m/mcu_programs.h\
     $$LIBLIMESUITESRC/src/lms7002m_mcu/MCU_BD.h\
-    srcmw/lms7002m_mcu/MCU_File.h\
+    $$LIBLIMESUITESRC/src/lms7002m_mcu/MCU_File.h\
     $$LIBLIMESUITESRC/src/protocols/ADCUnits.h\
     $$LIBLIMESUITESRC/src/protocols/dataTypes.h\
     $$LIBLIMESUITESRC/src/protocols/fifo.h\
@@ -112,7 +111,7 @@ HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
     $$LIBLIMESUITESRC/src/protocols/LMS64CProtocol.h\
     $$LIBLIMESUITESRC/src/protocols/LMSBoards.h\
     $$LIBLIMESUITESRC/src/Si5351C/Si5351C.h\
-    srcmw/ErrorReporting.h\
+    $$LIBLIMESUITESRC/src/ErrorReporting.h\
     $$LIBLIMESUITESRC/src/Logger.h\
     $$LIBLIMESUITESRC/src/SystemResources.h\
     $$LIBLIMESUITESRC/src/VersionInfo.h\
