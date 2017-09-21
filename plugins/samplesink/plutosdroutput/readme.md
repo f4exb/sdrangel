@@ -35,7 +35,7 @@ Then add the following defines on `cmake` command line when compiling SDRangel:
 
 <h4>1.1: Frequency</h4>
 
-This is the center frequency of reception in kHz. The limits are set as those of the AD9364: from 70 to 6000 MHz. PlutoSDR can be fooled to think it has a AD9364 chip with a very simple software hack described [here](https://wiki.analog.com/university/tools/pluto/users/customizing).
+This is the center frequency of transmission in kHz. The limits are set as those of the AD9364: from 70 to 6000 MHz. PlutoSDR can be fooled to think it has a AD9364 chip with a very simple software hack described [here](https://wiki.analog.com/university/tools/pluto/users/customizing).
 
 AD9363 extended frequency range is not guaranteed but would work normally particularly in the lower range.
 
@@ -53,15 +53,15 @@ This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hard
 
 <h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the host to device sample rate (5) multiplied by the software interpolation factor (3). 
+Baseband I/Q sample rate in kS/s. This is the host to device sample rate (5) divided by the software interpolation factor (3). 
 
 <h3>2: LO ppm correction</h3>
 
-Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 20.0 in 0.1 steps and is applied in hardware.
+Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 20.0 in 0.1 steps and is applied in hardware. This applies to the oscillator that controls both the Tx and Rx frequency therefore it is also changed on the Rx plugin if it is active.
 
-<h3>3: Software decimation factor</h3>
+<h3>3: Software interpolation factor</h3>
 
-The I/Q stream from the LimeSDR is downsampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
+The I/Q stream to the PlutoSDR is upsampled by a power of two by software inside the plugin from the signal coming from the passband. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
 
 <h3>4: Antenna (output) connection</h3>
 
@@ -73,7 +73,7 @@ This is the AD9363 device to/from host stream sample rate in S/s. It is the same
 
 Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.
 
-The minimum sample rate depends on the hardware FIR decimation factor (12) and is the following:
+The minimum sample rate depends on the hardware FIR decimation factor (9) and is the following:
 
   - no decimation: 25/12 MS/s thus 2083336 S/s (next multiple of 4)
   - decimation by 2: 25/24 MS/s thus 1041668 S/s
@@ -87,17 +87,19 @@ This is the Tx analog filter bandwidth in kHz in the AD9363 device. It can be va
 
 <h3>7: Hardware FIR filter toggle</h3>
 
-The AD9363 chip has an optional FIR filter in the Rx decimation chain as the last decimation block. Use this button to activate or deactivate the filter.
+The AD9363 chip has an optional FIR filter in the Tx interpolation chain as the first interpolation block. Use this button to activate or deactivate the filter.
 
-The FIR filter settings are the same on Rx and Tx side therefore any change here is automatically forwarded to the Tx GUI.
+The FIR filter settings are the same on Rx and Tx side therefore any change here is automatically forwarded to the Rx GUI.
 
 <h3>8: Hardware FIR filter bandwidth</h3>
 
 Use the wheels to adjust the bandwidth of the hardware FIR filter. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-The filter is calculated as a windowed FIR filter with a Blackman-Harris window. This has a high out of band rejection value at the expense of a slightly smoother roll off compared to other filters. The bandwidth value sets the -6 dB point approxomately.
+The filter limits are calculated as 0.05 and 0.9 times the FIR filter input frequency for the lower and higher limit respectively. The FIR filter input frequency is the baseband sample rate (5) multiplied by the FIR interpolation factor (9)
 
-The limits are calculated as 0.05 and 0.9 times the FIR filter input frequency for the lower and higher limit respectively. The FIR filter input frequency is the baseband sample rate (5) multiplied by the FIR interpolation factor (9)
+For bandwidths greater than 0.2 times the FIR filter input frequency the filter is calculated as a windowed FIR filter with a Blackman-Harris window. This has a high out of band rejection value at the expense of a slightly smoother roll off compared to other filters. The bandwidth value sets the -6 dB point approxomately.
+
+For bandwidths between 0.05 and 0.2 times the FIR filter input frequency the window used is a Hamming window giving a sharper transition.
 
 <h3>9: Hardware FIR interpolation factor</h3>
 

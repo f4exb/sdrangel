@@ -14,5 +14,9 @@ This folder contains classes and methods that can be used by different plugins t
     - limesdrinput
     - limesdroutput
     
+  - PlutoSDR: one Rx and one Tx full duplex. Plugins are
+    - plutosdrinput
+    - plutosdroutput
+
   - SDRdaemon: sends or receive samples to/from device remotely through the network. Used on the Tx plugin only
     - sdrdaemonsink 

@@ -40,6 +40,7 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
+  - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
 
@@ -124,8 +125,6 @@ Then add the following defines on `cmake` command line:
 PlutoSDR is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
 If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
-
-Only the Rx part is supported at the moment.
 
 <h2>RTL-SDR</h2>
 
@@ -234,16 +233,14 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
 
-  - Windows 32 bit (runs in 64 bit Windows) 
+  - Windows 32 bit (runs also in 64 bit Windows) 
   - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.04, Debian Stretch)
-  - Windows 64 bit until v3.5.4
+  - Windows 64 bit
   - Debian armv7l (Debian Jessie) until v3.5.0
   
 <h2>Windows distributions</h2>
 
 This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
-
-Starting at release v3.5.5 there are no more Windows64 distributions
 
 <h2>Debian distributions</h2>
 
@@ -277,8 +274,8 @@ The software is installed in `/opt/sdrangel` you can start it from the command l
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
   - Linux builds are made with 5.5.1
-  - Windows 32 build is made with 5.5.1
-  - Windows 64 build is made with 5.6 
+  - Windows 32 build is made with 5.9.1
+  - Windows 64 build is made with 5.9.1 
 
 <h2>Ubuntu</h2>
 

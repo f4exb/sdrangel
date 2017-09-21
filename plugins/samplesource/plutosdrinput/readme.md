@@ -61,7 +61,7 @@ Baseband I/Q sample rate in kS/s. This is the device to host sample rate (8) div
 
 <h3>2: LO ppm correction</h3>
 
-Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 20.0 in 0.1 steps and is applied in hardware.
+Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 20.0 in 0.1 steps and is applied in hardware. This applies to the oscillator that controls both the Rx and Tx frequency therefore it is also changed on the Tx plugin if it is active.
 
 <h3>3-4: Auto correction options</h3>
 
@@ -74,7 +74,7 @@ These buttons control the software DSP auto correction options:
   
 <h3>5: Software decimation factor</h3>
 
-The I/Q stream from the LimeSDR is doensampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
+The I/Q stream from the PlutoSDR is doensampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
 <h3>6: Decimated bandpass center frequency placement</h3>
 
@@ -114,9 +114,11 @@ The FIR filter settings are the same on Rx and Tx side therefore any change here
 
 Use the wheels to adjust the bandwidth of the hardware FIR filter. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-The filter is calculated as a windowed FIR filter with a Blackman-Harris window. This has a high out of band rejection value at the expense of a slightly smoother roll off compared to other filters. The bandwidth value sets the -6 dB point approxomately.
+The filter limits are calculated as 0.05 and 0.9 times the FIR filter input frequency for the lower and higher limit respectively. The FIR filter input frequency is the baseband sample rate (5) multiplied by the FIR interpolation factor (9)
 
-The limits are calculated as 0.1 and 0.9 times the FIR filter input frequency for the lower and higher limit respectively. The FIR filter input frequency is the baseband sample rate (8) multiplied by the FIR decimation factor (12)
+For bandwidths greater than 0.2 times the FIR filter input frequency the filter is calculated as a windowed FIR filter with a Blackman-Harris window. This has a high out of band rejection value at the expense of a slightly smoother roll off compared to other filters. The bandwidth value sets the -6 dB point approxomately.
+
+For bandwidths between 0.05 and 0.2 times the FIR filter input frequency the window used is a Hamming window giving a sharper transition.
 
 <h3>12: Hardware FIR decimation factor</h3>
 
