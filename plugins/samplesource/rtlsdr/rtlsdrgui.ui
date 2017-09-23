@@ -298,6 +298,16 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="6">
+      <widget class="TransverterButton" name="toolButton">
+       <property name="toolTip">
+        <string>Transverter frequency translation toggle</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -580,6 +590,11 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QToolButton</extends>
+   <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>
