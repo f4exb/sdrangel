@@ -23,6 +23,7 @@
 
 ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
 	QWidget(parent),
+	m_delta(0),
 	m_animationState(0),
 	m_colorMapper(colorMapper)
 {
@@ -133,6 +134,13 @@ void ValueDial::setValueRange(uint numDigits, quint64 min, quint64 max)
 	setFixedWidth((m_numDigits + m_numDecimalPoints) * m_digitWidth + 2);
 }
 
+void ValueDial::setDelta(qint64 delta)
+{
+    m_delta = delta;
+    m_animationTimer.start(20);
+    m_textNew = formatText(m_valueNew);
+}
+
 quint64 ValueDial::findExponent(int digit)
 {
 	quint64 e = 1;
@@ -158,7 +166,8 @@ QChar ValueDial::digitNeigh(QChar c, bool dir)
 
 QString ValueDial::formatText(quint64 value)
 {
-	QString str = QString("%1").arg(value, m_numDigits, 10, QChar('0'));
+    qint64 displayValue = value + m_delta > 0 ? value + m_delta : 0;
+	QString str = QString("%1").arg(displayValue, m_numDigits, 10, QChar('0'));
 
 	for(int i = 0; i < m_numDecimalPoints; i++)
 	{

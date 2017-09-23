@@ -20,6 +20,7 @@
 #include <regex>
 #include <iio.h>
 
+#include "deviceplutosdrbox.h"
 #include "deviceplutosdrscan.h"
 
 void DevicePlutoSDRScan::scan()
@@ -50,6 +51,11 @@ void DevicePlutoSDRScan::scan()
     {
         const char *description = iio_context_info_get_description(info[i]);
         const char *uri = iio_context_info_get_uri(info[i]);
+
+        if (!DevicePlutoSDRBox::probeURI(std::string(uri))) { // continue if not accessible
+            continue;
+        }
+
         printf("PlutoSDRScan::scan: %d: %s [%s]\n", i, description, uri);
         char *pch = strstr(const_cast<char*>(description), "PlutoSDR");
 

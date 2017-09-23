@@ -28,6 +28,8 @@ public:
 
 	void setValue(quint64 value);
 	void setValueRange(uint numDigits, quint64 min, quint64 max);
+	void setDelta(qint64 delta);
+	qint64 getDelta() const { return m_delta; }
 	void setFont(const QFont& font);
 	void setBold(bool bold);
 	void setColorMapper(ColorMapper colorMapper);
@@ -49,6 +51,7 @@ private:
 	quint64 m_value;
 	quint64 m_valueMax;
 	quint64 m_valueMin;
+	qint64  m_delta;
 	QString m_text;
 
 	quint64 m_valueNew;

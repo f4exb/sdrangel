@@ -29,6 +29,10 @@
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_lpfFIRRxGain(0),
         m_lpfFIRTxGain(0),
+        m_ctx(0),
+        m_devPhy(0),
+        m_devRx(0),
+        m_devTx(0),
         m_chnRx0(0),
         m_chnTx0(0),
         m_rxBuf(0),
@@ -36,9 +40,14 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_xoInitial(0)
 {
     m_ctx = iio_create_context_from_uri(uri.c_str());
-    m_devPhy = iio_context_find_device(m_ctx, "ad9361-phy");
-    m_devRx = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
-    m_devTx = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
+
+    if (m_ctx)
+    {
+        m_devPhy = iio_context_find_device(m_ctx, "ad9361-phy");
+        m_devRx = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
+        m_devTx = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
+    }
+
     m_valid = m_ctx && m_devPhy && m_devRx && m_devTx;
 
     if (m_valid) {
@@ -62,6 +71,21 @@ DevicePlutoSDRBox::~DevicePlutoSDRBox()
     closeRx();
     closeTx();
     if (m_ctx) { iio_context_destroy(m_ctx); }
+}
+
+bool DevicePlutoSDRBox::probeURI(const std::string& uri)
+{
+    bool retVal;
+    struct iio_context *ctx;
+
+    ctx = iio_create_context_from_uri(uri.c_str());
+    retVal = (ctx != 0);
+
+    if (ctx) {
+        iio_context_destroy(ctx);
+    }
+
+    return retVal;
 }
 
 void DevicePlutoSDRBox::set_params(DeviceType devType,
@@ -218,6 +242,8 @@ void DevicePlutoSDRBox::setFilter(const std::string &filterConfigStr)
 
 bool DevicePlutoSDRBox::openRx()
 {
+    if (!m_valid) { return false; }
+
     if (!m_chnRx0) {
         m_chnRx0 = iio_device_find_channel(m_devRx, "voltage0", false);
     }
@@ -243,6 +269,8 @@ bool DevicePlutoSDRBox::openRx()
 
 bool DevicePlutoSDRBox::openTx()
 {
+    if (!m_valid) { return false; }
+
     if (!m_chnTx0) {
         m_chnTx0 = iio_device_find_channel(m_devTx, "voltage0", true);
     }

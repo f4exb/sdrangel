@@ -63,6 +63,7 @@ public:
     DevicePlutoSDRBox(const std::string& uri);
     ~DevicePlutoSDRBox();
     bool isValid() const { return m_valid; }
+    static bool probeURI(const std::string& uri);
 
     void set_params(DeviceType devType, const std::vector<std::string> &params);
     bool get_param(DeviceType devType, const std::string &param, std::string &value);
