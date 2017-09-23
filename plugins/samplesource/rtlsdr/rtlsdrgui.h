@@ -65,7 +65,6 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
-	void queryDeviceReport();
 	void displayGains();
 	void displaySettings();
 	void sendSettings();

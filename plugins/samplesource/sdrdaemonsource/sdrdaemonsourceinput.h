@@ -318,7 +318,7 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
-	void setMessageQueueToGUI(MessageQueue *queue);
+	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
 private:
 	DeviceSourceAPI *m_deviceAPI;

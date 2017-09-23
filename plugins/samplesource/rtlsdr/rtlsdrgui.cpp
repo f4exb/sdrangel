@@ -52,8 +52,6 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	displaySettings();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-
-    queryDeviceReport(); // will reply with MsgReportRTLSDR to report gain list
 }
 
 RTLSDRGui::~RTLSDRGui()
@@ -132,7 +130,6 @@ bool RTLSDRGui::handleMessage(const Message& message)
 {
 	if (RTLSDRInput::MsgReportRTLSDR::match(message))
 	{
-		qDebug() << "RTLSDRGui::handleMessage: MsgReportRTLSDR";
 		m_gains = ((RTLSDRInput::MsgReportRTLSDR&) message).getGains();
 		displayGains();
 		return true;
@@ -316,12 +313,6 @@ void RTLSDRGui::on_record_toggled(bool checked)
     }
 
     RTLSDRInput::MsgFileRecord* message = RTLSDRInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
-}
-
-void RTLSDRGui::queryDeviceReport()
-{
-    RTLSDRInput::MsgQueryRTLSDR* message = RTLSDRInput::MsgQueryRTLSDR::create();
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 

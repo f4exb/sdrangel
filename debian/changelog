@@ -1,8 +1,9 @@
 sdrangel (3.7.2-1) unstable; urgency=medium
 
   * PlutoSDR: Remove from device enumeration if device is not accessible
+  * RTLSDR: Fixed gains retrieval in the GUI
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 01 Oct 2017 21:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 23 Sep 2017 05:14:18 +0200
 
 sdrangel (3.7.1-1) unstable; urgency=medium
 

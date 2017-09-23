@@ -42,7 +42,7 @@ public:
 	virtual bool handleMessage(const Message& message) = 0;
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+	virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
     SampleSinkFifo* getSampleFifo() { return &m_sampleFifo; }
 

@@ -50,21 +50,6 @@ public:
 		{ }
 	};
 
-	class MsgQueryRTLSDR : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		static MsgQueryRTLSDR* create()
-		{
-			return new MsgQueryRTLSDR();
-		}
-
-	protected:
-		MsgQueryRTLSDR() :
-			Message()
-		{ }
-	};
-
     class MsgReportRTLSDR : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -116,6 +101,7 @@ public:
 	virtual quint64 getCenterFrequency() const;
 
 	virtual bool handleMessage(const Message& message);
+	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
 	const std::vector<int>& getGains() const { return m_gains; }
 	void set_ds_mode(int on);
