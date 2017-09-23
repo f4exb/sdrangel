@@ -337,6 +337,7 @@ void RTLSDRGui::on_transverter_toggled(bool checked)
     m_settings.m_transverterMode = checked;
     m_settings.m_transverterDeltaFrequency = checked ? ui->transverter->getDeltaFrequency() : 0;
     updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
     sendSettings();
 }
 
