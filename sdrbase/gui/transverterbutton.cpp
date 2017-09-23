@@ -33,7 +33,7 @@ void TransverterButton::onToggled(bool checked)
     if (checked) {
         TransverterDialog transverterDialog(&m_deltaFrequency, this);
         transverterDialog.exec();
-        setToolTip(tr("Transverter frequency translation toggle. Delta frequency %1 kHz").arg(m_deltaFrequency));
+        setToolTip(tr("Transverter frequency translation toggle. Delta frequency %1 kHz").arg(m_deltaFrequency/1000));
     }
 }
 

@@ -106,6 +106,15 @@ public:
 	const std::vector<int>& getGains() const { return m_gains; }
 	void set_ds_mode(int on);
 
+	static const quint64 frequencyLowRangeMin;
+	static const quint64 frequencyLowRangeMax;
+    static const quint64 frequencyHighRangeMin;
+    static const quint64 frequencyHighRangeMax;
+	static const int sampleRateLowRangeMin;
+    static const int sampleRateLowRangeMax;
+    static const int sampleRateHighRangeMin;
+    static const int sampleRateHighRangeMax;
+
 private:
 	DeviceSourceAPI *m_deviceAPI;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output

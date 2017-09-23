@@ -28,6 +28,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
+
 RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::RTLSDRGui),
@@ -40,10 +41,10 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
+	updateFrequencyLimits();
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(7, 950000U, 2400000U);
+    ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateHighRangeMin, RTLSDRInput::sampleRateHighRangeMax);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -175,6 +176,18 @@ void RTLSDRGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
+void RTLSDRGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + m_settings.m_transverterDeltaFrequency/1000;
+    qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + m_settings.m_transverterDeltaFrequency/1000;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void RTLSDRGui::displayGains()
 {
     if (m_gains.size() > 0)
@@ -214,6 +227,9 @@ void RTLSDRGui::displaySettings()
 	ui->ppmText->setText(tr("%1").arg(m_settings.m_loPpmCorrection));
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
+	ui->checkBox->setChecked(m_settings.m_noModMode);
+	ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+	ui->transverter->setChecked(m_settings.m_transverterMode);
 }
 
 void RTLSDRGui::sendSettings()
@@ -316,6 +332,14 @@ void RTLSDRGui::on_record_toggled(bool checked)
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
+void RTLSDRGui::on_transverter_toggled(bool checked)
+{
+    m_settings.m_transverterMode = checked;
+    m_settings.m_transverterDeltaFrequency = checked ? ui->transverter->getDeltaFrequency() : 0;
+    updateFrequencyLimits();
+    sendSettings();
+}
+
 void RTLSDRGui::updateHardware()
 {
 	RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings);
@@ -356,18 +380,17 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 {
 	if (state == Qt::Checked)
 	{
-		// Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
-		((RTLSDRInput*)m_sampleSource)->set_ds_mode(3);
 		ui->gain->setEnabled(false);
-		ui->centerFrequency->setValueRange(7, 1000U, 275000U);
+        m_settings.m_noModMode = true;
+	    updateFrequencyLimits();
 		ui->centerFrequency->setValue(7000);
 		m_settings.m_centerFrequency = 7000 * 1000;
 	}
 	else
 	{
-		((RTLSDRInput*)m_sampleSource)->set_ds_mode(0);
 		ui->gain->setEnabled(true);
-		ui->centerFrequency->setValueRange(7, 28500U, 1700000U);
+        m_settings.m_noModMode = false;
+	    updateFrequencyLimits();
 		ui->centerFrequency->setValue(434000);
 		ui->gain->setValue(0);
 		m_settings.m_centerFrequency = 435000 * 1000;
@@ -391,9 +414,9 @@ void RTLSDRGui::on_sampleRate_changed(quint64 value)
 void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 {
     if (checked) {
-        ui->sampleRate->setValueRange(7, 230000U, 300000U);
+        ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateLowRangeMin, RTLSDRInput::sampleRateLowRangeMax);
     } else {
-        ui->sampleRate->setValueRange(7, 950000U, 2400000U);
+        ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateHighRangeMin, RTLSDRInput::sampleRateHighRangeMax);
     }
 
     m_settings.m_devSampleRate = ui->sampleRate->getValueNew();

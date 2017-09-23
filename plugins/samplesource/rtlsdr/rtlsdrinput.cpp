@@ -32,6 +32,15 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 
+const quint64 RTLSDRInput::frequencyLowRangeMin = 1000UL;
+const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
+const quint64 RTLSDRInput::frequencyHighRangeMin = 24000UL;
+const quint64 RTLSDRInput::frequencyHighRangeMax = 1900000UL;
+const int RTLSDRInput::sampleRateLowRangeMin = 230000U;
+const int RTLSDRInput::sampleRateLowRangeMax = 300000U;
+const int RTLSDRInput::sampleRateHighRangeMin = 950000U;
+const int RTLSDRInput::sampleRateHighRangeMax = 2400000U;
+
 RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
@@ -354,34 +363,42 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-    qint64 f_img = deviceCenterFrequency;
-    quint32 devSampleRate =m_settings.m_devSampleRate;
-
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_fcPos != settings.m_fcPos))
+            || (m_settings.m_fcPos != settings.m_fcPos)
+            || (m_settings.m_transverterMode != settings.m_transverterMode)
+            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
+        m_settings.m_transverterMode = settings.m_transverterMode;
+        m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+
+        deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
+
+        qint64 f_img = deviceCenterFrequency;
+        quint32 devSampleRate = m_settings.m_devSampleRate;
+
         forwardChange = true;
 
         if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == RTLSDRSettings::FC_POS_CENTER))
         {
-            deviceCenterFrequency = m_settings.m_centerFrequency;
             f_img = deviceCenterFrequency;
         }
         else
         {
             if (settings.m_fcPos == RTLSDRSettings::FC_POS_INFRA)
             {
-                deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
+                deviceCenterFrequency += (devSampleRate / 4);
                 f_img = deviceCenterFrequency + devSampleRate/2;
             }
             else if (settings.m_fcPos == RTLSDRSettings::FC_POS_SUPRA)
             {
-                deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
+                deviceCenterFrequency -= (devSampleRate / 4);
                 f_img = deviceCenterFrequency - devSampleRate/2;
             }
         }
+
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
 
         if (m_dev != 0)
         {
@@ -408,6 +425,18 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         {
             m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
             qDebug() << "RTLSDRInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+        }
+    }
+
+    if ((m_settings.m_noModMode != settings.m_noModMode) || force)
+    {
+        m_settings.m_noModMode = settings.m_noModMode;
+
+        // Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
+        if (m_settings.m_noModMode) {
+            set_ds_mode(3);
+        } else {
+            set_ds_mode(0);
         }
     }
 

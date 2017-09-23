@@ -69,6 +69,7 @@ private:
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
+	void updateFrequencyLimits();
 
 private slots:
     void handleInputMessages();
@@ -86,6 +87,7 @@ private slots:
     void on_agc_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_transverter_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
 };

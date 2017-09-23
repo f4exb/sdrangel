@@ -35,6 +35,9 @@ void RTLSDRSettings::resetToDefaults()
 	m_dcBlock = false;
 	m_iqImbalance = false;
 	m_agc = false;
+	m_noModMode = false;
+    m_transverterMode = false;
+	m_transverterDeltaFrequency = 0;
 }
 
 QByteArray RTLSDRSettings::serialize() const
@@ -50,6 +53,9 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeS32(8, m_devSampleRate);
     s.writeBool(9, m_lowSampleRate);
     s.writeBool(10, m_agc);
+    s.writeBool(11, m_noModMode);
+    s.writeBool(12, m_transverterMode);
+    s.writeS64(13, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -78,6 +84,9 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readS32(8, &m_devSampleRate, 1024*1000);
         d.readBool(9, &m_lowSampleRate, false);
         d.readBool(10, &m_agc, false);
+        d.readBool(11, &m_noModMode, false);
+        d.readBool(12, &m_transverterMode, false);
+        d.readS64(13, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}
