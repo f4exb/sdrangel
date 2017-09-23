@@ -58,7 +58,7 @@
           <enum>Qt::StrongFocus</enum>
          </property>
          <property name="toolTip">
-          <string>Transverter delta frequency (kHz)</string>
+          <string>Transverter delta frequency (Hz)</string>
          </property>
          <zorder>deltaFrequencyUnits</zorder>
         </widget>
@@ -66,7 +66,7 @@
        <item>
         <widget class="QLabel" name="deltaFrequencyUnits">
          <property name="text">
-          <string>kHz</string>
+          <string>Hz</string>
          </property>
         </widget>
        </item>
