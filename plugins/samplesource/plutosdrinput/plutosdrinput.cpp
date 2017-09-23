@@ -372,7 +372,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         if (m_plutoSDRInputThread != 0)
         {
             m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
-            qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << (1<<settings.m_fcPos);
+            qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << settings.m_fcPos;
         }
     }
 

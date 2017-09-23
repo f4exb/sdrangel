@@ -24,7 +24,8 @@ struct PlutoSDRInputSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
 		FC_POS_SUPRA,
-		FC_POS_CENTER
+		FC_POS_CENTER,
+		FC_POS_END
 	} fcPos_t;
 
     enum RFPath

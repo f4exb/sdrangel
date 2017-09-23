@@ -212,7 +212,7 @@ void PlutoSDRInputGui::on_swDecim_currentIndexChanged(int index)
 
 void PlutoSDRInputGui::on_fcPos_currentIndexChanged(int index)
 {
-    m_settings.m_fcPos = (PlutoSDRInputSettings::fcPos_t) (index > 2 ? 2 : index);
+    m_settings.m_fcPos = (PlutoSDRInputSettings::fcPos_t) (index < (int) PlutoSDRInputSettings::FC_POS_END ? index : PlutoSDRInputSettings::FC_POS_CENTER);
     sendSettings();
 }
 
