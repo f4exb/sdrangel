@@ -77,6 +77,8 @@ If you use a down converter to receive the 6 cm band narrowband center frequency
 
 For bands even higher in the frequency spectrum the GHz digits are not really significant so you can have them set at 1 GHz. Thus to receive the 10368 MHz frequency at 432 MHz you would set the translating frequency to 1368 - 432 = 936 MHz. Note that in this case the frequency of the LO used in the mixer of the transverter is set at 9936 MHz.
 
+The Hz precision allows a fine tuning of the transverter LO offset
+
 <h4>4a.2: Translating frequency enable/disable</h4>
 
 Use this toggle button to activate or deactivate the frequency translation
