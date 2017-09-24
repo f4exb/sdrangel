@@ -367,15 +367,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         forwardChangeOwnDSP = true;
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-    {
-        if (m_plutoSDRInputThread != 0)
-        {
-            m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
-            qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << settings.m_fcPos;
-        }
-    }
-
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
@@ -385,11 +376,59 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     std::vector<std::string> params;
     bool paramsToSet = false;
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+            || (m_settings.m_fcPos != settings.m_fcPos)
+            || (m_settings.m_transverterMode != settings.m_transverterMode)
+            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
     {
-        params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
-        paramsToSet = true;
-        forwardChangeOwnDSP = true;
+        qint64 deviceCenterFrequency = settings.m_centerFrequency;
+        deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+        qint64 f_img = deviceCenterFrequency;
+        quint32 devSampleRate = settings.m_devSampleRate;
+
+        if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_CENTER))
+        {
+            f_img = deviceCenterFrequency;
+        }
+        else
+        {
+            if (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_INFRA)
+            {
+                deviceCenterFrequency += (devSampleRate / 4);
+                f_img = deviceCenterFrequency + devSampleRate/2;
+            }
+            else if (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_SUPRA)
+            {
+                deviceCenterFrequency -= (devSampleRate / 4);
+                f_img = deviceCenterFrequency - devSampleRate/2;
+            }
+        }
+
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+
+        if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+                || (m_settings.m_transverterMode != settings.m_transverterMode)
+                || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+        {
+            params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
+            paramsToSet = true;
+            forwardChangeOwnDSP = true;
+        }
+
+        if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+        {
+            if (m_plutoSDRInputThread != 0)
+            {
+                m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
+                qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << settings.m_fcPos;
+            }
+        }
+
+        qDebug() << "PlutoSDRInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
+                << " device center freq: " << deviceCenterFrequency << " Hz"
+                << " device sample rate: " << devSampleRate << "S/s"
+                << " Actual sample rate: " << devSampleRate/(1<<settings.m_log2Decim) << "S/s"
+                << " img: " << f_img << "Hz";
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)

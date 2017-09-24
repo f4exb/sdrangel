@@ -44,7 +44,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) 
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, DevicePlutoSDR::loLowLimitFreq/1000, DevicePlutoSDR::loHighLimitFreq/1000);
+    updateFrequencyLimits();
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, DevicePlutoSDR::srLowLimitFreq, DevicePlutoSDR::srHighLimitFreq);
@@ -275,8 +275,21 @@ void PlutoSDRInputGui::on_antenna_currentIndexChanged(int index)
     sendSettings();
 }
 
+void PlutoSDRInputGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("PlutoSDRInputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
+}
+
 void PlutoSDRInputGui::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    updateFrequencyLimits();
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
@@ -402,20 +415,35 @@ void PlutoSDRInputGui::setSampleRateLimits()
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 }
 
+void PlutoSDRInputGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = DevicePlutoSDR::loLowLimitFreq/1000 + deltaFrequency;
+    qint64 maxLimit = DevicePlutoSDR::loHighLimitFreq/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("PlutoSDRInputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void PlutoSDRInputGui::handleInputMessages()
 {
     Message* message;
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("LimeSDRInputGUI::handleInputMessages: message: %s", message->getIdentifier());
+        qDebug("PlutoSDRInputGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("LimeSDRInputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("PlutoSDRInputGui::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
             setFIRBWLimits();
 
