@@ -602,7 +602,7 @@
   </customwidget>
   <customwidget>
    <class>TransverterButton</class>
-   <extends>QToolButton</extends>
+   <extends>QPushButton</extends>
    <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
