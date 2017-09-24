@@ -21,22 +21,24 @@
 #ifndef SDRBASE_GUI_TRANSVERTERBUTTON_H_
 #define SDRBASE_GUI_TRANSVERTERBUTTON_H_
 
-#include "buttonswitch.h"
+#include <QPushButton>
 
-class TransverterButton : public ButtonSwitch {
+class TransverterButton : public QPushButton {
     Q_OBJECT
 
 public:
     TransverterButton(QWidget* parent = 0);
-    void doToggle(bool checked);
     qint64 getDeltaFrequency() const { return m_deltaFrequency; }
     void setDeltaFrequency(qint64 deltaFrequency) { m_deltaFrequency = deltaFrequency; }
+    bool getDeltaFrequencyAcive() const { return m_deltaFrequencyActive; }
+    void setDeltaFrequencyActive(bool active) { m_deltaFrequencyActive = active; }
 
 private slots:
-    void onToggled(bool checked);
+    void onClicked();
 
 private:
     qint64 m_deltaFrequency;
+    bool m_deltaFrequencyActive;
 };
 
 

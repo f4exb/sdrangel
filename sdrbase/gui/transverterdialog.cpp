@@ -23,16 +23,18 @@
 #include "ui_transverterdialog.h"
 
 
-TransverterDialog::TransverterDialog(qint64 *deltaFrequency, QWidget* parent) :
+TransverterDialog::TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::TransverterDialog),
-    m_deltaFrequency(deltaFrequency)
+    m_deltaFrequency(deltaFrequency),
+    m_deltaFrequencyActive(deltaFrequencyActive)
 {
     ui->setupUi(this);
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
-    ui->deltaFrequency->setValue(*m_deltaFrequency);
+    ui->deltaFrequency->setValue(m_deltaFrequency);
+    ui->deltaFrequencyActive->setChecked(m_deltaFrequencyActive);
 }
 
 TransverterDialog::~TransverterDialog()
@@ -42,6 +44,7 @@ TransverterDialog::~TransverterDialog()
 
 void TransverterDialog::accept()
 {
-    *m_deltaFrequency = ui->deltaFrequency->getValueNew();
+    m_deltaFrequency = ui->deltaFrequency->getValueNew();
+    m_deltaFrequencyActive = ui->deltaFrequencyActive->isChecked();
     QDialog::accept();
 }

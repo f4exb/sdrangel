@@ -179,11 +179,14 @@ void RTLSDRGui::updateSampleRateAndFrequency()
 void RTLSDRGui::updateFrequencyLimits()
 {
     // values in kHz
-    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + m_settings.m_transverterDeltaFrequency/1000;
-    qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + m_settings.m_transverterDeltaFrequency/1000;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + deltaFrequency;
+    qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + deltaFrequency;
 
     minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
     maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("RTLSDRGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 
     ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
 }
@@ -299,10 +302,6 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 	sendSettings();
 }
 
-void RTLSDRGui::on_sampleRate_currentIndexChanged(int index __attribute__((unused)))
-{
-}
-
 void RTLSDRGui::on_startStop_toggled(bool checked)
 {
     if (checked)
@@ -332,10 +331,11 @@ void RTLSDRGui::on_record_toggled(bool checked)
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void RTLSDRGui::on_transverter_toggled(bool checked)
+void RTLSDRGui::on_transverter_clicked()
 {
-    m_settings.m_transverterMode = checked;
-    m_settings.m_transverterDeltaFrequency = checked ? ui->transverter->getDeltaFrequency() : 0;
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("RTLSDRGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
     sendSettings();

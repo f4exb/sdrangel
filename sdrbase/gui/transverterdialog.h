@@ -31,12 +31,13 @@ class TransverterDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit TransverterDialog(qint64 *deltaFrequency, QWidget* parent = 0);
+    explicit TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, QWidget* parent = 0);
     ~TransverterDialog();
 
 private:
     Ui::TransverterDialog* ui;
-    qint64 *m_deltaFrequency;
+    qint64& m_deltaFrequency;
+    bool& m_deltaFrequencyActive;
 
 private slots:
     void accept();

@@ -300,11 +300,20 @@
      </item>
      <item row="0" column="6">
       <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="toolTip">
         <string>Transverter frequency translation toggle</string>
        </property>
        <property name="text">
         <string>X</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

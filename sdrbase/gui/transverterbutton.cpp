@@ -22,22 +22,18 @@
 #include "transverterbutton.h"
 
 TransverterButton::TransverterButton(QWidget* parent) :
-    ButtonSwitch(parent),
-    m_deltaFrequency(0)
+    QPushButton(parent),
+    m_deltaFrequency(0),
+    m_deltaFrequencyActive(false)
 {
-    connect(this, SIGNAL(toggled(bool)), this, SLOT(onToggled(bool)));
+    connect(this, SIGNAL(clicked(bool)), this, SLOT(onClicked(bool)));
 }
 
-void TransverterButton::onToggled(bool checked)
+void TransverterButton::onClicked()
 {
-    if (checked) {
-        TransverterDialog transverterDialog(&m_deltaFrequency, this);
-        transverterDialog.exec();
-        setToolTip(tr("Transverter frequency translation toggle. Delta frequency %1 MHz").arg(m_deltaFrequency/1000000.0));
-    }
-}
-
-void TransverterButton::doToggle(bool checked)
-{
-    onToggled(checked);
+    TransverterDialog transverterDialog(m_deltaFrequency, m_deltaFrequencyActive, this);
+    transverterDialog.exec();
+    setToolTip(tr("Transverter frequency translation dialog. Delta frequency %1 MHz %2")
+            .arg(m_deltaFrequency/1000000.0)
+            .arg(m_deltaFrequencyActive ? "enabled" : "disabled"));
 }

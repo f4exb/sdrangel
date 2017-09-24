@@ -60,7 +60,6 @@
          <property name="toolTip">
           <string>Transverter delta frequency (Hz)</string>
          </property>
-         <zorder>deltaFrequencyUnits</zorder>
         </widget>
        </item>
        <item>
@@ -82,6 +81,20 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="ButtonSwitch" name="deltaFrequencyActive">
+         <property name="toolTip">
+          <string>Enable or disable frequency translation</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/checkmark.png</normaloff>:/checkmark.png</iconset>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -106,11 +119,18 @@
    <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../resources/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

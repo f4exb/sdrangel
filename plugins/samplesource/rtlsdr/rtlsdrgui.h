@@ -82,12 +82,11 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_ppm_valueChanged(int value);
 	void on_gain_valueChanged(int value);
-	void on_sampleRate_currentIndexChanged(int index);
 	void on_checkBox_stateChanged(int state);
     void on_agc_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
-    void on_transverter_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
 };
