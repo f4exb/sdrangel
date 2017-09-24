@@ -26,13 +26,18 @@ TransverterButton::TransverterButton(QWidget* parent) :
     m_deltaFrequency(0),
     m_deltaFrequencyActive(false)
 {
-    connect(this, SIGNAL(clicked(bool)), this, SLOT(onClicked(bool)));
+    connect(this, SIGNAL(clicked()), this, SLOT(onClicked()));
 }
 
 void TransverterButton::onClicked()
 {
     TransverterDialog transverterDialog(m_deltaFrequency, m_deltaFrequencyActive, this);
     transverterDialog.exec();
+    updateState();
+}
+
+void TransverterButton::updateState()
+{
     setToolTip(tr("Transverter frequency translation dialog. Delta frequency %1 MHz %2")
             .arg(m_deltaFrequency/1000000.0)
             .arg(m_deltaFrequencyActive ? "enabled" : "disabled"));

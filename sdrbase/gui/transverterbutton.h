@@ -29,9 +29,19 @@ class TransverterButton : public QPushButton {
 public:
     TransverterButton(QWidget* parent = 0);
     qint64 getDeltaFrequency() const { return m_deltaFrequency; }
-    void setDeltaFrequency(qint64 deltaFrequency) { m_deltaFrequency = deltaFrequency; }
     bool getDeltaFrequencyAcive() const { return m_deltaFrequencyActive; }
-    void setDeltaFrequencyActive(bool active) { m_deltaFrequencyActive = active; }
+
+    void setDeltaFrequency(qint64 deltaFrequency)
+    {
+        m_deltaFrequency = deltaFrequency;
+        updateState();
+    }
+
+    void setDeltaFrequencyActive(bool active)
+    {
+        m_deltaFrequencyActive = active;
+        updateState();
+    }
 
 private slots:
     void onClicked();
@@ -39,6 +49,8 @@ private slots:
 private:
     qint64 m_deltaFrequency;
     bool m_deltaFrequencyActive;
+
+    void updateState();
 };
 
 

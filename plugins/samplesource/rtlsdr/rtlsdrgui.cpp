@@ -222,6 +222,9 @@ void RTLSDRGui::displayGains()
 
 void RTLSDRGui::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
@@ -231,8 +234,6 @@ void RTLSDRGui::displaySettings()
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->checkBox->setChecked(m_settings.m_noModMode);
-	ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
-	ui->transverter->setChecked(m_settings.m_transverterMode);
 }
 
 void RTLSDRGui::sendSettings()
