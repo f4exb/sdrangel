@@ -1,3 +1,9 @@
+sdrangel (3.7.3-1) unstable; urgency=medium
+
+  * RTLSDR: Button and dialog to set frequency translation for transverter operation 
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Oct 2017 05:14:18 +0200
+
 sdrangel (3.7.2-1) unstable; urgency=medium
 
   * PlutoSDR: Remove from device enumeration if device is not accessible
