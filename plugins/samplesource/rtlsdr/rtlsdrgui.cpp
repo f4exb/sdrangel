@@ -234,6 +234,7 @@ void RTLSDRGui::displaySettings()
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->checkBox->setChecked(m_settings.m_noModMode);
+	ui->agc->setChecked(m_settings.m_agc);
 }
 
 void RTLSDRGui::sendSettings()
