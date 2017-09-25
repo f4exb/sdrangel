@@ -72,6 +72,7 @@ private:
 	void displaySampleRates();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
@@ -89,6 +90,7 @@ private slots:
 	void on_mixAGC_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();

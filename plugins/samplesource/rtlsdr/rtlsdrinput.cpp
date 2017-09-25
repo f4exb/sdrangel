@@ -372,9 +372,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         m_settings.m_transverterMode = settings.m_transverterMode;
         m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
         qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-
         deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
-
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
         qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = m_settings.m_devSampleRate;
 
@@ -397,8 +396,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
                 f_img = deviceCenterFrequency - devSampleRate/2;
             }
         }
-
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
 
         if (m_dev != 0)
         {

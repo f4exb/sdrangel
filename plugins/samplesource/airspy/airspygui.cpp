@@ -42,7 +42,7 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 24000U, 1900000U);
+	updateFrequencyLimits();
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -114,17 +114,6 @@ bool AirspyGui::deserialize(const QByteArray& data)
 bool AirspyGui::handleMessage(const Message& message __attribute__((unused)))
 {
     return false;
-//	if (AirspyInput::MsgReportAirspy::match(message))
-//	{
-//		qDebug() << "AirspyGui::handleMessage: MsgReportAirspy";
-//		m_rates = ((AirspyInput::MsgReportAirspy&) message).getSampleRates();
-//		displaySampleRates();
-//		return true;
-//	}
-//	else
-//	{
-//		return false;
-//	}
 }
 
 void AirspyGui::handleInputMessages()
@@ -162,8 +151,26 @@ void AirspyGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
+void AirspyGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = AirspyInput::loLowLimitFreq/1000 + deltaFrequency;
+    qint64 maxLimit = AirspyInput::loHighLimitFreq/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("AirspyGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void AirspyGui::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
@@ -353,6 +360,16 @@ void AirspyGui::on_record_toggled(bool checked)
 
     AirspyInput::MsgFileRecord* message = AirspyInput::MsgFileRecord::create(checked);
     m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void AirspyGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("AirspyGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
 }
 
 void AirspyGui::updateHardware()
