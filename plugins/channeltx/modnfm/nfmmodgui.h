@@ -17,10 +17,10 @@
 #ifndef PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "nfmmod.h"
@@ -36,7 +36,7 @@ namespace Ui {
     class NFMModGUI;
 }
 
-class NFMModGUI : public RollupWidget, public PluginInstanceUI {
+class NFMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:

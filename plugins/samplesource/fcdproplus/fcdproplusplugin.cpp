@@ -76,7 +76,7 @@ PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceUI* FCDProPlusPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* FCDProPlusPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
 {
 	if(sourceId == fcd_traits<ProPlus>::interfaceIID)
 	{

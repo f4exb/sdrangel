@@ -32,7 +32,7 @@ class DeviceSampleSink;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
-class PluginInstanceUI;
+class PluginInstanceGUI;
 class PluginAPI;
 class PluginInterface;
 class Preset;
@@ -74,7 +74,7 @@ public:
     void setSampleSinkDisplayName(const QString& serial);
     void setSampleSinkSequence(int sequence);
     void setSampleSinkPluginInterface(PluginInterface *iface);
-    void setSampleSinkPluginInstanceUI(PluginInstanceUI *gui);
+    void setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSinkId() const { return m_sampleSinkId; }
@@ -82,10 +82,10 @@ public:
     const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
-    PluginInstanceUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
+    PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
-    void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
 
     void freeChannels();
 
@@ -115,14 +115,14 @@ protected:
     struct ChannelInstanceRegistration
     {
         QString m_channelName;
-        PluginInstanceUI* m_gui;
+        PluginInstanceGUI* m_gui;
 
         ChannelInstanceRegistration() :
             m_channelName(),
             m_gui(0)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceUI* pluginGUI) :
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
             m_channelName(channelName),
             m_gui(pluginGUI)
         { }
@@ -153,7 +153,7 @@ protected:
     QString m_sampleSinkDisplayName;
     uint32_t m_sampleSinkSequence;
     PluginInterface* m_pluginInterface;
-    PluginInstanceUI* m_sampleSinkPluginInstanceUI;
+    PluginInstanceGUI* m_sampleSinkPluginInstanceUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
 

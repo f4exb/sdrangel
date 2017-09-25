@@ -1,9 +1,9 @@
 #ifndef INCLUDE_LoRaDEMODGUI_H
 #define INCLUDE_LoRaDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #define BANDWIDTHSTRING {7813,15625,20833,31250,62500}
@@ -19,7 +19,7 @@ namespace Ui {
 	class LoRaDemodGUI;
 }
 
-class LoRaDemodGUI : public RollupWidget, public PluginInstanceUI {
+class LoRaDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

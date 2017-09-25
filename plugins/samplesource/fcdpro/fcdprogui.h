@@ -17,10 +17,10 @@
 #ifndef INCLUDE_FCDPROGUI_H
 #define INCLUDE_FCDPROGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "fcdproinput.h"
@@ -32,7 +32,7 @@ namespace Ui {
 	class FCDProGui;
 }
 
-class FCDProGui : public QWidget, public PluginInstanceUI {
+class FCDProGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

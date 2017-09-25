@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/devicesamplesource.h"
@@ -186,18 +186,18 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)
     m_pluginInterface = iface;
 }
 
-void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui)
 {
     m_sampleSourcePluginInstanceUI = gui;
 }
 
-void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
+void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSourceAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
+void DeviceSourceAPI::removeChannelInstance(PluginInstanceGUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {

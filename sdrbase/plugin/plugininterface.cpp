@@ -1,10 +1,10 @@
+#include <plugin/plugininstancegui.h>
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "plugin/plugininterface.h"
-#include "plugininstanceui.h"
 
 
-void PluginInterface::deleteSampleSourcePluginInstanceGUI(PluginInstanceUI *ui)
+void PluginInterface::deleteSampleSourcePluginInstanceGUI(PluginInstanceGUI *ui)
 {
     ui->destroy();
 }
@@ -14,7 +14,7 @@ void PluginInterface::deleteSampleSourcePluginInstanceInput(DeviceSampleSource *
     source->destroy();
 }
 
-void PluginInterface::deleteSampleSinkPluginInstanceGUI(PluginInstanceUI *ui)
+void PluginInterface::deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui)
 {
     ui->destroy();
 }

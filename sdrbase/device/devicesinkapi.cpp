@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
 #include "dsp/devicesamplesink.h"
@@ -194,18 +194,18 @@ void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)
     m_pluginInterface = iface;
 }
 
-void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)
+void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui)
 {
     m_sampleSinkPluginInstanceUI = gui;
 }
 
-void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
+void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSinkAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
+void DeviceSinkAPI::removeChannelInstance(PluginInstanceGUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {

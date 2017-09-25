@@ -17,10 +17,10 @@
 #ifndef INCLUDE_FILESINKGUI_H
 #define INCLUDE_FILESINKGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "filesinkoutput.h"
@@ -34,7 +34,7 @@ namespace Ui {
 	class FileSinkGui;
 }
 
-class FileSinkGui : public QWidget, public PluginInstanceUI {
+class FileSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

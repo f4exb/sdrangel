@@ -17,10 +17,10 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "limesdroutput.h"
@@ -32,7 +32,7 @@ namespace Ui {
     class LimeSDROutputGUI;
 }
 
-class LimeSDROutputGUI : public QWidget, public PluginInstanceUI {
+class LimeSDROutputGUI : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:

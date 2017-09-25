@@ -81,7 +81,7 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
 {
 	if(sinkId == m_deviceTypeID)
 	{

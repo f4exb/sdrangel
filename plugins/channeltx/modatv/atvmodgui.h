@@ -17,10 +17,10 @@
 #ifndef PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 #define PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "atvmod.h"
@@ -37,7 +37,7 @@ namespace Ui {
     class ATVModGUI;
 }
 
-class ATVModGUI : public RollupWidget, public PluginInstanceUI {
+class ATVModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:

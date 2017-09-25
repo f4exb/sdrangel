@@ -18,11 +18,11 @@
 #ifndef INCLUDE_UDPSRCGUI_H
 #define INCLUDE_UDPSRCGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QHostAddress>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "udpsrc.h"
@@ -38,7 +38,7 @@ namespace Ui {
 	class UDPSrcGUI;
 }
 
-class UDPSrcGUI : public RollupWidget, public PluginInstanceUI {
+class UDPSrcGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

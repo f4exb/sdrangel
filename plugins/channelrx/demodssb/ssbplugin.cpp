@@ -33,7 +33,7 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(SSBDemodGUI::m_channelID, this);
 }
 
-PluginInstanceUI* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
 	if(channelName == SSBDemodGUI::m_channelID)
 	{

@@ -17,10 +17,10 @@
 #ifndef INCLUDE_HACKRFOUTPUTGUI_H
 #define INCLUDE_HACKRFOUTPUTGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "hackrfoutput.h"
@@ -34,7 +34,7 @@ namespace Ui {
 	class HackRFOutputGui;
 }
 
-class HackRFOutputGui : public QWidget, public PluginInstanceUI {
+class HackRFOutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

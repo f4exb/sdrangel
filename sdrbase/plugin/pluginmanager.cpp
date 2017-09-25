@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include <QApplication>

@@ -12,7 +12,7 @@ class PluginManager;
 class PluginInterface;
 class MainWindow;
 class MessageQueue;
-class PluginInstanceUI;
+class PluginInstanceGUI;
 
 class SDRANGEL_API PluginAPI : public QObject {
 	Q_OBJECT

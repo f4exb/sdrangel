@@ -17,11 +17,11 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include <QObject>
 #include <QWidget>
 #include <QTimer>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "plutosdroutputsettings.h"
@@ -33,7 +33,7 @@ namespace Ui {
     class PlutoSDROutputGUI;
 }
 
-class PlutoSDROutputGUI : public QWidget, public PluginInstanceUI {
+class PlutoSDROutputGUI : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
