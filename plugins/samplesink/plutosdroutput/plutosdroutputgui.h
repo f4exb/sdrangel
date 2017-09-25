@@ -72,6 +72,7 @@ private:
     void updateSampleRateAndFrequency();
     void setFIRBWLimits();
     void setSampleRateLimits();
+    void updateFrequencyLimits();
 
 private slots:
     void on_startStop_toggled(bool checked);
@@ -86,6 +87,7 @@ private slots:
     void on_lpFIRGain_currentIndexChanged(int index);
     void on_att_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
+    void on_transverter_clicked();
     void updateHardware();
     void updateStatus();
     void handleInputMessages();

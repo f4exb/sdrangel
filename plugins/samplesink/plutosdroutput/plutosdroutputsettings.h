@@ -42,6 +42,8 @@ struct PlutoSDROutputSettings {
     quint32 m_lpfBW;              //!< analog lowpass filter bandwidth (Hz)
     qint32  m_att;                //!< "hardware" attenuation in dB fourths
     RFPath  m_antennaPath;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
 
 
     PlutoSDROutputSettings();
