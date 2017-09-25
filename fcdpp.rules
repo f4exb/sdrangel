@@ -1,5 +1,0 @@
-# Udev rules for the Funcube Dongle Pro+ (0xfb31)
-
-# HIDAPI/libusb:
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="fb31", GROUP:="audio", MODE:="0666"
-

@@ -25,6 +25,7 @@
 
 #include <device/devicesourceapi.h>
 #include "fcdproconst.h"
+#include "fcdtraits.h"
 
 FCDProGui::FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
@@ -38,7 +39,7 @@ FCDProGui::FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 64000U, 1700000U);
+    updateFrequencyLimits();
 
 	ui->lnaGain->clear();
 	for (int i = 0; i < FCDProConstants::fcdpro_lna_gain_nb_values(); i++)
@@ -237,8 +238,26 @@ void FCDProGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
+void FCDProGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = fcd_traits<Pro>::loLowLimitFreq/1000 + deltaFrequency;
+    qint64 maxLimit = fcd_traits<Pro>::loHighLimitFreq/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("FCDProGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void FCDProGui::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->ppm->setValue(m_settings.m_LOppmTenths);
 	ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
@@ -438,6 +457,16 @@ void FCDProGui::on_record_toggled(bool checked)
 
     FCDProInput::MsgFileRecord* message = FCDProInput::MsgFileRecord::create(checked);
     m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void FCDProGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("FCDProGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
 }
 
 void FCDProGui::updateStatus()

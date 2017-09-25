@@ -45,6 +45,8 @@ void FCDProSettings::resetToDefaults()
 	m_ifFilterIndex = 0;
 	m_gain5Index = 0;
 	m_gain6Index = 0;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray FCDProSettings::serialize() const
@@ -70,6 +72,8 @@ QByteArray FCDProSettings::serialize() const
 	s.writeS32(17, m_ifFilterIndex);
 	s.writeS32(18, m_gain5Index);
 	s.writeS32(19, m_gain6Index);
+    s.writeBool(20, m_transverterMode);
+    s.writeS64(21, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -105,6 +109,8 @@ bool FCDProSettings::deserialize(const QByteArray& data)
 		d.readS32(17, &m_ifFilterIndex, 0);
 		d.readS32(18, &m_gain5Index, 0);
 		d.readS32(19, &m_gain6Index, 0);
+        d.readBool(20, &m_transverterMode, false);
+        d.readS64(21, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

@@ -30,6 +30,8 @@ struct fcd_traits
     static const char *displayedName;
     static const char *pluginDisplayedName;
     static const char *pluginVersion;
+    static const int64_t loLowLimitFreq;
+    static const int64_t loHighLimitFreq;
 };
 
 template<>
@@ -46,6 +48,8 @@ struct fcd_traits<Pro>
     static const char *displayedName;
     static const char *pluginDisplayedName;
     static const char *pluginVersion;
+    static const int64_t loLowLimitFreq;
+    static const int64_t loHighLimitFreq;
 };
 
 template<>
@@ -62,6 +66,8 @@ struct fcd_traits<ProPlus>
     static const char *displayedName;
     static const char *pluginDisplayedName;
     static const char *pluginVersion;
+    static const int64_t loLowLimitFreq;
+    static const int64_t loHighLimitFreq;
 };
 
 template <fcd_type FCDType> const char *fcd_traits<FCDType>::alsaDeviceName = "";
