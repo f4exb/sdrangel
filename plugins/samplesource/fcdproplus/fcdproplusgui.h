@@ -67,6 +67,7 @@ private:
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
 
 private slots:
     void handleInputMessages();
@@ -82,6 +83,7 @@ private slots:
 	void on_ppm_valueChanged(int value);
 	void on_startStop_toggled(bool checked);
 	void on_record_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
 };

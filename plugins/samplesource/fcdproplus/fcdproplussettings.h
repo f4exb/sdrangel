@@ -29,6 +29,8 @@ struct FCDProPlusSettings {
 	qint32 m_LOppmTenths;
 	bool m_dcBlock;
 	bool m_iqImbalance;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
 
 	FCDProPlusSettings();
 	void resetToDefaults();

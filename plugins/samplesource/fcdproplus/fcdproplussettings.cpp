@@ -35,6 +35,8 @@ void FCDProPlusSettings::resetToDefaults()
 	m_LOppmTenths = 0;
 	m_dcBlock = false;
 	m_iqImbalance = false;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray FCDProPlusSettings::serialize() const
@@ -50,6 +52,8 @@ QByteArray FCDProPlusSettings::serialize() const
 	s.writeBool(7, m_iqImbalance);
 	s.writeS32(8, m_LOppmTenths);
 	s.writeU32(9, m_ifGain);
+    s.writeBool(10, m_transverterMode);
+    s.writeS64(11, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -75,6 +79,8 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 		d.readBool(7, &m_iqImbalance, false);
 		d.readS32(8, &m_LOppmTenths, 0);
 		d.readU32(9, &m_ifGain, 0);
+        d.readBool(10, &m_transverterMode, false);
+        d.readS64(11, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

@@ -26,7 +26,7 @@ const char *fcd_traits<Pro>::pluginVersion = "3.7.3";
 const char *fcd_traits<ProPlus>::pluginVersion = "3.5.0";
 
 const int64_t fcd_traits<Pro>::loLowLimitFreq = 64000000L;
-const int64_t fcd_traits<ProPlus>::loLowLimitFreq = 64000000L;
+const int64_t fcd_traits<ProPlus>::loLowLimitFreq = 150000L;
 
 const int64_t fcd_traits<Pro>::loHighLimitFreq = 1700000000L;
-const int64_t fcd_traits<ProPlus>::loHighLimitFreq = 1700000000L;
+const int64_t fcd_traits<ProPlus>::loHighLimitFreq = 2000000000L;
