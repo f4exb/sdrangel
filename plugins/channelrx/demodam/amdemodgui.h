@@ -6,6 +6,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
+#include "amdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -56,6 +57,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	AMDemodSettings m_settings;
 	bool m_doApplySettings;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
@@ -70,6 +72,7 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+	void displaySettings();
 	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);

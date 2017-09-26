@@ -138,37 +138,7 @@ private:
 		RSRunning
 	};
 
-//	struct Config {
-//		int m_inputSampleRate;
-//		qint64 m_inputFrequencyOffset;
-//		Real m_rfBandwidth;
-//		Real m_squelch;
-//		Real m_volume;
-//		quint32 m_audioSampleRate;
-//		bool m_audioMute;
-//		bool m_bandpassEnable;
-//        bool m_copyAudioToUDP;
-//        QString m_udpAddress;
-//        quint16 m_udpPort;
-//
-//		Config() :
-//			m_inputSampleRate(-1),
-//			m_inputFrequencyOffset(0),
-//			m_rfBandwidth(-1),
-//			m_squelch(0),
-//			m_volume(0),
-//			m_audioSampleRate(0),
-//			m_audioMute(false),
-//			m_bandpassEnable(false),
-//            m_copyAudioToUDP(false),
-//            m_udpAddress("127.0.0.1"),
-//            m_udpPort(9999)
-//		{ }
-//	};
-
     AMDemodSettings m_settings;
-//	Config m_config;
-//	Config m_running;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

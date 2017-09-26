@@ -43,13 +43,6 @@ AMDemod::AMDemod() :
 {
 	setObjectName("AMDemod");
 
-//	m_config.m_inputSampleRate = 96000;
-//	m_config.m_inputFrequencyOffset = 0;
-//	m_config.m_rfBandwidth = 5000;
-//	m_config.m_squelch = -40.0;
-//	m_config.m_volume = 2.0;
-//	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 

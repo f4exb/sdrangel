@@ -155,6 +155,9 @@ bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 void AMDemodGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
+    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     displayUDPAddress();
 	applySettings();
 }
@@ -162,10 +165,13 @@ void AMDemodGUI::channelMarkerChanged()
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
-void AMDemodGUI::on_bandpassEnable_toggled(bool checked __attribute__((unused)))
+void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
 {
+    m_settings.m_bandpassEnable = checked;
     applySettings();
 }
 
@@ -173,28 +179,33 @@ void AMDemodGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 100);
+	m_settings.m_rfBandwidth = value * 100;
 	applySettings();
 }
 
 void AMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volume = value / 10.0;
 	applySettings();
 }
 
 void AMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
+	m_settings.m_squelch = value;
 	applySettings();
 }
 
-void AMDemodGUI::on_audioMute_toggled(bool checked __attribute__((unused)))
+void AMDemodGUI::on_audioMute_toggled(bool checked)
 {
+    m_settings.m_audioMute = checked;
 	applySettings();
 }
 
-void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked __attribute__((unused)))
+void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
 {
+    m_settings.m_copyAudioToUDP = checked;
     applySettings();
 }
 
@@ -257,6 +268,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
 
+    displaySettings();
 	applySettings(true);
 }
 
@@ -288,17 +300,55 @@ void AMDemodGUI::applySettings(bool force)
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
-			ui->rfBW->value() * 100.0,
-			ui->volume->value() / 10.0,
-			ui->squelch->value(),
-			ui->audioMute->isChecked(),
-			ui->bandpassEnable->isChecked(),
-			ui->copyAudioToUDP->isChecked(),
-			m_channelMarker.getUDPAddress(),
-			m_channelMarker.getUDPSendPort(),
-			force);
+//		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
+//			ui->rfBW->value() * 100.0,
+//			ui->volume->value() / 10.0,
+//			ui->squelch->value(),
+//			ui->audioMute->isChecked(),
+//			ui->bandpassEnable->isChecked(),
+//			ui->copyAudioToUDP->isChecked(),
+//			m_channelMarker.getUDPAddress(),
+//			m_channelMarker.getUDPSendPort(),
+//			force);
+
+        m_amDemod->configure(m_amDemod->getInputMessageQueue(),
+            m_settings.m_rfBandwidth,
+            m_settings.m_volume,
+            m_settings.m_squelch,
+            m_settings.m_audioMute,
+            m_settings.m_bandpassEnable,
+            m_settings.m_copyAudioToUDP,
+            m_settings.m_udpAddress,
+            m_settings.m_udpPort,
+            force);
+
 	}
+}
+
+void AMDemodGUI::displaySettings()
+{
+    blockApplySettings(true);
+
+    int displayValue = m_settings.m_rfBandwidth/100.0;
+    ui->rfBW->setValue(displayValue);
+    ui->rfBWText->setText(QString("%1 kHz").arg(displayValue / 10.0, 0, 'f', 1));
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+
+    ui->volume->setValue(m_settings.m_volume * 10.0);
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
+
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
+
+    ui->audioMute->setChecked(m_settings.m_audioMute);
+    ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
+    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
+
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
+    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
+
+    blockApplySettings(false);
 }
 
 void AMDemodGUI::displayUDPAddress()
