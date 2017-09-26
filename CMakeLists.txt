@@ -397,7 +397,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/devicesamplesink.h
 
     sdrbase/plugin/pluginapi.h
-    sdrbase/plugin/plugininstanceui.h
+    sdrbase/plugin/plugininstancegui.h
     sdrbase/plugin/plugininterface.h
     sdrbase/plugin/pluginmanager.h
 
