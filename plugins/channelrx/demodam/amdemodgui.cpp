@@ -252,7 +252,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::yellow);
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
@@ -279,7 +278,6 @@ AMDemodGUI::~AMDemodGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_amDemod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -300,28 +298,8 @@ void AMDemodGUI::applySettings(bool force)
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-//		m_amDemod->configure(m_amDemod->getInputMessageQueue(),
-//			ui->rfBW->value() * 100.0,
-//			ui->volume->value() / 10.0,
-//			ui->squelch->value(),
-//			ui->audioMute->isChecked(),
-//			ui->bandpassEnable->isChecked(),
-//			ui->copyAudioToUDP->isChecked(),
-//			m_channelMarker.getUDPAddress(),
-//			m_channelMarker.getUDPSendPort(),
-//			force);
-
-        m_amDemod->configure(m_amDemod->getInputMessageQueue(),
-            m_settings.m_rfBandwidth,
-            m_settings.m_volume,
-            m_settings.m_squelch,
-            m_settings.m_audioMute,
-            m_settings.m_bandpassEnable,
-            m_settings.m_copyAudioToUDP,
-            m_settings.m_udpAddress,
-            m_settings.m_udpPort,
-            force);
-
+	    AMDemod::MsgConfigureAMDemod* message = AMDemod::MsgConfigureAMDemod::create( m_settings, force);
+	    m_amDemod->getInputMessageQueue()->push(message);
 	}
 }
 

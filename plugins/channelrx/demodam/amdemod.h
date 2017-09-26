@@ -32,19 +32,31 @@
 class AMDemod : public BasebandSampleSink {
 	Q_OBJECT
 public:
+    class MsgConfigureAMDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const AMDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureAMDemod* create(const AMDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureAMDemod(settings, force);
+        }
+
+    private:
+        AMDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureAMDemod(const AMDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
 	AMDemod();
 	~AMDemod();
-
-	void configure(MessageQueue* messageQueue,
-	        Real rfBandwidth,
-	        Real volume,
-	        Real squelch,
-	        bool audioMute,
-	        bool bandpassEnable,
-	        bool copyAudioToUDP,
-	        const QString& udpAddress,
-	        quint16 udpPort,
-	        bool force);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -65,74 +77,6 @@ public:
 	}
 
 private:
-	class MsgConfigureAMDemod : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		Real getRFBandwidth() const { return m_rfBandwidth; }
-		Real getVolume() const { return m_volume; }
-		Real getSquelch() const { return m_squelch; }
-		bool getAudioMute() const { return m_audioMute; }
-		bool getBandpassEnable() const { return m_bandpassEnable; }
-		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
-		const QString& getUDPAddress() const { return m_udpAddress; }
-		quint16 getUDPPort() const { return m_udpPort; }
-		bool getForce() const { return m_force; }
-
-		static MsgConfigureAMDemod* create(Real rfBandwidth,
-		        Real volume,
-		        Real squelch,
-		        bool audioMute,
-		        bool bandpassEnable,
-		        bool copyAudioToUDP,
-		        const QString& udpAddress,
-		        quint16 udpPort,
-		        bool force)
-		{
-			return new MsgConfigureAMDemod(rfBandwidth,
-			        volume,
-			        squelch,
-			        audioMute,
-			        bandpassEnable,
-			        copyAudioToUDP,
-			        udpAddress,
-			        udpPort,
-			        force);
-		}
-
-	private:
-		Real m_rfBandwidth;
-		Real m_volume;
-		Real m_squelch;
-		bool m_audioMute;
-		bool m_bandpassEnable;
-		bool m_copyAudioToUDP;
-		QString m_udpAddress;
-		quint16 m_udpPort;
-		bool m_force;
-
-		MsgConfigureAMDemod(Real rfBandwidth,
-		        Real volume,
-		        Real squelch,
-		        bool audioMute,
-		        bool bandpassEnable,
-		        bool copyAudioToUDP,
-		        const QString& udpAddress,
-		        quint16 udpPort,
-		        bool force) :
-			Message(),
-			m_rfBandwidth(rfBandwidth),
-			m_volume(volume),
-			m_squelch(squelch),
-			m_audioMute(audioMute),
-			m_bandpassEnable(bandpassEnable),
-			m_copyAudioToUDP(copyAudioToUDP),
-			m_udpAddress(udpAddress),
-			m_udpPort(udpPort),
-			m_force(force)
-		{ }
-	};
-
 	enum RateState {
 		RSInitialFill,
 		RSRunning
