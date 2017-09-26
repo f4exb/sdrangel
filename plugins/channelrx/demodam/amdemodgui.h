@@ -74,6 +74,7 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
 	void displayUDPAddress();
+	void updateChannelMarker();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

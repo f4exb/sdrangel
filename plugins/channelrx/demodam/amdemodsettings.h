@@ -32,6 +32,7 @@ struct AMDemodSettings
     bool m_copyAudioToUDP;
     QString m_udpAddress;
     quint16 m_udpPort;
+    quint32 m_rgbColor;
     QByteArray m_channelMarkerBytes;
 
     AMDemodSettings();

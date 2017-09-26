@@ -42,10 +42,11 @@ QByteArray AMDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeS32(2, m_rfBandwidth/1000);
+    s.writeS32(2, m_rfBandwidth/100);
     s.writeS32(4, m_volume*10);
-    s.writeS32(5, m_squelch*10);
+    s.writeS32(5, m_squelch);
     s.writeBlob(6, m_channelMarkerBytes);
+    s.writeU32(7, m_rgbColor);
     s.writeBool(8, m_bandpassEnable);
     return s.final();
 }
@@ -68,12 +69,13 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &tmp, 4);
-        m_rfBandwidth = 1000 * tmp;
+        m_rfBandwidth = 100 * tmp;
         d.readS32(4, &tmp, 20);
         m_volume = tmp * 0.1;
         d.readS32(5, &tmp, -40);
-        m_squelch = tmp * 0.1;
+        m_squelch = tmp;
         d.readBlob(6, &m_channelMarkerBytes);
+        d.readU32(7, &m_rgbColor);
         d.readBool(8, &m_bandpassEnable, false);
         return true;
     }

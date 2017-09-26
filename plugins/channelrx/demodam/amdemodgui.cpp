@@ -68,83 +68,27 @@ void AMDemodGUI::setCenterFrequency(qint64 centerFrequency)
 
 void AMDemodGUI::resetToDefaults()
 {
-	blockApplySettings(true);
-
-	ui->rfBW->setValue(50);
-	ui->volume->setValue(20);
-	ui->squelch->setValue(-40);
-	ui->deltaFrequency->setValue(0);
-
-	blockApplySettings(false);
-	applySettings();
+    m_settings.resetToDefaults();
+    displaySettings();
+	applySettings(true);
 }
 
 QByteArray AMDemodGUI::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
-	s.writeS32(4, ui->volume->value());
-	s.writeS32(5, ui->squelch->value());
-    s.writeBlob(6, m_channelMarker.serialize());
-	s.writeU32(7, m_channelMarker.getColor().rgb());
-	s.writeBool(8, ui->bandpassEnable->isChecked());
-	return s.final();
+    return m_settings.serialize();
 }
 
 bool AMDemodGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
-
-	if(!d.isValid())
-    {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1)
-    {
-		QByteArray bytetmp;
-		quint32 u32tmp;
-		qint32 tmp;
-		bool boolTmp;
-		QString strtmp;
-
-		blockApplySettings(true);
-		m_channelMarker.blockSignals(true);
-
-        d.readBlob(6, &bytetmp);
-        m_channelMarker.deserialize(bytetmp);
-		d.readS32(1, &tmp, 0);
-		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
-		d.readS32(3, &tmp, 3);
-		//ui->afBW->setValue(tmp);
-		d.readS32(4, &tmp, 20);
-		ui->volume->setValue(tmp);
-		d.readS32(5, &tmp, -40);
-		ui->squelch->setValue(tmp);
-        if(d.readU32(7, &u32tmp)) {
-			m_channelMarker.setColor(u32tmp);
-        }
-        d.readBool(8, &boolTmp, false);
-        ui->bandpassEnable->setChecked(boolTmp);
-
-        this->setWindowTitle(m_channelMarker.getTitle());
-        displayUDPAddress();
-
-        blockApplySettings(false);
-		m_channelMarker.blockSignals(false);
-
-		applySettings(true);
-		return true;
-	}
-    else
-    {
-		resetToDefaults();
-		return false;
-	}
+    if(m_settings.deserialize(data)) {
+        updateChannelMarker();
+        displaySettings();
+        applySettings(true);
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 }
 
 bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -158,7 +102,9 @@ void AMDemodGUI::channelMarkerChanged()
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     displayUDPAddress();
+    m_settings.m_channelMarkerBytes = m_channelMarker.serialize();
 	applySettings();
 }
 
@@ -322,9 +268,13 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
+    m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
     m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
 
     blockApplySettings(false);
 }
@@ -332,6 +282,16 @@ void AMDemodGUI::displaySettings()
 void AMDemodGUI::displayUDPAddress()
 {
     ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+}
+
+void AMDemodGUI::updateChannelMarker()
+{
+    m_channelMarker.blockSignals(true);
+
+    m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
+    this->setWindowTitle(m_channelMarker.getTitle());
+
+    m_channelMarker.blockSignals(false);
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)
