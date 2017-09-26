@@ -43,14 +43,12 @@ AMDemod::AMDemod() :
 {
 	setObjectName("AMDemod");
 
-	m_config.m_inputSampleRate = 96000;
-	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 5000;
-	m_config.m_squelch = -40.0;
-	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-
-	apply();
+//	m_config.m_inputSampleRate = 96000;
+//	m_config.m_inputFrequencyOffset = 0;
+//	m_config.m_rfBandwidth = 5000;
+//	m_config.m_squelch = -40.0;
+//	m_config.m_volume = 2.0;
+//	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -60,7 +58,9 @@ AMDemod::AMDemod() :
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+
+    applySettings(m_settings, true);
 }
 
 AMDemod::~AMDemod()
@@ -142,8 +142,8 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 void AMDemod::start()
 {
-	qDebug() << "AMDemod::start: m_inputSampleRate: " << m_config.m_inputSampleRate
-			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+	qDebug() << "AMDemod::start: m_inputSampleRate: " << m_settings.m_inputSampleRate
+			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
 	m_squelchCount = 0;
 	m_audioFifo.clear();
@@ -161,41 +161,45 @@ bool AMDemod::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_inputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		AMDemodSettings settings = m_settings;
 
-		apply();
+		settings.m_inputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		qDebug() << "AMDemod::handleMessage: MsgChannelizerNotification:"
-				<< " m_inputSampleRate: " << m_config.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+        applySettings(settings);
+
+        qDebug() << "AMDemod::handleMessage: MsgChannelizerNotification:"
+                << " m_inputSampleRate: " << settings.m_inputSampleRate
+                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
 	else if (MsgConfigureAMDemod::match(cmd))
 	{
-		MsgConfigureAMDemod& cfg = (MsgConfigureAMDemod&) cmd;
+        MsgConfigureAMDemod& cfg = (MsgConfigureAMDemod&) cmd;
 
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_volume = cfg.getVolume();
-		m_config.m_squelch = cfg.getSquelch();
-		m_config.m_audioMute = cfg.getAudioMute();
-		m_config.m_bandpassEnable = cfg.getBandpassEnable();
-		m_config.m_copyAudioToUDP = cfg.getCopyAudioToUDP();
-		m_config.m_udpAddress = cfg.getUDPAddress();
-		m_config.m_udpPort = cfg.getUDPPort();
+        AMDemodSettings settings = m_settings;
 
-		apply(cfg.getForce());
+	    settings.m_rfBandwidth = cfg.getRFBandwidth();
+	    settings.m_volume = cfg.getVolume();
+	    settings.m_squelch = cfg.getSquelch();
+        settings.m_audioMute = cfg.getAudioMute();
+        settings.m_bandpassEnable = cfg.getBandpassEnable();
+        settings.m_copyAudioToUDP = cfg.getCopyAudioToUDP();
+        settings.m_udpAddress = cfg.getUDPAddress();
+        settings.m_udpPort = cfg.getUDPPort();
 
-		qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod:"
-				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioMute: " << m_config.m_audioMute
-				<< " m_bandpassEnable: " << m_config.m_bandpassEnable
-                << " m_copyAudioToUDP: " << m_config.m_copyAudioToUDP
-                << " m_udpAddress: " << m_config.m_udpAddress
-                << " m_udpPort: " << m_config.m_udpPort;
+        applySettings(settings);
+
+        qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod:"
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_volume: " << settings.m_volume
+                << " m_squelch: " << settings.m_squelch
+                << " m_audioMute: " << settings.m_audioMute
+                << " m_bandpassEnable: " << settings.m_bandpassEnable
+                << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+                << " m_udpAddress: " << settings.m_udpAddress
+                << " m_udpPort: " << settings.m_udpPort;
 
 		return true;
 	}
@@ -205,40 +209,77 @@ bool AMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void AMDemod::apply(bool force)
+//void AMDemod::apply(bool force)
+//{
+//
+//	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
+//		(m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
+//	{
+//		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
+//	}
+//
+//	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
+//		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
+//		(m_config.m_audioSampleRate != m_running.m_audioSampleRate) ||
+//		(m_config.m_bandpassEnable != m_running.m_bandpassEnable) || force)
+//	{
+//		m_settingsMutex.lock();
+//		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2f);
+//		m_interpolatorDistanceRemain = 0;
+//		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
+//		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
+//		m_settingsMutex.unlock();
+//	}
+//
+//	if ((m_config.m_squelch != m_running.m_squelch) || force)
+//	{
+//		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
+//		m_squelchLevel *= m_squelchLevel;
+//        qDebug("AMDemod::applySettings: m_squelchLevel: %f", m_squelchLevel);
+//	}
+//
+//    if ((m_config.m_udpAddress != m_running.m_udpAddress)
+//        || (m_config.m_udpPort != m_running.m_udpPort) || force)
+//    {
+//        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
+//        m_udpBufferAudio->setPort(m_config.m_udpPort);
+//    }
+//
+//	m_running = m_config;
+//}
+
+void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 {
-
-	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
-	{
-		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
-	}
-
-	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate) ||
-		(m_config.m_bandpassEnable != m_running.m_bandpassEnable) || force)
-	{
-		m_settingsMutex.lock();
-		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.2f);
-		m_interpolatorDistanceRemain = 0;
-		m_interpolatorDistance = (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
-		m_settingsMutex.unlock();
-	}
-
-	if ((m_config.m_squelch != m_running.m_squelch) || force)
-	{
-		m_squelchLevel = pow(10.0, m_config.m_squelch / 20.0);
-		m_squelchLevel *= m_squelchLevel;
-	}
-
-    if ((m_config.m_udpAddress != m_running.m_udpAddress)
-        || (m_config.m_udpPort != m_running.m_udpPort) || force)
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) ||
+        (m_settings.m_inputSampleRate != settings.m_inputSampleRate) || force)
     {
-        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
-        m_udpBufferAudio->setPort(m_config.m_udpPort);
+        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
     }
 
-	m_running = m_config;
+    if((m_settings.m_inputSampleRate != settings.m_inputSampleRate) ||
+        (m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
+        (m_settings.m_audioSampleRate != settings.m_audioSampleRate) ||
+        (m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_bandpass.create(301, settings.m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
+        m_settingsMutex.unlock();
+    }
+
+    if ((m_settings.m_squelch != settings.m_squelch) || force)
+    {
+        m_squelchLevel = pow(10.0, settings.m_squelch / 10.0);
+    }
+
+    if ((m_settings.m_udpAddress != settings.m_udpAddress)
+        || (m_settings.m_udpPort != settings.m_udpPort) || force)
+    {
+        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
+        m_udpBufferAudio->setPort(settings.m_udpPort);
+    }
+
+    m_settings = settings;
 }

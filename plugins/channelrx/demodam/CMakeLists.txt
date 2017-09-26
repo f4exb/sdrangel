@@ -3,12 +3,14 @@ project(am)
 set(am_SOURCES
 	amdemod.cpp
 	amdemodgui.cpp
+	amdemodsettings.cpp
 	amdemodplugin.cpp
 )
 
 set(am_HEADERS
 	amdemod.h
 	amdemodgui.h
+	amdemodsettings.h
 	amdemodplugin.h
 )
 
