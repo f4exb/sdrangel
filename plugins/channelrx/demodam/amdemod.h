@@ -29,6 +29,10 @@
 #include "util/message.h"
 #include "amdemodsettings.h"
 
+class DeviceSourceAPI;
+class DownChannelizer;
+class ThreadedBasebandSampleSink;
+
 class AMDemod : public BasebandSampleSink {
 	Q_OBJECT
 public:
@@ -55,7 +59,30 @@ public:
         { }
     };
 
-	AMDemod();
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+    AMDemod(DeviceSourceAPI *deviceAPI);
 	~AMDemod();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -81,6 +108,10 @@ private:
 		RSInitialFill,
 		RSRunning
 	};
+
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
     AMDemodSettings m_settings;
 

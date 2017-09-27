@@ -60,8 +60,8 @@ private:
 	AMDemodSettings m_settings;
 	bool m_doApplySettings;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
+//	ThreadedBasebandSampleSink* m_threadedChannelizer;
+//	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;

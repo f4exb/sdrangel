@@ -26,12 +26,16 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
+MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureChannelizer, Message)
 
 const int AMDemod::m_udpBlockSize = 512;
 
-AMDemod::AMDemod() :
+AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
     m_squelchOpen(false),
 	m_magsqSum(0.0f),
 	m_magsqPeak(0.0f),
@@ -42,6 +46,10 @@ AMDemod::AMDemod() :
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("AMDemod");
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -143,6 +151,16 @@ bool AMDemod::handleMessage(const Message& cmd)
                 << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
+	}
+	else if (MsgConfigureChannelizer::match(cmd))
+	{
+	    MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
 	}
 	else if (MsgConfigureAMDemod::match(cmd))
 	{
