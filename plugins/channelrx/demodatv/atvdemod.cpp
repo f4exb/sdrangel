@@ -636,7 +636,7 @@ void ATVDemod::applySettings()
         int sampleRate = m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
         MsgReportEffectiveSampleRate *report;
         report = MsgReportEffectiveSampleRate::create(sampleRate, m_objRunningPrivate.m_intNumberSamplePerLine);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
     }
 }
 

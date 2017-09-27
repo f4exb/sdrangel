@@ -1,7 +1,8 @@
 #include <dsp/basebandsamplesink.h>
 #include "util/message.h"
 
-BasebandSampleSink::BasebandSampleSink()
+BasebandSampleSink::BasebandSampleSink() :
+    m_guiMessageQueue(0)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

@@ -242,7 +242,7 @@ void ATVDemodGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = m_objATVDemod->getOutputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -285,6 +285,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     m_objScopeVis = new ScopeVisNG(ui->glScope);
     m_objATVDemod = new ATVDemod(m_objScopeVis);
+    m_objATVDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_objATVDemod->setATVScreen(ui->screenTV);
 
     m_objChannelizer = new DownChannelizer(m_objATVDemod);
@@ -337,7 +338,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
-    connect(m_objATVDemod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     QChar delta = QChar(0x94, 0x03);
     ui->fmDeviationLabel->setText(delta);
