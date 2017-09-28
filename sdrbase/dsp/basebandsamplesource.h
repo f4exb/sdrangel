@@ -56,11 +56,12 @@ public:
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-	MessageQueue *getOutputMessageQueue() { return &m_outputMessageQueue; } //!< Get the queue for asynchronous outbound communication
+    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
 protected:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-	MessageQueue m_outputMessageQueue; //!< Queue for asynchronous outbound communication
+    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 	SampleSourceFifo m_sampleFifo;    //!< Internal FIFO for multi-channel processing
 
 protected slots:

@@ -38,8 +38,6 @@ public:
 	~ThreadedBasebandSampleSource();
 
 	const BasebandSampleSource *getSource() const { return m_basebandSampleSource; }
-	MessageQueue* getInputMessageQueue() { return m_basebandSampleSource->getInputMessageQueue(); }   //!< Return pointer to sample source's input message queue
-	MessageQueue* getOutputMessageQueue() { return m_basebandSampleSource->getOutputMessageQueue(); } //!< Return pointer to sample source's output message queue
 
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()

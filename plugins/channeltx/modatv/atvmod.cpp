@@ -394,7 +394,7 @@ void ATVMod::pullVideo(Real& sample)
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             1); // open splash screen on GUI side
-                    getOutputMessageQueue()->push(report);
+                    getMessageQueueToGUI()->push(report);
                     int nbFrames = 0;
 
                     time(&start);
@@ -422,7 +422,7 @@ void ATVMod::pullVideo(Real& sample)
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             2); // close splash screen on GUI side
-                    getOutputMessageQueue()->push(report);
+                    getMessageQueueToGUI()->push(report);
                 }
                 else if (camera.m_videoFPS == 0.0f) // Hideous hack for windows
                 {
@@ -440,7 +440,7 @@ void ATVMod::pullVideo(Real& sample)
                             camera.m_videoWidth,
                             camera.m_videoHeight,
                             0);
-                    getOutputMessageQueue()->push(report);
+                    getMessageQueueToGUI()->push(report);
                 }
 
                 int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
@@ -603,7 +603,7 @@ bool ATVMod::handleMessage(const Message& cmd)
 
         MsgReportVideoFileSourceStreamTiming *report;
         report = MsgReportVideoFileSourceStreamTiming::create(framesCount);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
 
         return true;
     }
@@ -624,7 +624,7 @@ bool ATVMod::handleMessage(const Message& cmd)
     				m_cameras[m_cameraIndex].m_videoWidth,
     				m_cameras[m_cameraIndex].m_videoHeight,
     				0);
-            getOutputMessageQueue()->push(report);
+            getMessageQueueToGUI()->push(report);
     	}
 
     	return true;
@@ -723,7 +723,7 @@ void ATVMod::apply(bool force)
 
         MsgReportEffectiveSampleRate *report;
         report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
     }
 
     if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
@@ -979,7 +979,7 @@ void ATVMod::openVideo(const QString& fileName)
 
         MsgReportVideoFileSourceStreamData *report;
         report = MsgReportVideoFileSourceStreamData::create(m_videoFPS, m_videoLength);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
     }
     else
     {
@@ -1123,7 +1123,7 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
                 m_cameras[0].m_videoWidth,
                 m_cameras[0].m_videoHeight,
                 0);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
     }
 }
 

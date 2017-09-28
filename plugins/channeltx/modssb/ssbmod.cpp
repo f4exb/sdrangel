@@ -685,7 +685,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 
     	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
 
         return true;
     }
@@ -824,7 +824,7 @@ void SSBMod::openFileStream()
 
     MsgReportFileSourceStreamData *report;
     report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
-    getOutputMessageQueue()->push(report);
+    getMessageQueueToGUI()->push(report);
 }
 
 void SSBMod::seekFileStream(int seekPercentage)
