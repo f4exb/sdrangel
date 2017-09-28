@@ -154,9 +154,30 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool ChannelAnalyzerGUI::handleMessage(const Message& message __attribute__((unused)))
+bool ChannelAnalyzerGUI::handleMessage(const Message& message)
 {
+    if (ChannelAnalyzer::MsgReportChannelSampleRateChanged::match(message))
+    {
+        setNewRate(m_spanLog2);
+        return true;
+    }
+
 	return false;
+}
+
+void ChannelAnalyzerGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        qDebug("ChannelAnalyzerGUI::handleInputMessages: message: %s", message->getIdentifier());
+
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void ChannelAnalyzerGUI::viewChanged()
@@ -169,11 +190,6 @@ void ChannelAnalyzerGUI::tick()
 	Real powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
-}
-
-void ChannelAnalyzerGUI::channelSampleRateChanged()
-{
-	setNewRate(m_spanLog2);
 }
 
 void ChannelAnalyzerGUI::on_deltaMinus_toggled(bool minus)
@@ -326,11 +342,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *de
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
-	m_channelAnalyzer = new ChannelAnalyzer(m_spectrumScopeComboVis);
-	m_channelizer = new DownChannelizer(m_channelAnalyzer);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_channelAnalyzer = new ChannelAnalyzer(m_deviceAPI);
+	m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
+	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
 
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::ReverseGold));
 	ui->deltaFrequency->setValueRange(7, 0U, 9999999U);
@@ -361,6 +375,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *de
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
+	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
 	applySettings();
 	setNewRate(m_spanLog2);
 }
@@ -368,9 +384,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *de
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_channelAnalyzer;
 	delete m_spectrumVis;
 	delete m_scopeVis;
@@ -457,9 +470,8 @@ void ChannelAnalyzerGUI::applySettings()
 		ui->deltaFrequency->setValue(abs(m_channelMarker.getCenterFrequency()));
 		ui->deltaMinus->setChecked(m_channelMarker.getCenterFrequency() < 0);
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			m_channelizer->getInputSampleRate(),
-			m_channelMarker.getCenterFrequency());
+		ChannelAnalyzer::MsgConfigureChannelizer *msg = ChannelAnalyzer::MsgConfigureChannelizer::create(m_channelMarker.getCenterFrequency());
+		m_channelAnalyzer->getInputMessageQueue()->push(msg);
 
 		m_channelAnalyzer->configure(m_channelAnalyzer->getInputMessageQueue(),
 			ui->BW->value() * 100.0,
