@@ -59,7 +59,7 @@ public:
 
 private slots:
 	void viewChanged();
-	void channelizerInputSampleRateChanged();
+//	void channelizerInputSampleRateChanged();
 	void on_deltaFrequency_changed(qint64 value);
     void on_channelSampleRate_changed(quint64 value);
     void on_useRationalDownsampler_toggled(bool checked);
@@ -69,6 +69,7 @@ private slots:
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
+    void handleInputMessages();
 	void tick();
 
 private:
@@ -82,8 +83,8 @@ private:
 	int m_spanLog2;
 	MovingAverage<double> m_channelPowerDbAvg;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
+//	ThreadedBasebandSampleSink* m_threadedChannelizer;
+//	DownChannelizer* m_channelizer;
 	ChannelAnalyzerNG* m_channelAnalyzer;
 	SpectrumScopeNGComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
