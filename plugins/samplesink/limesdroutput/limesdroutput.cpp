@@ -259,6 +259,9 @@ void LimeSDROutput::closeDevice()
 
 bool LimeSDROutput::acquireChannel()
 {
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     // acquire the channel
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_TX, m_deviceShared.m_channel, true) != 0)
@@ -282,6 +285,8 @@ bool LimeSDROutput::acquireChannel()
     if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
     {
         qCritical("LimeSDROutput::acquireChannel: cannot setup the stream on Tx channel %d", m_deviceShared.m_channel);
+        resumeTxBuddies();
+        resumeRxBuddies();
         return false;
     }
     else
@@ -290,11 +295,17 @@ bool LimeSDROutput::acquireChannel()
     }
 
     m_channelAcquired = true;
+    resumeTxBuddies();
+    resumeRxBuddies();
+
     return true;
 }
 
 void LimeSDROutput::releaseChannel()
 {
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     // destroy the stream
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
     m_streamId.handle = 0;
@@ -307,6 +318,8 @@ void LimeSDROutput::releaseChannel()
     }
 
     m_channelAcquired = false;
+    resumeTxBuddies();
+    resumeRxBuddies();
 }
 
 bool LimeSDROutput::start()
