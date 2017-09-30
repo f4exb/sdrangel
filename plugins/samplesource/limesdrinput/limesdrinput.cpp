@@ -269,6 +269,8 @@ void LimeSDRInput::closeDevice()
         return;
     }
 
+    if (m_running) { stop(); }
+
     // destroy the stream
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
     m_streamId.handle = 0;
@@ -298,7 +300,7 @@ bool LimeSDRInput::start()
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) { stop(); }
 
     applySettings(m_settings, true);
 
