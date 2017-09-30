@@ -10,7 +10,7 @@ Homepage: https://github.com/f4exb/sdrangel
 
 Package: sdrangel
 Architecture: any
-Depends: libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libnanomsg0, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, libopencv-dev, libsqlite3-dev, pulseaudio, libxml2, ${shlibs:Depends}, ${misc:Depends}
+Depends: libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libnanomsg0|libnanomsg4, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, libopencv-dev, libsqlite3-dev, pulseaudio, libxml2, ${shlibs:Depends}, ${misc:Depends}
 Description: SDR/Analyzer/Generator front-end for various hardware
  SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF, RTL-SDR, FunCube, LimeSDR, PlutoSDR.
  Also File source and sink for I/Q samples, network I/Q sources with SDRDaemon.
