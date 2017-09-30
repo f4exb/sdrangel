@@ -398,8 +398,6 @@ bool DeviceSourceAPI::ChannelInstanceRegistration::operator<(const ChannelInstan
 
 void DeviceSourceAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 {
-    std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
-
     m_sourceBuddies.push_back(buddy);
     buddy->m_sourceBuddies.push_back(this);
     qDebug("DeviceSourceAPI::addSourceBuddy: added buddy %s(%s) [%lx] <-> [%lx]",
@@ -411,8 +409,6 @@ void DeviceSourceAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 
 void DeviceSourceAPI::addSinkBuddy(DeviceSinkAPI* buddy)
 {
-    std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
-
     m_sinkBuddies.push_back(buddy);
     buddy->m_sourceBuddies.push_back(this);
     qDebug("DeviceSourceAPI::addSinkBuddy: added buddy %s(%s) [%lx] <-> [%lx]",
