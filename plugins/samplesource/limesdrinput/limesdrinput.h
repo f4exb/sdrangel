@@ -241,8 +241,10 @@ private:
 
     bool openDevice();
     void closeDevice();
-    void suspendBuddies();
-    void resumeBuddies();
+    void suspendRxBuddies();
+    void resumeRxBuddies();
+    void suspendTxBuddies();
+    void resumeTxBuddies();
     bool applySettings(const LimeSDRInputSettings& settings, bool force = false);
 };
 
