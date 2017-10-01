@@ -141,11 +141,11 @@ int BFMDemodSettings::getRFBWIndex(int rfbw)
 {
     for (int i = 0; i < m_nbRFBW; i++)
     {
-        if (rfbw >= m_rfBW[i])
+        if (rfbw <= m_rfBW[i])
         {
             return i;
         }
     }
 
-    return 0;
+    return m_nbRFBW-1;
 }

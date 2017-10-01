@@ -44,16 +44,6 @@
 
 const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
 
-//int requiredBW(int rfBW)
-//{
-//	if (rfBW <= 48000)
-//		return 48000;
-//	else if (rfBW < 100000)
-//		return 96000;
-//	else
-//		return 384000;
-//}
-
 BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceAPI);
@@ -88,114 +78,34 @@ void BFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
 
 void BFMDemodGUI::resetToDefaults()
 {
-	blockApplySettings(true);
+    m_settings.resetToDefaults();
+    displaySettings();
 
-	ui->rfBW->setValue(4);
-	ui->afBW->setValue(3);
-	ui->volume->setValue(20);
-	ui->squelch->setValue(-40);
-	ui->deltaFrequency->setValue(0);
-	ui->copyAudioToUDP->setChecked(false);
-    m_channelMarker.setTitle("Broadcast FM Demod");
-    m_channelMarker.setColor(QColor(80, 120, 228));
-    m_channelMarker.setBandwidth(12500);
-    m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
-    setTitleColor(m_channelMarker.getColor());
+    blockApplySettings(true);
     ui->g00AltFrequenciesBox->setEnabled(false);
     ui->g14MappedFrequencies->setEnabled(false);
     ui->g14AltFrequencies->setEnabled(false);
-
 	blockApplySettings(false);
+
 	applySettings();
 }
 
 QByteArray BFMDemodGUI::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
-	s.writeS32(3, ui->afBW->value());
-	s.writeS32(4, ui->volume->value());
-	s.writeS32(5, ui->squelch->value());
-	s.writeU32(7, m_channelMarker.getColor().rgb());
-	s.writeBlob(8, ui->spectrumGUI->serialize());
-	s.writeBool(9, ui->audioStereo->isChecked());
-	s.writeBool(10, ui->lsbStereo->isChecked());
-	s.writeBlob(11, m_channelMarker.serialize());
-	return s.final();
+    return m_settings.serialize();
 }
 
 bool BFMDemodGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
-
-	if (!d.isValid())
-	{
-		resetToDefaults();
-		return false;
-	}
-
-	if (d.getVersion() == 1)
-	{
-		QByteArray bytetmp;
-		qint32 tmp;
-		quint32 u32tmp;
-		bool booltmp;
-		QString strtmp;
-
-		blockApplySettings(true);
-	    m_channelMarker.blockSignals(true);
-
-        d.readBlob(11, &bytetmp);
-        m_channelMarker.deserialize(bytetmp);
-
-		d.readS32(1, &tmp, 0);
-		m_channelMarker.setCenterFrequency(tmp);
-
-		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
-		ui->rfBWText->setText(QString("%1 kHz").arg(BFMDemodSettings::getRFBW(tmp) / 1000.0));
-		m_channelMarker.setBandwidth(BFMDemodSettings::getRFBW(tmp));
-
-		d.readS32(3, &tmp, 3);
-		ui->afBW->setValue(tmp);
-
-		d.readS32(4, &tmp, 20);
-		ui->volume->setValue(tmp);
-
-		d.readS32(5, &tmp, -40);
-		ui->squelch->setValue(tmp);
-
-		if(d.readU32(7, &u32tmp))
-		{
-			m_channelMarker.setColor(u32tmp);
-		}
-
-		d.readBlob(8, &bytetmp);
-		ui->spectrumGUI->deserialize(bytetmp);
-
-		d.readBool(9, &booltmp, false);
-		ui->audioStereo->setChecked(booltmp);
-
-		d.readBool(10, &booltmp, false);
-		ui->lsbStereo->setChecked(booltmp);
-
-        this->setWindowTitle(m_channelMarker.getTitle());
-		displayUDPAddress();
-
-		blockApplySettings(false);
-	    m_channelMarker.blockSignals(false);
-
-		applySettings(true);
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
+    if(m_settings.deserialize(data)) {
+        updateChannelMarker();
+        displaySettings();
+        applySettings(true);
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 }
 
 bool BFMDemodGUI::handleMessage(const Message& message)
@@ -229,7 +139,6 @@ void BFMDemodGUI::handleInputMessages()
     }
 }
 
-
 void BFMDemodGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
@@ -240,30 +149,36 @@ void BFMDemodGUI::channelMarkerChanged()
 void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void BFMDemodGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 kHz").arg(BFMDemodSettings::getRFBW(value) / 1000.0));
 	m_channelMarker.setBandwidth(BFMDemodSettings::getRFBW(value));
+	m_settings.m_rfBandwidth = BFMDemodSettings::getRFBW(value);
 	applySettings();
 }
 
 void BFMDemodGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1 kHz").arg(value));
+	m_settings.m_afBandwidth = value * 1000.0;
 	applySettings();
 }
 
 void BFMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volume = value / 10.0;
 	applySettings();
 }
 
 void BFMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
+	m_settings.m_squelch = value;
 	applySettings();
 }
 
@@ -274,26 +189,31 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 		ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
 
+	m_settings.m_audioStereo = stereo;
 	applySettings();
 }
 
-void BFMDemodGUI::on_lsbStereo_toggled(bool lsb __attribute__((unused)))
+void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
 {
+    m_settings.m_lsbStereo = lsb;
 	applySettings();
 }
 
-void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy __attribute__((unused)))
+void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy)
 {
+    m_settings.m_copyAudioToUDP = copy;
     applySettings();
 }
 
 void BFMDemodGUI::on_showPilot_clicked()
 {
+    m_settings.m_showPilot = ui->showPilot->isChecked();
 	applySettings();
 }
 
 void BFMDemodGUI::on_rds_clicked()
 {
+    m_settings.m_rdsActive = ui->rds->isChecked();
 	applySettings();
 }
 
@@ -415,10 +335,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_bfmDemod = new BFMDemod(m_deviceAPI);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_bfmDemod->setSampleSink(m_spectrumVis);
-//	m_channelizer = new DownChannelizer(m_bfmDemod);
-//	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-//	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-//	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
@@ -428,7 +344,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setTitle("Broadcast FM Demod");
 	m_channelMarker.setColor(QColor(80, 120, 228));
 	m_channelMarker.setBandwidth(12500);
@@ -437,6 +352,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.setVisible(true);
 	setTitleColor(m_channelMarker.getColor());
+
+	m_settings.setChannelMarker(&m_channelMarker);
+	m_settings.setSpectrumGUI(ui->spectrumGUI);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
@@ -452,6 +370,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	rdsUpdateFixedFields();
 	rdsUpdate(true);
+	displaySettings();
 	displayUDPAddress();
 	applySettings(true);
 }
@@ -459,17 +378,20 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 BFMDemodGUI::~BFMDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-//	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-//	delete m_threadedChannelizer;
-//	delete m_channelizer;
 	delete m_bfmDemod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
 void BFMDemodGUI::displayUDPAddress()
 {
     ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+}
+
+void BFMDemodGUI::updateChannelMarker()
+{
+    m_channelMarker.blockSignals(true);
+    this->setWindowTitle(m_channelMarker.getTitle());
+    m_channelMarker.blockSignals(false);
 }
 
 void BFMDemodGUI::blockApplySettings(bool block)
@@ -488,10 +410,6 @@ void BFMDemodGUI::applySettings(bool force)
 	            m_channelMarker.getCenterFrequency());
 	    m_bfmDemod->getInputMessageQueue()->push(message);
 
-//		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-//			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
-//			m_channelMarker.getCenterFrequency());
-
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_bfmDemod->configure(m_bfmDemod->getInputMessageQueue(),
@@ -508,6 +426,42 @@ void BFMDemodGUI::applySettings(bool force)
 			m_channelMarker.getUDPSendPort(),
 			force);
 	}
+}
+
+void BFMDemodGUI::displaySettings()
+{
+    blockApplySettings(true);
+
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+
+    ui->rfBW->setValue(BFMDemodSettings::getRFBWIndex(m_settings.m_rfBandwidth));
+    ui->rfBWText->setText(QString("%1 kHz").arg(m_settings.m_rfBandwidth / 1000.0));
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+
+    ui->afBW->setValue(m_settings.m_afBandwidth/1000.0);
+    ui->afBWText->setText(QString("%1 kHz").arg(m_settings.m_afBandwidth/1000.0));
+
+    ui->volume->setValue(m_settings.m_volume * 10.0);
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
+
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
+
+    ui->audioStereo->setChecked(m_settings.m_audioStereo);
+    ui->lsbStereo->setChecked(m_settings.m_lsbStereo);
+    ui->showPilot->setChecked(m_settings.m_showPilot);
+    ui->rds->setChecked(m_settings.m_rdsActive);
+    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
+    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
+    blockApplySettings(false);
 }
 
 void BFMDemodGUI::leaveEvent(QEvent*)
@@ -829,5 +783,4 @@ void BFMDemodGUI::changeFrequency(qint64 f)
 {
 	qint64 df = m_channelMarker.getCenterFrequency();
 	qDebug() << "BFMDemodGUI::changeFrequency: " << f - df;
-	// TODO: in the future it should be able to set the center frequency of the sample source this channel plugin is linked to
 }

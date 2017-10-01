@@ -89,8 +89,6 @@ private:
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
-//	ThreadedBasebandSampleSink* m_threadedChannelizer;
-//	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
 	BFMDemod* m_bfmDemod;
@@ -104,7 +102,9 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+    void displaySettings();
 	void displayUDPAddress();
+	void updateChannelMarker();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
 
