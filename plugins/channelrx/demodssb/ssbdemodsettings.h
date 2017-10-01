@@ -14,36 +14,44 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef PLUGINS_CHANNELRX_DEMODSSB_SSBDEMODSETTINGS_H_
+#define PLUGINS_CHANNELRX_DEMODSSB_SSBDEMODSETTINGS_H_
 
 #include <QByteArray>
 
 class Serializable;
 
-struct AMDemodSettings
+struct SSBDemodSettings
 {
     int m_inputSampleRate;
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
-    Real m_squelch;
+    Real m_lowCutoff;
     Real m_volume;
-    quint32 m_audioSampleRate;
+    int  m_spanLog2;
+    bool m_audioBinaural;
+    bool m_audioFlipChannels;
+    bool m_dsb;
     bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
+    bool m_agc;
+    bool m_agcClamping;
+    int  m_agcTimeLog2;
+    int  m_agcPowerThreshold;
+    int  m_agcThresholdGate;
     QString m_udpAddress;
     quint16 m_udpPort;
     quint32 m_rgbColor;
-    Serializable *m_channelMarker;
 
-    AMDemodSettings();
+    Serializable *m_channelMarker;
+    Serializable *m_spectrumGUI;
+
+    SSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };
 
 
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* PLUGINS_CHANNELRX_DEMODSSB_SSBDEMODSETTINGS_H_ */
