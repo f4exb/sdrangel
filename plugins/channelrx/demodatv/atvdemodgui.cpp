@@ -284,7 +284,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_scopeVis = new ScopeVisNG(ui->glScope);
-    m_atvDemod = new ATVDemod(m_scopeVis);
+    m_atvDemod = new ATVDemod(m_deviceAPI);
+    m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setATVScreen(ui->screenTV);
 

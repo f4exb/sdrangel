@@ -31,9 +31,9 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 
 const int ATVDemod::m_ssbFftLen = 1024;
 
-ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
-    m_objScopeSink(objScopeSink),
-    m_objRegisteredATVScreen(NULL),
+ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
+    m_registeredATVScreen(NULL),
     m_intNumberSamplePerTop(0),
     m_intImageIndex(0),
     m_intSynchroPoints(0),
@@ -88,7 +88,7 @@ ATVDemod::~ATVDemod()
 
 void ATVDemod::setATVScreen(ATVScreen *objScreen)
 {
-    m_objRegisteredATVScreen = objScreen;
+    m_registeredATVScreen = objScreen;
 }
 
 void ATVDemod::configure(
@@ -207,10 +207,10 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
     }
 
-    if ((m_running.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) // do only if scope tab is selected and scope is available
+    if ((m_running.m_intVideoTabIndex == 1) && (m_scopeSink != 0)) // do only if scope tab is selected and scope is available
     {
-        m_objScopeSink->feed(m_objScopeSampleBuffer.begin(), m_objScopeSampleBuffer.end(), false); // m_ssb = positive only
-        m_objScopeSampleBuffer.clear();
+        m_scopeSink->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), false); // m_ssb = positive only
+        m_scopeSampleBuffer.clear();
     }
 
     if (ptrBufferToRelease != 0)
@@ -390,8 +390,8 @@ void ATVDemod::demod(Complex& c)
     fltVal = m_running.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
     fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
 
-    if ((m_running.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) { // feed scope buffer only if scope is present and visible
-        m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
+    if ((m_running.m_intVideoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
+        m_scopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
     }
 
     m_fltAmpLineAverage += fltVal;
@@ -490,9 +490,9 @@ bool ATVDemod::handleMessage(const Message& cmd)
     }
     else
     {
-        if (m_objScopeSink != 0)
+        if (m_scopeSink != 0)
         {
-           return m_objScopeSink->handleMessage(cmd);
+           return m_scopeSink->handleMessage(cmd);
         }
         else
         {
@@ -574,8 +574,8 @@ void ATVDemod::applySettings()
         m_configPrivate.m_intNumberSamplePerLine = (int) (m_config.m_fltLineDuration * m_config.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_config.m_fltTopDuration * m_config.m_intSampleRate);
 
-        m_objRegisteredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
-        m_objRegisteredATVScreen->resizeATVScreen(
+        m_registeredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
+        m_registeredATVScreen->resizeATVScreen(
                 m_configPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                 m_intNumberOfLines - m_intNumberOfBlackLines);
 

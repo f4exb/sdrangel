@@ -385,16 +385,20 @@ void ATVMod::pullVideo(Real& sample)
                     time_t start, end;
                     cv::Mat frame;
 
-                    MsgReportCameraData *report;
-                    report = MsgReportCameraData::create(
-                            camera.m_cameraNumber,
-                            0.0f,
-							camera.m_videoFPSManual,
-							camera.m_videoFPSManualEnable,
-                            camera.m_videoWidth,
-                            camera.m_videoHeight,
-                            1); // open splash screen on GUI side
-                    getMessageQueueToGUI()->push(report);
+                    if (getMessageQueueToGUI())
+                    {
+                        MsgReportCameraData *report;
+                        report = MsgReportCameraData::create(
+                                camera.m_cameraNumber,
+                                0.0f,
+                                camera.m_videoFPSManual,
+                                camera.m_videoFPSManualEnable,
+                                camera.m_videoWidth,
+                                camera.m_videoHeight,
+                                1); // open splash screen on GUI side
+                        getMessageQueueToGUI()->push(report);
+                    }
+
                     int nbFrames = 0;
 
                     time(&start);
@@ -414,15 +418,19 @@ void ATVMod::pullVideo(Real& sample)
                     camera.m_videoFPSCount = camera.m_videoFPSq;
                     camera.m_videoPrevFPSCount = 0;
 
-                    report = MsgReportCameraData::create(
-                            camera.m_cameraNumber,
-                            camera.m_videoFPS,
-							camera.m_videoFPSManual,
-							camera.m_videoFPSManualEnable,
-                            camera.m_videoWidth,
-                            camera.m_videoHeight,
-                            2); // close splash screen on GUI side
-                    getMessageQueueToGUI()->push(report);
+                    if (getMessageQueueToGUI())
+                    {
+                        MsgReportCameraData *report;
+                        report = MsgReportCameraData::create(
+                                camera.m_cameraNumber,
+                                camera.m_videoFPS,
+                                camera.m_videoFPSManual,
+                                camera.m_videoFPSManualEnable,
+                                camera.m_videoWidth,
+                                camera.m_videoHeight,
+                                2); // close splash screen on GUI side
+                        getMessageQueueToGUI()->push(report);
+                    }
                 }
                 else if (camera.m_videoFPS == 0.0f) // Hideous hack for windows
                 {
@@ -431,16 +439,19 @@ void ATVMod::pullVideo(Real& sample)
                     camera.m_videoFPSCount = camera.m_videoFPSq;
                     camera.m_videoPrevFPSCount = 0;
 
-                    MsgReportCameraData *report;
-                    report = MsgReportCameraData::create(
-                            camera.m_cameraNumber,
-                            camera.m_videoFPS,
-							camera.m_videoFPSManual,
-							camera.m_videoFPSManualEnable,
-                            camera.m_videoWidth,
-                            camera.m_videoHeight,
-                            0);
-                    getMessageQueueToGUI()->push(report);
+                    if (getMessageQueueToGUI())
+                    {
+                        MsgReportCameraData *report;
+                        report = MsgReportCameraData::create(
+                                camera.m_cameraNumber,
+                                camera.m_videoFPS,
+                                camera.m_videoFPSManual,
+                                camera.m_videoFPSManualEnable,
+                                camera.m_videoWidth,
+                                camera.m_videoHeight,
+                                0);
+                        getMessageQueueToGUI()->push(report);
+                    }
                 }
 
                 int fpsIncrement = (int) camera.m_videoFPSCount - camera.m_videoPrevFPSCount;
@@ -601,9 +612,12 @@ bool ATVMod::handleMessage(const Message& cmd)
             framesCount = 0;
         }
 
-        MsgReportVideoFileSourceStreamTiming *report;
-        report = MsgReportVideoFileSourceStreamTiming::create(framesCount);
-        getMessageQueueToGUI()->push(report);
+        if (getMessageQueueToGUI())
+        {
+            MsgReportVideoFileSourceStreamTiming *report;
+            report = MsgReportVideoFileSourceStreamTiming::create(framesCount);
+            getMessageQueueToGUI()->push(report);
+        }
 
         return true;
     }
@@ -615,16 +629,20 @@ bool ATVMod::handleMessage(const Message& cmd)
     	if (index < m_cameras.size())
     	{
     		m_cameraIndex = index;
-    		MsgReportCameraData *report;
-            report = MsgReportCameraData::create(
-            		m_cameras[m_cameraIndex].m_cameraNumber,
-    				m_cameras[m_cameraIndex].m_videoFPS,
-                    m_cameras[m_cameraIndex].m_videoFPSManual,
-                    m_cameras[m_cameraIndex].m_videoFPSManualEnable,
-    				m_cameras[m_cameraIndex].m_videoWidth,
-    				m_cameras[m_cameraIndex].m_videoHeight,
-    				0);
-            getMessageQueueToGUI()->push(report);
+
+    		if (getMessageQueueToGUI())
+    		{
+                MsgReportCameraData *report;
+                report = MsgReportCameraData::create(
+                        m_cameras[m_cameraIndex].m_cameraNumber,
+                        m_cameras[m_cameraIndex].m_videoFPS,
+                        m_cameras[m_cameraIndex].m_videoFPSManual,
+                        m_cameras[m_cameraIndex].m_videoFPSManualEnable,
+                        m_cameras[m_cameraIndex].m_videoWidth,
+                        m_cameras[m_cameraIndex].m_videoHeight,
+                        0);
+                getMessageQueueToGUI()->push(report);
+    		}
     	}
 
     	return true;
@@ -721,9 +739,12 @@ void ATVMod::apply(bool force)
         applyStandard(); // set all timings
         m_settingsMutex.unlock();
 
-        MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
-        getMessageQueueToGUI()->push(report);
+        if (getMessageQueueToGUI())
+        {
+            MsgReportEffectiveSampleRate *report;
+            report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
+            getMessageQueueToGUI()->push(report);
+        }
     }
 
     if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
@@ -977,9 +998,12 @@ void ATVMod::openVideo(const QString& fileName)
         calculateVideoSizes();
         m_videoEOF = false;
 
-        MsgReportVideoFileSourceStreamData *report;
-        report = MsgReportVideoFileSourceStreamData::create(m_videoFPS, m_videoLength);
-        getMessageQueueToGUI()->push(report);
+        if (getMessageQueueToGUI())
+        {
+            MsgReportVideoFileSourceStreamData *report;
+            report = MsgReportVideoFileSourceStreamData::create(m_videoFPS, m_videoLength);
+            getMessageQueueToGUI()->push(report);
+        }
     }
     else
     {
@@ -1114,16 +1138,20 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
     if (m_cameras.size() > 0)
     {
         m_cameraIndex = 0;
-        MsgReportCameraData *report;
-        report = MsgReportCameraData::create(
-                m_cameras[0].m_cameraNumber,
-                m_cameras[0].m_videoFPS,
-                m_cameras[0].m_videoFPSManual,
-                m_cameras[0].m_videoFPSManualEnable,
-                m_cameras[0].m_videoWidth,
-                m_cameras[0].m_videoHeight,
-                0);
-        getMessageQueueToGUI()->push(report);
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportCameraData *report;
+            report = MsgReportCameraData::create(
+                    m_cameras[0].m_cameraNumber,
+                    m_cameras[0].m_videoFPS,
+                    m_cameras[0].m_videoFPSManual,
+                    m_cameras[0].m_videoFPSManualEnable,
+                    m_cameras[0].m_videoWidth,
+                    m_cameras[0].m_videoHeight,
+                    0);
+            getMessageQueueToGUI()->push(report);
+        }
     }
 }
 
