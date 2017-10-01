@@ -35,12 +35,12 @@ MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
-BFMDemod::BFMDemod(BasebandSampleSink* sampleSink, RDSParser *rdsParser) :
+BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI, BasebandSampleSink* sampleSink) :
+    m_deviceAPI(deviceAPI),
 	m_sampleSink(sampleSink),
 	m_audioFifo(250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
-    m_rdsParser(rdsParser),
 	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
 	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
 	m_fmExcursion(default_excursion)
@@ -182,10 +182,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						if (m_rdsDecoder.frameSync(bit))
 						{
-							if (m_rdsParser)
-							{
-								m_rdsParser->parseGroup(m_rdsDecoder.getGroup());
-							}
+						    m_rdsParser.parseGroup(m_rdsDecoder.getGroup());
 						}
 					}
 

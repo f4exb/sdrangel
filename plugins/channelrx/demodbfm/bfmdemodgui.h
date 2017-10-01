@@ -24,10 +24,9 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
-#include "rdsparser.h"
-
 class PluginAPI;
 class DeviceSourceAPI;
+class RDSParser;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -91,7 +90,6 @@ private:
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
-	RDSParser m_rdsParser;
 
 	BFMDemod* m_bfmDemod;
 	MovingAverage<double> m_channelPowerDbAvg;

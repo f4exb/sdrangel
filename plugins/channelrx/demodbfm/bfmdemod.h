@@ -33,14 +33,15 @@
 #include "util/message.h"
 #include "util/udpsink.h"
 
+#include "rdsparser.h"
 #include "rdsdecoder.h"
 #include "rdsdemod.h"
 
-class RDSParser;
+class DeviceSourceAPI;
 
 class BFMDemod : public BasebandSampleSink {
 public:
-	BFMDemod(BasebandSampleSink* sampleSink, RDSParser* rdsParser);
+	BFMDemod(DeviceSourceAPI *deviceAPI, BasebandSampleSink* sampleSink);
 	virtual ~BFMDemod();
 
 	void configure(MessageQueue* messageQueue,
@@ -84,6 +85,8 @@ public:
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
+
+    RDSParser& getRDSParser() { return m_rdsParser; }
 
 private:
 	class MsgConfigureBFMDemod : public Message {
@@ -214,6 +217,8 @@ private:
 	Config m_config;
 	Config m_running;
 
+	DeviceSourceAPI *m_deviceAPI;
+
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)
 	Real m_interpolatorDistance;
@@ -254,7 +259,7 @@ private:
 
 	RDSDemod m_rdsDemod;
 	RDSDecoder m_rdsDecoder;
-	RDSParser *m_rdsParser;
+	RDSParser m_rdsParser;
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
