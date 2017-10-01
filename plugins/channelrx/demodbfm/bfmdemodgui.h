@@ -23,6 +23,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
+#include "bfmdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -84,6 +85,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	BFMDemodSettings m_settings;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
@@ -96,8 +98,6 @@ private:
 	int m_rate;
 	std::vector<unsigned int> m_g14ComboIndex;
 	MessageQueue m_inputMessageQueue;
-
-	static const int m_rfBW[];
 
 	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BFMDemodGUI();

@@ -37,15 +37,12 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
+#include "bfmdemodsettings.h"
 #include "bfmdemod.h"
 #include "rdstmc.h"
 #include "ui_bfmdemodgui.h"
 
 const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
-
-const int BFMDemodGUI::m_rfBW[] = {
-	80000, 100000, 120000, 140000, 160000, 180000, 200000, 220000, 250000
-};
 
 //int requiredBW(int rfBW)
 //{
@@ -159,8 +156,8 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 
 		d.readS32(2, &tmp, 4);
 		ui->rfBW->setValue(tmp);
-		ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[tmp] / 1000.0));
-		m_channelMarker.setBandwidth(m_rfBW[tmp]);
+		ui->rfBWText->setText(QString("%1 kHz").arg(BFMDemodSettings::getRFBW(tmp) / 1000.0));
+		m_channelMarker.setBandwidth(BFMDemodSettings::getRFBW(tmp));
 
 		d.readS32(3, &tmp, 3);
 		ui->afBW->setValue(tmp);
@@ -247,8 +244,8 @@ void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void BFMDemodGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker.setBandwidth(m_rfBW[value]);
+	ui->rfBWText->setText(QString("%1 kHz").arg(BFMDemodSettings::getRFBW(value) / 1000.0));
+	m_channelMarker.setBandwidth(BFMDemodSettings::getRFBW(value));
 	applySettings();
 }
 
@@ -487,7 +484,7 @@ void BFMDemodGUI::applySettings(bool force)
 	    setTitleColor(m_channelMarker.getColor());
 
 	    BFMDemod::MsgConfigureChannelizer *message = BFMDemod::MsgConfigureChannelizer::create(
-	            requiredBW(m_rfBW[ui->rfBW->value()]),
+	            requiredBW(BFMDemodSettings::getRFBW(ui->rfBW->value())),
 	            m_channelMarker.getCenterFrequency());
 	    m_bfmDemod->getInputMessageQueue()->push(message);
 
@@ -498,7 +495,7 @@ void BFMDemodGUI::applySettings(bool force)
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_bfmDemod->configure(m_bfmDemod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->value()],
+		    BFMDemodSettings::getRFBW(ui->rfBW->value()),
 			ui->afBW->value() * 1000.0,
 			ui->volume->value() / 10.0,
 			ui->squelch->value(),

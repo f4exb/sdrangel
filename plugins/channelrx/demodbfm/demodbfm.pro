@@ -30,6 +30,7 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += bfmdemod.cpp\
     bfmdemodgui.cpp\
+    bfmdemodsettings.cpp\
     bfmplugin.cpp\
     rdsdemod.cpp\
     rdsdecoder.cpp\
@@ -38,6 +39,7 @@ SOURCES += bfmdemod.cpp\
 
 HEADERS += bfmdemod.h\
     bfmdemodgui.h\
+    bfmdemodsettings.h\
     bfmplugin.h\
     rdsdemod.h\
     rdsdecoder.h\
