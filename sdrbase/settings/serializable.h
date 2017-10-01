@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,36 +14,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef SDRBASE_SETTINGS_SERIALIZABLE_H_
+#define SDRBASE_SETTINGS_SERIALIZABLE_H_
 
-#include <QByteArray>
-
-class Serializable;
-
-struct AMDemodSettings
+class Serializable
 {
-    int m_inputSampleRate;
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    quint32 m_audioSampleRate;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
-    quint32 m_rgbColor;
-    Serializable *m_channelMarker;
-
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+public:
+    virtual ~Serializable() {}
+    virtual QByteArray serialize() const = 0;
+    virtual bool deserialize(const QByteArray& data) = 0;
 };
 
-
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* SDRBASE_SETTINGS_SERIALIZABLE_H_ */

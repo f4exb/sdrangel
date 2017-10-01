@@ -104,7 +104,7 @@ void AMDemodGUI::channelMarkerChanged()
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     displayUDPAddress();
-    m_settings.m_channelMarkerBytes = m_channelMarker.serialize();
+    //m_settings.m_channelMarkerBytes = m_channelMarker.serialize();
 	applySettings();
 }
 
@@ -202,6 +202,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
     m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.setVisible(true);
     setTitleColor(m_channelMarker.getColor());
+    m_settings.setChannelMarker(&m_channelMarker);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
@@ -281,7 +282,7 @@ void AMDemodGUI::updateChannelMarker()
 {
     m_channelMarker.blockSignals(true);
 
-    m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
+    //m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
     this->setWindowTitle(m_channelMarker.getTitle());
 
     m_channelMarker.blockSignals(false);

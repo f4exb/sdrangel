@@ -16,9 +16,11 @@
 
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
+#include "settings/serializable.h"
 #include "amdemodsettings.h"
 
-AMDemodSettings::AMDemodSettings()
+AMDemodSettings::AMDemodSettings() :
+    m_channelMarker(0)
 {
     resetToDefaults();
 }
@@ -45,7 +47,11 @@ QByteArray AMDemodSettings::serialize() const
     s.writeS32(2, m_rfBandwidth/100);
     s.writeS32(4, m_volume*10);
     s.writeS32(5, m_squelch);
-    s.writeBlob(6, m_channelMarkerBytes);
+
+    if (m_channelMarker) {
+        s.writeBlob(6, m_channelMarker->serialize());
+    }
+
     s.writeU32(7, m_rgbColor);
     s.writeBool(8, m_bandpassEnable);
     return s.final();
@@ -74,7 +80,12 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         m_volume = tmp * 0.1;
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
-        d.readBlob(6, &m_channelMarkerBytes);
+        d.readBlob(6, &bytetmp);
+
+        if (m_channelMarker) {
+            m_channelMarker->deserialize(bytetmp);
+        }
+
         d.readU32(7, &m_rgbColor);
         d.readBool(8, &m_bandpassEnable, false);
         return true;
