@@ -201,10 +201,37 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 	}
 }
 
-bool BFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool BFMDemodGUI::handleMessage(const Message& message)
 {
-	return false;
+    if (BFMDemod::MsgReportChannelSampleRateChanged::match(message))
+    {
+        BFMDemod::MsgReportChannelSampleRateChanged& report = (BFMDemod::MsgReportChannelSampleRateChanged&) message;
+        m_rate = report.getSampleRate();
+        ui->glSpectrum->setCenterFrequency(m_rate / 4);
+        ui->glSpectrum->setSampleRate(m_rate / 2);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
+
+void BFMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        qDebug("BFMDemodGUI::handleInputMessages: message: %s", message->getIdentifier());
+
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
+}
+
 
 void BFMDemodGUI::channelMarkerChanged()
 {
@@ -385,13 +412,16 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_bfmDemod = new BFMDemod(m_deviceAPI, m_spectrumVis);
-	m_channelizer = new DownChannelizer(m_bfmDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_bfmDemod = new BFMDemod(m_deviceAPI);
+	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
+	m_bfmDemod->setSampleSink(m_spectrumVis);
+//	m_channelizer = new DownChannelizer(m_bfmDemod);
+//	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+//	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+//	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
@@ -432,9 +462,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 BFMDemodGUI::~BFMDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
+//	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+//	delete m_threadedChannelizer;
+//	delete m_channelizer;
 	delete m_bfmDemod;
 	//delete m_channelMarker;
 	delete ui;
@@ -456,9 +486,14 @@ void BFMDemodGUI::applySettings(bool force)
 	{
 	    setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
-			m_channelMarker.getCenterFrequency());
+	    BFMDemod::MsgConfigureChannelizer *message = BFMDemod::MsgConfigureChannelizer::create(
+	            requiredBW(m_rfBW[ui->rfBW->value()]),
+	            m_channelMarker.getCenterFrequency());
+	    m_bfmDemod->getInputMessageQueue()->push(message);
+
+//		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+//			requiredBW(m_rfBW[ui->rfBW->value()]), // TODO: this is where requested sample rate is specified
+//			m_channelMarker.getCenterFrequency());
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
@@ -539,13 +574,6 @@ void BFMDemodGUI::tick()
 	m_rdsTimerCount = (m_rdsTimerCount + 1) % 25;
 
 	//qDebug() << "Pilot lock: " << m_bfmDemod->getPilotLock() << ":" << m_bfmDemod->getPilotLevel(); TODO: update a GUI item with status
-}
-
-void BFMDemodGUI::channelSampleRateChanged()
-{
-	m_rate = m_bfmDemod->getSampleRate();
-	ui->glSpectrum->setCenterFrequency(m_rate / 4);
-	ui->glSpectrum->setSampleRate(m_rate / 2);
 }
 
 void BFMDemodGUI::rdsUpdateFixedFields()

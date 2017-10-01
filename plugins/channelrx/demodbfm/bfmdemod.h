@@ -38,11 +38,57 @@
 #include "rdsdemod.h"
 
 class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 
 class BFMDemod : public BasebandSampleSink {
 public:
-	BFMDemod(DeviceSourceAPI *deviceAPI, BasebandSampleSink* sampleSink);
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+    class MsgReportChannelSampleRateChanged : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportChannelSampleRateChanged* create(int sampleRate)
+        {
+            return new MsgReportChannelSampleRateChanged(sampleRate);
+        }
+
+    private:
+        int m_sampleRate;
+
+        MsgReportChannelSampleRateChanged(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
+	BFMDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~BFMDemod();
+	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
 			Real rfBandwidth,
@@ -87,6 +133,9 @@ public:
     }
 
     RDSParser& getRDSParser() { return m_rdsParser; }
+
+private slots:
+    void channelSampleRateChanged();
 
 private:
 	class MsgConfigureBFMDemod : public Message {
@@ -218,6 +267,8 @@ private:
 	Config m_running;
 
 	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)

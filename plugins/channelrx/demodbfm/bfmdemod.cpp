@@ -15,29 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodbfm/bfmdemod.h"
-
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
-#include "bfmdemod.h"
-
 #include <dsp/downchannelizer.h>
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
 
 #include "rdsparser.h"
+#include "bfmdemod.h"
 
+MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(BFMDemod::MsgReportChannelSampleRateChanged, Message)
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
 const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
-BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI, BasebandSampleSink* sampleSink) :
+BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-	m_sampleSink(sampleSink),
 	m_audioFifo(250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
@@ -46,6 +47,11 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI, BasebandSampleSink* sampleSink) :
 	m_fmExcursion(default_excursion)
 {
 	setObjectName("BFMDemod");
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	m_config.m_inputSampleRate = 384000;
 	m_config.m_inputFrequencyOffset = 0;
@@ -83,6 +89,10 @@ BFMDemod::~BFMDemod()
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 	delete m_udpBufferAudio;
+
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void BFMDemod::configure(MessageQueue* messageQueue,
@@ -308,6 +318,12 @@ void BFMDemod::start()
 
 void BFMDemod::stop()
 {
+}
+
+void BFMDemod::channelSampleRateChanged()
+{
+    MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create(getSampleRate());
+    getMessageQueueToGUI()->push(msg);
 }
 
 bool BFMDemod::handleMessage(const Message& cmd)

@@ -59,7 +59,6 @@ public:
 
 private slots:
 	void channelMarkerChanged();
-	void channelSampleRateChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
@@ -77,6 +76,7 @@ private slots:
 	void on_g14AltFrequencies_activated(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
 	void tick();
 
 private:
@@ -87,8 +87,8 @@ private:
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
+//	ThreadedBasebandSampleSink* m_threadedChannelizer;
+//	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
 	BFMDemod* m_bfmDemod;
