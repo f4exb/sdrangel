@@ -298,7 +298,6 @@ void BFMDemodGUI::on_g14AltFrequencies_activated(int index __attribute__((unused
 	changeFrequency(f);
 }
 
-
 void BFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
@@ -345,12 +344,12 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.setTitle("Broadcast FM Demod");
-	m_channelMarker.setColor(QColor(80, 120, 228));
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setUDPAddress("127.0.0.1");
 	m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.setVisible(true);
+	m_channelMarker.setColor(m_settings.m_rgbColor);
 	setTitleColor(m_channelMarker.getColor());
 
 	m_settings.setChannelMarker(&m_channelMarker);
@@ -405,26 +404,15 @@ void BFMDemodGUI::applySettings(bool force)
 	{
 	    setTitleColor(m_channelMarker.getColor());
 
-	    BFMDemod::MsgConfigureChannelizer *message = BFMDemod::MsgConfigureChannelizer::create(
+	    BFMDemod::MsgConfigureChannelizer *msgChan = BFMDemod::MsgConfigureChannelizer::create(
 	            requiredBW(BFMDemodSettings::getRFBW(ui->rfBW->value())),
 	            m_channelMarker.getCenterFrequency());
-	    m_bfmDemod->getInputMessageQueue()->push(message);
+	    m_bfmDemod->getInputMessageQueue()->push(msgChan);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_bfmDemod->configure(m_bfmDemod->getInputMessageQueue(),
-		    BFMDemodSettings::getRFBW(ui->rfBW->value()),
-			ui->afBW->value() * 1000.0,
-			ui->volume->value() / 10.0,
-			ui->squelch->value(),
-			ui->audioStereo->isChecked(),
-			ui->lsbStereo->isChecked(),
-			ui->showPilot->isChecked(),
-			ui->rds->isChecked(),
-			ui->copyAudioToUDP->isChecked(),
-			m_channelMarker.getUDPAddress(),
-			m_channelMarker.getUDPSendPort(),
-			force);
+        BFMDemod::MsgConfigureBFMDemod* msgConfig = BFMDemod::MsgConfigureBFMDemod::create( m_settings, force);
+        m_bfmDemod->getInputMessageQueue()->push(msgConfig);
 	}
 }
 

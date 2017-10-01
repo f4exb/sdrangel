@@ -54,6 +54,7 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_magsqCount = 0;
 
     m_squelchLevel = 0;
+    m_squelchState = 0;
 
     m_interpolatorDistance = 0.0f;
     m_interpolatorDistanceRemain = 0.0f;
@@ -74,24 +75,17 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	m_config.m_inputSampleRate = 384000;
-	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 180000;
-	m_config.m_afBandwidth = 15000;
-	m_config.m_squelch = -60.0;
-	m_config.m_volume = 2.0;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate(); // normally 48 kHz
-	m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
-	m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterX.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterY.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
  	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
-
-	apply();
 
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_settings.m_udpPort);
+
+    applySettings(m_settings, true);
 }
 
 BFMDemod::~BFMDemod()
@@ -107,35 +101,6 @@ BFMDemod::~BFMDemod()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
-}
-
-void BFMDemod::configure(MessageQueue* messageQueue,
-		Real rfBandwidth,
-		Real afBandwidth,
-		Real volume,
-		Real squelch,
-		bool audioStereo,
-		bool lsbStereo,
-		bool showPilot,
-		bool rdsActive,
-		bool copyAudioToUDP,
-		const QString& udpAddress,
-		quint16 udpPort,
-		bool force)
-{
-	Message* cmd = MsgConfigureBFMDemod::create(rfBandwidth,
-			afBandwidth,
-			volume,
-			squelch,
-			audioStereo,
-			lsbStereo,
-			showPilot,
-			rdsActive,
-			copyAudioToUDP,
-			udpAddress,
-			udpPort,
-			force);
-	messageQueue->push(cmd);
 }
 
 void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -173,7 +138,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //			m_movingAverage.feed(msq);
 
 			if(m_magsq >= m_squelchLevel) {
-				m_squelchState = m_running.m_rfBandwidth / 20; // decay rate
+				m_squelchState = m_settings.m_rfBandwidth / 20; // decay rate
 			}
 
 			if(m_squelchState > 0)
@@ -188,12 +153,12 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				demod = 0;
 			}
 
-			if (!m_running.m_showPilot)
+			if (!m_settings.m_showPilot)
 			{
 				m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
 			}
 
-			if (m_running.m_rdsActive)
+			if (m_settings.m_rdsActive)
 			{
 				//Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
 				Complex r(demod * 2.0 * std::cos(3.0 * m_pilotPLLSamples[3]), 0.0);
@@ -218,16 +183,16 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			// Process stereo if stereo mode is selected
 
-			if (m_running.m_audioStereo)
+			if (m_settings.m_audioStereo)
 			{
 				m_pilotPLL.process(demod, m_pilotPLLSamples);
 
-				if (m_running.m_showPilot)
+				if (m_settings.m_showPilot)
 				{
 					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
 				}
 
-				if (m_running.m_lsbStereo)
+				if (m_settings.m_lsbStereo)
 				{
 					// 1.17 * 0.7 = 0.819
 					Complex s(demod * m_pilotPLLSamples[1], demod * m_pilotPLLSamples[2]);
@@ -254,32 +219,32 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
-				if (m_running.m_audioStereo)
+				if (m_settings.m_audioStereo)
 				{
 					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
 					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
-					if (m_running.m_lsbStereo)
+					if (m_settings.m_lsbStereo)
 					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
-						if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
+						if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
 					}
 					else
 					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_running.m_volume);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_running.m_volume);
-                        if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
+                        if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
 					}
 				}
 				else
 				{
 					Real deemph;
 					m_deemphasisFilterX.process(ci.real(), deemph);
-					quint16 sample = (qint16)(deemph * (1<<12) * m_running.m_volume);
+					quint16 sample = (qint16)(deemph * (1<<12) * m_settings.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
-                    if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+                    if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
 				}
 
 				++m_audioBufferFill;
@@ -346,48 +311,46 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_inputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+        BFMDemodSettings settings = m_settings;
 
-		apply();
+        settings.m_inputSampleRate = notif.getSampleRate();
+        settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		qDebug() << "BFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+        applySettings(settings);
 
-		return true;
-	}
-	else if (MsgConfigureBFMDemod::match(cmd))
-	{
-		MsgConfigureBFMDemod& cfg = (MsgConfigureBFMDemod&) cmd;
-
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_afBandwidth = cfg.getAFBandwidth();
-		m_config.m_volume = cfg.getVolume();
-		m_config.m_squelch = cfg.getSquelch();
-		m_config.m_audioStereo = cfg.getAudioStereo();
-		m_config.m_lsbStereo = cfg.getLsbStereo();
-		m_config.m_showPilot = cfg.getShowPilot();
-		m_config.m_rdsActive = cfg.getRDSActive();
-		m_config.m_copyAudioToUDP= cfg.getCopyAudioToUDP();
-		m_config.m_udpAddress = cfg.getUDPAddress();
-		m_config.m_udpPort = cfg.getUDPPort();
-
-		apply(cfg.getForce());
-
-		qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_afBandwidth: " << m_config.m_afBandwidth
-				<< " m_volume: " << m_config.m_volume
-				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioStereo: " << m_config.m_audioStereo
-				<< " m_lsbStereo: " << m_config.m_lsbStereo
-				<< " m_showPilot: " << m_config.m_showPilot
-				<< " m_rdsActive: " << m_config.m_rdsActive
-                << " m_copyAudioToUDP: " << m_config.m_copyAudioToUDP
-                << " m_udpAddress: " << m_config.m_udpAddress
-                << " m_udpPort: " << m_config.m_udpPort;
+        qDebug() << "BFMDemod::handleMessage: MsgChannelizerNotification:"
+                << " m_inputSampleRate: " << settings.m_inputSampleRate
+                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
+    else if (MsgConfigureBFMDemod::match(cmd))
+    {
+        MsgConfigureBFMDemod& cfg = (MsgConfigureBFMDemod&) cmd;
+
+        BFMDemodSettings settings = cfg.getSettings();
+
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        applySettings(settings, cfg.getForce());
+
+        qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod:"
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_volume: " << settings.m_volume
+                << " m_squelch: " << settings.m_squelch
+                << " m_audioStereo: " << settings.m_audioStereo
+                << " m_lsbStereo: " << settings.m_lsbStereo
+                << " m_showPilot: " << settings.m_showPilot
+                << " m_rdsActive: " << settings.m_rdsActive
+                << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+                << " m_udpAddress: " << settings.m_udpAddress
+                << " m_udpPort: " << settings.m_udpPort
+                << " force: " << cfg.getForce();
+
+        return true;
+    }
 	else
 	{
 		qDebug() << "BFMDemod::handleMessage: none";
@@ -403,87 +366,87 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void BFMDemod::apply(bool force)
+void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
 {
-	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate)
-		|| (m_config.m_audioStereo && (m_config.m_audioStereo != m_running.m_audioStereo)) || force)
-	{
-		m_pilotPLL.configure(19000.0/m_config.m_inputSampleRate, 50.0/m_config.m_inputSampleRate, 0.01);
-	}
-
-	if((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
-	{
-		qDebug() << "BFMDemod::handleMessage: m_nco.setFreq";
-		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
-	}
-
-	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_afBandwidth != m_running.m_afBandwidth) || force)
-	{
-		m_settingsMutex.lock();
-		qDebug() << "BFMDemod::handleMessage: m_interpolator.create";
-
-		m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
-		m_interpolatorDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
-		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-
-		m_interpolatorStereo.create(16, m_config.m_inputSampleRate, m_config.m_afBandwidth);
-		m_interpolatorStereoDistanceRemain = (Real) m_config.m_inputSampleRate / m_config.m_audioSampleRate;
-		m_interpolatorStereoDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-
-		m_interpolatorRDS.create(4, m_config.m_inputSampleRate, 600.0);
-		m_interpolatorRDSDistanceRemain = (Real) m_config.m_inputSampleRate / 250000.0;
-		m_interpolatorRDSDistance =  (Real) m_config.m_inputSampleRate / 250000.0;
-
-		m_settingsMutex.unlock();
-	}
-
-	if((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
-		(m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) || force)
-	{
-		m_settingsMutex.lock();
-		Real lowCut = -(m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
-		Real hiCut  = (m_config.m_rfBandwidth / 2.0) / m_config.m_inputSampleRate;
-		m_rfFilter->create_filter(lowCut, hiCut);
-		m_phaseDiscri.setFMScaling(m_config.m_inputSampleRate / m_fmExcursion);
-		m_settingsMutex.unlock();
-
-		qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
-				<< m_config.m_inputSampleRate
-				<< " lowCut: " << lowCut * m_config.m_inputSampleRate
-				<< " hiCut: " << hiCut * m_config.m_inputSampleRate;
-	}
-
-	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate) || force)
-	{
-		m_settingsMutex.lock();
-		qDebug() << "BFMDemod::handleMessage: m_lowpass.create";
-		m_lowpass.create(21, m_config.m_audioSampleRate, m_config.m_afBandwidth);
-		m_settingsMutex.unlock();
-	}
-
-	if ((m_config.m_squelch != m_running.m_squelch) || force)
-	{
-		qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 20.0);
-		m_squelchLevel *= m_squelchLevel;
-	}
-
-	if ((m_config.m_audioSampleRate != m_running.m_audioSampleRate) || force)
-	{
-		m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
-		m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
-	}
-
-    if ((m_config.m_udpAddress != m_running.m_udpAddress)
-        || (m_config.m_udpPort != m_running.m_udpPort) || force)
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate)
+        || (settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
     {
-        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
-        m_udpBufferAudio->setPort(m_config.m_udpPort);
+        m_pilotPLL.configure(19000.0/settings.m_inputSampleRate, 50.0/settings.m_inputSampleRate, 0.01);
     }
 
-	m_running = m_config;
+    if((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    {
+        qDebug() << "BFMDemod::handleMessage: m_nco.setFreq";
+        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+    }
+
+    if((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
+        (settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+        qDebug() << "BFMDemod::handleMessage: m_interpolator.create";
+
+        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_afBandwidth);
+        m_interpolatorDistanceRemain = (Real) settings.m_inputSampleRate / settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+
+        m_interpolatorStereo.create(16, settings.m_inputSampleRate, settings.m_afBandwidth);
+        m_interpolatorStereoDistanceRemain = (Real) settings.m_inputSampleRate / settings.m_audioSampleRate;
+        m_interpolatorStereoDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+
+        m_interpolatorRDS.create(4, settings.m_inputSampleRate, 600.0);
+        m_interpolatorRDSDistanceRemain = (Real) settings.m_inputSampleRate / 250000.0;
+        m_interpolatorRDSDistance =  (Real) settings.m_inputSampleRate / 250000.0;
+
+        m_settingsMutex.unlock();
+    }
+
+    if((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
+        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+        (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    {
+        m_settingsMutex.lock();
+        Real lowCut = -(settings.m_rfBandwidth / 2.0) / settings.m_inputSampleRate;
+        Real hiCut  = (settings.m_rfBandwidth / 2.0) / settings.m_inputSampleRate;
+        m_rfFilter->create_filter(lowCut, hiCut);
+        m_phaseDiscri.setFMScaling(settings.m_inputSampleRate / m_fmExcursion);
+        m_settingsMutex.unlock();
+
+        qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
+                << settings.m_inputSampleRate
+                << " lowCut: " << lowCut * settings.m_inputSampleRate
+                << " hiCut: " << hiCut * settings.m_inputSampleRate;
+    }
+
+    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        qDebug() << "BFMDemod::handleMessage: m_lowpass.create";
+        m_lowpass.create(21, settings.m_audioSampleRate, settings.m_afBandwidth);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_squelch != m_settings.m_squelch) || force)
+    {
+        qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
+        m_squelchLevel = std::pow(10.0, settings.m_squelch / 20.0);
+        m_squelchLevel *= m_squelchLevel;
+    }
+
+    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_deemphasisFilterX.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
+        m_deemphasisFilterY.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort) || force)
+    {
+        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
+        m_udpBufferAudio->setPort(settings.m_udpPort);
+    }
+
+    m_settings = settings;
 }

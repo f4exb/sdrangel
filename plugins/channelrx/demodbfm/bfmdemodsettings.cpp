@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -36,8 +38,8 @@ void BFMDemodSettings::resetToDefaults()
 {
     m_inputSampleRate = 384000;
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = getRFBW(4);
-    m_afBandwidth = 3000;
+    m_rfBandwidth = getRFBW(5);
+    m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
@@ -48,6 +50,7 @@ void BFMDemodSettings::resetToDefaults()
     m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
+    m_rgbColor = QColor(80, 120, 228).rgb();
 }
 
 QByteArray BFMDemodSettings::serialize() const
