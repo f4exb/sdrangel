@@ -89,12 +89,12 @@ private slots:
 
 private:
 	Ui::ATVDemodGUI* ui;
-    PluginAPI* m_objPluginAPI;
-    DeviceSourceAPI* m_objDeviceAPI;
-    ChannelMarker m_objChannelMarker;
-    ThreadedBasebandSampleSink* m_objThreadedChannelizer;
-    DownChannelizer* m_objChannelizer;
-    ATVDemod* m_objATVDemod;
+    PluginAPI* m_pluginAPI;
+    DeviceSourceAPI* m_deviceAPI;
+    ChannelMarker m_channelMarker;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
+    ATVDemod* m_atvDemod;
 
     bool m_blnBasicSettingsShown;
     bool m_blnDoApplySettings;
@@ -102,7 +102,7 @@ private:
     MovingAverage<double> m_objMagSqAverage;
     int m_intTickCount;
 
-    ScopeVisNG* m_objScopeVis;
+    ScopeVisNG* m_scopeVis;
 
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;

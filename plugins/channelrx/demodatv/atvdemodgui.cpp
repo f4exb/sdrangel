@@ -61,12 +61,12 @@ QString ATVDemodGUI::getName() const
 
 qint64 ATVDemodGUI::getCenterFrequency() const
 {
-    return m_objChannelMarker.getCenterFrequency();
+    return m_channelMarker.getCenterFrequency();
 }
 
 void ATVDemodGUI::setCenterFrequency(qint64 intCenterFrequency)
 {
-    m_objChannelMarker.setCenterFrequency(intCenterFrequency);
+    m_channelMarker.setCenterFrequency(intCenterFrequency);
     applySettings();
 }
 
@@ -105,8 +105,8 @@ QByteArray ATVDemodGUI::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(1, m_objChannelMarker.getCenterFrequency());
-    s.writeU32(2, m_objChannelMarker.getColor().rgb());
+    s.writeS32(1, m_channelMarker.getCenterFrequency());
+    s.writeU32(2, m_channelMarker.getColor().rgb());
     s.writeS32(3, ui->synchLevel->value());
     s.writeS32(4, ui->blackLevel->value());
     s.writeS32(5, ui->lineTime->value());
@@ -144,10 +144,10 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         bool booltmp;
 
         blockApplySettings(true);
-        m_objChannelMarker.blockSignals(true);
+        m_channelMarker.blockSignals(true);
 
         d.readS32(1, &tmp, 0);
-        m_objChannelMarker.setCenterFrequency(tmp);
+        m_channelMarker.setCenterFrequency(tmp);
 
 //        if (d.readU32(2, &u32tmp)) {
 //            m_objChannelMarker.setColor(u32tmp);
@@ -189,7 +189,7 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
         ui->standard->setCurrentIndex(tmp);
 
         blockApplySettings(false);
-        m_objChannelMarker.blockSignals(false);
+        m_channelMarker.blockSignals(false);
 
         lineTimeUpdate();
         topTimeUpdate();
@@ -211,7 +211,7 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
         int nbPointsPerLine =  ((ATVDemod::MsgReportEffectiveSampleRate&)objMessage).getNbPointsPerLine();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 2));
         ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
-        m_objScopeVis->setSampleRate(sampleRate);
+        m_scopeVis->setSampleRate(sampleRate);
         setRFFiltersSlidersRange(sampleRate);
         lineTimeUpdate();
         topTimeUpdate();
@@ -261,7 +261,7 @@ void ATVDemodGUI::onMenuDoubleClicked()
     {
         m_blnBasicSettingsShown = true;
         BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(
-                &m_objChannelMarker, this);
+                &m_channelMarker, this);
         bcsw->show();
     }
 }
@@ -270,9 +270,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
         QWidget* objParent) :
         RollupWidget(objParent),
         ui(new Ui::ATVDemodGUI),
-        m_objPluginAPI(objPluginAPI),
-        m_objDeviceAPI(objDeviceAPI),
-        m_objChannelMarker(this),
+        m_pluginAPI(objPluginAPI),
+        m_deviceAPI(objDeviceAPI),
+        m_channelMarker(this),
         m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true),
         m_objMagSqAverage(40, 0),
@@ -283,43 +283,43 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-    m_objScopeVis = new ScopeVisNG(ui->glScope);
-    m_objATVDemod = new ATVDemod(m_objScopeVis);
-    m_objATVDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_objATVDemod->setATVScreen(ui->screenTV);
+    m_scopeVis = new ScopeVisNG(ui->glScope);
+    m_atvDemod = new ATVDemod(m_scopeVis);
+    m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_atvDemod->setATVScreen(ui->screenTV);
 
-    m_objChannelizer = new DownChannelizer(m_objATVDemod);
-    m_objThreadedChannelizer = new ThreadedBasebandSampleSink(m_objChannelizer, this);
-    m_objDeviceAPI->addThreadedSink(m_objThreadedChannelizer);
+    m_channelizer = new DownChannelizer(m_atvDemod);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-    ui->glScope->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
-    connect(&m_objPluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+    ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+    connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-    connect(m_objChannelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
     //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
-    m_objChannelMarker.setColor(Qt::white);
-    m_objChannelMarker.setMovable(false);
-    m_objChannelMarker.setBandwidth(6000000);
-    m_objChannelMarker.setCenterFrequency(0);
-    m_objChannelMarker.setVisible(true);
-    setTitleColor(m_objChannelMarker.getColor());
+    m_channelMarker.setColor(Qt::white);
+    m_channelMarker.setMovable(false);
+    m_channelMarker.setBandwidth(6000000);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setVisible(true);
+    setTitleColor(m_channelMarker.getColor());
 
-    connect(&m_objChannelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+    connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-    m_objDeviceAPI->registerChannelInstance(m_strChannelID, this);
-    m_objDeviceAPI->addChannelMarker(&m_objChannelMarker);
-    m_objDeviceAPI->addRollupWidget(this);
+    m_deviceAPI->registerChannelInstance(m_strChannelID, this);
+    m_deviceAPI->addChannelMarker(&m_channelMarker);
+    m_deviceAPI->addRollupWidget(this);
 
     //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
     m_objMagSqAverage.resize(4, 1.0);
 
-    ui->scopeGUI->setBuddies(m_objScopeVis->getInputMessageQueue(), m_objScopeVis, ui->glScope);
+    ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
     resetToDefaults(); // does applySettings()
 
@@ -346,12 +346,12 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    m_objDeviceAPI->removeChannelInstance(this);
-    m_objDeviceAPI->removeThreadedSink(m_objThreadedChannelizer);
-    delete m_objThreadedChannelizer;
-    delete m_objChannelizer;
-    delete m_objATVDemod;
-    delete m_objScopeVis;
+    m_deviceAPI->removeChannelInstance(this);
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
+    delete m_atvDemod;
+    delete m_scopeVis;
     delete ui;
 }
 
@@ -364,13 +364,13 @@ void ATVDemodGUI::applySettings()
 {
     if (m_blnDoApplySettings)
     {
-		ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-        m_objChannelizer->configure(m_objChannelizer->getInputMessageQueue(),
-                m_objChannelizer->getInputSampleRate(), // always use maximum available bandwidth
-                m_objChannelMarker.getCenterFrequency());
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+                m_channelizer->getInputSampleRate(), // always use maximum available bandwidth
+                m_channelMarker.getCenterFrequency());
 
-        m_objATVDemod->configure(m_objATVDemod->getInputMessageQueue(),
+        m_atvDemod->configure(m_atvDemod->getInputMessageQueue(),
                 getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) + ui->lineTime->value() * m_fltLineTimeMultiplier,
                 getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) * (4.7f / 64.0f) + ui->topTime->value() * m_fltTopTimeMultiplier,
                 getFps(ui->fps->currentIndex()),
@@ -385,8 +385,8 @@ void ATVDemodGUI::applySettings()
 				ui->screenTabWidget->currentIndex());
 
         qDebug() << "ATVDemodGUI::applySettings:"
-                << " m_objChannelizer.inputSampleRate: " << m_objChannelizer->getInputSampleRate()
-                << " m_objATVDemod.sampleRate: " << m_objATVDemod->getSampleRate();
+                << " m_objChannelizer.inputSampleRate: " << m_channelizer->getInputSampleRate()
+                << " m_objATVDemod.sampleRate: " << m_atvDemod->getSampleRate();
     }
 }
 
@@ -394,7 +394,7 @@ void ATVDemodGUI::applyRFSettings()
 {
     if (m_blnDoApplySettings)
     {
-        m_objATVDemod->configureRF(m_objATVDemod->getInputMessageQueue(),
+        m_atvDemod->configureRF(m_atvDemod->getInputMessageQueue(),
                 (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
                 ui->rfBW->value() * m_rfSliderDivisor * 1.0f,
                 ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
@@ -411,26 +411,26 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
 
     if (ui->rfFiltering->isChecked()) // FFT filter
     {
-        m_objChannelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
-        m_objChannelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
+        m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
+        m_channelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
 
         if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_LSB) {
-            m_objChannelMarker.setSidebands(ChannelMarker::vlsb);
+            m_channelMarker.setSidebands(ChannelMarker::vlsb);
         } else if (ui->modulation->currentIndex() == (int) ATVDemod::ATV_USB) {
-            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
+            m_channelMarker.setSidebands(ChannelMarker::vusb);
         } else {
-            m_objChannelMarker.setSidebands(ChannelMarker::vusb);
+            m_channelMarker.setSidebands(ChannelMarker::vusb);
         }
     }
     else
     {
         if (ui->decimatorEnable->isChecked()) {
-            m_objChannelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
+            m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
         } else {
-            m_objChannelMarker.setBandwidth(m_objChannelizer->getInputSampleRate());
+            m_channelMarker.setBandwidth(m_channelizer->getInputSampleRate());
         }
 
-        m_objChannelMarker.setSidebands(ChannelMarker::dsb);
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
     }
 
     m_blnDoApplySettings = true;
@@ -464,14 +464,14 @@ void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
 void ATVDemodGUI::leaveEvent(QEvent*)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(false);
+    m_channelMarker.setHighlighted(false);
     blockApplySettings(false);
 }
 
 void ATVDemodGUI::enterEvent(QEvent*)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(true);
+    m_channelMarker.setHighlighted(true);
     blockApplySettings(false);
 }
 
@@ -483,13 +483,13 @@ void ATVDemodGUI::tick()
     }
     else
     {
-        if (m_objATVDemod)
+        if (m_atvDemod)
         {
-            m_objMagSqAverage.feed(m_objATVDemod->getMagSq());
+            m_objMagSqAverage.feed(m_atvDemod->getMagSq());
             double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (1<<30));
             ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
 
-            if (m_objATVDemod->getBFOLocked()) {
+            if (m_atvDemod->getBFOLocked()) {
                 ui->bfoLockedLabel->setStyleSheet("QLabel { background-color : green; }");
             } else {
                 ui->bfoLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -574,7 +574,7 @@ void ATVDemodGUI::on_reset_clicked(bool checked __attribute__((unused)))
 
 void ATVDemodGUI::on_modulation_currentIndexChanged(int index __attribute__((unused)))
 {
-    setRFFiltersSlidersRange(m_objATVDemod->getEffectiveSampleRate());
+    setRFFiltersSlidersRange(m_atvDemod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
@@ -595,7 +595,7 @@ void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 
 void ATVDemodGUI::on_rfFiltering_toggled(bool checked __attribute__((unused)))
 {
-    setRFFiltersSlidersRange(m_objATVDemod->getEffectiveSampleRate());
+    setRFFiltersSlidersRange(m_atvDemod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
@@ -608,7 +608,7 @@ void ATVDemodGUI::on_decimatorEnable_toggled(bool checked __attribute__((unused)
 
 void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_objChannelMarker.setCenterFrequency(value);
+    m_channelMarker.setCenterFrequency(value);
 }
 
 void ATVDemodGUI::on_bfo_valueChanged(int value)
@@ -633,10 +633,10 @@ void ATVDemodGUI::lineTimeUpdate()
     float nominalLineTime = getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex());
     int lineTimeScaleFactor = (int) std::log10(nominalLineTime);
 
-    if (m_objATVDemod->getEffectiveSampleRate() == 0) {
+    if (m_atvDemod->getEffectiveSampleRate() == 0) {
         m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
     } else {
-        m_fltLineTimeMultiplier = 1.0f / m_objATVDemod->getEffectiveSampleRate();
+        m_fltLineTimeMultiplier = 1.0f / m_atvDemod->getEffectiveSampleRate();
     }
 
     float lineTime = nominalLineTime + m_fltLineTimeMultiplier * ui->lineTime->value();
@@ -658,10 +658,10 @@ void ATVDemodGUI::topTimeUpdate()
     float nominalTopTime = getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) * (4.7f / 64.0f);
     int topTimeScaleFactor = (int) std::log10(nominalTopTime);
 
-    if (m_objATVDemod->getEffectiveSampleRate() == 0) {
+    if (m_atvDemod->getEffectiveSampleRate() == 0) {
         m_fltTopTimeMultiplier = std::pow(10.0, topTimeScaleFactor-3);
     } else {
-        m_fltTopTimeMultiplier = 1.0f / m_objATVDemod->getEffectiveSampleRate();
+        m_fltTopTimeMultiplier = 1.0f / m_atvDemod->getEffectiveSampleRate();
     }
 
     float topTime = nominalTopTime + m_fltTopTimeMultiplier * ui->topTime->value();

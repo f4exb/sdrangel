@@ -70,7 +70,7 @@ ATVDemod::ATVDemod(BasebandSampleSink* objScopeSink) :
 
     m_objMagSqAverage.resize(32, 1.0);
 
-    m_DSBFilter = new fftfilt((2.0f * m_objRFConfig.m_fltRFBandwidth) / 1000000, 2 * m_ssbFftLen); // arbitrary 1 MS/s sample rate
+    m_DSBFilter = new fftfilt((2.0f * m_rfConfig.m_fltRFBandwidth) / 1000000, 2 * m_ssbFftLen); // arbitrary 1 MS/s sample rate
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
@@ -188,12 +188,12 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 #endif
         Complex c(fltI, fltQ);
 
-        if (m_objRFRunning.m_intFrequencyOffset != 0)
+        if (m_rfRunning.m_intFrequencyOffset != 0)
         {
             c *= m_nco.nextIQ();
         }
 
-        if (m_objRFRunning.m_blndecimatorEnable)
+        if (m_rfRunning.m_blndecimatorEnable)
         {
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
@@ -207,7 +207,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
     }
 
-    if ((m_objRunning.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) // do only if scope tab is selected and scope is available
+    if ((m_running.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) // do only if scope tab is selected and scope is available
     {
         m_objScopeSink->feed(m_objScopeSampleBuffer.begin(), m_objScopeSampleBuffer.end(), false); // m_ssb = positive only
         m_objScopeSampleBuffer.clear();
@@ -223,7 +223,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void ATVDemod::demod(Complex& c)
 {
-    float fltDivSynchroBlack = 1.0f - m_objRunning.m_fltVoltLevelSynchroBlack;
+    float fltDivSynchroBlack = 1.0f - m_running.m_fltVoltLevelSynchroBlack;
     float fltNormI;
     float fltNormQ;
     float fltNorm;
@@ -232,12 +232,12 @@ void ATVDemod::demod(Complex& c)
 
     //********** FFT filtering **********
 
-    if (m_objRFRunning.m_blnFFTFiltering)
+    if (m_rfRunning.m_blnFFTFiltering)
     {
         int n_out;
         fftfilt::cmplx *filtered;
 
-        n_out = m_DSBFilter->runAsym(c, &filtered, m_objRFRunning.m_enmModulation != ATV_LSB); // all usb except explicitely lsb
+        n_out = m_DSBFilter->runAsym(c, &filtered, m_rfRunning.m_enmModulation != ATV_LSB); // all usb except explicitely lsb
 
         if (n_out > 0)
         {
@@ -250,11 +250,11 @@ void ATVDemod::demod(Complex& c)
 
     //********** demodulation **********
 
-    const float& fltI = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
-    const float& fltQ = m_objRFRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
+    const float& fltI = m_rfRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].real() : c.real();
+    const float& fltQ = m_rfRunning.m_blnFFTFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex-1].imag() : c.imag();
     double magSq;
 
-    if ((m_objRFRunning.m_enmModulation == ATV_FM1) || (m_objRFRunning.m_enmModulation == ATV_FM2))
+    if ((m_rfRunning.m_enmModulation == ATV_FM1) || (m_rfRunning.m_enmModulation == ATV_FM2))
     {
         //Amplitude FM
         magSq = fltI*fltI + fltQ*fltQ;
@@ -266,7 +266,7 @@ void ATVDemod::demod(Complex& c)
         //-2 > 2 : 0 -> 1 volt
         //0->0.3 synchro  0.3->1 image
 
-        if (m_objRFRunning.m_enmModulation == ATV_FM1)
+        if (m_rfRunning.m_enmModulation == ATV_FM1)
         {
             //YDiff Cd
             fltVal = m_fltBufferI[0]*(fltNormQ - m_fltBufferQ[1]);
@@ -304,12 +304,12 @@ void ATVDemod::demod(Complex& c)
         m_fltBufferI[0]=fltNormI;
         m_fltBufferQ[0]=fltNormQ;
 
-        if (m_objRFRunning.m_fmDeviation != 1.0f)
+        if (m_rfRunning.m_fmDeviation != 1.0f)
         {
-            fltVal = ((fltVal - 0.5f) / m_objRFRunning.m_fmDeviation) + 0.5f;
+            fltVal = ((fltVal - 0.5f) / m_rfRunning.m_fmDeviation) + 0.5f;
         }
     }
-    else if (m_objRFRunning.m_enmModulation == ATV_AM)
+    else if (m_rfRunning.m_enmModulation == ATV_AM)
     {
         //Amplitude AM
         magSq = fltI*fltI + fltQ*fltQ;
@@ -334,7 +334,7 @@ void ATVDemod::demod(Complex& c)
         fltVal -= m_fltAmpMin;
         fltVal /=m_fltAmpDelta;
     }
-    else if ((m_objRFRunning.m_enmModulation == ATV_USB) || (m_objRFRunning.m_enmModulation == ATV_LSB))
+    else if ((m_rfRunning.m_enmModulation == ATV_USB) || (m_rfRunning.m_enmModulation == ATV_LSB))
     {
         magSq = fltI*fltI + fltQ*fltQ;
         m_objMagSqAverage.feed(magSq);
@@ -349,7 +349,7 @@ void ATVDemod::demod(Complex& c)
         float mixI = fltI * bfoValues[0] - fltQ * bfoValues[1];
         float mixQ = fltI * bfoValues[1] + fltQ * bfoValues[0];
 
-        if (m_objRFRunning.m_enmModulation == ATV_USB) {
+        if (m_rfRunning.m_enmModulation == ATV_USB) {
             fltVal = (mixI + mixQ);
         } else {
             fltVal = (mixI - mixQ);
@@ -371,7 +371,7 @@ void ATVDemod::demod(Complex& c)
         fltVal -= m_fltAmpMin;
         fltVal /=m_fltAmpDelta;
     }
-    else if (m_objRFRunning.m_enmModulation == ATV_FM3)
+    else if (m_rfRunning.m_enmModulation == ATV_FM3)
     {
         float rawDeviation;
         fltVal = m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation) + 0.5f;
@@ -387,10 +387,10 @@ void ATVDemod::demod(Complex& c)
         fltVal = 0.0f;
     }
 
-    fltVal = m_objRunning.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
+    fltVal = m_running.m_blnInvertVideo ? 1.0f - fltVal : fltVal;
     fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
 
-    if ((m_objRunning.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) { // feed scope buffer only if scope is present and visible
+    if ((m_running.m_intVideoTabIndex == 1) && (m_objScopeSink != 0)) { // feed scope buffer only if scope is present and visible
         m_objScopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
     }
 
@@ -398,7 +398,7 @@ void ATVDemod::demod(Complex& c)
 
     //********** gray level **********
     //-0.3 -> 0.7
-    intVal = (int) 255.0*(fltVal - m_objRunning.m_fltVoltLevelSynchroBlack) / fltDivSynchroBlack;
+    intVal = (int) 255.0*(fltVal - m_running.m_fltVoltLevelSynchroBlack) / fltDivSynchroBlack;
 
     //0 -> 255
     if(intVal<0)
@@ -412,7 +412,7 @@ void ATVDemod::demod(Complex& c)
 
     //********** process video sample **********
 
-    if (m_objRunning.m_enmATVStandard == ATVStdHSkip)
+    if (m_running.m_enmATVStandard == ATVStdHSkip)
     {
         processHSkip(fltVal, intVal);
     }
@@ -438,12 +438,12 @@ bool ATVDemod::handleMessage(const Message& cmd)
     if (DownChannelizer::MsgChannelizerNotification::match(cmd))
     {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-        m_objConfig.m_intSampleRate = objNotif.getSampleRate();
-        m_objRFConfig.m_intFrequencyOffset = objNotif.getFrequencyOffset();
+        m_config.m_intSampleRate = objNotif.getSampleRate();
+        m_rfConfig.m_intFrequencyOffset = objNotif.getFrequencyOffset();
 
         qDebug() << "ATVDemod::handleMessage: MsgChannelizerNotification:"
-                << " m_intSampleRate: " << m_objConfig.m_intSampleRate
-                << " m_intFrequencyOffset: " << m_objRFConfig.m_intFrequencyOffset;
+                << " m_intSampleRate: " << m_config.m_intSampleRate
+                << " m_intFrequencyOffset: " << m_rfConfig.m_intFrequencyOffset;
 
         applySettings();
 
@@ -453,17 +453,17 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureATVDemod& objCfg = (MsgConfigureATVDemod&) cmd;
 
-        m_objConfig = objCfg.m_objMsgConfig;
+        m_config = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureATVDemod:"
-                << " m_fltVoltLevelSynchroBlack:" << m_objConfig.m_fltVoltLevelSynchroBlack
-                << " m_fltVoltLevelSynchroTop:" << m_objConfig.m_fltVoltLevelSynchroTop
-                << " m_fltFramePerS:" << m_objConfig.m_fltFramePerS
-                << " m_fltLineDurationUs:" << m_objConfig.m_fltLineDuration
-                << " m_fltRatioOfRowsToDisplay:" << m_objConfig.m_fltRatioOfRowsToDisplay
-                << " m_fltTopDurationUs:" << m_objConfig.m_fltTopDuration
-                << " m_blnHSync:" << m_objConfig.m_blnHSync
-                << " m_blnVSync:" << m_objConfig.m_blnVSync;
+                << " m_fltVoltLevelSynchroBlack:" << m_config.m_fltVoltLevelSynchroBlack
+                << " m_fltVoltLevelSynchroTop:" << m_config.m_fltVoltLevelSynchroTop
+                << " m_fltFramePerS:" << m_config.m_fltFramePerS
+                << " m_fltLineDurationUs:" << m_config.m_fltLineDuration
+                << " m_fltRatioOfRowsToDisplay:" << m_config.m_fltRatioOfRowsToDisplay
+                << " m_fltTopDurationUs:" << m_config.m_fltTopDuration
+                << " m_blnHSync:" << m_config.m_blnHSync
+                << " m_blnVSync:" << m_config.m_blnVSync;
 
         applySettings();
 
@@ -473,16 +473,16 @@ bool ATVDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureRFATVDemod& objCfg = (MsgConfigureRFATVDemod&) cmd;
 
-        m_objRFConfig = objCfg.m_objMsgConfig;
+        m_rfConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureRFATVDemod:"
-                << " m_enmModulation:" << m_objRFConfig.m_enmModulation
-                << " m_fltRFBandwidth:" << m_objRFConfig.m_fltRFBandwidth
-                << " m_fltRFOppBandwidth:" << m_objRFConfig.m_fltRFOppBandwidth
-                << " m_blnFFTFiltering:" << m_objRFConfig.m_blnFFTFiltering
-                << " m_blnDecimatorEnable:" << m_objRFConfig.m_blndecimatorEnable
-                << " m_fltBFOFrequency:" << m_objRFConfig.m_fltBFOFrequency
-                << " m_fmDeviation:" << m_objRFConfig.m_fmDeviation;
+                << " m_enmModulation:" << m_rfConfig.m_enmModulation
+                << " m_fltRFBandwidth:" << m_rfConfig.m_fltRFBandwidth
+                << " m_fltRFOppBandwidth:" << m_rfConfig.m_fltRFOppBandwidth
+                << " m_blnFFTFiltering:" << m_rfConfig.m_blnFFTFiltering
+                << " m_blnDecimatorEnable:" << m_rfConfig.m_blndecimatorEnable
+                << " m_fltBFOFrequency:" << m_rfConfig.m_fltBFOFrequency
+                << " m_fmDeviation:" << m_rfConfig.m_fmDeviation;
 
         applySettings();
 
@@ -504,30 +504,30 @@ bool ATVDemod::handleMessage(const Message& cmd)
 void ATVDemod::applySettings()
 {
 
-    if (m_objConfig.m_intSampleRate == 0)
+    if (m_config.m_intSampleRate == 0)
     {
         return;
     }
 
     bool forwardSampleRateChange = false;
 
-    if((m_objRFConfig.m_intFrequencyOffset != m_objRFRunning.m_intFrequencyOffset)
-       || (m_objRFConfig.m_enmModulation != m_objRFRunning.m_enmModulation)
-       || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate))
+    if((m_rfConfig.m_intFrequencyOffset != m_rfRunning.m_intFrequencyOffset)
+       || (m_rfConfig.m_enmModulation != m_rfRunning.m_enmModulation)
+       || (m_config.m_intSampleRate != m_running.m_intSampleRate))
     {
-        m_nco.setFreq(-m_objRFConfig.m_intFrequencyOffset, m_objConfig.m_intSampleRate);
+        m_nco.setFreq(-m_rfConfig.m_intFrequencyOffset, m_config.m_intSampleRate);
     }
 
-    if ((m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
-        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth)
-        || (m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
-        || (m_objConfig.m_intNumberOfLines != m_objRunning.m_intNumberOfLines))
+    if ((m_config.m_intSampleRate != m_running.m_intSampleRate)
+        || (m_rfConfig.m_fltRFBandwidth != m_rfRunning.m_fltRFBandwidth)
+        || (m_config.m_fltFramePerS != m_running.m_fltFramePerS)
+        || (m_config.m_intNumberOfLines != m_running.m_intNumberOfLines))
     {
         m_objSettingsMutex.lock();
 
-        int linesPerSecond = m_objConfig.m_intNumberOfLines * m_objConfig.m_fltFramePerS;
+        int linesPerSecond = m_config.m_intNumberOfLines * m_config.m_fltFramePerS;
 
-        int maxPoints = m_objConfig.m_intSampleRate / linesPerSecond;
+        int maxPoints = m_config.m_intSampleRate / linesPerSecond;
         int i = maxPoints;
 
         for (; i > 0; i--)
@@ -537,53 +537,53 @@ void ATVDemod::applySettings()
         }
 
         int nbPointsPerRateUnit = i == 0 ? maxPoints : i;
-        m_objConfigPrivate.m_intTVSampleRate = nbPointsPerRateUnit * linesPerSecond;
+        m_configPrivate.m_intTVSampleRate = nbPointsPerRateUnit * linesPerSecond;
 
-        if (m_objConfigPrivate.m_intTVSampleRate > 0)
+        if (m_configPrivate.m_intTVSampleRate > 0)
         {
-            m_interpolatorDistance = (Real) m_objConfigPrivate.m_intTVSampleRate / (Real) m_objConfig.m_intSampleRate;
+            m_interpolatorDistance = (Real) m_configPrivate.m_intTVSampleRate / (Real) m_config.m_intSampleRate;
         }
         else
         {
-            m_objConfigPrivate.m_intTVSampleRate = m_objConfig.m_intSampleRate;
+            m_configPrivate.m_intTVSampleRate = m_config.m_intSampleRate;
             m_interpolatorDistance = 1.0f;
         }
 
         m_interpolatorDistanceRemain = 0;
         m_interpolator.create(24,
-                m_objConfigPrivate.m_intTVSampleRate,
-                m_objRFConfig.m_fltRFBandwidth / getRFBandwidthDivisor(m_objRFConfig.m_enmModulation),
+                m_configPrivate.m_intTVSampleRate,
+                m_rfConfig.m_fltRFBandwidth / getRFBandwidthDivisor(m_rfConfig.m_enmModulation),
                 3.0);
         m_objSettingsMutex.unlock();
     }
 
-    if((m_objConfig.m_fltFramePerS != m_objRunning.m_fltFramePerS)
-       || (m_objConfig.m_fltLineDuration != m_objRunning.m_fltLineDuration)
-       || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
-       || (m_objConfig.m_fltTopDuration != m_objRunning.m_fltTopDuration)
-       || (m_objConfig.m_fltRatioOfRowsToDisplay != m_objRunning.m_fltRatioOfRowsToDisplay)
-       || (m_objConfig.m_enmATVStandard != m_objRunning.m_enmATVStandard)
-       || (m_objConfig.m_intNumberOfLines != m_objRunning.m_intNumberOfLines))
+    if((m_config.m_fltFramePerS != m_running.m_fltFramePerS)
+       || (m_config.m_fltLineDuration != m_running.m_fltLineDuration)
+       || (m_config.m_intSampleRate != m_running.m_intSampleRate)
+       || (m_config.m_fltTopDuration != m_running.m_fltTopDuration)
+       || (m_config.m_fltRatioOfRowsToDisplay != m_running.m_fltRatioOfRowsToDisplay)
+       || (m_config.m_enmATVStandard != m_running.m_enmATVStandard)
+       || (m_config.m_intNumberOfLines != m_running.m_intNumberOfLines))
     {
         m_objSettingsMutex.lock();
 
-        m_intNumberOfLines = m_objConfig.m_intNumberOfLines;
+        m_intNumberOfLines = m_config.m_intNumberOfLines;
 
         applyStandard();
 
-        m_objConfigPrivate.m_intNumberSamplePerLine = (int) (m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);
-        m_intNumberSamplePerTop = (int) (m_objConfig.m_fltTopDuration * m_objConfig.m_intSampleRate);
+        m_configPrivate.m_intNumberSamplePerLine = (int) (m_config.m_fltLineDuration * m_config.m_intSampleRate);
+        m_intNumberSamplePerTop = (int) (m_config.m_fltTopDuration * m_config.m_intSampleRate);
 
-        m_objRegisteredATVScreen->setRenderImmediate(!(m_objConfig.m_fltFramePerS > 25.0f));
+        m_objRegisteredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
         m_objRegisteredATVScreen->resizeATVScreen(
-                m_objConfigPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
+                m_configPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                 m_intNumberOfLines - m_intNumberOfBlackLines);
 
         qDebug() << "ATVDemod::applySettings:"
-                << " m_fltLineDuration: " << m_objConfig.m_fltLineDuration
-                << " m_fltFramePerS: " << m_objConfig.m_fltFramePerS
+                << " m_fltLineDuration: " << m_config.m_fltLineDuration
+                << " m_fltFramePerS: " << m_config.m_fltFramePerS
                 << " m_intNumberOfLines: " << m_intNumberOfLines
-                << " m_intNumberSamplePerLine: " << m_objConfigPrivate.m_intNumberSamplePerLine
+                << " m_intNumberSamplePerLine: " << m_configPrivate.m_intNumberSamplePerLine
                 << " m_intNumberOfBlackLines: " << m_intNumberOfBlackLines;
 
         m_intImageIndex = 0;
@@ -593,56 +593,56 @@ void ATVDemod::applySettings()
         m_objSettingsMutex.unlock();
     }
 
-    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
-        || (m_objConfigPrivate.m_intNumberSamplePerLine != m_objRunningPrivate.m_intNumberSamplePerLine)
-        || (m_objConfig.m_intSampleRate != m_objRunning.m_intSampleRate)
-        || (m_objRFConfig.m_blndecimatorEnable != m_objRFRunning.m_blndecimatorEnable))
+    if ((m_configPrivate.m_intTVSampleRate != m_runningPrivate.m_intTVSampleRate)
+        || (m_configPrivate.m_intNumberSamplePerLine != m_runningPrivate.m_intNumberSamplePerLine)
+        || (m_config.m_intSampleRate != m_running.m_intSampleRate)
+        || (m_rfConfig.m_blndecimatorEnable != m_rfRunning.m_blndecimatorEnable))
     {
         forwardSampleRateChange = true;
     }
 
-    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
-        || (m_objRFConfig.m_fltRFBandwidth != m_objRFRunning.m_fltRFBandwidth)
-        || (m_objRFConfig.m_fltRFOppBandwidth != m_objRFRunning.m_fltRFOppBandwidth))
+    if ((m_configPrivate.m_intTVSampleRate != m_runningPrivate.m_intTVSampleRate)
+        || (m_rfConfig.m_fltRFBandwidth != m_rfRunning.m_fltRFBandwidth)
+        || (m_rfConfig.m_fltRFOppBandwidth != m_rfRunning.m_fltRFOppBandwidth))
     {
         m_objSettingsMutex.lock();
-        m_DSBFilter->create_asym_filter(m_objRFConfig.m_fltRFOppBandwidth / m_objConfigPrivate.m_intTVSampleRate,
-                m_objRFConfig.m_fltRFBandwidth / m_objConfigPrivate.m_intTVSampleRate);
+        m_DSBFilter->create_asym_filter(m_rfConfig.m_fltRFOppBandwidth / m_configPrivate.m_intTVSampleRate,
+                m_rfConfig.m_fltRFBandwidth / m_configPrivate.m_intTVSampleRate);
         memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
         m_DSBFilterBufferIndex = 0;
         m_objSettingsMutex.unlock();
     }
 
-    if ((m_objConfigPrivate.m_intTVSampleRate != m_objRunningPrivate.m_intTVSampleRate)
-        || (m_objRFConfig.m_fltBFOFrequency != m_objRFRunning.m_fltBFOFrequency))
+    if ((m_configPrivate.m_intTVSampleRate != m_runningPrivate.m_intTVSampleRate)
+        || (m_rfConfig.m_fltBFOFrequency != m_rfRunning.m_fltBFOFrequency))
     {
-        m_bfoPLL.configure(m_objRFConfig.m_fltBFOFrequency / m_objConfigPrivate.m_intTVSampleRate,
-                100.0 / m_objConfigPrivate.m_intTVSampleRate,
+        m_bfoPLL.configure(m_rfConfig.m_fltBFOFrequency / m_configPrivate.m_intTVSampleRate,
+                100.0 / m_configPrivate.m_intTVSampleRate,
                 0.01);
-        m_bfoFilter.setFrequencies(m_objRFConfig.m_fltBFOFrequency, m_objConfigPrivate.m_intTVSampleRate);
+        m_bfoFilter.setFrequencies(m_rfConfig.m_fltBFOFrequency, m_configPrivate.m_intTVSampleRate);
     }
 
-    if (m_objRFConfig.m_fmDeviation != m_objRFRunning.m_fmDeviation)
+    if (m_rfConfig.m_fmDeviation != m_rfRunning.m_fmDeviation)
     {
-        m_objPhaseDiscri.setFMScaling(1.0f / m_objRFConfig.m_fmDeviation);
+        m_objPhaseDiscri.setFMScaling(1.0f / m_rfConfig.m_fmDeviation);
     }
 
-    m_objRunning = m_objConfig;
-    m_objRFRunning = m_objRFConfig;
-    m_objRunningPrivate = m_objConfigPrivate;
+    m_running = m_config;
+    m_rfRunning = m_rfConfig;
+    m_runningPrivate = m_configPrivate;
 
     if (forwardSampleRateChange)
     {
-        int sampleRate = m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
+        int sampleRate = m_rfRunning.m_blndecimatorEnable ? m_runningPrivate.m_intTVSampleRate : m_running.m_intSampleRate;
         MsgReportEffectiveSampleRate *report;
-        report = MsgReportEffectiveSampleRate::create(sampleRate, m_objRunningPrivate.m_intNumberSamplePerLine);
+        report = MsgReportEffectiveSampleRate::create(sampleRate, m_runningPrivate.m_intNumberSamplePerLine);
         getMessageQueueToGUI()->push(report);
     }
 }
 
 void ATVDemod::applyStandard()
 {
-    switch(m_objConfig.m_enmATVStandard)
+    switch(m_config.m_enmATVStandard)
     {
     case ATVStdHSkip:
         // what is left in a line for the image
@@ -689,23 +689,23 @@ void ATVDemod::applyStandard()
     }
 
     // for now all standards apply this
-    m_intNumberSamplePerLineSignals = (int) ((12.0f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);  // 12.0 = 7.3 + 4.7
-    m_intNumberSaplesPerHSync = (int) ((9.6f/64.0f)*m_objConfig.m_fltLineDuration * m_objConfig.m_intSampleRate);      // 9.4 = 4.7 + 4.7
+    m_intNumberSamplePerLineSignals = (int) ((12.0f/64.0f)*m_config.m_fltLineDuration * m_config.m_intSampleRate);  // 12.0 = 7.3 + 4.7
+    m_intNumberSaplesPerHSync = (int) ((9.6f/64.0f)*m_config.m_fltLineDuration * m_config.m_intSampleRate);      // 9.4 = 4.7 + 4.7
 }
 
 int ATVDemod::getSampleRate()
 {
-    return m_objRunning.m_intSampleRate;
+    return m_running.m_intSampleRate;
 }
 
 int ATVDemod::getEffectiveSampleRate()
 {
-    return m_objRFRunning.m_blndecimatorEnable ? m_objRunningPrivate.m_intTVSampleRate : m_objRunning.m_intSampleRate;
+    return m_rfRunning.m_blndecimatorEnable ? m_runningPrivate.m_intTVSampleRate : m_running.m_intSampleRate;
 }
 
 bool ATVDemod::getBFOLocked()
 {
-    if ((m_objRFRunning.m_enmModulation == ATV_USB) || (m_objRFRunning.m_enmModulation == ATV_LSB))
+    if ((m_rfRunning.m_enmModulation == ATV_USB) || (m_rfRunning.m_enmModulation == ATV_LSB))
     {
         return m_bfoPLL.locked();
     }

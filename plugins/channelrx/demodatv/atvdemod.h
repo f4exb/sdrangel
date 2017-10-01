@@ -411,14 +411,14 @@ private:
 
     //QElapsedTimer m_objTimer;
 
-    ATVConfig m_objRunning;
-    ATVConfig m_objConfig;
+    ATVConfig m_running;
+    ATVConfig m_config;
 
-    ATVRFConfig m_objRFRunning;
-    ATVRFConfig m_objRFConfig;
+    ATVRFConfig m_rfRunning;
+    ATVRFConfig m_rfConfig;
 
-    ATVConfigPrivate m_objRunningPrivate;
-    ATVConfigPrivate m_objConfigPrivate;
+    ATVConfigPrivate m_runningPrivate;
+    ATVConfigPrivate m_configPrivate;
 
     QMutex m_objSettingsMutex;
 
@@ -434,12 +434,12 @@ private:
         // Horizontal Synchro detection
 
         // Floor Detection 0
-        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
+        if (fltVal < m_running.m_fltVoltLevelSynchroTop)
         {
             m_intSynchroPoints++;
         }
         // Black detection 0.3
-        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+        else if (fltVal > m_running.m_fltVoltLevelSynchroBlack)
         {
             m_intSynchroPoints = 0;
         }
@@ -450,7 +450,7 @@ private:
 
         if (m_blnSynchroDetected)
         {
-            if (m_intSampleIndex >= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/2) // first after skip
+            if (m_intSampleIndex >= (3 * m_runningPrivate.m_intNumberSamplePerLine)/2) // first after skip
             {
                 //qDebug("VSync: %d %d %d", m_intColIndex, m_intSampleIndex, m_intLineIndex);
                 m_intAvgColIndex = m_intColIndex;
@@ -468,25 +468,25 @@ private:
             m_intSampleIndex++;
         }
 
-        if (m_intColIndex < m_objRunningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop - 1)
+        if (m_intColIndex < m_runningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop - 1)
         {
             m_intColIndex++;
         }
         else
         {
-            if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
+            if (m_running.m_blnHSync && (m_intLineIndex == 0))
             {
                 //qDebug("HCorr: %d", m_intAvgColIndex);
-                m_intColIndex = m_intNumberSamplePerTop + (m_objRunningPrivate.m_intNumberSamplePerLine - m_intAvgColIndex)/2; // amortizing factor 1/2
+                m_intColIndex = m_intNumberSamplePerTop + (m_runningPrivate.m_intNumberSamplePerLine - m_intAvgColIndex)/2; // amortizing factor 1/2
             }
             else
             {
                 m_intColIndex = m_intNumberSamplePerTop;
             }
 
-            if ((m_objRFRunning.m_enmModulation == ATV_AM)
-                || (m_objRFRunning.m_enmModulation == ATV_USB)
-                || (m_objRFRunning.m_enmModulation == ATV_LSB))
+            if ((m_rfRunning.m_enmModulation == ATV_AM)
+                || (m_rfRunning.m_enmModulation == ATV_USB)
+                || (m_rfRunning.m_enmModulation == ATV_LSB))
             {
                 m_fltAmpMin = m_fltEffMin;
                 m_fltAmpMax = m_fltEffMax;
@@ -510,18 +510,18 @@ private:
 
     inline void processClassic(float& fltVal, int& intVal)
     {
-        int intSynchroTimeSamples= (3 * m_objRunningPrivate.m_intNumberSamplePerLine)/4;
-        float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_objRunning.m_fltVoltLevelSynchroBlack;
+        int intSynchroTimeSamples= (3 * m_runningPrivate.m_intNumberSamplePerLine)/4;
+        float fltSynchroTrameLevel =  0.5f*((float)intSynchroTimeSamples) * m_running.m_fltVoltLevelSynchroBlack;
 
         // Horizontal Synchro detection
 
         // Floor Detection 0
-        if (fltVal < m_objRunning.m_fltVoltLevelSynchroTop)
+        if (fltVal < m_running.m_fltVoltLevelSynchroTop)
         {
             m_intSynchroPoints++;
         }
         // Black detection 0.3
-        else if (fltVal > m_objRunning.m_fltVoltLevelSynchroBlack)
+        else if (fltVal > m_running.m_fltVoltLevelSynchroBlack)
         {
             m_intSynchroPoints = 0;
         }
@@ -534,7 +534,7 @@ private:
 
         if (m_blnSynchroDetected)
         {
-            m_intAvgColIndex = m_intSampleIndex - m_intColIndex - (m_intColIndex < m_objRunningPrivate.m_intNumberSamplePerLine/2 ? 150 : 0);
+            m_intAvgColIndex = m_intSampleIndex - m_intColIndex - (m_intColIndex < m_runningPrivate.m_intNumberSamplePerLine/2 ? 150 : 0);
             //qDebug("HSync: %d %d %d", m_intSampleIndex, m_intColIndex, m_intAvgColIndex);
             m_intSampleIndex = 0;
         }
@@ -543,14 +543,14 @@ private:
             m_intSampleIndex++;
         }
 
-        if (!m_objRunning.m_blnHSync && (m_intColIndex >= m_objRunningPrivate.m_intNumberSamplePerLine)) // H Sync not active
+        if (!m_running.m_blnHSync && (m_intColIndex >= m_runningPrivate.m_intNumberSamplePerLine)) // H Sync not active
         {
             m_intColIndex = 0;
             blnNewLine = true;
         }
-        else if (m_intColIndex >= m_objRunningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
+        else if (m_intColIndex >= m_runningPrivate.m_intNumberSamplePerLine + m_intNumberSamplePerTop) // No valid H sync
         {
-            if (m_objRunning.m_blnHSync && (m_intLineIndex == 0))
+            if (m_running.m_blnHSync && (m_intLineIndex == 0))
             {
                 //qDebug("HSync: %d %d", m_intColIndex, m_intAvgColIndex);
                 m_intColIndex = m_intNumberSamplePerTop + m_intAvgColIndex/4; // amortizing 1/4
@@ -565,9 +565,9 @@ private:
 
         if (blnNewLine)
         {
-            if ((m_objRFRunning.m_enmModulation == ATV_AM)
-                || (m_objRFRunning.m_enmModulation == ATV_USB)
-                || (m_objRFRunning.m_enmModulation == ATV_LSB))
+            if ((m_rfRunning.m_enmModulation == ATV_AM)
+                || (m_rfRunning.m_enmModulation == ATV_USB)
+                || (m_rfRunning.m_enmModulation == ATV_LSB))
             {
                 m_fltAmpMin = m_fltEffMin;
                 m_fltAmpMax = m_fltEffMax;
@@ -604,7 +604,7 @@ private:
 
         // Vertical sync and image rendering
 
-        if ((m_objRunning.m_blnVSync) && (m_intLineIndex < m_intNumberOfLines)) // VSync activated and lines in range
+        if ((m_running.m_blnVSync) && (m_intLineIndex < m_intNumberOfLines)) // VSync activated and lines in range
         {
             if (m_intColIndex >= intSynchroTimeSamples)
             {
@@ -645,7 +645,7 @@ private:
                 {
                     m_objRegisteredATVScreen->renderImage(0);
 
-                    if (m_objRFRunning.m_enmModulation == ATV_AM)
+                    if (m_rfRunning.m_enmModulation == ATV_AM)
                     {
                         m_fltAmpMin = m_fltEffMin;
                         m_fltAmpMax = m_fltEffMax;
