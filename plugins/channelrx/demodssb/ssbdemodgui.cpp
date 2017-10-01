@@ -6,7 +6,6 @@
 #include <QMainWindow>
 
 #include "ui_ssbdemodgui.h"
-#include "ui_ssbdemodgui.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
@@ -48,113 +47,36 @@ qint64 SSBDemodGUI::getCenterFrequency() const
 void SSBDemodGUI::setCenterFrequency(qint64 centerFrequency)
 {
 	m_channelMarker.setCenterFrequency(centerFrequency);
+	m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
 void SSBDemodGUI::resetToDefaults()
 {
-	blockApplySettings(true);
-
-	ui->BW->setValue(30);
-	ui->volume->setValue(30);
-	ui->deltaFrequency->setValue(0);
-	ui->spanLog2->setValue(3);
-	ui->agc->setChecked(false);
-	ui->agcTimeLog2->setValue(7);
-	ui->agcPowerThreshold->setValue(-40);
-	ui->agcThresholdGate->setValue(4);
-
-	blockApplySettings(false);
+	m_settings.resetToDefaults();
 }
 
 QByteArray SSBDemodGUI::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->BW->value());
-	s.writeS32(3, ui->volume->value());
-	s.writeBlob(4, ui->spectrumGUI->serialize());
-	s.writeU32(5, m_channelMarker.getColor().rgb());
-	s.writeS32(6, ui->lowCut->value());
-	s.writeS32(7, ui->spanLog2->value());
-	s.writeBool(8, m_audioBinaural);
-	s.writeBool(9, m_audioFlipChannels);
-	s.writeBool(10, m_dsb);
-	s.writeBool(11, ui->agc->isChecked());
-	s.writeS32(12, ui->agcTimeLog2->value());
-	s.writeS32(13, ui->agcPowerThreshold->value());
-    s.writeS32(14, ui->agcThresholdGate->value());
-    s.writeBool(15, ui->agcClamping->isChecked());
-	return s.final();
+    return m_settings.serialize();
 }
 
 bool SSBDemodGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
-
-	if (!d.isValid())
-	{
-		resetToDefaults();
-	    applySettings();
-		return false;
-	}
-
-	if (d.getVersion() == 1)
-	{
-		QByteArray bytetmp;
-		quint32 u32tmp;
-		qint32 tmp;
-		bool booltmp;
-
-		blockApplySettings(true);
-	    m_channelMarker.blockSignals(true);
-
-		d.readS32(1, &tmp, 0);
-		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 30);
-		ui->BW->setValue(tmp);
-		d.readS32(3, &tmp, 30);
-		ui->volume->setValue(tmp);
-		d.readBlob(4, &bytetmp);
-		ui->spectrumGUI->deserialize(bytetmp);
-		if(d.readU32(5, &u32tmp))
-			m_channelMarker.setColor(u32tmp);
-		d.readS32(6, &tmp, 3);
-		ui->lowCut->setValue(tmp);
-		d.readS32(7, &tmp, 20);
-		ui->spanLog2->setValue(tmp);
-		setNewRate(tmp);
-		d.readBool(8, &m_audioBinaural);
-		ui->audioBinaural->setChecked(m_audioBinaural);
-		d.readBool(9, &m_audioFlipChannels);
-		ui->audioFlipChannels->setChecked(m_audioFlipChannels);
-		d.readBool(10, &m_dsb);
-		ui->dsb->setChecked(m_dsb);
-		d.readBool(11, &booltmp, false);
-		ui->agc->setChecked(booltmp);
-		d.readS32(12, &tmp, 7);
-		ui->agcTimeLog2->setValue(tmp);
-        d.readS32(13, &tmp, -40);
-        ui->agcPowerThreshold->setValue(tmp);
-        d.readS32(14, &tmp, 4);
-        ui->agcThresholdGate->setValue(tmp);
-        d.readBool(15, &booltmp, false);
-        ui->agcClamping->setChecked(booltmp);
-
+    if(m_settings.deserialize(data))
+    {
+        updateChannelMarker();
         displaySettings();
-
-		blockApplySettings(false);
-	    m_channelMarker.blockSignals(false);
-
-		applySettings();
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-	    applySettings();
-		return false;
-	}
+        applySettings(true); // will have true
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        displaySettings();
+        applySettings(true); // will have true
+        return false;
+    }
 }
 
 bool SSBDemodGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -170,18 +92,21 @@ void SSBDemodGUI::viewChanged()
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
+	m_settings.m_audioBinaural = binaural;
 	applySettings();
 }
 
 void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 {
 	m_audioFlipChannels = flip;
+	m_settings.m_audioFlipChannels = flip;
 	applySettings();
 }
 
 void SSBDemodGUI::on_dsb_toggled(bool dsb)
 {
 	m_dsb = dsb;
+	m_settings.m_dsb = dsb;
 
 	if (m_dsb)
 	{
@@ -218,6 +143,8 @@ void SSBDemodGUI::on_dsb_toggled(bool dsb)
 void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void SSBDemodGUI::on_BW_valueChanged(int value)
@@ -234,6 +161,7 @@ void SSBDemodGUI::on_BW_valueChanged(int value)
         ui->BWText->setText(tr("%1k").arg(s));
 	}
 
+	m_settings.m_rfBandwidth = value * 100;
 	on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 	setNewRate(m_spanLog2);
 }
@@ -277,22 +205,26 @@ void SSBDemodGUI::on_lowCut_valueChanged(int value)
 	QString s = QString::number(lowCutoff/1000.0, 'f', 1);
 	ui->lowCutText->setText(tr("%1k").arg(s));
 	ui->lowCut->setValue(lowCutoff/100);
+	m_settings.m_lowCutoff = lowCutoff;
 	applySettings();
 }
 
 void SSBDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volume = value / 10.0;
 	applySettings();
 }
 
-void SSBDemodGUI::on_agc_toggled(bool checked __attribute((__unused__)))
+void SSBDemodGUI::on_agc_toggled(bool checked)
 {
+    m_settings.m_agc = checked;
     applySettings();
 }
 
-void SSBDemodGUI::on_agcClamping_toggled(bool checked __attribute((__unused__)))
+void SSBDemodGUI::on_agcClamping_toggled(bool checked)
 {
+    m_settings.m_agcClamping = checked;
     applySettings();
 }
 
@@ -300,12 +232,14 @@ void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
 {
     QString s = QString::number((1<<value), 'f', 0);
     ui->agcTimeText->setText(s);
+    m_settings.m_agcTimeLog2 = value;
     applySettings();
 }
 
 void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 {
     displayAGCPowerThreshold(value);
+    m_settings.m_agcPowerThreshold = value;
     applySettings();
 }
 
@@ -313,12 +247,14 @@ void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
 {
     QString s = QString::number(value, 'f', 0);
     ui->agcThresholdGateText->setText(s);
+    m_settings.m_agcThresholdGate = value;
     applySettings();
 }
 
 void SSBDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
+	m_settings.m_audioMute = checked;
 	applySettings();
 }
 
@@ -326,6 +262,7 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 {
 	if (setNewRate(value))
 	{
+	    m_settings.m_spanLog2 = value;
 		applySettings();
 	}
 
@@ -386,11 +323,10 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_channelMarker.setColor(Qt::green);
-	m_channelMarker.setBandwidth(m_rate);
-	m_channelMarker.setSidebands(ChannelMarker::usb);
-	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
+    m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
@@ -400,9 +336,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
-	resetToDefaults();
 	displaySettings();
-	applySettings();
+	applySettings(true);
 	setNewRate(m_spanLog2);
 }
 
@@ -445,7 +380,6 @@ bool SSBDemodGUI::setNewRate(int spanLog2)
 		ui->lowCut->setValue(m_rate/100);
 		m_channelMarker.setLowCutoff(m_rate);
 	}
-
 
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 
@@ -496,7 +430,7 @@ void SSBDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void SSBDemodGUI::applySettings()
+void SSBDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -507,30 +441,90 @@ void SSBDemodGUI::applySettings()
                 48000, m_channelMarker.getCenterFrequency());
         m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
 
-		m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
-			ui->BW->value() * 100.0,
-			ui->lowCut->value() * 100.0,
-			ui->volume->value() / 10.0,
-			m_spanLog2,
-			m_audioBinaural,
-			m_audioFlipChannels,
-			m_dsb,
-			ui->audioMute->isChecked(),
-			ui->agc->isChecked(),
-			ui->agcClamping->isChecked(),
-			ui->agcTimeLog2->value(),
-			ui->agcPowerThreshold->value(),
-			ui->agcThresholdGate->value());
+        SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create( m_settings, force);
+        m_ssbDemod->getInputMessageQueue()->push(message);
 	}
 }
 
 void SSBDemodGUI::displaySettings()
 {
-    QString s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
+    m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
+    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
+    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+
+    if (m_settings.m_dsb) {
+        m_channelMarker.setSidebands(ChannelMarker::dsb);
+    } else {
+        if (m_settings.m_rfBandwidth < 0) {
+            m_channelMarker.setSidebands(ChannelMarker::lsb);
+        } else {
+            m_channelMarker.setSidebands(ChannelMarker::usb);
+        }
+    }
+
+    m_channelMarker.blockSignals(false);
+
+    blockApplySettings(true);
+
+    ui->agc->setChecked(m_settings.m_agc);
+    ui->agcClamping->setChecked(m_settings.m_agcClamping);
+    ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
+    ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
+    ui->audioMute->setChecked(m_settings.m_audioMute);
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->dsb->setChecked(m_settings.m_dsb);
+    ui->spanLog2->setValue(m_settings.m_spanLog2);
+
+    ui->BW->setValue(m_settings.m_rfBandwidth / 100.0);
+    QString s = QString::number(m_settings.m_rfBandwidth/1000.0, 'f', 1);
+
+    if (m_settings.m_dsb)
+    {
+        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
+    }
+    else
+    {
+        ui->BWText->setText(tr("%1k").arg(s));
+    }
+
+    ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
+    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
+
+    ui->volume->setValue(m_settings.m_volume * 10.0);
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
+
+    ui->agcTimeLog2->setValue(m_settings.m_agcTimeLog2);
+    s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
     ui->agcTimeText->setText(s);
+
+    ui->agcPowerThreshold->setValue(m_settings.m_agcPowerThreshold);
     displayAGCPowerThreshold(ui->agcPowerThreshold->value());
+
+    ui->agcThresholdGate->setValue(m_settings.m_agcThresholdGate);
     s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
     ui->agcThresholdGateText->setText(s);
+
+    blockApplySettings(false);
+}
+
+void SSBDemodGUI::displayUDPAddress()
+{
+    //TODO: ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+}
+
+void SSBDemodGUI::updateChannelMarker()
+{
+    m_channelMarker.blockSignals(true);
+
+    //m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
+    this->setWindowTitle(m_channelMarker.getTitle());
+
+    m_channelMarker.blockSignals(false);
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)

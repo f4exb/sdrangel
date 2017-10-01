@@ -6,6 +6,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
+#include "ssbdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -63,6 +64,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	SSBDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate;
@@ -85,8 +87,10 @@ private:
 	bool setNewRate(int spanLog2);
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
 	void displaySettings();
+    void displayUDPAddress();
+    void updateChannelMarker();
 
 	void displayAGCPowerThreshold(int value);
 

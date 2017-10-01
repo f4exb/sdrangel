@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -43,6 +45,8 @@ void SSBDemodSettings::resetToDefaults()
     m_spanLog2 = 3;
     m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
+    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_rgbColor = QColor(0, 255, 0).rgb();
 }
 
 QByteArray SSBDemodSettings::serialize() const
