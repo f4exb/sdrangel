@@ -31,10 +31,38 @@
 #define ssbFftLen 1024
 #define agcTarget 3276.8 // -10 dB amplitude => -20 dB power: center of normal signal
 
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
+
 class SSBDemod : public BasebandSampleSink {
 public:
-	SSBDemod(BasebandSampleSink* sampleSink);
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+	SSBDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~SSBDemod();
+	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
 			Real Bandwidth,
@@ -163,6 +191,10 @@ private:
 			m_agcThresholdGate(agcThresholdGate)
 		{ }
 	};
+
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
 	Real m_Bandwidth;
 	Real m_LowCutoff;

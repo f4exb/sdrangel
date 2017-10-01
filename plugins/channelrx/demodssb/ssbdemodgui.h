@@ -11,8 +11,6 @@ class PluginAPI;
 class DeviceSourceAPI;
 
 class AudioFifo;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class SSBDemod;
 class SpectrumVis;
 
@@ -76,8 +74,6 @@ private:
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;

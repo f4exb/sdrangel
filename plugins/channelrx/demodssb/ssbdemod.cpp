@@ -16,19 +16,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "ssbdemod.h"
 
-#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
+#include <dsp/downchannelizer.h>
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
 #include "util/db.h"
 
-MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
+#include "ssbdemod.h"
 
-SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
+MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
+MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureChannelizer, Message)
+
+SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_audioBinaual(false),
 	m_audioFlipChannels(false),
     m_dsb(false),
@@ -40,7 +46,7 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
     m_agcPowerThreshold(1e-2),
     m_agcThresholdGate(0),
     m_audioActive(false),
-    m_sampleSink(sampleSink),
+    m_sampleSink(0),
     m_audioFifo(24000),
     m_settingsMutex(QMutex::Recursive)
 {
@@ -75,6 +81,10 @@ SSBDemod::SSBDemod(BasebandSampleSink* sampleSink) :
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 }
 
@@ -84,6 +94,10 @@ SSBDemod::~SSBDemod()
 	if (DSBFilter) delete DSBFilter;
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void SSBDemod::configure(MessageQueue* messageQueue,
@@ -284,6 +298,16 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
+    }
 	else if (MsgConfigureSSBDemod::match(cmd))
 	{
 		MsgConfigureSSBDemod& cfg = (MsgConfigureSSBDemod&) cmd;

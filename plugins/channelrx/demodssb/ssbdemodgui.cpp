@@ -2,11 +2,9 @@
 #include "ssbdemodgui.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_ssbdemodgui.h"
 #include "ui_ssbdemodgui.h"
 #include "dsp/spectrumvis.h"
@@ -373,10 +371,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbDemod = new SSBDemod(m_spectrumVis);
-	m_channelizer = new DownChannelizer(m_ssbDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_ssbDemod = new SSBDemod(m_deviceAPI);
+	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
+	m_ssbDemod->setSampleSink(m_spectrumVis);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -389,7 +386,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
@@ -413,12 +409,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 SSBDemodGUI::~SSBDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_ssbDemod;
 	delete m_spectrumVis;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -511,9 +503,9 @@ void SSBDemodGUI::applySettings()
 		setTitleColor(m_channelMarker.getColor());
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+        SSBDemod::MsgConfigureChannelizer* channelConfigMsg = SSBDemod::MsgConfigureChannelizer::create(
+                48000, m_channelMarker.getCenterFrequency());
+        m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
 
 		m_ssbDemod->configure(m_ssbDemod->getInputMessageQueue(),
 			ui->BW->value() * 100.0,
