@@ -48,6 +48,27 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName("BFMDemod");
 
+    m_magsq = 0.0f;
+    m_magsqSum = 0.0f;
+    m_magsqPeak = 0.0f;
+    m_magsqCount = 0;
+
+    m_squelchLevel = 0;
+
+    m_interpolatorDistance = 0.0f;
+    m_interpolatorDistanceRemain = 0.0f;
+
+    m_interpolatorRDSDistance = 0.0f;
+    m_interpolatorRDSDistanceRemain = 0.0f;
+
+    m_interpolatorStereoDistance = 0.0f;
+    m_interpolatorStereoDistanceRemain = 0.0f;
+
+    m_sampleSink = 0;
+    m_m1Arg = 0;
+
+    m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
@@ -62,19 +83,12 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate(); // normally 48 kHz
 	m_deemphasisFilterX.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
 	m_deemphasisFilterY.configure(default_deemphasis * m_config.m_audioSampleRate * 1.0e-6);
-	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
-	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
+ 	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
 	apply();
 
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
-
-//	m_movingAverage.resize(16, 0);
-	m_magsq = 0.0f;
-    m_magsqSum = 0.0f;
-    m_magsqPeak = 0.0f;
-    m_magsqCount = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
     m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_config.m_udpPort);
