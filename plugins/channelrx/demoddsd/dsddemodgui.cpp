@@ -34,13 +34,10 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
+#include "dsddemodbaudrates.h"
 #include "dsddemod.h"
 
 const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
-
-unsigned int DSDDemodBaudRates::m_rates[] = {2400, 4800};
-unsigned int DSDDemodBaudRates::m_nb_rates = 2;
-unsigned int DSDDemodBaudRates::m_defaultRateIndex = 1; // 4800 bauds
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
@@ -322,8 +319,9 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_scopeVis = new ScopeVis(ui->glScope);
-	m_dsdDemod = new DSDDemod(m_scopeVis);
-	m_dsdDemod->registerGUI(this);
+	m_dsdDemod = new DSDDemod(m_deviceAPI);
+	m_dsdDemod->setScopeSink(m_scopeVis);
+	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->glScope->setSampleRate(48000);
     m_scopeVis->setSampleRate(48000);
@@ -339,11 +337,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
-	m_channelizer = new DownChannelizer(m_dsdDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setTitle(windowTitle());
 	m_channelMarker.setColor(Qt::cyan);
 	m_channelMarker.setBandwidth(10000);
@@ -366,11 +360,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 DSDDemodGUI::~DSDDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_dsdDemod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -400,9 +390,9 @@ void DSDDemodGUI::applySettings(bool force)
 
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+        DSDDemod::MsgConfigureChannelizer* channelConfigMsg = DSDDemod::MsgConfigureChannelizer::create(
+                48000, m_channelMarker.getCenterFrequency());
+        m_dsdDemod->getInputMessageQueue()->push(channelConfigMsg);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 	    ui->rfBWText->setText(QString("%1k").arg(ui->rfBW->value() / 10.0, 0, 'f', 1));
@@ -682,29 +672,4 @@ void DSDDemodGUI::tick()
 	}
 
 	m_tickCount++;
-}
-
-unsigned int DSDDemodBaudRates::getRate(unsigned int rate_index)
-{
-    if (rate_index < m_nb_rates)
-    {
-        return m_rates[rate_index];
-    }
-    else
-    {
-        return m_rates[m_defaultRateIndex];
-    }
-}
-
-unsigned int DSDDemodBaudRates::getRateIndex(unsigned int rate)
-{
-    for (unsigned int i=0; i < m_nb_rates; i++)
-    {
-        if (rate == m_rates[i])
-        {
-            return i;
-        }
-    }
-
-    return m_defaultRateIndex;
 }

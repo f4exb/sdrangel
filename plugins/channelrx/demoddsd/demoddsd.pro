@@ -40,12 +40,14 @@ CONFIG(Debug):build_subdir = debug
 SOURCES = dsddecoder.cpp\
 dsddemod.cpp\
 dsddemodgui.cpp\
-dsddemodplugin.cpp
+dsddemodplugin.cpp\
+dsddemodbaudrates.cpp
 
 HEADERS = dsddecoder.h\
 dsddemod.h\
 dsddemodgui.h\
-dsddemodplugin.h
+dsddemodplugin.h\
+dsddemodbaudrates.h
 
 FORMS = dsddemodgui.ui
 

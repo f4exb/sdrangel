@@ -35,12 +35,38 @@
 
 #include "dsddecoder.h"
 
-class DSDDemodGUI;
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 
 class DSDDemod : public BasebandSampleSink {
 public:
-    DSDDemod(BasebandSampleSink* sampleSink);
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+    DSDDemod(DeviceSourceAPI *deviceAPI);
 	~DSDDemod();
+	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
 			int  rfBandwidth,
@@ -68,10 +94,6 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
-
-	void registerGUI(DSDDemodGUI *dsdDemodGUI) {
-		m_dsdDemodGUI = dsdDemodGUI;
-	}
 
 	double getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
@@ -288,6 +310,10 @@ private:
 	Config m_config;
 	Config m_running;
 
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
+
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
@@ -320,7 +346,6 @@ private:
 	bool m_scopeEnabled;
 
 	DSDDecoder m_dsdDecoder;
-	DSDDemodGUI *m_dsdDemodGUI;
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;

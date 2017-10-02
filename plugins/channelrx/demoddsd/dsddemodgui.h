@@ -30,8 +30,6 @@
 class PluginAPI;
 class DeviceSourceAPI;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class ScopeVis;
 class DSDDemod;
 
@@ -100,8 +98,6 @@ private:
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
     ScopeVis* m_scopeVis;
 
 	DSDDemod* m_dsdDemod;
@@ -129,20 +125,6 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
-};
-
-class DSDDemodBaudRates
-{
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getDefaultRate() { return m_rates[m_defaultRateIndex]; }
-    static unsigned int getDefaultRateIndex() { return m_defaultRateIndex; }
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_nb_rates;
-    static unsigned int m_rates[2];
-    static unsigned int m_defaultRateIndex;
 };
 
 #endif // INCLUDE_DSDDEMODGUI_H

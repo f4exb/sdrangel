@@ -15,24 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demoddsd/dsddemod.h"
 
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
 #include <dsp/downchannelizer.h>
 #include "audio/audiooutput.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
-#include "dsddemodgui.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include <dsp/downchannelizer.h>
+#include <device/devicesourceapi.h>
 
+#include "dsddemod.h"
+
+MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 
 const int DSDDemod::m_udpBlockSize = 512;
 
-DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
+DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
+	m_deviceAPI(deviceAPI),
 	m_sampleCount(0),
 	m_squelchCount(0),
 	m_squelchOpen(false),
@@ -40,7 +46,7 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
     m_fmExcursion(24),
 	m_audioFifo1(48000),
     m_audioFifo2(48000),
-    m_scope(sampleSink),
+    m_scope(0),
     m_scopeEnabled(true),
     m_dsdDecoder(),
     m_settingsMutex(QMutex::Recursive)
@@ -79,6 +85,10 @@ DSDDemod::DSDDemod(BasebandSampleSink* sampleSink) :
     m_audioFifo1.setUDPSink(m_udpBufferAudio);
     m_audioFifo2.setUDPSink(m_udpBufferAudio);
 
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
     apply(true);
 }
 
@@ -88,6 +98,10 @@ DSDDemod::~DSDDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
     delete m_udpBufferAudio;
+
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,
@@ -364,6 +378,16 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
+    }
 	else if (MsgConfigureDSDDemod::match(cmd))
 	{
 		MsgConfigureDSDDemod& cfg = (MsgConfigureDSDDemod&) cmd;
