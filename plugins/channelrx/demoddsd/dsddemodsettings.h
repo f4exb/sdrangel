@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODDSD_DEMODDSDSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODDSD_DEMODDSDSETTINGS_H_
+#ifndef PLUGINS_CHANNELRX_DEMODDSD_DSDDEMODSETTINGS_H_
+#define PLUGINS_CHANNELRX_DEMODDSD_DSDDEMODSETTINGS_H_
 
 #include <QByteArray>
 
@@ -25,11 +25,11 @@ struct DSDDemodSettings
 {
     int m_inputSampleRate;
     qint64 m_inputFrequencyOffset;
-    int  m_rfBandwidth;
-    int  m_demodGain;
-    int  m_volume;
+    Real  m_rfBandwidth;
+    Real  m_demodGain;
+    Real  m_volume;
     int  m_baudRate;
-    int  m_fmDeviation;
+    Real  m_fmDeviation;
     int  m_squelchGate;
     Real m_squelch;
     bool m_audioMute;
@@ -43,6 +43,7 @@ struct DSDDemodSettings
     bool m_udpCopyAudio;
     QString m_udpAddress;
     quint16 m_udpPort;
+    quint32 m_rgbColor;
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;
@@ -56,4 +57,4 @@ struct DSDDemodSettings
 };
 
 
-#endif /* PLUGINS_CHANNELRX_DEMODDSD_DEMODDSDSETTINGS_H_ */
+#endif /* PLUGINS_CHANNELRX_DEMODDSD_DSDDEMODSETTINGS_H_ */

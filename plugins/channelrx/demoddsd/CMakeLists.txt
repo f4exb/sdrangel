@@ -5,6 +5,7 @@ set(dsddemod_SOURCES
     dsddemodgui.cpp
     dsddemodplugin.cpp
     dsddemodbaudrates.cpp
+    dsddemodsettings.cpp
     dsddecoder.cpp
 )
 
@@ -13,6 +14,7 @@ set(dsddemod_HEADERS
     dsddemodgui.h
     dsddemodplugin.h
     dsddemodbaudrates.h
+    dsddemodsettings.h
     dsddecoder.h
 )
 
