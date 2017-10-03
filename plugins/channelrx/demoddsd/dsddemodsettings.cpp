@@ -56,12 +56,12 @@ void DSDDemodSettings::resetToDefaults()
 QByteArray DSDDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeS32(1, m_inputSampleRate);
+    s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_rfBandwidth/100.0);
     s.writeS32(3, m_demodGain*100.0);
     s.writeS32(4, m_fmDeviation/100.0);
     s.writeS32(5, m_squelch);
-    s.writeS32(6, m_inputFrequencyOffset);
+    s.writeS32(6, m_inputSampleRate);
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_squelchGate);
     s.writeS32(9, m_volume*10.0);
@@ -105,7 +105,8 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readS32(1, &m_inputSampleRate, 96000);
+        d.readS32(1, &tmp, 0);
+        m_inputFrequencyOffset = tmp;
         d.readS32(2, &tmp, 4);
         m_rfBandwidth = tmp * 100.0;
         d.readS32(3, &tmp, 3);
@@ -114,8 +115,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_fmDeviation = tmp * 100.0;
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
-        d.readS32(6, &tmp, 0);
-        m_inputFrequencyOffset = tmp;
+        d.readS32(6, &m_inputSampleRate, 96000);
         d.readU32(7, &m_rgbColor);
         d.readS32(8, &m_squelchGate, 5);
         d.readS32(9, &tmp, 20);
