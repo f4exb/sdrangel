@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
+#include <plugin/plugininstancegui.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -146,7 +146,7 @@ MainWindow::MainWindow(QWidget* parent) :
 	        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
 	m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
     QWidget *gui;
-    PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+    PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
@@ -230,7 +230,7 @@ void MainWindow::addSourceDevice()
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
     QWidget *gui;
-    PluginInstanceUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+    PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), &gui, m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
@@ -286,7 +286,7 @@ void MainWindow::addSinkDevice()
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), m_deviceUIs.back()->m_deviceSinkAPI);
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSink(sink);
     QWidget *gui;
-    PluginInstanceUI *pluginUI = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
+    PluginInstanceGUI *pluginUI = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), &gui, m_deviceUIs.back()->m_deviceSinkAPI);
     m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
@@ -501,9 +501,9 @@ void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
 #if QT_VERSION >= 0x050400
-    m_showSystemWidget = new QLabel("SDRangel v3.7.2 " + qtVersionStr + QSysInfo::prettyProductName(), this);
+    m_showSystemWidget = new QLabel("SDRangel v3.7.3 " + qtVersionStr + QSysInfo::prettyProductName(), this);
 #else
-    m_showSystemWidget = new QLabel("SDRangel v3.7.2 " + qtVersionStr, this);
+    m_showSystemWidget = new QLabel("SDRangel v3.7.3 " + qtVersionStr, this);
 #endif
     statusBar()->addPermanentWidget(m_showSystemWidget);
 
@@ -895,7 +895,7 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
                 deviceUI->m_deviceSourceAPI->getSampleSourceId(), deviceUI->m_deviceSourceAPI);
         deviceUI->m_deviceSourceAPI->setSampleSource(source);
         QWidget *gui;
-        PluginInstanceUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+        PluginInstanceGUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceSourceAPI->getSampleSourceId(), &gui, deviceUI->m_deviceSourceAPI);
         deviceUI->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginUI);
@@ -974,7 +974,7 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
                 deviceUI->m_deviceSinkAPI->getSampleSinkId(), deviceUI->m_deviceSinkAPI);
         deviceUI->m_deviceSinkAPI->setSampleSink(sink);
         QWidget *gui;
-        PluginInstanceUI *pluginUI = deviceUI->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
+        PluginInstanceGUI *pluginUI = deviceUI->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
                 deviceUI->m_deviceSinkAPI->getSampleSinkId(), &gui, deviceUI->m_deviceSinkAPI);
         deviceUI->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);

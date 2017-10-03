@@ -71,6 +71,8 @@ struct PlutoSDRInputSettings {
     quint32 m_gain;            //!< "hardware" gain
     RFPath  m_antennaPath;
     GainMode m_gainMode;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
 
 
 	PlutoSDRInputSettings();

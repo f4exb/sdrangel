@@ -264,6 +264,8 @@ set(sdrbase_SOURCES
     sdrbase/gui/samplingdevicecontrol.cpp
     sdrbase/gui/scale.cpp
     sdrbase/gui/scaleengine.cpp
+    sdrbase/gui/transverterbutton.cpp
+    sdrbase/gui/transverterdialog.cpp
     sdrbase/gui/valuedial.cpp
     sdrbase/gui/valuedialz.cpp
 
@@ -386,6 +388,8 @@ set(sdrbase_HEADERS
     sdrbase/gui/samplingdevicecontrol.h
     sdrbase/gui/scale.h
     sdrbase/gui/scaleengine.h
+    sdrbase/gui/transverterbutton.h
+    sdrbase/gui/transverterdialog.h    
     sdrbase/gui/valuedial.h
     sdrbase/gui/valuedialz.h
 
@@ -393,7 +397,7 @@ set(sdrbase_HEADERS
     sdrbase/dsp/devicesamplesink.h
 
     sdrbase/plugin/pluginapi.h
-    sdrbase/plugin/plugininstanceui.h
+    sdrbase/plugin/plugininstancegui.h
     sdrbase/plugin/plugininterface.h
     sdrbase/plugin/pluginmanager.h
 
@@ -439,6 +443,7 @@ set(sdrbase_FORMS
     sdrbase/gui/audiodialog.ui
     sdrbase/gui/samplingdevicecontrol.ui
     sdrbase/gui/myposdialog.ui
+    sdrbase/gui/transverterdialog.ui
 )
 
 set(sdrbase_RESOURCES

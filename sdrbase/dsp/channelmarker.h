@@ -5,9 +5,10 @@
 #include <QColor>
 #include <QByteArray>
 
+#include "settings/serializable.h"
 #include "util/export.h"
 
-class SDRANGEL_API ChannelMarker : public QObject {
+class SDRANGEL_API ChannelMarker : public QObject, public Serializable {
 	Q_OBJECT
 
 public:
@@ -76,8 +77,8 @@ public:
     const QString& getDisplayAddressSend() const { return m_displayAddressSend; }
     const QString& getDisplayAddressReceive() const { return m_displayAddressReceive; }
 
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
 protected:
 	static QRgb m_colorTable[];

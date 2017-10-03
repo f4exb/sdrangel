@@ -343,11 +343,23 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     std::vector<std::string> params;
     bool paramsToSet = false;
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+
     {
-        params.push_back(QString(tr("out_altvoltage1_TX_LO_frequency=%1").arg(settings.m_centerFrequency)).toStdString());
+        qint64 deviceCenterFrequency = settings.m_centerFrequency;
+        deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+
+
+        params.push_back(QString(tr("out_altvoltage1_TX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
         paramsToSet = true;
         forwardChangeOwnDSP = true;
+
+        qDebug() << "PlutoSDROutput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
+                << " device center freq: " << deviceCenterFrequency << " Hz";
+
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)

@@ -1,12 +1,12 @@
 #ifndef INCLUDE_TCPSRCGUI_H
 #define INCLUDE_TCPSRCGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QHostAddress>
 
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "tcpsrc.h"
@@ -22,7 +22,7 @@ namespace Ui {
 	class TCPSrcGUI;
 }
 
-class TCPSrcGUI : public RollupWidget, public PluginInstanceUI {
+class TCPSrcGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

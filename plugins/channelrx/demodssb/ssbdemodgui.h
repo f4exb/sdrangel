@@ -1,18 +1,17 @@
 #ifndef INCLUDE_SSBDEMODGUI_H
 #define INCLUDE_SSBDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
+#include "ssbdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
 
 class AudioFifo;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class SSBDemod;
 class SpectrumVis;
 
@@ -20,7 +19,7 @@ namespace Ui {
 	class SSBDemodGUI;
 }
 
-class SSBDemodGUI : public RollupWidget, public PluginInstanceUI {
+class SSBDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -65,6 +64,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	SSBDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate;
@@ -76,8 +76,6 @@ private:
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
@@ -89,8 +87,10 @@ private:
 	bool setNewRate(int spanLog2);
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
 	void displaySettings();
+    void displayUDPAddress();
+    void updateChannelMarker();
 
 	void displayAGCPowerThreshold(int value);
 

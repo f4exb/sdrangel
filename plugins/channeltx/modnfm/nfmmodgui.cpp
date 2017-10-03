@@ -202,7 +202,7 @@ void NFMModGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = m_nfmMod->getOutputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -388,6 +388,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_nfmMod = new NFMMod();
+	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
 	m_channelizer = new UpChannelizer(m_nfmMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
@@ -425,7 +426,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	applySettings();
 
-	connect(m_nfmMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_nfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 

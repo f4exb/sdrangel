@@ -38,6 +38,8 @@ void AirspySettings::resetToDefaults()
 	m_biasT = false;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray AirspySettings::serialize() const
@@ -56,6 +58,8 @@ QByteArray AirspySettings::serialize() const
 	s.writeBool(10, m_iqCorrection);
 	s.writeBool(11, m_lnaAGC);
 	s.writeBool(12, m_mixerAGC);
+    s.writeBool(13, m_transverterMode);
+    s.writeS64(14, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -87,6 +91,8 @@ bool AirspySettings::deserialize(const QByteArray& data)
 		d.readBool(10, &m_iqCorrection, false);
 		d.readBool(11, &m_lnaAGC, false);
 		d.readBool(12, &m_mixerAGC, false);
+        d.readBool(13, &m_transverterMode, false);
+        d.readS64(14, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

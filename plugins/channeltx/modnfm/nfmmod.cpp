@@ -367,7 +367,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 
     	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
 
         return true;
     }
@@ -462,7 +462,7 @@ void NFMMod::openFileStream()
 
     MsgReportFileSourceStreamData *report;
     report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
-    getOutputMessageQueue()->push(report);
+    getMessageQueueToGUI()->push(report);
 }
 
 void NFMMod::seekFileStream(int seekPercentage)

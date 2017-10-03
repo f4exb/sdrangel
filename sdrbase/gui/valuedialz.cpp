@@ -185,7 +185,8 @@ QChar ValueDialZ::digitNeigh(QChar c, bool dir)
 
 QString ValueDialZ::formatText(qint64 value)
 {
-	QString str = QString("%1%2").arg(m_positiveOnly ? "" : value < 0 ? "-" : "+").arg(abs(value), m_numDigits, 10, QChar('0'));
+    qDebug("ValueDialZ::formatText: value: %lld", value);
+	QString str = QString("%1%2").arg(m_positiveOnly ? "" : value < 0 ? "-" : "+").arg(value < 0 ? -value : value, m_numDigits, 10, QChar('0'));
 
 	for(int i = 0; i < m_numDecimalPoints; i++)
 	{

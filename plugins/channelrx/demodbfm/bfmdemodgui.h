@@ -18,16 +18,16 @@
 #ifndef INCLUDE_BFMDEMODGUI_H
 #define INCLUDE_BFMDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
-
-#include "rdsparser.h"
+#include "bfmdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
+class RDSParser;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -38,7 +38,7 @@ namespace Ui {
 	class BFMDemodGUI;
 }
 
-class BFMDemodGUI : public RollupWidget, public PluginInstanceUI {
+class BFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -60,7 +60,6 @@ public:
 
 private slots:
 	void channelMarkerChanged();
-	void channelSampleRateChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
@@ -78,6 +77,7 @@ private slots:
 	void on_g14AltFrequencies_activated(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
 	void tick();
 
 private:
@@ -85,13 +85,11 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	BFMDemodSettings m_settings;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
-	RDSParser m_rdsParser;
 
 	BFMDemod* m_bfmDemod;
 	MovingAverage<double> m_channelPowerDbAvg;
@@ -99,14 +97,14 @@ private:
 	std::vector<unsigned int> m_g14ComboIndex;
 	MessageQueue m_inputMessageQueue;
 
-	static const int m_rfBW[];
-
 	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+    void displaySettings();
 	void displayUDPAddress();
+	void updateChannelMarker();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
 

@@ -38,6 +38,8 @@ struct FCDProSettings {
 	qint32 m_gain6Index;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
 
 	FCDProSettings();
 	void resetToDefaults();

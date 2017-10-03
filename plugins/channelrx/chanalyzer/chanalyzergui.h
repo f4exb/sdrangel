@@ -17,10 +17,10 @@
 #ifndef INCLUDE_CHANNELANALYZERGUI_H
 #define INCLUDE_CHANNELANALYZERGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 class PluginAPI;
@@ -37,7 +37,7 @@ namespace Ui {
 	class ChannelAnalyzerGUI;
 }
 
-class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceUI {
+class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -59,7 +59,6 @@ public:
 
 private slots:
 	void viewChanged();
-	void channelSampleRateChanged();
 	void on_deltaFrequency_changed(quint64 value);
 	void on_deltaMinus_toggled(bool minus);
 	void on_BW_valueChanged(int value);
@@ -68,6 +67,7 @@ private slots:
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
+    void handleInputMessages();
 	void tick();
 
 private:
@@ -81,8 +81,8 @@ private:
 	int m_spanLog2;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
+//	ThreadedBasebandSampleSink* m_threadedChannelizer;
+//	DownChannelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;

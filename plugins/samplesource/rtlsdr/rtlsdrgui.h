@@ -17,10 +17,10 @@
 #ifndef INCLUDE_RTLSDRGUI_H
 #define INCLUDE_RTLSDRGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "rtlsdrinput.h"
@@ -32,7 +32,7 @@ namespace Ui {
 	class RTLSDRSampleRates;
 }
 
-class RTLSDRGui : public QWidget, public PluginInstanceUI {
+class RTLSDRGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -69,6 +69,7 @@ private:
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
+	void updateFrequencyLimits();
 
 private slots:
     void handleInputMessages();
@@ -81,11 +82,11 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_ppm_valueChanged(int value);
 	void on_gain_valueChanged(int value);
-	void on_sampleRate_currentIndexChanged(int index);
 	void on_checkBox_stateChanged(int state);
     void on_agc_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
 };

@@ -16,17 +16,23 @@
 
 #include "chanalyzerng.h"
 
-#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
+
+#include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/downchannelizer.h"
 
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgReportChannelSampleRateChanged, Message)
 
-ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
+ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
+	m_sampleSink(0),
 	m_settingsMutex(QMutex::Recursive)
 {
 	m_undersampleCount = 0;
@@ -38,6 +44,12 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(BasebandSampleSink* sampleSink) :
 	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
 	apply(true);
 }
 
@@ -45,6 +57,9 @@ ChannelAnalyzerNG::~ChannelAnalyzerNG()
 {
 	if (SSBFilter) delete SSBFilter;
 	if (DSBFilter) delete DSBFilter;
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
@@ -54,7 +69,7 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 		int  spanLog2,
 		bool ssb)
 {
-	Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb);
+    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb);
 	messageQueue->push(cmd);
 }
 
@@ -102,6 +117,12 @@ void ChannelAnalyzerNG::stop()
 {
 }
 
+void ChannelAnalyzerNG::channelizerInputSampleRateChanged()
+{
+    MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create();
+    getMessageQueueToGUI()->push(msg);
+}
+
 bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
 	qDebug() << "ChannelAnalyzerNG::handleMessage: " << cmd.getIdentifier();
@@ -120,11 +141,19 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		apply();
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+        cfg.getSampleRate(),
+        cfg.getCenterFrequency());
+        return true;
+    }
 	else if (MsgConfigureChannelAnalyzer::match(cmd))
 	{
 		MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
-		m_config.m_channelSampleRate = cfg.getChannelSampleRate();
+        m_config.m_channelSampleRate = cfg.getChannelSampleRate();
 		m_config.m_Bandwidth = cfg.getBandwidth();
 		m_config.m_LowCutoff = cfg.getLoCutoff();
 		m_config.m_spanLog2 = cfg.getSpanLog2();
@@ -152,6 +181,8 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		}
 	}
 }
+
+
 
 void ChannelAnalyzerNG::apply(bool force)
 {

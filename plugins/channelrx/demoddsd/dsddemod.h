@@ -33,34 +33,64 @@
 #include "util/message.h"
 #include "util/udpsink.h"
 
+#include "dsddemodsettings.h"
 #include "dsddecoder.h"
 
-class DSDDemodGUI;
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 
 class DSDDemod : public BasebandSampleSink {
 public:
-    DSDDemod(BasebandSampleSink* sampleSink);
-	~DSDDemod();
+    class MsgConfigureDSDDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
 
-	void configure(MessageQueue* messageQueue,
-			int  rfBandwidth,
-			int  demodGain,
-            int  volume,
-            int  baudRate,
-			int  fmDeviation,
-			int  squelchGate,
-			Real squelch,
-			bool audioMute,
-			bool enableCosineFiltering,
-			bool syncOrConstellation,
-			bool slot1On,
-			bool slot2On,
-			bool tdmaStereo,
-			bool pllLock,
-			bool udpCopyAudio,
-			const QString& udpAddress,
-			quint16 udpPort,
-			bool force);
+    public:
+        const DSDDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureDSDDemod* create(const DSDDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureDSDDemod(settings, force);
+        }
+
+    private:
+        DSDDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureDSDDemod(const DSDDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+    DSDDemod(DeviceSourceAPI *deviceAPI);
+	~DSDDemod();
+	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
 
@@ -68,10 +98,6 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
-
-	void registerGUI(DSDDemodGUI *dsdDemodGUI) {
-		m_dsdDemodGUI = dsdDemodGUI;
-	}
 
 	double getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
@@ -113,180 +139,16 @@ private:
 		{}
 	};
 
-	class MsgConfigureDSDDemod : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		int  getRFBandwidth() const { return m_rfBandwidth; }
-		int  getDemodGain() const { return m_demodGain; }
-		int  getFMDeviation() const { return m_fmDeviation; }
-        int  getVolume() const { return m_volume; }
-        int  getBaudRate() const { return m_baudRate; }
-		int  getSquelchGate() const { return m_squelchGate; }
-		Real getSquelch() const { return m_squelch; }
-		bool getAudioMute() const { return m_audioMute; }
-		bool getEnableCosineFiltering() const { return m_enableCosineFiltering; }
-		bool getSyncOrConstellation() const { return m_syncOrConstellation; }
-		bool getSlot1On() const { return m_slot1On; }
-		bool getSlot2On() const { return m_slot2On; }
-		bool getTDMAStereo() const { return m_tdmaStereo; }
-		bool getPLLLock() const { return m_pllLock; }
-		bool getUDPCopyAudio() const { return m_udpCopyAudio; }
-		const QString& getUDPAddress() const { return m_udpAddress; }
-		quint16 getUDPPort() const { return m_udpPort; }
-
-		static MsgConfigureDSDDemod* create(int rfBandwidth,
-				int  demodGain,
-				int  fmDeviation,
-				int  volume,
-				int  baudRate,
-				int  squelchGate,
-				Real squelch,
-				bool audioMute,
-				bool enableCosineFiltering,
-				bool syncOrConstellation,
-				bool slot1On,
-				bool slot2On,
-				bool tdmaStereo,
-				bool pllLock,
-				bool udpCopyAudio,
-				const QString& udpAddress,
-				quint16 udpPort,
-				bool force)
-		{
-			return new MsgConfigureDSDDemod(rfBandwidth,
-			        demodGain,
-			        fmDeviation,
-			        volume,
-			        baudRate,
-			        squelchGate,
-			        squelch,
-			        audioMute,
-			        enableCosineFiltering,
-			        syncOrConstellation,
-			        slot1On,
-			        slot2On,
-			        tdmaStereo,
-			        pllLock,
-			        udpCopyAudio,
-			        udpAddress,
-			        udpPort,
-			        force);
-		}
-
-	private:
-		Real m_rfBandwidth;
-		Real m_demodGain;
-		int  m_fmDeviation;
-		int  m_volume;
-		int  m_baudRate;
-		int  m_squelchGate;
-		Real m_squelch;
-		bool m_audioMute;
-		bool m_enableCosineFiltering;
-		bool m_syncOrConstellation;
-        bool m_slot1On;
-        bool m_slot2On;
-        bool m_tdmaStereo;
-        bool m_pllLock;
-        bool m_udpCopyAudio;
-        QString m_udpAddress;
-        quint16 m_udpPort;
-        bool m_force;
-
-		MsgConfigureDSDDemod(int rfBandwidth,
-				int  demodGain,
-				int  fmDeviation,
-				int  volume,
-				int  baudRate,
-				int  squelchGate,
-				Real squelch,
-				bool audioMute,
-				bool enableCosineFiltering,
-				bool syncOrConstellation,
-				bool slot1On,
-				bool slot2On,
-				bool tdmaStereo,
-				bool pllLock,
-				bool udpCopyAudio,
-				const QString& udpAddress,
-				quint16 udpPort,
-				bool force) :
-			Message(),
-			m_rfBandwidth(rfBandwidth),
-			m_demodGain(demodGain),
-			m_fmDeviation(fmDeviation),
-			m_volume(volume),
-			m_baudRate(baudRate),
-			m_squelchGate(squelchGate),
-			m_squelch(squelch),
-			m_audioMute(audioMute),
-			m_enableCosineFiltering(enableCosineFiltering),
-			m_syncOrConstellation(syncOrConstellation),
-			m_slot1On(slot1On),
-			m_slot2On(slot2On),
-			m_tdmaStereo(tdmaStereo),
-			m_pllLock(pllLock),
-			m_udpCopyAudio(udpCopyAudio),
-			m_udpAddress(udpAddress),
-			m_udpPort(udpPort),
-			m_force(force)
-		{ }
-	};
-
 	enum RateState {
 		RSInitialFill,
 		RSRunning
 	};
 
-	struct Config {
-		int m_inputSampleRate;
-		qint64 m_inputFrequencyOffset;
-		int  m_rfBandwidth;
-		int  m_demodGain;
-		int  m_volume;
-		int  m_baudRate;
-		int  m_fmDeviation;
-		int  m_squelchGate;
-		Real m_squelch;
-		bool m_audioMute;
-		quint32 m_audioSampleRate;
-		bool m_enableCosineFiltering;
-		bool m_syncOrConstellation;
-		bool m_slot1On;
-		bool m_slot2On;
-		bool m_tdmaStereo;
-		bool m_pllLock;
-		bool m_udpCopyAudio;
-		QString m_udpAddress;
-		quint16 m_udpPort;
+	DSDDemodSettings m_settings;
 
-		Config() :
-			m_inputSampleRate(-1),
-			m_inputFrequencyOffset(0),
-			m_rfBandwidth(-1),
-			m_demodGain(-1),
-			m_volume(-1),
-			m_baudRate(4800),
-			m_fmDeviation(1),
-			m_squelchGate(1),
-			m_squelch(0),
-			m_audioMute(false),
-			m_audioSampleRate(0),
-			m_enableCosineFiltering(false),
-			m_syncOrConstellation(false),
-			m_slot1On(false),
-			m_slot2On(false),
-			m_tdmaStereo(false),
-			m_pllLock(true),
-			m_udpCopyAudio(false),
-			m_udpAddress("127.0.0.1"),
-			m_udpPort(9999)
-		{ }
-	};
-
-	Config m_config;
-	Config m_running;
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -299,7 +161,6 @@ private:
 	double m_squelchLevel;
 	bool m_squelchOpen;
 
-	Real m_lastArgument;
     MovingAverage<double> m_movingAverage;
     double m_magsq;
     double m_magsqSum;
@@ -320,7 +181,6 @@ private:
 	bool m_scopeEnabled;
 
 	DSDDecoder m_dsdDecoder;
-	DSDDemodGUI *m_dsdDemodGUI;
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;
@@ -328,7 +188,7 @@ private:
 
     static const int m_udpBlockSize;
 
-	void apply(bool force = false);
+	void applySettings(DSDDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

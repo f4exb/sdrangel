@@ -1,11 +1,11 @@
 #ifndef INCLUDE_NFMDEMODGUI_H
 #define INCLUDE_NFMDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 class PluginAPI;
@@ -19,7 +19,7 @@ namespace Ui {
 	class NFMDemodGUI;
 }
 
-class NFMDemodGUI : public RollupWidget, public PluginInstanceUI {
+class NFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:

@@ -45,17 +45,21 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_channelAcquired(false)
 {
     m_streamId.handle = 0;
-    suspendBuddies();
+    suspendRxBuddies();
+    suspendTxBuddies();
     openDevice();
-    resumeBuddies();
+    resumeTxBuddies();
+    resumeRxBuddies();
 }
 
 LimeSDROutput::~LimeSDROutput()
 {
     if (m_running) stop();
-    suspendBuddies();
+    suspendRxBuddies();
+    suspendTxBuddies();
     closeDevice();
-    resumeBuddies();
+    resumeTxBuddies();
+    resumeRxBuddies();
 }
 
 void LimeSDROutput::destroy()
@@ -161,56 +165,74 @@ bool LimeSDROutput::openDevice()
     return true;
 }
 
-void LimeSDROutput::suspendBuddies()
+void LimeSDROutput::suspendRxBuddies()
 {
-    // suspend Tx buddy's threads
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (; itSource != sourceBuddies.end(); ++itSource)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+        DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
 
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->stopWork();
+        if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
+        {
+            buddySharedPtr->m_thread->stopWork();
+            buddySharedPtr->m_threadWasRunning = true;
         }
-    }
-
-    // suspend Rx buddy's threads
-
-    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
-    {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
-
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->stopWork();
+        else
+        {
+            buddySharedPtr->m_threadWasRunning = false;
         }
     }
 }
 
-void LimeSDROutput::resumeBuddies()
+void LimeSDROutput::suspendTxBuddies()
 {
-    // resume Tx buddy's threads
+    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
 
-    for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
+    for (; itSink != sinkBuddies.end(); ++itSink)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+        DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
 
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->startWork();
+        if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
+        {
+            buddySharedPtr->m_thread->stopWork();
+            buddySharedPtr->m_threadWasRunning = true;
+        }
+        else
+        {
+            buddySharedPtr->m_threadWasRunning = false;
         }
     }
+}
 
-    // resume Rx buddy's threads
+void LimeSDROutput::resumeRxBuddies()
+{
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-    for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
+    for (; itSource != sourceBuddies.end(); ++itSource)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
-        DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
+        DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
 
-        if (buddyShared->m_thread) {
-            buddyShared->m_thread->startWork();
+        if (buddySharedPtr->m_threadWasRunning) {
+            buddySharedPtr->m_thread->startWork();
+        }
+    }
+}
+
+void LimeSDROutput::resumeTxBuddies()
+{
+    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+    for (; itSink != sinkBuddies.end(); ++itSink)
+    {
+        DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
+
+        if (buddySharedPtr->m_threadWasRunning) {
+            buddySharedPtr->m_thread->startWork();
         }
     }
 }
@@ -237,6 +259,9 @@ void LimeSDROutput::closeDevice()
 
 bool LimeSDROutput::acquireChannel()
 {
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     // acquire the channel
 
     if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_TX, m_deviceShared.m_channel, true) != 0)
@@ -260,6 +285,8 @@ bool LimeSDROutput::acquireChannel()
     if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
     {
         qCritical("LimeSDROutput::acquireChannel: cannot setup the stream on Tx channel %d", m_deviceShared.m_channel);
+        resumeTxBuddies();
+        resumeRxBuddies();
         return false;
     }
     else
@@ -268,11 +295,17 @@ bool LimeSDROutput::acquireChannel()
     }
 
     m_channelAcquired = true;
+    resumeTxBuddies();
+    resumeRxBuddies();
+
     return true;
 }
 
 void LimeSDROutput::releaseChannel()
 {
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     // destroy the stream
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
     m_streamId.handle = 0;
@@ -285,6 +318,8 @@ void LimeSDROutput::releaseChannel()
     }
 
     m_channelAcquired = false;
+    resumeTxBuddies();
+    resumeRxBuddies();
 }
 
 bool LimeSDROutput::start()
@@ -293,7 +328,7 @@ bool LimeSDROutput::start()
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) { stop(); }
 
     if (!acquireChannel())
     {
@@ -573,41 +608,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
     if (suspendAllThread)
     {
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-        for (; itSource != sourceBuddies.end(); ++itSource)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
-            {
-                buddySharedPtr->m_thread->stopWork();
-                buddySharedPtr->m_threadWasRunning = true;
-            }
-            else
-            {
-                buddySharedPtr->m_threadWasRunning = false;
-            }
-        }
-
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-        for (; itSink != sinkBuddies.end(); ++itSink)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
-            {
-                buddySharedPtr->m_thread->stopWork();
-                buddySharedPtr->m_threadWasRunning = true;
-            }
-            else
-            {
-                buddySharedPtr->m_threadWasRunning = false;
-            }
-        }
+        suspendRxBuddies();
+        suspendTxBuddies();
 
         if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
         {
@@ -617,17 +619,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     }
     else if (suspendTxThread)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-        for (; itSink != sinkBuddies.end(); ++itSink)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_thread) {
-                buddySharedPtr->m_thread->stopWork();
-            }
-        }
+        suspendTxBuddies();
 
         if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
         {
@@ -851,29 +843,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
     if (suspendAllThread)
     {
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-        for (; itSource != sourceBuddies.end(); ++itSource)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_threadWasRunning) {
-                buddySharedPtr->m_thread->startWork();
-            }
-        }
-
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-        for (; itSink != sinkBuddies.end(); ++itSink)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_threadWasRunning) {
-                buddySharedPtr->m_thread->startWork();
-            }
-        }
+        resumeTxBuddies();
+        resumeRxBuddies();
 
         if (ownThreadWasRunning) {
             m_limeSDROutputThread->startWork();
@@ -881,17 +852,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     }
     else if (suspendTxThread)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-        for (; itSink != sinkBuddies.end(); ++itSink)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_threadWasRunning) {
-                buddySharedPtr->m_thread->startWork();
-            }
-        }
+        resumeTxBuddies();
 
         if (ownThreadWasRunning) {
             m_limeSDROutputThread->startWork();

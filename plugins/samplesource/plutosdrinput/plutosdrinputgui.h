@@ -17,11 +17,11 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include <QObject>
 #include <QWidget>
 #include <QTimer>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "plutosdrinputsettings.h"
@@ -33,7 +33,7 @@ namespace Ui {
     class PlutoSDRInputGUI;
 }
 
-class PlutoSDRInputGui : public QWidget, public PluginInstanceUI {
+class PlutoSDRInputGui : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
@@ -72,6 +72,7 @@ private:
     void updateSampleRateAndFrequency();
     void setFIRBWLimits();
     void setSampleRateLimits();
+    void updateFrequencyLimits();
 
 private slots:
     void on_startStop_toggled(bool checked);
@@ -91,6 +92,7 @@ private slots:
     void on_gainMode_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
+    void on_transverter_clicked();
     void updateHardware();
     void updateStatus();
     void handleInputMessages();

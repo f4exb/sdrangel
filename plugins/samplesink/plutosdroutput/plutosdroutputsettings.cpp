@@ -36,6 +36,8 @@ void PlutoSDROutputSettings::resetToDefaults()
 	m_lpfFIRlog2Interp = 0;
 	m_att = -50;
 	m_antennaPath = RFPATH_A;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray PlutoSDROutputSettings::serialize() const
@@ -52,6 +54,8 @@ QByteArray PlutoSDROutputSettings::serialize() const
     s.writeU64(12, m_devSampleRate);
     s.writeS32(13, m_att);
     s.writeS32(14, (int) m_antennaPath);
+    s.writeBool(15, m_transverterMode);
+    s.writeS64(16, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -91,6 +95,8 @@ bool PlutoSDROutputSettings::deserialize(const QByteArray& data)
         } else {
             m_antennaPath = RFPATH_A;
         }
+        d.readBool(15, &m_transverterMode, false);
+        d.readS64(16, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

@@ -119,6 +119,8 @@ SOURCES += mainwindow.cpp\
         gui/mypositiondialog.cpp\
         gui/scale.cpp\
         gui/scaleengine.cpp\
+        gui/transverterbutton.cpp\
+        gui/transverterdialog.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
         dsp/devicesamplesource.cpp\
@@ -228,12 +230,14 @@ HEADERS  += mainwindow.h\
         gui/mypositiondialog.h\
         gui/scale.h\
         gui/scaleengine.h\
+        gui/transverterbutton.h\
+        gui/transverterdialog.h\
         gui/valuedial.h\
         gui/valuedialz.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/pluginapi.h\
-        plugin/plugininstanceui.h\
+        plugin/plugininstancegui.h\
         plugin/plugininterface.h\
         plugin/pluginmanager.h\
         settings/preferences.h\
@@ -263,6 +267,7 @@ FORMS    += mainwindow.ui\
         gui/samplingdevicecontrol.ui\
         gui/myposdialog.ui\
         gui/glspectrumgui.ui\
+        gui/transverterdialog.ui\
         mainwindow.ui
 
 RESOURCES = resources/res.qrc

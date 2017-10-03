@@ -17,10 +17,10 @@
 #ifndef INCLUDE_AIRSPYGUI_H
 #define INCLUDE_AIRSPYGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 #include "airspyinput.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class AirspySampleRates;
 }
 
-class AirspyGui : public QWidget, public PluginInstanceUI {
+class AirspyGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -72,6 +72,7 @@ private:
 	void displaySampleRates();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
@@ -89,6 +90,7 @@ private slots:
 	void on_mixAGC_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();

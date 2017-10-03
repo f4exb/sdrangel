@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/devicesamplesource.h"
@@ -186,18 +186,18 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)
     m_pluginInterface = iface;
 }
 
-void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui)
+void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui)
 {
     m_sampleSourcePluginInstanceUI = gui;
 }
 
-void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
+void DeviceSourceAPI::registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSourceAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
+void DeviceSourceAPI::removeChannelInstance(PluginInstanceGUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -398,8 +398,6 @@ bool DeviceSourceAPI::ChannelInstanceRegistration::operator<(const ChannelInstan
 
 void DeviceSourceAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 {
-    std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
-
     m_sourceBuddies.push_back(buddy);
     buddy->m_sourceBuddies.push_back(this);
     qDebug("DeviceSourceAPI::addSourceBuddy: added buddy %s(%s) [%lx] <-> [%lx]",
@@ -411,8 +409,6 @@ void DeviceSourceAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 
 void DeviceSourceAPI::addSinkBuddy(DeviceSinkAPI* buddy)
 {
-    std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
-
     m_sinkBuddies.push_back(buddy);
     buddy->m_sourceBuddies.push_back(this);
     qDebug("DeviceSourceAPI::addSinkBuddy: added buddy %s(%s) [%lx] <-> [%lx]",

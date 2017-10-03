@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+#undef M_PI_2
+#define M_PI_2 1.57079632679489661923
 
 const Real RDSDemod::m_pllBeta = 50;
 const Real RDSDemod::m_fsc = 1187.5;
@@ -77,7 +81,7 @@ bool RDSDemod::process(Real demod, bool& bit)
 		m_parms.clock_offset = 0;
 	}*/
 
-	m_parms.subcarr_phi += (2 * M_PI * m_fsc) / (Real) m_srate;
+    m_parms.subcarr_phi += (2 * M_PI * m_fsc) / (Real) m_srate;
 	m_parms.clock_phi = m_parms.subcarr_phi + m_parms.clock_offset;
 
 	// Clock phase recovery

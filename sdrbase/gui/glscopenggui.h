@@ -25,6 +25,7 @@
 #include "util/export.h"
 #include "util/message.h"
 #include "dsp/scopevisng.h"
+#include "settings/serializable.h"
 
 namespace Ui {
     class GLScopeNGGUI;
@@ -33,7 +34,7 @@ namespace Ui {
 class MessageQueue;
 class GLScopeNG;
 
-class SDRANGEL_API GLScopeNGGUI : public QWidget {
+class SDRANGEL_API GLScopeNGGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:
@@ -52,8 +53,8 @@ public:
 
     void setSampleRate(int sampleRate);
     void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
     bool handleMessage(Message* message);
 

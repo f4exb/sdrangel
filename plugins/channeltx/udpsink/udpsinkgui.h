@@ -17,11 +17,11 @@
 #ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
 #define PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
 
+#include <plugin/plugininstancegui.h>
 #include <QObject>
 
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "udpsink.h"
@@ -37,7 +37,7 @@ namespace Ui {
     class UDPSinkGUI;
 }
 
-class UDPSinkGUI : public RollupWidget, public PluginInstanceUI {
+class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:

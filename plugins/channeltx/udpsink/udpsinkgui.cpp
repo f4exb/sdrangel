@@ -178,7 +178,7 @@ void UDPSinkGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = m_udpSink->getOutputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -205,6 +205,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
     m_udpSink = new UDPSink(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
+    m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
     m_channelizer = new UpChannelizer(m_udpSink);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
@@ -241,7 +242,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     displaySettings();
     applySettings(true);
 
-    connect(m_udpSink->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     connect(m_udpSink, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 

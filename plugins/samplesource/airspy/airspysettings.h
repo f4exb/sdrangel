@@ -37,6 +37,8 @@ struct AirspySettings {
 	bool m_biasT;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
 
 	AirspySettings();
 	void resetToDefaults();

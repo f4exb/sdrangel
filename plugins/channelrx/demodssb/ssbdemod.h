@@ -18,9 +18,10 @@
 #ifndef INCLUDE_SSBDEMOD_H
 #define INCLUDE_SSBDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
+
+#include <dsp/basebandsamplesink.h>
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
@@ -28,13 +29,66 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "ssbdemodsettings.h"
+
 #define ssbFftLen 1024
 #define agcTarget 3276.8 // -10 dB amplitude => -20 dB power: center of normal signal
 
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
+
 class SSBDemod : public BasebandSampleSink {
 public:
-	SSBDemod(BasebandSampleSink* sampleSink);
+    class MsgConfigureSSBDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SSBDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSSBDemod* create(const SSBDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureSSBDemod(settings, force);
+        }
+
+    private:
+        SSBDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSSBDemod(const SSBDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+	SSBDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~SSBDemod();
+	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
 			Real Bandwidth,
@@ -71,7 +125,7 @@ public:
     }
 
 private:
-	class MsgConfigureSSBDemod : public Message {
+	class MsgConfigureSSBDemodPrivate : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -89,7 +143,7 @@ private:
 		int  getAGCPowerThershold() const { return m_agcPowerThreshold; }
         int  getAGCThersholdGate() const { return m_agcThresholdGate; }
 
-		static MsgConfigureSSBDemod* create(Real Bandwidth,
+		static MsgConfigureSSBDemodPrivate* create(Real Bandwidth,
 				Real LowCutoff,
 				Real volume,
 				int spanLog2,
@@ -103,7 +157,7 @@ private:
                 int  agcPowerThreshold,
                 int  agcThresholdGate)
 		{
-			return new MsgConfigureSSBDemod(
+			return new MsgConfigureSSBDemodPrivate(
 			        Bandwidth,
 			        LowCutoff,
 			        volume,
@@ -134,7 +188,7 @@ private:
 		int  m_agcPowerThreshold;
 		int  m_agcThresholdGate;
 
-		MsgConfigureSSBDemod(Real Bandwidth,
+		MsgConfigureSSBDemodPrivate(Real Bandwidth,
 				Real LowCutoff,
 				Real volume,
 				int spanLog2,
@@ -163,6 +217,11 @@ private:
 			m_agcThresholdGate(agcThresholdGate)
 		{ }
 	};
+
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
+    SSBDemodSettings m_settings;
 
 	Real m_Bandwidth;
 	Real m_LowCutoff;
@@ -204,6 +263,8 @@ private:
 	quint32 m_audioSampleRate;
 
 	QMutex m_settingsMutex;
+
+	void applySettings(const SSBDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_SSBDEMOD_H

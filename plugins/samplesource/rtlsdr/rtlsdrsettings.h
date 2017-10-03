@@ -34,6 +34,9 @@ struct RTLSDRSettings {
 	bool m_dcBlock;
 	bool m_iqImbalance;
 	bool m_agc;
+	bool m_noModMode;
+    bool m_transverterMode;
+	qint64 m_transverterDeltaFrequency;
 
 	RTLSDRSettings();
 	void resetToDefaults();

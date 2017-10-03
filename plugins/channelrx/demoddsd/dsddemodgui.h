@@ -18,20 +18,20 @@
 #ifndef INCLUDE_DSDDEMODGUI_H
 #define INCLUDE_DSDDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QMenu>
 
 #include "gui/rollupwidget.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
+
+#include "dsddemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class ScopeVis;
 class DSDDemod;
 
@@ -39,7 +39,7 @@ namespace Ui {
 	class DSDDemodGUI;
 }
 
-class DSDDemodGUI : public RollupWidget, public PluginInstanceUI {
+class DSDDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -96,12 +96,11 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	DSDDemodSettings m_settings;
 	bool m_doApplySettings;
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
     ScopeVis* m_scopeVis;
 
 	DSDDemod* m_dsdDemod;
@@ -124,25 +123,12 @@ private:
 
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+    void displaySettings();
 	void updateMyPosition();
 	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
-};
-
-class DSDDemodBaudRates
-{
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getDefaultRate() { return m_rates[m_defaultRateIndex]; }
-    static unsigned int getDefaultRateIndex() { return m_defaultRateIndex; }
-    static unsigned int getNbRates();
-private:
-    static unsigned int m_nb_rates;
-    static unsigned int m_rates[2];
-    static unsigned int m_defaultRateIndex;
 };
 
 #endif // INCLUDE_DSDDEMODGUI_H

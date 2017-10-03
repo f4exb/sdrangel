@@ -58,8 +58,6 @@ public:
 	~ThreadedBasebandSampleSink();
 
 	const BasebandSampleSink *getSink() const { return m_basebandSampleSink; }
-	MessageQueue* getInputMessageQueue() { return m_basebandSampleSink->getInputMessageQueue(); } //!< Return pointer to sample sink's input message queue
-	MessageQueue* getOutputMessageQueue() { return m_basebandSampleSink->getOutputMessageQueue(); } //!< Return pointer to sample sink's output message queue
 
 	void start(); //!< this thread start()
 	void stop();  //!< this thread exit() and wait()

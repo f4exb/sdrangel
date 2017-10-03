@@ -14,19 +14,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/chanalyzer/chanalyzer.h"
+#include "chanalyzer.h"
 
-#include <dsp/downchannelizer.h>
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
+
+#include <dsp/downchannelizer.h>
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
 
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Message)
 
-ChannelAnalyzer::ChannelAnalyzer(BasebandSampleSink* sampleSink) :
-	m_sampleSink(sampleSink),
+ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
+	m_sampleSink(0),
 	m_settingsMutex(QMutex::Recursive)
 {
 	m_Bandwidth = 5000;
@@ -42,12 +48,20 @@ ChannelAnalyzer::ChannelAnalyzer(BasebandSampleSink* sampleSink) :
 	m_magsq = 0;
 	SSBFilter = new fftfilt(m_LowCutoff / m_sampleRate, m_Bandwidth / m_sampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_Bandwidth / m_sampleRate, 2*ssbFftLen);
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 }
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
 	if (SSBFilter) delete SSBFilter;
 	if (DSBFilter) delete DSBFilter;
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void ChannelAnalyzer::configure(MessageQueue* messageQueue,
@@ -130,6 +144,12 @@ void ChannelAnalyzer::stop()
 {
 }
 
+void ChannelAnalyzer::channelSampleRateChanged()
+{
+    MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create();
+    getMessageQueueToGUI()->push(msg);
+}
+
 bool ChannelAnalyzer::handleMessage(const Message& cmd)
 {
 	float band, lowCutoff;
@@ -147,6 +167,16 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 				<< " frequencyOffset: " << notif.getFrequencyOffset();
 
 		return true;
+	}
+	else if (MsgConfigureChannelizer::match(cmd))
+	{
+	    MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            m_channelizer->getInputSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
 	}
 	else if (MsgConfigureChannelAnalyzer::match(cmd))
 	{

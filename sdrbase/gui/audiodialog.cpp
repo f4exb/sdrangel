@@ -54,11 +54,13 @@ AudioDialog::AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
         i++;
     }
 
-    if(ui->audioOutTree->currentItem() == NULL)
+    if(ui->audioOutTree->currentItem() == 0) {
         ui->audioOutTree->setCurrentItem(ui->audioOutTree->topLevelItem(0));
+    }
 
-	if(ui->audioInTree->currentItem() == NULL)
+	if(ui->audioInTree->currentItem() == 0) {
 		ui->audioInTree->setCurrentItem(ui->audioInTree->topLevelItem(0));
+	}
 
 	ui->tabWidget->setCurrentIndex(0);
 

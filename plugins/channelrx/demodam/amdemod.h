@@ -27,23 +27,63 @@
 #include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "amdemodsettings.h"
+
+class DeviceSourceAPI;
+class DownChannelizer;
+class ThreadedBasebandSampleSink;
 
 class AMDemod : public BasebandSampleSink {
 	Q_OBJECT
 public:
-	AMDemod();
-	~AMDemod();
+    class MsgConfigureAMDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
 
-	void configure(MessageQueue* messageQueue,
-	        Real rfBandwidth,
-	        Real volume,
-	        Real squelch,
-	        bool audioMute,
-	        bool bandpassEnable,
-	        bool copyAudioToUDP,
-	        const QString& udpAddress,
-	        quint16 udpPort,
-	        bool force);
+    public:
+        const AMDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureAMDemod* create(const AMDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureAMDemod(settings, force);
+        }
+
+    private:
+        AMDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureAMDemod(const AMDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
+    AMDemod(DeviceSourceAPI *deviceAPI);
+	~AMDemod();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -64,109 +104,16 @@ public:
 	}
 
 private:
-	class MsgConfigureAMDemod : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		Real getRFBandwidth() const { return m_rfBandwidth; }
-		Real getVolume() const { return m_volume; }
-		Real getSquelch() const { return m_squelch; }
-		bool getAudioMute() const { return m_audioMute; }
-		bool getBandpassEnable() const { return m_bandpassEnable; }
-		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
-		const QString& getUDPAddress() const { return m_udpAddress; }
-		quint16 getUDPPort() const { return m_udpPort; }
-		bool getForce() const { return m_force; }
-
-		static MsgConfigureAMDemod* create(Real rfBandwidth,
-		        Real volume,
-		        Real squelch,
-		        bool audioMute,
-		        bool bandpassEnable,
-		        bool copyAudioToUDP,
-		        const QString& udpAddress,
-		        quint16 udpPort,
-		        bool force)
-		{
-			return new MsgConfigureAMDemod(rfBandwidth,
-			        volume,
-			        squelch,
-			        audioMute,
-			        bandpassEnable,
-			        copyAudioToUDP,
-			        udpAddress,
-			        udpPort,
-			        force);
-		}
-
-	private:
-		Real m_rfBandwidth;
-		Real m_volume;
-		Real m_squelch;
-		bool m_audioMute;
-		bool m_bandpassEnable;
-		bool m_copyAudioToUDP;
-		QString m_udpAddress;
-		quint16 m_udpPort;
-		bool m_force;
-
-		MsgConfigureAMDemod(Real rfBandwidth,
-		        Real volume,
-		        Real squelch,
-		        bool audioMute,
-		        bool bandpassEnable,
-		        bool copyAudioToUDP,
-		        const QString& udpAddress,
-		        quint16 udpPort,
-		        bool force) :
-			Message(),
-			m_rfBandwidth(rfBandwidth),
-			m_volume(volume),
-			m_squelch(squelch),
-			m_audioMute(audioMute),
-			m_bandpassEnable(bandpassEnable),
-			m_copyAudioToUDP(copyAudioToUDP),
-			m_udpAddress(udpAddress),
-			m_udpPort(udpPort),
-			m_force(force)
-		{ }
-	};
-
 	enum RateState {
 		RSInitialFill,
 		RSRunning
 	};
 
-	struct Config {
-		int m_inputSampleRate;
-		qint64 m_inputFrequencyOffset;
-		Real m_rfBandwidth;
-		Real m_squelch;
-		Real m_volume;
-		quint32 m_audioSampleRate;
-		bool m_audioMute;
-		bool m_bandpassEnable;
-        bool m_copyAudioToUDP;
-        QString m_udpAddress;
-        quint16 m_udpPort;
+	DeviceSourceAPI *m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
-		Config() :
-			m_inputSampleRate(-1),
-			m_inputFrequencyOffset(0),
-			m_rfBandwidth(-1),
-			m_squelch(0),
-			m_volume(0),
-			m_audioSampleRate(0),
-			m_audioMute(false),
-			m_bandpassEnable(false),
-            m_copyAudioToUDP(false),
-            m_udpAddress("127.0.0.1"),
-            m_udpPort(9999)
-		{ }
-	};
-
-	Config m_config;
-	Config m_running;
+    AMDemodSettings m_settings;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -194,7 +141,8 @@ private:
 
 	QMutex m_settingsMutex;
 
-	void apply(bool force = false);
+//	void apply(bool force = false);
+    void applySettings(const AMDemodSettings& settings, bool force = false);
 
 	void processOneSample(Complex &ci)
 	{
@@ -213,9 +161,9 @@ private:
 
         if (m_magsq >= m_squelchLevel)
         {
-            if (m_squelchCount <= m_running.m_audioSampleRate / 10)
+            if (m_squelchCount <= m_settings.m_audioSampleRate / 10)
             {
-                if (m_squelchCount == m_running.m_audioSampleRate / 20) {
+                if (m_squelchCount == m_settings.m_audioSampleRate / 20) {
                     m_volumeAGC.fill(1.0);
                 }
 
@@ -232,28 +180,28 @@ private:
 
         qint16 sample;
 
-        if ((m_squelchCount >= m_running.m_audioSampleRate / 20) && !m_running.m_audioMute)
+        if ((m_squelchCount >= m_settings.m_audioSampleRate / 20) && !m_settings.m_audioMute)
         {
             Real demod = sqrt(magsq);
             m_volumeAGC.feed(demod);
             demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
 
-            if (m_running.m_bandpassEnable)
+            if (m_settings.m_bandpassEnable)
             {
                 demod = m_bandpass.filter(demod);
                 demod /= 301.0f;
             }
 
-            Real attack = (m_squelchCount - 0.05f * m_running.m_audioSampleRate) / (0.05f * m_running.m_audioSampleRate);
-            sample = demod * attack * 2048 * m_running.m_volume;
-            if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * 32768);
+            Real attack = (m_squelchCount - 0.05f * m_settings.m_audioSampleRate) / (0.05f * m_settings.m_audioSampleRate);
+            sample = demod * attack * 2048 * m_settings.m_volume;
+            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * 32768);
 
             m_squelchOpen = true;
         }
         else
         {
             sample = 0;
-            if (m_running.m_copyAudioToUDP) m_udpBufferAudio->write(0);
+            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(0);
             m_squelchOpen = false;
         }
 
@@ -273,6 +221,7 @@ private:
             m_audioBufferFill = 0;
         }
 	}
+
 };
 
 #endif // INCLUDE_AMDEMOD_H

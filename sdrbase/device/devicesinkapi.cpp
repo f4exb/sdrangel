@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
 #include "dsp/devicesamplesink.h"
@@ -194,18 +194,18 @@ void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)
     m_pluginInterface = iface;
 }
 
-void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceUI *gui)
+void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui)
 {
     m_sampleSinkPluginInstanceUI = gui;
 }
 
-void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI)
+void DeviceSinkAPI::registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
     renameChannelInstances();
 }
 
-void DeviceSinkAPI::removeChannelInstance(PluginInstanceUI* pluginGUI)
+void DeviceSinkAPI::removeChannelInstance(PluginInstanceGUI* pluginGUI)
 {
     for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -395,8 +395,6 @@ bool DeviceSinkAPI::ChannelInstanceRegistration::operator<(const ChannelInstance
 
 void DeviceSinkAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 {
-    std::vector<DeviceSourceAPI*>::iterator it = m_sourceBuddies.begin();
-
     m_sourceBuddies.push_back(buddy);
     buddy->m_sinkBuddies.push_back(this);
     qDebug("DeviceSinkAPI::addSourceBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",
@@ -408,8 +406,6 @@ void DeviceSinkAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 
 void DeviceSinkAPI::addSinkBuddy(DeviceSinkAPI* buddy)
 {
-    std::vector<DeviceSinkAPI*>::iterator it = m_sinkBuddies.begin();
-
     m_sinkBuddies.push_back(buddy);
     buddy->m_sinkBuddies.push_back(this);
     qDebug("DeviceSinkAPI::addSinkBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",

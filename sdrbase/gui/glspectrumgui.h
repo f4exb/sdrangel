@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "dsp/dsptypes.h"
 #include "util/export.h"
+#include "settings/serializable.h"
 
 namespace Ui {
 	class GLSpectrumGUI;
@@ -13,7 +14,7 @@ class MessageQueue;
 class SpectrumVis;
 class GLSpectrum;
 
-class SDRANGEL_API GLSpectrumGUI : public QWidget {
+class SDRANGEL_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
 
 public:
@@ -23,8 +24,8 @@ public:
 	void setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
 
 	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
+	virtual QByteArray serialize() const;
+	virtual bool deserialize(const QByteArray& data);
 
 private:
 	Ui::GLSpectrumGUI* ui;

@@ -41,6 +41,8 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_gain = 40;
 	m_antennaPath = RFPATH_A_BAL;
 	m_gainMode = GAIN_MANUAL;
+	m_transverterMode = false;
+	m_transverterDeltaFrequency = 0;
 }
 
 QByteArray PlutoSDRInputSettings::serialize() const
@@ -61,6 +63,8 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeU32(13, m_gain);
     s.writeS32(14, (int) m_antennaPath);
     s.writeS32(15, (int) m_gainMode);
+    s.writeBool(16, m_transverterMode);
+    s.writeS64(17, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -114,6 +118,8 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
         } else {
             m_gainMode = GAIN_MANUAL;
         }
+        d.readBool(16, &m_transverterMode, false);
+        d.readS64(17, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

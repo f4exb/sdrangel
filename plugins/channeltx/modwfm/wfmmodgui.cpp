@@ -183,7 +183,7 @@ void WFMModGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = m_wfmMod->getOutputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -358,6 +358,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_wfmMod = new WFMMod();
+	m_wfmMod->setMessageQueueToGUI(getInputMessageQueue());
 	m_channelizer = new UpChannelizer(m_wfmMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
@@ -390,7 +391,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	applySettings();
 
-	connect(m_wfmMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_wfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 

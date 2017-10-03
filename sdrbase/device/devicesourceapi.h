@@ -34,7 +34,7 @@ class DeviceSampleSource;
 class MessageQueue;
 class ChannelMarker;
 class QWidget;
-class PluginInstanceUI;
+class PluginInstanceGUI;
 class PluginAPI;
 class PluginInterface;
 class Preset;
@@ -75,7 +75,7 @@ public:
     void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
     void setSampleSourcePluginInterface(PluginInterface *iface);
-    void setSampleSourcePluginInstanceGUI(PluginInstanceUI *gui);
+    void setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
@@ -83,10 +83,10 @@ public:
     const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
-    PluginInstanceUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
+    PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
 
-    void registerChannelInstance(const QString& channelName, PluginInstanceUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
 
     void freeChannels();
 
@@ -116,14 +116,14 @@ protected:
     struct ChannelInstanceRegistration
     {
         QString m_channelName;
-        PluginInstanceUI* m_gui;
+        PluginInstanceGUI* m_gui;
 
         ChannelInstanceRegistration() :
             m_channelName(),
             m_gui(NULL)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceUI* pluginGUI) :
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
             m_channelName(channelName),
             m_gui(pluginGUI)
         { }
@@ -154,7 +154,7 @@ protected:
     QString m_sampleSourceDisplayName;
     uint32_t m_sampleSourceSequence;
     PluginInterface* m_pluginInterface;
-    PluginInstanceUI* m_sampleSourcePluginInstanceUI;
+    PluginInstanceGUI* m_sampleSourcePluginInstanceUI;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
 

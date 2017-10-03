@@ -3,12 +3,14 @@ project(ssb)
 set(ssb_SOURCES
 	ssbdemod.cpp
 	ssbdemodgui.cpp
+	ssbdemodsettings.cpp
 	ssbplugin.cpp
 )
 
 set(ssb_HEADERS
 	ssbdemod.h
 	ssbdemodgui.h
+	ssbdemodsettings.h
 	ssbplugin.h
 )
 

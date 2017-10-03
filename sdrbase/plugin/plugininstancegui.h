@@ -10,10 +10,10 @@
 class Message;
 class MessageQueue;
 
-class SDRANGEL_API PluginInstanceUI {
+class SDRANGEL_API PluginInstanceGUI {
 public:
-	PluginInstanceUI() { };
-	virtual ~PluginInstanceUI() { };
+	PluginInstanceGUI() { };
+	virtual ~PluginInstanceGUI() { };
 
 	virtual void destroy() = 0;
 

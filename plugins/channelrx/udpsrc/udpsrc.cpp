@@ -476,7 +476,7 @@ void UDPSrc::apply(bool force)
         m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
-    if ((m_config.m_audioActive != m_config.m_audioActive) || force)
+    if ((m_config.m_audioActive != m_running.m_audioActive) || force)
     {
         if (m_config.m_audioActive)
         {

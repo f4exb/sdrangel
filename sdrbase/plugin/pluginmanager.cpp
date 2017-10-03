@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstanceui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include <QApplication>
@@ -32,10 +32,8 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 
-const QString PluginManager::m_sdrDaemonHardwareID = "SDRdaemon";
-const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemon";
-const QString PluginManager::m_sdrDaemonFECHardwareID = "SDRdaemonFEC";
-const QString PluginManager::m_sdrDaemonFECDeviceTypeID = "sdrangel.samplesource.sdrdaemonfec";
+const QString PluginManager::m_sdrDaemonHardwareID = "SDRdaemonSource";
+const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemonsource";
 const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
@@ -169,10 +167,8 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
     }
 
     SamplingDevice *sdrDaemonSSD0 = 0;
-    SamplingDevice *sdrDaemonFECSSD0 = 0;
     SamplingDevice *fileSourceSSD0 = 0;
     bool duplicateSDRDaemon = true;
-    bool duplicateSDRDaemonFEC = true;
     bool duplicateFileSource = true;
 
     for(int i = 0; i < m_sampleSourceDevices.count(); ++i)
@@ -184,15 +180,6 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
             }
             else if (m_sampleSourceDevices[i].m_deviceSequence == deviceUID) { // already there
                 duplicateSDRDaemon = false;
-            }
-        }
-        else if (m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonFECDeviceTypeID) // SDRdaemon with FEC
-        {
-            if (m_sampleSourceDevices[i].m_deviceSequence == 0) { // reference to device 0
-                sdrDaemonFECSSD0 = &m_sampleSourceDevices[i];
-            }
-            else if (m_sampleSourceDevices[i].m_deviceSequence == deviceUID) { // already there
-                duplicateSDRDaemonFEC = false;
             }
         }
         else if (m_sampleSourceDevices[i].m_deviceId == m_fileSourceDeviceTypeID) // File Source
@@ -211,24 +198,10 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
         m_sampleSourceDevices.append(
             SamplingDevice(
                 sdrDaemonSSD0->m_plugin,
-                QString("SDRdaemon[%1]").arg(deviceUID),
+                QString("SDRdaemonSource[%1]").arg(deviceUID),
                 sdrDaemonSSD0->m_hadrwareId,
                 sdrDaemonSSD0->m_deviceId,
                 sdrDaemonSSD0->m_deviceSerial,
-                deviceUID
-            )
-        );
-    }
-
-    if (sdrDaemonFECSSD0 && duplicateSDRDaemonFEC) // append item for a new instance
-    {
-        m_sampleSourceDevices.append(
-            SamplingDevice(
-                sdrDaemonFECSSD0->m_plugin,
-                QString("SDRdaemonFEC[%1]").arg(deviceUID),
-                sdrDaemonFECSSD0->m_hadrwareId,
-                sdrDaemonFECSSD0->m_deviceId,
-                sdrDaemonFECSSD0->m_deviceSerial,
                 deviceUID
             )
         );
@@ -294,7 +267,6 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID
 	{
 	    // For "local" devices show only ones that concern this device set
 	    if ((m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonDeviceTypeID)
-	            || (m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonFECDeviceTypeID)
 	            || (m_sampleSourceDevices[i].m_deviceId == m_fileSourceDeviceTypeID))
 	    {
 	        if (deviceUID != m_sampleSourceDevices[i].m_deviceSequence) {

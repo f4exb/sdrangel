@@ -338,7 +338,7 @@ bool AMMod::handleMessage(const Message& cmd)
 
     	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
-        getOutputMessageQueue()->push(report);
+        getMessageQueueToGUI()->push(report);
 
         return true;
     }
@@ -415,7 +415,7 @@ void AMMod::openFileStream()
 
     MsgReportFileSourceStreamData *report;
     report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
-    getOutputMessageQueue()->push(report);
+    getMessageQueueToGUI()->push(report);
 }
 
 void AMMod::seekFileStream(int seekPercentage)

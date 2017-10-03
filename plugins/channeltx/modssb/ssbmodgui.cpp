@@ -237,7 +237,7 @@ void SSBModGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = m_ssbMod->getOutputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -540,6 +540,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbMod = new SSBMod(m_spectrumVis);
+	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
 	m_channelizer = new UpChannelizer(m_ssbMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
 	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
@@ -580,7 +581,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	applySettings();
 	setNewRate(m_spanLog2);
 
-	connect(m_ssbMod->getOutputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 

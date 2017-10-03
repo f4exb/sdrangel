@@ -30,7 +30,9 @@
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgFileRecord, Message)
-//MESSAGE_CLASS_DEFINITION(AirspyInput::MsgReportAirspy, Message)
+
+const qint64 AirspyInput::loLowLimitFreq = 24000000L;
+const qint64 AirspyInput::loHighLimitFreq = 1900000000L;
 
 AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -332,32 +334,37 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
-
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
-			(m_settings.m_fcPos != settings.m_fcPos))
+	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+	        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+	        || (m_settings.m_fcPos != settings.m_fcPos)
+	        || (m_settings.m_transverterMode != settings.m_transverterMode)
+	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
 	{
-		m_settings.m_centerFrequency = settings.m_centerFrequency;
-		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+        m_settings.m_centerFrequency = settings.m_centerFrequency;
+        m_settings.m_transverterMode = settings.m_transverterMode;
+        m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+        m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+
+        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+        deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+        qint64 f_img = deviceCenterFrequency;
+        quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
 
 		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == AirspySettings::FC_POS_CENTER))
 		{
-			deviceCenterFrequency = m_settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
 			if (settings.m_fcPos == AirspySettings::FC_POS_INFRA)
 			{
-				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
+				deviceCenterFrequency += (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
 			else if (settings.m_fcPos == AirspySettings::FC_POS_SUPRA)
 			{
-				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
+				deviceCenterFrequency -= (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;
 			}
 		}
@@ -503,7 +510,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 	if (forwardChange)
 	{
-		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
+		int sampleRate = m_sampleRates[m_settings.m_devSampleRateIndex]/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);

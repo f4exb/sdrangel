@@ -17,10 +17,10 @@
 #ifndef INCLUDE_FCDPROGUI_H
 #define INCLUDE_FCDPROGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
 
 #include "fcdproinput.h"
@@ -32,7 +32,7 @@ namespace Ui {
 	class FCDProGui;
 }
 
-class FCDProGui : public QWidget, public PluginInstanceUI {
+class FCDProGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -68,6 +68,7 @@ private:
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
 
 private slots:
     void handleInputMessages();
@@ -95,6 +96,7 @@ private slots:
 	void on_setDefaults_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
 	void on_record_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
 };

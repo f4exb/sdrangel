@@ -1,11 +1,12 @@
 #ifndef INCLUDE_AMDEMODGUI_H
 #define INCLUDE_AMDEMODGUI_H
 
+#include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
-#include "plugin/plugininstanceui.h"
 #include "util/messagequeue.h"
+#include "amdemodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -18,7 +19,7 @@ namespace Ui {
 	class AMDemodGUI;
 }
 
-class AMDemodGUI : public RollupWidget, public PluginInstanceUI {
+class AMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
@@ -56,10 +57,11 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	AMDemodSettings m_settings;
 	bool m_doApplySettings;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
+//	ThreadedBasebandSampleSink* m_threadedChannelizer;
+//	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
@@ -70,7 +72,9 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+	void displaySettings();
 	void displayUDPAddress();
+	void updateChannelMarker();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

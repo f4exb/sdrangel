@@ -224,8 +224,10 @@ private:
     void closeDevice();
     bool acquireChannel();
     void releaseChannel();
-    void suspendBuddies();
-    void resumeBuddies();
+    void suspendRxBuddies();
+    void resumeRxBuddies();
+    void suspendTxBuddies();
+    void resumeTxBuddies();
     bool applySettings(const LimeSDROutputSettings& settings, bool force = false);
 };
 
