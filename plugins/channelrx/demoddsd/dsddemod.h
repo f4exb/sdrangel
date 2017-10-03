@@ -33,6 +33,7 @@
 #include "util/message.h"
 #include "util/udpsink.h"
 
+#include "dsddemodsettings.h"
 #include "dsddecoder.h"
 
 class DeviceSourceAPI;
@@ -41,6 +42,29 @@ class DownChannelizer;
 
 class DSDDemod : public BasebandSampleSink {
 public:
+    class MsgConfigureDSDDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const DSDDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureDSDDemod* create(const DSDDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureDSDDemod(settings, force);
+        }
+
+    private:
+        DSDDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureDSDDemod(const DSDDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -135,7 +159,7 @@ private:
 		{}
 	};
 
-	class MsgConfigureDSDDemod : public Message {
+	class MsgConfigureDSDDemodPrivate : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -157,7 +181,7 @@ private:
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		quint16 getUDPPort() const { return m_udpPort; }
 
-		static MsgConfigureDSDDemod* create(Real rfBandwidth,
+		static MsgConfigureDSDDemodPrivate* create(Real rfBandwidth,
                 Real fmDeviation,
                 Real demodGain,
 				Real volume,
@@ -176,7 +200,7 @@ private:
 				quint16 udpPort,
 				bool force)
 		{
-			return new MsgConfigureDSDDemod(rfBandwidth,
+			return new MsgConfigureDSDDemodPrivate(rfBandwidth,
                     fmDeviation,
 			        demodGain,
 			        volume,
@@ -216,7 +240,7 @@ private:
         quint16 m_udpPort;
         bool m_force;
 
-		MsgConfigureDSDDemod(Real rfBandwidth,
+		MsgConfigureDSDDemodPrivate(Real rfBandwidth,
 		        Real fmDeviation,
 		        Real demodGain,
 				Real volume,
@@ -309,6 +333,7 @@ private:
 
 	Config m_config;
 	Config m_running;
+	DSDDemodSettings m_settings;
 
 	DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
@@ -354,6 +379,7 @@ private:
     static const int m_udpBlockSize;
 
 	void apply(bool force = false);
+	void applySettings(DSDDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

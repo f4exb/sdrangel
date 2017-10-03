@@ -462,6 +462,9 @@ void DSDDemodGUI::applySettings(bool force)
                 48000, m_channelMarker.getCenterFrequency());
         m_dsdDemod->getInputMessageQueue()->push(channelConfigMsg);
 
+        DSDDemod::MsgConfigureDSDDemod* message = DSDDemod::MsgConfigureDSDDemod::create( m_settings, force);
+        m_dsdDemod->getInputMessageQueue()->push(message);
+
 //		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 //	    ui->rfBWText->setText(QString("%1k").arg(ui->rfBW->value() / 10.0, 0, 'f', 1));
 //	    ui->demodGainText->setText(QString("%1").arg(ui->demodGain->value() / 100.0, 0, 'f', 2));
@@ -474,25 +477,25 @@ void DSDDemodGUI::applySettings(bool force)
 //      ui->slot2On->setChecked(m_slot2On);
 //      ui->tdmaStereoSplit->setChecked(m_tdmaStereo);
 
-		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
-			m_settings.m_rfBandwidth,
-            m_settings.m_fmDeviation,
-			m_settings.m_demodGain,
-			m_settings.m_volume,
-			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
-			m_settings.m_squelchGate, // in 10ths of ms
-			m_settings.m_squelch,
-			m_settings.m_audioMute,
-			m_settings.m_enableCosineFiltering,
-			m_settings.m_syncOrConstellation,
-			m_settings.m_slot1On,
-			m_settings.m_slot2On,
-			m_settings.m_tdmaStereo,
-			m_settings.m_pllLock,
-			m_settings.m_udpCopyAudio,
-			m_channelMarker.getUDPAddress(),
-			m_channelMarker.getUDPSendPort(),
-			force);
+//		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
+//			m_settings.m_rfBandwidth,
+//            m_settings.m_fmDeviation,
+//			m_settings.m_demodGain,
+//			m_settings.m_volume,
+//			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
+//			m_settings.m_squelchGate, // in 10ths of ms
+//			m_settings.m_squelch,
+//			m_settings.m_audioMute,
+//			m_settings.m_enableCosineFiltering,
+//			m_settings.m_syncOrConstellation,
+//			m_settings.m_slot1On,
+//			m_settings.m_slot2On,
+//			m_settings.m_tdmaStereo,
+//			m_settings.m_pllLock,
+//			m_settings.m_udpCopyAudio,
+//			m_channelMarker.getUDPAddress(),
+//			m_channelMarker.getUDPSendPort(),
+//			force);
 	}
 }
 

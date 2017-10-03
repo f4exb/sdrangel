@@ -33,6 +33,7 @@
 
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
+MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 
 const int DSDDemod::m_udpBlockSize = 512;
@@ -124,7 +125,7 @@ void DSDDemod::configure(MessageQueue* messageQueue,
         quint16 udpPort,
         bool force)
 {
-	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
+	Message* cmd = MsgConfigureDSDDemodPrivate::create(rfBandwidth,
             fmDeviation,
 			demodGain,
 			volume,
@@ -182,7 +183,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_demodGain;
+            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain;
             m_sampleCount++;
 
             // AF processing
@@ -219,7 +220,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_dsdDecoder.pushSample(sample);
 
-            if (m_running.m_enableCosineFiltering) { // show actual input to FSK demod
+            if (m_settings.m_enableCosineFiltering) { // show actual input to FSK demod
             	sample = m_dsdDecoder.getFilteredSample();
             }
 
@@ -237,7 +238,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 delayedSample = m_sampleBuffer[m_sampleBufferIndex - samplesPerSymbol];
             }
 
-            if (m_running.m_syncOrConstellation)
+            if (m_settings.m_syncOrConstellation)
             {
                 Sample s(sample, m_dsdDecoder.getSymbolSyncSample());
                 m_scopeSampleBuffer.push_back(s);
@@ -250,30 +251,30 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (DSPEngine::instance()->hasDVSerialSupport())
             {
-                if ((m_running.m_slot1On) && m_dsdDecoder.mbeDVReady1())
+                if ((m_settings.m_slot1On) && m_dsdDecoder.mbeDVReady1())
                 {
-                    if (!m_running.m_audioMute)
+                    if (!m_settings.m_audioMute)
                     {
                         DSPEngine::instance()->pushMbeFrame(
                                 m_dsdDecoder.getMbeDVFrame1(),
                                 m_dsdDecoder.getMbeRateIndex(),
-                                m_running.m_volume,
-                                m_running.m_tdmaStereo ? 1 : 3, // left or both channels
+                                m_settings.m_volume,
+                                m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
                                 &m_audioFifo1);
                     }
 
                     m_dsdDecoder.resetMbeDV1();
                 }
 
-                if ((m_running.m_slot2On) && m_dsdDecoder.mbeDVReady2())
+                if ((m_settings.m_slot2On) && m_dsdDecoder.mbeDVReady2())
                 {
-                    if (!m_running.m_audioMute)
+                    if (!m_settings.m_audioMute)
                     {
                         DSPEngine::instance()->pushMbeFrame(
                                 m_dsdDecoder.getMbeDVFrame2(),
                                 m_dsdDecoder.getMbeRateIndex(),
-                                m_running.m_volume,
-                                m_running.m_tdmaStereo ? 2 : 3, // right or both channels
+                                m_settings.m_volume,
+                                m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
                                 &m_audioFifo2);
                     }
 
@@ -283,9 +284,9 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 //            if (DSPEngine::instance()->hasDVSerialSupport() && m_dsdDecoder.mbeDVReady1())
 //            {
-//                if (!m_running.m_audioMute)
+//                if (!m_settings.m_audioMute)
 //                {
-//                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_running.m_volume, &m_audioFifo1);
+//                    DSPEngine::instance()->pushMbeFrame(m_dsdDecoder.getMbeDVFrame1(), m_dsdDecoder.getMbeRateIndex(), m_settings.m_volume, &m_audioFifo1);
 //                }
 //
 //                m_dsdDecoder.resetMbeDV1();
@@ -297,14 +298,14 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	if (!DSPEngine::instance()->hasDVSerialSupport())
 	{
-	    if (m_running.m_slot1On)
+	    if (m_settings.m_slot1On)
 	    {
 	        int nbAudioSamples;
 	        short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
 
 	        if (nbAudioSamples > 0)
 	        {
-	            if (!m_running.m_audioMute) {
+	            if (!m_settings.m_audioMute) {
 	                m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
 	            }
 
@@ -312,14 +313,14 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	        }
 	    }
 
-        if (m_running.m_slot2On)
+        if (m_settings.m_slot2On)
         {
             int nbAudioSamples;
             short *dsdAudio = m_dsdDecoder.getAudio2(nbAudioSamples);
 
             if (nbAudioSamples > 0)
             {
-                if (!m_running.m_audioMute) {
+                if (!m_settings.m_audioMute) {
                     m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples, 10);
                 }
 
@@ -332,7 +333,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //
 //	    if (nbAudioSamples > 0)
 //	    {
-//	        if (!m_running.m_audioMute) {
+//	        if (!m_settings.m_audioMute) {
 //	            uint res = m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
 //	        }
 //
@@ -388,9 +389,42 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
         return true;
     }
-	else if (MsgConfigureDSDDemod::match(cmd))
+    else if (MsgConfigureDSDDemod::match(cmd))
+    {
+        MsgConfigureDSDDemod& cfg = (MsgConfigureDSDDemod&) cmd;
+
+        DSDDemodSettings settings = cfg.getSettings();
+
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        applySettings(settings, cfg.getForce());
+
+        qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_settings.m_rfBandwidth
+                << " m_fmDeviation: " << m_settings.m_fmDeviation
+                << " m_demodGain: " << m_settings.m_demodGain
+                << " m_volume: " << m_settings.m_volume
+                << " m_baudRate: " << m_settings.m_baudRate
+                << " m_squelchGate" << m_settings.m_squelchGate
+                << " m_squelch: " << m_settings.m_squelch
+                << " m_audioMute: " << m_settings.m_audioMute
+                << " m_enableCosineFiltering: " << m_settings.m_enableCosineFiltering
+                << " m_syncOrConstellation: " << m_settings.m_syncOrConstellation
+                << " m_slot1On: " << m_settings.m_slot1On
+                << " m_slot2On: " << m_settings.m_slot2On
+                << " m_tdmaStereo: " << m_settings.m_tdmaStereo
+                << " m_pllLock: " << m_settings.m_pllLock
+                << " m_udpCopyAudio: " << m_settings.m_udpCopyAudio
+                << " m_udpAddress: " << m_settings.m_udpAddress
+                << " m_udpPort: " << m_settings.m_udpPort
+                << " force: " << cfg.getForce();
+
+        return true;
+    }
+	else if (MsgConfigureDSDDemodPrivate::match(cmd))
 	{
-		MsgConfigureDSDDemod& cfg = (MsgConfigureDSDDemod&) cmd;
+		MsgConfigureDSDDemodPrivate& cfg = (MsgConfigureDSDDemodPrivate&) cmd;
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_demodGain = cfg.getDemodGain();
@@ -412,7 +446,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemodPrivate: m_rfBandwidth: " << m_config.m_rfBandwidth
                 << " m_fmDeviation: " << m_config.m_fmDeviation
 				<< " m_demodGain: " << m_config.m_demodGain
 				<< " m_volume: " << m_config.m_volume
@@ -522,4 +556,84 @@ void DSDDemod::apply(bool force)
     }
 
     m_running = m_config;
+}
+
+void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
+{
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    {
+        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+    }
+
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
+        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, settings.m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    {
+        m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
+    }
+
+    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    {
+        m_squelchGate = 480 * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
+        m_squelchCount = 0; // reset squelch open counter
+    }
+
+    if ((settings.m_squelch != m_settings.m_squelch) || force)
+    {
+        // input is a value in dB
+        m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
+        //m_squelchLevel *= m_squelchLevel;
+    }
+
+    if ((settings.m_volume != m_settings.m_volume) || force)
+    {
+        m_dsdDecoder.setAudioGain(settings.m_volume);
+    }
+
+    if ((settings.m_baudRate != m_settings.m_baudRate) || force)
+    {
+        m_dsdDecoder.setBaudRate(settings.m_baudRate);
+    }
+
+    if ((settings.m_enableCosineFiltering != m_settings.m_enableCosineFiltering) || force)
+    {
+        m_dsdDecoder.enableCosineFiltering(settings.m_enableCosineFiltering);
+    }
+
+    if ((settings.m_tdmaStereo != m_settings.m_tdmaStereo) || force)
+    {
+        m_dsdDecoder.setTDMAStereo(settings.m_tdmaStereo);
+    }
+
+    if ((settings.m_pllLock != m_settings.m_pllLock) || force)
+    {
+        m_dsdDecoder.setSymbolPLLLock(settings.m_pllLock);
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort) || force)
+    {
+        m_udpBufferAudio->setAddress(settings.m_udpAddress);
+        m_udpBufferAudio->setPort(settings.m_udpPort);
+    }
+
+    if ((settings.m_udpCopyAudio != m_settings.m_udpCopyAudio)
+        || (settings.m_slot1On != m_settings.m_slot1On)
+        || (settings.m_slot2On != m_settings.m_slot2On) || force)
+    {
+        m_audioFifo1.setCopyToUDP(settings.m_slot1On && settings.m_udpCopyAudio);
+        m_audioFifo2.setCopyToUDP(settings.m_slot2On && !settings.m_slot1On && settings.m_udpCopyAudio);
+    }
+
+    m_settings = settings;
 }
