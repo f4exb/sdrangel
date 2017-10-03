@@ -407,8 +407,8 @@ void DSDDemodGUI::applySettings(bool force)
         ui->tdmaStereoSplit->setChecked(m_tdmaStereo);
 
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
-			ui->rfBW->value(),
-            ui->fmDeviation->value(),
+			ui->rfBW->value() * 100.0,
+            ui->fmDeviation->value() * 100.0,
 			ui->demodGain->value(),
 			ui->volume->value(),
 			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),

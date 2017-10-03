@@ -55,9 +55,9 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 
 	m_config.m_inputSampleRate = 96000;
 	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 100;
+	m_config.m_rfBandwidth = 10000.0;
+    m_config.m_fmDeviation = 5000.0;
 	m_config.m_demodGain = 100;
-	m_config.m_fmDeviation = 100;
 	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
@@ -105,8 +105,8 @@ DSDDemod::~DSDDemod()
 }
 
 void DSDDemod::configure(MessageQueue* messageQueue,
-		int  rfBandwidth,
-        int  fmDeviation,
+		Real rfBandwidth,
+		Real fmDeviation,
 		int  demodGain,
 		int  volume,
 		int  baudRate,
@@ -125,8 +125,8 @@ void DSDDemod::configure(MessageQueue* messageQueue,
         bool force)
 {
 	Message* cmd = MsgConfigureDSDDemod::create(rfBandwidth,
+            fmDeviation,
 			demodGain,
-			fmDeviation,
 			volume,
 			baudRate,
 			squelchGate,
@@ -412,9 +412,9 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_config.m_rfBandwidth * 100
+		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_fmDeviation: " << m_config.m_fmDeviation
 				<< " m_demodGain: " << m_config.m_demodGain / 100.0
-				<< " m_fmDeviation: " << m_config.m_fmDeviation * 100
 				<< " m_volume: " << m_config.m_volume / 10.0
                 << " m_baudRate: " << m_config.m_baudRate
 				<< " m_squelchGate" << m_config.m_squelchGate
@@ -456,7 +456,7 @@ void DSDDemod::apply(bool force)
 		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
 	{
 		m_settingsMutex.lock();
-		m_interpolator.create(16, m_config.m_inputSampleRate, (m_config.m_rfBandwidth * 100) / 2.2);
+		m_interpolator.create(16, m_config.m_inputSampleRate, (m_config.m_rfBandwidth) / 2.2);
 		m_interpolatorDistanceRemain = 0;
 		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
 		m_phaseDiscri.setFMScaling((float) m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);

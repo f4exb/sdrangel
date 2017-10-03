@@ -69,8 +69,8 @@ public:
 	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
-			int  rfBandwidth,
-            int  fmDeviation,
+			Real  rfBandwidth,
+			Real  fmDeviation,
 			int  demodGain,
             int  volume,
             int  baudRate,
@@ -139,9 +139,9 @@ private:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		int  getRFBandwidth() const { return m_rfBandwidth; }
+		Real getRFBandwidth() const { return m_rfBandwidth; }
+        Real getFMDeviation() const { return m_fmDeviation; }
 		int  getDemodGain() const { return m_demodGain; }
-		int  getFMDeviation() const { return m_fmDeviation; }
         int  getVolume() const { return m_volume; }
         int  getBaudRate() const { return m_baudRate; }
 		int  getSquelchGate() const { return m_squelchGate; }
@@ -157,9 +157,9 @@ private:
 		const QString& getUDPAddress() const { return m_udpAddress; }
 		quint16 getUDPPort() const { return m_udpPort; }
 
-		static MsgConfigureDSDDemod* create(int rfBandwidth,
+		static MsgConfigureDSDDemod* create(Real rfBandwidth,
+                Real fmDeviation,
 				int  demodGain,
-				int  fmDeviation,
 				int  volume,
 				int  baudRate,
 				int  squelchGate,
@@ -177,8 +177,8 @@ private:
 				bool force)
 		{
 			return new MsgConfigureDSDDemod(rfBandwidth,
+                    fmDeviation,
 			        demodGain,
-			        fmDeviation,
 			        volume,
 			        baudRate,
 			        squelchGate,
@@ -198,8 +198,8 @@ private:
 
 	private:
 		Real m_rfBandwidth;
+        Real m_fmDeviation;
 		Real m_demodGain;
-		int  m_fmDeviation;
 		int  m_volume;
 		int  m_baudRate;
 		int  m_squelchGate;
@@ -217,8 +217,8 @@ private:
         bool m_force;
 
 		MsgConfigureDSDDemod(int rfBandwidth,
+                int  fmDeviation,
 				int  demodGain,
-				int  fmDeviation,
 				int  volume,
 				int  baudRate,
 				int  squelchGate,
@@ -236,8 +236,8 @@ private:
 				bool force) :
 			Message(),
 			m_rfBandwidth(rfBandwidth),
+            m_fmDeviation(fmDeviation),
 			m_demodGain(demodGain),
-			m_fmDeviation(fmDeviation),
 			m_volume(volume),
 			m_baudRate(baudRate),
 			m_squelchGate(squelchGate),
@@ -264,11 +264,11 @@ private:
 	struct Config {
 		int m_inputSampleRate;
 		qint64 m_inputFrequencyOffset;
-		int  m_rfBandwidth;
+		Real m_rfBandwidth;
+        Real m_fmDeviation;
 		int  m_demodGain;
 		int  m_volume;
 		int  m_baudRate;
-		int  m_fmDeviation;
 		int  m_squelchGate;
 		Real m_squelch;
 		bool m_audioMute;
@@ -286,11 +286,11 @@ private:
 		Config() :
 			m_inputSampleRate(-1),
 			m_inputFrequencyOffset(0),
-			m_rfBandwidth(-1),
+			m_rfBandwidth(10000.0),
+            m_fmDeviation(5000.0),
 			m_demodGain(-1),
 			m_volume(-1),
 			m_baudRate(4800),
-			m_fmDeviation(1),
 			m_squelchGate(1),
 			m_squelch(0),
 			m_audioMute(false),
