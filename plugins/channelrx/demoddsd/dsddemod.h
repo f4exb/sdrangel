@@ -292,7 +292,7 @@ private:
 			m_volume(1.0),
 			m_baudRate(4800),
 			m_squelchGate(1),
-			m_squelch(0),
+			m_squelch(-40.0),
 			m_audioMute(false),
 			m_audioSampleRate(0),
 			m_enableCosineFiltering(false),

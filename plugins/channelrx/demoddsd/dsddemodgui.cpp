@@ -413,7 +413,7 @@ void DSDDemodGUI::applySettings(bool force)
 			ui->volume->value() / 10.0,
 			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
 			ui->squelchGate->value(), // in 10ths of ms
-			ui->squelch->value(),
+			ui->squelch->value() / 10.0,
 			ui->audioMute->isChecked(),
 			m_enableCosineFiltering,
 			m_syncOrConstellation,

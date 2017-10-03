@@ -476,8 +476,8 @@ void DSDDemod::apply(bool force)
 
 	if ((m_config.m_squelch != m_running.m_squelch) || force)
 	{
-		// input is a value in tenths of dB
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 100.0);
+		// input is a value in dB
+		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 10.0);
 		//m_squelchLevel *= m_squelchLevel;
 	}
 
