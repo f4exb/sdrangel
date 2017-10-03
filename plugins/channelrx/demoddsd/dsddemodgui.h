@@ -27,6 +27,8 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
+#include "dsddemodsettings.h"
+
 class PluginAPI;
 class DeviceSourceAPI;
 
@@ -94,6 +96,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	DSDDemodSettings m_settings;
 	bool m_doApplySettings;
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
@@ -120,6 +123,7 @@ private:
 
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+    void displaySettings();
 	void updateMyPosition();
 	void displayUDPAddress();
 
