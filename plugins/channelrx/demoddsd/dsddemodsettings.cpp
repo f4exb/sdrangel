@@ -33,10 +33,10 @@ void DSDDemodSettings::resetToDefaults()
     m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 10000.0;
+    m_fmDeviation = 5000.0;
     m_demodGain = 1.0;
     m_volume = 1.0;
     m_baudRate = 4800;
-    m_fmDeviation = 5000.0;
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
     m_squelch = -30.0;
     m_audioMute = false;

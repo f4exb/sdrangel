@@ -409,8 +409,8 @@ void DSDDemodGUI::applySettings(bool force)
 		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
 			ui->rfBW->value() * 100.0,
             ui->fmDeviation->value() * 100.0,
-			ui->demodGain->value(),
-			ui->volume->value(),
+			ui->demodGain->value() / 100.0,
+			ui->volume->value() / 10.0,
 			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
 			ui->squelchGate->value(), // in 10ths of ms
 			ui->squelch->value(),

@@ -69,10 +69,10 @@ public:
 	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
-			Real  rfBandwidth,
-			Real  fmDeviation,
-			int  demodGain,
-            int  volume,
+			Real rfBandwidth,
+			Real fmDeviation,
+			Real demodGain,
+            Real volume,
             int  baudRate,
 			int  squelchGate,
 			Real squelch,
@@ -141,8 +141,8 @@ private:
 	public:
 		Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getFMDeviation() const { return m_fmDeviation; }
-		int  getDemodGain() const { return m_demodGain; }
-        int  getVolume() const { return m_volume; }
+        Real getDemodGain() const { return m_demodGain; }
+        Real getVolume() const { return m_volume; }
         int  getBaudRate() const { return m_baudRate; }
 		int  getSquelchGate() const { return m_squelchGate; }
 		Real getSquelch() const { return m_squelch; }
@@ -159,8 +159,8 @@ private:
 
 		static MsgConfigureDSDDemod* create(Real rfBandwidth,
                 Real fmDeviation,
-				int  demodGain,
-				int  volume,
+                Real demodGain,
+				Real volume,
 				int  baudRate,
 				int  squelchGate,
 				Real squelch,
@@ -200,7 +200,7 @@ private:
 		Real m_rfBandwidth;
         Real m_fmDeviation;
 		Real m_demodGain;
-		int  m_volume;
+		Real m_volume;
 		int  m_baudRate;
 		int  m_squelchGate;
 		Real m_squelch;
@@ -216,10 +216,10 @@ private:
         quint16 m_udpPort;
         bool m_force;
 
-		MsgConfigureDSDDemod(int rfBandwidth,
-                int  fmDeviation,
-				int  demodGain,
-				int  volume,
+		MsgConfigureDSDDemod(Real rfBandwidth,
+		        Real fmDeviation,
+		        Real demodGain,
+				Real volume,
 				int  baudRate,
 				int  squelchGate,
 				Real squelch,
@@ -266,8 +266,8 @@ private:
 		qint64 m_inputFrequencyOffset;
 		Real m_rfBandwidth;
         Real m_fmDeviation;
-		int  m_demodGain;
-		int  m_volume;
+        Real m_demodGain;
+        Real m_volume;
 		int  m_baudRate;
 		int  m_squelchGate;
 		Real m_squelch;
@@ -288,8 +288,8 @@ private:
 			m_inputFrequencyOffset(0),
 			m_rfBandwidth(10000.0),
             m_fmDeviation(5000.0),
-			m_demodGain(-1),
-			m_volume(-1),
+			m_demodGain(1.0),
+			m_volume(1.0),
 			m_baudRate(4800),
 			m_squelchGate(1),
 			m_squelch(0),

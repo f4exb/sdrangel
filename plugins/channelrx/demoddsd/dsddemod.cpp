@@ -57,7 +57,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	m_config.m_inputFrequencyOffset = 0;
 	m_config.m_rfBandwidth = 10000.0;
     m_config.m_fmDeviation = 5000.0;
-	m_config.m_demodGain = 100;
+	m_config.m_demodGain = 1.0;
 	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
@@ -107,8 +107,8 @@ DSDDemod::~DSDDemod()
 void DSDDemod::configure(MessageQueue* messageQueue,
 		Real rfBandwidth,
 		Real fmDeviation,
-		int  demodGain,
-		int  volume,
+		Real demodGain,
+		Real volume,
 		int  baudRate,
 		int  squelchGate,
 		Real squelch,
@@ -182,7 +182,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * ((float) m_running.m_demodGain / 100.0f);
+            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_demodGain;
             m_sampleCount++;
 
             // AF processing
@@ -414,8 +414,8 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
 		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_config.m_rfBandwidth
                 << " m_fmDeviation: " << m_config.m_fmDeviation
-				<< " m_demodGain: " << m_config.m_demodGain / 100.0
-				<< " m_volume: " << m_config.m_volume / 10.0
+				<< " m_demodGain: " << m_config.m_demodGain
+				<< " m_volume: " << m_config.m_volume
                 << " m_baudRate: " << m_config.m_baudRate
 				<< " m_squelchGate" << m_config.m_squelchGate
 				<< " m_squelch: " << m_config.m_squelch
@@ -483,7 +483,7 @@ void DSDDemod::apply(bool force)
 
     if ((m_config.m_volume != m_running.m_volume) || force)
     {
-        m_dsdDecoder.setAudioGain(m_config.m_volume / 10.0f);
+        m_dsdDecoder.setAudioGain(m_config.m_volume);
     }
 
     if ((m_config.m_baudRate != m_running.m_baudRate) || force)

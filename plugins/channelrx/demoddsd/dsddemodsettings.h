@@ -26,10 +26,10 @@ struct DSDDemodSettings
     int m_inputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real  m_rfBandwidth;
+    Real  m_fmDeviation;
     Real  m_demodGain;
     Real  m_volume;
     int  m_baudRate;
-    Real  m_fmDeviation;
     int  m_squelchGate;
     Real m_squelch;
     bool m_audioMute;
