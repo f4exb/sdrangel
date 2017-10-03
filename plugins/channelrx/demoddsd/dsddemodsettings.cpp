@@ -32,13 +32,13 @@ void DSDDemodSettings::resetToDefaults()
 {
     m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 10000.0;
+    m_rfBandwidth = 12500.0;
     m_fmDeviation = 5000.0;
-    m_demodGain = 1.0;
-    m_volume = 1.0;
+    m_demodGain = 1.25;
+    m_volume = 2.0;
     m_baudRate = 4800;
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
-    m_squelch = -30.0;
+    m_squelch = -40.0;
     m_audioMute = false;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_enableCosineFiltering = false;
@@ -107,11 +107,11 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
-        d.readS32(2, &tmp, 4);
+        d.readS32(2, &tmp, 125);
         m_rfBandwidth = tmp * 100.0;
-        d.readS32(3, &tmp, 3);
+        d.readS32(3, &tmp, 125);
         m_demodGain = tmp / 100.0;
-        d.readS32(4, &tmp, 20);
+        d.readS32(4, &tmp, 50);
         m_fmDeviation = tmp * 100.0;
         d.readS32(5, &tmp, -400);
         m_squelch = tmp / 10.0;

@@ -33,19 +33,22 @@
 
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
-MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 
 const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	m_deviceAPI(deviceAPI),
-	m_sampleCount(0),
-	m_squelchCount(0),
-	m_squelchOpen(false),
+    m_interpolatorDistance(0.0f),
+    m_interpolatorDistanceRemain(0.0f),
+    m_sampleCount(0),
+    m_squelchCount(0),
+    m_squelchGate(0),
+    m_squelchLevel(1e-4),
+    m_squelchOpen(false),
     m_movingAverage(40, 0),
     m_fmExcursion(24),
-	m_audioFifo1(48000),
+    m_audioFifo1(48000),
     m_audioFifo2(48000),
     m_scope(0),
     m_scopeEnabled(true),
@@ -53,19 +56,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("DSDDemod");
-
-	m_config.m_inputSampleRate = 96000;
-	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 10000.0;
-    m_config.m_fmDeviation = 5000.0;
-	m_config.m_demodGain = 1.0;
-	m_config.m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
-	m_config.m_squelch = -30.0;
-	m_config.m_volume = 1.0;
-	m_config.m_baudRate = 4800;
-	m_config.m_audioMute = false;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-	m_config.m_enableCosineFiltering = false;
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -82,7 +72,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
     DSPEngine::instance()->addAudioSink(&m_audioFifo2);
 
-    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_config.m_udpPort);
+    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_settings.m_udpPort);
     m_audioFifo1.setUDPSink(m_udpBufferAudio);
     m_audioFifo2.setUDPSink(m_udpBufferAudio);
 
@@ -90,7 +80,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-    apply(true);
+    applySettings(m_settings, true);
 }
 
 DSDDemod::~DSDDemod()
@@ -103,47 +93,6 @@ DSDDemod::~DSDDemod()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
-}
-
-void DSDDemod::configure(MessageQueue* messageQueue,
-		Real rfBandwidth,
-		Real fmDeviation,
-		Real demodGain,
-		Real volume,
-		int  baudRate,
-		int  squelchGate,
-		Real squelch,
-		bool audioMute,
-		bool enableCosineFiltering,
-		bool syncOrConstellation,
-		bool slot1On,
-		bool slot2On,
-		bool tdmaStereo,
-		bool pllLock,
-        bool udpCopyAudio,
-        const QString& udpAddress,
-        quint16 udpPort,
-        bool force)
-{
-	Message* cmd = MsgConfigureDSDDemodPrivate::create(rfBandwidth,
-            fmDeviation,
-			demodGain,
-			volume,
-			baudRate,
-			squelchGate,
-			squelch,
-			audioMute,
-			enableCosineFiltering,
-			syncOrConstellation,
-			slot1On,
-			slot2On,
-			tdmaStereo,
-			pllLock,
-			udpCopyAudio,
-			udpAddress,
-			udpPort,
-			force);
-	messageQueue->push(cmd);
 }
 
 void DSDDemod::configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude)
@@ -369,13 +318,14 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_inputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		DSDDemodSettings settings = m_settings;
+		settings.m_inputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		apply();
+		applySettings(settings);
 
-		qDebug() << "DSDDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+		qDebug() << "DSDDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << settings.m_inputSampleRate
+				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
@@ -422,50 +372,6 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
         return true;
     }
-	else if (MsgConfigureDSDDemodPrivate::match(cmd))
-	{
-		MsgConfigureDSDDemodPrivate& cfg = (MsgConfigureDSDDemodPrivate&) cmd;
-
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_demodGain = cfg.getDemodGain();
-		m_config.m_fmDeviation = cfg.getFMDeviation();
-		m_config.m_volume = cfg.getVolume();
-		m_config.m_baudRate = cfg.getBaudRate();
-		m_config.m_squelchGate = cfg.getSquelchGate();
-		m_config.m_squelch = cfg.getSquelch();
-		m_config.m_audioMute = cfg.getAudioMute();
-		m_config.m_enableCosineFiltering = cfg.getEnableCosineFiltering();
-		m_config.m_syncOrConstellation = cfg.getSyncOrConstellation();
-		m_config.m_slot1On = cfg.getSlot1On();
-		m_config.m_slot2On = cfg.getSlot2On();
-		m_config.m_tdmaStereo = cfg.getTDMAStereo();
-		m_config.m_pllLock = cfg.getPLLLock();
-		m_config.m_udpCopyAudio = cfg.getUDPCopyAudio();
-		m_config.m_udpAddress = cfg.getUDPAddress();
-		m_config.m_udpPort = cfg.getUDPPort();
-
-		apply();
-
-		qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemodPrivate: m_rfBandwidth: " << m_config.m_rfBandwidth
-                << " m_fmDeviation: " << m_config.m_fmDeviation
-				<< " m_demodGain: " << m_config.m_demodGain
-				<< " m_volume: " << m_config.m_volume
-                << " m_baudRate: " << m_config.m_baudRate
-				<< " m_squelchGate" << m_config.m_squelchGate
-				<< " m_squelch: " << m_config.m_squelch
-				<< " m_audioMute: " << m_config.m_audioMute
-				<< " m_enableCosineFiltering: " << m_config.m_enableCosineFiltering
-				<< " m_syncOrConstellation: " << m_config.m_syncOrConstellation
-				<< " m_slot1On: " << m_config.m_slot1On
-				<< " m_slot2On: " << m_config.m_slot2On
-				<< " m_tdmaStereo: " << m_config.m_tdmaStereo
-				<< " m_pllLock: " << m_config.m_pllLock
-                << " m_udpCopyAudio: " << m_config.m_udpCopyAudio
-                << " m_udpAddress: " << m_config.m_udpAddress
-                << " m_udpPort: " << m_config.m_udpPort;
-
-		return true;
-	}
 	else if (MsgConfigureMyPosition::match(cmd))
 	{
 		MsgConfigureMyPosition& cfg = (MsgConfigureMyPosition&) cmd;
@@ -476,86 +382,6 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
-}
-
-void DSDDemod::apply(bool force)
-{
-	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-		(m_config.m_inputSampleRate != m_running.m_inputSampleRate) || force)
-	{
-		m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
-	}
-
-	if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth) || force)
-	{
-		m_settingsMutex.lock();
-		m_interpolator.create(16, m_config.m_inputSampleRate, (m_config.m_rfBandwidth) / 2.2);
-		m_interpolatorDistanceRemain = 0;
-		m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_audioSampleRate;
-		m_phaseDiscri.setFMScaling((float) m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
-		m_settingsMutex.unlock();
-	}
-
-	if ((m_config.m_fmDeviation != m_running.m_fmDeviation) || force)
-	{
-		m_phaseDiscri.setFMScaling((float) m_config.m_rfBandwidth / (float) m_config.m_fmDeviation);
-	}
-
-	if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
-	{
-		m_squelchGate = 480 * m_config.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
-		m_squelchCount = 0; // reset squelch open counter
-	}
-
-	if ((m_config.m_squelch != m_running.m_squelch) || force)
-	{
-		// input is a value in dB
-		m_squelchLevel = std::pow(10.0, m_config.m_squelch / 10.0);
-		//m_squelchLevel *= m_squelchLevel;
-	}
-
-    if ((m_config.m_volume != m_running.m_volume) || force)
-    {
-        m_dsdDecoder.setAudioGain(m_config.m_volume);
-    }
-
-    if ((m_config.m_baudRate != m_running.m_baudRate) || force)
-    {
-        m_dsdDecoder.setBaudRate(m_config.m_baudRate);
-    }
-
-    if ((m_config.m_enableCosineFiltering != m_running.m_enableCosineFiltering) || force)
-    {
-    	m_dsdDecoder.enableCosineFiltering(m_config.m_enableCosineFiltering);
-    }
-
-    if ((m_config.m_tdmaStereo != m_running.m_tdmaStereo) || force)
-    {
-        m_dsdDecoder.setTDMAStereo(m_config.m_tdmaStereo);
-    }
-
-    if ((m_config.m_pllLock != m_running.m_pllLock) || force)
-    {
-        m_dsdDecoder.setSymbolPLLLock(m_config.m_pllLock);
-    }
-
-    if ((m_config.m_udpAddress != m_running.m_udpAddress)
-        || (m_config.m_udpPort != m_running.m_udpPort) || force)
-    {
-        m_udpBufferAudio->setAddress(m_config.m_udpAddress);
-        m_udpBufferAudio->setPort(m_config.m_udpPort);
-    }
-
-    if ((m_config.m_udpCopyAudio != m_running.m_udpCopyAudio)
-        || (m_config.m_slot1On != m_running.m_slot1On)
-        || (m_config.m_slot2On != m_running.m_slot2On) || force)
-    {
-        m_audioFifo1.setCopyToUDP(m_config.m_slot1On && m_config.m_udpCopyAudio);
-        m_audioFifo2.setCopyToUDP(m_config.m_slot2On && !m_config.m_slot1On && m_config.m_udpCopyAudio);
-    }
-
-    m_running = m_config;
 }
 
 void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
@@ -592,7 +418,6 @@ void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
     {
         // input is a value in dB
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
-        //m_squelchLevel *= m_squelchLevel;
     }
 
     if ((settings.m_volume != m_settings.m_volume) || force)

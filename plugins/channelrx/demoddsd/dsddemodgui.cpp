@@ -83,24 +83,6 @@ void DSDDemodGUI::resetToDefaults()
 QByteArray DSDDemodGUI::serialize() const
 {
     return m_settings.serialize();
-//	SimpleSerializer s(1);
-//	s.writeS32(1, m_channelMarker.getCenterFrequency());
-//	s.writeS32(2, ui->rfBW->value());
-//	s.writeS32(3, ui->demodGain->value());
-//	s.writeS32(4, ui->fmDeviation->value());
-//	s.writeS32(5, ui->squelch->value());
-//	s.writeU32(7, m_channelMarker.getColor().rgb());
-//	s.writeS32(8, ui->squelchGate->value());
-//	s.writeS32(9, ui->volume->value());
-//  s.writeBlob(10, ui->scopeGUI->serialize());
-//  s.writeS32(11, ui->baudRate->currentIndex());
-//  s.writeBool(12, m_enableCosineFiltering);
-//  s.writeBool(13, m_syncOrConstellation);
-//  s.writeBool(14, m_slot1On);
-//  s.writeBool(15, m_slot2On);
-//  s.writeBool(16, m_tdmaStereo);
-//  s.writeBlob(17, m_channelMarker.serialize());
-//	return s.final();
 }
 
 bool DSDDemodGUI::deserialize(const QByteArray& data)
@@ -116,73 +98,6 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if (!d.isValid())
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if (d.getVersion() == 1)
-//	{
-//		QByteArray bytetmp;
-//		QString strtmp;
-//		quint32 u32tmp;
-//		qint32 tmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//        d.readBlob(17, &bytetmp);
-//        m_channelMarker.deserialize(bytetmp);
-//
-//		d.readS32(1, &tmp, 0);
-//		m_channelMarker.setCenterFrequency(tmp);
-//		d.readS32(2, &tmp, 4);
-//		ui->rfBW->setValue(tmp);
-//		d.readS32(3, &tmp, 3);
-//		ui->demodGain->setValue(tmp);
-//		d.readS32(4, &tmp, 20);
-//		ui->fmDeviation->setValue(tmp);
-//		d.readS32(5, &tmp, -40);
-//		ui->squelch->setValue(tmp);
-//
-//		if(d.readU32(7, &u32tmp))
-//		{
-//			m_channelMarker.setColor(u32tmp);
-//		}
-//
-//		d.readS32(8, &tmp, 5);
-//		ui->squelchGate->setValue(tmp);
-//        d.readS32(9, &tmp, 20);
-//        ui->volume->setValue(tmp);
-//        d.readBlob(10, &bytetmp);
-//        ui->scopeGUI->deserialize(bytetmp);
-//        d.readS32(11, &tmp, 20);
-//        ui->baudRate->setCurrentIndex(tmp);
-//        d.readBool(12, &m_enableCosineFiltering, false);
-//        d.readBool(13, &m_syncOrConstellation, false);
-//        d.readBool(14, &m_slot1On, false);
-//        d.readBool(15, &m_slot2On, false);
-//        d.readBool(16, &m_tdmaStereo, false);
-//
-//        this->setWindowTitle(m_channelMarker.getTitle());
-//        displayUDPAddress();
-//
-//		blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		updateMyPosition(); // we do it also here to be able to refresh with latest settings
-//		applySettings(true);
-//		return true;
-//	}
-//	else
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool DSDDemodGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -464,38 +379,6 @@ void DSDDemodGUI::applySettings(bool force)
 
         DSDDemod::MsgConfigureDSDDemod* message = DSDDemod::MsgConfigureDSDDemod::create( m_settings, force);
         m_dsdDemod->getInputMessageQueue()->push(message);
-
-//		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-//	    ui->rfBWText->setText(QString("%1k").arg(ui->rfBW->value() / 10.0, 0, 'f', 1));
-//	    ui->demodGainText->setText(QString("%1").arg(ui->demodGain->value() / 100.0, 0, 'f', 2));
-//	    ui->fmDeviationText->setText(QString("%1k").arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
-//		ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
-//	    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
-//	    ui->enableCosineFiltering->setChecked(m_enableCosineFiltering);
-//	    ui->syncOrConstellation->setChecked(m_syncOrConstellation);
-//	    ui->slot1On->setChecked(m_slot1On);
-//      ui->slot2On->setChecked(m_slot2On);
-//      ui->tdmaStereoSplit->setChecked(m_tdmaStereo);
-
-//		m_dsdDemod->configure(m_dsdDemod->getInputMessageQueue(),
-//			m_settings.m_rfBandwidth,
-//            m_settings.m_fmDeviation,
-//			m_settings.m_demodGain,
-//			m_settings.m_volume,
-//			DSDDemodBaudRates::getRate(ui->baudRate->currentIndex()),
-//			m_settings.m_squelchGate, // in 10ths of ms
-//			m_settings.m_squelch,
-//			m_settings.m_audioMute,
-//			m_settings.m_enableCosineFiltering,
-//			m_settings.m_syncOrConstellation,
-//			m_settings.m_slot1On,
-//			m_settings.m_slot2On,
-//			m_settings.m_tdmaStereo,
-//			m_settings.m_pllLock,
-//			m_settings.m_udpCopyAudio,
-//			m_channelMarker.getUDPAddress(),
-//			m_channelMarker.getUDPSendPort(),
-//			force);
 	}
 }
 
