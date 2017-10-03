@@ -106,8 +106,8 @@ DSDDemod::~DSDDemod()
 
 void DSDDemod::configure(MessageQueue* messageQueue,
 		int  rfBandwidth,
+        int  fmDeviation,
 		int  demodGain,
-		int  fmDeviation,
 		int  volume,
 		int  baudRate,
 		int  squelchGate,

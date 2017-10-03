@@ -70,10 +70,10 @@ public:
 
 	void configure(MessageQueue* messageQueue,
 			int  rfBandwidth,
+            int  fmDeviation,
 			int  demodGain,
             int  volume,
             int  baudRate,
-			int  fmDeviation,
 			int  squelchGate,
 			Real squelch,
 			bool audioMute,
