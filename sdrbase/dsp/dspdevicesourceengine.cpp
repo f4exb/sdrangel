@@ -73,8 +73,11 @@ void DSPDeviceSourceEngine::start()
 void DSPDeviceSourceEngine::stop()
 {
 	qDebug() << "DSPDeviceSourceEngine::stop";
-	DSPExit cmd;
-	m_syncMessenger.sendWait(cmd);
+    gotoIdle();
+    m_state = StNotStarted;
+	QThread::exit();
+//	DSPExit cmd;
+//	m_syncMessenger.sendWait(cmd);
 }
 
 bool DSPDeviceSourceEngine::initAcquisition()
