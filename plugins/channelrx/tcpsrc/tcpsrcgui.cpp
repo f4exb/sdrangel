@@ -65,7 +65,6 @@ void TCPSrcGUI::resetToDefaults()
 QByteArray TCPSrcGUI::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeBlob(1, saveState());
 	s.writeS32(2, m_channelMarker.getCenterFrequency());
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
@@ -96,8 +95,6 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
 
-		d.readBlob(1, &bytetmp);
-		restoreState(bytetmp);
 		d.readS32(2, &s32tmp, 0);
 		m_channelMarker.setCenterFrequency(s32tmp);
 		d.readS32(3, &s32tmp, TCPSrc::FormatSSB);

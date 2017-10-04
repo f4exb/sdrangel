@@ -9,10 +9,6 @@ class SDRANGEL_API RollupWidget : public QWidget {
 
 public:
 	RollupWidget(QWidget* parent = NULL);
-
-	QByteArray saveState(int version = 0) const;
-	bool restoreState(const QByteArray& state, int version = 0);
-
 	void setTitleColor(const QColor& c);
 
 signals:
@@ -26,6 +22,9 @@ protected:
 	QColor m_titleColor;
 
 	int arrangeRollups();
+
+	QByteArray saveState(int version = 0) const;
+    bool restoreState(const QByteArray& state, int version = 0);
 
 	void paintEvent(QPaintEvent*);
 	int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame);

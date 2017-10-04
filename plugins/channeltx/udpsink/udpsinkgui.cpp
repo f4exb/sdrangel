@@ -79,7 +79,6 @@ void UDPSinkGUI::resetToDefaults()
 QByteArray UDPSinkGUI::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeBlob(1, saveState());
     s.writeS32(2, m_channelMarker.getCenterFrequency());
     s.writeS32(3, m_sampleFormat);
     s.writeReal(4, m_inputSampleRate);
@@ -116,8 +115,6 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         blockApplySettings(true);
         m_channelMarker.blockSignals(true);
 
-        d.readBlob(1, &bytetmp);
-        restoreState(bytetmp);
         d.readBlob(6, &bytetmp);
         m_channelMarker.deserialize(bytetmp);
 
