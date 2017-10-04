@@ -89,7 +89,6 @@ void UDPSrcGUI::resetToDefaults()
 QByteArray UDPSrcGUI::serialize() const
 {
 	SimpleSerializer s(1);
-	s.writeBlob(1, saveState());
 	s.writeS32(2, m_channelMarker.getCenterFrequency());
 	s.writeS32(3, m_sampleFormat);
 	s.writeReal(4, m_outputSampleRate);
@@ -128,8 +127,6 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 		blockApplySettings(true);
 		m_channelMarker.blockSignals(true);
 
-		d.readBlob(1, &bytetmp);
-		restoreState(bytetmp);
         d.readBlob(6, &bytetmp);
         m_channelMarker.deserialize(bytetmp);
 
