@@ -25,11 +25,13 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += udpsrc.cpp\
     udpsrcgui.cpp\
-    udpsrcplugin.cpp
+    udpsrcplugin.cpp\
+    udpsrcsettings.cpp
 
 HEADERS += udpsrc.h\
     udpsrcgui.h\
-    udpsrcplugin.h
+    udpsrcplugin.h\
+    udpsrcsettings.h
 
 FORMS += udpsrcgui.ui
 

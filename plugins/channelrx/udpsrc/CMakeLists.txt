@@ -4,12 +4,14 @@ set(udpsrc_SOURCES
 	udpsrc.cpp
 	udpsrcgui.cpp
 	udpsrcplugin.cpp
+	udpsrcsettings.cpp
 )
 
 set(udpsrc_HEADERS
 	udpsrc.h
 	udpsrcgui.h
 	udpsrcplugin.h
+	udpsrcsettings.h
 )
 
 set(udpsrc_FORMS
