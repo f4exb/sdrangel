@@ -34,7 +34,7 @@
 
 
 class QUdpSocket;
-class UDPSrcGUI;
+class DeviceSourceAPI;
 
 class UDPSrc : public BasebandSampleSink {
 	Q_OBJECT
@@ -54,8 +54,9 @@ public:
 		FormatNone
 	};
 
-	UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum);
+	UDPSrc(DeviceSourceAPI *deviceAPI);
 	virtual ~UDPSrc();
+	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
 	void configure(MessageQueue* messageQueue,
 			SampleFormat sampleFormat,
@@ -292,8 +293,8 @@ protected:
     Config m_config;
     Config m_running;
 
-	MessageQueue* m_uiMessageQueue;
-	UDPSrcGUI* m_udpSrcGUI;
+    DeviceSourceAPI *m_deviceAPI;
+
 	QUdpSocket *m_audioSocket;
 
 	double m_magsq;

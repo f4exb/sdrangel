@@ -31,11 +31,13 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
-UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampleSink* spectrum) :
+UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
     m_amMovingAverage(1200, 1e-10),
     m_audioFifo(24000),
+    m_spectrum(0),
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
@@ -57,9 +59,6 @@ UDPSrc::UDPSrc(MessageQueue* uiMessageQueue, UDPSrcGUI* udpSrcGUI, BasebandSampl
 	m_nco.setFreq(0, m_config.m_inputSampleRate);
 	m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
-	m_uiMessageQueue = uiMessageQueue;
-	m_udpSrcGUI = udpSrcGUI;
-	m_spectrum = spectrum;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
