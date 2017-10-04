@@ -196,7 +196,7 @@ bool DVSerialEngine::scan()
             controller.thread = new QThread();
 
             controller.worker->moveToThread(controller.thread);
-            connect(controller.thread, SIGNAL(started()), controller.worker, SLOT(process()));
+            //connect(controller.thread, SIGNAL(started()), controller.worker, SLOT(process()));
             connect(controller.worker, SIGNAL(finished()), controller.thread, SLOT(quit()));
             connect(controller.worker, SIGNAL(finished()), controller.worker, SLOT(deleteLater()));
             connect(controller.thread, SIGNAL(finished()), controller.thread, SLOT(deleteLater()));
