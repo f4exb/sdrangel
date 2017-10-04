@@ -18,15 +18,18 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 
-#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "util/db.h"
+#include "dsp/downchannelizer.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
 
 #include "udpsrcgui.h"
 #include "udpsrc.h"
 
 const Real UDPSrc::m_agcTarget = 16384.0f;
 
+MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
@@ -68,6 +71,11 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 	m_scale = 0;
 	m_magsq = 0;
 	m_inMagsq = 0;
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
 	UDPFilter = new fftfilt(0.0, (m_config.m_rfBandwidth / 2.0) / m_config.m_outputSampleRate, udpBlockSize);
 
 	m_phaseDiscri.setFMScaling((float) m_config. m_outputSampleRate / (2.0f * m_config.m_fmDeviation));
@@ -96,6 +104,9 @@ UDPSrc::~UDPSrc()
 	delete[] m_udpAudioBuf;
 	if (UDPFilter) delete UDPFilter;
 	if (m_running.m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 /** what needs the "apply" button validation */
@@ -363,6 +374,16 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
         return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
+    }
 	else if (MsgUDPSrcConfigureImmediate::match(cmd))
 	{
 		MsgUDPSrcConfigureImmediate& cfg = (MsgUDPSrcConfigureImmediate&) cmd;

@@ -29,8 +29,6 @@
 
 class PluginAPI;
 class DeviceSourceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class UDPSrc;
 class SpectrumVis;
 
@@ -103,8 +101,6 @@ private:
 	MessageQueue m_inputMessageQueue;
 
 	// RF path
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 
 	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);

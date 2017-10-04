@@ -18,8 +18,6 @@
 #include "udpsrcgui.h"
 
 #include "device/devicesourceapi.h"
-#include "dsp/downchannelizer.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
@@ -273,9 +271,6 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_udpSrc = new UDPSrc(m_deviceAPI);
 	m_udpSrc->setSpectrum(m_spectrumVis);
-	m_channelizer = new DownChannelizer(m_udpSrc);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	ui->fmDeviation->setEnabled(false);
 
@@ -293,7 +288,6 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("UDP Sample Source");
@@ -319,12 +313,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 UDPSrcGUI::~UDPSrcGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_udpSrc;
 	delete m_spectrumVis;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -402,9 +392,9 @@ void UDPSrcGUI::applySettings(bool force)
 		connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 		ui->glSpectrum->setSampleRate(outputSampleRate);
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			outputSampleRate,
-			m_channelMarker.getCenterFrequency());
+        UDPSrc::MsgConfigureChannelizer* channelConfigMsg = UDPSrc::MsgConfigureChannelizer::create(
+                outputSampleRate, m_channelMarker.getCenterFrequency());
+        m_udpSrc->getInputMessageQueue()->push(channelConfigMsg);
 
 		UDPSrc::SampleFormat sampleFormat;
 
