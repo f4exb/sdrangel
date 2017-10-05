@@ -395,11 +395,24 @@ void UDPSrcGUI::displaySettings()
             break;
     }
 
-    ui->gain->setValue(m_settings.m_gain*10.0);
-    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
+
+    ui->squelchGate->setValue(m_settings.m_squelchGate*100.0);
+    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
+
+    ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
+    ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
+
+    ui->agc->setChecked(m_settings.m_agc);
+    ui->audioActive->setChecked(m_settings.m_audioActive);
+    ui->audioStereo->setChecked(m_settings.m_audioStereo);
 
     ui->volume->setValue(m_settings.m_volume);
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
+
+    ui->gain->setValue(m_settings.m_gain*10.0);
+    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
 
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
