@@ -43,7 +43,7 @@ void UDPSrcSettings::resetToDefaults()
     m_audioActive = false;
     m_audioStereo = false;
     m_volume = 20;
-    m_udpAddressStr = "127.0.0.1";
+    m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_audioPort = 9998;
 }

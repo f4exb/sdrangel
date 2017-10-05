@@ -54,8 +54,9 @@ struct UDPSrcSettings
     bool m_audioActive;
     bool m_audioStereo;
     int m_volume;
+    quint32 m_rgbColor;
 
-    QString m_udpAddressStr;
+    QString m_udpAddress;
     uint16_t m_udpPort;
     uint16_t m_audioPort;
 

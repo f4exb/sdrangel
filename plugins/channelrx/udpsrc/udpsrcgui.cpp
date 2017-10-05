@@ -65,150 +65,167 @@ QString UDPSrcGUI::getName() const
 
 void UDPSrcGUI::resetToDefaults()
 {
-	blockApplySettings(true);
+    m_settings.resetToDefaults();
+    displaySettings();
+    applySettingsImmediate(true);
+    applySettings(true);
 
-	ui->sampleFormat->setCurrentIndex(0);
-	ui->sampleRate->setText("48000");
-	ui->rfBandwidth->setText("32000");
-	ui->fmDeviation->setText("2500");
-	ui->spectrumGUI->resetToDefaults();
-	ui->gain->setValue(10);
-	ui->volume->setValue(20);
-	ui->audioActive->setChecked(false);
-	ui->audioStereo->setChecked(false);
-    ui->agc->setChecked(false);
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
-    m_channelMarker.setUDPReceivePort(9998);
-
-	blockApplySettings(false);
-	applySettingsImmediate();
-	applySettings();
+//	blockApplySettings(true);
+//
+//	ui->sampleFormat->setCurrentIndex(0);
+//	ui->sampleRate->setText("48000");
+//	ui->rfBandwidth->setText("32000");
+//	ui->fmDeviation->setText("2500");
+//	ui->spectrumGUI->resetToDefaults();
+//	ui->gain->setValue(10);
+//	ui->volume->setValue(20);
+//	ui->audioActive->setChecked(false);
+//	ui->audioStereo->setChecked(false);
+//    ui->agc->setChecked(false);
+//    m_channelMarker.setUDPAddress("127.0.0.1");
+//    m_channelMarker.setUDPSendPort(9999);
+//    m_channelMarker.setUDPReceivePort(9998);
+//
+//	blockApplySettings(false);
+//	applySettingsImmediate();
+//	applySettings();
 }
 
 QByteArray UDPSrcGUI::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(2, m_channelMarker.getCenterFrequency());
-	s.writeS32(3, m_sampleFormat);
-	s.writeReal(4, m_outputSampleRate);
-	s.writeReal(5, m_rfBandwidth);
-	s.writeBlob(6, m_channelMarker.serialize());
-	s.writeBlob(7, ui->spectrumGUI->serialize());
-	s.writeS32(8, ui->gain->value());
-	s.writeBool(11, m_audioActive);
-	s.writeS32(12, (qint32)m_volume);
-	s.writeBool(14, m_audioStereo);
-	s.writeS32(15, m_fmDeviation);
-	s.writeS32(16, ui->squelch->value());
-	s.writeS32(17, ui->squelchGate->value());
-    s.writeBool(18, ui->agc->isChecked());
-	return s.final();
+    return m_settings.serialize();
+//	SimpleSerializer s(1);
+//	s.writeS32(2, m_channelMarker.getCenterFrequency());
+//	s.writeS32(3, m_sampleFormat);
+//	s.writeReal(4, m_outputSampleRate);
+//	s.writeReal(5, m_rfBandwidth);
+//	s.writeBlob(6, m_channelMarker.serialize());
+//	s.writeBlob(7, ui->spectrumGUI->serialize());
+//	s.writeS32(8, ui->gain->value());
+//	s.writeBool(11, m_audioActive);
+//	s.writeS32(12, (qint32)m_volume);
+//	s.writeBool(14, m_audioStereo);
+//	s.writeS32(15, m_fmDeviation);
+//	s.writeS32(16, ui->squelch->value());
+//	s.writeS32(17, ui->squelchGate->value());
+//    s.writeBool(18, ui->agc->isChecked());
+//	return s.final();
 }
 
 bool UDPSrcGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
+    if(m_settings.deserialize(data))
+    {
+        displaySettings();
+        applySettingsImmediate(true);
+        applySettings(true);
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 
-	if (!d.isValid())
-	{
-		resetToDefaults();
-		return false;
-	}
-
-	if (d.getVersion() == 1)
-	{
-		QByteArray bytetmp;
-		QString strtmp;
-		qint32 s32tmp;
-		Real realtmp;
-		bool booltmp;
-
-		blockApplySettings(true);
-		m_channelMarker.blockSignals(true);
-
-        d.readBlob(6, &bytetmp);
-        m_channelMarker.deserialize(bytetmp);
-
-		d.readS32(2, &s32tmp, 0);
-		m_channelMarker.setCenterFrequency(s32tmp);
-		d.readS32(3, &s32tmp, UDPSrcSettings::FormatS16LE);
-		switch(s32tmp) {
-			case UDPSrcSettings::FormatS16LE:
-				ui->sampleFormat->setCurrentIndex(0);
-				break;
-			case UDPSrcSettings::FormatNFM:
-				ui->sampleFormat->setCurrentIndex(1);
-				break;
-			case UDPSrcSettings::FormatNFMMono:
-				ui->sampleFormat->setCurrentIndex(2);
-				break;
-			case UDPSrcSettings::FormatLSB:
-				ui->sampleFormat->setCurrentIndex(3);
-				break;
-			case UDPSrcSettings::FormatUSB:
-				ui->sampleFormat->setCurrentIndex(4);
-				break;
-			case UDPSrcSettings::FormatLSBMono:
-				ui->sampleFormat->setCurrentIndex(5);
-				break;
-			case UDPSrcSettings::FormatUSBMono:
-				ui->sampleFormat->setCurrentIndex(6);
-				break;
-			case UDPSrcSettings::FormatAMMono:
-				ui->sampleFormat->setCurrentIndex(7);
-				break;
-            case UDPSrcSettings::FormatAMNoDCMono:
-                ui->sampleFormat->setCurrentIndex(8);
-                break;
-            case UDPSrcSettings::FormatAMBPFMono:
-                ui->sampleFormat->setCurrentIndex(9);
-                break;
-			default:
-				ui->sampleFormat->setCurrentIndex(0);
-				break;
-		}
-		d.readReal(4, &realtmp, 48000);
-		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
-		d.readReal(5, &realtmp, 32000);
-		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
-		d.readBlob(7, &bytetmp);
-		ui->spectrumGUI->deserialize(bytetmp);
-        d.readS32(8, &s32tmp, 10);
-        ui->gain->setValue(s32tmp);
-        ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
-		d.readBool(11, &booltmp, false);
-		ui->audioActive->setChecked(booltmp);
-		d.readS32(12, &s32tmp, 20);
-		ui->volume->setValue(s32tmp);
-		ui->volumeText->setText(QString("%1").arg(s32tmp));
-		d.readBool(14, &booltmp, false);
-		ui->audioStereo->setChecked(booltmp);
-		d.readS32(15, &s32tmp, 2500);
-		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
-        d.readS32(16, &s32tmp, -60);
-        ui->squelch->setValue(s32tmp);
-        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
-        d.readS32(17, &s32tmp, 5);
-        ui->squelchGate->setValue(s32tmp);
-        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
-        d.readBool(18, &booltmp, false);
-        ui->agc->setChecked(booltmp);
-
-        blockApplySettings(false);
-		m_channelMarker.blockSignals(false);
-
-		this->setWindowTitle(m_channelMarker.getTitle());
-		displaySettings();
-		applySettingsImmediate(true);
-		applySettings(true);
-		return true;
-	}
-	else
-	{
-		resetToDefaults();
-		return false;
-	}
+//	SimpleDeserializer d(data);
+//
+//	if (!d.isValid())
+//	{
+//		resetToDefaults();
+//		return false;
+//	}
+//
+//	if (d.getVersion() == 1)
+//	{
+//		QByteArray bytetmp;
+//		QString strtmp;
+//		qint32 s32tmp;
+//		Real realtmp;
+//		bool booltmp;
+//
+//		blockApplySettings(true);
+//		m_channelMarker.blockSignals(true);
+//
+//        d.readBlob(6, &bytetmp);
+//        m_channelMarker.deserialize(bytetmp);
+//
+//		d.readS32(2, &s32tmp, 0);
+//		m_channelMarker.setCenterFrequency(s32tmp);
+//		d.readS32(3, &s32tmp, UDPSrcSettings::FormatS16LE);
+//		switch(s32tmp) {
+//			case UDPSrcSettings::FormatS16LE:
+//				ui->sampleFormat->setCurrentIndex(0);
+//				break;
+//			case UDPSrcSettings::FormatNFM:
+//				ui->sampleFormat->setCurrentIndex(1);
+//				break;
+//			case UDPSrcSettings::FormatNFMMono:
+//				ui->sampleFormat->setCurrentIndex(2);
+//				break;
+//			case UDPSrcSettings::FormatLSB:
+//				ui->sampleFormat->setCurrentIndex(3);
+//				break;
+//			case UDPSrcSettings::FormatUSB:
+//				ui->sampleFormat->setCurrentIndex(4);
+//				break;
+//			case UDPSrcSettings::FormatLSBMono:
+//				ui->sampleFormat->setCurrentIndex(5);
+//				break;
+//			case UDPSrcSettings::FormatUSBMono:
+//				ui->sampleFormat->setCurrentIndex(6);
+//				break;
+//			case UDPSrcSettings::FormatAMMono:
+//				ui->sampleFormat->setCurrentIndex(7);
+//				break;
+//            case UDPSrcSettings::FormatAMNoDCMono:
+//                ui->sampleFormat->setCurrentIndex(8);
+//                break;
+//            case UDPSrcSettings::FormatAMBPFMono:
+//                ui->sampleFormat->setCurrentIndex(9);
+//                break;
+//			default:
+//				ui->sampleFormat->setCurrentIndex(0);
+//				break;
+//		}
+//		d.readReal(4, &realtmp, 48000);
+//		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
+//		d.readReal(5, &realtmp, 32000);
+//		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
+//		d.readBlob(7, &bytetmp);
+//		ui->spectrumGUI->deserialize(bytetmp);
+//        d.readS32(8, &s32tmp, 10);
+//        ui->gain->setValue(s32tmp);
+//        ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
+//		d.readBool(11, &booltmp, false);
+//		ui->audioActive->setChecked(booltmp);
+//		d.readS32(12, &s32tmp, 20);
+//		ui->volume->setValue(s32tmp);
+//		ui->volumeText->setText(QString("%1").arg(s32tmp));
+//		d.readBool(14, &booltmp, false);
+//		ui->audioStereo->setChecked(booltmp);
+//		d.readS32(15, &s32tmp, 2500);
+//		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
+//        d.readS32(16, &s32tmp, -60);
+//        ui->squelch->setValue(s32tmp);
+//        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
+//        d.readS32(17, &s32tmp, 5);
+//        ui->squelchGate->setValue(s32tmp);
+//        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
+//        d.readBool(18, &booltmp, false);
+//        ui->agc->setChecked(booltmp);
+//
+//        blockApplySettings(false);
+//		m_channelMarker.blockSignals(false);
+//
+//		this->setWindowTitle(m_channelMarker.getTitle());
+//		displaySettings();
+//		applySettingsImmediate(true);
+//		applySettings(true);
+//		return true;
+//	}
+//	else
+//	{
+//		resetToDefaults();
+//		return false;
+//	}
 }
 
 bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -220,8 +237,12 @@ bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
 void UDPSrcGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
-    displaySettings();
-	applySettings();
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
+    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    displayUDPAddress();
+    applySettings();
 }
 
 void UDPSrcGUI::tick()
@@ -325,10 +346,72 @@ void UDPSrcGUI::blockApplySettings(bool block)
 
 void UDPSrcGUI::displaySettings()
 {
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
+    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+
+    ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));
+
+    switch(m_settings.m_sampleFormat)
+    {
+        case UDPSrcSettings::FormatS16LE:
+            ui->sampleFormat->setCurrentIndex(0);
+            break;
+        case UDPSrcSettings::FormatNFM:
+            ui->sampleFormat->setCurrentIndex(1);
+            break;
+        case UDPSrcSettings::FormatNFMMono:
+            ui->sampleFormat->setCurrentIndex(2);
+            break;
+        case UDPSrcSettings::FormatLSB:
+            ui->sampleFormat->setCurrentIndex(3);
+            break;
+        case UDPSrcSettings::FormatUSB:
+            ui->sampleFormat->setCurrentIndex(4);
+            break;
+        case UDPSrcSettings::FormatLSBMono:
+            ui->sampleFormat->setCurrentIndex(5);
+            break;
+        case UDPSrcSettings::FormatUSBMono:
+            ui->sampleFormat->setCurrentIndex(6);
+            break;
+        case UDPSrcSettings::FormatAMMono:
+            ui->sampleFormat->setCurrentIndex(7);
+            break;
+        case UDPSrcSettings::FormatAMNoDCMono:
+            ui->sampleFormat->setCurrentIndex(8);
+            break;
+        case UDPSrcSettings::FormatAMBPFMono:
+            ui->sampleFormat->setCurrentIndex(9);
+            break;
+        default:
+            ui->sampleFormat->setCurrentIndex(0);
+            break;
+    }
+
+    ui->gain->setValue(m_settings.m_gain*10.0);
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
+
+    ui->volume->setValue(m_settings.m_volume);
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
+
+    ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
+
+    ui->squelchGate->setValue(m_settings.m_squelchGate*100.0);
     ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
+
+    displayUDPAddress();
+}
+
+void UDPSrcGUI::displayUDPAddress()
+{
     ui->addressText->setText(tr("%1:%2/%3").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()).arg(m_channelMarker.getUDPReceivePort()));
 }
 

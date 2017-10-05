@@ -112,6 +112,7 @@ private:
 	void applySettings(bool force = false);
 	void applySettingsImmediate(bool force = false);
 	void displaySettings();
+	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
