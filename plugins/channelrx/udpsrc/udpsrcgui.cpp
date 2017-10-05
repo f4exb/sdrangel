@@ -309,11 +309,12 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("UDP Sample Source");
-	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setUDPAddress("127.0.0.1");
 	m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.setUDPReceivePort(9998);
 	m_channelMarker.setVisible(true);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_channelMarker.getColor());
 
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setSpectrumGUI(ui->spectrumGUI);

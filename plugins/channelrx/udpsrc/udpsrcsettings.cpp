@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -46,6 +48,7 @@ void UDPSrcSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_audioPort = 9998;
+    m_rgbColor = QColor(225, 25, 99).rgb();
 }
 
 QByteArray UDPSrcSettings::serialize() const
@@ -65,6 +68,7 @@ QByteArray UDPSrcSettings::serialize() const
     }
 
     s.writeS32(8, m_gain*10.0);
+    s.writeU32(9, m_rgbColor);
     s.writeBool(11, m_audioActive);
     s.writeS32(12, m_volume);
     s.writeBool(14, m_audioStereo);
@@ -118,6 +122,7 @@ bool UDPSrcSettings::deserialize(const QByteArray& data)
 
         d.readS32(8, &s32tmp, 10);
         m_gain = s32tmp / 10.0;
+        d.readU32(9, &m_rgbColor);
         d.readBool(11, &m_audioActive, false);
         d.readS32(12, &m_volume, 20);
         d.readBool(14, &m_audioStereo, false);
