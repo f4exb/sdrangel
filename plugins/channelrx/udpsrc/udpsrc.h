@@ -32,6 +32,7 @@
 #include "util/message.h"
 #include "audio/audiofifo.h"
 
+#include "udpsrcsettings.h"
 
 class QUdpSocket;
 class DeviceSourceAPI;
@@ -65,26 +66,26 @@ public:
         { }
     };
 
-	enum SampleFormat {
-		FormatS16LE,
-		FormatNFM,
-		FormatNFMMono,
-		FormatLSB,
-		FormatUSB,
-		FormatLSBMono,
-		FormatUSBMono,
-		FormatAMMono,
-		FormatAMNoDCMono,
-		FormatAMBPFMono,
-		FormatNone
-	};
+//	enum SampleFormat {
+//		FormatS16LE,
+//		FormatNFM,
+//		FormatNFMMono,
+//		FormatLSB,
+//		FormatUSB,
+//		FormatLSBMono,
+//		FormatUSBMono,
+//		FormatAMMono,
+//		FormatAMNoDCMono,
+//		FormatAMBPFMono,
+//		FormatNone
+//	};
 
 	UDPSrc(DeviceSourceAPI *deviceAPI);
 	virtual ~UDPSrc();
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
 	void configure(MessageQueue* messageQueue,
-			SampleFormat sampleFormat,
+			UDPSrcSettings::SampleFormat sampleFormat,
 			Real outputSampleRate,
 			Real rfBandwidth,
 			int fmDeviation,
@@ -122,7 +123,7 @@ protected:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		SampleFormat getSampleFormat() const { return m_sampleFormat; }
+		UDPSrcSettings::SampleFormat getSampleFormat() const { return m_sampleFormat; }
 		Real getOutputSampleRate() const { return m_outputSampleRate; }
 		Real getRFBandwidth() const { return m_rfBandwidth; }
 		int getFMDeviation() const { return m_fmDeviation; }
@@ -131,7 +132,7 @@ protected:
 		int getAudioPort() const { return m_audioPort; }
 		bool getForce() const { return m_force; }
 
-		static MsgUDPSrcConfigure* create(SampleFormat
+		static MsgUDPSrcConfigure* create(UDPSrcSettings::SampleFormat
 				sampleFormat,
 				Real sampleRate,
 				Real rfBandwidth,
@@ -152,7 +153,7 @@ protected:
 		}
 
 	private:
-		SampleFormat m_sampleFormat;
+		UDPSrcSettings::SampleFormat m_sampleFormat;
 		Real m_outputSampleRate;
 		Real m_rfBandwidth;
 		int m_fmDeviation;
@@ -161,7 +162,7 @@ protected:
 		int m_audioPort;
 		bool m_force;
 
-		MsgUDPSrcConfigure(SampleFormat sampleFormat,
+		MsgUDPSrcConfigure(UDPSrcSettings::SampleFormat sampleFormat,
 				Real outputSampleRate,
 				Real rfBandwidth,
 				int fmDeviation,
@@ -274,7 +275,7 @@ protected:
 
     struct Config {
         Real m_outputSampleRate;
-        SampleFormat m_sampleFormat;
+        UDPSrcSettings::SampleFormat m_sampleFormat;
         Real m_inputSampleRate;
         qint64 m_inputFrequencyOffset;
         Real m_rfBandwidth;
@@ -295,7 +296,7 @@ protected:
 
         Config() :
             m_outputSampleRate(48000),
-            m_sampleFormat(FormatS16LE),
+            m_sampleFormat(UDPSrcSettings::FormatS16LE),
             m_inputSampleRate(48000),
             m_inputFrequencyOffset(0),
             m_rfBandwidth(12500),

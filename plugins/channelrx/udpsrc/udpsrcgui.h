@@ -26,6 +26,7 @@
 #include "util/messagequeue.h"
 
 #include "udpsrc.h"
+#include "udpsrcsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -83,13 +84,14 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	UDPSrc* m_udpSrc;
+	UDPSrcSettings m_settings;
 	ChannelMarker m_channelMarker;
 	MovingAverage<double> m_channelPowerAvg;
     MovingAverage<double> m_inPowerAvg;
 	uint32_t m_tickCount;
 
 	// settings
-	UDPSrc::SampleFormat m_sampleFormat;
+	UDPSrcSettings::SampleFormat m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_fmDeviation;

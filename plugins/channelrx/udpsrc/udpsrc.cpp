@@ -111,7 +111,7 @@ UDPSrc::~UDPSrc()
 
 /** what needs the "apply" button validation */
 void UDPSrc::configure(MessageQueue* messageQueue,
-		SampleFormat sampleFormat,
+        UDPSrcSettings::SampleFormat sampleFormat,
 		Real outputSampleRate,
 		Real rfBandwidth,
 		int fmDeviation,
@@ -182,9 +182,9 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		    double agcFactor = 1.0;
 
             if ((m_running.m_agc) &&
-                (m_running.m_sampleFormat != FormatNFM) &&
-                (m_running.m_sampleFormat != FormatNFMMono) &&
-                (m_running.m_sampleFormat != FormatS16LE))
+                (m_running.m_sampleFormat != UDPSrcSettings::FormatNFM) &&
+                (m_running.m_sampleFormat != UDPSrcSettings::FormatNFMMono) &&
+                (m_running.m_sampleFormat != UDPSrcSettings::FormatS16LE))
             {
                 agcFactor = m_agc.feedAndGetValue(ci);
                 inMagSq = m_agc.getMagSq();
@@ -204,7 +204,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 			calculateSquelch(m_inMagsq);
 
-			if (m_running.m_sampleFormat == FormatLSB) // binaural LSB
+			if (m_running.m_sampleFormat == UDPSrcSettings::FormatLSB) // binaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -220,7 +220,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			if (m_running.m_sampleFormat == FormatUSB) // binaural USB
+			if (m_running.m_sampleFormat == UDPSrcSettings::FormatUSB) // binaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -236,19 +236,19 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == FormatNFM)
+			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatNFM)
 			{
 				double demod = m_squelchOpen ? 32768.0 * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_gain : 0;
 				m_udpBuffer->write(Sample(demod, demod));
 				m_outMovingAverage.feed((demod * demod) / (1<<30));
 			}
-			else if (m_running.m_sampleFormat == FormatNFMMono)
+			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
 			{
 				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_gain) : 0;
 				m_udpBufferMono->write(demod);
 				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
-			else if (m_running.m_sampleFormat == FormatLSBMono) // Monaural LSB
+			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -263,7 +263,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == FormatUSBMono) // Monaural USB
+			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatUSBMono) // Monaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -278,13 +278,13 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == FormatAMMono)
+			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMMono)
 			{
 				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * agcFactor * m_running.m_gain) : 0;
 				m_udpBufferMono->write(demod);
 				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
-            else if (m_running.m_sampleFormat == FormatAMNoDCMono)
+            else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMNoDCMono)
             {
                 if (m_squelchOpen)
                 {
@@ -300,7 +300,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     m_outMovingAverage.feed(0);
                 }
             }
-            else if (m_running.m_sampleFormat == FormatAMBPFMono)
+            else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMBPFMono)
             {
                 if (m_squelchOpen)
                 {
@@ -471,10 +471,10 @@ void UDPSrc::apply(bool force)
         m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
 
-        if ((m_config.m_sampleFormat == FormatLSB) ||
-            (m_config.m_sampleFormat == FormatLSBMono) ||
-            (m_config.m_sampleFormat == FormatUSB) ||
-            (m_config.m_sampleFormat == FormatUSBMono))
+        if ((m_config.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
         {
             m_squelchGate = m_config.m_outputSampleRate * 0.05;
         }
@@ -511,10 +511,10 @@ void UDPSrc::apply(bool force)
 
     if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
     {
-        if ((m_config.m_sampleFormat == FormatLSB) ||
-            (m_config.m_sampleFormat == FormatLSBMono) ||
-            (m_config.m_sampleFormat == FormatUSB) ||
-            (m_config.m_sampleFormat == FormatUSBMono))
+        if ((m_config.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
+            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
         {
             m_squelchGate = m_config.m_outputSampleRate * 0.05;
         }
