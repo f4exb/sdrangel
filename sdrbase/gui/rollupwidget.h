@@ -20,6 +20,7 @@ protected:
 	};
 
 	QColor m_titleColor;
+	QColor m_titleTextColor;
 
 	int arrangeRollups();
 

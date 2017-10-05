@@ -14,7 +14,9 @@ RollupWidget::RollupWidget(QWidget* parent) :
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
 
+	// Vorgaben aus der Palette
 	m_titleColor = palette().highlight().color();
+	m_titleTextColor = palette().highlightedText().color();
 }
 
 QByteArray RollupWidget::saveState(int version) const
@@ -92,6 +94,8 @@ bool RollupWidget::restoreState(const QByteArray& state, int version)
 void RollupWidget::setTitleColor(const QColor& c)
 {
 	m_titleColor = c;
+	float l = 0.2126*c.redF() + 0.7152*c.greenF() + 0.0722*c.blueF();
+	m_titleTextColor = l < 0.5f ? Qt::white : Qt::black;
 	update();
 }
 
@@ -187,7 +191,8 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	p.drawLine(r.bottomLeft() + QPointF(1, -1), r.topRight() + QPointF(-1, 1));
 
 	// Titel
-	p.setPen(palette().highlightedText().color());
+	//p.setPen(palette().highlightedText().color());
+	p.setPen(m_titleTextColor);
 	p.drawText(QRect(2 + fm.height(), 2, width() - 4 - 2 * fm.height(), fm.height()),
 		fm.elidedText(windowTitle(), Qt::ElideMiddle, width() - 4 - 2 * fm.height(), 0));
 
