@@ -397,21 +397,21 @@ bool UDPSrc::handleMessage(const Message& cmd)
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 
-        m_config.m_audioActive = m_settings.m_audioActive;
-        m_config.m_audioStereo = m_settings.m_audioStereo;
-        m_config.m_gain = m_settings.m_gain;
-        m_config.m_volume = m_settings.m_volume;
-        m_config.m_squelch = CalcDb::powerFromdB((double) m_settings.m_squelchdB);
-        m_config.m_squelchGate = m_settings.m_squelchGate;
-        m_config.m_squelchEnabled = m_settings.m_squelchEnabled;
-        m_config.m_agc = m_settings.m_agc;
-        m_config.m_sampleFormat = m_settings.m_sampleFormat;
-        m_config.m_outputSampleRate = m_settings.m_outputSampleRate;
-        m_config.m_rfBandwidth = m_settings.m_rfBandwidth;
-        m_config.m_udpAddressStr = m_settings.m_udpAddress;
-        m_config.m_udpPort = m_settings.m_udpPort;
-        m_config.m_audioPort = m_settings.m_audioPort;
-        m_config.m_fmDeviation = m_settings.m_fmDeviation;
+        m_config.m_audioActive = settings.m_audioActive;
+        m_config.m_audioStereo = settings.m_audioStereo;
+        m_config.m_gain = settings.m_gain;
+        m_config.m_volume = settings.m_volume;
+        m_config.m_squelch = CalcDb::powerFromdB((double) settings.m_squelchdB);
+        m_config.m_squelchGate = settings.m_squelchGate;
+        m_config.m_squelchEnabled = settings.m_squelchEnabled;
+        m_config.m_agc = settings.m_agc;
+        m_config.m_sampleFormat = settings.m_sampleFormat;
+        m_config.m_outputSampleRate = settings.m_outputSampleRate;
+        m_config.m_rfBandwidth = settings.m_rfBandwidth;
+        m_config.m_udpAddressStr = settings.m_udpAddress;
+        m_config.m_udpPort = settings.m_udpPort;
+        m_config.m_audioPort = settings.m_audioPort;
+        m_config.m_fmDeviation = settings.m_fmDeviation;
 
         apply(cfg.getForce());
 
@@ -421,9 +421,10 @@ bool UDPSrc::handleMessage(const Message& cmd)
                 << " m_audioActive: " << m_config.m_audioActive
                 << " m_audioStereo: " << m_config.m_audioStereo
                 << " m_gain: " << m_config.m_gain
+                << " m_volume: " << m_config.m_volume
                 << " m_squelchEnabled: " << m_config.m_squelchEnabled
                 << " m_squelch: " << m_config.m_squelch
-                << " getSquelchDB: " << m_settings.m_squelchdB
+                << " getSquelchDB: " << settings.m_squelchdB
                 << " m_squelchGate" << m_config.m_squelchGate
                 << " m_agc" << m_config.m_agc
                 << " m_sampleFormat: " << m_config.m_sampleFormat
@@ -434,6 +435,8 @@ bool UDPSrc::handleMessage(const Message& cmd)
                 << " m_udpPort: " << m_config.m_udpPort
                 << " m_audioPort: " << m_config.m_audioPort
                 << " force: " << cfg.getForce();
+
+        m_settings = settings;
 
         return true;
     }

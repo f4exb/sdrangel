@@ -63,7 +63,8 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
-        { }
+        {
+        }
     };
 
     class MsgConfigureChannelizer : public Message {
