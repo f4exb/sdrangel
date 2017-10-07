@@ -43,6 +43,29 @@ class UDPSrc : public BasebandSampleSink {
 	Q_OBJECT
 
 public:
+    class MsgConfigureUDPSrc : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const UDPSrcSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureUDPSrc* create(const UDPSrcSettings& settings, bool force)
+        {
+            return new MsgConfigureUDPSrc(settings, force);
+        }
+
+    private:
+        UDPSrcSettings m_settings;
+        bool m_force;
+
+        MsgConfigureUDPSrc(const UDPSrcSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -66,20 +89,6 @@ public:
         { }
     };
 
-//	enum SampleFormat {
-//		FormatS16LE,
-//		FormatNFM,
-//		FormatNFMMono,
-//		FormatLSB,
-//		FormatUSB,
-//		FormatLSBMono,
-//		FormatUSBMono,
-//		FormatAMMono,
-//		FormatAMNoDCMono,
-//		FormatAMBPFMono,
-//		FormatNone
-//	};
-
 	UDPSrc(DeviceSourceAPI *deviceAPI);
 	virtual ~UDPSrc();
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
@@ -97,9 +106,9 @@ public:
 			bool audioActive,
 			bool audioStereo,
 			Real gain,
-			int volume,
+			int  volume,
 			Real squelchDB,
-			Real squelchGate,
+			int  squelchGate,
 			bool squelchEnabled,
 			bool agc,
 			bool force);
@@ -191,7 +200,7 @@ protected:
 		bool getAudioActive() const { return m_audioActive; }
 		bool getAudioStereo() const { return m_audioStereo; }
 		Real getSquelchDB() const { return m_squelchDB; }
-		Real getSquelchGate() const { return m_squelchGate; }
+		int  getSquelchGate() const { return m_squelchGate; }
 		bool getSquelchEnabled() const { return m_squelchEnabled; }
 		bool getAGC() const { return m_agc; }
 		bool getForce() const { return m_force; }
@@ -199,10 +208,10 @@ protected:
 		static MsgUDPSrcConfigureImmediate* create(
 				bool audioActive,
 				bool audioStereo,
-				int gain,
-				int volume,
+				Real gain,
+				int  volume,
 				Real squelchDB,
-				Real squelchGate,
+				int  squelchGate,
 				bool squelchEnabled,
 				bool agc,
 				bool force)
@@ -225,7 +234,7 @@ protected:
 		bool m_audioActive;
 		bool m_audioStereo;
 		Real m_squelchDB;
-        Real m_squelchGate; // seconds
+        int  m_squelchGate; // 100ths seconds
 		bool m_squelchEnabled;
 		bool m_agc;
 		bool m_force;
@@ -236,7 +245,7 @@ protected:
 				Real gain,
 				int volume,
                 Real squelchDB,
-                Real squelchGate,
+                int  squelchGate,
                 bool squelchEnabled,
                 bool agc,
                 bool force) :
@@ -283,7 +292,7 @@ protected:
         bool m_channelMute;
         Real m_gain;
         Real m_squelch; //!< squared magnitude
-        Real m_squelchGate; //!< seconds
+        int  m_squelchGate; //!< 100ths seconds
         bool m_squelchEnabled;
         bool m_agc;
         bool m_audioActive;
@@ -304,7 +313,7 @@ protected:
             m_channelMute(false),
             m_gain(1.0),
             m_squelch(1e-6),
-            m_squelchGate(0.0),
+            m_squelchGate(5),
             m_squelchEnabled(true),
             m_agc(false),
             m_audioActive(false),
@@ -318,6 +327,7 @@ protected:
 
     Config m_config;
     Config m_running;
+    UDPSrcSettings m_settings;
 
     DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;

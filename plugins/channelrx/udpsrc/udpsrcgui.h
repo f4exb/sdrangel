@@ -63,9 +63,6 @@ private slots:
 	void on_sampleFormat_currentIndexChanged(int index);
 	void on_sampleRate_textEdited(const QString& arg1);
 	void on_rfBandwidth_textEdited(const QString& arg1);
-	void on_udpAddress_textEdited(const QString& arg1);
-	void on_udpPort_textEdited(const QString& arg1);
-	void on_audioPort_textEdited(const QString& arg1);
 	void on_fmDeviation_textEdited(const QString& arg1);
 	void on_audioActive_toggled(bool active);
 	void on_audioStereo_toggled(bool stereo);
@@ -75,7 +72,7 @@ private slots:
 	void on_gain_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
-	void on_squelchGate_valueChanged(int value);
+    void on_squelchGate_valueChanged(int value);
 	void on_agc_toggled(bool agc);
 	void tick();
 
@@ -91,15 +88,8 @@ private:
 	uint32_t m_tickCount;
 
 	// settings
-	UDPSrcSettings::SampleFormat m_sampleFormat;
-	Real m_outputSampleRate;
-	Real m_rfBandwidth;
-	int m_fmDeviation;
-	Real m_gain;
-	bool m_audioActive;
-	bool m_audioStereo;
-	int m_volume;
 	bool m_doApplySettings;
+	bool m_rfBandwidthChanged;
 	MessageQueue m_inputMessageQueue;
 
 	// RF path
@@ -113,6 +103,8 @@ private:
 	void applySettingsImmediate(bool force = false);
 	void displaySettings();
 	void displayUDPAddress();
+	void setSampleFormat(int index);
+	void setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleFormat);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

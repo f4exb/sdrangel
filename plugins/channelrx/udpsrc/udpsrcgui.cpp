@@ -69,53 +69,18 @@ void UDPSrcGUI::resetToDefaults()
     displaySettings();
     applySettingsImmediate(true);
     applySettings(true);
-
-//	blockApplySettings(true);
-//
-//	ui->sampleFormat->setCurrentIndex(0);
-//	ui->sampleRate->setText("48000");
-//	ui->rfBandwidth->setText("32000");
-//	ui->fmDeviation->setText("2500");
-//	ui->spectrumGUI->resetToDefaults();
-//	ui->gain->setValue(10);
-//	ui->volume->setValue(20);
-//	ui->audioActive->setChecked(false);
-//	ui->audioStereo->setChecked(false);
-//    ui->agc->setChecked(false);
-//    m_channelMarker.setUDPAddress("127.0.0.1");
-//    m_channelMarker.setUDPSendPort(9999);
-//    m_channelMarker.setUDPReceivePort(9998);
-//
-//	blockApplySettings(false);
-//	applySettingsImmediate();
-//	applySettings();
 }
 
 QByteArray UDPSrcGUI::serialize() const
 {
     return m_settings.serialize();
-//	SimpleSerializer s(1);
-//	s.writeS32(2, m_channelMarker.getCenterFrequency());
-//	s.writeS32(3, m_sampleFormat);
-//	s.writeReal(4, m_outputSampleRate);
-//	s.writeReal(5, m_rfBandwidth);
-//	s.writeBlob(6, m_channelMarker.serialize());
-//	s.writeBlob(7, ui->spectrumGUI->serialize());
-//	s.writeS32(8, ui->gain->value());
-//	s.writeBool(11, m_audioActive);
-//	s.writeS32(12, (qint32)m_volume);
-//	s.writeBool(14, m_audioStereo);
-//	s.writeS32(15, m_fmDeviation);
-//	s.writeS32(16, ui->squelch->value());
-//	s.writeS32(17, ui->squelchGate->value());
-//    s.writeBool(18, ui->agc->isChecked());
-//	return s.final();
 }
 
 bool UDPSrcGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
+        qDebug("UDPSrcGUI::deserialize: m_squelchGate: %d", m_settings.m_squelchGate);
         displaySettings();
         applySettingsImmediate(true);
         applySettings(true);
@@ -124,108 +89,6 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if (!d.isValid())
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if (d.getVersion() == 1)
-//	{
-//		QByteArray bytetmp;
-//		QString strtmp;
-//		qint32 s32tmp;
-//		Real realtmp;
-//		bool booltmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//        d.readBlob(6, &bytetmp);
-//        m_channelMarker.deserialize(bytetmp);
-//
-//		d.readS32(2, &s32tmp, 0);
-//		m_channelMarker.setCenterFrequency(s32tmp);
-//		d.readS32(3, &s32tmp, UDPSrcSettings::FormatS16LE);
-//		switch(s32tmp) {
-//			case UDPSrcSettings::FormatS16LE:
-//				ui->sampleFormat->setCurrentIndex(0);
-//				break;
-//			case UDPSrcSettings::FormatNFM:
-//				ui->sampleFormat->setCurrentIndex(1);
-//				break;
-//			case UDPSrcSettings::FormatNFMMono:
-//				ui->sampleFormat->setCurrentIndex(2);
-//				break;
-//			case UDPSrcSettings::FormatLSB:
-//				ui->sampleFormat->setCurrentIndex(3);
-//				break;
-//			case UDPSrcSettings::FormatUSB:
-//				ui->sampleFormat->setCurrentIndex(4);
-//				break;
-//			case UDPSrcSettings::FormatLSBMono:
-//				ui->sampleFormat->setCurrentIndex(5);
-//				break;
-//			case UDPSrcSettings::FormatUSBMono:
-//				ui->sampleFormat->setCurrentIndex(6);
-//				break;
-//			case UDPSrcSettings::FormatAMMono:
-//				ui->sampleFormat->setCurrentIndex(7);
-//				break;
-//            case UDPSrcSettings::FormatAMNoDCMono:
-//                ui->sampleFormat->setCurrentIndex(8);
-//                break;
-//            case UDPSrcSettings::FormatAMBPFMono:
-//                ui->sampleFormat->setCurrentIndex(9);
-//                break;
-//			default:
-//				ui->sampleFormat->setCurrentIndex(0);
-//				break;
-//		}
-//		d.readReal(4, &realtmp, 48000);
-//		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
-//		d.readReal(5, &realtmp, 32000);
-//		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
-//		d.readBlob(7, &bytetmp);
-//		ui->spectrumGUI->deserialize(bytetmp);
-//        d.readS32(8, &s32tmp, 10);
-//        ui->gain->setValue(s32tmp);
-//        ui->gainText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
-//		d.readBool(11, &booltmp, false);
-//		ui->audioActive->setChecked(booltmp);
-//		d.readS32(12, &s32tmp, 20);
-//		ui->volume->setValue(s32tmp);
-//		ui->volumeText->setText(QString("%1").arg(s32tmp));
-//		d.readBool(14, &booltmp, false);
-//		ui->audioStereo->setChecked(booltmp);
-//		d.readS32(15, &s32tmp, 2500);
-//		ui->fmDeviation->setText(QString("%1").arg(s32tmp));
-//        d.readS32(16, &s32tmp, -60);
-//        ui->squelch->setValue(s32tmp);
-//        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
-//        d.readS32(17, &s32tmp, 5);
-//        ui->squelchGate->setValue(s32tmp);
-//        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
-//        d.readBool(18, &booltmp, false);
-//        ui->agc->setChecked(booltmp);
-//
-//        blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		this->setWindowTitle(m_channelMarker.getTitle());
-//		displaySettings();
-//		applySettingsImmediate(true);
-//		applySettings(true);
-//		return true;
-//	}
-//	else
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -236,11 +99,13 @@ bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
 
 void UDPSrcGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    //m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    //m_settings.m_rfBandwidth = m_channelMarker.getBandwidth();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    this->setWindowTitle(m_channelMarker.getTitle());
+    setTitleColor(m_settings.m_rgbColor);
     displayUDPAddress();
     applySettings();
 }
@@ -277,9 +142,8 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	m_channelPowerAvg(4, 1e-10),
     m_inPowerAvg(4, 1e-10),
 	m_tickCount(0),
-	m_gain(1.0),
-    m_volume(20),
-    m_doApplySettings(true)
+    m_doApplySettings(true),
+    m_rfBandwidthChanged(false)
 {
 	ui->setupUi(this);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -356,10 +220,42 @@ void UDPSrcGUI::displaySettings()
     m_channelMarker.blockSignals(false);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
     ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));
+    setSampleFormatIndex(m_settings.m_sampleFormat);
 
-    switch(m_settings.m_sampleFormat)
+    ui->squelch->setValue(m_settings.m_squelchdB);
+    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
+
+    qDebug("UDPSrcGUI::deserialize: m_squelchGate: %d", m_settings.m_squelchGate);
+    ui->squelchGate->setValue(m_settings.m_squelchGate);
+    ui->squelchGateText->setText(tr("%1").arg(m_settings.m_squelchGate*10.0, 0, 'f', 0));
+
+    ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
+    ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
+
+    ui->agc->setChecked(m_settings.m_agc);
+    ui->audioActive->setChecked(m_settings.m_audioActive);
+    ui->audioStereo->setChecked(m_settings.m_audioStereo);
+
+    ui->volume->setValue(m_settings.m_volume);
+    ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
+
+    ui->gain->setValue(m_settings.m_gain*10.0);
+    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
+
+    ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
+
+    displayUDPAddress();
+}
+
+void UDPSrcGUI::displayUDPAddress()
+{
+    ui->addressText->setText(tr("%1:%2/%3").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()).arg(m_channelMarker.getUDPReceivePort()));
+}
+
+void UDPSrcGUI::setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleFormat)
+{
+    switch(sampleFormat)
     {
         case UDPSrcSettings::FormatS16LE:
             ui->sampleFormat->setCurrentIndex(0);
@@ -395,168 +291,99 @@ void UDPSrcGUI::displaySettings()
             ui->sampleFormat->setCurrentIndex(0);
             break;
     }
-
-    ui->squelch->setValue(m_settings.m_squelch);
-    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
-
-    ui->squelchGate->setValue(m_settings.m_squelchGate*100.0);
-    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
-
-    ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
-    ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
-
-    ui->agc->setChecked(m_settings.m_agc);
-    ui->audioActive->setChecked(m_settings.m_audioActive);
-    ui->audioStereo->setChecked(m_settings.m_audioStereo);
-
-    ui->volume->setValue(m_settings.m_volume);
-    ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
-
-    ui->gain->setValue(m_settings.m_gain*10.0);
-    ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
-
-    ui->squelch->setValue(m_settings.m_squelch);
-    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
-
-    ui->squelchGate->setValue(m_settings.m_squelchGate*100.0);
-    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
-
-    displayUDPAddress();
 }
 
-void UDPSrcGUI::displayUDPAddress()
+void UDPSrcGUI::setSampleFormat(int index)
 {
-    ui->addressText->setText(tr("%1:%2/%3").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()).arg(m_channelMarker.getUDPReceivePort()));
+    switch(index)
+    {
+        case 0:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatS16LE;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 1:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatNFM;
+            ui->fmDeviation->setEnabled(true);
+            break;
+        case 2:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatNFMMono;
+            ui->fmDeviation->setEnabled(true);
+            break;
+        case 3:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatLSB;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 4:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatUSB;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 5:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatLSBMono;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 6:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatUSBMono;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 7:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatAMMono;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 8:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatAMNoDCMono;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 9:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatAMBPFMono;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        default:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatS16LE;
+            ui->fmDeviation->setEnabled(false);
+            break;
+    }
 }
 
 void UDPSrcGUI::applySettingsImmediate(bool force)
 {
 	if (m_doApplySettings)
 	{
-		m_audioActive = ui->audioActive->isChecked();
-		m_audioStereo = ui->audioStereo->isChecked();
-		m_gain = ui->gain->value() / 10.0;
-		m_volume = ui->volume->value();
+        UDPSrc::MsgConfigureUDPSrc* message = UDPSrc::MsgConfigureUDPSrc::create( m_settings, force);
+        m_udpSrc->getInputMessageQueue()->push(message);
 
-		m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
-			m_audioActive,
-		    m_audioStereo,
-		    m_gain,
-			m_volume,
-			ui->squelch->value() * 1.0f,
-			ui->squelchGate->value() * 0.01f,
-			ui->squelch->value() != -100,
-			ui->agc->isChecked(),
-			force);
+//        m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
+//			m_settings.m_audioActive,
+//		    m_settings.m_audioStereo,
+//		    m_settings.m_gain,
+//			m_settings.m_volume,
+//			m_settings.m_squelch,
+//			m_settings.m_squelchGate,
+//			m_settings.m_squelch != -100,
+//			m_settings.m_agc,
+//			force);
 	}
 }
-
 
 void UDPSrcGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		bool ok;
-
-		Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
-
-		if((!ok) || (outputSampleRate < 1000))
-		{
-			outputSampleRate = 48000;
-		}
-
-		Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
-
-		if((!ok) || (rfBandwidth > outputSampleRate))
-		{
-			rfBandwidth = outputSampleRate;
-		}
-
-		int fmDeviation = ui->fmDeviation->text().toInt(&ok);
-
-		if ((!ok) || (fmDeviation < 1))
-		{
-			fmDeviation = 2500;
-		}
-
-		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-		ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
-		ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-		ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
-		m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
-		m_channelMarker.setBandwidth((int)rfBandwidth);
-		connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-		ui->glSpectrum->setSampleRate(outputSampleRate);
-
         UDPSrc::MsgConfigureChannelizer* channelConfigMsg = UDPSrc::MsgConfigureChannelizer::create(
-                outputSampleRate, m_channelMarker.getCenterFrequency());
+                m_settings.m_outputSampleRate, m_channelMarker.getCenterFrequency());
         m_udpSrc->getInputMessageQueue()->push(channelConfigMsg);
 
-        UDPSrcSettings::SampleFormat sampleFormat;
+        UDPSrc::MsgConfigureUDPSrc* message = UDPSrc::MsgConfigureUDPSrc::create( m_settings, force);
+        m_udpSrc->getInputMessageQueue()->push(message);
 
-		switch(ui->sampleFormat->currentIndex())
-		{
-			case 0:
-				sampleFormat = UDPSrcSettings::FormatS16LE;
-				ui->fmDeviation->setEnabled(false);
-				break;
-			case 1:
-				sampleFormat = UDPSrcSettings::FormatNFM;
-				ui->fmDeviation->setEnabled(true);
-				break;
-			case 2:
-				sampleFormat = UDPSrcSettings::FormatNFMMono;
-				ui->fmDeviation->setEnabled(true);
-				break;
-			case 3:
-				sampleFormat = UDPSrcSettings::FormatLSB;
-				ui->fmDeviation->setEnabled(false);
-				break;
-			case 4:
-				sampleFormat = UDPSrcSettings::FormatUSB;
-				ui->fmDeviation->setEnabled(false);
-				break;
-			case 5:
-				sampleFormat = UDPSrcSettings::FormatLSBMono;
-				ui->fmDeviation->setEnabled(false);
-				break;
-			case 6:
-				sampleFormat = UDPSrcSettings::FormatUSBMono;
-				ui->fmDeviation->setEnabled(false);
-				break;
-			case 7:
-				sampleFormat = UDPSrcSettings::FormatAMMono;
-				ui->fmDeviation->setEnabled(false);
-				break;
-            case 8:
-                sampleFormat = UDPSrcSettings::FormatAMNoDCMono;
-                ui->fmDeviation->setEnabled(false);
-                break;
-            case 9:
-                sampleFormat = UDPSrcSettings::FormatAMBPFMono;
-                ui->fmDeviation->setEnabled(false);
-                break;
-			default:
-				sampleFormat = UDPSrcSettings::FormatS16LE;
-				ui->fmDeviation->setEnabled(false);
-				break;
-		}
-
-		m_sampleFormat = sampleFormat;
-		m_outputSampleRate = outputSampleRate;
-		m_rfBandwidth = rfBandwidth;
-		m_fmDeviation = fmDeviation;
-
-		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
-			sampleFormat,
-			outputSampleRate,
-			rfBandwidth,
-			fmDeviation,
-			m_channelMarker.getUDPAddress(),
-			m_channelMarker.getUDPSendPort(),
-			m_channelMarker.getUDPReceivePort(),
-			force);
+//		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
+//			m_settings.m_sampleFormat,
+//			m_settings.m_outputSampleRate,
+//			m_settings.m_rfBandwidth,
+//			m_settings.m_fmDeviation,
+//			m_channelMarker.getUDPAddress(),
+//			m_channelMarker.getUDPSendPort(),
+//			m_channelMarker.getUDPReceivePort(),
+//			force);
 
 		ui->applyBtn->setEnabled(false);
 		ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
@@ -566,6 +393,8 @@ void UDPSrcGUI::applySettings(bool force)
 void UDPSrcGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
@@ -576,87 +405,131 @@ void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 		ui->fmDeviation->setEnabled(false);
 	}
 
+	setSampleFormat(index);
+
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
+
+    if((!ok) || (outputSampleRate < 1000))
+    {
+        m_settings.m_outputSampleRate = 48000;
+        ui->sampleRate->setText(QString("%1").arg(outputSampleRate, 0));
+    }
+    else
+    {
+        m_settings.m_outputSampleRate = outputSampleRate;
+    }
+
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
+
+    if((!ok) || (rfBandwidth > m_settings.m_outputSampleRate))
+    {
+        m_settings.m_rfBandwidth = m_settings.m_outputSampleRate;
+        ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
+    }
+    else
+    {
+        m_settings.m_rfBandwidth = rfBandwidth;
+    }
+
+    m_rfBandwidthChanged = true;
+
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
 {
-	ui->applyBtn->setEnabled(true);
-	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
+    bool ok;
+    int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 
-void UDPSrcGUI::on_udpAddress_textEdited(const QString& arg1 __attribute__((unused)))
-{
-	ui->applyBtn->setEnabled(true);
-	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
+    if ((!ok) || (fmDeviation < 1))
+    {
+        m_settings.m_fmDeviation = 2500;
+        ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation));
+    }
+    else
+    {
+        m_settings.m_fmDeviation = fmDeviation;
+    }
 
-void UDPSrcGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused)))
-{
-	ui->applyBtn->setEnabled(true);
-	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
-
-void UDPSrcGUI::on_audioPort_textEdited(const QString& arg1 __attribute__((unused)))
-{
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_applyBtn_clicked()
 {
+    if (m_rfBandwidthChanged)
+    {
+        blockApplySettings(true);
+        m_channelMarker.setBandwidth((int) m_settings.m_rfBandwidth);
+        m_rfBandwidthChanged = false;
+        blockApplySettings(false);
+    }
+
+    ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
+
 	applySettings();
 }
 
-void UDPSrcGUI::on_audioActive_toggled(bool active __attribute__((unused)))
+void UDPSrcGUI::on_audioActive_toggled(bool active)
 {
+    m_settings.m_audioActive = active;
 	applySettingsImmediate();
 }
 
-void UDPSrcGUI::on_audioStereo_toggled(bool stereo __attribute__((unused)))
+void UDPSrcGUI::on_audioStereo_toggled(bool stereo)
 {
+    m_settings.m_audioStereo = stereo;
 	applySettingsImmediate();
 }
 
-void UDPSrcGUI::on_agc_toggled(bool agc __attribute__((unused)))
+void UDPSrcGUI::on_agc_toggled(bool agc)
 {
+    m_settings.m_agc = agc;
     applySettingsImmediate();
 }
 
 void UDPSrcGUI::on_gain_valueChanged(int value)
 {
+    m_settings.m_gain = value / 10.0;
 	ui->gainText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
 	applySettingsImmediate();
 }
 
 void UDPSrcGUI::on_volume_valueChanged(int value)
 {
+    m_settings.m_volume = value;
 	ui->volumeText->setText(QString("%1").arg(value));
 	applySettingsImmediate();
 }
 
 void UDPSrcGUI::on_squelch_valueChanged(int value)
 {
+    m_settings.m_squelchdB = value;
+
     if (value == -100) // means disabled
     {
         ui->squelchText->setText("---");
+        m_settings.m_squelchEnabled = false;
     }
     else
     {
         ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
+        m_settings.m_squelchEnabled = true;
     }
 
     applySettingsImmediate();
@@ -664,6 +537,7 @@ void UDPSrcGUI::on_squelch_valueChanged(int value)
 
 void UDPSrcGUI::on_squelchGate_valueChanged(int value)
 {
+    m_settings.m_squelchGate = value;
     ui->squelchGateText->setText(tr("%1").arg(value*10.0, 0, 'f', 0));
     applySettingsImmediate();
 }

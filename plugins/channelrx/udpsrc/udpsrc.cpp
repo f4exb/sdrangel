@@ -29,6 +29,7 @@
 
 const Real UDPSrc::m_agcTarget = 16384.0f;
 
+MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureUDPSrc, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
@@ -138,7 +139,7 @@ void UDPSrc::configureImmediate(MessageQueue* messageQueue,
 		Real boost,
 		int  volume,
 		Real squelchDB,
-		Real squelchGate,
+		int  squelchGate,
 		bool squelchEnabled,
 		bool agc,
 		bool force)
@@ -358,8 +359,6 @@ void UDPSrc::stop()
 
 bool UDPSrc::handleMessage(const Message& cmd)
 {
-	qDebug() << "UDPSrc::handleMessage";
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -381,6 +380,60 @@ bool UDPSrc::handleMessage(const Message& cmd)
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
+
+        qDebug() << "UDPSrc::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
+    else if (MsgConfigureUDPSrc::match(cmd))
+    {
+        MsgConfigureUDPSrc& cfg = (MsgConfigureUDPSrc&) cmd;
+
+        UDPSrcSettings settings = cfg.getSettings();
+
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        m_config.m_audioActive = m_settings.m_audioActive;
+        m_config.m_audioStereo = m_settings.m_audioStereo;
+        m_config.m_gain = m_settings.m_gain;
+        m_config.m_volume = m_settings.m_volume;
+        m_config.m_squelch = CalcDb::powerFromdB((double) m_settings.m_squelchdB);
+        m_config.m_squelchGate = m_settings.m_squelchGate;
+        m_config.m_squelchEnabled = m_settings.m_squelchEnabled;
+        m_config.m_agc = m_settings.m_agc;
+        m_config.m_sampleFormat = m_settings.m_sampleFormat;
+        m_config.m_outputSampleRate = m_settings.m_outputSampleRate;
+        m_config.m_rfBandwidth = m_settings.m_rfBandwidth;
+        m_config.m_udpAddressStr = m_settings.m_udpAddress;
+        m_config.m_udpPort = m_settings.m_udpPort;
+        m_config.m_audioPort = m_settings.m_audioPort;
+        m_config.m_fmDeviation = m_settings.m_fmDeviation;
+
+        apply(cfg.getForce());
+
+        qDebug() << "UDPSrc::handleMessage: MsgConfigureUDPSrc: "
+                << " m_inputSampleRate: " << m_config.m_inputSampleRate
+                << " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset
+                << " m_audioActive: " << m_config.m_audioActive
+                << " m_audioStereo: " << m_config.m_audioStereo
+                << " m_gain: " << m_config.m_gain
+                << " m_squelchEnabled: " << m_config.m_squelchEnabled
+                << " m_squelch: " << m_config.m_squelch
+                << " getSquelchDB: " << m_settings.m_squelchdB
+                << " m_squelchGate" << m_config.m_squelchGate
+                << " m_agc" << m_config.m_agc
+                << " m_sampleFormat: " << m_config.m_sampleFormat
+                << " m_outputSampleRate: " << m_config.m_outputSampleRate
+                << " m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_fmDeviation: " << m_config.m_fmDeviation
+                << " m_udpAddressStr: " << m_config.m_udpAddressStr
+                << " m_udpPort: " << m_config.m_udpPort
+                << " m_audioPort: " << m_config.m_audioPort
+                << " force: " << cfg.getForce();
 
         return true;
     }
@@ -407,7 +460,13 @@ bool UDPSrc::handleMessage(const Message& cmd)
                 << " m_squelch: " << m_config.m_squelch
                 << " getSquelchDB: " << cfg.getSquelchDB()
                 << " m_squelchGate" << m_config.m_squelchGate
-                << " m_agc" << m_config.m_agc;
+                << " m_agc" << m_config.m_agc
+                << " m_sampleFormat: " << m_config.m_sampleFormat
+                << " m_outputSampleRate: " << m_config.m_outputSampleRate
+                << " m_rfBandwidth: " << m_config.m_rfBandwidth
+                << " m_udpAddressStr: " << m_config.m_udpAddressStr
+                << " m_udpPort: " << m_config.m_udpPort
+                << " m_audioPort: " << m_config.m_audioPort;
 
 		return true;
 
@@ -426,9 +485,13 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		apply(cfg.getForce());
 
-		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure: m_sampleFormat: " << m_config.m_sampleFormat
+		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure:"
+		        << " m_inputSampleRate: " << m_config.m_inputSampleRate
+		        << " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset
+		        << " m_sampleFormat: " << m_config.m_sampleFormat
 				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
+				<< " m_fmDeviation: " << m_config.m_fmDeviation
 				<< " m_udpAddressStr: " << m_config.m_udpAddressStr
 				<< " m_udpPort: " << m_config.m_udpPort
 				<< " m_audioPort: " << m_config.m_audioPort;
@@ -480,13 +543,14 @@ void UDPSrc::apply(bool force)
         }
         else
         {
-            m_squelchGate = m_config.m_outputSampleRate * m_config.m_squelchGate;
+            m_squelchGate = (m_config.m_outputSampleRate * m_config.m_squelchGate) / 100;
         }
 
-        m_squelchRelease = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        m_squelchRelease = (m_config.m_outputSampleRate * m_config.m_squelchGate) / 100;
         initSquelch(m_squelchOpen);
         m_agc.resize(m_config.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
-        m_agc.setStepDownDelay( m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate));
+        int stepDownDelay =  (m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 1 : m_config.m_squelchGate))/100;
+        m_agc.setStepDownDelay(stepDownDelay);
         m_agc.setGate(m_config.m_outputSampleRate * 0.05);
 
         m_bandpass.create(301, m_config.m_outputSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
@@ -520,12 +584,13 @@ void UDPSrc::apply(bool force)
         }
         else
         {
-            m_squelchGate = m_config.m_outputSampleRate * m_config.m_squelchGate;
+            m_squelchGate = (m_config.m_outputSampleRate * m_config.m_squelchGate)/100;
         }
 
-        m_squelchRelease = m_config.m_outputSampleRate * m_config.m_squelchGate;
+        m_squelchRelease = (m_config.m_outputSampleRate * m_config.m_squelchGate)/100;
         initSquelch(m_squelchOpen);
-        m_agc.setStepDownDelay(m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 0.01 : m_config.m_squelchGate)); // same delay for up and down
+        int stepDownDelay =  (m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 1 : m_config.m_squelchGate))/100;
+        m_agc.setStepDownDelay(stepDownDelay); // same delay for up and down
     }
 
     if ((m_config.m_squelch != m_running.m_squelch) || force)

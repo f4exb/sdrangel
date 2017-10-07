@@ -38,7 +38,7 @@ void UDPSrcSettings::resetToDefaults()
     m_fmDeviation = 2500;
     m_channelMute = false;
     m_gain = 1.0;
-    m_squelch = -60.0;
+    m_squelchdB = -60;
     m_squelchGate = 0.0;
     m_squelchEnabled = true;
     m_agc = false;
@@ -55,7 +55,7 @@ QByteArray UDPSrcSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(2, m_inputFrequencyOffset);
-    s.writeS32(3, m_sampleFormat);
+    s.writeS32(3, (int) m_sampleFormat);
     s.writeReal(4, m_outputSampleRate);
     s.writeReal(5, m_rfBandwidth);
 
@@ -73,8 +73,8 @@ QByteArray UDPSrcSettings::serialize() const
     s.writeS32(12, m_volume);
     s.writeBool(14, m_audioStereo);
     s.writeS32(15, m_fmDeviation);
-    s.writeS32(16, m_squelch);
-    s.writeS32(17, m_squelchGate * 100.0);
+    s.writeS32(16, m_squelchdB);
+    s.writeS32(17, m_squelchGate);
     s.writeBool(18, m_agc);
     return s.final();
 
@@ -127,10 +127,8 @@ bool UDPSrcSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_volume, 20);
         d.readBool(14, &m_audioStereo, false);
         d.readS32(15, &m_fmDeviation, 2500);
-        d.readS32(16, &s32tmp, -60);
-        m_squelch = s32tmp * 1.0;
-        d.readS32(17, &s32tmp, 5);
-        m_squelchGate = s32tmp / 100.0;
+        d.readS32(16, &m_squelchdB, -60);
+        d.readS32(17, &m_squelchGate, 5);
         d.readBool(18, &m_agc, false);
         return true;
     }

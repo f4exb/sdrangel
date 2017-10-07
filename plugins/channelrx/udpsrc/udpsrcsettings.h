@@ -47,8 +47,8 @@ struct UDPSrcSettings
     int m_fmDeviation;
     bool m_channelMute;
     float m_gain;
-    float m_squelch; //!< squared magnitude
-    float m_squelchGate; //!< seconds
+    int  m_squelchdB;  //!< power dB
+    int  m_squelchGate; //!< 100ths seconds
     bool m_squelchEnabled;
     bool m_agc;
     bool m_audioActive;
