@@ -26,7 +26,7 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum) :
+TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, BasebandSampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");
@@ -41,7 +41,6 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampl
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 	m_uiMessageQueue = uiMessageQueue;
-	m_tcpSrcGUI = tcpSrcGUI;
 	m_spectrum = spectrum;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;

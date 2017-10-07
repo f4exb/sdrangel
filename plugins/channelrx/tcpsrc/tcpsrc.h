@@ -69,7 +69,7 @@ public:
         { }
     };
 
-	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum);
+	TCPSrc(MessageQueue* uiMessageQueue, BasebandSampleSink* spectrum);
 	virtual ~TCPSrc();
 
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -150,7 +150,6 @@ protected:
 	};
 
 	MessageQueue* m_uiMessageQueue;
-	TCPSrcGUI* m_tcpSrcGUI;
 
     TCPSrcSettings m_settings;
 
