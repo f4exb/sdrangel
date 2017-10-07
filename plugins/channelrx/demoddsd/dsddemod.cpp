@@ -207,7 +207,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                         DSPEngine::instance()->pushMbeFrame(
                                 m_dsdDecoder.getMbeDVFrame1(),
                                 m_dsdDecoder.getMbeRateIndex(),
-                                m_settings.m_volume,
+                                m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
                                 &m_audioFifo1);
                     }
@@ -222,7 +222,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                         DSPEngine::instance()->pushMbeFrame(
                                 m_dsdDecoder.getMbeDVFrame2(),
                                 m_dsdDecoder.getMbeRateIndex(),
-                                m_settings.m_volume,
+                                m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
                                 &m_audioFifo2);
                     }
