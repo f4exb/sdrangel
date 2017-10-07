@@ -10,12 +10,15 @@ class Serializable;
 struct LoRaDemodSettings
 {
     int m_centerFrequency;
-    int m_bandwidth;
+    int m_bandwidthIndex;
     int m_spread;
     uint32_t m_rgbColor;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+
+    static const int bandwidths[];
+    static const int nb_bandwidths;
 
     LoRaDemodSettings();
     void resetToDefaults();

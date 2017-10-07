@@ -6,7 +6,7 @@
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 
-#define BANDWIDTHSTRING {7813,15625,20833,31250,62500}
+#include "lorademodsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -51,6 +51,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	LoRaDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
@@ -64,7 +65,8 @@ private:
 	virtual ~LoRaDemodGUI();
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
+	void displaySettings();
 };
 
 #endif // INCLUDE_LoRaDEMODGUI_H

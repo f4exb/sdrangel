@@ -7,6 +7,9 @@
 #include "settings/serializable.h"
 #include "lorademodsettings.h"
 
+const int LoRaDemodSettings::bandwidths[] = {7813,15625,20833,31250,62500};
+const int LoRaDemodSettings::nb_bandwidths = 5;
+
 LoRaDemodSettings::LoRaDemodSettings() :
     m_channelMarker(0),
     m_spectrumGUI(0)
@@ -16,7 +19,7 @@ LoRaDemodSettings::LoRaDemodSettings() :
 
 void LoRaDemodSettings::resetToDefaults()
 {
-    m_bandwidth = 0;
+    m_bandwidthIndex = 0;
     m_spread = 0;
 }
 
@@ -24,7 +27,7 @@ QByteArray LoRaDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_centerFrequency);
-    s.writeS32(2, m_bandwidth);
+    s.writeS32(2, m_bandwidthIndex);
     s.writeS32(3, m_spread);
 
     if (m_spectrumGUI) {
@@ -53,7 +56,7 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
 
         d.readS32(1, &m_centerFrequency, 0);
-        d.readS32(2, &m_bandwidth, 0);
+        d.readS32(2, &m_bandwidthIndex, 0);
         d.readS32(3, &m_spread, 0);
 
         if (m_spectrumGUI) {
