@@ -25,10 +25,12 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += lorademod.cpp\
     lorademodgui.cpp\
+    lorademodsettings.cpp\
     loraplugin.cpp
 
 HEADERS += lorademod.h\
     lorademodgui.h\
+    lorademodsettings.h\
     loraplugin.h
 
 FORMS += lorademodgui.ui

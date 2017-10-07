@@ -3,12 +3,14 @@ project(lora)
 set(lora_SOURCES
 	lorademod.cpp
 	lorademodgui.cpp
+	lorademodsettings.cpp
 	loraplugin.cpp
 )
 
 set(lora_HEADERS
 	lorademod.h
 	lorademodgui.h
+	lorademodsettings.h
 	loraplugin.h
 )
 
