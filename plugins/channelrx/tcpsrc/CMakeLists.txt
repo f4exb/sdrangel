@@ -4,12 +4,14 @@ set(tcpsrc_SOURCES
 	tcpsrc.cpp
 	tcpsrcgui.cpp
 	tcpsrcplugin.cpp
+	tcpsrcsettings.cpp
 )
 
 set(tcpsrc_HEADERS
 	tcpsrc.h
 	tcpsrcgui.h
 	tcpsrcplugin.h
+	tcpsrcsettings.h
 )
 
 set(tcpsrc_FORMS

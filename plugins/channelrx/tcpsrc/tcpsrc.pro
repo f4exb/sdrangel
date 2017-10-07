@@ -25,11 +25,13 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += tcpsrc.cpp\
     tcpsrcgui.cpp\
-    tcpsrcplugin.cpp
+    tcpsrcplugin.cpp\
+    tcpsrcsettings.cpp
 
 HEADERS += tcpsrc.h\
     tcpsrcgui.h\
-    tcpsrcplugin.h
+    tcpsrcplugin.h\
+    tcpsrcsettings.h
 
 FORMS += tcpsrcgui.ui
 
