@@ -16,9 +16,13 @@
 
 #include "tcpsrc.h"
 
-#include <dsp/downchannelizer.h>
 #include <QTcpServer>
 #include <QTcpSocket>
+
+#include <dsp/downchannelizer.h>
+#include "dsp/threadedbasebandsamplesink.h"
+#include <device/devicesourceapi.h>
+
 #include "tcpsrcgui.h"
 
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureTCPSrc, Message)
@@ -26,7 +30,8 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-TCPSrc::TCPSrc(BasebandSampleSink* spectrum) :
+TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");
@@ -40,7 +45,7 @@ TCPSrc::TCPSrc(BasebandSampleSink* spectrum) :
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
-	m_spectrum = spectrum;
+	m_spectrum = 0;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
@@ -50,6 +55,11 @@ TCPSrc::TCPSrc(BasebandSampleSink* spectrum) :
 	m_scale = 0;
 	m_volume = 0;
 	m_magsq = 0;
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
 	m_sampleBufferSSB.resize(tcpFftLen);
 	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
 	// if (!TCPFilter) segfault;
@@ -58,6 +68,10 @@ TCPSrc::TCPSrc(BasebandSampleSink* spectrum) :
 TCPSrc::~TCPSrc()
 {
 	if (TCPFilter) delete TCPFilter;
+
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
@@ -172,8 +186,6 @@ void TCPSrc::stop()
 
 bool TCPSrc::handleMessage(const Message& cmd)
 {
-	qDebug() << "TCPSrc::handleMessage";
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -192,6 +204,20 @@ bool TCPSrc::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "TCPSrc::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureTCPSrc::match(cmd))
     {
         MsgConfigureTCPSrc& cfg = (MsgConfigureTCPSrc&) cmd;
@@ -235,7 +261,7 @@ bool TCPSrc::handleMessage(const Message& cmd)
 
         m_settingsMutex.unlock();
 
-        qDebug() << "MsgConfigureTCPSrc::handleMessage: MsgConfigureTCPSrc:"
+        qDebug() << "TCPSrc::handleMessage: MsgConfigureTCPSrc:"
                 << " m_sampleFormat: " << m_sampleFormat
                 << " m_outputSampleRate: " << m_outputSampleRate
                 << " m_rfBandwidth: " << m_rfBandwidth
@@ -251,13 +277,19 @@ bool TCPSrc::handleMessage(const Message& cmd)
 
 		m_spectrumEnabled = spc.getEnabled();
 
-		qDebug() << "  - MsgTCPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+		qDebug() << "TCPSrc::handleMessage: MsgTCPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
 		return true;
 	}
 	else if (MsgTCPSrcConnection::match(cmd))
 	{
 		MsgTCPSrcConnection& con = (MsgTCPSrcConnection&) cmd;
+
+	    qDebug() << "TCPSrc::handleMessage: MsgTCPSrcConnection"
+                << " connect: " << con.getConnect()
+                << " id: " << con.getID()
+                << " peer address: " << con.getPeerAddress()
+                << " peer port: " << con.getPeerPort();
 
 		if (con.getConnect())
 		{

@@ -14,8 +14,6 @@
 
 class PluginAPI;
 class DeviceSourceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class TCPSrc;
 class SpectrumVis;
 
@@ -76,8 +74,6 @@ private:
 	bool m_doApplySettings;
 
 	// RF path
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 

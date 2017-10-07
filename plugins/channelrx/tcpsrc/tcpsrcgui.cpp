@@ -1,8 +1,6 @@
-#include "../../channelrx/tcpsrc/tcpsrcgui.h"
+#include "tcpsrcgui.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/downchannelizer.h>
-#include "../../../sdrbase/dsp/threadedbasebandsamplesink.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
@@ -11,7 +9,7 @@
 #include "gui/basicchannelsettingswidget.h"
 #include "ui_tcpsrcgui.h"
 #include "mainwindow.h"
-#include "../../channelrx/tcpsrc/tcpsrc.h"
+#include "tcpsrc.h"
 
 const QString TCPSrcGUI::m_channelID = "sdrangel.channel.tcpsrc";
 
@@ -142,10 +140,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_tcpSrc = new TCPSrc(m_spectrumVis);
-	m_channelizer = new DownChannelizer(m_tcpSrc);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_tcpSrc = new TCPSrc(m_deviceAPI);
+	m_tcpSrc->setSpectrum(m_spectrumVis);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
 	ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -174,15 +170,15 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
-	applySettings();
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
+    m_settings.setChannelMarker(&m_channelMarker);
+
+    applySettings();
 }
 
 TCPSrcGUI::~TCPSrcGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_tcpSrc;
 	delete m_spectrumVis;
 	delete ui;
@@ -199,9 +195,9 @@ void TCPSrcGUI::applySettings()
 	{
 		ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			m_settings.m_outputSampleRate,
-			m_channelMarker.getCenterFrequency());
+        TCPSrc::MsgConfigureChannelizer* channelConfigMsg = TCPSrc::MsgConfigureChannelizer::create(
+                m_settings.m_outputSampleRate, m_channelMarker.getCenterFrequency());
+        m_tcpSrc->getInputMessageQueue()->push(channelConfigMsg);
 
         TCPSrc::MsgConfigureTCPSrc* message = TCPSrc::MsgConfigureTCPSrc::create( m_settings, false);
         m_tcpSrc->getInputMessageQueue()->push(message);

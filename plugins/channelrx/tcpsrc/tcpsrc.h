@@ -17,6 +17,9 @@
 class QTcpServer;
 class QTcpSocket;
 class TCPSrcGUI;
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 
 class TCPSrc : public BasebandSampleSink {
 	Q_OBJECT
@@ -98,8 +101,9 @@ public:
         { }
     };
 
-	TCPSrc(BasebandSampleSink* spectrum);
+	TCPSrc(DeviceSourceAPI* m_deviceAPI);
 	virtual ~TCPSrc();
+	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
@@ -150,6 +154,9 @@ protected:
 	};
 
     TCPSrcSettings m_settings;
+    DeviceSourceAPI* m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
     int m_inputSampleRate;
 
