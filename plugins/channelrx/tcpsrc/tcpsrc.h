@@ -69,7 +69,36 @@ public:
         { }
     };
 
-	TCPSrc(MessageQueue* uiMessageQueue, BasebandSampleSink* spectrum);
+    class MsgTCPSrcConnection : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getConnect() const { return m_connect; }
+        quint32 getID() const { return m_id; }
+        const QHostAddress& getPeerAddress() const { return m_peerAddress; }
+        int getPeerPort() const { return m_peerPort; }
+
+        static MsgTCPSrcConnection* create(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort)
+        {
+            return new MsgTCPSrcConnection(connect, id, peerAddress, peerPort);
+        }
+
+    private:
+        bool m_connect;
+        quint32 m_id;
+        QHostAddress m_peerAddress;
+        int m_peerPort;
+
+        MsgTCPSrcConnection(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort) :
+            Message(),
+            m_connect(connect),
+            m_id(id),
+            m_peerAddress(peerAddress),
+            m_peerPort(peerPort)
+        { }
+    };
+
+	TCPSrc(BasebandSampleSink* spectrum);
 	virtual ~TCPSrc();
 
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -79,35 +108,6 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
-
-	class MsgTCPSrcConnection : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool getConnect() const { return m_connect; }
-		quint32 getID() const { return m_id; }
-		const QHostAddress& getPeerAddress() const { return m_peerAddress; }
-		int getPeerPort() const { return m_peerPort; }
-
-		static MsgTCPSrcConnection* create(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort)
-		{
-			return new MsgTCPSrcConnection(connect, id, peerAddress, peerPort);
-		}
-
-	private:
-		bool m_connect;
-		quint32 m_id;
-		QHostAddress m_peerAddress;
-		int m_peerPort;
-
-		MsgTCPSrcConnection(bool connect, quint32 id, const QHostAddress& peerAddress, int peerPort) :
-			Message(),
-			m_connect(connect),
-			m_id(id),
-			m_peerAddress(peerAddress),
-			m_peerPort(peerPort)
-		{ }
-	};
 
 protected:
 	class MsgTCPSrcSpectrum : public Message {
@@ -148,8 +148,6 @@ protected:
 			m_connect(connect)
 		{ }
 	};
-
-	MessageQueue* m_uiMessageQueue;
 
     TCPSrcSettings m_settings;
 

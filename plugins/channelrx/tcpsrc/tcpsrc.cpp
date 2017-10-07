@@ -26,7 +26,7 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, BasebandSampleSink* spectrum) :
+TCPSrc::TCPSrc(BasebandSampleSink* spectrum) :
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");
@@ -40,7 +40,6 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, BasebandSampleSink* spectrum) :
 	m_nco.setFreq(0, m_inputSampleRate);
 	m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 	m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
-	m_uiMessageQueue = uiMessageQueue;
 	m_spectrum = spectrum;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
@@ -289,11 +288,15 @@ void TCPSrc::closeAllSockets(Sockets* sockets)
 	for(int i = 0; i < sockets->count(); ++i)
 	{
 		MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(false, sockets->at(i).id, QHostAddress(), 0);
-		m_uiMessageQueue->push(msg);
+		getInputMessageQueue()->push(msg);
+
+		if (getMessageQueueToGUI()) { // Propagate to GUI
+		    getMessageQueueToGUI()->push(msg);
+		}
+
 		sockets->at(i).socket->close();
 	}
 }
-
 
 void TCPSrc::onNewConnection()
 {
@@ -318,10 +321,15 @@ void TCPSrc::processNewConnection()
 			case TCPSrcSettings::FormatSSB:
 			{
 				quint32 id = (TCPSrcSettings::FormatSSB << 24) | m_nextSSBId;
-				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
 				m_ssbSockets.push_back(Socket(id, connection));
-				m_uiMessageQueue->push(msg);
+
+				if (getMessageQueueToGUI()) // Notify GUI of peer details
+				{
+                    MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
+                    getMessageQueueToGUI()->push(msg);
+				}
+
 				break;
 			}
 
@@ -329,10 +337,15 @@ void TCPSrc::processNewConnection()
 			{
 				qDebug("TCPSrc::processNewConnection: establish new S16LE connection");
 				quint32 id = (TCPSrcSettings::FormatS16LE << 24) | m_nextS16leId;
-				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextS16leId = (m_nextS16leId + 1) & 0xffffff;
 				m_s16leSockets.push_back(Socket(id, connection));
-				m_uiMessageQueue->push(msg);
+
+				if (getMessageQueueToGUI()) // Notify GUI of peer details
+				{
+                    MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
+                    getMessageQueueToGUI()->push(msg);
+				}
+
 				break;
 			}
 
@@ -348,6 +361,11 @@ void TCPSrc::onDisconnected()
 	qDebug("TCPSrc::onDisconnected");
 	MsgTCPSrcConnection *cmd = MsgTCPSrcConnection::create(false, 0, QHostAddress::Any, 0);
 	getInputMessageQueue()->push(cmd);
+
+    if (getMessageQueueToGUI()) { // Propagate to GUI
+        getMessageQueueToGUI()->push(cmd);
+    }
+
 }
 
 void TCPSrc::processDeconnection()
@@ -388,9 +406,14 @@ void TCPSrc::processDeconnection()
 
 	if(socket != 0)
 	{
-		MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(false, id, QHostAddress(), 0);
-		m_uiMessageQueue->push(msg);
-		socket->deleteLater();
+        MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(false, id, QHostAddress(), 0);
+        getInputMessageQueue()->push(msg);
+
+        if (getMessageQueueToGUI()) { // Propagate to GUI
+            getMessageQueueToGUI()->push(msg);
+        }
+
+        socket->deleteLater();
 	}
 }
 

@@ -85,8 +85,6 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
 
 bool TCPSrcGUI::handleMessage(const Message& message)
 {
-	qDebug() << "TCPSrcGUI::handleMessage";
-
 	if (TCPSrc::MsgTCPSrcConnection::match(message))
 	{
 		TCPSrc::MsgTCPSrcConnection& con = (TCPSrc::MsgTCPSrcConnection&) message;
@@ -144,7 +142,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_tcpSrc = new TCPSrc(m_pluginAPI->getMainWindowMessageQueue(), m_spectrumVis);
+	m_tcpSrc = new TCPSrc(m_spectrumVis);
 	m_channelizer = new DownChannelizer(m_tcpSrc);
 	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
 	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
