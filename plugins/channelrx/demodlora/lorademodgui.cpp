@@ -4,8 +4,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "dsp/threadedbasebandsamplesink.h"
-#include "ui_lorademodgui.h"
 #include "ui_lorademodgui.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
@@ -137,21 +135,19 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWi
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_LoRaDemod = new LoRaDemod(m_spectrumVis);
-	m_channelizer = new DownChannelizer(m_LoRaDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_LoRaDemod = new LoRaDemod(m_deviceAPI);
+	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
-	setTitleColor(Qt::magenta);
-
-	m_channelMarker.setColor(Qt::magenta);
-	m_channelMarker.setBandwidth(LoRaDemodSettings::bandwidths[0]);
-	m_channelMarker.setCenterFrequency(0);
+//	setTitleColor(Qt::magenta);
+//
+//	m_channelMarker.setColor(Qt::magenta);
+//	m_channelMarker.setBandwidth(LoRaDemodSettings::bandwidths[0]);
+//	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
@@ -160,17 +156,18 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWi
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
-	ui->spectrumGUI->setBuddies(m_channelizer->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
-	applySettings();
+	m_settings.setChannelMarker(&m_channelMarker);
+	m_settings.setSpectrumGUI(ui->spectrumGUI);
+
+	displaySettings();
+	applySettings(true);
 }
 
 LoRaDemodGUI::~LoRaDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_LoRaDemod;
 	delete m_spectrumVis;
 	delete ui;
@@ -185,11 +182,15 @@ void LoRaDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
-			m_channelMarker.getCenterFrequency());
+        setTitleColor(m_channelMarker.getColor());
 
-		m_LoRaDemod->configure(m_LoRaDemod->getInputMessageQueue(), m_settings.m_bandwidthIndex);
+        LoRaDemod::MsgConfigureChannelizer* channelConfigMsg = LoRaDemod::MsgConfigureChannelizer::create(
+                LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
+                m_channelMarker.getCenterFrequency());
+        m_LoRaDemod->getInputMessageQueue()->push(channelConfigMsg);
+
+        LoRaDemod::MsgConfigureLoRaDemod* message = LoRaDemod::MsgConfigureLoRaDemod::create( m_settings, force);
+        m_LoRaDemod->getInputMessageQueue()->push(message);
 	}
 }
 
@@ -201,4 +202,11 @@ void LoRaDemodGUI::displaySettings()
     ui->BW->setValue(m_settings.m_bandwidthIndex);
     m_channelMarker.setBandwidth(thisBW);
     blockApplySettings(false);
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setBandwidth(thisBW);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
 }

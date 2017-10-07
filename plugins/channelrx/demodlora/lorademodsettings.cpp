@@ -21,6 +21,7 @@ void LoRaDemodSettings::resetToDefaults()
 {
     m_bandwidthIndex = 0;
     m_spread = 0;
+    m_rgbColor = QColor(255, 0, 255).rgb();
 }
 
 QByteArray LoRaDemodSettings::serialize() const

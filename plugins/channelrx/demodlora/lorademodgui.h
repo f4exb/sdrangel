@@ -10,8 +10,6 @@
 
 class PluginAPI;
 class DeviceSourceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class LoRaDemod;
 class SpectrumVis;
 
@@ -55,8 +53,6 @@ private:
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
