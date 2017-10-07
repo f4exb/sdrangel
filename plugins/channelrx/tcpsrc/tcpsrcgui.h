@@ -10,6 +10,7 @@
 #include "util/messagequeue.h"
 
 #include "tcpsrc.h"
+#include "tcpsrcsettings.h"
 
 class PluginAPI;
 class DeviceSourceAPI;
@@ -52,7 +53,7 @@ private slots:
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDoubleClicked();
-	void on_boost_valueChanged(int value);
+	void on_volume_valueChanged(int value);
 	void tick();
 
 private:
@@ -64,12 +65,14 @@ private:
 	MovingAverage<double> m_channelPowerDbAvg;
 
 	// settings
-	TCPSrc::SampleFormat m_sampleFormat;
+	TCPSrcSettings m_settings;
+	TCPSrcSettings::SampleFormat m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_boost;
 	int m_tcpPort;
 	bool m_basicSettingsShown;
+	bool m_rfBandwidthChanged;
 	bool m_doApplySettings;
 
 	// RF path
@@ -83,6 +86,9 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings();
+	void displaySettings();
+    void setSampleFormat(int index);
+    void setSampleFormatIndex(const TCPSrcSettings::SampleFormat& sampleFormat);
 
 	void addConnection(quint32 id, const QHostAddress& peerAddress, int peerPort);
 	void delConnection(quint32 id);

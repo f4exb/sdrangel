@@ -31,7 +31,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampl
 	setObjectName("TCPSrc");
 
 	m_inputSampleRate = 96000;
-	m_sampleFormat = FormatSSB;
+	m_sampleFormat = TCPSrcSettings::FormatSSB;
 	m_outputSampleRate = 48000;
 	m_rfBandwidth = 32000;
 	m_tcpServer = 0;
@@ -61,7 +61,7 @@ TCPSrc::~TCPSrc()
 	if (TCPFilter) delete TCPFilter;
 }
 
-void TCPSrc::configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
+void TCPSrc::configure(MessageQueue* messageQueue, TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
 {
 	Message* cmd = MsgTCPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, tcpPort, boost);
 	messageQueue->push(cmd);
@@ -110,7 +110,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		m_s16leSockets[i].socket->write((const char*)&m_sampleBuffer[0], m_sampleBuffer.size() * 4);
 	}
 
-	if((m_sampleFormat == FormatSSB) && (m_ssbSockets.count() > 0)) {
+	if((m_sampleFormat == TCPSrcSettings::FormatSSB) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			//Complex cj(it->real() / 30000.0, it->imag() / 30000.0);
 			Complex cj(it->real(), it->imag());
@@ -130,7 +130,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		}
 	}
 
-	if((m_sampleFormat == FormatNFM) && (m_ssbSockets.count() > 0)) {
+	if((m_sampleFormat == TCPSrcSettings::FormatNFM) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
 			Complex cj(it->real() / 32768.0f, it->imag() / 32768.0f);
 			// An FFT filter here is overkill, but was already set up for SSB
@@ -225,7 +225,7 @@ bool TCPSrc::handleMessage(const Message& cmd)
 		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
 		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 
-		if (m_sampleFormat == FormatSSB)
+		if (m_sampleFormat == TCPSrcSettings::FormatSSB)
 		{
 			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
 		}
@@ -311,10 +311,10 @@ void TCPSrc::processNewConnection()
 
 		switch(m_sampleFormat) {
 
-			case FormatNFM:
-			case FormatSSB:
+			case TCPSrcSettings::FormatNFM:
+			case TCPSrcSettings::FormatSSB:
 			{
-				quint32 id = (FormatSSB << 24) | m_nextSSBId;
+				quint32 id = (TCPSrcSettings::FormatSSB << 24) | m_nextSSBId;
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextSSBId = (m_nextSSBId + 1) & 0xffffff;
 				m_ssbSockets.push_back(Socket(id, connection));
@@ -322,10 +322,10 @@ void TCPSrc::processNewConnection()
 				break;
 			}
 
-			case FormatS16LE:
+			case TCPSrcSettings::FormatS16LE:
 			{
 				qDebug("TCPSrc::processNewConnection: establish new S16LE connection");
-				quint32 id = (FormatS16LE << 24) | m_nextS16leId;
+				quint32 id = (TCPSrcSettings::FormatS16LE << 24) | m_nextS16leId;
 				MsgTCPSrcConnection* msg = MsgTCPSrcConnection::create(true, id, connection->peerAddress(), connection->peerPort());
 				m_nextS16leId = (m_nextS16leId + 1) & 0xffffff;
 				m_s16leSockets.push_back(Socket(id, connection));

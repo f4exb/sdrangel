@@ -60,11 +60,11 @@
        <string>Sample format</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
        <property name="text">
-        <string>S16LE SSB</string>
+        <string>S16LE I/Q</string>
        </property>
       </item>
       <item>
@@ -74,7 +74,7 @@
       </item>
       <item>
        <property name="text">
-        <string>S16LE I/Q</string>
+        <string>S16LE SSB</string>
        </property>
       </item>
      </widget>
@@ -310,14 +310,14 @@
     <item row="5" column="1">
      <layout class="QHBoxLayout" name="BoostLayout">
       <item>
-       <widget class="QLabel" name="boostLabel">
+       <widget class="QLabel" name="volumeLabel">
         <property name="text">
-         <string>Boost</string>
+         <string>Vol</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="boost">
+       <widget class="QSlider" name="volume">
         <property name="toolTip">
          <string>Amplitude boost</string>
         </property>
@@ -333,7 +333,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="boostText">
+       <widget class="QLabel" name="volumeText">
         <property name="text">
          <string>0</string>
         </property>

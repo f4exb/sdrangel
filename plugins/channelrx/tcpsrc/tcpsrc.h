@@ -1,13 +1,16 @@
 #ifndef INCLUDE_TCPSRC_H
 #define INCLUDE_TCPSRC_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <QHostAddress>
+
+#include <dsp/basebandsamplesink.h>
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
+
+#include "tcpsrcsettings.h"
 
 #define tcpFftLen 2048
 
@@ -19,17 +22,10 @@ class TCPSrc : public BasebandSampleSink {
 	Q_OBJECT
 
 public:
-	enum SampleFormat {
-		FormatSSB,
-		FormatNFM,
-		FormatS16LE,
-		FormatNone
-	};
-
 	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum);
 	virtual ~TCPSrc();
 
-	void configure(MessageQueue* messageQueue, SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
+	void configure(MessageQueue* messageQueue, TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
 
@@ -72,25 +68,25 @@ protected:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		SampleFormat getSampleFormat() const { return m_sampleFormat; }
+		TCPSrcSettings::SampleFormat getSampleFormat() const { return m_sampleFormat; }
 		Real getOutputSampleRate() const { return m_outputSampleRate; }
 		Real getRFBandwidth() const { return m_rfBandwidth; }
 		int getTCPPort() const { return m_tcpPort; }
 		int getBoost() const { return m_boost; }
 
-		static MsgTCPSrcConfigure* create(SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int tcpPort, int boost)
+		static MsgTCPSrcConfigure* create(TCPSrcSettings::SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int tcpPort, int boost)
 		{
 			return new MsgTCPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, tcpPort, boost);
 		}
 
 	private:
-		SampleFormat m_sampleFormat;
+		TCPSrcSettings::SampleFormat m_sampleFormat;
 		Real m_outputSampleRate;
 		Real m_rfBandwidth;
 		int m_tcpPort;
 		int m_boost;
 
-		MsgTCPSrcConfigure(SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost) :
+		MsgTCPSrcConfigure(TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost) :
 			Message(),
 			m_sampleFormat(sampleFormat),
 			m_outputSampleRate(outputSampleRate),
