@@ -31,8 +31,6 @@ const Real UDPSrc::m_agcTarget = 16384.0f;
 
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureUDPSrc, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigure, Message)
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcConfigureImmediate, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
@@ -42,6 +40,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_amMovingAverage(1200, 1e-10),
     m_audioFifo(24000),
     m_spectrum(0),
+    m_squelch(1e-6),
     m_squelchOpen(false),
     m_squelchOpenCount(0),
     m_squelchCloseCount(0),
@@ -52,17 +51,17 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName("UDPSrc");
 
-	m_udpBuffer = new UDPSink<Sample>(this, udpBlockSize, m_config.m_udpPort);
-	m_udpBufferMono = new UDPSink<FixReal>(this, udpBlockSize, m_config.m_udpPort);
+	m_udpBuffer = new UDPSink<Sample>(this, udpBlockSize, m_settings.m_udpPort);
+	m_udpBufferMono = new UDPSink<FixReal>(this, udpBlockSize, m_settings.m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 	m_udpAudioBuf = new char[m_udpAudioPayloadSize];
 
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 
-	m_nco.setFreq(0, m_config.m_inputSampleRate);
-	m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
-	m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
+	m_nco.setFreq(0, m_settings.m_inputSampleRate);
+	m_interpolator.create(16, m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / 2.0);
+	m_sampleDistanceRemain = m_settings.m_inputSampleRate / m_settings.m_outputSampleRate;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
@@ -77,13 +76,13 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-	UDPFilter = new fftfilt(0.0, (m_config.m_rfBandwidth / 2.0) / m_config.m_outputSampleRate, udpBlockSize);
+	UDPFilter = new fftfilt(0.0, (m_settings.m_rfBandwidth / 2.0) / m_settings.m_outputSampleRate, udpBlockSize);
 
-	m_phaseDiscri.setFMScaling((float) m_config. m_outputSampleRate / (2.0f * m_config.m_fmDeviation));
+	m_phaseDiscri.setFMScaling((float) m_settings. m_outputSampleRate / (2.0f * m_settings.m_fmDeviation));
 
-	if (m_audioSocket->bind(QHostAddress::LocalHost, m_config.m_audioPort))
+	if (m_audioSocket->bind(QHostAddress::LocalHost, m_settings.m_audioPort))
 	{
-		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_config.m_audioPort);
+		qDebug("UDPSrc::UDPSrc: bind audio socket to port %d", m_settings.m_audioPort);
 		connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()), Qt::QueuedConnection);
 	}
 	else
@@ -95,6 +94,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_agc.setClamping(true);
 
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
+    applySettings(m_settings, true);
 }
 
 UDPSrc::~UDPSrc()
@@ -104,57 +104,10 @@ UDPSrc::~UDPSrc()
 	delete m_udpBufferMono;
 	delete[] m_udpAudioBuf;
 	if (UDPFilter) delete UDPFilter;
-	if (m_running.m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	if (m_settings.m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
-}
-
-/** what needs the "apply" button validation */
-void UDPSrc::configure(MessageQueue* messageQueue,
-        UDPSrcSettings::SampleFormat sampleFormat,
-		Real outputSampleRate,
-		Real rfBandwidth,
-		int fmDeviation,
-		const QString& udpAddress,
-		int udpPort,
-		int audioPort,
-		bool force)
-{
-	Message* cmd = MsgUDPSrcConfigure::create(sampleFormat,
-			outputSampleRate,
-			rfBandwidth,
-			fmDeviation,
-			udpAddress,
-			udpPort,
-			audioPort,
-			force);
-	messageQueue->push(cmd);
-}
-
-/** changes applied immediately */
-void UDPSrc::configureImmediate(MessageQueue* messageQueue,
-		bool audioActive,
-		bool audioStereo,
-		Real boost,
-		int  volume,
-		Real squelchDB,
-		int  squelchGate,
-		bool squelchEnabled,
-		bool agc,
-		bool force)
-{
-	Message* cmd = MsgUDPSrcConfigureImmediate::create(
-			audioActive,
-			audioStereo,
-			boost,
-			volume,
-			squelchDB,
-			squelchGate,
-			squelchEnabled,
-			agc,
-			force);
-	messageQueue->push(cmd);
 }
 
 void UDPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
@@ -182,10 +135,10 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		    double inMagSq;
 		    double agcFactor = 1.0;
 
-            if ((m_running.m_agc) &&
-                (m_running.m_sampleFormat != UDPSrcSettings::FormatNFM) &&
-                (m_running.m_sampleFormat != UDPSrcSettings::FormatNFMMono) &&
-                (m_running.m_sampleFormat != UDPSrcSettings::FormatS16LE))
+            if ((m_settings.m_agc) &&
+                (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFM) &&
+                (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFMMono) &&
+                (m_settings.m_sampleFormat != UDPSrcSettings::FormatS16LE))
             {
                 agcFactor = m_agc.feedAndGetValue(ci);
                 inMagSq = m_agc.getMagSq();
@@ -201,11 +154,11 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			Sample ss(ci.real(), ci.imag());
 			m_sampleBuffer.push_back(ss);
 
-			m_sampleDistanceRemain += m_running.m_inputSampleRate / m_running.m_outputSampleRate;
+			m_sampleDistanceRemain += m_settings.m_inputSampleRate / m_settings.m_outputSampleRate;
 
 			calculateSquelch(m_inMagsq);
 
-			if (m_running.m_sampleFormat == UDPSrcSettings::FormatLSB) // binaural LSB
+			if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSB) // binaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -214,14 +167,14 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = m_squelchOpen ? sideband[i].real() * m_running.m_gain : 0;
-						r = m_squelchOpen ? sideband[i].imag() * m_running.m_gain : 0;
+						l = m_squelchOpen ? sideband[i].real() * m_settings.m_gain : 0;
+						r = m_squelchOpen ? sideband[i].imag() * m_settings.m_gain : 0;
 					    m_udpBuffer->write(Sample(l, r));
 					    m_outMovingAverage.feed((l*l + r*r) / (1<<30));
 					}
 				}
 			}
-			if (m_running.m_sampleFormat == UDPSrcSettings::FormatUSB) // binaural USB
+			if (m_settings.m_sampleFormat == UDPSrcSettings::FormatUSB) // binaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -230,26 +183,26 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = m_squelchOpen ? sideband[i].real() * m_running.m_gain : 0;
-						r = m_squelchOpen ? sideband[i].imag() * m_running.m_gain : 0;
+						l = m_squelchOpen ? sideband[i].real() * m_settings.m_gain : 0;
+						r = m_squelchOpen ? sideband[i].imag() * m_settings.m_gain : 0;
 						m_udpBuffer->write(Sample(l, r));
 						m_outMovingAverage.feed((l*l + r*r) / (1<<30));
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatNFM)
+			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFM)
 			{
-				double demod = m_squelchOpen ? 32768.0 * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_gain : 0;
+				double demod = m_squelchOpen ? 32768.0 * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
 				m_udpBuffer->write(Sample(demod, demod));
 				m_outMovingAverage.feed((demod * demod) / (1<<30));
 			}
-			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
+			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
 			{
-				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_running.m_gain) : 0;
+				FixReal demod = m_squelchOpen ? (FixReal) (32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain) : 0;
 				m_udpBufferMono->write(demod);
 				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
-			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
+			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -258,13 +211,13 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_running.m_gain : 0;
+						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_settings.m_gain : 0;
 						m_udpBufferMono->write(l);
 						m_outMovingAverage.feed((l * l) / (1<<30));
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatUSBMono) // Monaural USB
+			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono) // Monaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -273,25 +226,25 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 				{
 					for (int i = 0; i < n_out; i++)
 					{
-						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_running.m_gain : 0;
+						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_settings.m_gain : 0;
 						m_udpBufferMono->write(l);
 						m_outMovingAverage.feed((l * l) / (1<<30));
 					}
 				}
 			}
-			else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMMono)
+			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMMono)
 			{
-				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * agcFactor * m_running.m_gain) : 0;
+				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * agcFactor * m_settings.m_gain) : 0;
 				m_udpBufferMono->write(demod);
 				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
 			}
-            else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMNoDCMono)
+            else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMNoDCMono)
             {
                 if (m_squelchOpen)
                 {
                     double demodf = sqrt(inMagSq);
                     m_amMovingAverage.feed(demodf);
-                    FixReal demod = (FixReal) ((demodf - m_amMovingAverage.average()) * agcFactor * m_running.m_gain);
+                    FixReal demod = (FixReal) ((demodf - m_amMovingAverage.average()) * agcFactor * m_settings.m_gain);
                     m_udpBufferMono->write(demod);
                     m_outMovingAverage.feed((demod * demod) / 1073741824.0);
                 }
@@ -301,14 +254,14 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     m_outMovingAverage.feed(0);
                 }
             }
-            else if (m_running.m_sampleFormat == UDPSrcSettings::FormatAMBPFMono)
+            else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMBPFMono)
             {
                 if (m_squelchOpen)
                 {
                     double demodf = sqrt(inMagSq);
                     demodf = m_bandpass.filter(demodf);
                     demodf /= 301.0;
-                    FixReal demod = (FixReal) (demodf * agcFactor * m_running.m_gain);
+                    FixReal demod = (FixReal) (demodf * agcFactor * m_settings.m_gain);
                     m_udpBufferMono->write(demod);
                     m_outMovingAverage.feed((demod * demod) / 1073741824.0);
                 }
@@ -322,9 +275,9 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			{
 			    if (m_squelchOpen)
 			    {
-	                Sample s(ci.real() * m_running.m_gain, ci.imag() * m_running.m_gain);
+	                Sample s(ci.real() * m_settings.m_gain, ci.imag() * m_settings.m_gain);
 	                m_udpBuffer->write(s);
-	                m_outMovingAverage.feed((inMagSq*m_running.m_gain*m_running.m_gain) / (1<<30));
+	                m_outMovingAverage.feed((inMagSq*m_settings.m_gain*m_settings.m_gain) / (1<<30));
 			    }
 			    else
 			    {
@@ -363,12 +316,15 @@ bool UDPSrc::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_inputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		UDPSrcSettings settings;
 
-		apply(false);
+		settings.m_inputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		qDebug() << "UDPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << m_config.m_inputSampleRate
+		//apply(false);
+		applySettings(settings);
+
+		qDebug() << "UDPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << settings.m_inputSampleRate
                  << " frequencyOffset: " << notif.getFrequencyOffset();
 
         return true;
@@ -397,110 +353,30 @@ bool UDPSrc::handleMessage(const Message& cmd)
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 
-        m_config.m_audioActive = settings.m_audioActive;
-        m_config.m_audioStereo = settings.m_audioStereo;
-        m_config.m_gain = settings.m_gain;
-        m_config.m_volume = settings.m_volume;
-        m_config.m_squelch = CalcDb::powerFromdB((double) settings.m_squelchdB);
-        m_config.m_squelchGate = settings.m_squelchGate;
-        m_config.m_squelchEnabled = settings.m_squelchEnabled;
-        m_config.m_agc = settings.m_agc;
-        m_config.m_sampleFormat = settings.m_sampleFormat;
-        m_config.m_outputSampleRate = settings.m_outputSampleRate;
-        m_config.m_rfBandwidth = settings.m_rfBandwidth;
-        m_config.m_udpAddressStr = settings.m_udpAddress;
-        m_config.m_udpPort = settings.m_udpPort;
-        m_config.m_audioPort = settings.m_audioPort;
-        m_config.m_fmDeviation = settings.m_fmDeviation;
-
-        apply(cfg.getForce());
+        applySettings(settings, cfg.getForce());
 
         qDebug() << "UDPSrc::handleMessage: MsgConfigureUDPSrc: "
-                << " m_inputSampleRate: " << m_config.m_inputSampleRate
-                << " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset
-                << " m_audioActive: " << m_config.m_audioActive
-                << " m_audioStereo: " << m_config.m_audioStereo
-                << " m_gain: " << m_config.m_gain
-                << " m_volume: " << m_config.m_volume
-                << " m_squelchEnabled: " << m_config.m_squelchEnabled
-                << " m_squelch: " << m_config.m_squelch
-                << " getSquelchDB: " << settings.m_squelchdB
-                << " m_squelchGate" << m_config.m_squelchGate
-                << " m_agc" << m_config.m_agc
-                << " m_sampleFormat: " << m_config.m_sampleFormat
-                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-                << " m_rfBandwidth: " << m_config.m_rfBandwidth
-                << " m_fmDeviation: " << m_config.m_fmDeviation
-                << " m_udpAddressStr: " << m_config.m_udpAddressStr
-                << " m_udpPort: " << m_config.m_udpPort
-                << " m_audioPort: " << m_config.m_audioPort
+                << " m_inputSampleRate: " << settings.m_inputSampleRate
+                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+                << " m_audioActive: " << settings.m_audioActive
+                << " m_audioStereo: " << settings.m_audioStereo
+                << " m_gain: " << settings.m_gain
+                << " m_volume: " << settings.m_volume
+                << " m_squelchEnabled: " << settings.m_squelchEnabled
+                << " m_squelchdB: " << settings.m_squelchdB
+                << " m_squelchGate" << settings.m_squelchGate
+                << " m_agc" << settings.m_agc
+                << " m_sampleFormat: " << settings.m_sampleFormat
+                << " m_outputSampleRate: " << settings.m_outputSampleRate
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_fmDeviation: " << settings.m_fmDeviation
+                << " m_udpAddressStr: " << settings.m_udpAddress
+                << " m_udpPort: " << settings.m_udpPort
+                << " m_audioPort: " << settings.m_audioPort
                 << " force: " << cfg.getForce();
-
-        m_settings = settings;
 
         return true;
     }
-	else if (MsgUDPSrcConfigureImmediate::match(cmd))
-	{
-		MsgUDPSrcConfigureImmediate& cfg = (MsgUDPSrcConfigureImmediate&) cmd;
-
-		m_config.m_audioActive = cfg.getAudioActive();
-		m_config.m_audioStereo = cfg.getAudioStereo();
-		m_config.m_gain = cfg.getGain();
-		m_config.m_volume = cfg.getVolume();
-		m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
-		m_config.m_squelchGate = cfg.getSquelchGate();
-		m_config.m_squelchEnabled = cfg.getSquelchEnabled();
-		m_config.m_agc = cfg.getAGC();
-
-		apply(cfg.getForce());
-
-		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigureImmediate: "
-				<< " m_audioActive: " << m_config.m_audioActive
-				<< " m_audioStereo: " << m_config.m_audioStereo
-				<< " m_gain: " << m_config.m_gain
-				<< " m_squelchEnabled: " << m_config.m_squelchEnabled
-                << " m_squelch: " << m_config.m_squelch
-                << " getSquelchDB: " << cfg.getSquelchDB()
-                << " m_squelchGate" << m_config.m_squelchGate
-                << " m_agc" << m_config.m_agc
-                << " m_sampleFormat: " << m_config.m_sampleFormat
-                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-                << " m_rfBandwidth: " << m_config.m_rfBandwidth
-                << " m_udpAddressStr: " << m_config.m_udpAddressStr
-                << " m_udpPort: " << m_config.m_udpPort
-                << " m_audioPort: " << m_config.m_audioPort;
-
-		return true;
-
-	}
-	else if (MsgUDPSrcConfigure::match(cmd))
-	{
-		MsgUDPSrcConfigure& cfg = (MsgUDPSrcConfigure&) cmd;
-
-		m_config.m_sampleFormat = cfg.getSampleFormat();
-		m_config.m_outputSampleRate = cfg.getOutputSampleRate();
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_udpAddressStr = cfg.getUDPAddress();
-		m_config.m_udpPort = cfg.getUDPPort();
-		m_config.m_audioPort = cfg.getAudioPort();
-		m_config.m_fmDeviation = cfg.getFMDeviation();
-
-		apply(cfg.getForce());
-
-		qDebug() << "UDPSrc::handleMessage: MsgUDPSrcConfigure:"
-		        << " m_inputSampleRate: " << m_config.m_inputSampleRate
-		        << " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset
-		        << " m_sampleFormat: " << m_config.m_sampleFormat
-				<< " m_outputSampleRate: " << m_config.m_outputSampleRate
-				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_fmDeviation: " << m_config.m_fmDeviation
-				<< " m_udpAddressStr: " << m_config.m_udpAddressStr
-				<< " m_udpPort: " << m_config.m_udpPort
-				<< " m_audioPort: " << m_config.m_audioPort;
-
-		return true;
-	}
 	else if (MsgUDPSrcSpectrum::match(cmd))
 	{
 		MsgUDPSrcSpectrum& spc = (MsgUDPSrcSpectrum&) cmd;
@@ -524,122 +400,6 @@ bool UDPSrc::handleMessage(const Message& cmd)
 	}
 }
 
-void UDPSrc::apply(bool force)
-{
-    m_settingsMutex.lock();
-
-    if ((m_config.m_inputSampleRate != m_running.m_inputSampleRate) ||
-        (m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-        (m_config.m_rfBandwidth != m_running.m_rfBandwidth) ||
-        (m_config.m_outputSampleRate != m_running.m_outputSampleRate) || force)
-    {
-        m_nco.setFreq(-m_config.m_inputFrequencyOffset, m_config.m_inputSampleRate);
-        m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_rfBandwidth / 2.0);
-        m_sampleDistanceRemain = m_config.m_inputSampleRate / m_config.m_outputSampleRate;
-
-        if ((m_config.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
-        {
-            m_squelchGate = m_config.m_outputSampleRate * 0.05;
-        }
-        else
-        {
-            m_squelchGate = (m_config.m_outputSampleRate * m_config.m_squelchGate) / 100;
-        }
-
-        m_squelchRelease = (m_config.m_outputSampleRate * m_config.m_squelchGate) / 100;
-        initSquelch(m_squelchOpen);
-        m_agc.resize(m_config.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
-        int stepDownDelay =  (m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 1 : m_config.m_squelchGate))/100;
-        m_agc.setStepDownDelay(stepDownDelay);
-        m_agc.setGate(m_config.m_outputSampleRate * 0.05);
-
-        m_bandpass.create(301, m_config.m_outputSampleRate, 300.0, m_config.m_rfBandwidth / 2.0f);
-
-        m_inMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
-        m_amMovingAverage.resize(m_config.m_outputSampleRate * 0.005, 1e-10); //  5 ms
-        m_outMovingAverage.resize(m_config.m_outputSampleRate * 0.01, 1e-10); // 10 ms
-    }
-
-    if ((m_config.m_audioActive != m_running.m_audioActive) || force)
-    {
-        if (m_config.m_audioActive)
-        {
-            m_audioBufferFill = 0;
-            DSPEngine::instance()->addAudioSink(&m_audioFifo);
-        }
-        else
-        {
-            DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-        }
-    }
-
-    if ((m_config.m_squelchGate != m_running.m_squelchGate) || force)
-    {
-        if ((m_config.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
-            (m_config.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
-        {
-            m_squelchGate = m_config.m_outputSampleRate * 0.05;
-        }
-        else
-        {
-            m_squelchGate = (m_config.m_outputSampleRate * m_config.m_squelchGate)/100;
-        }
-
-        m_squelchRelease = (m_config.m_outputSampleRate * m_config.m_squelchGate)/100;
-        initSquelch(m_squelchOpen);
-        int stepDownDelay =  (m_config.m_outputSampleRate * (m_config.m_squelchGate == 0 ? 1 : m_config.m_squelchGate))/100;
-        m_agc.setStepDownDelay(stepDownDelay); // same delay for up and down
-    }
-
-    if ((m_config.m_squelch != m_running.m_squelch) || force)
-    {
-        m_agc.setThreshold(m_config.m_squelch*(1<<23));
-    }
-
-    if ((m_config.m_udpAddressStr != m_running.m_udpAddressStr) || force)
-    {
-        m_udpBuffer->setAddress(m_config.m_udpAddressStr);
-        m_udpBufferMono->setAddress(m_config.m_udpAddressStr);
-    }
-
-    if ((m_config.m_udpPort != m_running.m_udpPort) || force)
-    {
-        m_udpBuffer->setPort(m_config.m_udpPort);
-        m_udpBufferMono->setPort(m_config.m_udpPort);
-    }
-
-    if ((m_config.m_audioPort != m_running.m_audioPort) || force)
-    {
-        disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
-        delete m_audioSocket;
-        m_audioSocket = new QUdpSocket(this);
-
-        if (m_audioSocket->bind(QHostAddress::LocalHost, m_config.m_audioPort))
-        {
-            connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()), Qt::QueuedConnection);
-            qDebug("UDPSrc::handleMessage: audio socket bound to port %d", m_config.m_audioPort);
-        }
-        else
-        {
-            qWarning("UDPSrc::handleMessage: cannot bind audio socket");
-        }
-    }
-
-    if ((m_config.m_fmDeviation != m_running.m_fmDeviation) || force)
-    {
-        m_phaseDiscri.setFMScaling((float) m_config.m_outputSampleRate / (2.0f * m_config.m_fmDeviation));
-    }
-
-    m_settingsMutex.unlock();
-
-    m_running = m_config;
-}
-
 void UDPSrc::audioReadyRead()
 {
 	while (m_audioSocket->hasPendingDatagrams())
@@ -648,16 +408,16 @@ void UDPSrc::audioReadyRead()
 	    qint64 udpReadBytes = m_audioSocket->readDatagram(m_udpAudioBuf, pendingDataSize, 0, 0);
 		//qDebug("UDPSrc::audioReadyRead: %lld", udpReadBytes);
 
-		if (m_running.m_audioActive)
+		if (m_settings.m_audioActive)
 		{
-			if (m_running.m_audioStereo)
+			if (m_settings.m_audioStereo)
 			{
 				for (int i = 0; i < udpReadBytes - 3; i += 4)
 				{
 					qint16 l_sample = (qint16) *(&m_udpAudioBuf[i]);
 					qint16 r_sample = (qint16) *(&m_udpAudioBuf[i+2]);
-					m_audioBuffer[m_audioBufferFill].l  = l_sample * m_running.m_volume;
-					m_audioBuffer[m_audioBufferFill].r  = r_sample * m_running.m_volume;
+					m_audioBuffer[m_audioBufferFill].l  = l_sample * m_settings.m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = r_sample * m_settings.m_volume;
 					++m_audioBufferFill;
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
@@ -678,8 +438,8 @@ void UDPSrc::audioReadyRead()
 				for (int i = 0; i < udpReadBytes - 1; i += 2)
 				{
 					qint16 sample = (qint16) *(&m_udpAudioBuf[i]);
-					m_audioBuffer[m_audioBufferFill].l  = sample * m_running.m_volume;
-					m_audioBuffer[m_audioBufferFill].r  = sample * m_running.m_volume;
+					m_audioBuffer[m_audioBufferFill].l  = sample * m_settings.m_volume;
+					m_audioBuffer[m_audioBufferFill].r  = sample * m_settings.m_volume;
 					++m_audioBufferFill;
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
@@ -706,4 +466,121 @@ void UDPSrc::audioReadyRead()
 	}
 
 	//qDebug("UDPSrc::audioReadyRead: done");
+}
+
+void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
+{
+    m_settingsMutex.lock();
+
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
+        (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.0);
+        m_sampleDistanceRemain = settings.m_inputSampleRate / settings.m_outputSampleRate;
+
+        if ((settings.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
+        {
+            m_squelchGate = settings.m_outputSampleRate * 0.05;
+        }
+        else
+        {
+            m_squelchGate = (settings.m_outputSampleRate * settings.m_squelchGate) / 100;
+        }
+
+        m_squelchRelease = (settings.m_outputSampleRate * settings.m_squelchGate) / 100;
+        initSquelch(m_squelchOpen);
+        m_agc.resize(settings.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
+        int stepDownDelay =  (settings.m_outputSampleRate * (settings.m_squelchGate == 0 ? 1 : settings.m_squelchGate))/100;
+        m_agc.setStepDownDelay(stepDownDelay);
+        m_agc.setGate(settings.m_outputSampleRate * 0.05);
+
+        m_bandpass.create(301, settings.m_outputSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
+
+        m_inMovingAverage.resize(settings.m_outputSampleRate * 0.01, 1e-10);  // 10 ms
+        m_amMovingAverage.resize(settings.m_outputSampleRate * 0.005, 1e-10); //  5 ms
+        m_outMovingAverage.resize(settings.m_outputSampleRate * 0.01, 1e-10); // 10 ms
+    }
+
+    if ((settings.m_audioActive != m_settings.m_audioActive) || force)
+    {
+        if (settings.m_audioActive)
+        {
+            m_audioBufferFill = 0;
+            DSPEngine::instance()->addAudioSink(&m_audioFifo);
+        }
+        else
+        {
+            DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+        }
+    }
+
+    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    {
+        if ((settings.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
+            (settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
+        {
+            m_squelchGate = settings.m_outputSampleRate * 0.05;
+        }
+        else
+        {
+            m_squelchGate = (settings.m_outputSampleRate * settings.m_squelchGate)/100;
+        }
+
+        m_squelchRelease = (settings.m_outputSampleRate * settings.m_squelchGate)/100;
+        initSquelch(m_squelchOpen);
+        int stepDownDelay =  (settings.m_outputSampleRate * (settings.m_squelchGate == 0 ? 1 : settings.m_squelchGate))/100;
+        m_agc.setStepDownDelay(stepDownDelay); // same delay for up and down
+    }
+
+    if ((settings.m_squelchdB != m_settings.m_squelchdB) || force)
+    {
+        m_squelch = CalcDb::powerFromdB(settings.m_squelchdB);
+        m_agc.setThreshold(m_squelch*(1<<23));
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force)
+    {
+        m_udpBuffer->setAddress(const_cast<QString&>(settings.m_udpAddress));
+        m_udpBufferMono->setAddress(const_cast<QString&>(settings.m_udpAddress));
+    }
+
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force)
+    {
+        m_udpBuffer->setPort(settings.m_udpPort);
+        m_udpBufferMono->setPort(settings.m_udpPort);
+    }
+
+    if ((settings.m_audioPort != m_settings.m_audioPort) || force)
+    {
+        disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
+        delete m_audioSocket;
+        m_audioSocket = new QUdpSocket(this);
+
+        if (m_audioSocket->bind(QHostAddress::LocalHost, settings.m_audioPort))
+        {
+            connect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()), Qt::QueuedConnection);
+            qDebug("UDPSrc::handleMessage: audio socket bound to port %d", settings.m_audioPort);
+        }
+        else
+        {
+            qWarning("UDPSrc::handleMessage: cannot bind audio socket");
+        }
+    }
+
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    {
+        m_phaseDiscri.setFMScaling((float) settings.m_outputSampleRate / (2.0f * settings.m_fmDeviation));
+    }
+
+    m_settingsMutex.unlock();
+
+    m_settings = settings;
 }

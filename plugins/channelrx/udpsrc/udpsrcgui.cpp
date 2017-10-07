@@ -350,17 +350,6 @@ void UDPSrcGUI::applySettingsImmediate(bool force)
 	{
         UDPSrc::MsgConfigureUDPSrc* message = UDPSrc::MsgConfigureUDPSrc::create( m_settings, force);
         m_udpSrc->getInputMessageQueue()->push(message);
-
-//        m_udpSrc->configureImmediate(m_udpSrc->getInputMessageQueue(),
-//			m_settings.m_audioActive,
-//		    m_settings.m_audioStereo,
-//		    m_settings.m_gain,
-//			m_settings.m_volume,
-//			m_settings.m_squelch,
-//			m_settings.m_squelchGate,
-//			m_settings.m_squelch != -100,
-//			m_settings.m_agc,
-//			force);
 	}
 }
 
@@ -374,16 +363,6 @@ void UDPSrcGUI::applySettings(bool force)
 
         UDPSrc::MsgConfigureUDPSrc* message = UDPSrc::MsgConfigureUDPSrc::create( m_settings, force);
         m_udpSrc->getInputMessageQueue()->push(message);
-
-//		m_udpSrc->configure(m_udpSrc->getInputMessageQueue(),
-//			m_settings.m_sampleFormat,
-//			m_settings.m_outputSampleRate,
-//			m_settings.m_rfBandwidth,
-//			m_settings.m_fmDeviation,
-//			m_channelMarker.getUDPAddress(),
-//			m_channelMarker.getUDPSendPort(),
-//			m_channelMarker.getUDPReceivePort(),
-//			force);
 
 		ui->applyBtn->setEnabled(false);
 		ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
