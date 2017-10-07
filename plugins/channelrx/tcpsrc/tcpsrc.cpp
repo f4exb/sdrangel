@@ -21,7 +21,8 @@
 #include <QTcpSocket>
 #include "tcpsrcgui.h"
 
-MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConfigure, Message)
+MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureTCPSrc, Message)
+MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
@@ -49,7 +50,7 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampl
 	m_last = 0;
 	m_this = 0;
 	m_scale = 0;
-	m_boost = 0;
+	m_volume = 0;
 	m_magsq = 0;
 	m_sampleBufferSSB.resize(tcpFftLen);
 	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
@@ -59,12 +60,6 @@ TCPSrc::TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampl
 TCPSrc::~TCPSrc()
 {
 	if (TCPFilter) delete TCPFilter;
-}
-
-void TCPSrc::configure(MessageQueue* messageQueue, TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost)
-{
-	Message* cmd = MsgTCPSrcConfigure::create(sampleFormat, outputSampleRate, rfBandwidth, tcpPort, boost);
-	messageQueue->push(cmd);
 }
 
 void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
@@ -85,7 +80,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 	// Rtl-Sdr uses full 16-bit scale; FCDPP does not
 	//int rescale = 32768 * (1 << m_boost);
-	int rescale = (1 << m_boost);
+	int rescale = (1 << m_volume);
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it) {
 		//Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
@@ -199,50 +194,59 @@ bool TCPSrc::handleMessage(const Message& cmd)
 
 		return true;
 	}
-	else if (MsgTCPSrcConfigure::match(cmd))
-	{
-		MsgTCPSrcConfigure& cfg = (MsgTCPSrcConfigure&) cmd;
+    else if (MsgConfigureTCPSrc::match(cmd))
+    {
+        MsgConfigureTCPSrc& cfg = (MsgConfigureTCPSrc&) cmd;
 
-		m_settingsMutex.lock();
+        TCPSrcSettings settings = cfg.getSettings();
 
-		m_sampleFormat = cfg.getSampleFormat();
-		m_outputSampleRate = cfg.getOutputSampleRate();
-		m_rfBandwidth = cfg.getRFBandwidth();
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 
-		if (cfg.getTCPPort() != m_tcpPort)
-		{
-			m_tcpPort = cfg.getTCPPort();
+        m_settingsMutex.lock();
 
-			if(m_tcpServer->isListening())
-			{
-				m_tcpServer->close();
-			}
+        m_sampleFormat = settings.m_sampleFormat;
+        m_outputSampleRate = settings.m_outputSampleRate;
+        m_rfBandwidth = settings.m_rfBandwidth;
 
-			m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
-		}
+        if (settings.m_tcpPort != m_tcpPort)
+        {
+            m_tcpPort = settings.m_tcpPort;
 
-		m_boost = cfg.getBoost();
-		m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
-		m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
+            if(m_tcpServer->isListening())
+            {
+                m_tcpServer->close();
+            }
 
-		if (m_sampleFormat == TCPSrcSettings::FormatSSB)
-		{
-			TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
-		}
-		else
-		{
-			TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
-		}
+            m_tcpServer->listen(QHostAddress::Any, m_tcpPort);
+        }
 
-		m_settingsMutex.unlock();
+        m_volume = settings.m_volume;
+        m_interpolator.create(16, m_inputSampleRate, m_rfBandwidth / 2.0);
+        m_sampleDistanceRemain = m_inputSampleRate / m_outputSampleRate;
 
-		qDebug() << "  - MsgTCPSrcConfigure: m_sampleFormat: " << m_sampleFormat
-				<< " m_outputSampleRate: " << m_outputSampleRate
-				<< " m_rfBandwidth: " << m_rfBandwidth
-				<< " m_boost: " << m_boost;
+        if (m_sampleFormat == TCPSrcSettings::FormatSSB)
+        {
+            TCPFilter->create_filter(0.3 / 48.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+        }
+        else
+        {
+            TCPFilter->create_filter(0.0, m_rfBandwidth / 2.0 / m_outputSampleRate);
+        }
 
-		return true;
-	}
+        m_settingsMutex.unlock();
+
+        qDebug() << "MsgConfigureTCPSrc::handleMessage: MsgConfigureTCPSrc:"
+                << " m_sampleFormat: " << m_sampleFormat
+                << " m_outputSampleRate: " << m_outputSampleRate
+                << " m_rfBandwidth: " << m_rfBandwidth
+                << " m_volume: " << m_volume;
+
+        m_settings = settings;
+
+        return true;
+    }
 	else if (MsgTCPSrcSpectrum::match(cmd))
 	{
 		MsgTCPSrcSpectrum& spc = (MsgTCPSrcSpectrum&) cmd;

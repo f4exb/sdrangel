@@ -81,65 +81,6 @@ bool TCPSrcGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if (!d.isValid())
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if (d.getVersion() == 1)
-//	{
-//		QByteArray bytetmp;
-//		qint32 s32tmp;
-//		Real realtmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//		d.readS32(2, &s32tmp, 0);
-//		m_channelMarker.setCenterFrequency(s32tmp);
-//		d.readS32(3, &s32tmp, TCPSrcSettings::FormatSSB);
-//		switch(s32tmp) {
-//			case TCPSrcSettings::FormatSSB:
-//				ui->sampleFormat->setCurrentIndex(0);
-//				break;
-//			case TCPSrcSettings::FormatNFM:
-//				ui->sampleFormat->setCurrentIndex(1);
-//				break;
-//			case TCPSrcSettings::FormatS16LE:
-//				ui->sampleFormat->setCurrentIndex(2);
-//				break;
-//			default:
-//				ui->sampleFormat->setCurrentIndex(0);
-//				break;
-//		}
-//		d.readReal(4, &realtmp, 48000);
-//		ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
-//		d.readReal(5, &realtmp, 32000);
-//		ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
-//		d.readS32(6, &s32tmp, 9999);
-//		ui->tcpPort->setText(QString("%1").arg(s32tmp));
-//		d.readBlob(7, &bytetmp);
-//		ui->spectrumGUI->deserialize(bytetmp);
-//		d.readS32(8, &s32tmp, 1);
-//		ui->volume->setValue(s32tmp);
-//		d.readS32(9, &s32tmp, 0);
-//		m_channelMarker.setCenterFrequency(s32tmp);
-//
-//		blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		applySettings();
-//		return true;
-//	}
-//	else
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool TCPSrcGUI::handleMessage(const Message& message)
@@ -264,12 +205,8 @@ void TCPSrcGUI::applySettings()
 			m_settings.m_outputSampleRate,
 			m_channelMarker.getCenterFrequency());
 
-		m_tcpSrc->configure(m_tcpSrc->getInputMessageQueue(),
-			m_settings.m_sampleFormat,
-			m_settings.m_outputSampleRate,
-			m_settings.m_rfBandwidth,
-			m_settings.m_tcpPort,
-			m_settings.m_volume);
+        TCPSrc::MsgConfigureTCPSrc* message = TCPSrc::MsgConfigureTCPSrc::create( m_settings, false);
+        m_tcpSrc->getInputMessageQueue()->push(message);
 	}
 }
 

@@ -22,10 +22,56 @@ class TCPSrc : public BasebandSampleSink {
 	Q_OBJECT
 
 public:
+    class MsgConfigureTCPSrc : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const TCPSrcSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureTCPSrc* create(const TCPSrcSettings& settings, bool force)
+        {
+            return new MsgConfigureTCPSrc(settings, force);
+        }
+
+    private:
+        TCPSrcSettings m_settings;
+        bool m_force;
+
+        MsgConfigureTCPSrc(const TCPSrcSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        {
+        }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
 	TCPSrc(MessageQueue* uiMessageQueue, TCPSrcGUI* tcpSrcGUI, BasebandSampleSink* spectrum);
 	virtual ~TCPSrc();
 
-	void configure(MessageQueue* messageQueue, TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost);
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
 	double getMagSq() const { return m_magsq; }
 
@@ -64,37 +110,6 @@ public:
 	};
 
 protected:
-	class MsgTCPSrcConfigure : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		TCPSrcSettings::SampleFormat getSampleFormat() const { return m_sampleFormat; }
-		Real getOutputSampleRate() const { return m_outputSampleRate; }
-		Real getRFBandwidth() const { return m_rfBandwidth; }
-		int getTCPPort() const { return m_tcpPort; }
-		int getBoost() const { return m_boost; }
-
-		static MsgTCPSrcConfigure* create(TCPSrcSettings::SampleFormat sampleFormat, Real sampleRate, Real rfBandwidth, int tcpPort, int boost)
-		{
-			return new MsgTCPSrcConfigure(sampleFormat, sampleRate, rfBandwidth, tcpPort, boost);
-		}
-
-	private:
-		TCPSrcSettings::SampleFormat m_sampleFormat;
-		Real m_outputSampleRate;
-		Real m_rfBandwidth;
-		int m_tcpPort;
-		int m_boost;
-
-		MsgTCPSrcConfigure(TCPSrcSettings::SampleFormat sampleFormat, Real outputSampleRate, Real rfBandwidth, int tcpPort, int boost) :
-			Message(),
-			m_sampleFormat(sampleFormat),
-			m_outputSampleRate(outputSampleRate),
-			m_rfBandwidth(rfBandwidth),
-			m_tcpPort(tcpPort),
-			m_boost(boost)
-		{ }
-	};
 	class MsgTCPSrcSpectrum : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -137,13 +152,15 @@ protected:
 	MessageQueue* m_uiMessageQueue;
 	TCPSrcGUI* m_tcpSrcGUI;
 
-	int m_inputSampleRate;
+    TCPSrcSettings m_settings;
+
+    int m_inputSampleRate;
 
 	int m_sampleFormat;
 	Real m_outputSampleRate;
 	Real m_rfBandwidth;
 	int m_tcpPort;
-	int m_boost;
+	int m_volume;
 	double m_magsq;
 
 	Real m_scale;
