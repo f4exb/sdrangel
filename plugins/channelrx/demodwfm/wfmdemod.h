@@ -34,6 +34,10 @@
 
 #define rfFilterFftLength 1024
 
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
+class DeviceSourceAPI;
+
 class WFMDemod : public BasebandSampleSink {
 public:
     class MsgConfigureWFMDemod : public Message {
@@ -82,8 +86,9 @@ public:
         { }
     };
 
-	WFMDemod(BasebandSampleSink* sampleSink);
+	WFMDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~WFMDemod();
+	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -110,7 +115,10 @@ private:
 		RSRunning
 	};
 
-	WFMDemodSettings m_settings;
+    DeviceSourceAPI* m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
+    WFMDemodSettings m_settings;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)

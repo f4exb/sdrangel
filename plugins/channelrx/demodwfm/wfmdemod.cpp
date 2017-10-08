@@ -15,33 +15,42 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodwfm/wfmdemod.h"
 
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
 #include <dsp/downchannelizer.h>
+#include "dsp/threadedbasebandsamplesink.h"
+#include <device/devicesourceapi.h>
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
 
+#include "wfmdemod.h"
+
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureChannelizer, Message)
 
-WFMDemod::WFMDemod(BasebandSampleSink* sampleSink) :
+WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
+    m_deviceAPI(deviceAPI),
     m_squelchOpen(false),
     m_magsq(0.0f),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
     m_movingAverage(40, 0),
-    m_sampleSink(sampleSink),
+    m_sampleSink(0),
     m_audioFifo(250000),
     m_settingsMutex(QMutex::Recursive)
 
 {
 	setObjectName("WFMDemod");
+
+	m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 	m_phaseDiscri.setFMScaling(384000/75000);
@@ -63,6 +72,10 @@ WFMDemod::~WFMDemod()
 	}
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+
+	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))

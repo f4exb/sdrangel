@@ -6,7 +6,6 @@
 #include <QMainWindow>
 #include <QDebug>
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_wfmdemodgui.h"
 #include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
@@ -173,10 +172,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_wfmDemod = new WFMDemod(0);
-	m_channelizer = new DownChannelizer(m_wfmDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+	m_wfmDemod = new WFMDemod(m_deviceAPI);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -193,6 +189,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
 	m_deviceAPI->addRollupWidget(this);
 
+	m_settings.setChannelMarker(&m_channelMarker);
+
     displaySettings();
 	applySettings(true);
 }
@@ -200,9 +198,6 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 WFMDemodGUI::~WFMDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_wfmDemod;
 	//delete m_channelMarker;
 	delete ui;
@@ -219,9 +214,10 @@ void WFMDemodGUI::applySettings(bool force)
 	{
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())), // TODO: this is where requested sample rate is specified
-			m_channelMarker.getCenterFrequency());
+        WFMDemod::MsgConfigureChannelizer *msgChan = WFMDemod::MsgConfigureChannelizer::create(
+                requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())),
+                m_channelMarker.getCenterFrequency());
+        m_wfmDemod->getInputMessageQueue()->push(msgChan);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 

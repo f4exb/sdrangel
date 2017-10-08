@@ -12,8 +12,6 @@
 class PluginAPI;
 class DeviceSourceAPI;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class WFMDemod;
 
 namespace Ui {
@@ -63,8 +61,6 @@ private:
     bool m_audioMute;
     bool m_squelchOpen;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	WFMDemod* m_wfmDemod;
 	MovingAverage<double> m_channelPowerDbAvg;
 	MessageQueue m_inputMessageQueue;
