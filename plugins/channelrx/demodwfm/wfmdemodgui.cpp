@@ -12,6 +12,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "wfmdemod.h"
@@ -84,8 +85,14 @@ bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 	return false;
 }
 
-void WFMDemodGUI::viewChanged()
+void WFMDemodGUI::channelMarkerChanged()
 {
+    this->setWindowTitle(m_channelMarker.getTitle());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
+    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    displayUDPAddress();
 	applySettings();
 }
 
@@ -134,14 +141,11 @@ void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool r
 {
 }
 
-void WFMDemodGUI::onMenuDoubleClicked()
+void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-	if(!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
 }
 
 WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -170,7 +174,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_wfmDemod = new WFMDemod(m_deviceAPI);
 
@@ -183,7 +187,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_channelMarker.getColor());
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
 	m_deviceAPI->addChannelMarker(&m_channelMarker);
@@ -253,6 +257,11 @@ void WFMDemodGUI::displaySettings()
     m_channelMarker.blockSignals(false);
 
     blockApplySettings(false);
+}
+
+void WFMDemodGUI::displayUDPAddress()
+{
+    //ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
 }
 
 void WFMDemodGUI::leaveEvent(QEvent*)
