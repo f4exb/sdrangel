@@ -38,7 +38,6 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class NFMDemodGUI;
 
 class NFMDemod : public BasebandSampleSink {
 public:
@@ -88,17 +87,33 @@ public:
         { }
     };
 
-	NFMDemod(DeviceSourceAPI *deviceAPI);
+    class MsgReportCTCSSFreq : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        Real getFrequency() const { return m_freq; }
+
+        static MsgReportCTCSSFreq* create(Real freq)
+        {
+            return new MsgReportCTCSSFreq(freq);
+        }
+
+    private:
+        Real m_freq;
+
+        MsgReportCTCSSFreq(Real freq) :
+            Message(),
+            m_freq(freq)
+        { }
+    };
+
+    NFMDemod(DeviceSourceAPI *deviceAPI);
 	~NFMDemod();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
-
-	void registerGUI(NFMDemodGUI *nfmDemodGUI) {
-		m_nfmDemodGUI = nfmDemodGUI;
-	}
 
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
@@ -174,7 +189,6 @@ private:
 	AudioFifo m_audioFifo;
     UDPSink<qint16> *m_udpBufferAudio;
 
-	NFMDemodGUI *m_nfmDemodGUI;
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;

@@ -33,6 +33,7 @@
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(NFMDemod::MsgReportCTCSSFreq, Message)
 
 static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 const int NFMDemod::m_udpBlockSize = 512;
@@ -240,7 +241,10 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 								{
 									if (maxToneIndex+1 != m_ctcssIndex)
 									{
-										m_nfmDemodGUI->setCtcssFreq(m_ctcssDetector.getToneSet()[maxToneIndex]);
+									    if (getMessageQueueToGUI()) {
+									        MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(m_ctcssDetector.getToneSet()[maxToneIndex]);
+									        getMessageQueueToGUI()->push(msg);
+									    }
 										m_ctcssIndex = maxToneIndex+1;
 									}
 								}
@@ -248,7 +252,10 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 								{
 									if (m_ctcssIndex != 0)
 									{
-										m_nfmDemodGUI->setCtcssFreq(0);
+                                        if (getMessageQueueToGUI()) {
+                                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                                            getMessageQueueToGUI()->push(msg);
+                                        }
 										m_ctcssIndex = 0;
 									}
 								}
@@ -273,8 +280,12 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				{
 					if (m_ctcssIndex != 0)
 					{
-						m_nfmDemodGUI->setCtcssFreq(0);
-						m_ctcssIndex = 0;
+                        if (getMessageQueueToGUI()) {
+                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                            getMessageQueueToGUI()->push(msg);
+                        }
+
+                        m_ctcssIndex = 0;
 					}
 
 					sample = 0;

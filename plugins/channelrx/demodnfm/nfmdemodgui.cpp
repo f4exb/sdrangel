@@ -160,7 +160,28 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 
 bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
-	return false;
+    if (NFMDemod::MsgReportCTCSSFreq::match(message))
+    {
+        NFMDemod::MsgReportCTCSSFreq& report = (NFMDemod::MsgReportCTCSSFreq&) message;
+        setCtcssFreq(report.getFrequency());
+        //qDebug("NFMDemodGUI::handleMessage: MsgReportCTCSSFreq: %f", report.getFrequency());
+        return true;
+    }
+
+    return false;
+}
+
+void NFMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void NFMDemodGUI::channelMarkerChanged()
@@ -303,7 +324,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmDemod = new NFMDemod(m_deviceAPI);
-	m_nfmDemod->registerGUI(this);
+	m_nfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -353,6 +374,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	QChar delta = QChar(0x94, 0x03);
 	ui->deltaSquelch->setText(delta);
+
+	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	applySettings(true);
 }
