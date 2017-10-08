@@ -1,13 +1,12 @@
-#include "../../channelrx/demodlora/loraplugin.h"
-
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/demodlora/lorademodgui.h"
+#include "loraplugin.h"
+#include "lorademodgui.h"
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
 	QString("LoRa Demodulator"),
-	QString("2.0.0"),
+	QString("3.7.4"),
 	QString("(c) 2015 John Greb"),
 	QString("http://www.maintech.de"),
 	true,

@@ -3,12 +3,14 @@ project(wfm)
 set(wfm_SOURCES
 	wfmdemod.cpp
 	wfmdemodgui.cpp
+	wfmdemodsettings.cpp
 	wfmplugin.cpp
 )
 
 set(wfm_HEADERS
 	wfmdemod.h
 	wfmdemodgui.h
+	wfmdemodsettings.h
 	wfmplugin.h
 )
 
