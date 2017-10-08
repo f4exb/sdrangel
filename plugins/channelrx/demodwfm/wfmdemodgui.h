@@ -7,6 +7,8 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
+#include "wfmdemodsettings.h"
+
 class PluginAPI;
 class DeviceSourceAPI;
 
@@ -55,6 +57,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	WFMDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
     bool m_audioMute;
@@ -73,7 +76,8 @@ private:
 	virtual ~WFMDemodGUI();
 
     void blockApplySettings(bool block);
-	void applySettings();
+	void applySettings(bool force = false);
+	void displaySettings();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

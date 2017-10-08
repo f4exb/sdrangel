@@ -42,6 +42,7 @@ void WFMDemodSettings::resetToDefaults()
     m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
+    m_audioMute = false;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";

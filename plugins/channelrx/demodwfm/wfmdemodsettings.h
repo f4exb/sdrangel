@@ -28,6 +28,7 @@ struct WFMDemodSettings
     Real m_afBandwidth;
     Real m_volume;
     Real m_squelch;
+    bool m_audioMute;
     quint32 m_audioSampleRate;
     bool m_copyAudioToUDP;
     QString m_udpAddress;

@@ -367,7 +367,7 @@
          </size>
         </property>
         <property name="text">
-         <string>-40dB</string>
+         <string>-40 dB</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
