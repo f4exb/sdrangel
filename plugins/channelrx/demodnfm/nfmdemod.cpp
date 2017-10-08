@@ -63,6 +63,7 @@ NFMDemod::NFMDemod() :
 	m_config.m_squelch = -30.0;
 	m_config.m_volume = 1.0;
 	m_config.m_ctcssOn = false;
+	m_config.m_ctcssIndex = 0;
 	m_config.m_audioMute = false;
 	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
@@ -95,6 +96,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 		int  squelchGate,
 		bool deltaSquelch,
 		Real squelch,
+		int  ctcssIndex,
 		bool ctcssOn,
 		bool audioMute,
         bool copyAudioToUDP,
@@ -109,6 +111,7 @@ void NFMDemod::configure(MessageQueue* messageQueue,
 			squelchGate,
 			deltaSquelch,
 			squelch,
+			ctcssIndex,
 			ctcssOn,
 			audioMute,
 			copyAudioToUDP,
@@ -390,6 +393,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 		m_config.m_squelchGate = cfg.getSquelchGate();
 		m_config.m_deltaSquelch = cfg.getDeltaSquelch();
 		m_config.m_squelch = cfg.getSquelch();
+		m_config.m_ctcssIndex = cfg.getCtcssIndex();
 		m_config.m_ctcssOn = cfg.getCtcssOn();
 		m_config.m_audioMute = cfg.getAudioMute();
 		m_config.m_copyAudioToUDP = cfg.getCopyAudioToUDP();
@@ -405,6 +409,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 				<< " m_squelchGate: " << m_config.m_squelchGate
 				<< " m_deltaSquelch: " << m_config.m_deltaSquelch
 				<< " m_squelch: " << m_squelchLevel
+                << " m_ctcssIndex: " << m_config.m_ctcssIndex
 				<< " m_ctcssOn: " << m_config.m_ctcssOn
 				<< " m_audioMute: " << m_config.m_audioMute
                 << " m_copyAudioToUDP: " << m_config.m_copyAudioToUDP
@@ -481,6 +486,11 @@ void NFMDemod::apply(bool force)
     {
         m_udpBufferAudio->setAddress(m_config.m_udpAddress);
         m_udpBufferAudio->setPort(m_config.m_udpPort);
+    }
+
+    if ((m_config.m_ctcssIndex != m_running.m_ctcssIndex) || force)
+    {
+        setSelectedCtcssIndex(m_config.m_ctcssIndex);
     }
 
 	m_running = m_config;

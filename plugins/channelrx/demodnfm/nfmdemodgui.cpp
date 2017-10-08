@@ -268,11 +268,8 @@ void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
 
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
-	if (m_nfmDemod != 0)
-	{
-		m_nfmDemod->setSelectedCtcssIndex(index);
-	}
 	m_settings.m_ctcssIndex = index;
+	applySettings();
 }
 
 void NFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
@@ -304,13 +301,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	blockApplySettings(true);
-	ui->rfBW->clear();
-	for (int i = 0; i < m_nbRfBW; i++) {
-		ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
-	}
-	blockApplySettings(false);
-
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
@@ -319,15 +309,25 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	int ctcss_nbTones;
-	const Real *ctcss_tones = m_nfmDemod->getCtcssToneSet(ctcss_nbTones);
+    blockApplySettings(true);
 
-	ui->ctcss->addItem("--");
+    ui->rfBW->clear();
 
-	for (int i=0; i<ctcss_nbTones; i++)
-	{
-		ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
-	}
+    for (int i = 0; i < m_nbRfBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    }
+
+    int ctcss_nbTones;
+    const Real *ctcss_tones = m_nfmDemod->getCtcssToneSet(ctcss_nbTones);
+
+    ui->ctcss->addItem("--");
+
+    for (int i=0; i<ctcss_nbTones; i++)
+    {
+        ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
+    }
+
+    blockApplySettings(false);
 
 	ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }"); // squelch closed
 
@@ -396,6 +396,7 @@ void NFMDemodGUI::applySettings(bool force)
 			m_settings.m_squelchGate, // in 10ths of ms 1 -> 50
 			m_settings.m_deltaSquelch,
 			m_settings.m_squelch, // -1000 -> 0
+			m_settings.m_ctcssIndex,
 			m_settings.m_ctcssOn,
 			m_settings.m_audioMute,
 			m_settings.m_copyAudioToUDP,

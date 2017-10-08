@@ -48,6 +48,7 @@ public:
 			int  squelchGate,
             bool deltaSquelch,
 			Real squelch,
+			int  ctcssIndex,
 			bool ctcssOn,
 			bool audioMute,
             bool copyAudioToUDP,
@@ -99,6 +100,7 @@ private:
 		int  getSquelchGate() const { return m_squelchGate; }
 		bool getDeltaSquelch() const { return m_deltaSquelch; }
 		Real getSquelch() const { return m_squelch; }
+		int  getCtcssIndex() const { return m_ctcssIndex; }
 		bool getCtcssOn() const { return m_ctcssOn; }
 		bool getAudioMute() const { return m_audioMute; }
 		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
@@ -113,6 +115,7 @@ private:
 				int  squelchGate,
 				bool deltaSquelch,
 				Real squelch,
+				int  ctcssIndex,
 				bool ctcssOn,
 				bool audioMute,
                 bool copyAudioToUDP,
@@ -128,6 +131,7 @@ private:
 			        squelchGate,
 			        deltaSquelch,
 			        squelch,
+			        ctcssIndex,
 			        ctcssOn,
 			        audioMute,
 			        copyAudioToUDP,
@@ -144,6 +148,7 @@ private:
 		int  m_squelchGate;
 		bool m_deltaSquelch;
 		Real m_squelch;
+		int  m_ctcssIndex;
 		bool m_ctcssOn;
 		bool m_audioMute;
         bool m_copyAudioToUDP;
@@ -158,6 +163,7 @@ private:
 				int  squelchGate,
 				bool deltaSquelch,
 				Real squelch,
+				int  ctcssIndex,
 				bool ctcssOn,
 				bool audioMute,
 				bool copyAudioToUDP,
@@ -172,6 +178,7 @@ private:
 			m_squelchGate(squelchGate),
 			m_deltaSquelch(deltaSquelch),
 			m_squelch(squelch),
+			m_ctcssIndex(ctcssIndex),
 			m_ctcssOn(ctcssOn),
 			m_audioMute(audioMute),
 			m_copyAudioToUDP(copyAudioToUDP),
