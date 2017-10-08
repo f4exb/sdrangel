@@ -3,12 +3,14 @@ project(nfm)
 set(nfm_SOURCES
 	nfmdemod.cpp
 	nfmdemodgui.cpp
+	nfmdemodsettings.cpp
 	nfmplugin.cpp
 )
 
 set(nfm_HEADERS
 	nfmdemod.h
 	nfmdemodgui.h
+	nfmdemodsettings.h
 	nfmplugin.h
 )
 

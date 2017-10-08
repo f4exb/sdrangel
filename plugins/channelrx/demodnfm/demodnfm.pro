@@ -25,10 +25,12 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += nfmdemod.cpp\
     nfmdemodgui.cpp\
+    nfmdemodsettings.cpp\
     nfmplugin.cpp
 
 HEADERS += nfmdemod.h\
     nfmdemodgui.h\
+    nfmdemodsettings.h\
     nfmplugin.h
 
 FORMS += nfmdemodgui.ui
