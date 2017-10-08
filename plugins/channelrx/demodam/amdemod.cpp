@@ -68,6 +68,9 @@ AMDemod::~AMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
     delete m_udpBufferAudio;
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
