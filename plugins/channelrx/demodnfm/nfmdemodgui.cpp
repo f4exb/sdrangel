@@ -388,21 +388,8 @@ void NFMDemodGUI::applySettings(bool force)
 
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
-			m_settings.m_rfBandwidth,
-			m_settings.m_afBandwidth,
-			m_settings.m_fmDeviation,
-			m_settings.m_volume,
-			m_settings.m_squelchGate, // in 10ths of ms 1 -> 50
-			m_settings.m_deltaSquelch,
-			m_settings.m_squelch, // -1000 -> 0
-			m_settings.m_ctcssIndex,
-			m_settings.m_ctcssOn,
-			m_settings.m_audioMute,
-			m_settings.m_copyAudioToUDP,
-			m_channelMarker.getUDPAddress(),
-			m_channelMarker.getUDPSendPort(),
-			force);
+        NFMDemod::MsgConfigureNFMDemod* message = NFMDemod::MsgConfigureNFMDemod::create( m_settings, force);
+        m_nfmDemod->getInputMessageQueue()->push(message);
 	}
 }
 

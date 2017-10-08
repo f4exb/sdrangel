@@ -33,28 +33,60 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "nfmdemodsettings.h"
+
 class NFMDemodGUI;
 
 class NFMDemod : public BasebandSampleSink {
 public:
+    class MsgConfigureNFMDemod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const NFMDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureNFMDemod* create(const NFMDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureNFMDemod(settings, force);
+        }
+
+    private:
+        NFMDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureNFMDemod(const NFMDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
 	NFMDemod();
 	~NFMDemod();
-
-	void configure(MessageQueue* messageQueue,
-			Real rfBandwidth,
-			Real afBandwidth,
-			int  fmDeviation,
-			Real volume,
-			int  squelchGate,
-            bool deltaSquelch,
-			Real squelch,
-			int  ctcssIndex,
-			bool ctcssOn,
-			bool audioMute,
-            bool copyAudioToUDP,
-            const QString& udpAddress,
-            qint16 udpPort,
-			bool force);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -89,150 +121,12 @@ public:
     }
 
 private:
-	class MsgConfigureNFMDemod : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		Real getRFBandwidth() const { return m_rfBandwidth; }
-		Real getAFBandwidth() const { return m_afBandwidth; }
-		int  getFMDeviation() const { return m_fmDeviation; }
-		Real getVolume() const { return m_volume; }\
-		int  getSquelchGate() const { return m_squelchGate; }
-		bool getDeltaSquelch() const { return m_deltaSquelch; }
-		Real getSquelch() const { return m_squelch; }
-		int  getCtcssIndex() const { return m_ctcssIndex; }
-		bool getCtcssOn() const { return m_ctcssOn; }
-		bool getAudioMute() const { return m_audioMute; }
-		bool getCopyAudioToUDP() const { return m_copyAudioToUDP; }
-		const QString& getUDPAddress() const { return m_udpAddress; }
-		quint16 getUDPPort() const { return m_udpPort; }
-		bool getForce() const { return m_force; }
-
-		static MsgConfigureNFMDemod* create(Real rfBandwidth,
-				Real afBandwidth,
-				int  fmDeviation,
-				Real volume,
-				int  squelchGate,
-				bool deltaSquelch,
-				Real squelch,
-				int  ctcssIndex,
-				bool ctcssOn,
-				bool audioMute,
-                bool copyAudioToUDP,
-                const QString& udpAddress,
-                qint16 udpPort,
-				bool force)
-		{
-			return new MsgConfigureNFMDemod(
-			        rfBandwidth,
-			        afBandwidth,
-			        fmDeviation,
-			        volume,
-			        squelchGate,
-			        deltaSquelch,
-			        squelch,
-			        ctcssIndex,
-			        ctcssOn,
-			        audioMute,
-			        copyAudioToUDP,
-			        udpAddress,
-			        udpPort,
-			        force);
-		}
-
-	private:
-		Real m_rfBandwidth;
-		Real m_afBandwidth;
-		int  m_fmDeviation;
-		Real m_volume;
-		int  m_squelchGate;
-		bool m_deltaSquelch;
-		Real m_squelch;
-		int  m_ctcssIndex;
-		bool m_ctcssOn;
-		bool m_audioMute;
-        bool m_copyAudioToUDP;
-        QString m_udpAddress;
-        quint16 m_udpPort;
-		bool m_force;
-
-		MsgConfigureNFMDemod(Real rfBandwidth,
-				Real afBandwidth,
-				int  fmDeviation,
-				Real volume,
-				int  squelchGate,
-				bool deltaSquelch,
-				Real squelch,
-				int  ctcssIndex,
-				bool ctcssOn,
-				bool audioMute,
-				bool copyAudioToUDP,
-				const QString& udpAddress,
-				qint16 udpPort,
-				bool force) :
-			Message(),
-			m_rfBandwidth(rfBandwidth),
-			m_afBandwidth(afBandwidth),
-			m_fmDeviation(fmDeviation),
-			m_volume(volume),
-			m_squelchGate(squelchGate),
-			m_deltaSquelch(deltaSquelch),
-			m_squelch(squelch),
-			m_ctcssIndex(ctcssIndex),
-			m_ctcssOn(ctcssOn),
-			m_audioMute(audioMute),
-			m_copyAudioToUDP(copyAudioToUDP),
-			m_udpAddress(udpAddress),
-			m_udpPort(udpPort),
-			m_force(force)
-		{ }
-	};
-
 	enum RateState {
 		RSInitialFill,
 		RSRunning
 	};
 
-	struct Config {
-		int m_inputSampleRate;
-		qint64 m_inputFrequencyOffset;
-		Real m_rfBandwidth;
-		Real m_afBandwidth;
-		int  m_fmDeviation;
-		int  m_squelchGate;
-		bool m_deltaSquelch;
-		Real m_squelch;
-		Real m_volume;
-		bool m_ctcssOn;
-		bool m_audioMute;
-		int  m_ctcssIndex;
-		quint32 m_audioSampleRate;
-        bool m_copyAudioToUDP;
-        QString m_udpAddress;
-        quint16 m_udpPort;
-
-		Config() :
-			m_inputSampleRate(-1),
-			m_inputFrequencyOffset(0),
-			m_rfBandwidth(-1),
-			m_afBandwidth(-1),
-			m_fmDeviation(1),
-			m_squelchGate(1),
-			m_deltaSquelch(false),
-			m_squelch(0),
-			m_volume(0),
-			m_ctcssOn(false),
-			m_audioMute(false),
-			m_ctcssIndex(0),
-			m_audioSampleRate(0),
-			m_copyAudioToUDP(false),
-			m_udpAddress("127.0.0.1"),
-			m_udpPort(9999)
-		{ }
-	};
-
-	Config m_config;
-	Config m_running;
+	NFMDemodSettings m_settings;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -280,7 +174,8 @@ private:
 
     static const int m_udpBlockSize;
 
-    void apply(bool force = false);
+//    void apply(bool force = false);
+    void applySettings(const NFMDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_NFMDEMOD_H
