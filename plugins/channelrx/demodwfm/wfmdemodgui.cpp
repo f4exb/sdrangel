@@ -225,12 +225,8 @@ void WFMDemodGUI::applySettings(bool force)
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_wfmDemod->configure(m_wfmDemod->getInputMessageQueue(),
-		    m_settings.m_rfBandwidth,
-			m_settings.m_afBandwidth,
-			m_settings.m_volume,
-			m_settings.m_squelch,
-			m_settings.m_audioMute);
+        WFMDemod::MsgConfigureWFMDemod* msgConfig = WFMDemod::MsgConfigureWFMDemod::create( m_settings, force);
+        m_wfmDemod->getInputMessageQueue()->push(msgConfig);
 	}
 }
 
