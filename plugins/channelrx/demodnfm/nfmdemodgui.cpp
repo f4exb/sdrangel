@@ -1,12 +1,10 @@
 #include "nfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
-#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_nfmdemodgui.h"
 #include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
@@ -304,7 +302,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_nfmDemod = new NFMDemod();
+	m_nfmDemod = new NFMDemod(m_deviceAPI);
 	m_nfmDemod->registerGUI(this);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -336,10 +334,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
-	m_channelizer = new DownChannelizer(m_nfmDemod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::red);
 	m_channelMarker.setBandwidth(12500);
@@ -366,9 +360,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 NFMDemodGUI::~NFMDemodGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_nfmDemod;
 	//delete m_channelMarker;
 	delete ui;
@@ -382,9 +373,9 @@ void NFMDemodGUI::applySettings(bool force)
 
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+        NFMDemod::MsgConfigureChannelizer* channelConfigMsg = NFMDemod::MsgConfigureChannelizer::create(
+                48000, m_channelMarker.getCenterFrequency());
+        m_nfmDemod->getInputMessageQueue()->push(channelConfigMsg);
 
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 

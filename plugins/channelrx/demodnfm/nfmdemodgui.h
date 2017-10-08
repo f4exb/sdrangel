@@ -13,8 +13,6 @@
 class PluginAPI;
 class DeviceSourceAPI;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class NFMDemod;
 
 namespace Ui {
@@ -68,8 +66,6 @@ private:
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
-	ThreadedBasebandSampleSink* m_threadedChannelizer;
-	DownChannelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;

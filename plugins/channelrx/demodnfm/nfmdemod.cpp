@@ -25,6 +25,8 @@
 #include "audio/audiooutput.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include <device/devicesourceapi.h>
 
 #include "nfmdemodgui.h"
 #include "nfmdemod.h"
@@ -35,7 +37,8 @@ MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureChannelizer, Message)
 static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 const int NFMDemod::m_udpBlockSize = 512;
 
-NFMDemod::NFMDemod() :
+NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
+    m_deviceAPI(devieAPI),
 	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_squelchCount(0),
@@ -54,6 +57,10 @@ NFMDemod::NFMDemod() :
     m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("NFMDemod");
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -74,6 +81,9 @@ NFMDemod::~NFMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 	delete m_udpBufferAudio;
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 float arctan2(Real y, Real x)
@@ -338,6 +348,16 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        return true;
+    }
 	else if (MsgConfigureNFMDemod::match(cmd))
 	{
 	    MsgConfigureNFMDemod& cfg = (MsgConfigureNFMDemod&) cmd;

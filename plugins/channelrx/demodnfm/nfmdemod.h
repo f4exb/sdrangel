@@ -35,6 +35,9 @@
 
 #include "nfmdemodsettings.h"
 
+class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 class NFMDemodGUI;
 
 class NFMDemod : public BasebandSampleSink {
@@ -85,7 +88,7 @@ public:
         { }
     };
 
-	NFMDemod();
+	NFMDemod(DeviceSourceAPI *deviceAPI);
 	~NFMDemod();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -125,6 +128,10 @@ private:
 		RSInitialFill,
 		RSRunning
 	};
+
+    DeviceSourceAPI* m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
 	NFMDemodSettings m_settings;
 
