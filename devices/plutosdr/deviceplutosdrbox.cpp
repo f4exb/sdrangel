@@ -150,6 +150,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
         if (ret < 0)
         {
             std::string item;
+           char errstr[256];
 
             switch (type)
             {
@@ -166,7 +167,8 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
                 item = "unknown";
                 break;
             }
-            std::cerr << "DevicePlutoSDRBox::set_params: Unable to write " << item << " attribute " << key << "=" << val << ": " << ret << std::endl;
+            iio_strerror(-ret, errstr, 255);
+            std::cerr << "DevicePlutoSDRBox::set_params: Unable to write " << item << " attribute " << key << "=" << val << ": " << errstr << " (" << ret << ") " << std::endl;
         }
         else
         {
