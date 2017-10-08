@@ -1,13 +1,12 @@
-#include "../../channelrx/demodnfm/nfmplugin.h"
-
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/demodnfm/nfmdemodgui.h"
+#include "nfmplugin.h"
+#include "nfmdemodgui.h"
 
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
 	QString("NFM Demodulator"),
-	QString("3.6.1"),
+	QString("3.7.4"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

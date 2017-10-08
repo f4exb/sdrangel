@@ -8,6 +8,8 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
+#include "nfmdemodsettings.h"
+
 class PluginAPI;
 class DeviceSourceAPI;
 
@@ -62,14 +64,13 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceSourceAPI* m_deviceAPI;
 	ChannelMarker m_channelMarker;
+	NFMDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
 	ThreadedBasebandSampleSink* m_threadedChannelizer;
 	DownChannelizer* m_channelizer;
 	NFMDemod* m_nfmDemod;
-	bool m_ctcssOn;
-	bool m_audioMute;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;

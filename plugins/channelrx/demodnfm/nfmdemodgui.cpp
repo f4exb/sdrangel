@@ -168,6 +168,10 @@ bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 void NFMDemodGUI::channelMarkerChanged()
 {
     this->setWindowTitle(m_channelMarker.getTitle());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
+    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     displayUDPAddress();
     applySettings();
 }
@@ -175,37 +179,44 @@ void NFMDemodGUI::channelMarkerChanged()
 void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void NFMDemodGUI::on_rfBW_currentIndexChanged(int index)
 {
 	qDebug() << "NFMDemodGUI::on_rfBW_currentIndexChanged" << index;
 	//ui->rfBWText->setText(QString("%1 k").arg(m_rfBW[value] / 1000.0));
-	m_channelMarker.setBandwidth(m_rfBW[index]);
+	m_channelMarker.setBandwidth(NFMDemodSettings::getRFBW(index));
+	m_settings.m_rfBandwidth = NFMDemodSettings::getRFBW(index);
+	m_settings.m_fmDeviation = NFMDemodSettings::getFMDev(index);
 	applySettings();
 }
 
 void NFMDemodGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1 k").arg(value));
+	m_settings.m_afBandwidth = value * 1000.0;
 	applySettings();
 }
 
 void NFMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volume = value / 10.0;
 	applySettings();
 }
 
-void NFMDemodGUI::on_squelchGate_valueChanged(int value __attribute__((unused)))
+void NFMDemodGUI::on_squelchGate_valueChanged(int value)
 {
-    ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0f, 0, 'f', 0));
+    ui->squelchGateText->setText(QString("%1").arg(value * 10.0f, 0, 'f', 0));
+    m_settings.m_squelchGate = value;
 	applySettings();
 }
 
-void NFMDemodGUI::on_deltaSquelch_toggled(bool checked __attribute__((unused)))
+void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
 {
-    if (ui->deltaSquelch->isChecked())
+    if (checked)
     {
         ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 10.0, 0, 'f', 1));
         ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
@@ -217,6 +228,7 @@ void NFMDemodGUI::on_deltaSquelch_toggled(bool checked __attribute__((unused)))
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
         ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
+    m_settings.m_deltaSquelch = checked;
     applySettings();
 }
 
@@ -232,23 +244,25 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
         ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
     }
+    m_settings.m_squelch = value * 1.0;
 	applySettings();
 }
 
 void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
 {
-	m_ctcssOn = checked;
+	m_settings.m_ctcssOn = checked;
 	applySettings();
 }
 
 void NFMDemodGUI::on_audioMute_toggled(bool checked)
 {
-	m_audioMute = checked;
+	m_settings.m_audioMute = checked;
 	applySettings();
 }
 
-void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked __attribute__((unused)))
+void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
 {
+    m_settings.m_copyAudioToUDP = checked;
     applySettings();
 }
 
@@ -258,6 +272,7 @@ void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 	{
 		m_nfmDemod->setSelectedCtcssIndex(index);
 	}
+	m_settings.m_ctcssIndex = index;
 }
 
 void NFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
@@ -374,16 +389,16 @@ void NFMDemodGUI::applySettings(bool force)
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_nfmDemod->configure(m_nfmDemod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->currentIndex()],
-			ui->afBW->value() * 1000.0f,
-			m_fmDev[ui->rfBW->currentIndex()],
-			ui->volume->value() / 10.0f,
-			ui->squelchGate->value(), // in 10ths of ms 1 -> 50
-			ui->deltaSquelch->isChecked(),
-			ui->squelch->value(), // -1000 -> 0
-			ui->ctcssOn->isChecked(),
-			ui->audioMute->isChecked(),
-			ui->copyAudioToUDP->isChecked(),
+			m_settings.m_rfBandwidth,
+			m_settings.m_afBandwidth,
+			m_settings.m_fmDeviation,
+			m_settings.m_volume,
+			m_settings.m_squelchGate, // in 10ths of ms 1 -> 50
+			m_settings.m_deltaSquelch,
+			m_settings.m_squelch, // -1000 -> 0
+			m_settings.m_ctcssOn,
+			m_settings.m_audioMute,
+			m_settings.m_copyAudioToUDP,
 			m_channelMarker.getUDPAddress(),
 			m_channelMarker.getUDPSendPort(),
 			force);
