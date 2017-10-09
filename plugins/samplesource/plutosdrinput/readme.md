@@ -173,6 +173,10 @@ See AD9363 documentation for details on AGC options.
 
 Use this button to adjust the global gain manually in manual gain mode. This button is disabled when AGC modes are selected with combo (14).
 
+<h4>15a: Actual gain fetched from device</h4>
+
+This is the actual gain in dB set in the device.
+
 <h4>16: Indicative RSSI</h4>
 
 This is the indicative RSSI of the receiver.
