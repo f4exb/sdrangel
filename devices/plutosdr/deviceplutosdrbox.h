@@ -93,6 +93,7 @@ public:
     void setFIR(uint32_t sampleRate, uint32_t intdec, DeviceUse use, uint32_t bw, int gain);
     void setFIREnable(bool enable);
     void setLOPPMTenths(int ppmTenths);
+    bool getRxGain(int& gaindB, unsigned int chan);
     bool getRxRSSI(std::string& rssiStr, unsigned int chan);
     bool getTxRSSI(std::string& rssiStr, unsigned int chan);
     bool fetchTemp();

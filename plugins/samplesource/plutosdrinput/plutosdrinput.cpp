@@ -538,6 +538,15 @@ void PlutoSDRInput::getRSSI(std::string& rssiStr)
     }
 }
 
+void PlutoSDRInput::getGain(int& gaindB)
+{
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+
+    if (!plutoBox->getRxGain(gaindB, 0)) {
+        gaindB = 0;
+    }
+}
+
 bool PlutoSDRInput::fetchTemperature()
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();

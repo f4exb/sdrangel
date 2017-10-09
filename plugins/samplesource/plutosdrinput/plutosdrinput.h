@@ -90,6 +90,7 @@ public:
     uint32_t getADCSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
     uint32_t getFIRSampleRate() const { return m_deviceSampleRates.m_hb1Rate; }
     void getRSSI(std::string& rssiStr);
+    void getGain(int& gainStr);
     bool fetchTemperature();
     float getTemperature();
 

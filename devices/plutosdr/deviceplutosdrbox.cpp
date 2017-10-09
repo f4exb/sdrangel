@@ -626,6 +626,37 @@ void DevicePlutoSDRBox::getXO()
     }
 }
 
+bool DevicePlutoSDRBox::getRxGain(int& gaindB, unsigned int chan)
+{
+    chan = chan % 2;
+    char buff[30];
+    snprintf(buff, sizeof(buff), "in_voltage%d_hardwaregain", chan);
+    std::string gainStr;
+    get_param(DEVICE_PHY, buff, gainStr);
+
+    std::regex gain_regex("(.+)\\.(.+) dB");
+    std::smatch gain_match;
+    std::regex_search(gainStr, gain_match, gain_regex);
+
+    if (gain_match.size() == 3)
+    {
+        try
+        {
+            gaindB = boost::lexical_cast<int>(gain_match[1]);
+            return true;
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            qWarning("DevicePlutoSDRBox::getRxGain: bad conversion to numeric");
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool DevicePlutoSDRBox::getRxRSSI(std::string& rssiStr, unsigned int chan)
 {
     chan = chan % 2;
