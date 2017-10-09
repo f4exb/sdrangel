@@ -4,12 +4,14 @@ set(modam_SOURCES
 	ammod.cpp
 	ammodgui.cpp
 	ammodplugin.cpp
+	ammodsettings.cpp
 )
 
 set(modam_HEADERS
 	ammod.h
 	ammodgui.h
 	ammodplugin.h
+	ammodsettings.h
 )
 
 set(modam_FORMS

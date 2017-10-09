@@ -25,11 +25,13 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += ammod.cpp\
 	ammodgui.cpp\
-	ammodplugin.cpp
+	ammodplugin.cpp\
+	ammodsettings.cpp
 
 HEADERS += ammod.h\
 	ammodgui.h\
-	ammodplugin.h
+	ammodplugin.h\
+	ammodsettings.h
 
 FORMS += ammodgui.ui
 
