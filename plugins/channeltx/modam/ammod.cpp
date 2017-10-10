@@ -26,6 +26,8 @@
 #include "dsp/pidcontroller.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMModPrivate, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAFInput, Message)
@@ -89,13 +91,13 @@ void AMMod::configure(MessageQueue* messageQueue,
 		bool audioMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureAMMod::create(rfBandwidth, modFactor, toneFrequency, volumeFactor, audioMute, playLoop);
+	Message* cmd = MsgConfigureAMModPrivate::create(rfBandwidth, modFactor, toneFrequency, volumeFactor, audioMute, playLoop);
 	messageQueue->push(cmd);
 }
 
 void AMMod::pull(Sample& sample)
 {
-	if (m_running.m_channelMute)
+	if (m_settings.m_channelMute)
 	{
 		sample.m_real = 0.0f;
 		sample.m_imag = 0.0f;
@@ -160,7 +162,7 @@ void AMMod::modulateSample()
     calculateLevel(t);
     m_audioBufferFill++;
 
-    m_modSample.real((t*m_running.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+    m_modSample.real((t*m_settings.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
     m_modSample.imag(0.0f);
 }
 
@@ -178,7 +180,7 @@ void AMMod::pullAF(Real& sample)
         {
             if (m_ifstream.eof())
             {
-            	if (m_running.m_playLoop)
+            	if (m_settings.m_playLoop)
             	{
                     m_ifstream.clear();
                     m_ifstream.seekg(0, std::ios::beg);
@@ -192,7 +194,7 @@ void AMMod::pullAF(Real& sample)
             else
             {
             	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_running.m_volumeFactor;
+            	sample *= m_settings.m_volumeFactor;
             }
         }
         else
@@ -201,7 +203,7 @@ void AMMod::pullAF(Real& sample)
         }
         break;
     case AMModInputAudio:
-        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_running.m_volumeFactor;
+        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
         break;
     case AMModInputCWTone:
         Real fadeFactor;
@@ -272,6 +274,9 @@ bool AMMod::handleMessage(const Message& cmd)
 		m_config.m_outputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
+		m_settings.m_outputSampleRate = notif.getSampleRate();
+		m_settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
+
 		apply();
 
 		qDebug() << "AMMod::handleMessage: MsgChannelizerNotification:"
@@ -281,9 +286,31 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
-	else if (MsgConfigureAMMod::match(cmd))
+    else if (MsgConfigureAMMod::match(cmd))
+    {
+        MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
+
+        AMModSettings settings = cfg.getSettings();
+
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        applySettings(settings, cfg.getForce());
+
+        qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_modFactor: " << settings.m_modFactor
+                << " m_toneFrequency: " << settings.m_toneFrequency
+                << " m_volumeFactor: " << settings.m_volumeFactor
+                << " m_audioMute: " << settings.m_channelMute
+                << " m_playLoop: " << settings.m_playLoop;
+
+        return true;
+    }
+	else if (MsgConfigureAMModPrivate::match(cmd))
 	{
-		MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
+	    MsgConfigureAMModPrivate& cfg = (MsgConfigureAMModPrivate&) cmd;
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_modFactor = cfg.getModFactor();
@@ -294,7 +321,7 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
+		qDebug() << "AMMod::handleMessage: MsgConfigureAMModPrivate:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_modFactor: " << m_config.m_modFactor
                 << " m_toneFrequency: " << m_config.m_toneFrequency
@@ -394,6 +421,16 @@ void AMMod::apply()
 	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
 	m_running.m_channelMute = m_config.m_channelMute;
 	m_running.m_playLoop = m_config.m_playLoop;
+
+    m_settings.m_outputSampleRate = m_config.m_outputSampleRate;
+    m_settings.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
+    m_settings.m_rfBandwidth = m_config.m_rfBandwidth;
+    m_settings.m_modFactor = m_config.m_modFactor;
+    m_settings.m_toneFrequency = m_config.m_toneFrequency;
+    m_settings.m_volumeFactor = m_config.m_volumeFactor;
+    m_settings.m_audioSampleRate = m_config.m_audioSampleRate;
+    m_settings.m_channelMute = m_config.m_channelMute;
+    m_settings.m_playLoop = m_config.m_playLoop;
 }
 
 void AMMod::openFileStream()
@@ -428,5 +465,42 @@ void AMMod::seekFileStream(int seekPercentage)
         seekPoint *= sizeof(Real);
         m_ifstream.clear();
         m_ifstream.seekg(seekPoint, std::ios::beg);
+    }
+}
+
+void AMMod::applySettings(const AMModSettings& settings, bool force)
+{
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
+       (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+       (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) settings.m_audioSampleRate / (Real) settings.m_outputSampleRate;
+        m_interpolator.create(48, settings.m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
+        m_cwSmoother.setNbFadeSamples(settings.m_audioSampleRate / 250); // 4 ms
     }
 }

@@ -32,10 +32,58 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "ammodsettings.h"
+
 class AMMod : public BasebandSampleSource {
     Q_OBJECT
 
 public:
+    class MsgConfigureAMMod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const AMModSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureAMMod* create(const AMModSettings& settings, bool force)
+        {
+            return new MsgConfigureAMMod(settings, force);
+        }
+
+    private:
+        AMModSettings m_settings;
+        bool m_force;
+
+        MsgConfigureAMMod(const AMModSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
     typedef enum
     {
         AMModInputNone,
@@ -205,7 +253,7 @@ signals:
 
 
 private:
-    class MsgConfigureAMMod : public Message
+    class MsgConfigureAMModPrivate : public Message
     {
         MESSAGE_CLASS_DECLARATION
 
@@ -217,9 +265,9 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureAMMod* create(Real rfBandwidth, float modFactor, float toneFreqeuncy, float volumeFactor, bool channelMute, bool playLoop)
+        static MsgConfigureAMModPrivate* create(Real rfBandwidth, float modFactor, float toneFreqeuncy, float volumeFactor, bool channelMute, bool playLoop)
         {
-            return new MsgConfigureAMMod(rfBandwidth, modFactor, toneFreqeuncy, volumeFactor, channelMute, playLoop);
+            return new MsgConfigureAMModPrivate(rfBandwidth, modFactor, toneFreqeuncy, volumeFactor, channelMute, playLoop);
         }
 
     private:
@@ -230,7 +278,7 @@ private:
         bool m_channelMute;
         bool m_playLoop;
 
-        MsgConfigureAMMod(Real rfBandwidth, float modFactor, float toneFrequency, float volumeFactor, bool channelMute, bool playLoop) :
+        MsgConfigureAMModPrivate(Real rfBandwidth, float modFactor, float toneFrequency, float volumeFactor, bool channelMute, bool playLoop) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_modFactor(modFactor),
@@ -278,6 +326,7 @@ private:
 
     Config m_config;
     Config m_running;
+    AMModSettings m_settings;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -314,6 +363,7 @@ private:
     static const int m_levelNbSamples;
 
     void apply();
+    void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
     void calculateLevel(Real& sample);
     void modulateSample();

@@ -409,6 +409,9 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
+//        AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
+//        m_amMod->getInputMessageQueue()->push(message);
+
 		m_amMod->configure(m_amMod->getInputMessageQueue(),
 			m_settings.m_rfBandwidth,
 			m_settings.m_modFactor,
