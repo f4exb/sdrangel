@@ -362,7 +362,7 @@ private:
 
     static const int m_levelNbSamples;
 
-    void apply();
+//    void apply();
     void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
     void calculateLevel(Real& sample);
