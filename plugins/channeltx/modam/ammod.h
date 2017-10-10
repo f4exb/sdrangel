@@ -324,8 +324,8 @@ private:
 
     //=================================================================
 
-    Config m_config;
-    Config m_running;
+//    Config m_config;
+//    Config m_running;
     AMModSettings m_settings;
 
     NCO m_carrierNco;
@@ -362,7 +362,6 @@ private:
 
     static const int m_levelNbSamples;
 
-//    void apply();
     void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
     void calculateLevel(Real& sample);

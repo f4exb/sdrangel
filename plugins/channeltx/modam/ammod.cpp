@@ -52,12 +52,12 @@ AMMod::AMMod() :
 {
 	setObjectName("AMMod");
 
-	m_config.m_outputSampleRate = 48000;
-	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 12500;
-	m_config.m_modFactor = 0.2f;
-	m_config.m_toneFrequency = 1000.0f;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+//	m_config.m_outputSampleRate = 48000;
+//	m_config.m_inputFrequencyOffset = 0;
+//	m_config.m_rfBandwidth = 12500;
+//	m_config.m_modFactor = 0.2f;
+//	m_config.m_toneFrequency = 1000.0f;
+//	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -66,11 +66,11 @@ AMMod::AMMod() :
 	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
-	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
+	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 
 	// CW keyer
-	m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 	m_cwSmoother.setNbFadeSamples(192); // 4 ms @ 48 kHz
@@ -143,7 +143,7 @@ void AMMod::pull(Sample& sample)
 void AMMod::pullAudio(int nbSamples)
 {
 //    qDebug("AMMod::pullAudio: %d", nbSamples);
-    unsigned int nbAudioSamples = nbSamples * ((Real) m_config.m_audioSampleRate / (Real) m_config.m_basebandSampleRate);
+    unsigned int nbAudioSamples = nbSamples * ((Real) m_settings.m_audioSampleRate / (Real) m_settings.m_basebandSampleRate);
 
     if (nbAudioSamples > m_audioBuffer.size())
     {
@@ -254,8 +254,8 @@ void AMMod::calculateLevel(Real& sample)
 
 void AMMod::start()
 {
-	qDebug() << "AMMod::start: m_outputSampleRate: " << m_config.m_outputSampleRate
-			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+	qDebug() << "AMMod::start: m_outputSampleRate: " << m_settings.m_outputSampleRate
+			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
 	m_audioFifo.clear();
 }
@@ -270,9 +270,9 @@ bool AMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
-		m_config.m_outputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+//		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
+//		m_config.m_outputSampleRate = notif.getSampleRate();
+//		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
 		AMModSettings settings = m_settings;
 
