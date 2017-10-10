@@ -224,14 +224,6 @@ public:
     AMMod();
     ~AMMod();
 
-    void configure(MessageQueue* messageQueue,
-            Real rfBandwidth,
-            float modFactor,
-            float toneFrequency,
-			float volumeFactor,
-            bool channelMute,
-            bool playLoop);
-
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples);
     virtual void start();
@@ -253,79 +245,11 @@ signals:
 
 
 private:
-    class MsgConfigureAMModPrivate : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        Real getRFBandwidth() const { return m_rfBandwidth; }
-        float getModFactor() const { return m_modFactor; }
-        float getToneFrequency() const { return m_toneFrequency; }
-        float getVolumeFactor() const { return m_volumeFactor; }
-        bool getChannelMute() const { return m_channelMute; }
-        bool getPlayLoop() const { return m_playLoop; }
-
-        static MsgConfigureAMModPrivate* create(Real rfBandwidth, float modFactor, float toneFreqeuncy, float volumeFactor, bool channelMute, bool playLoop)
-        {
-            return new MsgConfigureAMModPrivate(rfBandwidth, modFactor, toneFreqeuncy, volumeFactor, channelMute, playLoop);
-        }
-
-    private:
-        Real m_rfBandwidth;
-        float m_modFactor;
-        float m_toneFrequency;
-        float m_volumeFactor;
-        bool m_channelMute;
-        bool m_playLoop;
-
-        MsgConfigureAMModPrivate(Real rfBandwidth, float modFactor, float toneFrequency, float volumeFactor, bool channelMute, bool playLoop) :
-            Message(),
-            m_rfBandwidth(rfBandwidth),
-            m_modFactor(modFactor),
-            m_toneFrequency(toneFrequency),
-            m_volumeFactor(volumeFactor),
-            m_channelMute(channelMute),
-			m_playLoop(playLoop)
-        { }
-    };
-
-    //=================================================================
-
     enum RateState {
         RSInitialFill,
         RSRunning
     };
 
-    struct Config {
-        int m_basebandSampleRate;
-        int m_outputSampleRate;
-        qint64 m_inputFrequencyOffset;
-        Real m_rfBandwidth;
-        float m_modFactor;
-        float m_toneFrequency;
-        float m_volumeFactor;
-        quint32 m_audioSampleRate;
-        bool m_channelMute;
-        bool m_playLoop;
-
-        Config() :
-            m_basebandSampleRate(0),
-            m_outputSampleRate(-1),
-            m_inputFrequencyOffset(0),
-            m_rfBandwidth(-1),
-            m_modFactor(0.2f),
-            m_toneFrequency(100),
-            m_volumeFactor(1.0f),
-            m_audioSampleRate(0),
-            m_channelMute(false),
-			m_playLoop(false)
-        { }
-    };
-
-    //=================================================================
-
-//    Config m_config;
-//    Config m_running;
     AMModSettings m_settings;
 
     NCO m_carrierNco;

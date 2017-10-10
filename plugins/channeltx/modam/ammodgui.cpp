@@ -88,55 +88,6 @@ bool AMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if(!d.isValid())
-//    {
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if(d.getVersion() == 1)
-//    {
-//		QByteArray bytetmp;
-//		quint32 u32tmp;
-//		qint32 tmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//		d.readS32(1, &tmp, 0);
-//		m_channelMarker.setCenterFrequency(tmp);
-//		d.readS32(2, &tmp, 4);
-//		ui->rfBW->setValue(tmp);
-//		d.readS32(3, &tmp, 100);
-//		ui->toneFrequency->setValue(tmp);
-//		d.readS32(4, &tmp, 20);
-//		ui->modPercent->setValue(tmp);
-//
-//        if(d.readU32(5, &u32tmp))
-//        {
-//			m_channelMarker.setColor(u32tmp);
-//        }
-//
-//        d.readS32(6, &tmp, 10);
-//        ui->volume->setValue(tmp);
-//
-//        d.readBlob(7, &bytetmp);
-//        ui->cwKeyerGUI->deserialize(bytetmp);
-//
-//        blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		applySettings();
-//		return true;
-//	}
-//    else
-//    {
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool AMModGUI::handleMessage(const Message& message)
@@ -351,7 +302,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::yellow);
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
@@ -388,7 +338,6 @@ AMModGUI::~AMModGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_amMod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -411,14 +360,6 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 
         AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
         m_amMod->getInputMessageQueue()->push(message);
-
-//		m_amMod->configure(m_amMod->getInputMessageQueue(),
-//			m_settings.m_rfBandwidth,
-//			m_settings.m_modFactor,
-//			m_settings.m_toneFrequency,
-//			m_settings.m_volumeFactor,
-//			m_settings.m_channelMute,
-//			m_settings.m_playLoop);
 	}
 }
 
