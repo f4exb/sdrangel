@@ -275,6 +275,20 @@ bool AMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "AMMod::handleMessage: MsgConfigureChannelizer:"
+                << " getSampleRate: " << cfg.getSampleRate()
+                << " getCenterFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureAMMod::match(cmd))
     {
         MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
@@ -415,4 +429,6 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
         m_cwSmoother.setNbFadeSamples(settings.m_audioSampleRate / 250); // 4 ms
     }
+
+    m_settings = settings;
 }

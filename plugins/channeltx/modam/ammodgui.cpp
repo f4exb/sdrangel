@@ -132,7 +132,7 @@ void AMModGUI::handleSourceMessages()
 void AMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_inputFrequencyOffset = value;
     applySettings();
 }
 
@@ -345,8 +345,7 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 		setTitleColor(m_channelMarker.getColor());
 
 		AMMod::MsgConfigureChannelizer *msgConfigure = AMMod::MsgConfigureChannelizer::create(
-            48000,
-            m_channelMarker.getCenterFrequency());
+		        48000, m_channelMarker.getCenterFrequency());
         m_amMod->getInputMessageQueue()->push(msgConfigure);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
