@@ -24,6 +24,8 @@
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/threadedbasebandsamplesource.h"
+#include "device/devicesinkapi.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
@@ -36,7 +38,8 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
 const int AMMod::m_levelNbSamples = 480; // every 10ms
 
-AMMod::AMMod() :
+AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
     m_audioFifo(4800),
@@ -67,11 +70,18 @@ AMMod::AMMod() :
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 	m_cwSmoother.setNbFadeSamples(192); // 4 ms @ 48 kHz
 
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
     applySettings(m_settings, true);
 }
 
 AMMod::~AMMod()
 {
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 

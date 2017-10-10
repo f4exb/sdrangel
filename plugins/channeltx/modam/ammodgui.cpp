@@ -25,7 +25,6 @@
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 
-#include "dsp/threadedbasebandsamplesource.h"
 #include "ui_ammodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -289,12 +288,8 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_amMod = new AMMod();
+	m_amMod = new AMMod(m_deviceAPI);
 	m_amMod->setMessageQueueToGUI(getInputMessageQueue());
-	m_channelizer = new UpChannelizer(m_amMod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -334,9 +329,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 AMModGUI::~AMModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_amMod;
 	delete ui;
 }
@@ -352,9 +344,10 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 	{
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+		AMMod::MsgConfigureChannelizer *msgConfigure = AMMod::MsgConfigureChannelizer::create(
+            48000,
+            m_channelMarker.getCenterFrequency());
+        m_amMod->getInputMessageQueue()->push(msgConfigure);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 

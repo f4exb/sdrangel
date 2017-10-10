@@ -34,6 +34,10 @@
 
 #include "ammodsettings.h"
 
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+class DeviceSinkAPI;
+
 class AMMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -221,7 +225,7 @@ public:
 
     //=================================================================
 
-    AMMod();
+    AMMod(DeviceSinkAPI *deviceAPI);
     ~AMMod();
 
     virtual void pull(Sample& sample);
@@ -250,6 +254,9 @@ private:
         RSRunning
     };
 
+    DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
     AMModSettings m_settings;
 
     NCO m_carrierNco;
