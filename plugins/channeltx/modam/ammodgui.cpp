@@ -409,16 +409,16 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-//        AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
-//        m_amMod->getInputMessageQueue()->push(message);
+        AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
+        m_amMod->getInputMessageQueue()->push(message);
 
-		m_amMod->configure(m_amMod->getInputMessageQueue(),
-			m_settings.m_rfBandwidth,
-			m_settings.m_modFactor,
-			m_settings.m_toneFrequency,
-			m_settings.m_volumeFactor,
-			m_settings.m_channelMute,
-			m_settings.m_playLoop);
+//		m_amMod->configure(m_amMod->getInputMessageQueue(),
+//			m_settings.m_rfBandwidth,
+//			m_settings.m_modFactor,
+//			m_settings.m_toneFrequency,
+//			m_settings.m_volumeFactor,
+//			m_settings.m_channelMute,
+//			m_settings.m_playLoop);
 	}
 }
 

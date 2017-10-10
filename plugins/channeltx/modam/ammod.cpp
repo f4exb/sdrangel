@@ -274,15 +274,18 @@ bool AMMod::handleMessage(const Message& cmd)
 		m_config.m_outputSampleRate = notif.getSampleRate();
 		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		m_settings.m_outputSampleRate = notif.getSampleRate();
-		m_settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		AMModSettings settings = m_settings;
 
-		apply();
+		settings.m_basebandSampleRate = notif.getBasebandSampleRate();
+		settings.m_outputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
+
+		applySettings(settings);
 
 		qDebug() << "AMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
-                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+				<< " m_basebandSampleRate: " << settings.m_basebandSampleRate
+                << " m_outputSampleRate: " << settings.m_outputSampleRate
+				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
@@ -293,12 +296,16 @@ bool AMMod::handleMessage(const Message& cmd)
         AMModSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 
         applySettings(settings, cfg.getForce());
 
         qDebug() << "AMMod::handleMessage: MsgConfigureAMMod:"
+                << " m_basebandSampleRate: " << settings.m_basebandSampleRate
+                << " m_outputSampleRate: " << settings.m_outputSampleRate
+                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
                 << " m_rfBandwidth: " << settings.m_rfBandwidth
                 << " m_modFactor: " << settings.m_modFactor
                 << " m_toneFrequency: " << settings.m_toneFrequency
