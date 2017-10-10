@@ -374,10 +374,11 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 
     ui->cwKeyerGUI->setBuddies(m_amMod->getInputMessageQueue(), m_amMod->getCWKeyer());
 
-	applySettings();
-
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_amMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+
+	displaySettings();
+    applySettings(true);
 }
 
 AMModGUI::~AMModGUI()
@@ -422,18 +423,17 @@ void AMModGUI::displaySettings()
 {
     blockApplySettings(true);
 
-    ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
+    ui->rfBW->setValue(roundf(m_settings.m_rfBandwidth / 100.0));
     ui->rfBWText->setText(QString("%1 kHz").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
 
-    int modPercent = m_settings.m_modFactor * 100.0;
+    int modPercent = roundf(m_settings.m_modFactor * 100.0);
     ui->modPercent->setValue(modPercent);
     ui->modPercentText->setText(QString("%1").arg(modPercent));
 
-    ui->toneFrequency->setValue(m_settings.m_toneFrequency / 10.0);
+    ui->toneFrequency->setValue(roundf(m_settings.m_toneFrequency / 10.0));
     ui->toneFrequencyText->setText(QString("%1k").arg(m_settings.m_toneFrequency / 1000.0, 0, 'f', 2));
 
-    int volume = m_settings.m_volumeFactor * 10.0;
-    ui->volume->setValue(volume);
+    ui->volume->setValue(roundf(m_settings.m_volumeFactor * 10.0));
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
 
     ui->channelMute->setChecked(m_settings.m_channelMute);

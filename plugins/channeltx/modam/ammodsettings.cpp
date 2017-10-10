@@ -48,11 +48,11 @@ QByteArray AMModSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeS32(2, m_rfBandwidth / 100.0);
-    s.writeS32(3, m_toneFrequency / 10.0);
-    s.writeS32(4, m_modFactor * 100.0);
+    s.writeReal(2, m_rfBandwidth);
+    s.writeReal(3, m_toneFrequency);
+    s.writeReal(4, m_modFactor);
     s.writeU32(5, m_rgbColor);
-    s.writeS32(6, m_volumeFactor * 10.0);
+    s.writeReal(6, m_volumeFactor);
 
     if (m_cwKeyerGUI) {
         s.writeBlob(7, m_cwKeyerGUI->serialize());
@@ -82,15 +82,11 @@ bool AMModSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
-        d.readS32(2, &tmp, 125);
-        m_rfBandwidth = tmp * 100.0;
-        d.readS32(3, &tmp, 100);
-        m_toneFrequency = tmp * 10;
-        d.readS32(4, &tmp, 20);
-        m_modFactor = tmp / 100.0;
+        d.readReal(2, &m_rfBandwidth, 12500.0);
+        d.readReal(3, &m_toneFrequency, 1000.0);
+        d.readReal(4, &m_modFactor, 0.2f);
         d.readU32(5, &m_rgbColor);
-        d.readS32(6, &tmp, 10);
-        m_volumeFactor = tmp / 10.0;
+        d.readReal(6, &m_volumeFactor, 1.0);
 
         if (m_cwKeyerGUI) {
             d.readBlob(7, &bytetmp);
