@@ -14,13 +14,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 #include "ammodsettings.h"
 
 AMModSettings::AMModSettings() :
-    m_channelMarker(0)
+    m_channelMarker(0),
+    m_cwKeyerGUI(0)
 {
     resetToDefaults();
 }
@@ -37,6 +40,7 @@ void AMModSettings::resetToDefaults()
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;
+    m_rgbColor = QColor(255, 255, 0).rgb();
 }
 
 QByteArray AMModSettings::serialize() const
@@ -74,7 +78,6 @@ bool AMModSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         QByteArray bytetmp;
-        quint32 u32tmp;
         qint32 tmp;
 
         d.readS32(1, &tmp, 0);
@@ -84,10 +87,10 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readS32(3, &tmp, 100);
         m_toneFrequency = tmp * 10;
         d.readS32(4, &tmp, 20);
-        m_modFactor = tmp * 100;
+        m_modFactor = tmp / 100.0;
         d.readU32(5, &m_rgbColor);
         d.readS32(6, &tmp, 10);
-        m_volumeFactor = tmp * 10.0;
+        m_volumeFactor = tmp / 10.0;
 
         if (m_cwKeyerGUI) {
             d.readBlob(7, &bytetmp);

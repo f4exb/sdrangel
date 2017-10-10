@@ -68,83 +68,75 @@ void AMModGUI::setCenterFrequency(qint64 centerFrequency)
 
 void AMModGUI::resetToDefaults()
 {
-	blockApplySettings(true);
-
-	ui->rfBW->setValue(50);
-	ui->modPercent->setValue(20);
-	ui->volume->setValue(10);
-	ui->toneFrequency->setValue(100);
-	ui->deltaFrequency->setValue(0);
-
-	blockApplySettings(false);
-	applySettings();
+    m_settings.resetToDefaults();
+    displaySettings();
+    applySettings(true);
 }
 
 QByteArray AMModGUI::serialize() const
 {
-	SimpleSerializer s(1);
-
-	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->value());
-	s.writeS32(3, ui->toneFrequency->value());
-	s.writeS32(4, ui->modPercent->value());
-	s.writeU32(5, m_channelMarker.getColor().rgb());
-	s.writeS32(6, ui->volume->value());
-	s.writeBlob(7, ui->cwKeyerGUI->serialize());
-
-	return s.final();
+    return m_settings.serialize();
 }
 
 bool AMModGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
+    if(m_settings.deserialize(data)) {
+        displaySettings();
+        applySettings(true);
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 
-	if(!d.isValid())
-    {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1)
-    {
-		QByteArray bytetmp;
-		quint32 u32tmp;
-		qint32 tmp;
-
-		blockApplySettings(true);
-		m_channelMarker.blockSignals(true);
-
-		d.readS32(1, &tmp, 0);
-		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 4);
-		ui->rfBW->setValue(tmp);
-		d.readS32(3, &tmp, 100);
-		ui->toneFrequency->setValue(tmp);
-		d.readS32(4, &tmp, 20);
-		ui->modPercent->setValue(tmp);
-
-        if(d.readU32(5, &u32tmp))
-        {
-			m_channelMarker.setColor(u32tmp);
-        }
-
-        d.readS32(6, &tmp, 10);
-        ui->volume->setValue(tmp);
-
-        d.readBlob(7, &bytetmp);
-        ui->cwKeyerGUI->deserialize(bytetmp);
-
-        blockApplySettings(false);
-		m_channelMarker.blockSignals(false);
-
-		applySettings();
-		return true;
-	}
-    else
-    {
-		resetToDefaults();
-		return false;
-	}
+//	SimpleDeserializer d(data);
+//
+//	if(!d.isValid())
+//    {
+//		resetToDefaults();
+//		return false;
+//	}
+//
+//	if(d.getVersion() == 1)
+//    {
+//		QByteArray bytetmp;
+//		quint32 u32tmp;
+//		qint32 tmp;
+//
+//		blockApplySettings(true);
+//		m_channelMarker.blockSignals(true);
+//
+//		d.readS32(1, &tmp, 0);
+//		m_channelMarker.setCenterFrequency(tmp);
+//		d.readS32(2, &tmp, 4);
+//		ui->rfBW->setValue(tmp);
+//		d.readS32(3, &tmp, 100);
+//		ui->toneFrequency->setValue(tmp);
+//		d.readS32(4, &tmp, 20);
+//		ui->modPercent->setValue(tmp);
+//
+//        if(d.readU32(5, &u32tmp))
+//        {
+//			m_channelMarker.setColor(u32tmp);
+//        }
+//
+//        d.readS32(6, &tmp, 10);
+//        ui->volume->setValue(tmp);
+//
+//        d.readBlob(7, &bytetmp);
+//        ui->cwKeyerGUI->deserialize(bytetmp);
+//
+//        blockApplySettings(false);
+//		m_channelMarker.blockSignals(false);
+//
+//		applySettings();
+//		return true;
+//	}
+//    else
+//    {
+//		resetToDefaults();
+//		return false;
+//	}
 }
 
 bool AMModGUI::handleMessage(const Message& message)
@@ -190,11 +182,14 @@ void AMModGUI::handleSourceMessages()
 void AMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void AMModGUI::on_rfBW_valueChanged(int value)
 {
 	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_rfBandwidth = value * 100.0;
 	m_channelMarker.setBandwidth(value * 100);
 	applySettings();
 }
@@ -202,29 +197,34 @@ void AMModGUI::on_rfBW_valueChanged(int value)
 void AMModGUI::on_modPercent_valueChanged(int value)
 {
 	ui->modPercentText->setText(QString("%1").arg(value));
+	m_settings.m_modFactor = value / 100.0;
 	applySettings();
 }
 
 void AMModGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    m_settings.m_volumeFactor = value / 10.0;
     applySettings();
 }
 
 void AMModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_toneFrequency = value * 10.0;
     applySettings();
 }
 
 
-void AMModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
+void AMModGUI::on_channelMute_toggled(bool checked)
 {
+    m_settings.m_channelMute = checked;
 	applySettings();
 }
 
-void AMModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
+void AMModGUI::on_playLoop_toggled(bool checked)
 {
+    m_settings.m_playLoop = checked;
 	applySettings();
 }
 
@@ -357,6 +357,9 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
+	m_settings.setChannelMarker(&m_channelMarker);
+	m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
+
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
@@ -393,7 +396,7 @@ void AMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AMModGUI::applySettings()
+void AMModGUI::applySettings(bool force __attribute((unused)))
 {
 	if (m_doApplySettings)
 	{
@@ -406,13 +409,44 @@ void AMModGUI::applySettings()
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		m_amMod->configure(m_amMod->getInputMessageQueue(),
-			ui->rfBW->value() * 100.0,
-			ui->modPercent->value() / 100.0f,
-			ui->toneFrequency->value() * 10.0f,
-			ui->volume->value() / 10.0f ,
-			ui->channelMute->isChecked(),
-			ui->playLoop->isChecked());
+			m_settings.m_rfBandwidth,
+			m_settings.m_modFactor,
+			m_settings.m_toneFrequency,
+			m_settings.m_volumeFactor,
+			m_settings.m_channelMute,
+			m_settings.m_playLoop);
 	}
+}
+
+void AMModGUI::displaySettings()
+{
+    blockApplySettings(true);
+
+    ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
+    ui->rfBWText->setText(QString("%1 kHz").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
+
+    int modPercent = m_settings.m_modFactor * 100.0;
+    ui->modPercent->setValue(modPercent);
+    ui->modPercentText->setText(QString("%1").arg(modPercent));
+
+    ui->toneFrequency->setValue(m_settings.m_toneFrequency / 10.0);
+    ui->toneFrequencyText->setText(QString("%1k").arg(m_settings.m_toneFrequency / 1000.0, 0, 'f', 2));
+
+    int volume = m_settings.m_volumeFactor * 10.0;
+    ui->volume->setValue(volume);
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
+
+    ui->channelMute->setChecked(m_settings.m_channelMute);
+    ui->playLoop->setChecked(m_settings.m_playLoop);
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
+    blockApplySettings(false);
 }
 
 void AMModGUI::leaveEvent(QEvent*)

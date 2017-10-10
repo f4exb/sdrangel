@@ -21,6 +21,7 @@
 #include <QWidget>
 #include "dsp/dsptypes.h"
 #include "util/export.h"
+#include "settings/serializable.h"
 
 namespace Ui {
     class CWKeyerGUI;
@@ -29,7 +30,7 @@ namespace Ui {
 class MessageQueue;
 class CWKeyer;
 
-class SDRANGEL_API CWKeyerGUI : public QWidget {
+class SDRANGEL_API CWKeyerGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:

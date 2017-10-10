@@ -24,6 +24,7 @@
 #include "util/messagequeue.h"
 
 #include "ammod.h"
+#include "ammodsettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -86,6 +87,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
     ChannelMarker m_channelMarker;
+    AMModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
@@ -107,7 +109,8 @@ private:
     virtual ~AMModGUI();
 
     void blockApplySettings(bool block);
-    void applySettings();
+    void applySettings(bool force = false);
+    void displaySettings();
     void updateWithStreamData();
     void updateWithStreamTime();
 
