@@ -34,6 +34,8 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "nfmmodsettings.h"
+
 class NFMMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -187,7 +189,7 @@ public:
             bool channelMute,
             bool playLoop,
             bool ctcssOn,
-            float ctcssFrequency);
+            int  ctcssFrequencyIndex);
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples);
@@ -223,7 +225,7 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         bool getPlayLoop() const { return m_playLoop; }
         bool getCTCSSOn() const { return m_ctcssOn; }
-        float getCTCSSFrequency() const { return m_ctcssFrequency; }
+        float getCTCSSFrequencyIndex() const { return m_ctcssFrequencyIndex; }
 
         static MsgConfigureNFMMod* create(Real rfBandwidth,
                 Real afBandwidth,
@@ -233,7 +235,7 @@ private:
                 bool channelMute,
                 bool playLoop,
                 bool ctcssOn,
-                float ctcssFrequency)
+                int  ctcssFrequencyIndex)
         {
             return new MsgConfigureNFMMod(rfBandwidth,
                     afBandwidth,
@@ -243,7 +245,7 @@ private:
                     channelMute,
                     playLoop,
                     ctcssOn,
-                    ctcssFrequency);
+                    ctcssFrequencyIndex);
         }
 
     private:
@@ -255,7 +257,7 @@ private:
         bool m_channelMute;
         bool m_playLoop;
         bool m_ctcssOn;
-        float m_ctcssFrequency;
+        int  m_ctcssFrequencyIndex;
 
         MsgConfigureNFMMod(Real rfBandwidth,
                 Real afBandwidth,
@@ -265,7 +267,7 @@ private:
                 bool channelMute,
                 bool playLoop,
                 bool ctcssOn,
-                float ctcssFrequency) :
+                int  ctcssFrequencyIndex) :
             Message(),
             m_rfBandwidth(rfBandwidth),
             m_afBandwidth(afBandwidth),
@@ -275,7 +277,7 @@ private:
             m_channelMute(channelMute),
 			m_playLoop(playLoop),
 			m_ctcssOn(ctcssOn),
-			m_ctcssFrequency(ctcssFrequency)
+			m_ctcssFrequencyIndex(ctcssFrequencyIndex)
         { }
     };
 

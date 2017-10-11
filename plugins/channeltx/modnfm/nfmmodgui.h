@@ -24,6 +24,7 @@
 #include "util/messagequeue.h"
 
 #include "nfmmod.h"
+#include "nfmmodsettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -90,6 +91,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
     ChannelMarker m_channelMarker;
+    NFMModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 

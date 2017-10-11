@@ -214,45 +214,54 @@ void NFMModGUI::handleSourceMessages()
 void NFMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void NFMModGUI::on_rfBW_currentIndexChanged(int index)
 {
-	m_channelMarker.setBandwidth(m_rfBW[index]);
+	m_channelMarker.setBandwidth(NFMModSettings::getRFBW(index));
+	m_settings.m_rfBandwidth = NFMModSettings::getRFBW(index);
 	applySettings();
 }
 
 void NFMModGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1k").arg(value));
+	m_settings.m_afBandwidth = value * 1000.0;
 	applySettings();
 }
 
 void NFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_fmDeviation = value * 100.0;
 	applySettings();
 }
 
 void NFMModGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volumeFactor = value / 10.0;
 	applySettings();
 }
 
 void NFMModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_toneFrequency = value * 10.0;
     applySettings();
 }
 
-void NFMModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
+void NFMModGUI::on_channelMute_toggled(bool checked)
 {
+    m_settings.m_channelMute = checked;
 	applySettings();
 }
 
-void NFMModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
+void NFMModGUI::on_playLoop_toggled(bool checked)
 {
+    m_settings.m_playLoop = checked;
 	applySettings();
 }
 
@@ -325,13 +334,15 @@ void NFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void NFMModGUI::on_ctcss_currentIndexChanged(int index __attribute__((unused)))
+void NFMModGUI::on_ctcss_currentIndexChanged(int index)
 {
+    m_settings.m_ctcssIndex = index;
     applySettings();
 }
 
-void NFMModGUI::on_ctcssOn_toggled(bool checked __attribute__((unused)))
+void NFMModGUI::on_ctcssOn_toggled(bool checked)
 {
+    m_settings.m_ctcssOn = checked;
     applySettings();
 }
 
@@ -458,16 +469,27 @@ void NFMModGUI::applySettings()
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->currentIndex()],
-			ui->afBW->value() * 1000.0,
-			ui->fmDev->value() * 100.0f, // value is in '100 Hz
-			ui->toneFrequency->value() * 10.0f,
-			ui->volume->value() / 10.0f,
-			ui->channelMute->isChecked(),
-			ui->playLoop->isChecked(),
-			ui->ctcssOn->isChecked(),
-			m_ctcssTones[ui->ctcss->currentIndex()]);
+        m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
+            m_settings.m_rfBandwidth,
+            m_settings.m_afBandwidth,
+            m_settings.m_fmDeviation, // value is in '100 Hz
+            m_settings.m_toneFrequency,
+            m_settings.m_volumeFactor,
+            m_settings.m_channelMute,
+            m_settings.m_playLoop,
+            m_settings.m_ctcssOn,
+            m_settings.m_ctcssIndex);
+
+//		m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
+//			m_rfBW[ui->rfBW->currentIndex()],
+//			ui->afBW->value() * 1000.0,
+//			ui->fmDev->value() * 100.0f, // value is in '100 Hz
+//			ui->toneFrequency->value() * 10.0f,
+//			ui->volume->value() / 10.0f,
+//			ui->channelMute->isChecked(),
+//			ui->playLoop->isChecked(),
+//			ui->ctcssOn->isChecked(),
+//			m_ctcssTones[ui->ctcss->currentIndex()]);
 	}
 }
 

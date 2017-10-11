@@ -93,7 +93,7 @@ void NFMMod::configure(MessageQueue* messageQueue,
 		bool audioMute,
 		bool playLoop,
 		bool ctcssOn,
-		float ctcssFrequency)
+		int  ctcssFrequencyIndex)
 {
 	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth,
 	        afBandwidth,
@@ -103,7 +103,7 @@ void NFMMod::configure(MessageQueue* messageQueue,
 	        audioMute,
 	        playLoop,
 	        ctcssOn,
-	        ctcssFrequency);
+	        ctcssFrequencyIndex);
 	messageQueue->push(cmd);
 }
 
@@ -316,7 +316,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 		m_config.m_channelMute = cfg.getChannelMute();
 		m_config.m_playLoop = cfg.getPlayLoop();
 		m_config.m_ctcssOn = cfg.getCTCSSOn();
-		m_config.m_ctcssFrequency = cfg.getCTCSSFrequency();
+		m_config.m_ctcssFrequency = NFMModSettings::getCTCSSFreq(cfg.getCTCSSFrequencyIndex());
 
 		apply();
 
