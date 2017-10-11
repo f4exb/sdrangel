@@ -72,10 +72,6 @@ private:
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
-	static const int m_rfBW[];
-	static const int m_fmDev[];
-	static const int m_nbRfBW;
-
 	explicit NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~NFMDemodGUI();
 

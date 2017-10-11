@@ -17,14 +17,6 @@
 
 const QString NFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.nfm";
 
-const int NFMDemodGUI::m_rfBW[] = {
-	5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
-};
-const int NFMDemodGUI::m_fmDev[] = { // corresponding FM deviations
-    1000, 1500, 2000, 2000,  2000,  2500,  3000,  3500,  5000
-};
-const int NFMDemodGUI::m_nbRfBW = 9;
-
 NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceAPI);
@@ -332,8 +324,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
     ui->rfBW->clear();
 
-    for (int i = 0; i < m_nbRfBW; i++) {
-        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    for (int i = 0; i < NFMDemodSettings::m_nbRfBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(NFMDemodSettings::getRFBW(i) / 1000.0, 0, 'f', 2));
     }
 
     int ctcss_nbTones;
