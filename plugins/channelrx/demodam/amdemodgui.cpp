@@ -81,7 +81,6 @@ QByteArray AMDemodGUI::serialize() const
 bool AMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
-        updateChannelMarker();
         displaySettings();
         applySettings(true);
         return true;
@@ -98,7 +97,7 @@ bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 
 void AMDemodGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
@@ -245,12 +244,20 @@ void AMDemodGUI::applySettings(bool force)
 
 void AMDemodGUI::displaySettings()
 {
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
+
     blockApplySettings(true);
 
     int displayValue = m_settings.m_rfBandwidth/100.0;
     ui->rfBW->setValue(displayValue);
     ui->rfBWText->setText(QString("%1 kHz").arg(displayValue / 10.0, 0, 'f', 1));
-    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
 
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
@@ -262,30 +269,12 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
-    m_channelMarker.blockSignals(false);
-
     blockApplySettings(false);
 }
 
 void AMDemodGUI::displayUDPAddress()
 {
     ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
-}
-
-void AMDemodGUI::updateChannelMarker()
-{
-    m_channelMarker.blockSignals(true);
-
-    //m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
-    this->setWindowTitle(m_channelMarker.getTitle());
-
-    m_channelMarker.blockSignals(false);
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)

@@ -87,7 +87,7 @@ bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 
 void WFMDemodGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
@@ -232,9 +232,15 @@ void WFMDemodGUI::applySettings(bool force)
 
 void WFMDemodGUI::displaySettings()
 {
-    blockApplySettings(true);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
 
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+    setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
 
     ui->rfBW->setCurrentIndex(WFMDemodSettings::getRFBWIndex(m_settings.m_rfBandwidth));
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
@@ -247,14 +253,6 @@ void WFMDemodGUI::displaySettings()
 
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
-
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
-    m_channelMarker.blockSignals(false);
 
     blockApplySettings(false);
 }

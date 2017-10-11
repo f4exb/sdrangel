@@ -300,11 +300,11 @@ void TCPSrcGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));

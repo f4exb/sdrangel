@@ -322,16 +322,15 @@ void DSDDemodGUI::displayUDPAddress()
 
 void DSDDemodGUI::displaySettings()
 {
-    blockApplySettings(true);
-
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
     m_channelMarker.setColor(m_settings.m_rgbColor);
-    this->setWindowTitle(m_channelMarker.getTitle());
     setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
@@ -542,7 +541,7 @@ void DSDDemodGUI::formatStatusText()
 
 void DSDDemodGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
     displayUDPAddress();
     applySettings();
 }

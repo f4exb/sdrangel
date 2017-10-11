@@ -101,10 +101,10 @@ void UDPSrcGUI::channelMarkerChanged()
 {
     //m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     //m_settings.m_rfBandwidth = m_channelMarker.getBandwidth();
+    setWindowTitle(m_channelMarker.getTitle());
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-    this->setWindowTitle(m_channelMarker.getTitle());
     setTitleColor(m_settings.m_rgbColor);
     displayUDPAddress();
     applySettings();
@@ -213,11 +213,11 @@ void UDPSrcGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));

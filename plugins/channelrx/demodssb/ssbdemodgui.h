@@ -90,7 +90,6 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
     void displayUDPAddress();
-    void updateChannelMarker();
 
 	void displayAGCPowerThreshold(int value);
 

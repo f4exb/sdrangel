@@ -65,7 +65,6 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
-        updateChannelMarker();
         displaySettings();
         applySettings(true); // will have true
         return true;
@@ -452,8 +451,6 @@ void SSBDemodGUI::displaySettings()
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
 
@@ -468,6 +465,8 @@ void SSBDemodGUI::displaySettings()
     }
 
     m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -515,16 +514,6 @@ void SSBDemodGUI::displaySettings()
 void SSBDemodGUI::displayUDPAddress()
 {
     //TODO: ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
-}
-
-void SSBDemodGUI::updateChannelMarker()
-{
-    m_channelMarker.blockSignals(true);
-
-    //m_channelMarker.deserialize(m_settings.m_channelMarkerBytes);
-    this->setWindowTitle(m_channelMarker.getTitle());
-
-    m_channelMarker.blockSignals(false);
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)

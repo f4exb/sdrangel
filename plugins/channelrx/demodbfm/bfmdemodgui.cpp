@@ -98,7 +98,6 @@ QByteArray BFMDemodGUI::serialize() const
 bool BFMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
-        updateChannelMarker();
         displaySettings();
         applySettings(true);
         return true;
@@ -141,7 +140,7 @@ void BFMDemodGUI::handleInputMessages()
 
 void BFMDemodGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
@@ -390,13 +389,6 @@ void BFMDemodGUI::displayUDPAddress()
     ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
 }
 
-void BFMDemodGUI::updateChannelMarker()
-{
-    m_channelMarker.blockSignals(true);
-    this->setWindowTitle(m_channelMarker.getTitle());
-    m_channelMarker.blockSignals(false);
-}
-
 void BFMDemodGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
@@ -422,9 +414,15 @@ void BFMDemodGUI::applySettings(bool force)
 
 void BFMDemodGUI::displaySettings()
 {
-    blockApplySettings(true);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
 
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+    setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
 
     ui->rfBW->setValue(BFMDemodSettings::getRFBWIndex(m_settings.m_rfBandwidth));
     ui->rfBWText->setText(QString("%1 kHz").arg(m_settings.m_rfBandwidth / 1000.0));
@@ -444,14 +442,6 @@ void BFMDemodGUI::displaySettings()
     ui->showPilot->setChecked(m_settings.m_showPilot);
     ui->rds->setChecked(m_settings.m_rdsActive);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
-
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPSendPort(m_settings.m_udpPort);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
-    m_channelMarker.blockSignals(false);
 
     blockApplySettings(false);
 }

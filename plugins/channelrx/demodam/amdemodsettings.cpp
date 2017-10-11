@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -38,6 +40,7 @@ void AMDemodSettings::resetToDefaults()
     m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
+    m_rgbColor = QColor(255, 255, 0).rgb();
 }
 
 QByteArray AMDemodSettings::serialize() const

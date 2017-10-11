@@ -196,12 +196,7 @@ void LoRaDemodGUI::applySettings(bool force)
 
 void LoRaDemodGUI::displaySettings()
 {
-    blockApplySettings(true);
     int thisBW = LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
-    ui->BWText->setText(QString("%1 Hz").arg(thisBW));
-    ui->BW->setValue(m_settings.m_bandwidthIndex);
-    m_channelMarker.setBandwidth(thisBW);
-    blockApplySettings(false);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setBandwidth(thisBW);
@@ -209,4 +204,9 @@ void LoRaDemodGUI::displaySettings()
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+
+    blockApplySettings(true);
+    ui->BWText->setText(QString("%1 Hz").arg(thisBW));
+    ui->BW->setValue(m_settings.m_bandwidthIndex);
+    blockApplySettings(false);
 }
