@@ -319,7 +319,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_nfmMod = new NFMMod();
+	m_nfmMod = new NFMMod(m_deviceAPI);
 	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
 	m_channelizer = new UpChannelizer(m_nfmMod);
 	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);

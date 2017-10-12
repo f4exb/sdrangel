@@ -36,6 +36,10 @@
 
 #include "nfmmodsettings.h"
 
+class DeviceSinkAPI;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+
 class NFMMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -223,7 +227,7 @@ public:
 
     //=================================================================
 
-    NFMMod();
+    NFMMod(DeviceSinkAPI *deviceAPI);
     ~NFMMod();
 
     virtual void pull(Sample& sample);
@@ -252,6 +256,9 @@ private:
         RSRunning
     };
 
+    DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
     NFMModSettings m_settings;
 
     NCO m_carrierNco;

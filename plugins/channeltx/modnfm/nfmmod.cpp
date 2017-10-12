@@ -17,12 +17,16 @@
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
+
 #include <stdio.h>
 #include <complex.h>
 #include <algorithm>
+
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "device/devicesinkapi.h"
+
 #include "nfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureNFMMod, Message)
@@ -36,7 +40,8 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
 
 const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
-NFMMod::NFMMod() :
+NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
+	m_deviceAPI(deviceAPI),
 	m_modPhasor(0.0f),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
