@@ -26,6 +26,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
 #include "device/devicesinkapi.h"
+#include "dsp/threadedbasebandsamplesource.h"
 
 #include "nfmmod.h"
 
@@ -74,12 +75,19 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
     m_cwKeyer.setMode(CWKeyer::CWNone);
     m_cwSmoother.setNbFadeSamples(192); // 2 ms @ 48 kHz
 
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
     applySettings(m_settings, true);
 }
 
 NFMMod::~NFMMod()
 {
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void NFMMod::pull(Sample& sample)
@@ -285,9 +293,9 @@ bool NFMMod::handleMessage(const Message& cmd)
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
 
-//        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-//            cfg.getSampleRate(),
-//            cfg.getCenterFrequency());
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
 
         qDebug() << "NFMMod::handleMessage: MsgConfigureChannelizer:"
                 << " getSampleRate: " << cfg.getSampleRate()

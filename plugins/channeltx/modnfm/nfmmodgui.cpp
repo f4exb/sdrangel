@@ -21,16 +21,14 @@
 #include <QDebug>
 
 #include "device/devicesinkapi.h"
-#include "dsp/upchannelizer.h"
-
-#include "dsp/threadedbasebandsamplesource.h"
-#include "ui_nfmmodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+
+#include "ui_nfmmodgui.h"
 #include "nfmmodgui.h"
 
 const QString NFMModGUI::m_channelID = "sdrangel.channeltx.modnfm";
@@ -321,10 +319,6 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	m_nfmMod = new NFMMod(m_deviceAPI);
 	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
-	m_channelizer = new UpChannelizer(m_nfmMod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -366,9 +360,6 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 NFMModGUI::~NFMModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_nfmMod;
 	delete ui;
 }
@@ -384,9 +375,9 @@ void NFMModGUI::applySettings(bool force)
 	{
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+		NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
+		        48000, m_channelMarker.getCenterFrequency());
+		m_nfmMod->getInputMessageQueue()->push(msgChan);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 

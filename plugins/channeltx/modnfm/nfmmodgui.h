@@ -28,9 +28,6 @@
 
 class PluginAPI;
 class DeviceSinkAPI;
-
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
 class NFMMod;
 
 namespace Ui {
@@ -95,8 +92,6 @@ private:
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
     NFMMod* m_nfmMod;
     MovingAverage<double> m_channelPowerDbAvg;
 
