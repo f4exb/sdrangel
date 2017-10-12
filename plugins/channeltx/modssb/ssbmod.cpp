@@ -240,7 +240,7 @@ void SSBMod::pullAF(Complex& sample)
     case SSBModInputTone:
     	if (m_running.m_dsb)
     	{
-    		Real t = m_toneNco.next();
+    		Real t = m_toneNco.next()/1.25;
     		sample.real(t);
     		sample.imag(t);
     	}
@@ -378,7 +378,7 @@ void SSBMod::pullAF(Complex& sample)
         	{
             	if (m_running.m_dsb)
             	{
-            		Real t = m_toneNco.next() * fadeFactor;
+            		Real t = (m_toneNco.next() * fadeFactor)/1.25;
             		sample.real(t);
             		sample.imag(t);
             	}
