@@ -59,20 +59,6 @@ void NFMDemodGUI::resetToDefaults()
 QByteArray NFMDemodGUI::serialize() const
 {
     return m_settings.serialize();
-//	SimpleSerializer s(1);
-//	s.writeS32(1, m_channelMarker.getCenterFrequency());
-//	s.writeS32(2, ui->rfBW->currentIndex());
-//	s.writeS32(3, ui->afBW->value());
-//	s.writeS32(4, ui->volume->value());
-//	s.writeS32(5, ui->squelch->value());
-//	s.writeU32(7, m_channelMarker.getColor().rgb());
-//	s.writeS32(8, ui->ctcss->currentIndex());
-//	s.writeBool(9, ui->ctcssOn->isChecked());
-//	s.writeBool(10, ui->audioMute->isChecked());
-//	s.writeS32(11, ui->squelchGate->value());
-//	s.writeBool(12, ui->deltaSquelch->isChecked());
-//	s.writeBlob(13, m_channelMarker.serialize());
-//	return s.final();
 }
 
 bool NFMDemodGUI::deserialize(const QByteArray& data)
@@ -85,69 +71,6 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if (!d.isValid())
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if (d.getVersion() == 1)
-//	{
-//		QByteArray bytetmp;
-//		quint32 u32tmp;
-//		qint32 tmp;
-//		bool boolTmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//        d.readBlob(13, &bytetmp);
-//        m_channelMarker.deserialize(bytetmp);
-//
-//		d.readS32(1, &tmp, 0);
-//		m_channelMarker.setCenterFrequency(tmp);
-//		d.readS32(2, &tmp, 4);
-//		ui->rfBW->setCurrentIndex(tmp);
-//		d.readS32(3, &tmp, 3);
-//		ui->afBW->setValue(tmp);
-//		d.readS32(4, &tmp, 20);
-//		ui->volume->setValue(tmp);
-//		d.readS32(5, &tmp, -40);
-//		ui->squelch->setValue(tmp);
-//
-//		if(d.readU32(7, &u32tmp))
-//		{
-//			m_channelMarker.setColor(u32tmp);
-//		}
-//
-//		d.readS32(8, &tmp, 0);
-//		ui->ctcss->setCurrentIndex(tmp);
-//		d.readBool(9, &boolTmp, false);
-//		ui->ctcssOn->setChecked(boolTmp);
-//		d.readBool(10, &boolTmp, false);
-//		ui->audioMute->setChecked(boolTmp);
-//		d.readS32(11, &tmp, 5);
-//		ui->squelchGate->setValue(tmp);
-//        d.readBool(12, &boolTmp, false);
-//        ui->deltaSquelch->setChecked(boolTmp);
-//
-//        this->setWindowTitle(m_channelMarker.getTitle());
-//        displayUDPAddress();
-//
-//		blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		applySettings(true);
-//		return true;
-//	}
-//	else
-//	{
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))

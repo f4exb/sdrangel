@@ -17,13 +17,6 @@
 
 #include "wfmdemod.h"
 
-const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
-
-const int WFMDemodGUI::m_rfBW[] = {
-        12500, 25000, 40000, 60000, 75000, 80000, 100000, 125000, 140000, 160000, 180000, 200000, 220000, 250000
-};
-const int WFMDemodGUI::m_nbRfBW = 14;
-
 WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceAPI);
@@ -167,8 +160,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
     blockApplySettings(true);
     ui->rfBW->clear();
-    for (int i = 0; i < m_nbRfBW; i++) {
-        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    for (int i = 0; i < WFMDemodSettings::m_nbRFBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(WFMDemodSettings::getRFBW(i) / 1000.0, 0, 'f', 2));
     }
     ui->rfBW->setCurrentIndex(6);
     blockApplySettings(false);

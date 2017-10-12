@@ -65,9 +65,6 @@ private:
 	MovingAverage<double> m_channelPowerDbAvg;
 	MessageQueue m_inputMessageQueue;
 
-	static const int m_rfBW[];
-    static const int m_nbRfBW;
-
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
 	virtual ~WFMDemodGUI();
 
