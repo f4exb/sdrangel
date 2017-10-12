@@ -297,9 +297,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-	m_channelMarker.setColor(Qt::yellow);
-	m_channelMarker.setBandwidth(5000);
-	m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle("AM Modulator");
 	m_channelMarker.setVisible(true);
 
 	m_settings.setChannelMarker(&m_channelMarker);
@@ -357,6 +355,13 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 
 void AMModGUI::displaySettings()
 {
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
     blockApplySettings(true);
 
     ui->rfBW->setValue(roundf(m_settings.m_rfBandwidth / 100.0));
@@ -374,13 +379,6 @@ void AMModGUI::displaySettings()
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
-
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
-    m_channelMarker.blockSignals(false);
 
     blockApplySettings(false);
 }
