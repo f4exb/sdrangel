@@ -307,13 +307,14 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     blockApplySettings(true);
+
     ui->rfBW->clear();
     for (int i = 0; i < NFMModSettings::m_nbRfBW; i++) {
         ui->rfBW->addItem(QString("%1").arg(NFMModSettings::getRFBW(i) / 1000.0, 0, 'f', 2));
     }
     ui->rfBW->setCurrentIndex(6);
-    blockApplySettings(false);
 
+    blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
@@ -377,7 +378,7 @@ void NFMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void NFMModGUI::applySettings(bool force __attribute__((unused)))
+void NFMModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -389,16 +390,8 @@ void NFMModGUI::applySettings(bool force __attribute__((unused)))
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-        m_nfmMod->configure(m_nfmMod->getInputMessageQueue(),
-            m_settings.m_rfBandwidth,
-            m_settings.m_afBandwidth,
-            m_settings.m_fmDeviation, // value is in '100 Hz
-            m_settings.m_toneFrequency,
-            m_settings.m_volumeFactor,
-            m_settings.m_channelMute,
-            m_settings.m_playLoop,
-            m_settings.m_ctcssOn,
-            m_settings.m_ctcssIndex);
+		NFMMod::MsgConfigureNFMMod *msg = NFMMod::MsgConfigureNFMMod::create(m_settings, force);
+		m_nfmMod->getInputMessageQueue()->push(msg);
 	}
 }
 

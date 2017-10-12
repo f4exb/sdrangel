@@ -51,16 +51,6 @@ NFMMod::NFMMod() :
 {
 	setObjectName("NFMod");
 
-	m_config.m_outputSampleRate = 48000;
-	m_config.m_inputFrequencyOffset = 0;
-	m_config.m_rfBandwidth = 12500;
-	m_config.m_afBandwidth = 3000;
-	m_config.m_fmDeviation = 5000.0f;
-	m_config.m_toneFrequency = 1000.0f;
-	m_config.m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-
-	apply();
-
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
@@ -68,15 +58,17 @@ NFMMod::NFMMod() :
 	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
-	m_toneNco.setFreq(1000.0, m_config.m_audioSampleRate);
-	m_ctcssNco.setFreq(88.5, m_config.m_audioSampleRate);
+	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
+	m_ctcssNco.setFreq(88.5, m_settings.m_audioSampleRate);
 	DSPEngine::instance()->addAudioSource(&m_audioFifo);
 
     // CW keyer
-    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
+    m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
     m_cwSmoother.setNbFadeSamples(192); // 2 ms @ 48 kHz
+
+    applySettings(m_settings, true);
 }
 
 NFMMod::~NFMMod()
@@ -84,32 +76,9 @@ NFMMod::~NFMMod()
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
 }
 
-void NFMMod::configure(MessageQueue* messageQueue,
-		Real rfBandwidth,
-		Real afBandwidth,
-		float fmDeviation,
-		float toneFrequency,
-		float volumeFactor,
-		bool audioMute,
-		bool playLoop,
-		bool ctcssOn,
-		int  ctcssFrequencyIndex)
-{
-	Message* cmd = MsgConfigureNFMMod::create(rfBandwidth,
-	        afBandwidth,
-	        fmDeviation,
-	        toneFrequency,
-	        volumeFactor,
-	        audioMute,
-	        playLoop,
-	        ctcssOn,
-	        ctcssFrequencyIndex);
-	messageQueue->push(cmd);
-}
-
 void NFMMod::pull(Sample& sample)
 {
-	if (m_running.m_channelMute)
+	if (m_settings.m_channelMute)
 	{
 		sample.m_real = 0.0f;
 		sample.m_imag = 0.0f;
@@ -154,7 +123,7 @@ void NFMMod::pull(Sample& sample)
 
 void NFMMod::pullAudio(int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_config.m_audioSampleRate / (Real) m_config.m_basebandSampleRate);
+    unsigned int nbSamplesAudio = nbSamples * ((Real) m_settings.m_audioSampleRate / (Real) m_settings.m_basebandSampleRate);
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {
@@ -173,14 +142,14 @@ void NFMMod::modulateSample()
     calculateLevel(t);
     m_audioBufferFill++;
 
-    if (m_running.m_ctcssOn)
+    if (m_settings.m_ctcssOn)
     {
-        m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 378.0f * m_ctcssNco.next()) * (M_PI / 378.0f);
+        m_modPhasor += (m_settings.m_fmDeviation / (float) m_settings.m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 378.0f * m_ctcssNco.next()) * (M_PI / 378.0f);
     }
     else
     {
         // 378 = 302 * 1.25; 302 = number of filter taps (established experimentally)
-        m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 378.0f);
+        m_modPhasor += (m_settings.m_fmDeviation / (float) m_settings.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 378.0f);
     }
 
     m_modSample.real(cos(m_modPhasor) * 29204.0f); // -1 dB
@@ -201,7 +170,7 @@ void NFMMod::pullAF(Real& sample)
         {
             if (m_ifstream.eof())
             {
-            	if (m_running.m_playLoop)
+            	if (m_settings.m_playLoop)
             	{
                     m_ifstream.clear();
                     m_ifstream.seekg(0, std::ios::beg);
@@ -215,7 +184,7 @@ void NFMMod::pullAF(Real& sample)
             else
             {
             	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_running.m_volumeFactor;
+            	sample *= m_settings.m_volumeFactor;
             }
         }
         else
@@ -224,7 +193,7 @@ void NFMMod::pullAF(Real& sample)
         }
         break;
     case NFMModInputAudio:
-        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_running.m_volumeFactor;
+        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
         break;
     case NFMModInputCWTone:
         Real fadeFactor;
@@ -275,8 +244,8 @@ void NFMMod::calculateLevel(Real& sample)
 
 void NFMMod::start()
 {
-	qDebug() << "NFMMod::start: m_outputSampleRate: " << m_config.m_outputSampleRate
-			<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+	qDebug() << "NFMMod::start: m_outputSampleRate: " << m_settings.m_outputSampleRate
+			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
 	m_audioFifo.clear();
 }
@@ -291,48 +260,46 @@ bool NFMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
-        m_config.m_outputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		NFMModSettings settings = m_settings;
 
-		apply();
+		settings.m_basebandSampleRate = notif.getBasebandSampleRate();
+		settings.m_outputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
 
-		qDebug() << "NFMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
-                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+        applySettings(settings);
 
-		return true;
-	}
-	else if (MsgConfigureNFMMod::match(cmd))
-	{
-		MsgConfigureNFMMod& cfg = (MsgConfigureNFMMod&) cmd;
-
-		m_config.m_rfBandwidth = cfg.getRFBandwidth();
-		m_config.m_afBandwidth = cfg.getAFBandwidth();
-		m_config.m_fmDeviation = cfg.getFMDeviation();
-		m_config.m_toneFrequency = cfg.getToneFrequency();
-		m_config.m_volumeFactor = cfg.getVolumeFactor();
-		m_config.m_channelMute = cfg.getChannelMute();
-		m_config.m_playLoop = cfg.getPlayLoop();
-		m_config.m_ctcssOn = cfg.getCTCSSOn();
-		m_config.m_ctcssFrequency = NFMModSettings::getCTCSSFreq(cfg.getCTCSSFrequencyIndex());
-
-		apply();
-
-		qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod:"
-				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
-				<< " m_afBandwidth: " << m_config.m_afBandwidth
-				<< " m_fmDeviation: " << m_config.m_fmDeviation
-                << " m_toneFrequency: " << m_config.m_toneFrequency
-                << " m_volumeFactor: " << m_config.m_volumeFactor
-				<< " m_channelMute: " << m_config.m_channelMute
-				<< " m_playLoop: " << m_config.m_playLoop
-				<< " m_ctcssOn: " << m_config.m_ctcssOn
-				<< " m_ctcssFrequency: " << m_config.m_ctcssFrequency;
+        qDebug() << "NFMMod::handleMessage: MsgChannelizerNotification:"
+				<< " m_basebandSampleRate: " << settings.m_basebandSampleRate
+                << " m_outputSampleRate: " << settings.m_outputSampleRate
+				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
+    else if (MsgConfigureNFMMod::match(cmd))
+    {
+        MsgConfigureNFMMod& cfg = (MsgConfigureNFMMod&) cmd;
+
+        NFMModSettings settings = cfg.getSettings();
+
+        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod:"
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_afBandwidth: " << settings.m_afBandwidth
+                << " m_fmDeviation: " << settings.m_fmDeviation
+                << " m_volumeFactor: " << settings.m_volumeFactor
+                << " m_toneFrequency: " << settings.m_toneFrequency
+                << " m_ctcssIndex: " << settings.m_ctcssIndex
+                << " m_ctcssOn: " << settings.m_ctcssOn
+                << " m_channelMute: " << settings.m_channelMute
+                << " m_playLoop: " << settings.m_playLoop
+                << " force: " << cfg.getForce();
+
+        applySettings(settings, cfg.getForce());
+
+        return true;
+    }
 	else if (MsgConfigureFileSourceName::match(cmd))
     {
         MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
@@ -377,72 +344,6 @@ bool NFMMod::handleMessage(const Message& cmd)
 	}
 }
 
-void NFMMod::apply()
-{
-
-	if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-	    (m_config.m_outputSampleRate != m_running.m_outputSampleRate))
-	{
-        m_settingsMutex.lock();
-		m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
-        m_settingsMutex.unlock();
-	}
-
-	if((m_config.m_outputSampleRate != m_running.m_outputSampleRate) ||
-		(m_config.m_rfBandwidth != m_running.m_rfBandwidth))
-	{
-		m_settingsMutex.lock();
-		m_interpolatorDistanceRemain = 0;
-		m_interpolatorConsumed = false;
-		m_interpolatorDistance = (Real) m_config.m_audioSampleRate / (Real) m_config.m_outputSampleRate;
-        m_interpolator.create(48, m_config.m_audioSampleRate, m_config.m_rfBandwidth / 2.2, 3.0);
-		m_settingsMutex.unlock();
-	}
-
-	if ((m_config.m_afBandwidth != m_running.m_afBandwidth) ||
-		(m_config.m_audioSampleRate != m_running.m_audioSampleRate))
-	{
-		m_settingsMutex.lock();
-		m_lowpass.create(301, m_config.m_audioSampleRate, 250.0);
-		m_bandpass.create(301, m_config.m_audioSampleRate, 300.0, m_config.m_afBandwidth);
-		m_settingsMutex.unlock();
-	}
-
-	if ((m_config.m_toneFrequency != m_running.m_toneFrequency) ||
-	    (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
-	{
-        m_settingsMutex.lock();
-        m_toneNco.setFreq(m_config.m_toneFrequency, m_config.m_audioSampleRate);
-        m_settingsMutex.unlock();
-	}
-
-    if (m_config.m_audioSampleRate != m_running.m_audioSampleRate)
-    {
-        m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-        m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 250); // 4 ms
-    }
-
-    if ((m_config.m_ctcssFrequency != m_running.m_ctcssFrequency) ||
-        (m_config.m_audioSampleRate != m_running.m_audioSampleRate))
-    {
-        m_settingsMutex.lock();
-        m_ctcssNco.setFreq(m_config.m_ctcssFrequency, m_config.m_audioSampleRate);
-        m_settingsMutex.unlock();
-    }
-
-	m_running.m_outputSampleRate = m_config.m_outputSampleRate;
-	m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
-	m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-	m_running.m_afBandwidth = m_config.m_afBandwidth;
-	m_running.m_fmDeviation = m_config.m_fmDeviation;
-    m_running.m_volumeFactor = m_config.m_volumeFactor;
-	m_running.m_audioSampleRate = m_config.m_audioSampleRate;
-	m_running.m_channelMute = m_config.m_channelMute;
-	m_running.m_playLoop = m_config.m_playLoop;
-	m_running.m_ctcssOn = m_config.m_ctcssOn;
-	m_running.m_ctcssFrequency = m_config.m_ctcssFrequency;
-}
-
 void NFMMod::openFileStream()
 {
     if (m_ifstream.is_open()) {
@@ -477,3 +378,59 @@ void NFMMod::seekFileStream(int seekPercentage)
         m_ifstream.seekg(seekPoint, std::ios::beg);
     }
 }
+
+void NFMMod::applySettings(const NFMModSettings& settings, bool force)
+{
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
+        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) settings.m_audioSampleRate / (Real) settings.m_outputSampleRate;
+        m_interpolator.create(48, settings.m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_lowpass.create(301, settings.m_audioSampleRate, 250.0);
+        m_bandpass.create(301, settings.m_audioSampleRate, 300.0, settings.m_afBandwidth);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
+        m_cwSmoother.setNbFadeSamples(settings.m_audioSampleRate / 250); // 4 ms
+    }
+
+    if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(settings.m_ctcssIndex), settings.m_audioSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    m_settings = settings;
+}
+
