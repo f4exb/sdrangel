@@ -4,12 +4,14 @@ set(modwfm_SOURCES
 	wfmmod.cpp
 	wfmmodgui.cpp
 	wfmmodplugin.cpp
+	wfmmodsettings.cpp
 )
 
 set(modwfm_HEADERS
 	wfmmod.h
 	wfmmodgui.h
 	wfmmodplugin.h
+	wfmmodsettings.h
 )
 
 set(modwfm_FORMS

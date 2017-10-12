@@ -25,11 +25,13 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += wfmmod.cpp\
 	wfmmodgui.cpp\
-	wfmmodplugin.cpp
+	wfmmodplugin.cpp\
+	wfmmodsettings.cpp
 
 HEADERS += wfmmod.h\
 	wfmmodgui.h\
-	wfmmodplugin.h
+	wfmmodplugin.h\
+	wfmmodsettings.h
 
 FORMS += wfmmodgui.ui
 
