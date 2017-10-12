@@ -17,6 +17,8 @@
 
 #include "wfmdemod.h"
 
+const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
+
 WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
 {
 	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceAPI);
