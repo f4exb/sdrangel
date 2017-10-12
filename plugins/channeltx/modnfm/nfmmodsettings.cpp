@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDebug>
 
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -74,7 +75,7 @@ QByteArray NFMModSettings::serialize() const
     }
 
     if (m_channelMarker) {
-        s.writeBlob(8, m_channelMarker->serialize());
+        s.writeBlob(11, m_channelMarker->serialize());
     }
 
     s.writeBool(9, m_ctcssOn);
@@ -124,6 +125,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
     }
     else
     {
+        qDebug() << "NFMModSettings::deserialize: ERROR";
         resetToDefaults();
         return false;
     }
