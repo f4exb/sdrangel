@@ -348,7 +348,7 @@ void NFMDemodGUI::displaySettings()
     ui->squelchGate->setValue(m_settings.m_squelchGate);
 
     ui->deltaSquelch->setChecked(m_settings.m_deltaSquelch);
-    ui->squelch->setValue(m_settings.m_squelch * 10.0);
+    ui->squelch->setValue(m_settings.m_squelch * 1.0);
 
     if (m_settings.m_deltaSquelch)
     {

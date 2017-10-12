@@ -448,7 +448,7 @@
        <widget class="QLabel" name="squelchText">
         <property name="minimumSize">
          <size>
-          <width>34</width>
+          <width>40</width>
           <height>0</height>
          </size>
         </property>
