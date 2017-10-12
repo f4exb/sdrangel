@@ -26,6 +26,7 @@
 #include "nfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureNFMMod, Message)
+MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureAFInput, Message)
@@ -275,6 +276,20 @@ bool NFMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+//        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+//            cfg.getSampleRate(),
+//            cfg.getCenterFrequency());
+
+        qDebug() << "NFMMod::handleMessage: MsgConfigureChannelizer:"
+                << " getSampleRate: " << cfg.getSampleRate()
+                << " getCenterFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureNFMMod::match(cmd))
     {
         MsgConfigureNFMMod& cfg = (MsgConfigureNFMMod&) cmd;
