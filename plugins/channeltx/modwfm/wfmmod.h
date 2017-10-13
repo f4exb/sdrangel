@@ -33,6 +33,8 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "wfmmodsettings.h"
+
 class WFMMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -45,6 +47,29 @@ public:
         WFMModInputAudio,
         WFMModInputCWTone
     } WFMModInputAF;
+
+    class MsgConfigureWFMMod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const WFMModSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureWFMMod* create(const WFMModSettings& settings, bool force)
+        {
+            return new MsgConfigureWFMMod(settings, force);
+        }
+
+    private:
+        WFMModSettings m_settings;
+        bool m_force;
+
+        MsgConfigureWFMMod(const WFMModSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
 
     class MsgConfigureFileSourceName : public Message
     {
@@ -207,7 +232,7 @@ signals:
 
 
 private:
-    class MsgConfigureWFMMod : public Message
+    class MsgConfigureWFMModPrivate : public Message
     {
         MESSAGE_CLASS_DECLARATION
 
@@ -220,7 +245,7 @@ private:
         bool getChannelMute() const { return m_channelMute; }
         bool getPlayLoop() const { return m_playLoop; }
 
-        static MsgConfigureWFMMod* create(Real rfBandwidth,
+        static MsgConfigureWFMModPrivate* create(Real rfBandwidth,
         		Real afBandwidth,
 				float fmDeviation,
 				float toneFrequency,
@@ -228,7 +253,7 @@ private:
 				bool channelMute,
 				bool playLoop)
         {
-            return new MsgConfigureWFMMod(rfBandwidth,
+            return new MsgConfigureWFMModPrivate(rfBandwidth,
             		afBandwidth,
 					fmDeviation,
 					toneFrequency,
@@ -246,7 +271,7 @@ private:
         bool m_channelMute;
         bool m_playLoop;
 
-        MsgConfigureWFMMod(Real rfBandwidth,
+        MsgConfigureWFMModPrivate(Real rfBandwidth,
         		Real afBandwidth,
 				float fmDeviation,
 				float toneFrequency,
@@ -303,6 +328,7 @@ private:
 
     Config m_config;
     Config m_running;
+    WFMModSettings m_settings;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -345,6 +371,7 @@ private:
     static const int m_levelNbSamples;
 
     void apply();
+    void applySettings(const WFMModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
     void calculateLevel(const Real& sample);
     void openFileStream();

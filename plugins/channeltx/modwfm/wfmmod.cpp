@@ -26,6 +26,7 @@
 #include "wfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMMod, Message)
+MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMModPrivate, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureAFInput, Message)
@@ -103,7 +104,7 @@ void WFMMod::configure(MessageQueue* messageQueue,
 		bool channelMute,
 		bool playLoop)
 {
-	Message* cmd = MsgConfigureWFMMod::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, channelMute, playLoop);
+	Message* cmd = MsgConfigureWFMModPrivate::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, channelMute, playLoop);
 	messageQueue->push(cmd);
 }
 
@@ -308,9 +309,9 @@ bool WFMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
-	else if (MsgConfigureWFMMod::match(cmd))
+	else if (MsgConfigureWFMModPrivate::match(cmd))
 	{
-	    MsgConfigureWFMMod& cfg = (MsgConfigureWFMMod&) cmd;
+	    MsgConfigureWFMModPrivate& cfg = (MsgConfigureWFMModPrivate&) cmd;
 
 		m_config.m_rfBandwidth = cfg.getRFBandwidth();
 		m_config.m_afBandwidth = cfg.getAFBandwidth();
@@ -477,4 +478,62 @@ void WFMMod::seekFileStream(int seekPercentage)
         m_ifstream.clear();
         m_ifstream.seekg(seekPoint, std::ios::beg);
     }
+}
+
+void WFMMod::applySettings(const WFMModSettings& settings, bool force)
+{
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate))
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) ||
+        (settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) settings.m_audioSampleRate / (Real) settings.m_outputSampleRate;
+        m_interpolator.create(48, settings.m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        Real lowCut = -(settings.m_rfBandwidth / 2.0) / settings.m_outputSampleRate;
+        Real hiCut  = (settings.m_rfBandwidth / 2.0) / settings.m_outputSampleRate;
+        m_rfFilter->create_filter(lowCut, hiCut);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_toneNcoRF.setFreq(settings.m_toneFrequency, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_cwKeyer.setSampleRate(settings.m_outputSampleRate);
+        m_cwSmoother.setNbFadeSamples(settings.m_outputSampleRate / 250); // 4 ms
+        m_cwKeyer.reset();
+    }
+
+    m_settings = settings;
 }
