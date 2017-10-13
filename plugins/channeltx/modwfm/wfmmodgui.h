@@ -114,6 +114,7 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+    void displaySettings();
     void updateWithStreamData();
     void updateWithStreamTime();
 

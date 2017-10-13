@@ -414,8 +414,10 @@ void NFMModGUI::displaySettings()
     ui->toneFrequency->setValue(m_settings.m_toneFrequency / 10.0);
 
     ui->ctcssOn->setChecked(m_settings.m_ctcssOn);
-    ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
+
+    ui->channelMute->setChecked(m_settings.m_channelMute);
+    ui->playLoop->setChecked(m_settings.m_playLoop);
 
     blockApplySettings(false);
 }

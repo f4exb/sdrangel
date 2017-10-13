@@ -399,10 +399,13 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
     ui->cwKeyerGUI->setBuddies(m_wfmMod->getInputMessageQueue(), m_wfmMod->getCWKeyer());
 
-	applySettings();
+    m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_wfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+
+    applySettings();
 }
 
 WFMModGUI::~WFMModGUI()
@@ -451,6 +454,39 @@ void WFMModGUI::applySettings()
 //			ui->channelMute->isChecked(),
 //			ui->playLoop->isChecked());
 	}
+}
+
+void WFMModGUI::displaySettings()
+{
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.blockSignals(false);
+
+    setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
+
+    ui->rfBW->setCurrentIndex(WFMModSettings::getRFBWIndex(m_settings.m_rfBandwidth));
+
+    ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0));
+    ui->afBW->setValue(m_settings.m_afBandwidth / 1000.0);
+
+    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 1000.0));
+    ui->fmDev->setValue(m_settings.m_fmDeviation / 1000.0);
+
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
+    ui->volume->setValue(m_settings.m_volumeFactor * 10.0);
+
+    ui->toneFrequencyText->setText(QString("%1k").arg(m_settings.m_toneFrequency / 1000.0, 0, 'f', 2));
+    ui->toneFrequency->setValue(m_settings.m_toneFrequency / 10.0);
+
+    ui->channelMute->setChecked(m_settings.m_channelMute);
+    ui->playLoop->setChecked(m_settings.m_playLoop);
+
+    blockApplySettings(false);
 }
 
 void WFMModGUI::leaveEvent(QEvent*)
