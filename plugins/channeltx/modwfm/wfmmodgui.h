@@ -24,6 +24,7 @@
 #include "util/messagequeue.h"
 
 #include "wfmmod.h"
+#include "wfmmodsettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -87,6 +88,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
     ChannelMarker m_channelMarker;
+    WFMModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 

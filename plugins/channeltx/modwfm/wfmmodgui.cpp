@@ -195,45 +195,55 @@ void WFMModGUI::handleSourceMessages()
 void WFMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void WFMModGUI::on_rfBW_currentIndexChanged(int index)
 {
-	m_channelMarker.setBandwidth(m_rfBW[index]);
+    float rfBW = WFMModSettings::getRFBW(index);
+	m_channelMarker.setBandwidth(rfBW);
+	m_settings.m_rfBandwidth = rfBW;
 	applySettings();
 }
 
 void WFMModGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1k").arg(value));
+	m_settings.m_afBandwidth = value * 1000.0;
 	applySettings();
 }
 
 void WFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1k").arg(value));
+	m_settings.m_fmDeviation = value * 1000.0;
 	applySettings();
 }
 
 void WFMModGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volumeFactor = value / 10.0;
 	applySettings();
 }
 
 void WFMModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_toneFrequency = value * 10.0;
     applySettings();
 }
 
-void WFMModGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
+void WFMModGUI::on_channelMute_toggled(bool checked)
 {
+    m_settings.m_channelMute = checked;
 	applySettings();
 }
 
-void WFMModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
+void WFMModGUI::on_playLoop_toggled(bool checked)
 {
+    m_settings.m_playLoop = checked;
 	applySettings();
 }
 
@@ -423,14 +433,23 @@ void WFMModGUI::applySettings()
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
-			m_rfBW[ui->rfBW->currentIndex()],
-			ui->afBW->value() * 1000.0,
-			ui->fmDev->value() * 1000.0f, // value is in '100 Hz
-			ui->toneFrequency->value() * 10.0f,
-			ui->volume->value() / 10.0f,
-			ui->channelMute->isChecked(),
-			ui->playLoop->isChecked());
+        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
+            m_settings.m_rfBandwidth,
+            m_settings.m_afBandwidth,
+            m_settings.m_fmDeviation,
+            m_settings.m_toneFrequency,
+            m_settings.m_volumeFactor,
+            m_settings.m_channelMute,
+            m_settings.m_playLoop);
+
+//        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
+//			m_rfBW[ui->rfBW->currentIndex()],
+//			ui->afBW->value() * 1000.0,
+//			ui->fmDev->value() * 1000.0f, // value is in '100 Hz
+//			ui->toneFrequency->value() * 10.0f,
+//			ui->volume->value() / 10.0f,
+//			ui->channelMute->isChecked(),
+//			ui->playLoop->isChecked());
 	}
 }
 
