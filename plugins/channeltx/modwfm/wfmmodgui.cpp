@@ -72,84 +72,98 @@ void WFMModGUI::setCenterFrequency(qint64 centerFrequency)
 
 void WFMModGUI::resetToDefaults()
 {
-	blockApplySettings(true);
+    m_settings.resetToDefaults();
+    displaySettings();
+    applySettings(true);
 
-	ui->rfBW->setCurrentIndex(7);
-	ui->afBW->setValue(8);
-	ui->fmDev->setValue(50);
-	ui->toneFrequency->setValue(100);
-	ui->volume->setValue(10);
-	ui->deltaFrequency->setValue(0);
-
-	blockApplySettings(false);
-	applySettings();
+//	blockApplySettings(true);
+//
+//	ui->rfBW->setCurrentIndex(7);
+//	ui->afBW->setValue(8);
+//	ui->fmDev->setValue(50);
+//	ui->toneFrequency->setValue(100);
+//	ui->volume->setValue(10);
+//	ui->deltaFrequency->setValue(0);
+//
+//	blockApplySettings(false);
+//	applySettings();
 }
 
 QByteArray WFMModGUI::serialize() const
 {
-	SimpleSerializer s(1);
-	s.writeS32(1, m_channelMarker.getCenterFrequency());
-	s.writeS32(2, ui->rfBW->currentIndex());
-	s.writeS32(3, ui->afBW->value());
-	s.writeS32(4, ui->fmDev->value());
-	s.writeU32(5, m_channelMarker.getColor().rgb());
-	s.writeS32(6, ui->toneFrequency->value());
-	s.writeS32(7, ui->volume->value());
-	s.writeBlob(8, ui->cwKeyerGUI->serialize());
-	return s.final();
+    return m_settings.serialize();
+//	SimpleSerializer s(1);
+//	s.writeS32(1, m_channelMarker.getCenterFrequency());
+//	s.writeS32(2, ui->rfBW->currentIndex());
+//	s.writeS32(3, ui->afBW->value());
+//	s.writeS32(4, ui->fmDev->value());
+//	s.writeU32(5, m_channelMarker.getColor().rgb());
+//	s.writeS32(6, ui->toneFrequency->value());
+//	s.writeS32(7, ui->volume->value());
+//	s.writeBlob(8, ui->cwKeyerGUI->serialize());
+//	return s.final();
 }
 
 bool WFMModGUI::deserialize(const QByteArray& data)
 {
-	SimpleDeserializer d(data);
+    if(m_settings.deserialize(data)) {
+        displaySettings();
+        applySettings(true);
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 
-	if(!d.isValid())
-    {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1)
-    {
-		QByteArray bytetmp;
-		quint32 u32tmp;
-		qint32 tmp;
-
-		blockApplySettings(true);
-		m_channelMarker.blockSignals(true);
-
-		d.readS32(1, &tmp, 0);
-		m_channelMarker.setCenterFrequency(tmp);
-		d.readS32(2, &tmp, 7);
-		ui->rfBW->setCurrentIndex(tmp);
-		d.readS32(3, &tmp, 3);
-		ui->afBW->setValue(tmp);
-		d.readS32(4, &tmp, 50);
-		ui->fmDev->setValue(tmp);
-
-        if(d.readU32(5, &u32tmp))
-        {
-			m_channelMarker.setColor(u32tmp);
-        }
-
-        d.readS32(6, &tmp, 100);
-        ui->toneFrequency->setValue(tmp);
-        d.readS32(7, &tmp, 10);
-        ui->volume->setValue(tmp);
-        d.readBlob(8, &bytetmp);
-        ui->cwKeyerGUI->deserialize(bytetmp);
-
-        blockApplySettings(false);
-		m_channelMarker.blockSignals(false);
-
-		applySettings();
-		return true;
-	}
-    else
-    {
-		resetToDefaults();
-		return false;
-	}
+//	SimpleDeserializer d(data);
+//
+//	if(!d.isValid())
+//    {
+//		resetToDefaults();
+//		return false;
+//	}
+//
+//	if(d.getVersion() == 1)
+//    {
+//		QByteArray bytetmp;
+//		quint32 u32tmp;
+//		qint32 tmp;
+//
+//		blockApplySettings(true);
+//		m_channelMarker.blockSignals(true);
+//
+//		d.readS32(1, &tmp, 0);
+//		m_channelMarker.setCenterFrequency(tmp);
+//		d.readS32(2, &tmp, 7);
+//		ui->rfBW->setCurrentIndex(tmp);
+//		d.readS32(3, &tmp, 3);
+//		ui->afBW->setValue(tmp);
+//		d.readS32(4, &tmp, 50);
+//		ui->fmDev->setValue(tmp);
+//
+//        if(d.readU32(5, &u32tmp))
+//        {
+//			m_channelMarker.setColor(u32tmp);
+//        }
+//
+//        d.readS32(6, &tmp, 100);
+//        ui->toneFrequency->setValue(tmp);
+//        d.readS32(7, &tmp, 10);
+//        ui->volume->setValue(tmp);
+//        d.readBlob(8, &bytetmp);
+//        ui->cwKeyerGUI->deserialize(bytetmp);
+//
+//        blockApplySettings(false);
+//		m_channelMarker.blockSignals(false);
+//
+//		applySettings();
+//		return true;
+//	}
+//    else
+//    {
+//		resetToDefaults();
+//		return false;
+//	}
 }
 
 bool WFMModGUI::handleMessage(const Message& message)
@@ -405,7 +419,8 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_wfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 
-    applySettings();
+	displaySettings();
+    applySettings(true);
 }
 
 WFMModGUI::~WFMModGUI()
@@ -424,7 +439,7 @@ void WFMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void WFMModGUI::applySettings()
+void WFMModGUI::applySettings(bool force __attribute__((unused)))
 {
 	if (m_doApplySettings)
 	{

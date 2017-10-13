@@ -68,7 +68,7 @@ void NFMModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings();
+    applySettings(true);
 }
 
 QByteArray NFMModGUI::serialize() const
@@ -78,7 +78,6 @@ QByteArray NFMModGUI::serialize() const
 
 bool NFMModGUI::deserialize(const QByteArray& data)
 {
-    qDebug("NFMModGUI::deserialize");
     if(m_settings.deserialize(data)) {
         displaySettings();
         applySettings(true);
