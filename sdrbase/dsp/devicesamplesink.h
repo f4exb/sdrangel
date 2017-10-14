@@ -44,7 +44,6 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-	MessageQueue *getOutputMessageQueueToGUI() { return &m_outputMessageQueueToGUI; } // TODO: remove
 	SampleSourceFifo* getSampleFifo() { return &m_sampleSourceFifo; }
 
 protected slots:
@@ -54,7 +53,6 @@ protected:
     SampleSourceFifo m_sampleSourceFifo;
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
-    MessageQueue m_outputMessageQueueToGUI; //!< Output queue specialized for the sink GUI // TODO: remove
 };
 
 #endif /* SDRBASE_DSP_DEVICESAMPLESINK_H_ */

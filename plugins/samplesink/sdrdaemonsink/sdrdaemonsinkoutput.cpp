@@ -152,7 +152,7 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 		if (m_sdrDaemonSinkThread != 0)
 		{
 			report = MsgReportSDRdaemonSinkStreamTiming::create(m_sdrDaemonSinkThread->getSamplesCount());
-			getOutputMessageQueueToGUI()->push(report);
+			getMessageQueueToGUI()->push(report);
 		}
 
 		return true;
