@@ -296,38 +296,6 @@ private:
         RSRunning
     };
 
-    struct Config {
-        int m_basebandSampleRate;
-        int m_outputSampleRate;
-        qint64 m_inputFrequencyOffset;
-        Real m_rfBandwidth;
-        Real m_afBandwidth;
-        float m_fmDeviation;
-        float m_toneFrequency;
-        float m_volumeFactor;
-        quint32 m_audioSampleRate;
-        bool m_channelMute;
-        bool m_playLoop;
-
-        Config() :
-            m_basebandSampleRate(0),
-            m_outputSampleRate(-1),
-            m_inputFrequencyOffset(0),
-            m_rfBandwidth(-1),
-            m_afBandwidth(-1),
-            m_fmDeviation(5000.0f),
-            m_toneFrequency(1000.0f),
-            m_volumeFactor(1.0f),
-            m_audioSampleRate(0),
-            m_channelMute(false),
-			m_playLoop(false)
-        { }
-    };
-
-    //=================================================================
-
-    Config m_config;
-    Config m_running;
     WFMModSettings m_settings;
 
     NCO m_carrierNco;
@@ -370,7 +338,6 @@ private:
     CWSmoother m_cwSmoother;
     static const int m_levelNbSamples;
 
-    void apply();
     void applySettings(const WFMModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
     void calculateLevel(const Real& sample);

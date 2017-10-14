@@ -35,11 +35,6 @@
 
 const QString WFMModGUI::m_channelID = "sdrangel.channeltx.modwfm";
 
-const int WFMModGUI::m_rfBW[] = {
-	12500, 25000, 40000, 60000, 75000, 80000, 100000, 125000, 140000, 160000, 180000, 200000, 220000, 250000
-};
-const int WFMModGUI::m_nbRfBW = 14;
-
 WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
 {
     WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceAPI);
@@ -75,33 +70,11 @@ void WFMModGUI::resetToDefaults()
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
-
-//	blockApplySettings(true);
-//
-//	ui->rfBW->setCurrentIndex(7);
-//	ui->afBW->setValue(8);
-//	ui->fmDev->setValue(50);
-//	ui->toneFrequency->setValue(100);
-//	ui->volume->setValue(10);
-//	ui->deltaFrequency->setValue(0);
-//
-//	blockApplySettings(false);
-//	applySettings();
 }
 
 QByteArray WFMModGUI::serialize() const
 {
     return m_settings.serialize();
-//	SimpleSerializer s(1);
-//	s.writeS32(1, m_channelMarker.getCenterFrequency());
-//	s.writeS32(2, ui->rfBW->currentIndex());
-//	s.writeS32(3, ui->afBW->value());
-//	s.writeS32(4, ui->fmDev->value());
-//	s.writeU32(5, m_channelMarker.getColor().rgb());
-//	s.writeS32(6, ui->toneFrequency->value());
-//	s.writeS32(7, ui->volume->value());
-//	s.writeBlob(8, ui->cwKeyerGUI->serialize());
-//	return s.final();
 }
 
 bool WFMModGUI::deserialize(const QByteArray& data)
@@ -114,56 +87,6 @@ bool WFMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-
-//	SimpleDeserializer d(data);
-//
-//	if(!d.isValid())
-//    {
-//		resetToDefaults();
-//		return false;
-//	}
-//
-//	if(d.getVersion() == 1)
-//    {
-//		QByteArray bytetmp;
-//		quint32 u32tmp;
-//		qint32 tmp;
-//
-//		blockApplySettings(true);
-//		m_channelMarker.blockSignals(true);
-//
-//		d.readS32(1, &tmp, 0);
-//		m_channelMarker.setCenterFrequency(tmp);
-//		d.readS32(2, &tmp, 7);
-//		ui->rfBW->setCurrentIndex(tmp);
-//		d.readS32(3, &tmp, 3);
-//		ui->afBW->setValue(tmp);
-//		d.readS32(4, &tmp, 50);
-//		ui->fmDev->setValue(tmp);
-//
-//        if(d.readU32(5, &u32tmp))
-//        {
-//			m_channelMarker.setColor(u32tmp);
-//        }
-//
-//        d.readS32(6, &tmp, 100);
-//        ui->toneFrequency->setValue(tmp);
-//        d.readS32(7, &tmp, 10);
-//        ui->volume->setValue(tmp);
-//        d.readBlob(8, &bytetmp);
-//        ui->cwKeyerGUI->deserialize(bytetmp);
-//
-//        blockApplySettings(false);
-//		m_channelMarker.blockSignals(false);
-//
-//		applySettings();
-//		return true;
-//	}
-//    else
-//    {
-//		resetToDefaults();
-//		return false;
-//	}
 }
 
 bool WFMModGUI::handleMessage(const Message& message)
@@ -370,13 +293,14 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     blockApplySettings(true);
+
     ui->rfBW->clear();
-    for (int i = 0; i < m_nbRfBW; i++) {
-        ui->rfBW->addItem(QString("%1").arg(m_rfBW[i] / 1000.0, 0, 'f', 2));
+    for (int i = 0; i < WFMModSettings::m_nbRfBW; i++) {
+        ui->rfBW->addItem(QString("%1").arg(WFMModSettings::getRFBW(i) / 1000.0, 0, 'f', 2));
     }
     ui->rfBW->setCurrentIndex(7);
-    blockApplySettings(false);
 
+    blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
@@ -395,10 +319,13 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	//m_channelMarker = new ChannelMarker(this);
-	m_channelMarker.setColor(Qt::blue);
-	m_channelMarker.setBandwidth(m_rfBW[ui->rfBW->currentIndex()]);
-	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
+//	m_channelMarker.setColor(Qt::blue);
+//	m_channelMarker.setBandwidth(m_rfBW[ui->rfBW->currentIndex()]);
+//	m_channelMarker.setCenterFrequency(0);
+//	m_channelMarker.setVisible(true);
+
+    m_channelMarker.setTitle("WFM Modulator");
+    m_channelMarker.setVisible(true);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
@@ -446,31 +373,13 @@ void WFMModGUI::applySettings(bool force)
 		setTitleColor(m_channelMarker.getColor());
 
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		   requiredBW(m_rfBW[ui->rfBW->currentIndex()]),
-			m_channelMarker.getCenterFrequency());
+		   requiredBW(WFMModSettings::getRFBW(ui->rfBW->currentIndex())),
+		   m_channelMarker.getCenterFrequency());
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
 		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(m_settings, force);
 		m_wfmMod->getInputMessageQueue()->push(msgConf);
-
-//        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
-//            m_settings.m_rfBandwidth,
-//            m_settings.m_afBandwidth,
-//            m_settings.m_fmDeviation,
-//            m_settings.m_toneFrequency,
-//            m_settings.m_volumeFactor,
-//            m_settings.m_channelMute,
-//            m_settings.m_playLoop);
-
-//        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
-//			m_rfBW[ui->rfBW->currentIndex()],
-//			ui->afBW->value() * 1000.0,
-//			ui->fmDev->value() * 1000.0f, // value is in '100 Hz
-//			ui->toneFrequency->value() * 10.0f,
-//			ui->volume->value() / 10.0f,
-//			ui->channelMute->isChecked(),
-//			ui->playLoop->isChecked());
 	}
 }
 

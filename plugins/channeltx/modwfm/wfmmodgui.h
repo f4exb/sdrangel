@@ -106,9 +106,6 @@ private:
     WFMMod::WFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    static const int m_rfBW[];
-    static const int m_nbRfBW;
-
     explicit WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~WFMModGUI();
 
