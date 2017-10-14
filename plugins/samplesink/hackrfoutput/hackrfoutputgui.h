@@ -65,6 +65,7 @@ private:
 	Ui::HackRFOutputGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	bool m_forceSettings;
 	HackRFOutputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

@@ -183,7 +183,7 @@ bool HackRFOutput::handleMessage(const Message& message)
 		MsgConfigureHackRF& conf = (MsgConfigureHackRF&) message;
 		qDebug() << "HackRFOutput::handleMessage: MsgConfigureHackRF";
 
-		bool success = applySettings(conf.getSettings(), false);
+		bool success = applySettings(conf.getSettings(), conf.getForce());
 
 		if (!success)
 		{

@@ -36,6 +36,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::HackRFOutputGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(0),
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
@@ -110,6 +111,7 @@ bool HackRFOutputGui::deserialize(const QByteArray& data)
 	if(m_settings.deserialize(data))
 	{
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	}
@@ -322,8 +324,9 @@ void HackRFOutputGui::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "HackRFOutputGui::updateHardware";
-        HackRFOutput::MsgConfigureHackRF* message = HackRFOutput::MsgConfigureHackRF::create(m_settings);
+        HackRFOutput::MsgConfigureHackRF* message = HackRFOutput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
+        m_forceSettings = true;
         m_updateTimer.stop();
     }
 }
