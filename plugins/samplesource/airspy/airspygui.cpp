@@ -34,6 +34,7 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::AirspyGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
@@ -53,6 +54,8 @@ AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	m_rates = ((AirspyInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+
+    sendSettings();
 }
 
 AirspyGui::~AirspyGui()
@@ -103,6 +106,7 @@ bool AirspyGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	} else {
@@ -375,8 +379,9 @@ void AirspyGui::on_transverter_clicked()
 void AirspyGui::updateHardware()
 {
 	qDebug() << "AirspyGui::updateHardware";
-	AirspyInput::MsgConfigureAirspy* message = AirspyInput::MsgConfigureAirspy::create( m_settings);
+	AirspyInput::MsgConfigureAirspy* message = AirspyInput::MsgConfigureAirspy::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 

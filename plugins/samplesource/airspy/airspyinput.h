@@ -34,18 +34,21 @@ public:
 
 	public:
 		const AirspySettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureAirspy* create(const AirspySettings& settings)
+		static MsgConfigureAirspy* create(const AirspySettings& settings, bool force)
 		{
-			return new MsgConfigureAirspy(settings);
+			return new MsgConfigureAirspy(settings, force);
 		}
 
 	private:
 		AirspySettings m_settings;
+		bool m_force;
 
-		MsgConfigureAirspy(const AirspySettings& settings) :
+		MsgConfigureAirspy(const AirspySettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 

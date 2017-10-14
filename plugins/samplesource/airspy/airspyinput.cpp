@@ -227,7 +227,7 @@ bool AirspyInput::handleMessage(const Message& message)
 		MsgConfigureAirspy& conf = (MsgConfigureAirspy&) message;
 		qDebug() << "AirspyInput::handleMessage: MsgConfigureAirspy";
 
-		bool success = applySettings(conf.getSettings(), false);
+		bool success = applySettings(conf.getSettings(), conf.getForce());
 
 		if (!success)
 		{

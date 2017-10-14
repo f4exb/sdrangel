@@ -58,6 +58,7 @@ private:
 	Ui::AirspyGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
+	bool m_forceSettings;
 	AirspySettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
