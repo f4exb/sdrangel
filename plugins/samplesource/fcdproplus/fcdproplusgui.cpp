@@ -32,6 +32,7 @@ FCDProPlusGui::FCDProPlusGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FCDProPlusGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
@@ -113,6 +114,7 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 	if(m_settings.deserialize(data))
 	{
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	}
@@ -216,8 +218,9 @@ void FCDProPlusGui::on_iqImbalance_toggled(bool checked)
 
 void FCDProPlusGui::updateHardware()
 {
-	FCDProPlusInput::MsgConfigureFCD* message = FCDProPlusInput::MsgConfigureFCD::create(m_settings);
+	FCDProPlusInput::MsgConfigureFCD* message = FCDProPlusInput::MsgConfigureFCD::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 

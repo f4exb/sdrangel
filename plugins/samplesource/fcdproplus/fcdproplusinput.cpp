@@ -169,7 +169,7 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 	{
 		qDebug() << "FCDProPlusInput::handleMessage: MsgConfigureFCD";
 		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
-		applySettings(conf.getSettings(), false);
+		applySettings(conf.getSettings(), conf.getForce());
 		return true;
 	}
     else if (MsgFileRecord::match(message))
