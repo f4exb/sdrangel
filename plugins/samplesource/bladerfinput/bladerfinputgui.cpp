@@ -32,6 +32,7 @@ BladerfInputGui::BladerfInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BladerfInputGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_sampleRate(0),
@@ -110,6 +111,7 @@ bool BladerfInputGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	} else {
@@ -359,8 +361,9 @@ void BladerfInputGui::on_record_toggled(bool checked)
 void BladerfInputGui::updateHardware()
 {
 	qDebug() << "BladerfGui::updateHardware";
-	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create( m_settings);
+	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 

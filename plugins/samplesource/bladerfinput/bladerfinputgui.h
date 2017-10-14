@@ -54,6 +54,7 @@ private:
 	Ui::BladerfInputGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
+	bool m_forceSettings;
 	BladeRFInputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
