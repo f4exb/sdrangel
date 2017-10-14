@@ -31,7 +31,8 @@
 SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SDRPlayGui),
-    m_deviceAPI(deviceAPI)
+    m_deviceAPI(deviceAPI),
+    m_forceSettings(true)
 {
     m_sampleSource = (SDRPlayInput*) m_deviceAPI->getSampleSource();
 
@@ -121,6 +122,7 @@ bool SDRPlayGui::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
+        m_forceSettings = true;
         sendSettings();
         return true;
     }
@@ -265,8 +267,9 @@ void SDRPlayGui::sendSettings()
 void SDRPlayGui::updateHardware()
 {
     qDebug() << "SDRPlayGui::updateHardware";
-    SDRPlayInput::MsgConfigureSDRPlay* message = SDRPlayInput::MsgConfigureSDRPlay::create( m_settings);
+    SDRPlayInput::MsgConfigureSDRPlay* message = SDRPlayInput::MsgConfigureSDRPlay::create( m_settings, m_forceSettings);
     m_sampleSource->getInputMessageQueue()->push(message);
+    m_forceSettings = false;
     m_updateTimer.stop();
 }
 

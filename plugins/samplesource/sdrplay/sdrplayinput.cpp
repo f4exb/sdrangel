@@ -232,7 +232,7 @@ bool SDRPlayInput::handleMessage(const Message& message)
         // standard changes
         else
         {
-            if (!applySettings(settings, false, false))
+            if (!applySettings(settings, false, conf.getForce()))
             {
                 qDebug("SDRPlayInput::handleMessage: config error");
             }

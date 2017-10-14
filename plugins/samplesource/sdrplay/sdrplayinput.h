@@ -35,18 +35,21 @@ public:
 
     public:
         const SDRPlaySettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
 
-        static MsgConfigureSDRPlay* create(const SDRPlaySettings& settings)
+        static MsgConfigureSDRPlay* create(const SDRPlaySettings& settings, bool force)
         {
-            return new MsgConfigureSDRPlay(settings);
+            return new MsgConfigureSDRPlay(settings, force);
         }
 
     private:
         SDRPlaySettings m_settings;
+        bool m_force;
 
-        MsgConfigureSDRPlay(const SDRPlaySettings& settings) :
+        MsgConfigureSDRPlay(const SDRPlaySettings& settings, bool force) :
             Message(),
-            m_settings(settings)
+            m_settings(settings),
+            m_force(force)
         { }
     };
 

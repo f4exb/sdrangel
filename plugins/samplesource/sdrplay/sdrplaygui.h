@@ -57,6 +57,7 @@ private:
     Ui::SDRPlayGui* ui;
 
     DeviceSourceAPI* m_deviceAPI;
+    bool m_forceSettings;
     SDRPlaySettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
