@@ -10,6 +10,7 @@ TEMPLATE = lib
 TARGET = httpserver
 
 INCLUDEPATH += $$PWD
+QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
