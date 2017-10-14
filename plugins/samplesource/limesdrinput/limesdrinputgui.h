@@ -62,6 +62,7 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     bool m_doApplySettings;
+    bool m_forceSettings;
     int m_statusCounter;
     int m_deviceStatusCounter;
     MessageQueue m_inputMessageQueue;

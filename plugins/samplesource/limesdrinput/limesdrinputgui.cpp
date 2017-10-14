@@ -36,6 +36,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, QWidget* parent) :
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
     m_doApplySettings(true),
+    m_forceSettings(true),
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
@@ -125,6 +126,7 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
+        m_forceSettings = true;
         sendSettings();
         return true;
     }
@@ -324,8 +326,9 @@ void LimeSDRInputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "LimeSDRInputGUI::updateHardware";
-        LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings);
+        LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings, m_forceSettings);
         m_limeSDRInput->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
         m_updateTimer.stop();
     }
 }

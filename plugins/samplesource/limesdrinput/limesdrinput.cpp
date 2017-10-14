@@ -42,8 +42,7 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
     m_limeSDRInputThread(0),
     m_deviceDescription("LimeSDRInput"),
-    m_running(false),
-    m_firstConfig(true)
+    m_running(false)
 {
     m_streamId.handle = 0;
     suspendRxBuddies();
@@ -421,13 +420,9 @@ bool LimeSDRInput::handleMessage(const Message& message)
         MsgConfigureLimeSDR& conf = (MsgConfigureLimeSDR&) message;
         qDebug() << "LimeSDRInput::handleMessage: MsgConfigureLimeSDR";
 
-        if (!applySettings(conf.getSettings(), m_firstConfig))
+        if (!applySettings(conf.getSettings(), conf.getForce()))
         {
             qDebug("LimeSDRInput::handleMessage config error");
-        }
-        else
-        {
-            m_firstConfig = false;
         }
 
         return true;

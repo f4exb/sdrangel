@@ -37,18 +37,21 @@ public:
 
     public:
         const LimeSDRInputSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
 
-        static MsgConfigureLimeSDR* create(const LimeSDRInputSettings& settings)
+        static MsgConfigureLimeSDR* create(const LimeSDRInputSettings& settings, bool force)
         {
-            return new MsgConfigureLimeSDR(settings);
+            return new MsgConfigureLimeSDR(settings, force);
         }
 
     private:
         LimeSDRInputSettings m_settings;
+        bool m_force;
 
-        MsgConfigureLimeSDR(const LimeSDRInputSettings& settings) :
+        MsgConfigureLimeSDR(const LimeSDRInputSettings& settings, bool force) :
             Message(),
-            m_settings(settings)
+            m_settings(settings),
+            m_force(force)
         { }
     };
 
@@ -235,7 +238,6 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
-    bool m_firstConfig;
     lms_stream_t m_streamId;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
