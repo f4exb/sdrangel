@@ -35,18 +35,21 @@ public:
 
 	public:
 		const RTLSDRSettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureRTLSDR* create(const RTLSDRSettings& settings)
+		static MsgConfigureRTLSDR* create(const RTLSDRSettings& settings, bool force)
 		{
-			return new MsgConfigureRTLSDR(settings);
+			return new MsgConfigureRTLSDR(settings, force);
 		}
 
 	private:
 		RTLSDRSettings m_settings;
+		bool m_force;
 
-		MsgConfigureRTLSDR(const RTLSDRSettings& settings) :
+		MsgConfigureRTLSDR(const RTLSDRSettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 

@@ -33,6 +33,7 @@ RTLSDRGui::RTLSDRGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::RTLSDRGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
@@ -117,6 +118,7 @@ bool RTLSDRGui::deserialize(const QByteArray& data)
     {
         displayGains();
         displaySettings();
+        m_forceSettings = true;
         sendSettings();
         return true;
     }
@@ -345,8 +347,9 @@ void RTLSDRGui::on_transverter_clicked()
 
 void RTLSDRGui::updateHardware()
 {
-	RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings);
+	RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 

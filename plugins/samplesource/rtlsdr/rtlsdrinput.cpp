@@ -249,7 +249,7 @@ bool RTLSDRInput::handleMessage(const Message& message)
         MsgConfigureRTLSDR& conf = (MsgConfigureRTLSDR&) message;
         qDebug() << "RTLSDRInput::handleMessage: MsgConfigureRTLSDR";
 
-        bool success = applySettings(conf.getSettings(), false);
+        bool success = applySettings(conf.getSettings(), conf.getForce());
 
         if (!success)
         {

@@ -11,7 +11,7 @@
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QString("RTL-SDR Input"),
-	QString("3.7.3"),
+	QString("3.7.4"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -55,6 +55,7 @@ private:
 	Ui::RTLSDRGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
+	bool m_forceSettings;
 	RTLSDRSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
