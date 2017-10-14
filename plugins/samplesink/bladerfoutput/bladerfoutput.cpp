@@ -207,7 +207,7 @@ bool BladerfOutput::handleMessage(const Message& message)
 		MsgConfigureBladerf& conf = (MsgConfigureBladerf&) message;
 		qDebug() << "BladerfInput::handleMessage: MsgConfigureBladerf";
 
-		if (!applySettings(conf.getSettings(), false))
+		if (!applySettings(conf.getSettings(), conf.getForce()))
 		{
 			qDebug("BladeRF config error");
 		}

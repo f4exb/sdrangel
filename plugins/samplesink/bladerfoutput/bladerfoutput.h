@@ -36,18 +36,21 @@ public:
 
 	public:
 		const BladeRFOutputSettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureBladerf* create(const BladeRFOutputSettings& settings)
+		static MsgConfigureBladerf* create(const BladeRFOutputSettings& settings, bool force)
 		{
-			return new MsgConfigureBladerf(settings);
+			return new MsgConfigureBladerf(settings, force);
 		}
 
 	private:
 		BladeRFOutputSettings m_settings;
+		bool m_force;
 
-		MsgConfigureBladerf(const BladeRFOutputSettings& settings) :
+		MsgConfigureBladerf(const BladeRFOutputSettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 
