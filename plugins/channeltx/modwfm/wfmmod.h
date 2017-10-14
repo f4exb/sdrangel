@@ -202,15 +202,6 @@ public:
     WFMMod();
     ~WFMMod();
 
-    void configure(MessageQueue* messageQueue,
-            Real rfBandwidth,
-            Real afBandwidth,
-            float fmDeviation,
-            float toneFrequency,
-			float volumeFactor,
-            bool audioMute,
-            bool playLoop);
-
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples);
     virtual void start();
@@ -232,65 +223,6 @@ signals:
 
 
 private:
-    class MsgConfigureWFMModPrivate : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        Real getRFBandwidth() const { return m_rfBandwidth; }
-        Real getAFBandwidth() const { return m_afBandwidth; }
-        float getFMDeviation() const { return m_fmDeviation; }
-        float getToneFrequency() const { return m_toneFrequency; }
-        float getVolumeFactor() const { return m_volumeFactor; }
-        bool getChannelMute() const { return m_channelMute; }
-        bool getPlayLoop() const { return m_playLoop; }
-
-        static MsgConfigureWFMModPrivate* create(Real rfBandwidth,
-        		Real afBandwidth,
-				float fmDeviation,
-				float toneFrequency,
-				float volumeFactor,
-				bool channelMute,
-				bool playLoop)
-        {
-            return new MsgConfigureWFMModPrivate(rfBandwidth,
-            		afBandwidth,
-					fmDeviation,
-					toneFrequency,
-					volumeFactor,
-					channelMute,
-					playLoop);
-        }
-
-    private:
-        Real m_rfBandwidth;
-        Real m_afBandwidth;
-        float m_fmDeviation;
-        float m_toneFrequency;
-        float m_volumeFactor;
-        bool m_channelMute;
-        bool m_playLoop;
-
-        MsgConfigureWFMModPrivate(Real rfBandwidth,
-        		Real afBandwidth,
-				float fmDeviation,
-				float toneFrequency,
-				float volumeFactor,
-				bool channelMute,
-				bool playLoop) :
-            Message(),
-            m_rfBandwidth(rfBandwidth),
-            m_afBandwidth(afBandwidth),
-            m_fmDeviation(fmDeviation),
-            m_toneFrequency(toneFrequency),
-            m_volumeFactor(volumeFactor),
-            m_channelMute(channelMute),
-			m_playLoop(playLoop)
-        { }
-    };
-
-    //=================================================================
-
     enum RateState {
         RSInitialFill,
         RSRunning

@@ -58,7 +58,7 @@ public:
     static const QString m_channelID;
 
 private slots:
-    void viewChanged();
+    void channelMarkerChanged();
     void channelizerOutputSampleRateChanged();
     void handleSourceMessages();
 

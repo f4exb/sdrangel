@@ -26,7 +26,6 @@
 #include "wfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMMod, Message)
-MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMModPrivate, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureAFInput, Message)
@@ -87,19 +86,6 @@ WFMMod::~WFMMod()
     delete m_rfFilter;
     delete[] m_rfFilterBuffer;
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
-}
-
-void WFMMod::configure(MessageQueue* messageQueue,
-		Real rfBandwidth,
-		Real afBandwidth,
-		float fmDeviation,
-		float toneFrequency,
-		float volumeFactor,
-		bool channelMute,
-		bool playLoop)
-{
-	Message* cmd = MsgConfigureWFMModPrivate::create(rfBandwidth, afBandwidth, fmDeviation, toneFrequency, volumeFactor, channelMute, playLoop);
-	messageQueue->push(cmd);
 }
 
 void WFMMod::pull(Sample& sample)

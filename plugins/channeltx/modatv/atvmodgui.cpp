@@ -236,7 +236,7 @@ bool ATVModGUI::handleMessage(const Message& message)
     }
 }
 
-void ATVModGUI::viewChanged()
+void ATVModGUI::channelMarkerChanged()
 {
 	applySettings();
 }
@@ -641,7 +641,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);

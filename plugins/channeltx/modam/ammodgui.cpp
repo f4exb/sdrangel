@@ -111,7 +111,7 @@ bool AMModGUI::handleMessage(const Message& message)
     }
 }
 
-void AMModGUI::viewChanged()
+void AMModGUI::channelMarkerChanged()
 {
 	applySettings();
 }
@@ -303,7 +303,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);

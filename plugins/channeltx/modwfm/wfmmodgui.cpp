@@ -111,7 +111,7 @@ bool WFMModGUI::handleMessage(const Message& message)
     }
 }
 
-void WFMModGUI::viewChanged()
+void WFMModGUI::channelMarkerChanged()
 {
 	applySettings();
 }
@@ -327,7 +327,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_channelMarker.setTitle("WFM Modulator");
     m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);

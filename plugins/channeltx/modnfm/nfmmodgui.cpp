@@ -110,7 +110,7 @@ bool NFMModGUI::handleMessage(const Message& message)
     }
 }
 
-void NFMModGUI::viewChanged()
+void NFMModGUI::channelMarkerChanged()
 {
 	applySettings();
 }
@@ -328,7 +328,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_channelMarker.setTitle("NFM Modulator");
 	m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
