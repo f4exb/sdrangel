@@ -36,18 +36,21 @@ public:
 
     public:
         const LimeSDROutputSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
 
-        static MsgConfigureLimeSDR* create(const LimeSDROutputSettings& settings)
+        static MsgConfigureLimeSDR* create(const LimeSDROutputSettings& settings, bool force)
         {
-            return new MsgConfigureLimeSDR(settings);
+            return new MsgConfigureLimeSDR(settings, force);
         }
 
     private:
         LimeSDROutputSettings m_settings;
+        bool m_force;
 
-        MsgConfigureLimeSDR(const LimeSDROutputSettings& settings) :
+        MsgConfigureLimeSDR(const LimeSDROutputSettings& settings, bool force) :
             Message(),
-            m_settings(settings)
+            m_settings(settings),
+            m_force(force)
         { }
     };
 
@@ -215,7 +218,6 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
-    bool m_firstConfig;
     bool m_channelAcquired;
 
     lms_stream_t m_streamId;

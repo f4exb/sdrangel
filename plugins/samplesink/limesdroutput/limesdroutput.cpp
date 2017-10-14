@@ -41,7 +41,6 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_limeSDROutputThread(0),
     m_deviceDescription("LimeSDROutput"),
     m_running(false),
-    m_firstConfig(true),
     m_channelAcquired(false)
 {
     m_streamId.handle = 0;
@@ -435,13 +434,9 @@ bool LimeSDROutput::handleMessage(const Message& message)
         MsgConfigureLimeSDR& conf = (MsgConfigureLimeSDR&) message;
         qDebug() << "LimeSDROutput::handleMessage: MsgConfigureLimeSDR";
 
-        if (!applySettings(conf.getSettings(), m_firstConfig))
+        if (!applySettings(conf.getSettings(), conf.getForce()))
         {
             qDebug("LimeSDROutput::handleMessage config error");
-        }
-        else
-        {
-            m_firstConfig = false;
         }
 
         return true;
@@ -693,6 +688,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         int fifoSize = std::max(
                 (int) ((settings.m_devSampleRate/(1<<settings.m_log2SoftInterp)) * DeviceLimeSDRShared::m_sampleFifoLengthInSeconds),
                 DeviceLimeSDRShared::m_sampleFifoMinSize);
+        qDebug("LimeSDROutput::applySettings: resize FIFO: %d", fifoSize);
         m_sampleSourceFifo.resize(fifoSize);
     }
 

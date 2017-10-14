@@ -33,6 +33,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSinkEngine::State)-1),
     m_doApplySettings(true),
+    m_forceSettings(true),
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
@@ -74,6 +75,8 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+
+    sendSettings();
 }
 
 LimeSDROutputGUI::~LimeSDROutputGUI()
@@ -125,6 +128,7 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
+        m_forceSettings = true;
         sendSettings();
         return true;
     }
@@ -302,8 +306,9 @@ void LimeSDROutputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "LimeSDROutputGUI::updateHardware";
-        LimeSDROutput::MsgConfigureLimeSDR* message = LimeSDROutput::MsgConfigureLimeSDR::create(m_settings);
+        LimeSDROutput::MsgConfigureLimeSDR* message = LimeSDROutput::MsgConfigureLimeSDR::create(m_settings, m_forceSettings);
         m_limeSDROutput->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
         m_updateTimer.stop();
     }
 }
