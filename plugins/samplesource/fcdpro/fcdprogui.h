@@ -55,6 +55,7 @@ private:
 	Ui::FCDProGui* ui;
 
 	DeviceSourceAPI* m_deviceAPI;
+	bool m_forceSettings;
 	FCDProSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;

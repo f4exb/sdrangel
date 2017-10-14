@@ -31,6 +31,7 @@ FCDProGui::FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FCDProGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
@@ -195,6 +196,7 @@ bool FCDProGui::deserialize(const QByteArray& data)
 	if(m_settings.deserialize(data))
 	{
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	}
@@ -500,8 +502,9 @@ void FCDProGui::updateStatus()
 
 void FCDProGui::updateHardware()
 {
-	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings);
+	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 
