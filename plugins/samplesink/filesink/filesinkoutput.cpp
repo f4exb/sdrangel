@@ -98,8 +98,11 @@ bool FileSinkOutput::start()
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSinkOutput::start: started");
 
-	MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(true); // acquisition on
-	getMessageQueueToGUI()->push(report);
+    if (getMessageQueueToGUI())
+    {
+        MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(true); // acquisition on
+        getMessageQueueToGUI()->push(report);
+    }
 
 	return true;
 }
@@ -120,8 +123,11 @@ void FileSinkOutput::stop()
         m_ofstream.close();
     }
 
-    MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
-    getMessageQueueToGUI()->push(report);
+    if (getMessageQueueToGUI())
+    {
+        MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
+        getMessageQueueToGUI()->push(report);
+    }
 }
 
 const QString& FileSinkOutput::getDeviceDescription() const
@@ -183,7 +189,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	{
         MsgReportFileSinkStreamTiming *report;
 
-		if (m_fileSinkThread != 0)
+		if (m_fileSinkThread != 0 && getMessageQueueToGUI())
 		{
 			report = MsgReportFileSinkStreamTiming::create(m_fileSinkThread->getSamplesCount());
 			getMessageQueueToGUI()->push(report);
