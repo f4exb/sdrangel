@@ -439,7 +439,7 @@ void WFMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void WFMModGUI::applySettings(bool force __attribute__((unused)))
+void WFMModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -451,14 +451,17 @@ void WFMModGUI::applySettings(bool force __attribute__((unused)))
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
-            m_settings.m_rfBandwidth,
-            m_settings.m_afBandwidth,
-            m_settings.m_fmDeviation,
-            m_settings.m_toneFrequency,
-            m_settings.m_volumeFactor,
-            m_settings.m_channelMute,
-            m_settings.m_playLoop);
+		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(m_settings, force);
+		m_wfmMod->getInputMessageQueue()->push(msgConf);
+
+//        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
+//            m_settings.m_rfBandwidth,
+//            m_settings.m_afBandwidth,
+//            m_settings.m_fmDeviation,
+//            m_settings.m_toneFrequency,
+//            m_settings.m_volumeFactor,
+//            m_settings.m_channelMute,
+//            m_settings.m_playLoop);
 
 //        m_wfmMod->configure(m_wfmMod->getInputMessageQueue(),
 //			m_rfBW[ui->rfBW->currentIndex()],

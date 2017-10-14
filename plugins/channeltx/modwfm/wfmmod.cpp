@@ -66,7 +66,7 @@ WFMMod::WFMMod() :
     memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
     m_rfFilterBufferIndex = 0;
 
-	apply();
+	//apply();
 
 
 	m_audioBuffer.resize(1<<14);
@@ -86,6 +86,8 @@ WFMMod::WFMMod() :
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
     m_cwKeyer.reset();
+
+    applySettings(m_settings, true);
 }
 
 WFMMod::~WFMMod()
@@ -110,7 +112,7 @@ void WFMMod::configure(MessageQueue* messageQueue,
 
 void WFMMod::pull(Sample& sample)
 {
-	if (m_running.m_channelMute)
+	if (m_settings.m_channelMute)
 	{
 		sample.m_real = 0.0f;
 		sample.m_imag = 0.0f;
@@ -139,7 +141,7 @@ void WFMMod::pull(Sample& sample)
 	    pullAF(ri);
 	}
 
-    m_modPhasor += (m_running.m_fmDeviation / (float) m_running.m_outputSampleRate) * ri.real() * M_PI * 2.0f;
+    m_modPhasor += (m_settings.m_fmDeviation / (float) m_settings.m_outputSampleRate) * ri.real() * M_PI * 2.0f;
     ci.real(cos(m_modPhasor) * 29204.0f); // -1 dB
     ci.imag(sin(m_modPhasor) * 29204.0f);
 
@@ -185,7 +187,7 @@ void WFMMod::pullAF(Complex& sample)
     switch (m_afInput)
     {
     case WFMModInputTone:
-        sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor);
+        sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor);
         sample.imag(0.0f);
         break;
     case WFMModInputFile:
@@ -195,7 +197,7 @@ void WFMMod::pullAF(Complex& sample)
         {
             if (m_ifstream.eof())
             {
-            	if (m_running.m_playLoop)
+            	if (m_settings.m_playLoop)
             	{
                     m_ifstream.clear();
                     m_ifstream.seekg(0, std::ios::beg);
@@ -211,7 +213,7 @@ void WFMMod::pullAF(Complex& sample)
             {
                 Real s;
             	m_ifstream.read(reinterpret_cast<char*>(&s), sizeof(Real));
-            	sample.real(s * m_running.m_volumeFactor);
+            	sample.real(s * m_settings.m_volumeFactor);
                 sample.imag(0.0f);
             }
         }
@@ -223,7 +225,7 @@ void WFMMod::pullAF(Complex& sample)
         break;
     case WFMModInputAudio:
         {
-            sample.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_running.m_volumeFactor);
+            sample.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor);
             sample.imag(0.0f);
         }
         break;
@@ -233,14 +235,14 @@ void WFMMod::pullAF(Complex& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwSmoother.getFadeSample(true, fadeFactor);
-            sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor * fadeFactor);
+            sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor * fadeFactor);
             sample.imag(0.0f);
         }
         else
         {
             if (m_cwSmoother.getFadeSample(false, fadeFactor))
             {
-                sample.real(m_toneNcoRF.next() * m_running.m_volumeFactor * fadeFactor);
+                sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor * fadeFactor);
                 sample.imag(0.0f);
             }
             else
@@ -296,19 +298,45 @@ bool WFMMod::handleMessage(const Message& cmd)
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
 
-		m_config.m_basebandSampleRate = notif.getBasebandSampleRate();
-        m_config.m_outputSampleRate = notif.getSampleRate();
-		m_config.m_inputFrequencyOffset = notif.getFrequencyOffset();
+		WFMModSettings settings = m_settings;
 
-		apply();
+		settings.m_basebandSampleRate = notif.getBasebandSampleRate();
+		settings.m_outputSampleRate = notif.getSampleRate();
+		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
+
+		applySettings(settings);
 
 		qDebug() << "WFMMod::handleMessage: MsgChannelizerNotification:"
-				<< " m_basebandSampleRate: " << m_config.m_basebandSampleRate
-                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-				<< " m_inputFrequencyOffset: " << m_config.m_inputFrequencyOffset;
+				<< " m_basebandSampleRate: " << settings.m_basebandSampleRate
+                << " m_outputSampleRate: " << settings.m_outputSampleRate
+				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
 	}
+    else if (MsgConfigureWFMMod::match(cmd))
+    {
+        MsgConfigureWFMMod& cfg = (MsgConfigureWFMMod&) cmd;
+
+        WFMModSettings settings = cfg.getSettings();
+
+        settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
+        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        qDebug() << "NFWFMMod::handleMessage: MsgConfigureWFMMod:"
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_afBandwidth: " << settings.m_afBandwidth
+                << " m_fmDeviation: " << settings.m_fmDeviation
+                << " m_volumeFactor: " << settings.m_volumeFactor
+                << " m_toneFrequency: " << settings.m_toneFrequency
+                << " m_channelMute: " << settings.m_channelMute
+                << " m_playLoop: " << settings.m_playLoop
+                << " force: " << cfg.getForce();
+
+        applySettings(settings, cfg.getForce());
+
+        return true;
+    }
 	else if (MsgConfigureWFMModPrivate::match(cmd))
 	{
 	    MsgConfigureWFMModPrivate& cfg = (MsgConfigureWFMModPrivate&) cmd;
@@ -323,7 +351,7 @@ bool WFMMod::handleMessage(const Message& cmd)
 
 		apply();
 
-		qDebug() << "WFMMod::handleMessage: MsgConfigureWFMMod:"
+		qDebug() << "WFMMod::handleMessage: MsgConfigureWFMModPrivate:"
 				<< " m_rfBandwidth: " << m_config.m_rfBandwidth
 				<< " m_afBandwidth: " << m_config.m_afBandwidth
 				<< " m_fmDeviation: " << m_config.m_fmDeviation
