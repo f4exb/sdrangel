@@ -57,6 +57,7 @@ private:
 	Ui::FileSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	bool m_forceSettings;
 	FileSinkSettings m_settings;
     QString m_fileName;
 	QTimer m_updateTimer;

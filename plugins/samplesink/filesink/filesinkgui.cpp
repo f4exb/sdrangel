@@ -38,6 +38,7 @@ FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSinkGui),
 	m_deviceAPI(deviceAPI),
+	m_forceSettings(true),
 	m_settings(),
 	m_fileName("./test.sdriq"),
     m_deviceSampleSink(0),
@@ -117,6 +118,7 @@ bool FileSinkGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
+		m_forceSettings = true;
 		sendSettings();
 		return true;
 	} else {
@@ -196,8 +198,9 @@ void FileSinkGui::sendSettings()
 void FileSinkGui::updateHardware()
 {
     qDebug() << "FileSinkGui::updateHardware";
-    FileSinkOutput::MsgConfigureFileSink* message = FileSinkOutput::MsgConfigureFileSink::create(m_settings);
+    FileSinkOutput::MsgConfigureFileSink* message = FileSinkOutput::MsgConfigureFileSink::create(m_settings, m_forceSettings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
+    m_forceSettings = false;
     m_updateTimer.stop();
 }
 

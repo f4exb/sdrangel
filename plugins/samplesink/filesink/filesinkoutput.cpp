@@ -157,7 +157,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
     {
 	    qDebug() << "FileSinkOutput::handleMessage: MsgConfigureFileSink";
 	    MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
-        applySettings(conf.getSettings(), false);
+        applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
 	else if (MsgConfigureFileSinkWork::match(message))
