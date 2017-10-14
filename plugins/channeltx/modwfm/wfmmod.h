@@ -35,6 +35,10 @@
 
 #include "wfmmodsettings.h"
 
+class DeviceSinkAPI;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+
 class WFMMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -68,6 +72,29 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
         { }
     };
 
@@ -199,7 +226,7 @@ public:
 
     //=================================================================
 
-    WFMMod();
+    WFMMod(DeviceSinkAPI *deviceAPI);
     ~WFMMod();
 
     virtual void pull(Sample& sample);
@@ -227,6 +254,10 @@ private:
         RSInitialFill,
         RSRunning
     };
+
+    DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
 
     WFMModSettings m_settings;
 

@@ -17,15 +17,21 @@
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
+
 #include <stdio.h>
 #include <complex.h>
 #include <algorithm>
+
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/threadedbasebandsamplesource.h"
+#include "device/devicesinkapi.h"
+
 #include "wfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMMod, Message)
+MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureAFInput, Message)
@@ -36,7 +42,8 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
 const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 
-WFMMod::WFMMod() :
+WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_modPhasor(0.0f),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
@@ -52,13 +59,14 @@ WFMMod::WFMMod() :
 {
 	setObjectName("WFMod");
 
-	m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
+    m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
     memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
     m_rfFilterBufferIndex = 0;
-
-	//apply();
-
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -86,6 +94,9 @@ WFMMod::~WFMMod()
     delete m_rfFilter;
     delete[] m_rfFilterBuffer;
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void WFMMod::pull(Sample& sample)
@@ -291,6 +302,20 @@ bool WFMMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "WFMMod::handleMessage: MsgConfigureChannelizer:"
+                << " getSampleRate: " << cfg.getSampleRate()
+                << " getCenterFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureWFMMod::match(cmd))
     {
         MsgConfigureWFMMod& cfg = (MsgConfigureWFMMod&) cmd;

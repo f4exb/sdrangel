@@ -22,15 +22,15 @@
 
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
-
 #include "dsp/threadedbasebandsamplesource.h"
-#include "ui_wfmmodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+
+#include "ui_wfmmodgui.h"
 #include "wfmmodgui.h"
 
 const QString WFMModGUI::m_channelID = "sdrangel.channeltx.modwfm";
@@ -305,24 +305,14 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_wfmMod = new WFMMod();
+	m_wfmMod = new WFMMod(m_deviceAPI);
 	m_wfmMod->setMessageQueueToGUI(getInputMessageQueue());
-	m_channelizer = new UpChannelizer(m_wfmMod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
-
-	//m_channelMarker = new ChannelMarker(this);
-//	m_channelMarker.setColor(Qt::blue);
-//	m_channelMarker.setBandwidth(m_rfBW[ui->rfBW->currentIndex()]);
-//	m_channelMarker.setCenterFrequency(0);
-//	m_channelMarker.setVisible(true);
 
     m_channelMarker.setTitle("WFM Modulator");
     m_channelMarker.setVisible(true);
@@ -353,11 +343,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 WFMModGUI::~WFMModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_wfmMod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -372,9 +358,10 @@ void WFMModGUI::applySettings(bool force)
 	{
 		setTitleColor(m_channelMarker.getColor());
 
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		   requiredBW(WFMModSettings::getRFBW(ui->rfBW->currentIndex())),
-		   m_channelMarker.getCenterFrequency());
+		WFMMod::MsgConfigureChannelizer *msgChan = WFMMod::MsgConfigureChannelizer::create(
+		        requiredBW(WFMModSettings::getRFBW(ui->rfBW->currentIndex())),
+                m_channelMarker.getCenterFrequency());
+        m_wfmMod->getInputMessageQueue()->push(msgChan);
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 

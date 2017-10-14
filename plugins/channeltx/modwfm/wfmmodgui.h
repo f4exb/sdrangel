@@ -92,8 +92,8 @@ private:
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
+//    ThreadedBasebandSampleSource* m_threadedChannelizer;
+//    UpChannelizer* m_channelizer;
     WFMMod* m_wfmMod;
     MovingAverage<double> m_channelPowerDbAvg;
 
