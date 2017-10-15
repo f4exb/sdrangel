@@ -94,6 +94,7 @@ private:
 
     // settings
     UDPSinkSettings m_settings;
+    bool m_rfBandwidthChanged;
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
 
@@ -103,6 +104,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayUDPSettings();
     void setSampleFormat(int index);
     void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 

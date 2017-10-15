@@ -79,17 +79,19 @@ void UDPSinkGUI::resetToDefaults()
 QByteArray UDPSinkGUI::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeS32(2, m_channelMarker.getCenterFrequency());
+    s.writeS32(2, m_settings.m_inputFrequencyOffset);
     s.writeS32(3, (int) m_settings.m_sampleFormat);
     s.writeReal(4, m_settings.m_inputSampleRate);
     s.writeReal(5, m_settings.m_rfBandwidth);
+
     s.writeBlob(6, m_channelMarker.serialize());
     s.writeBlob(7, ui->spectrumGUI->serialize());
+
     s.writeS32(10, roundf(m_settings.m_gainOut * 10.0));
     s.writeS32(11, m_settings.m_fmDeviation);
     s.writeBool(13, m_settings.m_stereoInput);
     s.writeS32(14, roundf(m_settings.m_squelch));
-    s.writeS32(15, ui->squelchGate->value());
+    s.writeS32(15, roundf(m_settings.m_squelchGate * 100.0));
     s.writeBool(16, m_settings.m_autoRWBalance);
     s.writeS32(17, roundf(m_settings.m_gainIn * 10.0));
     return s.final();
@@ -120,16 +122,17 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.deserialize(bytetmp);
 
         d.readS32(2, &s32tmp, 0);
-        m_channelMarker.setCenterFrequency(s32tmp);
-
+        m_settings.m_inputFrequencyOffset = s32tmp;
         d.readS32(3, &s32tmp, UDPSinkSettings::FormatS16LE);
         setSampleFormat(s32tmp);
         d.readReal(4, &realtmp, 48000);
         m_settings.m_inputSampleRate = realtmp;
         d.readReal(5, &realtmp, 32000);
         m_settings.m_rfBandwidth = realtmp;
+
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
+
         d.readS32(10, &s32tmp, 10);
         m_settings.m_gainOut = s32tmp / 10.0;
         d.readS32(11, &s32tmp, 2500);
@@ -140,8 +143,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_settings.m_squelch = s32tmp * 1.0;
         m_settings.m_squelchEnabled = (s32tmp != -100);
         d.readS32(15, &s32tmp, 5);
-        ui->squelchGate->setValue(s32tmp);
-        ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
+        m_settings.m_squelchGate = s32tmp / 100.0;
         d.readBool(16, &booltmp, true);
         m_settings.m_autoRWBalance = booltmp;
         d.readS32(17, &s32tmp, 10);
@@ -150,7 +152,6 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
 
-        this->setWindowTitle(m_channelMarker.getTitle());
         displaySettings();
         applySettings(true);
         return true;
@@ -190,6 +191,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
         m_inPowerAvg(4, 1e-10),
         m_tickCount(0),
         m_channelMarker(this),
+        m_rfBandwidthChanged(false),
         m_doApplySettings(true)
 {
     ui->setupUi(this);
@@ -260,16 +262,9 @@ void UDPSinkGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        setTitleColor(m_channelMarker.getColor());
-        ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-        m_channelMarker.blockSignals(true);
-        m_channelMarker.setBandwidth((int)m_settings.m_rfBandwidth);
-        m_channelMarker.blockSignals(false);
-        ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
-
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
                 m_settings.m_inputSampleRate,
-                m_channelMarker.getCenterFrequency());
+                m_settings.m_inputFrequencyOffset);
 
         m_udpSink->configure(m_udpSink->getInputMessageQueue(),
             m_settings.m_sampleFormat,
@@ -277,8 +272,8 @@ void UDPSinkGUI::applySettings(bool force)
             m_settings.m_rfBandwidth,
             m_settings.m_fmDeviation,
             m_settings.m_amModFactor,
-            m_channelMarker.getUDPAddress(),
-            m_channelMarker.getUDPReceivePort(),
+            m_settings.m_udpAddress,
+            m_settings.m_udpPort,
             m_settings.m_channelMute,
             m_settings.m_gainIn,
             m_settings.m_gainOut,
@@ -296,7 +291,20 @@ void UDPSinkGUI::applySettings(bool force)
 
 void UDPSinkGUI::displaySettings()
 {
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth((int)m_settings.m_rfBandwidth);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
+    m_channelMarker.setUDPReceivePort(m_settings.m_udpPort);
+    m_channelMarker.blockSignals(false);
+
+    setTitleColor(m_settings.m_rgbColor);
+    this->setWindowTitle(m_channelMarker.getTitle());
+
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
     ui->sampleRate->setText(QString("%1").arg(roundf(m_settings.m_inputSampleRate), 0));
+    ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
     ui->rfBandwidth->setText(QString("%1").arg(roundf(m_settings.m_rfBandwidth), 0));
     ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
     ui->amModPercent->setText(QString("%1").arg(roundf(m_settings.m_amModFactor * 100.0), 0));
@@ -324,19 +332,26 @@ void UDPSinkGUI::displaySettings()
     ui->squelchGateText->setText(tr("%1").arg(roundf(m_settings.m_squelchGate * 1000.0), 0, 'f', 0));
     ui->squelchGate->setValue(roundf(m_settings.m_squelchGate * 100.0));
 
-    ui->addressText->setText(tr("%1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPReceivePort()));
+    ui->addressText->setText(tr("%1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
+}
+
+void UDPSinkGUI::displayUDPSettings()
+{
 }
 
 void UDPSinkGUI::channelMarkerChanged()
 {
-    this->setWindowTitle(m_channelMarker.getTitle());
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress();
+    m_settings.m_udpPort = m_channelMarker.getUDPReceivePort();
     displaySettings();
     applySettings();
 }
 
 void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = value;
+    m_channelMarker.setCenterFrequency(value); // will trigger apply settings
 }
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
@@ -467,7 +482,15 @@ void UDPSinkGUI::on_channelMute_toggled(bool checked)
 
 void UDPSinkGUI::on_applyBtn_clicked()
 {
-    applySettings();
+    if (m_rfBandwidthChanged)
+    {
+        m_channelMarker.setBandwidth(m_settings.m_rfBandwidth); // will call apply settings
+        m_rfBandwidthChanged = false;
+    }
+    else
+    {
+        applySettings();
+    }
 }
 
 void UDPSinkGUI::on_resetUDPReadIndex_clicked()
