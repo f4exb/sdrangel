@@ -121,11 +121,11 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readS32(2, &s32tmp, 0);
         m_channelMarker.setCenterFrequency(s32tmp);
 
-        d.readS32(3, &s32tmp, UDPSink::FormatS16LE);
-        if (s32tmp < (int) UDPSink::FormatNone) {
+        d.readS32(3, &s32tmp, UDPSinkSettings::FormatS16LE);
+        if (s32tmp < (int) UDPSinkSettings::FormatNone) {
             ui->sampleFormat->setCurrentIndex(s32tmp);
         } else {
-            ui->sampleFormat->setCurrentIndex(((int) UDPSink::FormatNone) - 1);
+            ui->sampleFormat->setCurrentIndex(((int) UDPSinkSettings::FormatNone) - 1);
         }
         d.readReal(4, &realtmp, 48000);
         ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
@@ -308,38 +308,38 @@ void UDPSinkGUI::applySettings(bool force)
                 inputSampleRate,
                 m_channelMarker.getCenterFrequency());
 
-        UDPSink::SampleFormat sampleFormat;
+        UDPSinkSettings::SampleFormat sampleFormat;
 
         switch(ui->sampleFormat->currentIndex())
         {
             case 0:
-                sampleFormat = UDPSink::FormatS16LE;
+                sampleFormat = UDPSinkSettings::FormatS16LE;
                 ui->fmDeviation->setEnabled(false);
                 ui->stereoInput->setChecked(true);
                 ui->stereoInput->setEnabled(false);
                 break;
             case 1:
-                sampleFormat = UDPSink::FormatNFM;
+                sampleFormat = UDPSinkSettings::FormatNFM;
                 ui->fmDeviation->setEnabled(true);
                 ui->stereoInput->setEnabled(true);
                 break;
             case 2:
-                sampleFormat = UDPSink::FormatLSB;
+                sampleFormat = UDPSinkSettings::FormatLSB;
                 ui->fmDeviation->setEnabled(false);
                 ui->stereoInput->setEnabled(true);
                 break;
             case 3:
-                sampleFormat = UDPSink::FormatUSB;
+                sampleFormat = UDPSinkSettings::FormatUSB;
                 ui->fmDeviation->setEnabled(false);
                 ui->stereoInput->setEnabled(true);
                 break;
             case 4:
-                sampleFormat = UDPSink::FormatAM;
+                sampleFormat = UDPSinkSettings::FormatAM;
                 ui->fmDeviation->setEnabled(false);
                 ui->stereoInput->setEnabled(true);
                 break;
             default:
-                sampleFormat = UDPSink::FormatS16LE;
+                sampleFormat = UDPSinkSettings::FormatS16LE;
                 ui->fmDeviation->setEnabled(false);
                 ui->stereoInput->setChecked(true);
                 ui->stereoInput->setEnabled(false);
@@ -397,13 +397,13 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
 {
-    if ((index == (int) UDPSink::FormatNFM)) {
+    if ((index == (int) UDPSinkSettings::FormatNFM)) {
         ui->fmDeviation->setEnabled(true);
     } else {
         ui->fmDeviation->setEnabled(false);
     }
 
-    if (index == (int) UDPSink::FormatAM) {
+    if (index == (int) UDPSinkSettings::FormatAM) {
         ui->amModPercent->setEnabled(true);
     } else {
         ui->amModPercent->setEnabled(false);

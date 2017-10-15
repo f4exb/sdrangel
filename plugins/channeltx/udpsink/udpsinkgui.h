@@ -25,6 +25,7 @@
 #include "util/messagequeue.h"
 
 #include "udpsink.h"
+#include "udpsinksettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -94,7 +95,8 @@ private:
     ChannelMarker m_channelMarker;
 
     // settings
-    UDPSink::SampleFormat m_sampleFormat;
+    UDPSinkSettings m_settings;
+    UDPSinkSettings::SampleFormat m_sampleFormat;
     Real m_inputSampleRate;
     Real m_rfBandwidth;
     int m_fmDeviation;

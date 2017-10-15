@@ -28,6 +28,7 @@
 #include "util/message.h"
 
 #include "udpsinkudphandler.h"
+#include "udpsinksettings.h"
 
 class UDPSinkGUI;
 
@@ -35,15 +36,6 @@ class UDPSink : public BasebandSampleSource {
     Q_OBJECT
 
 public:
-    enum SampleFormat {
-        FormatS16LE,
-        FormatNFM,
-        FormatLSB,
-        FormatUSB,
-        FormatAM,
-        FormatNone
-    };
-
     UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum);
     virtual ~UDPSink();
 
@@ -58,7 +50,7 @@ public:
     bool getSquelchOpen() const { return m_squelchOpen; }
 
     void configure(MessageQueue* messageQueue,
-            SampleFormat sampleFormat,
+            UDPSinkSettings::SampleFormat sampleFormat,
             Real inputSampleRate,
             Real rfBandwidth,
             int fmDeviation,
@@ -91,7 +83,7 @@ private:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        SampleFormat getSampleFormat() const { return m_sampleFormat; }
+        UDPSinkSettings::SampleFormat getSampleFormat() const { return m_sampleFormat; }
         Real getInputSampleRate() const { return m_inputSampleRate; }
         Real getRFBandwidth() const { return m_rfBandwidth; }
         int getFMDeviation() const { return m_fmDeviation; }
@@ -108,7 +100,8 @@ private:
         bool getAutoRWBalance() const { return m_autoRWBalance; }
         bool getStereoInput() const { return m_stereoInput; }
 
-        static MsgUDPSinkConfigure* create(SampleFormat
+        static MsgUDPSinkConfigure* create(
+                UDPSinkSettings::SampleFormat
                 sampleFormat,
                 Real inputSampleRate,
                 Real rfBandwidth,
@@ -126,7 +119,8 @@ private:
                 bool stereoInput,
                 bool force)
         {
-            return new MsgUDPSinkConfigure(sampleFormat,
+            return new MsgUDPSinkConfigure(
+                    sampleFormat,
                     inputSampleRate,
                     rfBandwidth,
                     fmDeviation,
@@ -145,7 +139,7 @@ private:
         }
 
     private:
-        SampleFormat m_sampleFormat;
+        UDPSinkSettings::SampleFormat m_sampleFormat;
         Real m_inputSampleRate;
         Real m_rfBandwidth;
         int m_fmDeviation;
@@ -162,7 +156,8 @@ private:
         bool m_stereoInput;
         bool m_force;
 
-        MsgUDPSinkConfigure(SampleFormat sampleFormat,
+        MsgUDPSinkConfigure(
+                UDPSinkSettings::SampleFormat sampleFormat,
                 Real inputSampleRate,
                 Real rfBandwidth,
                 int fmDeviation,

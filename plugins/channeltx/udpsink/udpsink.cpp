@@ -120,7 +120,7 @@ void UDPSink::pull(Sample& sample)
 
 void UDPSink::modulateSample()
 {
-    if (m_running.m_sampleFormat == FormatS16LE) // Linear I/Q transponding
+    if (m_running.m_sampleFormat == UDPSinkSettings::FormatS16LE) // Linear I/Q transponding
     {
         Sample s;
 
@@ -144,7 +144,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if (m_running.m_sampleFormat == FormatNFM)
+    else if (m_running.m_sampleFormat == UDPSinkSettings::FormatNFM)
     {
         FixReal t;
         readMonoSample(t);
@@ -167,7 +167,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if (m_running.m_sampleFormat == FormatAM)
+    else if (m_running.m_sampleFormat == UDPSinkSettings::FormatAM)
     {
         FixReal t;
         readMonoSample(t);
@@ -188,7 +188,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if ((m_running.m_sampleFormat == FormatLSB) || (m_running.m_sampleFormat == FormatUSB))
+    else if ((m_running.m_sampleFormat == UDPSinkSettings::FormatLSB) || (m_running.m_sampleFormat == UDPSinkSettings::FormatUSB))
     {
         FixReal t;
         Complex c, ci;
@@ -206,7 +206,7 @@ void UDPSink::modulateSample()
             ci.real((t / 32768.0f) * m_running.m_gainOut);
             ci.imag(0.0f);
 
-            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_running.m_sampleFormat == FormatUSB));
+            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_running.m_sampleFormat == UDPSinkSettings::FormatUSB));
 
             if (n_out > 0)
             {
@@ -432,7 +432,7 @@ bool UDPSink::handleMessage(const Message& cmd)
 }
 
 void UDPSink::configure(MessageQueue* messageQueue,
-        SampleFormat sampleFormat,
+        UDPSinkSettings::SampleFormat sampleFormat,
         Real outputSampleRate,
         Real rfBandwidth,
         int fmDeviation,
