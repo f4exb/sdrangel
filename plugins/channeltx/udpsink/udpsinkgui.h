@@ -64,8 +64,6 @@ private slots:
     void on_sampleFormat_currentIndexChanged(int index);
     void on_sampleRate_textEdited(const QString& arg1);
     void on_rfBandwidth_textEdited(const QString& arg1);
-    void on_udpAddress_textEdited(const QString& arg1);
-    void on_udpPort_textEdited(const QString& arg1);
     void on_fmDeviation_textEdited(const QString& arg1);
     void on_amModPercent_textEdited(const QString& arg1);
     void on_applyBtn_clicked();

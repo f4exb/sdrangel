@@ -440,18 +440,6 @@ void UDPSinkGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((u
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSinkGUI::on_udpAddress_textEdited(const QString& arg1 __attribute__((unused)))
-{
-    ui->applyBtn->setEnabled(true);
-    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
-
-void UDPSinkGUI::on_udpPort_textEdited(const QString& arg1 __attribute__((unused)))
-{
-    ui->applyBtn->setEnabled(true);
-    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
-
 void UDPSinkGUI::on_gainIn_valueChanged(int value)
 {
     ui->gainInText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
