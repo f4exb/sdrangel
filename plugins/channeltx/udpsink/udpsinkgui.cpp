@@ -85,13 +85,13 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeReal(5, m_settings.m_rfBandwidth);
     s.writeBlob(6, m_channelMarker.serialize());
     s.writeBlob(7, ui->spectrumGUI->serialize());
-    s.writeS32(10, ui->gainOut->value());
+    s.writeS32(10, roundf(m_settings.m_gainOut * 10.0));
     s.writeS32(11, m_settings.m_fmDeviation);
-    s.writeBool(13, ui->stereoInput->isChecked());
-    s.writeS32(14, ui->squelch->value());
+    s.writeBool(13, m_settings.m_stereoInput);
+    s.writeS32(14, roundf(m_settings.m_squelch));
     s.writeS32(15, ui->squelchGate->value());
-    s.writeBool(16, ui->autoRWBalance->isChecked());
-    s.writeS32(17, ui->gainIn->value());
+    s.writeBool(16, m_settings.m_autoRWBalance);
+    s.writeS32(17, roundf(m_settings.m_gainIn * 10.0));
     return s.final();
 }
 
@@ -131,23 +131,21 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
         d.readS32(10, &s32tmp, 10);
-        ui->gainOut->setValue(s32tmp);
-        ui->gainOutText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
+        m_settings.m_gainOut = s32tmp / 10.0;
         d.readS32(11, &s32tmp, 2500);
         m_settings.m_fmDeviation = s32tmp * 1.0;
         d.readBool(13, &booltmp, true);
-        ui->stereoInput->setChecked(booltmp);
+        m_settings.m_stereoInput = booltmp;
         d.readS32(14, &s32tmp, -60);
-        ui->squelch->setValue(s32tmp);
-        ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
+        m_settings.m_squelch = s32tmp * 1.0;
+        m_settings.m_squelchEnabled = (s32tmp != -100);
         d.readS32(15, &s32tmp, 5);
         ui->squelchGate->setValue(s32tmp);
         ui->squelchGateText->setText(tr("%1").arg(s32tmp*10.0, 0, 'f', 0));
         d.readBool(16, &booltmp, true);
-        ui->autoRWBalance->setChecked(booltmp);
+        m_settings.m_autoRWBalance = booltmp;
         d.readS32(17, &s32tmp, 10);
-        ui->gainIn->setValue(s32tmp);
-        ui->gainInText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
+        m_settings.m_gainIn = s32tmp / 10.0;
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
@@ -281,14 +279,14 @@ void UDPSinkGUI::applySettings(bool force)
             m_settings.m_amModFactor,
             m_channelMarker.getUDPAddress(),
             m_channelMarker.getUDPReceivePort(),
-            ui->channelMute->isChecked(),
-            ui->gainIn->value() / 10.0f,
-            ui->gainOut->value() / 10.0f,
-            ui->squelch->value() * 1.0f,
-            ui->squelchGate->value() * 0.01f,
-            ui->squelch->value() != -100,
-            ui->autoRWBalance->isChecked(),
-            ui->stereoInput->isChecked(),
+            m_settings.m_channelMute,
+            m_settings.m_gainIn,
+            m_settings.m_gainOut,
+            m_settings.m_squelch,
+            m_settings.m_squelchGate,
+            m_settings.m_squelchEnabled,
+            m_settings.m_autoRWBalance,
+            m_settings.m_stereoInput,
             force);
 
         ui->applyBtn->setEnabled(false);
@@ -301,14 +299,31 @@ void UDPSinkGUI::displaySettings()
     ui->sampleRate->setText(QString("%1").arg(roundf(m_settings.m_inputSampleRate), 0));
     ui->rfBandwidth->setText(QString("%1").arg(roundf(m_settings.m_rfBandwidth), 0));
     ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
-    ui->amModPercent->setText(QString("%1").arg(roundf(m_settings.m_amModFactor), 0));
+    ui->amModPercent->setText(QString("%1").arg(roundf(m_settings.m_amModFactor * 100.0), 0));
 
     setSampleFormatIndex(m_settings.m_sampleFormat);
 
-    ui->gainInText->setText(tr("%1").arg(ui->gainIn->value()/10.0, 0, 'f', 1));
-    ui->gainOutText->setText(tr("%1").arg(ui->gainOut->value()/10.0, 0, 'f', 1));
-    ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
-    ui->squelchGateText->setText(tr("%1").arg(ui->squelchGate->value()*10.0, 0, 'f', 0));
+    ui->channelMute->setChecked(m_settings.m_channelMute);
+    ui->autoRWBalance->setChecked(m_settings.m_autoRWBalance);
+    ui->stereoInput->setChecked(m_settings.m_stereoInput);
+
+    ui->gainInText->setText(tr("%1").arg(m_settings.m_gainIn, 0, 'f', 1));
+    ui->gainIn->setValue(roundf(m_settings.m_gainIn * 10.0));
+
+    ui->gainOutText->setText(tr("%1").arg(m_settings.m_gainOut, 0, 'f', 1));
+    ui->gainOut->setValue(roundf(m_settings.m_gainOut * 10.0));
+
+    if (m_settings.m_squelchEnabled) {
+        ui->squelchText->setText(tr("%1").arg(m_settings.m_squelch, 0, 'f', 0));
+    } else {
+        ui->squelchText->setText("---");
+    }
+
+    ui->squelch->setValue(roundf(m_settings.m_squelch));
+
+    ui->squelchGateText->setText(tr("%1").arg(roundf(m_settings.m_squelchGate * 1000.0), 0, 'f', 0));
+    ui->squelchGate->setValue(roundf(m_settings.m_squelchGate * 100.0));
+
     ui->addressText->setText(tr("%1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPReceivePort()));
 }
 
@@ -411,25 +426,27 @@ void UDPSinkGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((u
 
 void UDPSinkGUI::on_gainIn_valueChanged(int value)
 {
-    ui->gainInText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
+    m_settings.m_gainIn = value / 10.0;
+    ui->gainInText->setText(tr("%1").arg(m_settings.m_gainIn, 0, 'f', 1));
     applySettings();
 }
 
 void UDPSinkGUI::on_gainOut_valueChanged(int value)
 {
-    ui->gainOutText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
+    m_settings.m_gainOut = value / 10.0;
+    ui->gainOutText->setText(tr("%1").arg(m_settings.m_gainOut, 0, 'f', 1));
     applySettings();
 }
 
 void UDPSinkGUI::on_squelch_valueChanged(int value)
 {
-    if (value == -100) // means disabled
-    {
+    m_settings.m_squelchEnabled = (value != -100);
+    m_settings.m_squelch = value * 1.0;
+
+    if (m_settings.m_squelchEnabled) {
+        ui->squelchText->setText(tr("%1").arg(m_settings.m_squelch, 0, 'f', 0));
+    } else {
         ui->squelchText->setText("---");
-    }
-    else
-    {
-        ui->squelchText->setText(tr("%1").arg(value*1.0, 0, 'f', 0));
     }
 
     applySettings();
@@ -437,12 +454,14 @@ void UDPSinkGUI::on_squelch_valueChanged(int value)
 
 void UDPSinkGUI::on_squelchGate_valueChanged(int value)
 {
-    ui->squelchGateText->setText(tr("%1").arg(value*10.0, 0, 'f', 0));
+    m_settings.m_squelchGate = value / 100.0;
+    ui->squelchGateText->setText(tr("%1").arg(roundf(value * 10.0), 0, 'f', 0));
     applySettings();
 }
 
-void UDPSinkGUI::on_channelMute_toggled(bool checked __attribute__((unused)))
+void UDPSinkGUI::on_channelMute_toggled(bool checked)
 {
+    m_settings.m_channelMute = checked;
     applySettings();
 }
 
@@ -456,13 +475,15 @@ void UDPSinkGUI::on_resetUDPReadIndex_clicked()
     m_udpSink->resetReadIndex(m_udpSink->getInputMessageQueue());
 }
 
-void UDPSinkGUI::on_autoRWBalance_toggled(bool checked __attribute__((unused)))
+void UDPSinkGUI::on_autoRWBalance_toggled(bool checked)
 {
+    m_settings.m_autoRWBalance = checked;
     applySettings();
 }
 
-void UDPSinkGUI::on_stereoInput_toggled(bool checked __attribute__((unused)))
+void UDPSinkGUI::on_stereoInput_toggled(bool checked)
 {
+    m_settings.m_stereoInput = checked;
     applySettings();
 }
 
