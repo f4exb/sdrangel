@@ -62,105 +62,120 @@ void UDPSinkGUI::setCenterFrequency(qint64 centerFrequency)
 
 void UDPSinkGUI::resetToDefaults()
 {
-    blockApplySettings(true);
+    m_settings.resetToDefaults();
+    displaySettings();
+    applySettings(true);
 
-    ui->sampleFormat->setCurrentIndex(0);
-    ui->sampleRate->setText("48000");
-    ui->rfBandwidth->setText("32000");
-    ui->fmDeviation->setText("2500");
-    ui->spectrumGUI->resetToDefaults();
-    ui->gainIn->setValue(10);
-    ui->gainOut->setValue(10);
-
-    blockApplySettings(false);
-    applySettings();
+//    blockApplySettings(true);
+//
+//    ui->sampleFormat->setCurrentIndex(0);
+//    ui->sampleRate->setText("48000");
+//    ui->rfBandwidth->setText("32000");
+//    ui->fmDeviation->setText("2500");
+//    ui->spectrumGUI->resetToDefaults();
+//    ui->gainIn->setValue(10);
+//    ui->gainOut->setValue(10);
+//
+//    blockApplySettings(false);
+//    applySettings();
 }
 
 QByteArray UDPSinkGUI::serialize() const
 {
-    SimpleSerializer s(1);
-    s.writeS32(2, m_settings.m_inputFrequencyOffset);
-    s.writeS32(3, (int) m_settings.m_sampleFormat);
-    s.writeReal(4, m_settings.m_inputSampleRate);
-    s.writeReal(5, m_settings.m_rfBandwidth);
-
-    s.writeBlob(6, m_channelMarker.serialize());
-    s.writeBlob(7, ui->spectrumGUI->serialize());
-
-    s.writeS32(10, roundf(m_settings.m_gainOut * 10.0));
-    s.writeS32(11, m_settings.m_fmDeviation);
-    s.writeBool(13, m_settings.m_stereoInput);
-    s.writeS32(14, roundf(m_settings.m_squelch));
-    s.writeS32(15, roundf(m_settings.m_squelchGate * 100.0));
-    s.writeBool(16, m_settings.m_autoRWBalance);
-    s.writeS32(17, roundf(m_settings.m_gainIn * 10.0));
-    return s.final();
+    return m_settings.serialize();
+//    SimpleSerializer s(1);
+//    s.writeS32(2, m_settings.m_inputFrequencyOffset);
+//    s.writeS32(3, (int) m_settings.m_sampleFormat);
+//    s.writeReal(4, m_settings.m_inputSampleRate);
+//    s.writeReal(5, m_settings.m_rfBandwidth);
+//
+//    s.writeBlob(6, m_channelMarker.serialize());
+//    s.writeBlob(7, ui->spectrumGUI->serialize());
+//
+//    s.writeS32(10, roundf(m_settings.m_gainOut * 10.0));
+//    s.writeS32(11, m_settings.m_fmDeviation);
+//    s.writeBool(13, m_settings.m_stereoInput);
+//    s.writeS32(14, roundf(m_settings.m_squelch));
+//    s.writeS32(15, roundf(m_settings.m_squelchGate * 100.0));
+//    s.writeBool(16, m_settings.m_autoRWBalance);
+//    s.writeS32(17, roundf(m_settings.m_gainIn * 10.0));
+//    return s.final();
 }
 
 bool UDPSinkGUI::deserialize(const QByteArray& data)
 {
-    SimpleDeserializer d(data);
-
-    if (!d.isValid())
+    if(m_settings.deserialize(data))
     {
-        resetToDefaults();
-        return false;
-    }
-
-    if (d.getVersion() == 1)
-    {
-        QByteArray bytetmp;
-        QString strtmp;
-        qint32 s32tmp;
-        Real realtmp;
-        bool booltmp;
-
-        blockApplySettings(true);
-        m_channelMarker.blockSignals(true);
-
-        d.readBlob(6, &bytetmp);
-        m_channelMarker.deserialize(bytetmp);
-
-        d.readS32(2, &s32tmp, 0);
-        m_settings.m_inputFrequencyOffset = s32tmp;
-        d.readS32(3, &s32tmp, UDPSinkSettings::FormatS16LE);
-        setSampleFormat(s32tmp);
-        d.readReal(4, &realtmp, 48000);
-        m_settings.m_inputSampleRate = realtmp;
-        d.readReal(5, &realtmp, 32000);
-        m_settings.m_rfBandwidth = realtmp;
-
-        d.readBlob(7, &bytetmp);
-        ui->spectrumGUI->deserialize(bytetmp);
-
-        d.readS32(10, &s32tmp, 10);
-        m_settings.m_gainOut = s32tmp / 10.0;
-        d.readS32(11, &s32tmp, 2500);
-        m_settings.m_fmDeviation = s32tmp * 1.0;
-        d.readBool(13, &booltmp, true);
-        m_settings.m_stereoInput = booltmp;
-        d.readS32(14, &s32tmp, -60);
-        m_settings.m_squelch = s32tmp * 1.0;
-        m_settings.m_squelchEnabled = (s32tmp != -100);
-        d.readS32(15, &s32tmp, 5);
-        m_settings.m_squelchGate = s32tmp / 100.0;
-        d.readBool(16, &booltmp, true);
-        m_settings.m_autoRWBalance = booltmp;
-        d.readS32(17, &s32tmp, 10);
-        m_settings.m_gainIn = s32tmp / 10.0;
-
-        blockApplySettings(false);
-        m_channelMarker.blockSignals(false);
-
         displaySettings();
         applySettings(true);
         return true;
-    }
-    else
-    {
+    } else {
         resetToDefaults();
         return false;
     }
+
+//    SimpleDeserializer d(data);
+//
+//    if (!d.isValid())
+//    {
+//        resetToDefaults();
+//        return false;
+//    }
+//
+//    if (d.getVersion() == 1)
+//    {
+//        QByteArray bytetmp;
+//        QString strtmp;
+//        qint32 s32tmp;
+//        Real realtmp;
+//        bool booltmp;
+//
+//        blockApplySettings(true);
+//        m_channelMarker.blockSignals(true);
+//
+//        d.readBlob(6, &bytetmp);
+//        m_channelMarker.deserialize(bytetmp);
+//
+//        d.readS32(2, &s32tmp, 0);
+//        m_settings.m_inputFrequencyOffset = s32tmp;
+//        d.readS32(3, &s32tmp, UDPSinkSettings::FormatS16LE);
+//        m_settings.m_sampleFormat = (UDPSinkSettings::SampleFormat) s32tmp;
+//        d.readReal(4, &realtmp, 48000);
+//        m_settings.m_inputSampleRate = realtmp;
+//        d.readReal(5, &realtmp, 32000);
+//        m_settings.m_rfBandwidth = realtmp;
+//
+//        d.readBlob(7, &bytetmp);
+//        ui->spectrumGUI->deserialize(bytetmp);
+//
+//        d.readS32(10, &s32tmp, 10);
+//        m_settings.m_gainOut = s32tmp / 10.0;
+//        d.readS32(11, &s32tmp, 2500);
+//        m_settings.m_fmDeviation = s32tmp * 1.0;
+//        d.readBool(13, &booltmp, false);
+//        m_settings.m_stereoInput = booltmp;
+//        d.readS32(14, &s32tmp, -60);
+//        m_settings.m_squelch = s32tmp * 1.0;
+//        m_settings.m_squelchEnabled = (s32tmp != -100);
+//        d.readS32(15, &s32tmp, 5);
+//        m_settings.m_squelchGate = s32tmp / 100.0;
+//        d.readBool(16, &booltmp, true);
+//        m_settings.m_autoRWBalance = booltmp;
+//        d.readS32(17, &s32tmp, 10);
+//        m_settings.m_gainIn = s32tmp / 10.0;
+//
+//        blockApplySettings(false);
+//        m_channelMarker.blockSignals(false);
+//
+//        displaySettings();
+//        applySettings(true);
+//        return true;
+//    }
+//    else
+//    {
+//        resetToDefaults();
+//        return false;
+//    }
 }
 
 bool UDPSinkGUI::handleMessage(const Message& message __attribute__((unused)))
@@ -573,21 +588,35 @@ void UDPSinkGUI::setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampl
     {
         case UDPSinkSettings::FormatS16LE:
             ui->sampleFormat->setCurrentIndex(0);
+            ui->fmDeviation->setEnabled(false);
+            ui->stereoInput->setChecked(true);
+            ui->stereoInput->setEnabled(false);
             break;
         case UDPSinkSettings::FormatNFM:
             ui->sampleFormat->setCurrentIndex(1);
+            ui->fmDeviation->setEnabled(true);
+            ui->stereoInput->setEnabled(true);
             break;
         case UDPSinkSettings::FormatLSB:
             ui->sampleFormat->setCurrentIndex(2);
+            ui->fmDeviation->setEnabled(false);
+            ui->stereoInput->setEnabled(true);
             break;
         case UDPSinkSettings::FormatUSB:
             ui->sampleFormat->setCurrentIndex(3);
+            ui->fmDeviation->setEnabled(false);
+            ui->stereoInput->setEnabled(true);
             break;
         case UDPSinkSettings::FormatAM:
             ui->sampleFormat->setCurrentIndex(4);
+            ui->fmDeviation->setEnabled(false);
+            ui->stereoInput->setEnabled(true);
             break;
         default:
             ui->sampleFormat->setCurrentIndex(0);
+            ui->fmDeviation->setEnabled(false);
+            ui->stereoInput->setChecked(true);
+            ui->stereoInput->setEnabled(false);
             break;
     }
 }

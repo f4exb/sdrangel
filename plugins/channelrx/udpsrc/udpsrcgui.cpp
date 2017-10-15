@@ -80,7 +80,6 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
-        qDebug("UDPSrcGUI::deserialize: m_squelchGate: %d", m_settings.m_squelchGate);
         displaySettings();
         applySettingsImmediate(true);
         applySettings(true);

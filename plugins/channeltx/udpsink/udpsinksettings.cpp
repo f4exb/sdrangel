@@ -127,10 +127,11 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
 
         d.readS32(11, &m_fmDeviation, 2500);
         d.readReal(12, &m_amModFactor, 0.95);
-        d.readBool(13, &m_stereoInput, true);
+        d.readBool(13, &m_stereoInput, false);
 
         d.readS32(14, &s32tmp, -60);
         m_squelch = s32tmp * 1.0;
+        m_squelchEnabled = (s32tmp != -100);
 
         d.readS32(15, &s32tmp, 5);
         m_squelchGate = s32tmp / 100.0;
