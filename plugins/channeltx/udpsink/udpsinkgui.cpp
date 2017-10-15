@@ -87,6 +87,7 @@ QByteArray UDPSinkGUI::serialize() const
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(10, ui->gainOut->value());
     s.writeS32(11, m_fmDeviation);
+    s.writeBool(13, ui->stereoInput->isChecked());
     s.writeS32(14, ui->squelch->value());
     s.writeS32(15, ui->squelchGate->value());
     s.writeBool(16, ui->autoRWBalance->isChecked());
@@ -138,6 +139,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->gainOutText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
         ui->fmDeviation->setText(QString("%1").arg(s32tmp));
+        d.readBool(13, &booltmp, true);
+        ui->stereoInput->setChecked(booltmp);
         d.readS32(14, &s32tmp, -60);
         ui->squelch->setValue(s32tmp);
         ui->squelchText->setText(tr("%1").arg(s32tmp*1.0, 0, 'f', 0));
