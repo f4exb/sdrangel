@@ -101,8 +101,7 @@ private:
         bool getStereoInput() const { return m_stereoInput; }
 
         static MsgUDPSinkConfigure* create(
-                UDPSinkSettings::SampleFormat
-                sampleFormat,
+                UDPSinkSettings::SampleFormat sampleFormat,
                 Real inputSampleRate,
                 Real rfBandwidth,
                 int fmDeviation,

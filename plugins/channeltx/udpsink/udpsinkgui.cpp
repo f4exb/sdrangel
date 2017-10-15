@@ -81,8 +81,8 @@ QByteArray UDPSinkGUI::serialize() const
     SimpleSerializer s(1);
     s.writeS32(2, m_channelMarker.getCenterFrequency());
     s.writeS32(3, m_sampleFormat);
-    s.writeReal(4, m_inputSampleRate);
-    s.writeReal(5, m_rfBandwidth);
+    s.writeReal(4, m_settings.m_inputSampleRate);
+    s.writeReal(5, m_settings.m_rfBandwidth);
     s.writeBlob(6, m_channelMarker.serialize());
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(10, ui->gainOut->value());
@@ -129,9 +129,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
             ui->sampleFormat->setCurrentIndex(((int) UDPSinkSettings::FormatNone) - 1);
         }
         d.readReal(4, &realtmp, 48000);
-        ui->sampleRate->setText(QString("%1").arg(realtmp, 0));
+        m_settings.m_inputSampleRate = realtmp;
         d.readReal(5, &realtmp, 32000);
-        ui->rfBandwidth->setText(QString("%1").arg(realtmp, 0));
+        m_settings.m_rfBandwidth = realtmp;
         d.readBlob(7, &bytetmp);
         ui->spectrumGUI->deserialize(bytetmp);
         d.readS32(10, &s32tmp, 10);
@@ -268,19 +268,19 @@ void UDPSinkGUI::applySettings(bool force)
     {
         bool ok;
 
-        Real inputSampleRate = ui->sampleRate->text().toDouble(&ok);
-
-        if((!ok) || (inputSampleRate < 1000))
-        {
-            inputSampleRate = 48000;
-        }
-
-        Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
-
-        if((!ok) || (rfBandwidth > inputSampleRate))
-        {
-            rfBandwidth = inputSampleRate;
-        }
+//        Real inputSampleRate = ui->sampleRate->text().toDouble(&ok);
+//
+//        if((!ok) || (inputSampleRate < 1000))
+//        {
+//            inputSampleRate = 48000;
+//        }
+//
+//        Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
+//
+//        if((!ok) || (rfBandwidth > inputSampleRate))
+//        {
+//            rfBandwidth = inputSampleRate;
+//        }
 
         int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 
@@ -298,17 +298,17 @@ void UDPSinkGUI::applySettings(bool force)
 
         setTitleColor(m_channelMarker.getColor());
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-        ui->sampleRate->setText(QString("%1").arg(inputSampleRate, 0));
-        ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
+//        ui->sampleRate->setText(QString("%1").arg(inputSampleRate, 0));
+//        ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
         ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
         ui->amModPercent->setText(QString("%1").arg(amModPercent));
         m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
-        m_channelMarker.setBandwidth((int)rfBandwidth);
+        m_channelMarker.setBandwidth((int)m_settings.m_rfBandwidth);
         connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-        ui->glSpectrum->setSampleRate(inputSampleRate);
+        ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-                inputSampleRate,
+                m_settings.m_inputSampleRate,
                 m_channelMarker.getCenterFrequency());
 
         UDPSinkSettings::SampleFormat sampleFormat;
@@ -350,14 +350,14 @@ void UDPSinkGUI::applySettings(bool force)
         }
 
         m_sampleFormat = sampleFormat;
-        m_inputSampleRate = inputSampleRate;
-        m_rfBandwidth = rfBandwidth;
+//        m_inputSampleRate = inputSampleRate;
+//        m_rfBandwidth = rfBandwidth;
         m_fmDeviation = fmDeviation;
 
         m_udpSink->configure(m_udpSink->getInputMessageQueue(),
             sampleFormat,
-            inputSampleRate,
-            rfBandwidth,
+            m_settings.m_inputSampleRate,
+            m_settings.m_rfBandwidth,
             fmDeviation,
             amModPercent / 100.0f,
             m_channelMarker.getUDPAddress(),
@@ -379,6 +379,8 @@ void UDPSinkGUI::applySettings(bool force)
 
 void UDPSinkGUI::displaySettings()
 {
+    ui->sampleRate->setText(QString("%1").arg(m_settings.m_inputSampleRate, 0));
+    ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
     ui->gainInText->setText(tr("%1").arg(ui->gainIn->value()/10.0, 0, 'f', 1));
     ui->gainOutText->setText(tr("%1").arg(ui->gainOut->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
@@ -418,12 +420,32 @@ void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
 
 void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    Real inputSampleRate = ui->sampleRate->text().toDouble(&ok);
+
+    if ((!ok) || (inputSampleRate < 1000)) {
+        m_settings.m_inputSampleRate = 48000;
+        ui->sampleRate->setText(QString("%1").arg(m_settings.m_inputSampleRate, 0));
+    } else {
+        m_settings.m_inputSampleRate = inputSampleRate;
+    }
+
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
+
+    if ((!ok) || (rfBandwidth > m_settings.m_inputSampleRate)) {
+        m_settings.m_rfBandwidth = m_settings.m_inputSampleRate;
+        ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
+    } else {
+        m_settings.m_rfBandwidth = rfBandwidth;
+    }
+
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }

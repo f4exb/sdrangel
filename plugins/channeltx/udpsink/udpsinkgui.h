@@ -95,8 +95,8 @@ private:
     // settings
     UDPSinkSettings m_settings;
     UDPSinkSettings::SampleFormat m_sampleFormat;
-    Real m_inputSampleRate;
-    Real m_rfBandwidth;
+//    Real m_inputSampleRate;
+//    Real m_rfBandwidth;
     int m_fmDeviation;
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;

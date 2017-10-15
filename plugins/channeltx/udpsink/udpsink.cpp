@@ -433,7 +433,7 @@ bool UDPSink::handleMessage(const Message& cmd)
 
 void UDPSink::configure(MessageQueue* messageQueue,
         UDPSinkSettings::SampleFormat sampleFormat,
-        Real outputSampleRate,
+        Real inputSampleRate,
         Real rfBandwidth,
         int fmDeviation,
         Real amModFactor,
@@ -450,7 +450,7 @@ void UDPSink::configure(MessageQueue* messageQueue,
         bool force)
 {
     Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
-            outputSampleRate,
+            inputSampleRate,
             rfBandwidth,
             fmDeviation,
             amModFactor,
