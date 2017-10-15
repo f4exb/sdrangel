@@ -28,7 +28,6 @@ BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* 
 	m_log2Interp(0),
 	m_fcPos(0)
 {
-    m_sampleFifo->resize(16*BLADERFOUTPUT_BLOCKSIZE);
 }
 
 BladerfOutputThread::~BladerfOutputThread()

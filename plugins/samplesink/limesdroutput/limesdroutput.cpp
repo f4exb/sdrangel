@@ -43,6 +43,7 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_running(false),
     m_channelAcquired(false)
 {
+    m_sampleSourceFifo.resize(16*LIMESDROUTPUT_BLOCKSIZE);
     m_streamId.handle = 0;
     suspendRxBuddies();
     suspendTxBuddies();

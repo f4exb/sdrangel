@@ -27,7 +27,6 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_log2Interp(0),
     m_fcPos(LimeSDROutputSettings::FC_POS_CENTER)
 {
-    m_sampleFifo->resize(16*LIMESDROUTPUT_BLOCKSIZE);
 }
 
 LimeSDROutputThread::~LimeSDROutputThread()
