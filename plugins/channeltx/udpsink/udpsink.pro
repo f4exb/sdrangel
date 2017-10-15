@@ -27,13 +27,15 @@ SOURCES += udpsink.cpp\
     udpsinkgui.cpp\
     udpsinkplugin.cpp\
     udpsinkmsg.cpp\
-    udpsinkudphandler.cpp
+    udpsinkudphandler.cpp\
+    udpsinksettings.cpp
 
 HEADERS += udpsink.h\
     udpsinkgui.h\
     udpsinkplugin.h\
     udpsinkmsg.h\
-    udpsinkudphandler.h
+    udpsinkudphandler.h\
+    udpsinksettings.h
 
 FORMS += udpsinkgui.ui
 
