@@ -80,13 +80,13 @@ QByteArray UDPSinkGUI::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(2, m_channelMarker.getCenterFrequency());
-    s.writeS32(3, m_sampleFormat);
+    s.writeS32(3, (int) m_settings.m_sampleFormat);
     s.writeReal(4, m_settings.m_inputSampleRate);
     s.writeReal(5, m_settings.m_rfBandwidth);
     s.writeBlob(6, m_channelMarker.serialize());
     s.writeBlob(7, ui->spectrumGUI->serialize());
     s.writeS32(10, ui->gainOut->value());
-    s.writeS32(11, m_fmDeviation);
+    s.writeS32(11, m_settings.m_fmDeviation);
     s.writeBool(13, ui->stereoInput->isChecked());
     s.writeS32(14, ui->squelch->value());
     s.writeS32(15, ui->squelchGate->value());
@@ -123,11 +123,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         m_channelMarker.setCenterFrequency(s32tmp);
 
         d.readS32(3, &s32tmp, UDPSinkSettings::FormatS16LE);
-        if (s32tmp < (int) UDPSinkSettings::FormatNone) {
-            ui->sampleFormat->setCurrentIndex(s32tmp);
-        } else {
-            ui->sampleFormat->setCurrentIndex(((int) UDPSinkSettings::FormatNone) - 1);
-        }
+        setSampleFormat(s32tmp);
         d.readReal(4, &realtmp, 48000);
         m_settings.m_inputSampleRate = realtmp;
         d.readReal(5, &realtmp, 32000);
@@ -138,7 +134,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
         ui->gainOut->setValue(s32tmp);
         ui->gainOutText->setText(tr("%1").arg(s32tmp/10.0, 0, 'f', 1));
         d.readS32(11, &s32tmp, 2500);
-        ui->fmDeviation->setText(QString("%1").arg(s32tmp));
+        m_settings.m_fmDeviation = s32tmp * 1.0;
         d.readBool(13, &booltmp, true);
         ui->stereoInput->setChecked(booltmp);
         d.readS32(14, &s32tmp, -60);
@@ -266,100 +262,23 @@ void UDPSinkGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        bool ok;
-
-//        Real inputSampleRate = ui->sampleRate->text().toDouble(&ok);
-//
-//        if((!ok) || (inputSampleRate < 1000))
-//        {
-//            inputSampleRate = 48000;
-//        }
-//
-//        Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
-//
-//        if((!ok) || (rfBandwidth > inputSampleRate))
-//        {
-//            rfBandwidth = inputSampleRate;
-//        }
-
-        int fmDeviation = ui->fmDeviation->text().toInt(&ok);
-
-        if ((!ok) || (fmDeviation < 1))
-        {
-            fmDeviation = 2500;
-        }
-
-        int amModPercent = ui->amModPercent->text().toInt(&ok);
-
-        if ((!ok) || (amModPercent < 1) || (amModPercent > 100))
-        {
-            amModPercent = 95;
-        }
-
         setTitleColor(m_channelMarker.getColor());
         ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-//        ui->sampleRate->setText(QString("%1").arg(inputSampleRate, 0));
-//        ui->rfBandwidth->setText(QString("%1").arg(rfBandwidth, 0));
-        ui->fmDeviation->setText(QString("%1").arg(fmDeviation));
-        ui->amModPercent->setText(QString("%1").arg(amModPercent));
-        m_channelMarker.disconnect(this, SLOT(channelMarkerChanged()));
+        m_channelMarker.blockSignals(true);
         m_channelMarker.setBandwidth((int)m_settings.m_rfBandwidth);
-        connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+        m_channelMarker.blockSignals(false);
         ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
                 m_settings.m_inputSampleRate,
                 m_channelMarker.getCenterFrequency());
 
-        UDPSinkSettings::SampleFormat sampleFormat;
-
-        switch(ui->sampleFormat->currentIndex())
-        {
-            case 0:
-                sampleFormat = UDPSinkSettings::FormatS16LE;
-                ui->fmDeviation->setEnabled(false);
-                ui->stereoInput->setChecked(true);
-                ui->stereoInput->setEnabled(false);
-                break;
-            case 1:
-                sampleFormat = UDPSinkSettings::FormatNFM;
-                ui->fmDeviation->setEnabled(true);
-                ui->stereoInput->setEnabled(true);
-                break;
-            case 2:
-                sampleFormat = UDPSinkSettings::FormatLSB;
-                ui->fmDeviation->setEnabled(false);
-                ui->stereoInput->setEnabled(true);
-                break;
-            case 3:
-                sampleFormat = UDPSinkSettings::FormatUSB;
-                ui->fmDeviation->setEnabled(false);
-                ui->stereoInput->setEnabled(true);
-                break;
-            case 4:
-                sampleFormat = UDPSinkSettings::FormatAM;
-                ui->fmDeviation->setEnabled(false);
-                ui->stereoInput->setEnabled(true);
-                break;
-            default:
-                sampleFormat = UDPSinkSettings::FormatS16LE;
-                ui->fmDeviation->setEnabled(false);
-                ui->stereoInput->setChecked(true);
-                ui->stereoInput->setEnabled(false);
-                break;
-        }
-
-        m_sampleFormat = sampleFormat;
-//        m_inputSampleRate = inputSampleRate;
-//        m_rfBandwidth = rfBandwidth;
-        m_fmDeviation = fmDeviation;
-
         m_udpSink->configure(m_udpSink->getInputMessageQueue(),
-            sampleFormat,
+            m_settings.m_sampleFormat,
             m_settings.m_inputSampleRate,
             m_settings.m_rfBandwidth,
-            fmDeviation,
-            amModPercent / 100.0f,
+            m_settings.m_fmDeviation,
+            m_settings.m_amModFactor,
             m_channelMarker.getUDPAddress(),
             m_channelMarker.getUDPReceivePort(),
             ui->channelMute->isChecked(),
@@ -379,8 +298,13 @@ void UDPSinkGUI::applySettings(bool force)
 
 void UDPSinkGUI::displaySettings()
 {
-    ui->sampleRate->setText(QString("%1").arg(m_settings.m_inputSampleRate, 0));
-    ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
+    ui->sampleRate->setText(QString("%1").arg(roundf(m_settings.m_inputSampleRate), 0));
+    ui->rfBandwidth->setText(QString("%1").arg(roundf(m_settings.m_rfBandwidth), 0));
+    ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation, 0));
+    ui->amModPercent->setText(QString("%1").arg(roundf(m_settings.m_amModFactor), 0));
+
+    setSampleFormatIndex(m_settings.m_sampleFormat);
+
     ui->gainInText->setText(tr("%1").arg(ui->gainIn->value()/10.0, 0, 'f', 1));
     ui->gainOutText->setText(tr("%1").arg(ui->gainOut->value()/10.0, 0, 'f', 1));
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
@@ -413,6 +337,8 @@ void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
     } else {
         ui->amModPercent->setEnabled(false);
     }
+
+    setSampleFormat(index);
 
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
@@ -452,12 +378,33 @@ void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((un
 
 void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    int fmDeviation = ui->fmDeviation->text().toInt(&ok);
+
+    if ((!ok) || (fmDeviation < 1)) {
+        m_settings.m_fmDeviation = 2500;
+        ui->fmDeviation->setText(QString("%1").arg(m_settings.m_fmDeviation));
+    } else {
+        m_settings.m_fmDeviation = fmDeviation;
+    }
+
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSinkGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((unused)))
 {
+    bool ok;
+    int amModPercent = ui->amModPercent->text().toInt(&ok);
+
+    if ((!ok) || (amModPercent < 1) || (amModPercent > 100))
+    {
+        m_settings.m_amModFactor = 0.95;
+        ui->amModPercent->setText(QString("%1").arg(95));
+    } else {
+        m_settings.m_amModFactor = amModPercent / 100.0;
+    }
+
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
@@ -575,4 +522,69 @@ void UDPSinkGUI::tick()
 
     m_tickCount++;
 }
+
+void UDPSinkGUI::setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat)
+{
+    switch(sampleFormat)
+    {
+        case UDPSinkSettings::FormatS16LE:
+            ui->sampleFormat->setCurrentIndex(0);
+            break;
+        case UDPSinkSettings::FormatNFM:
+            ui->sampleFormat->setCurrentIndex(1);
+            break;
+        case UDPSinkSettings::FormatLSB:
+            ui->sampleFormat->setCurrentIndex(2);
+            break;
+        case UDPSinkSettings::FormatUSB:
+            ui->sampleFormat->setCurrentIndex(3);
+            break;
+        case UDPSinkSettings::FormatAM:
+            ui->sampleFormat->setCurrentIndex(4);
+            break;
+        default:
+            ui->sampleFormat->setCurrentIndex(0);
+            break;
+    }
+}
+
+void UDPSinkGUI::setSampleFormat(int index)
+{
+    switch(index)
+    {
+    case 0:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatS16LE;
+        ui->fmDeviation->setEnabled(false);
+        ui->stereoInput->setChecked(true);
+        ui->stereoInput->setEnabled(false);
+        break;
+    case 1:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatNFM;
+        ui->fmDeviation->setEnabled(true);
+        ui->stereoInput->setEnabled(true);
+        break;
+    case 2:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatLSB;
+        ui->fmDeviation->setEnabled(false);
+        ui->stereoInput->setEnabled(true);
+        break;
+    case 3:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatUSB;
+        ui->fmDeviation->setEnabled(false);
+        ui->stereoInput->setEnabled(true);
+        break;
+    case 4:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatAM;
+        ui->fmDeviation->setEnabled(false);
+        ui->stereoInput->setEnabled(true);
+        break;
+    default:
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatS16LE;
+        ui->fmDeviation->setEnabled(false);
+        ui->stereoInput->setChecked(true);
+        ui->stereoInput->setEnabled(false);
+        break;
+    }
+}
+
 

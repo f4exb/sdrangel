@@ -94,10 +94,6 @@ private:
 
     // settings
     UDPSinkSettings m_settings;
-    UDPSinkSettings::SampleFormat m_sampleFormat;
-//    Real m_inputSampleRate;
-//    Real m_rfBandwidth;
-    int m_fmDeviation;
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
 
@@ -107,6 +103,8 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void setSampleFormat(int index);
+    void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

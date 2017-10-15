@@ -105,12 +105,12 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         d.readS32(2, &s32tmp, 0);
         m_inputFrequencyOffset = s32tmp;
 
-        d.readS32(3, &s32tmp, (int) FormatS16LE);
+        d.readS32(3, &s32tmp, 0);
 
         if (s32tmp < (int) FormatNone) {
-            m_sampleFormat = s32tmp;
+            m_sampleFormat = (SampleFormat) s32tmp;
         } else {
-            m_sampleFormat = (int) FormatNone - 1;
+            m_sampleFormat = (SampleFormat) ((int) FormatNone - 1);
         }
 
         d.readReal(4, &m_outputSampleRate, 48000);

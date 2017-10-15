@@ -36,7 +36,7 @@ struct UDPSinkSettings
 
     int m_basebandSampleRate;
     Real m_outputSampleRate;
-    int m_sampleFormat;
+    SampleFormat m_sampleFormat;
     Real m_inputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
