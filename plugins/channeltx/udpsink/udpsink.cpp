@@ -310,6 +310,52 @@ bool UDPSink::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+//        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+//            cfg.getSampleRate(),
+//            cfg.getCenterFrequency());
+
+        qDebug() << "UDPSink::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
+    else if (MsgConfigureUDPSink::match(cmd))
+    {
+        MsgConfigureUDPSink& cfg = (MsgConfigureUDPSink&) cmd;
+
+        UDPSinkSettings settings = cfg.getSettings();
+
+        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
+        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
+        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
+
+        applySettings(settings, cfg.getForce());
+
+        qDebug() << "UDPSink::handleMessage: MsgConfigureUDPSink:"
+                << " m_sampleFormat: " << settings.m_sampleFormat
+                << " m_inputSampleRate: " << settings.m_inputSampleRate
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_fmDeviation: " << settings.m_fmDeviation
+                << " m_udpAddressStr: " << settings.m_udpAddress
+                << " m_udpPort: " << settings.m_udpPort
+                << " m_channelMute: " << settings.m_channelMute
+                << " m_gainIn: " << settings.m_gainIn
+                << " m_gainOut: " << settings.m_gainOut
+                << " m_squelchGate: " << settings.m_squelchGate
+                << " m_squelch: " << settings.m_squelch << "dB"
+                << " m_squelchEnabled: " << settings.m_squelchEnabled
+                << " m_autoRWBalance: " << settings.m_autoRWBalance
+                << " m_stereoInput: " << settings.m_stereoInput
+                << " force: " << cfg.getForce();
+
+        return true;
+    }
     else if (MsgUDPSinkConfigure::match(cmd))
     {
         MsgUDPSinkConfigure& cfg = (MsgUDPSinkConfigure&) cmd;
