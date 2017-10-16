@@ -51,7 +51,7 @@ UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandS
 {
     setObjectName("UDPSink");
     m_udpHandler.setFeedbackMessageQueue(&m_inputMessageQueue);
-    m_SSBFilter = new fftfilt(m_config.m_lowCutoff / m_config.m_inputSampleRate, m_config.m_rfBandwidth / m_config.m_inputSampleRate, m_ssbFftLen);
+    m_SSBFilter = new fftfilt(m_running.m_lowCutoff / m_running.m_inputSampleRate, m_running.m_rfBandwidth / m_running.m_inputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     apply(true);
 }
@@ -393,8 +393,8 @@ bool UDPSink::handleMessage(const Message& cmd)
             m_settingsMutex.lock();
             m_interpolatorDistanceRemain = 0;
             m_interpolatorConsumed = false;
-            m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_config.m_outputSampleRate;
-            //m_interpolator.create(48, m_actualInputSampleRate, m_config.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
+            m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_running.m_outputSampleRate;
+            //m_interpolator.create(48, m_actualInputSampleRate, m_running.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
             m_settingsMutex.unlock();
         }
 
