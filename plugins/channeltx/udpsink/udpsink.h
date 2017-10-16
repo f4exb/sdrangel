@@ -324,6 +324,7 @@ private:
     Config m_config;
     Config m_running;
     UDPSinkSettings m_settings;
+    Real m_squelch;
 
     NCO m_carrierNco;
     Complex m_modSample;
@@ -371,7 +372,7 @@ private:
     static const int m_sampleRateAverageItems = 17;
     static const int m_ssbFftLen = 1024;
 
-    void apply(bool force);
+    //void apply(bool force);
     void applySettings(const UDPSinkSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);
@@ -379,7 +380,7 @@ private:
 
     inline void calculateSquelch(double value)
     {
-        if ((!m_running.m_squelchEnabled) || (value > m_running.m_squelch))
+        if ((!m_settings.m_squelchEnabled) || (value > m_squelch))
         {
             if (m_squelchThreshold == 0)
             {
@@ -439,15 +440,15 @@ private:
     {
         Sample s;
 
-        if (m_running.m_stereoInput)
+        if (m_settings.m_stereoInput)
         {
             m_udpHandler.readSample(s);
-            t = ((s.m_real + s.m_imag) * m_running.m_gainIn) / 2;
+            t = ((s.m_real + s.m_imag) * m_settings.m_gainIn) / 2;
         }
         else
         {
             m_udpHandler.readSample(t);
-            t *= m_running.m_gainIn;
+            t *= m_settings.m_gainIn;
         }
     }
 };

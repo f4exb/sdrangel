@@ -281,23 +281,26 @@ void UDPSinkGUI::applySettings(bool force)
                 m_settings.m_inputSampleRate,
                 m_settings.m_inputFrequencyOffset);
 
-        m_udpSink->configure(m_udpSink->getInputMessageQueue(),
-            m_settings.m_sampleFormat,
-            m_settings.m_inputSampleRate,
-            m_settings.m_rfBandwidth,
-            m_settings.m_fmDeviation,
-            m_settings.m_amModFactor,
-            m_settings.m_udpAddress,
-            m_settings.m_udpPort,
-            m_settings.m_channelMute,
-            m_settings.m_gainIn,
-            m_settings.m_gainOut,
-            m_settings.m_squelch,
-            m_settings.m_squelchGate,
-            m_settings.m_squelchEnabled,
-            m_settings.m_autoRWBalance,
-            m_settings.m_stereoInput,
-            force);
+        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
+        m_udpSink->getInputMessageQueue()->push(message);
+
+//        m_udpSink->configure(m_udpSink->getInputMessageQueue(),
+//            m_settings.m_sampleFormat,
+//            m_settings.m_inputSampleRate,
+//            m_settings.m_rfBandwidth,
+//            m_settings.m_fmDeviation,
+//            m_settings.m_amModFactor,
+//            m_settings.m_udpAddress,
+//            m_settings.m_udpPort,
+//            m_settings.m_channelMute,
+//            m_settings.m_gainIn,
+//            m_settings.m_gainOut,
+//            m_settings.m_squelch,
+//            m_settings.m_squelchGate,
+//            m_settings.m_squelchEnabled,
+//            m_settings.m_autoRWBalance,
+//            m_settings.m_stereoInput,
+//            force);
 
         ui->applyBtn->setEnabled(false);
         ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
