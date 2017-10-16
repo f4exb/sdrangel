@@ -96,23 +96,6 @@ public:
     int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
-//    void configure(MessageQueue* messageQueue,
-//            UDPSinkSettings::SampleFormat sampleFormat,
-//            Real inputSampleRate,
-//            Real rfBandwidth,
-//            int fmDeviation,
-//            Real amModFactor,
-//            const QString& udpAddress,
-//            int udpPort,
-//            bool channelMute,
-//            Real gainIn,
-//            Real gainOut,
-//            Real squelchDB,
-//            Real squelchGate,
-//            bool squelchEnabled,
-//            bool autoRWBalance,
-//            bool stereoInput,
-//            bool force = false);
     void setSpectrum(MessageQueue* messageQueue, bool enabled);
     void resetReadIndex(MessageQueue* messageQueue);
 
@@ -126,119 +109,6 @@ signals:
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
 private:
-//    class MsgUDPSinkConfigure : public Message {
-//        MESSAGE_CLASS_DECLARATION
-//
-//    public:
-//        UDPSinkSettings::SampleFormat getSampleFormat() const { return m_sampleFormat; }
-//        Real getInputSampleRate() const { return m_inputSampleRate; }
-//        Real getRFBandwidth() const { return m_rfBandwidth; }
-//        int getFMDeviation() const { return m_fmDeviation; }
-//        Real getAMModFactor() const { return m_amModFactor; }
-//        const QString& getUDPAddress() const { return m_udpAddress; }
-//        int getUDPPort() const { return m_udpPort; }
-//        bool getChannelMute() const { return m_channelMute; }
-//        Real getGainIn() const { return m_gainIn; }
-//        Real getGainOut() const { return m_gainOut; }
-//        Real getSquelchDB() const { return m_squelchDB; }
-//        Real getSquelchGate() const { return m_squelchGate; }
-//        bool getSquelchEnabled() const { return m_squelchEnabled; }
-//        bool getForce() const { return m_force; }
-//        bool getAutoRWBalance() const { return m_autoRWBalance; }
-//        bool getStereoInput() const { return m_stereoInput; }
-//
-//        static MsgUDPSinkConfigure* create(
-//                UDPSinkSettings::SampleFormat sampleFormat,
-//                Real inputSampleRate,
-//                Real rfBandwidth,
-//                int fmDeviation,
-//                Real amModFactor,
-//                const QString& udpAddress,
-//                int udpPort,
-//                bool channelMute,
-//                Real gainIn,
-//                Real gainOut,
-//                Real squelchDB,
-//                Real squelchGate,
-//                bool squelchEnabled,
-//                bool autoRWBalance,
-//                bool stereoInput,
-//                bool force)
-//        {
-//            return new MsgUDPSinkConfigure(
-//                    sampleFormat,
-//                    inputSampleRate,
-//                    rfBandwidth,
-//                    fmDeviation,
-//                    amModFactor,
-//                    udpAddress,
-//                    udpPort,
-//                    channelMute,
-//                    gainIn,
-//                    gainOut,
-//                    squelchDB,
-//                    squelchGate,
-//                    squelchEnabled,
-//                    autoRWBalance,
-//                    stereoInput,
-//                    force);
-//        }
-//
-//    private:
-//        UDPSinkSettings::SampleFormat m_sampleFormat;
-//        Real m_inputSampleRate;
-//        Real m_rfBandwidth;
-//        int m_fmDeviation;
-//        Real m_amModFactor;
-//        QString m_udpAddress;
-//        int m_udpPort;
-//        bool m_channelMute;
-//        Real m_gainIn;
-//        Real m_gainOut;
-//        Real m_squelchDB;
-//        Real m_squelchGate;
-//        bool m_squelchEnabled;
-//        bool m_autoRWBalance;
-//        bool m_stereoInput;
-//        bool m_force;
-//
-//        MsgUDPSinkConfigure(
-//                UDPSinkSettings::SampleFormat sampleFormat,
-//                Real inputSampleRate,
-//                Real rfBandwidth,
-//                int fmDeviation,
-//                Real amModFactor,
-//                const QString& udpAddress,
-//                int udpPort,
-//                bool channelMute,
-//                Real gainIn,
-//                Real gainOut,
-//                Real squelchDB,
-//                Real squelchGate,
-//                bool squelchEnabled,
-//                bool autoRWBalance,
-//                bool stereoInput,
-//                bool force) :
-//            Message(),
-//            m_sampleFormat(sampleFormat),
-//            m_inputSampleRate(inputSampleRate),
-//            m_rfBandwidth(rfBandwidth),
-//            m_fmDeviation(fmDeviation),
-//            m_amModFactor(amModFactor),
-//            m_udpAddress(udpAddress),
-//            m_udpPort(udpPort),
-//            m_channelMute(channelMute),
-//            m_gainIn(gainIn),
-//            m_gainOut(gainOut),
-//            m_squelchDB(squelchDB),
-//            m_squelchGate(squelchGate),
-//            m_squelchEnabled(squelchEnabled),
-//            m_autoRWBalance(autoRWBalance),
-//            m_stereoInput(stereoInput),
-//            m_force(force)
-//        { }
-//    };
-
     class MsgUDPSinkSpectrum : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -276,53 +146,6 @@ private:
         { }
     };
 
-//    struct Config {
-//        int m_basebandSampleRate;
-//        Real m_outputSampleRate;
-//        int m_sampleFormat;
-//        Real m_inputSampleRate;
-//        qint64 m_inputFrequencyOffset;
-//        Real m_rfBandwidth;
-//        Real m_lowCutoff;
-//        int m_fmDeviation;
-//        Real m_amModFactor;
-//        bool m_channelMute;
-//        Real m_gainIn;
-//        Real m_gainOut;
-//        Real m_squelch; //!< squared magnitude
-//        Real m_squelchGate; //!< seconds
-//        bool m_squelchEnabled;
-//        bool m_autoRWBalance;
-//        bool m_stereoInput;
-//
-//        QString m_udpAddressStr;
-//        quint16 m_udpPort;
-//
-//        Config() :
-//            m_basebandSampleRate(48000),
-//            m_outputSampleRate(48000),
-//            m_sampleFormat(0),
-//            m_inputSampleRate(48000),
-//            m_inputFrequencyOffset(0),
-//            m_rfBandwidth(12500),
-//            m_lowCutoff(300),
-//            m_fmDeviation(1.0),
-//            m_amModFactor(0.95),
-//            m_channelMute(false),
-//            m_gainIn(1.0),
-//            m_gainOut(1.0),
-//            m_squelch(-50.0),
-//            m_squelchGate(0.05),
-//            m_squelchEnabled(true),
-//            m_autoRWBalance(true),
-//            m_stereoInput(false),
-//            m_udpAddressStr("127.0.0.1"),
-//            m_udpPort(9999)
-//        {}
-//    };
-//
-//    Config m_config;
-//    Config m_running;
     UDPSinkSettings m_settings;
     Real m_squelch;
 
@@ -372,7 +195,6 @@ private:
     static const int m_sampleRateAverageItems = 17;
     static const int m_ssbFftLen = 1024;
 
-    //void apply(bool force);
     void applySettings(const UDPSinkSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);
