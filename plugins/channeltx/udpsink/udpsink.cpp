@@ -23,7 +23,7 @@
 
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSink, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
+//MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
@@ -359,46 +359,46 @@ bool UDPSink::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgUDPSinkConfigure::match(cmd))
-    {
-        MsgUDPSinkConfigure& cfg = (MsgUDPSinkConfigure&) cmd;
-
-        m_config.m_sampleFormat = cfg.getSampleFormat();
-        m_config.m_inputSampleRate = cfg.getInputSampleRate();
-        m_config.m_rfBandwidth = cfg.getRFBandwidth();
-        m_config.m_fmDeviation = cfg.getFMDeviation();
-        m_config.m_udpAddressStr = cfg.getUDPAddress();
-        m_config.m_udpPort = cfg.getUDPPort();
-        m_config.m_channelMute = cfg.getChannelMute();
-        m_config.m_gainIn = cfg.getGainIn();
-        m_config.m_gainOut = cfg.getGainOut();
-        m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
-        m_config.m_squelchGate = cfg.getSquelchGate();
-        m_config.m_squelchEnabled = cfg.getSquelchEnabled();
-        m_config.m_autoRWBalance = cfg.getAutoRWBalance();
-        m_config.m_stereoInput = cfg.getStereoInput();
-
-        //apply(cfg.getForce());
-
-        qDebug() << "UDPSink::handleMessage: MsgUDPSinkConfigure:"
-                << " m_sampleFormat: " << m_config.m_sampleFormat
-                << " m_inputSampleRate: " << m_config.m_inputSampleRate
-                << " m_rfBandwidth: " << m_config.m_rfBandwidth
-                << " m_fmDeviation: " << m_config.m_fmDeviation
-                << " m_udpAddressStr: " << m_config.m_udpAddressStr
-                << " m_udpPort: " << m_config.m_udpPort
-                << " m_channelMute: " << m_config.m_channelMute
-                << " m_gainIn: " << m_config.m_gainIn
-                << " m_gainOut: " << m_config.m_gainOut
-                << " squelchDB: " << cfg.getSquelchDB()
-                << " m_squelchGate: " << m_config.m_squelchGate
-                << " m_squelch: " << m_config.m_squelch
-                << " m_squelchEnabled: " << m_config.m_squelchEnabled
-                << " m_autoRWBalance: " << m_config.m_autoRWBalance
-                << " m_stereoInput: " << m_config.m_stereoInput;
-
-        return true;
-    }
+//    else if (MsgUDPSinkConfigure::match(cmd))
+//    {
+//        MsgUDPSinkConfigure& cfg = (MsgUDPSinkConfigure&) cmd;
+//
+//        m_config.m_sampleFormat = cfg.getSampleFormat();
+//        m_config.m_inputSampleRate = cfg.getInputSampleRate();
+//        m_config.m_rfBandwidth = cfg.getRFBandwidth();
+//        m_config.m_fmDeviation = cfg.getFMDeviation();
+//        m_config.m_udpAddressStr = cfg.getUDPAddress();
+//        m_config.m_udpPort = cfg.getUDPPort();
+//        m_config.m_channelMute = cfg.getChannelMute();
+//        m_config.m_gainIn = cfg.getGainIn();
+//        m_config.m_gainOut = cfg.getGainOut();
+//        m_config.m_squelch = CalcDb::powerFromdB(cfg.getSquelchDB());
+//        m_config.m_squelchGate = cfg.getSquelchGate();
+//        m_config.m_squelchEnabled = cfg.getSquelchEnabled();
+//        m_config.m_autoRWBalance = cfg.getAutoRWBalance();
+//        m_config.m_stereoInput = cfg.getStereoInput();
+//
+//        //apply(cfg.getForce());
+//
+//        qDebug() << "UDPSink::handleMessage: MsgUDPSinkConfigure:"
+//                << " m_sampleFormat: " << m_config.m_sampleFormat
+//                << " m_inputSampleRate: " << m_config.m_inputSampleRate
+//                << " m_rfBandwidth: " << m_config.m_rfBandwidth
+//                << " m_fmDeviation: " << m_config.m_fmDeviation
+//                << " m_udpAddressStr: " << m_config.m_udpAddressStr
+//                << " m_udpPort: " << m_config.m_udpPort
+//                << " m_channelMute: " << m_config.m_channelMute
+//                << " m_gainIn: " << m_config.m_gainIn
+//                << " m_gainOut: " << m_config.m_gainOut
+//                << " squelchDB: " << cfg.getSquelchDB()
+//                << " m_squelchGate: " << m_config.m_squelchGate
+//                << " m_squelch: " << m_config.m_squelch
+//                << " m_squelchEnabled: " << m_config.m_squelchEnabled
+//                << " m_autoRWBalance: " << m_config.m_autoRWBalance
+//                << " m_stereoInput: " << m_config.m_stereoInput;
+//
+//        return true;
+//    }
     else if (UDPSinkMessages::MsgSampleRateCorrection::match(cmd))
     {
         UDPSinkMessages::MsgSampleRateCorrection& cfg = (UDPSinkMessages::MsgSampleRateCorrection&) cmd;
@@ -482,42 +482,42 @@ bool UDPSink::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSink::configure(MessageQueue* messageQueue,
-        UDPSinkSettings::SampleFormat sampleFormat,
-        Real inputSampleRate,
-        Real rfBandwidth,
-        int fmDeviation,
-        Real amModFactor,
-        const QString& udpAddress,
-        int udpPort,
-        bool channelMute,
-        Real gainIn,
-        Real gainOut,
-        Real squelchDB,
-        Real squelchGate,
-        bool squelchEnabled,
-        bool autoRWBalance,
-        bool stereoInput,
-        bool force)
-{
-    Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
-            inputSampleRate,
-            rfBandwidth,
-            fmDeviation,
-            amModFactor,
-            udpAddress,
-            udpPort,
-            channelMute,
-            gainIn,
-            gainOut,
-            squelchDB,
-            squelchGate,
-            squelchEnabled,
-            autoRWBalance,
-            stereoInput,
-            force);
-    messageQueue->push(cmd);
-}
+//void UDPSink::configure(MessageQueue* messageQueue,
+//        UDPSinkSettings::SampleFormat sampleFormat,
+//        Real inputSampleRate,
+//        Real rfBandwidth,
+//        int fmDeviation,
+//        Real amModFactor,
+//        const QString& udpAddress,
+//        int udpPort,
+//        bool channelMute,
+//        Real gainIn,
+//        Real gainOut,
+//        Real squelchDB,
+//        Real squelchGate,
+//        bool squelchEnabled,
+//        bool autoRWBalance,
+//        bool stereoInput,
+//        bool force)
+//{
+//    Message* cmd = MsgUDPSinkConfigure::create(sampleFormat,
+//            inputSampleRate,
+//            rfBandwidth,
+//            fmDeviation,
+//            amModFactor,
+//            udpAddress,
+//            udpPort,
+//            channelMute,
+//            gainIn,
+//            gainOut,
+//            squelchDB,
+//            squelchGate,
+//            squelchEnabled,
+//            autoRWBalance,
+//            stereoInput,
+//            force);
+//    messageQueue->push(cmd);
+//}
 
 void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
