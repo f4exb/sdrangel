@@ -36,6 +36,53 @@ class UDPSink : public BasebandSampleSource {
     Q_OBJECT
 
 public:
+    class MsgConfigureUDPSink : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const UDPSinkSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureUDPSink* create(const UDPSinkSettings& settings, bool force)
+        {
+            return new MsgConfigureUDPSink(settings, force);
+        }
+
+    private:
+        UDPSinkSettings m_settings;
+        bool m_force;
+
+        MsgConfigureUDPSink(const UDPSinkSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        {
+        }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
     UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum);
     virtual ~UDPSink();
 
@@ -276,6 +323,7 @@ private:
 
     Config m_config;
     Config m_running;
+    UDPSinkSettings m_settings;
 
     NCO m_carrierNco;
     Complex m_modSample;
@@ -324,6 +372,7 @@ private:
     static const int m_ssbFftLen = 1024;
 
     void apply(bool force);
+    void applySettings(const UDPSinkSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);
     void calculateLevel(Complex sample);

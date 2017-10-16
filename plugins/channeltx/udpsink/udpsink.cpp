@@ -21,6 +21,8 @@
 #include "udpsinkmsg.h"
 #include "udpsink.h"
 
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSink, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkConfigure, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
@@ -558,4 +560,83 @@ void UDPSink::apply(bool force)
     }
 
     m_running = m_config;
+}
+
+void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
+{
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
+       (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+       (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) settings.m_outputSampleRate;
+        m_interpolator.create(48, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+        m_actualInputSampleRate = settings.m_inputSampleRate;
+        m_udpHandler.resetReadIndex();
+        m_sampleRateSum = 0.0;
+        m_sampleRateAvgCounter = 0;
+        m_spectrumChunkSize = settings.m_inputSampleRate * 0.05; // 50 ms chunk
+        m_spectrumChunkCounter = 0;
+        m_levelNbSamples = settings.m_inputSampleRate * 0.01; // every 10 ms
+        m_levelCalcCount = 0;
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_udpHandler.resizeBuffer(settings.m_inputSampleRate);
+        m_inMovingAverage.resize(settings.m_inputSampleRate * 0.01, 1e-10); // 10 ms
+        m_squelchThreshold = settings.m_inputSampleRate * settings.m_squelchGate;
+        initSquelch(m_squelchOpen);
+        m_SSBFilter->create_filter(settings.m_lowCutoff / settings.m_inputSampleRate, settings.m_rfBandwidth / settings.m_inputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    {
+        m_squelchThreshold = settings.m_outputSampleRate * settings.m_squelchGate;
+        initSquelch(m_squelchOpen);
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) ||
+        (settings.m_udpPort != m_settings.m_udpPort) || force)
+    {
+        m_settingsMutex.lock();
+        m_udpHandler.configureUDPLink(settings.m_udpAddress, settings.m_udpPort);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_channelMute != m_settings.m_channelMute) || force)
+    {
+        if (!settings.m_channelMute) {
+            m_udpHandler.resetReadIndex();
+        }
+    }
+
+    if ((settings.m_autoRWBalance != m_settings.m_autoRWBalance) || force)
+    {
+        m_settingsMutex.lock();
+        m_udpHandler.setAutoRWBalance(settings.m_autoRWBalance);
+
+        if (!settings.m_autoRWBalance)
+        {
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorConsumed = false;
+            m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) settings.m_outputSampleRate;
+            m_interpolator.create(48, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+            m_actualInputSampleRate = settings.m_inputSampleRate;
+            m_udpHandler.resetReadIndex();
+        }
+
+        m_settingsMutex.unlock();
+    }
+
+    m_settings = settings;
 }
