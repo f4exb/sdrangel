@@ -26,10 +26,8 @@ MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
-UDPSink::UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum) :
+UDPSink::UDPSink(BasebandSampleSink* spectrum) :
     m_squelch(1e-6),
-    m_uiMessageQueue(uiMessageQueue),
-    m_udpSinkGUI(udpSinkGUI),
     m_spectrum(spectrum),
     m_spectrumEnabled(false),
     m_spectrumChunkSize(2160),
@@ -441,16 +439,16 @@ bool UDPSink::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
+void UDPSink::setSpectrum(bool enabled)
 {
     Message* cmd = MsgUDPSinkSpectrum::create(enabled);
-    messageQueue->push(cmd);
+    getInputMessageQueue()->push(cmd);
 }
 
-void UDPSink::resetReadIndex(MessageQueue* messageQueue)
+void UDPSink::resetReadIndex()
 {
     Message* cmd = MsgResetReadIndex::create();
-    messageQueue->push(cmd);
+    getInputMessageQueue()->push(cmd);
 }
 
 void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)

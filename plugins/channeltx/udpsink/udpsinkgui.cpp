@@ -122,7 +122,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-    m_udpSink = new UDPSink(m_pluginAPI->getMainWindowMessageQueue(), this, m_spectrumVis);
+    m_udpSink = new UDPSink(m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
     m_channelizer = new UpChannelizer(m_udpSink);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
@@ -402,7 +402,7 @@ void UDPSinkGUI::on_applyBtn_clicked()
 
 void UDPSinkGUI::on_resetUDPReadIndex_clicked()
 {
-    m_udpSink->resetReadIndex(m_udpSink->getInputMessageQueue());
+    m_udpSink->resetReadIndex();
 }
 
 void UDPSinkGUI::on_autoRWBalance_toggled(bool checked)
@@ -421,7 +421,7 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     if ((widget == ui->spectrumBox) && (m_udpSink != 0))
     {
-        m_udpSink->setSpectrum(m_udpSink->getInputMessageQueue(), rollDown);
+        m_udpSink->setSpectrum(rollDown);
     }
 }
 

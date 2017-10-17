@@ -30,8 +30,6 @@
 #include "udpsinkudphandler.h"
 #include "udpsinksettings.h"
 
-class UDPSinkGUI;
-
 class UDPSink : public BasebandSampleSource {
     Q_OBJECT
 
@@ -83,7 +81,7 @@ public:
         { }
     };
 
-    UDPSink(MessageQueue* uiMessageQueue, UDPSinkGUI* udpSinkGUI, BasebandSampleSink* spectrum);
+    UDPSink(BasebandSampleSink* spectrum);
     virtual ~UDPSink();
 
     virtual void start();
@@ -96,8 +94,8 @@ public:
     int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
-    void setSpectrum(MessageQueue* messageQueue, bool enabled);
-    void resetReadIndex(MessageQueue* messageQueue);
+    void setSpectrum(bool enabled);
+    void resetReadIndex();
 
 signals:
     /**
@@ -152,8 +150,6 @@ private:
     NCO m_carrierNco;
     Complex m_modSample;
 
-    MessageQueue* m_uiMessageQueue;
-    UDPSinkGUI* m_udpSinkGUI;
     BasebandSampleSink* m_spectrum;
     bool m_spectrumEnabled;
     SampleVector m_sampleBuffer;
