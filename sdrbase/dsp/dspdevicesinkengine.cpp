@@ -615,12 +615,14 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 //        kv.first = threadedSource;
 //        (threadedSource->getSampleSourceFifo()).getReadIterator(kv.second);
 //        m_threadedBasebandSampleSourcesIteratorMap.insert(kv);
-		threadedSource->start();
+//		threadedSource->start();
 	}
 	else if (DSPRemoveThreadedSampleSource::match(*message))
 	{
 		ThreadedBasebandSampleSource* threadedSource = ((DSPRemoveThreadedSampleSource*) message)->getThreadedSampleSource();
-		threadedSource->stop();
+		if (m_state == StRunning) {
+		    threadedSource->stop();
+		}
         // not used with sample by sample processing
 //		m_threadedBasebandSampleSourcesIteratorMap.erase(threadedSource);
 		m_threadedBasebandSampleSources.remove(threadedSource);
