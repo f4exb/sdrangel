@@ -122,7 +122,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-    m_udpSink = new UDPSink(m_spectrumVis);
+    m_udpSink = new UDPSink(m_deviceAPI, m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
     m_channelizer = new UpChannelizer(m_udpSink);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);

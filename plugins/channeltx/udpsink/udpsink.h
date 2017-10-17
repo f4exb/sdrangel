@@ -30,6 +30,8 @@
 #include "udpsinkudphandler.h"
 #include "udpsinksettings.h"
 
+class DeviceSinkAPI;
+
 class UDPSink : public BasebandSampleSource {
     Q_OBJECT
 
@@ -81,7 +83,7 @@ public:
         { }
     };
 
-    UDPSink(BasebandSampleSink* spectrum);
+    UDPSink(DeviceSinkAPI *deviceAPI, BasebandSampleSink* spectrum);
     virtual ~UDPSink();
 
     virtual void start();
@@ -143,6 +145,8 @@ private:
             Message()
         { }
     };
+
+    DeviceSinkAPI* m_deviceAPI;
 
     UDPSinkSettings m_settings;
     Real m_squelch;

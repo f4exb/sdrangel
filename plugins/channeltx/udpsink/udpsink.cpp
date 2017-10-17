@@ -26,7 +26,8 @@ MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
-UDPSink::UDPSink(BasebandSampleSink* spectrum) :
+UDPSink::UDPSink(DeviceSinkAPI *deviceAPI, BasebandSampleSink* spectrum) :
+    m_deviceAPI(deviceAPI),
     m_squelch(1e-6),
     m_spectrum(spectrum),
     m_spectrumEnabled(false),
