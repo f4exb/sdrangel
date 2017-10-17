@@ -31,6 +31,8 @@
 #include "udpsinksettings.h"
 
 class DeviceSinkAPI;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
 
 class UDPSink : public BasebandSampleSource {
     Q_OBJECT
@@ -147,6 +149,8 @@ private:
     };
 
     DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
 
     UDPSinkSettings m_settings;
     Real m_squelch;

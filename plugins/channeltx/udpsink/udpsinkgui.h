@@ -29,8 +29,6 @@
 
 class PluginAPI;
 class DeviceSinkAPI;
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
 class UDPSink;
 class SpectrumVis;
 
@@ -83,8 +81,6 @@ private:
     Ui::UDPSinkGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
     SpectrumVis* m_spectrumVis;
     UDPSink* m_udpSink;
     MovingAverage<double> m_channelPowerAvg;

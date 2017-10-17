@@ -16,8 +16,11 @@
 
 #include <QDebug>
 
+#include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
+#include "dsp/threadedbasebandsamplesource.h"
 #include "util/db.h"
+
 #include "udpsinkmsg.h"
 #include "udpsink.h"
 
@@ -51,6 +54,11 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI, BasebandSampleSink* spectrum) :
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName("UDPSink");
+
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
     m_udpHandler.setFeedbackMessageQueue(&m_inputMessageQueue);
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / m_settings.m_inputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
@@ -61,6 +69,9 @@ UDPSink::~UDPSink()
 {
     delete[] m_SSBFilterBuffer;
     delete m_SSBFilter;
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void UDPSink::start()
@@ -315,9 +326,9 @@ bool UDPSink::handleMessage(const Message& cmd)
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
 
-//        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-//            cfg.getSampleRate(),
-//            cfg.getCenterFrequency());
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
 
         qDebug() << "UDPSink::handleMessage: MsgConfigureChannelizer:"
                 << " sampleRate: " << cfg.getSampleRate()

@@ -15,8 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/devicesinkapi.h"
-#include "dsp/upchannelizer.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -124,9 +122,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
     m_udpSink = new UDPSink(m_deviceAPI, m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
-    m_channelizer = new UpChannelizer(m_udpSink);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
     ui->fmDeviation->setEnabled(false);
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
@@ -167,9 +162,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 UDPSinkGUI::~UDPSinkGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
     delete m_udpSink;
     delete m_spectrumVis;
     delete ui;
@@ -184,9 +176,10 @@ void UDPSinkGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+        UDPSink::MsgConfigureChannelizer *msgChan = UDPSink::MsgConfigureChannelizer::create(
                 m_settings.m_inputSampleRate,
                 m_settings.m_inputFrequencyOffset);
+        m_udpSink->getInputMessageQueue()->push(msgChan);
 
         UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
