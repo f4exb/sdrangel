@@ -25,11 +25,13 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += ssbmod.cpp\
 	ssbmodgui.cpp\
-	ssbmodplugin.cpp
+	ssbmodplugin.cpp\
+	ssbmodsettings.cpp
 
 HEADERS += ssbmod.h\
 	ssbmodgui.h\
-	ssbmodplugin.h
+	ssbmodplugin.h\
+	ssbmodsettings.h
 
 FORMS += ssbmodgui.ui
 

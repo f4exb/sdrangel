@@ -4,12 +4,14 @@ set(modssb_SOURCES
     ssbmod.cpp
     ssbmodgui.cpp
     ssbmodplugin.cpp
+    ssbmodsettings.cpp
 )
 
 set(modssb_HEADERS
     ssbmod.h
     ssbmodgui.h
     ssbmodplugin.h
+    ssbmodsettings.h
 )
 
 set(modssb_FORMS
