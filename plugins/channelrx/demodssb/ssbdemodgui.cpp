@@ -119,6 +119,8 @@ void SSBDemodGUI::on_dsb_toggled(bool dsb)
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
         ui->lowCut->setValue(0);
         ui->lowCut->setEnabled(false);
+
+        applySettings();
 	}
 	else
 	{
@@ -135,7 +137,6 @@ void SSBDemodGUI::on_dsb_toggled(bool dsb)
         on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
 	}
 
-	applySettings();
 	setNewRate(m_spanLog2);
 }
 

@@ -249,10 +249,14 @@ void SSBModGUI::handleSourceMessages()
 void SSBModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void SSBModGUI::on_dsb_toggled(bool checked)
 {
+    m_settings.m_dsb = checked;
+
     if (checked)
     {
         if (ui->BW->value() < 0) {
@@ -265,6 +269,9 @@ void SSBModGUI::on_dsb_toggled(bool checked)
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
         ui->lowCut->setValue(0);
         ui->lowCut->setEnabled(false);
+
+        m_settings.m_bandwidth = ui->BW->value() * 100.0;
+        m_settings.m_lowCutoff = 0;
 
         applySettings();
     }
@@ -279,6 +286,7 @@ void SSBModGUI::on_dsb_toggled(bool checked)
         QString bwStr = QString::number(ui->BW->value()/10.0, 'f', 1);
         ui->BWText->setText(tr("%1k").arg(bwStr));
         ui->lowCut->setEnabled(true);
+        m_settings.m_bandwidth = ui->BW->value() * 100.0;
 
         on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
     }
@@ -286,13 +294,15 @@ void SSBModGUI::on_dsb_toggled(bool checked)
     setNewRate(m_spanLog2);
 }
 
-void SSBModGUI::on_audioBinaural_toggled(bool checked __attribute__((unused)))
+void SSBModGUI::on_audioBinaural_toggled(bool checked)
 {
+    m_settings.m_audioBinaural = checked;
 	applySettings();
 }
 
-void SSBModGUI::on_audioFlipChannels_toggled(bool checked __attribute__((unused)))
+void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
 {
+    m_settings.m_audioFlipChannels = checked;
 	applySettings();
 }
 
@@ -300,6 +310,7 @@ void SSBModGUI::on_spanLog2_valueChanged(int value)
 {
     if (setNewRate(value))
     {
+        m_settings.m_spanLog2 = value;
         applySettings();
     }
 
@@ -319,8 +330,8 @@ void SSBModGUI::on_BW_valueChanged(int value)
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
+    m_settings.m_bandwidth = value * 100;
     on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-	applySettings();
 	setNewRate(m_spanLog2);
 }
 
@@ -331,6 +342,7 @@ void SSBModGUI::on_lowCut_valueChanged(int value)
     QString s = QString::number(lowCutoff/1000.0, 'f', 1);
     ui->lowCutText->setText(tr("%1k").arg(s));
     ui->lowCut->setValue(lowCutoff/100);
+    m_settings.m_lowCutoff = ui->lowCut->value() * 100.0;
     applySettings();
 }
 
@@ -369,23 +381,26 @@ int SSBModGUI::getEffectiveLowCutoff(int lowCutoff)
 void SSBModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_toneFrequency = value * 10.0;
     applySettings();
 }
 
 void SSBModGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    m_settings.m_volumeFactor = value / 10.0;
     applySettings();
 }
 
 void SSBModGUI::on_audioMute_toggled(bool checked)
 {
-    qDebug() << "SSBModGUI::on_audioMute_toggled: " << checked << ":" << ui->audioMute->isChecked();
+    m_settings.m_audioMute = checked;
 	applySettings();
 }
 
-void SSBModGUI::on_playLoop_toggled(bool checked __attribute__((unused)))
+void SSBModGUI::on_playLoop_toggled(bool checked)
 {
+    m_settings.m_playLoop = checked;
     applySettings();
 }
 
@@ -431,26 +446,30 @@ void SSBModGUI::on_mic_toggled(bool checked)
     m_ssbMod->getInputMessageQueue()->push(message);
 }
 
-void SSBModGUI::on_agc_toggled(bool checked __attribute((__unused__)))
+void SSBModGUI::on_agc_toggled(bool checked)
 {
+    m_settings.m_agc = checked;
     applySettings();
 }
 
 void SSBModGUI::on_agcOrder_valueChanged(int value){
     QString s = QString::number(value / 100.0, 'f', 2);
     ui->agcOrderText->setText(s);
+    m_settings.m_agcOrder = value / 100.0;
     applySettings();
 }
 
 void SSBModGUI::on_agcTime_valueChanged(int value){
     QString s = QString::number(m_agcTimeConstant[value], 'f', 0);
     ui->agcTimeText->setText(s);
+    m_settings.m_agcTime = value * 48;
     applySettings();
 }
 
 void SSBModGUI::on_agcThreshold_valueChanged(int value)
 {
     displayAGCPowerThreshold(value);
+    m_settings.m_agcThreshold = value;
     applySettings();
 }
 
@@ -458,6 +477,7 @@ void SSBModGUI::on_agcThresholdGate_valueChanged(int value)
 {
     QString s = QString::number(value, 'f', 0);
     ui->agcThresholdGateText->setText(s);
+    m_settings.m_agcThresholdGate = value * 48;
     applySettings();
 }
 
@@ -465,6 +485,7 @@ void SSBModGUI::on_agcThresholdDelay_valueChanged(int value)
 {
     QString s = QString::number(value * 10, 'f', 0);
     ui->agcThresholdDelayText->setText(s);
+    m_settings.m_agcThresholdDelay = value * 48;
     applySettings();
 }
 

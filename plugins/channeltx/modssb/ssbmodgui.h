@@ -24,6 +24,7 @@
 #include "util/messagequeue.h"
 
 #include "ssbmod.h"
+#include "ssbmodsettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -97,6 +98,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
     ChannelMarker m_channelMarker;
+    SSBModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 	int m_rate;
