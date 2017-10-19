@@ -230,6 +230,10 @@ bool SSBModGUI::handleMessage(const Message& message)
 
 void SSBModGUI::channelMarkerChanged()
 {
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_udpAddress = m_channelMarker.getUDPAddress();
+    m_settings.m_udpPort = m_channelMarker.getUDPReceivePort();
+    displaySettings();
 	applySettings();
 }
 
@@ -711,23 +715,41 @@ void SSBModGUI::applySettings()
 
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-		m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
-			ui->BW->value() * 100.0f,
-			ui->lowCut->value() * 100.0f,
-			ui->toneFrequency->value() * 10.0f,
-            ui->volume->value() / 10.0f,
-			m_spanLog2,
-			ui->audioBinaural->isChecked(),
-			ui->audioFlipChannels->isChecked(),
-			ui->dsb->isChecked(),
-			ui->audioMute->isChecked(),
-			ui->playLoop->isChecked(),
-			ui->agc->isChecked(),
-			ui->agcOrder->value() / 100.0,
-			m_agcTimeConstant[ui->agcTime->value()],
+        m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
+            m_settings.m_bandwidth,
+            m_settings.m_lowCutoff,
+            m_settings.m_toneFrequency,
+            m_settings.m_volumeFactor,
+            m_spanLog2,
+            m_settings.m_audioBinaural,
+            m_settings.m_audioFlipChannels,
+            m_settings.m_dsb,
+            m_settings.m_audioMute,
+            m_settings.m_playLoop,
+            m_settings.m_agc,
+            m_settings.m_agcOrder,
+            m_agcTimeConstant[ui->agcTime->value()], // TBD
             ui->agcThreshold->value(),
             ui->agcThresholdGate->value(),
             ui->agcThresholdDelay->value() * 10);
+
+//		m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
+//			ui->BW->value() * 100.0f,
+//			ui->lowCut->value() * 100.0f,
+//			ui->toneFrequency->value() * 10.0f,
+//            ui->volume->value() / 10.0f,
+//			m_spanLog2,
+//			ui->audioBinaural->isChecked(),
+//			ui->audioFlipChannels->isChecked(),
+//			ui->dsb->isChecked(),
+//			ui->audioMute->isChecked(),
+//			ui->playLoop->isChecked(),
+//			ui->agc->isChecked(),
+//			ui->agcOrder->value() / 100.0,
+//			m_agcTimeConstant[ui->agcTime->value()],
+//            ui->agcThreshold->value(),
+//            ui->agcThresholdGate->value(),
+//            ui->agcThresholdDelay->value() * 10);
 	}
 }
 
