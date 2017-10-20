@@ -59,7 +59,6 @@ public:
     static const QString m_channelID;
 
 private slots:
-    void channelMarkerChanged();
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
@@ -133,6 +132,7 @@ private:
     void displayAGCPowerThreshold(int value);
     void updateWithStreamData();
     void updateWithStreamTime();
+    void channelMarkerUpdate();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

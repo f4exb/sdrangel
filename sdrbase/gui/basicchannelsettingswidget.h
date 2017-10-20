@@ -17,6 +17,7 @@ public:
 	explicit BasicChannelSettingsWidget(ChannelMarker* marker, QWidget* parent = NULL);
 	~BasicChannelSettingsWidget();
 	void setUDPDialogVisible(bool visible);
+	bool getHasChanged() const { return m_hasChanged; }
 
 private slots:
 	void on_title_textChanged(const QString& text);
@@ -27,6 +28,7 @@ private slots:
 private:
 	Ui::BasicChannelSettingsWidget* ui;
 	ChannelMarker* m_channelMarker;
+	bool m_hasChanged;
 
 	void paintColor();
 };

@@ -84,8 +84,7 @@ void SSBModGUI::resetToDefaults()
 
     ui->BW->setValue(30);
     ui->lowCut->setValue(3);
-    ui->spanLog2->setValue(3);
-    m_spanLog2 = 3;
+    ui->spanLog2->setValue(m_settings.m_spanLog2);
 	ui->toneFrequency->setValue(100);
 	ui->deltaFrequency->setValue(0);
 	ui->audioBinaural->setChecked(false);
@@ -228,13 +227,13 @@ bool SSBModGUI::handleMessage(const Message& message)
     }
 }
 
-void SSBModGUI::channelMarkerChanged()
+void SSBModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress();
     m_settings.m_udpPort = m_channelMarker.getUDPReceivePort();
     displaySettings();
-	applySettings();
+    applySettings();
 }
 
 void SSBModGUI::handleSourceMessages()
@@ -295,7 +294,7 @@ void SSBModGUI::on_dsb_toggled(bool checked)
         on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
     }
 
-    setNewRate(m_spanLog2);
+    setNewRate(m_settings.m_spanLog2);
 }
 
 void SSBModGUI::on_audioBinaural_toggled(bool checked)
@@ -336,7 +335,7 @@ void SSBModGUI::on_BW_valueChanged(int value)
 
     m_settings.m_bandwidth = value * 100;
     on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-	setNewRate(m_spanLog2);
+	setNewRate(m_settings.m_spanLog2);
 }
 
 void SSBModGUI::on_lowCut_valueChanged(int value)
@@ -466,14 +465,14 @@ void SSBModGUI::on_agcOrder_valueChanged(int value){
 void SSBModGUI::on_agcTime_valueChanged(int value){
     QString s = QString::number(m_agcTimeConstant[value], 'f', 0);
     ui->agcTimeText->setText(s);
-    m_settings.m_agcTime = value * 48;
+    m_settings.m_agcTime = m_agcTimeConstant[value] * 48;
     applySettings();
 }
 
 void SSBModGUI::on_agcThreshold_valueChanged(int value)
 {
     displayAGCPowerThreshold(value);
-    m_settings.m_agcThreshold = value;
+    m_settings.m_agcThreshold = value; // dB
     applySettings();
 }
 
@@ -489,7 +488,7 @@ void SSBModGUI::on_agcThresholdDelay_valueChanged(int value)
 {
     QString s = QString::number(value * 10, 'f', 0);
     ui->agcThresholdDelayText->setText(s);
-    m_settings.m_agcThresholdDelay = value * 48;
+    m_settings.m_agcThresholdDelay = value * 480;
     applySettings();
 }
 
@@ -533,10 +532,16 @@ void SSBModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 
 void SSBModGUI::onMenuDoubleClicked()
 {
-	if(!m_basicSettingsShown) {
+	if (!m_basicSettingsShown)
+	{
 		m_basicSettingsShown = true;
 		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
 		bcsw->show();
+
+		if (bcsw->getHasChanged())
+		{
+		    channelMarkerUpdate();
+		}
 	}
 }
 
@@ -549,7 +554,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(3),
 	m_channelPowerDbAvg(20,0),
     m_recordLength(0),
     m_recordSampleRate(48000),
@@ -593,8 +597,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
     m_deviceAPI->addRollupWidget(this);
@@ -604,7 +606,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
     displaySettings();
 	applySettings();
-	setNewRate(m_spanLog2);
+	setNewRate(m_settings.m_spanLog2);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
@@ -629,7 +631,7 @@ bool SSBModGUI::setNewRate(int spanLog2)
 		return false;
 	}
 
-	m_spanLog2 = spanLog2;
+	m_settings.m_spanLog2 = spanLog2;
 	m_rate = 48000 / (1<<spanLog2);
 
 	if (ui->BW->value() < -m_rate/100)
@@ -720,7 +722,7 @@ void SSBModGUI::applySettings()
             m_settings.m_lowCutoff,
             m_settings.m_toneFrequency,
             m_settings.m_volumeFactor,
-            m_spanLog2,
+            m_settings.m_spanLog2,
             m_settings.m_audioBinaural,
             m_settings.m_audioFlipChannels,
             m_settings.m_dsb,
@@ -728,10 +730,10 @@ void SSBModGUI::applySettings()
             m_settings.m_playLoop,
             m_settings.m_agc,
             m_settings.m_agcOrder,
-            m_agcTimeConstant[ui->agcTime->value()], // TBD
-            ui->agcThreshold->value(),
-            ui->agcThresholdGate->value(),
-            ui->agcThresholdDelay->value() * 10);
+            m_settings.m_agcTime,
+            m_settings.m_agcThreshold,
+            m_settings.m_agcThresholdGate,
+            m_settings.m_agcThresholdDelay);
 
 //		m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
 //			ui->BW->value() * 100.0f,

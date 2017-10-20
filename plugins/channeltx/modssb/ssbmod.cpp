@@ -620,14 +620,21 @@ bool SSBMod::handleMessage(const Message& cmd)
 		m_config.m_playLoop = cfg.getPlayLoop();
 		m_config.m_agc = cfg.getAGC();
 
-		m_config.m_agcTime = 48 * cfg.getAGCTime(); // ms
+		m_config.m_agcTime = cfg.getAGCTime(); // ms
 		m_config.m_agcOrder = cfg.getAGCOrder();
 		m_config.m_agcThresholdEnable = cfg.getAGCThreshold() != -99;
 		m_config.m_agcThreshold = CalcDb::powerFromdB(cfg.getAGCThreshold()); // power dB
-		m_config.m_agcThresholdGate = 48 * cfg.getAGCThresholdGate(); // ms
-		m_config.m_agcThresholdDelay = 48 * cfg.getAGCThresholdDelay(); // ms
+		m_config.m_agcThresholdGate = cfg.getAGCThresholdGate(); // ms
+		m_config.m_agcThresholdDelay = cfg.getAGCThresholdDelay(); // ms
 
-		apply();
+//        m_config.m_agcTime = 48 * cfg.getAGCTime(); // ms
+//        m_config.m_agcOrder = cfg.getAGCOrder();
+//        m_config.m_agcThresholdEnable = cfg.getAGCThreshold() != -99;
+//        m_config.m_agcThreshold = CalcDb::powerFromdB(cfg.getAGCThreshold()); // power dB
+//        m_config.m_agcThresholdGate = 48 * cfg.getAGCThresholdGate(); // ms
+//        m_config.m_agcThresholdDelay = 48 * cfg.getAGCThresholdDelay(); // ms
+
+        apply();
 
 		m_settingsMutex.unlock();
 
@@ -644,6 +651,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 				<< " m_playLoop: " << m_config.m_playLoop
 				<< " m_agc: " << m_config.m_agc
 				<< " m_agcTime: " << m_config.m_agcTime
+                << " m_agcOrder: " << m_config.m_agcOrder
                 << " m_agcThresholdEnable: " << m_config.m_agcThresholdEnable
                 << " m_agcThreshold: " << m_config.m_agcThreshold
                 << " m_agcThresholdGate: " << m_config.m_agcThresholdGate

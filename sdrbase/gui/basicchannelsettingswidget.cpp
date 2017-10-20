@@ -7,7 +7,8 @@
 BasicChannelSettingsWidget::BasicChannelSettingsWidget(ChannelMarker* marker, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BasicChannelSettingsWidget),
-	m_channelMarker(marker)
+	m_channelMarker(marker),
+	m_hasChanged(false)
 {
 	ui->setupUi(this);
 	ui->title->setText(m_channelMarker->getTitle());
@@ -24,6 +25,7 @@ BasicChannelSettingsWidget::~BasicChannelSettingsWidget()
 void BasicChannelSettingsWidget::on_title_textChanged(const QString& text)
 {
 	m_channelMarker->setTitle(text);
+	m_hasChanged = true;
 }
 
 void BasicChannelSettingsWidget::on_colorBtn_clicked()
@@ -33,12 +35,14 @@ void BasicChannelSettingsWidget::on_colorBtn_clicked()
 	if(c.isValid()) {
 		m_channelMarker->setColor(c);
 		paintColor();
+	    m_hasChanged = true;
 	}
 }
 
 void BasicChannelSettingsWidget::on_address_textEdited(const QString& arg1)
 {
     m_channelMarker->setUDPAddress(arg1);
+    m_hasChanged = true;
 }
 
 void BasicChannelSettingsWidget::on_port_textEdited(const QString& arg1)
@@ -52,6 +56,7 @@ void BasicChannelSettingsWidget::on_port_textEdited(const QString& arg1)
     }
 
     m_channelMarker->setUDPReceivePort(udpPort);
+    m_hasChanged = true;
 }
 
 void BasicChannelSettingsWidget::paintColor()
