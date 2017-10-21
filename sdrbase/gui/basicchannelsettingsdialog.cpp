@@ -8,7 +8,8 @@
 BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BasicChannelSettingsDialog),
-    m_channelMarker(marker)
+    m_channelMarker(marker),
+    m_hasChanged(false)
 {
     ui->setupUi(this);
     ui->title->setText(m_channelMarker->getTitle());
@@ -77,5 +78,6 @@ void BasicChannelSettingsDialog::accept()
 
     m_channelMarker->setFrequencyScaleDisplayType((ChannelMarker::frequencyScaleDisplay_t) ui->fScaleDisplayType->currentIndex());
 
+    m_hasChanged = true;
     QDialog::accept();
 }

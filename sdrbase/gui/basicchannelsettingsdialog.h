@@ -16,6 +16,7 @@ class BasicChannelSettingsDialog : public QDialog
 public:
     explicit BasicChannelSettingsDialog(ChannelMarker* marker, QWidget *parent = 0);
     ~BasicChannelSettingsDialog();
+    bool hasChanged() const { return m_hasChanged; }
 
 private slots:
     void on_colorBtn_clicked();
@@ -25,6 +26,7 @@ private:
     Ui::BasicChannelSettingsDialog *ui;
     ChannelMarker* m_channelMarker;
     QColor m_color;
+    bool m_hasChanged;
 
     void paintColor();
 };
