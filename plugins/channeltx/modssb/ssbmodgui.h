@@ -58,7 +58,7 @@ public:
 
 private slots:
     void handleSourceMessages();
-
+    void channelMarkerChanged();
     void on_deltaFrequency_changed(qint64 value);
     void on_dsb_toggled(bool checked);
     void on_audioBinaural_toggled(bool checked);

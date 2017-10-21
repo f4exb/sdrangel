@@ -114,6 +114,13 @@ bool SSBModGUI::handleMessage(const Message& message)
     }
 }
 
+void SSBModGUI::channelMarkerChanged()
+{
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    displaySettings();
+    applySettings();
+}
+
 void SSBModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -478,6 +485,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+
+    connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceAPI->registerChannelInstance(m_channelID, this);
     m_deviceAPI->addChannelMarker(&m_channelMarker);
