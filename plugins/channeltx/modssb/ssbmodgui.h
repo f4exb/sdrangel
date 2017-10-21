@@ -101,7 +101,6 @@ private:
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 	int m_rate;
-	int m_spanLog2;
 
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
@@ -118,8 +117,6 @@ private:
     SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    //static const int m_agcTimeConstant[]; //!< time constant index to value in ms
-
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SSBModGUI();
 
@@ -127,7 +124,7 @@ private:
     bool setNewRate(int spanLog2);
 
     void blockApplySettings(bool block);
-    void applySettings();
+    void applySettings(bool force = false);
     void displaySettings();
     void displayAGCPowerThreshold();
     void updateWithStreamData();

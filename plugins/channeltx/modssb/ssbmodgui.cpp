@@ -63,6 +63,7 @@ qint64 SSBModGUI::getCenterFrequency() const {
 void SSBModGUI::setCenterFrequency(qint64 centerFrequency)
 {
 	m_channelMarker.setCenterFrequency(centerFrequency);
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -81,14 +82,14 @@ bool SSBModGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(); // will have true
+        applySettings(true); // will have true
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(); // will have true
+        applySettings(true); // will have true
         return false;
     }
 }
@@ -478,7 +479,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
@@ -497,7 +497,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
     displaySettings();
-	applySettings();
+	applySettings(true);
 	setNewRate(m_settings.m_spanLog2);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -512,7 +512,6 @@ SSBModGUI::~SSBModGUI()
 	delete m_channelizer;
 	delete m_ssbMod;
 	delete m_spectrumVis;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -597,35 +596,16 @@ void SSBModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void SSBModGUI::applySettings()
+void SSBModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-
 		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
 			48000,
 			m_channelMarker.getCenterFrequency());
 
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
-        m_ssbMod->configure(m_ssbMod->getInputMessageQueue(),
-            m_settings.m_bandwidth,
-            m_settings.m_lowCutoff,
-            m_settings.m_toneFrequency,
-            m_settings.m_volumeFactor,
-            m_settings.m_spanLog2,
-            m_settings.m_audioBinaural,
-            m_settings.m_audioFlipChannels,
-            m_settings.m_dsb,
-            m_settings.m_audioMute,
-            m_settings.m_playLoop,
-            m_settings.m_agc,
-            m_settings.m_agcOrder,
-            m_settings.m_agcTime,
-            m_settings.m_agcThreshold,
-            m_settings.m_agcThresholdGate,
-            m_settings.m_agcThresholdDelay);
+		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(m_settings, force);
+		m_ssbMod->getInputMessageQueue()->push(msg);
 	}
 }
 
