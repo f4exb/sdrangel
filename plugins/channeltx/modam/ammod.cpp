@@ -68,7 +68,6 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
-	m_cwSmoother.setNbFadeSamples(192); // 4 ms @ 48 kHz
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
@@ -200,12 +199,12 @@ void AMMod::pullAF(Real& sample)
 
         if (m_cwKeyer.getSample())
         {
-            m_cwSmoother.getFadeSample(true, fadeFactor);
+            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
             sample = m_toneNco.next() * fadeFactor;
         }
         else
         {
-            if (m_cwSmoother.getFadeSample(false, fadeFactor))
+            if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
             {
                 sample = m_toneNco.next() * fadeFactor;
             }
@@ -427,7 +426,6 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
     if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
     {
         m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
-        m_cwSmoother.setNbFadeSamples(settings.m_audioSampleRate / 250); // 4 ms
     }
 
     m_settings = settings;

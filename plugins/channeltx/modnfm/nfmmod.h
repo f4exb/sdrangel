@@ -295,7 +295,6 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
-    CWSmoother m_cwSmoother;
     static const int m_levelNbSamples;
 
     //void apply();

@@ -81,7 +81,6 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 
     // CW keyer
     m_cwKeyer.setSampleRate(m_settings.m_outputSampleRate);
-    m_cwSmoother.setNbFadeSamples(m_settings.m_outputSampleRate / 250); // 4 ms
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
     m_cwKeyer.reset();
@@ -223,13 +222,13 @@ void WFMMod::pullAF(Complex& sample)
 
         if (m_cwKeyer.getSample())
         {
-            m_cwSmoother.getFadeSample(true, fadeFactor);
+            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
             sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor * fadeFactor);
             sample.imag(0.0f);
         }
         else
         {
-            if (m_cwSmoother.getFadeSample(false, fadeFactor))
+            if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
             {
                 sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor * fadeFactor);
                 sample.imag(0.0f);
@@ -470,7 +469,6 @@ void WFMMod::applySettings(const WFMModSettings& settings, bool force)
     if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
     {
         m_cwKeyer.setSampleRate(settings.m_outputSampleRate);
-        m_cwSmoother.setNbFadeSamples(settings.m_outputSampleRate / 250); // 4 ms
         m_cwKeyer.reset();
     }
 
