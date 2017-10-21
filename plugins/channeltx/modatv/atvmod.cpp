@@ -23,6 +23,8 @@
 #include "atvmod.h"
 
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVMod, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVModPrivate, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureImageFileName, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileName, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceSeek, Message)
@@ -117,7 +119,7 @@ void ATVMod::configure(MessageQueue* messageQueue,
             float fmExcursion,
             bool forceDecimator)
 {
-    Message* cmd = MsgConfigureATVMod::create(
+    Message* cmd = MsgConfigureATVModPrivate::create(
             rfBandwidth,
             rfOppBandwidth,
             atvStd,
@@ -539,9 +541,9 @@ bool ATVMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureATVMod::match(cmd))
+    else if (MsgConfigureATVModPrivate::match(cmd))
     {
-        MsgConfigureATVMod& cfg = (MsgConfigureATVMod&) cmd;
+        MsgConfigureATVModPrivate& cfg = (MsgConfigureATVModPrivate&) cmd;
 
         m_config.m_rfBandwidth = cfg.getRFBandwidth();
         m_config.m_rfOppBandwidth = cfg.getRFOppBandwidth();
@@ -694,101 +696,6 @@ bool ATVMod::handleMessage(const Message& cmd)
     {
         return false;
     }
-}
-
-void ATVMod::apply(bool force)
-{
-    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
-        || (m_config.m_atvStd != m_running.m_atvStd)
-        || (m_config.m_nbLines != m_running.m_nbLines)
-        || (m_config.m_fps != m_running.m_fps)
-        || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
-        || (m_config.m_atvModulation != m_running.m_atvModulation) || force)
-    {
-        getBaseValues(m_config.m_outputSampleRate, m_config.m_nbLines * m_config.m_fps, m_tvSampleRate, m_pointsPerLine);
-
-//        qDebug() << "ATVMod::apply: "
-//                << " m_nbLines: " << m_config.m_nbLines
-//                << " m_fps: " << m_config.m_fps
-//                << " rateUnits: " << rateUnits
-//                << " nbPointsPerRateUnit: " << nbPointsPerRateUnit
-//                << " m_outputSampleRate: " << m_config.m_outputSampleRate
-//                << " m_tvSampleRate: " << m_tvSampleRate
-//                << " m_pointsPerTU: " << m_pointsPerTU;
-
-        m_settingsMutex.lock();
-
-        if (m_tvSampleRate > 0)
-        {
-            m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_config.m_outputSampleRate;
-            m_interpolator.create(32,
-                    m_tvSampleRate,
-                    m_config.m_rfBandwidth / getRFBandwidthDivisor(m_config.m_atvModulation),
-                    3.0);
-        }
-        else
-        {
-            m_tvSampleRate = m_config.m_outputSampleRate;
-        }
-
-        m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_tvSampleRate);
-        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
-        m_SSBFilterBufferIndex = 0;
-
-        applyStandard(); // set all timings
-        m_settingsMutex.unlock();
-
-        if (getMessageQueueToGUI())
-        {
-            MsgReportEffectiveSampleRate *report;
-            report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
-            getMessageQueueToGUI()->push(report);
-        }
-    }
-
-    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
-        || (m_config.m_rfOppBandwidth != m_running.m_rfOppBandwidth)
-        || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
-        || (m_config.m_nbLines != m_running.m_nbLines) // difference in line period may have changed TV sample rate
-        || (m_config.m_fps != m_running.m_fps)         //
-        || force)
-    {
-        m_settingsMutex.lock();
-
-        m_DSBFilter->create_asym_filter(m_config.m_rfOppBandwidth / m_tvSampleRate, m_config.m_rfBandwidth / m_tvSampleRate);
-        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
-        m_DSBFilterBufferIndex = 0;
-
-        m_settingsMutex.unlock();
-    }
-
-    if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
-        (m_config.m_outputSampleRate != m_running.m_outputSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
-        m_settingsMutex.unlock();
-    }
-
-    m_running.m_outputSampleRate = m_config.m_outputSampleRate;
-    m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
-    m_running.m_rfBandwidth = m_config.m_rfBandwidth;
-    m_running.m_rfOppBandwidth = m_config.m_rfOppBandwidth;
-    m_running.m_atvModInput = m_config.m_atvModInput;
-    m_running.m_atvStd = m_config.m_atvStd;
-    m_running.m_nbLines = m_config.m_nbLines;
-    m_running.m_fps = m_config.m_fps;
-    m_running.m_uniformLevel = m_config.m_uniformLevel;
-    m_running.m_atvModulation = m_config.m_atvModulation;
-    m_running.m_videoPlayLoop = m_config.m_videoPlayLoop;
-    m_running.m_videoPlay = m_config.m_videoPlay;
-    m_running.m_cameraPlay = m_config.m_cameraPlay;
-    m_running.m_channelMute = m_config.m_channelMute;
-    m_running.m_invertedVideo = m_config.m_invertedVideo;
-    m_running.m_rfScalingFactor = m_config.m_rfScalingFactor;
-    m_running.m_fmExcursion = m_config.m_fmExcursion;
-    m_running.m_forceDecimator = m_config.m_forceDecimator;
 }
 
 void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit)
@@ -1172,3 +1079,166 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_running.m_uniformLevel), thickness, CV_AA);
 }
 
+void ATVMod::apply(bool force)
+{
+    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
+        || (m_config.m_atvStd != m_running.m_atvStd)
+        || (m_config.m_nbLines != m_running.m_nbLines)
+        || (m_config.m_fps != m_running.m_fps)
+        || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
+        || (m_config.m_atvModulation != m_running.m_atvModulation) || force)
+    {
+        getBaseValues(m_config.m_outputSampleRate, m_config.m_nbLines * m_config.m_fps, m_tvSampleRate, m_pointsPerLine);
+
+//        qDebug() << "ATVMod::apply: "
+//                << " m_nbLines: " << m_config.m_nbLines
+//                << " m_fps: " << m_config.m_fps
+//                << " rateUnits: " << rateUnits
+//                << " nbPointsPerRateUnit: " << nbPointsPerRateUnit
+//                << " m_outputSampleRate: " << m_config.m_outputSampleRate
+//                << " m_tvSampleRate: " << m_tvSampleRate
+//                << " m_pointsPerTU: " << m_pointsPerTU;
+
+        m_settingsMutex.lock();
+
+        if (m_tvSampleRate > 0)
+        {
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_config.m_outputSampleRate;
+            m_interpolator.create(32,
+                    m_tvSampleRate,
+                    m_config.m_rfBandwidth / getRFBandwidthDivisor(m_config.m_atvModulation),
+                    3.0);
+        }
+        else
+        {
+            m_tvSampleRate = m_config.m_outputSampleRate;
+        }
+
+        m_SSBFilter->create_filter(0, m_config.m_rfBandwidth / m_tvSampleRate);
+        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilterBufferIndex = 0;
+
+        applyStandard(); // set all timings
+        m_settingsMutex.unlock();
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportEffectiveSampleRate *report;
+            report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
+
+    if ((m_config.m_outputSampleRate != m_running.m_outputSampleRate)
+        || (m_config.m_rfOppBandwidth != m_running.m_rfOppBandwidth)
+        || (m_config.m_rfBandwidth != m_running.m_rfBandwidth)
+        || (m_config.m_nbLines != m_running.m_nbLines) // difference in line period may have changed TV sample rate
+        || (m_config.m_fps != m_running.m_fps)         //
+        || force)
+    {
+        m_settingsMutex.lock();
+
+        m_DSBFilter->create_asym_filter(m_config.m_rfOppBandwidth / m_tvSampleRate, m_config.m_rfBandwidth / m_tvSampleRate);
+        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+        m_DSBFilterBufferIndex = 0;
+
+        m_settingsMutex.unlock();
+    }
+
+    if ((m_config.m_inputFrequencyOffset != m_running.m_inputFrequencyOffset) ||
+        (m_config.m_outputSampleRate != m_running.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(m_config.m_inputFrequencyOffset, m_config.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    m_running.m_outputSampleRate = m_config.m_outputSampleRate;
+    m_running.m_inputFrequencyOffset = m_config.m_inputFrequencyOffset;
+    m_running.m_rfBandwidth = m_config.m_rfBandwidth;
+    m_running.m_rfOppBandwidth = m_config.m_rfOppBandwidth;
+    m_running.m_atvModInput = m_config.m_atvModInput;
+    m_running.m_atvStd = m_config.m_atvStd;
+    m_running.m_nbLines = m_config.m_nbLines;
+    m_running.m_fps = m_config.m_fps;
+    m_running.m_uniformLevel = m_config.m_uniformLevel;
+    m_running.m_atvModulation = m_config.m_atvModulation;
+    m_running.m_videoPlayLoop = m_config.m_videoPlayLoop;
+    m_running.m_videoPlay = m_config.m_videoPlay;
+    m_running.m_cameraPlay = m_config.m_cameraPlay;
+    m_running.m_channelMute = m_config.m_channelMute;
+    m_running.m_invertedVideo = m_config.m_invertedVideo;
+    m_running.m_rfScalingFactor = m_config.m_rfScalingFactor;
+    m_running.m_fmExcursion = m_config.m_fmExcursion;
+    m_running.m_forceDecimator = m_config.m_forceDecimator;
+}
+
+void ATVMod::applySettings(const ATVModSettings& settings, bool force)
+{
+    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate)
+        || (settings.m_atvStd != m_settings.m_atvStd)
+        || (settings.m_nbLines != m_settings.m_nbLines)
+        || (settings.m_fps != m_settings.m_fps)
+        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+        || (settings.m_atvModulation != m_settings.m_atvModulation) || force)
+    {
+        getBaseValues(settings.m_outputSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_pointsPerLine);
+
+        m_settingsMutex.lock();
+
+        if (m_tvSampleRate > 0)
+        {
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) settings.m_outputSampleRate;
+            m_interpolator.create(32,
+                    m_tvSampleRate,
+                    settings.m_rfBandwidth / getRFBandwidthDivisor(settings.m_atvModulation),
+                    3.0);
+        }
+        else
+        {
+            m_tvSampleRate = settings.m_outputSampleRate;
+        }
+
+        m_SSBFilter->create_filter(0, settings.m_rfBandwidth / m_tvSampleRate);
+        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilterBufferIndex = 0;
+
+        applyStandard(); // set all timings
+        m_settingsMutex.unlock();
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportEffectiveSampleRate *report;
+            report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
+
+    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate)
+        || (settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth)
+        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+        || (settings.m_nbLines != m_settings.m_nbLines) // difference in line period may have changed TV sample rate
+        || (settings.m_fps != m_settings.m_fps)         //
+        || force)
+    {
+        m_settingsMutex.lock();
+
+        m_DSBFilter->create_asym_filter(settings.m_rfOppBandwidth / m_tvSampleRate, settings.m_rfBandwidth / m_tvSampleRate);
+        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+        m_DSBFilterBufferIndex = 0;
+
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    m_settings = settings;
+}

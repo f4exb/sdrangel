@@ -40,6 +40,52 @@ class ATVMod : public BasebandSampleSource {
     Q_OBJECT
 
 public:
+    class MsgConfigureATVMod : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const ATVModSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureATVMod* create(const ATVModSettings& settings, bool force)
+        {
+            return new MsgConfigureATVMod(settings, force);
+        }
+
+    private:
+        ATVModSettings m_settings;
+        bool m_force;
+
+        MsgConfigureATVMod(const ATVModSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        int m_sampleRate;
+        int  m_centerFrequency;
+
+        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
     class MsgConfigureImageFileName : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -388,7 +434,7 @@ signals:
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
 private:
-    class MsgConfigureATVMod : public Message
+    class MsgConfigureATVModPrivate : public Message
     {
         MESSAGE_CLASS_DECLARATION
 
@@ -410,7 +456,7 @@ private:
         float getFMExcursion() const { return m_fmExcursion; }
         bool getForceDecimator() const { return m_forceDecimator; }
 
-        static MsgConfigureATVMod* create(
+        static MsgConfigureATVModPrivate* create(
             Real rfBandwidth,
             Real rfOppBandwidth,
             ATVModSettings::ATVStd atvStd,
@@ -428,7 +474,7 @@ private:
 			float fmExcursion,
 			bool forceDecimator)
         {
-            return new MsgConfigureATVMod(
+            return new MsgConfigureATVModPrivate(
                     rfBandwidth,
                     rfOppBandwidth,
                     atvStd,
@@ -465,7 +511,7 @@ private:
         float         m_fmExcursion;
         bool          m_forceDecimator;
 
-        MsgConfigureATVMod(
+        MsgConfigureATVModPrivate(
                 Real rfBandwidth,
                 Real rfOppBandwidth,
                 ATVModSettings::ATVStd atvStd,
@@ -581,6 +627,7 @@ private:
 
     Config m_config;
     Config m_running;
+    ATVModSettings m_settings;
 
     NCO m_carrierNco;
     Complex m_modSample;
@@ -671,6 +718,7 @@ private:
     static const int m_cameraFPSTestNbFrames; //!< number of frames for camera FPS test
 
     void apply(bool force = false);
+    void applySettings(const ATVModSettings& settings, bool force = false);
     void pullFinalize(Complex& ci, Sample& sample);
     void pullVideo(Real& sample);
     void calculateLevel(Real& sample);
