@@ -324,6 +324,19 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "BFMDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureBFMDemod::match(cmd))
     {
         MsgConfigureBFMDemod& cfg = (MsgConfigureBFMDemod&) cmd;
@@ -353,7 +366,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
     }
 	else
 	{
-		qDebug() << "BFMDemod::handleMessage: none";
+		qDebug() << "BFMDemod::handleMessage: passed: " << cmd.getIdentifier();
 
 		if (m_sampleSink != 0)
 		{

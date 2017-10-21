@@ -138,14 +138,12 @@ void BFMDemodGUI::handleInputMessages()
     }
 }
 
-void BFMDemodGUI::channelMarkerChanged()
+void BFMDemodGUI::channelMarkerUpdate()
 {
-    setWindowTitle(m_channelMarker.getTitle());
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-    displayUDPAddress();
+    displaySettings();
     applySettings();
 }
 
@@ -310,6 +308,11 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
     dialog.move(p);
     dialog.exec();
+
+    if (dialog.hasChanged())
+    {
+        channelMarkerUpdate();
+    }
 }
 
 BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
@@ -398,14 +401,10 @@ void BFMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    setTitleColor(m_channelMarker.getColor());
-
 	    BFMDemod::MsgConfigureChannelizer *msgChan = BFMDemod::MsgConfigureChannelizer::create(
-	            requiredBW(BFMDemodSettings::getRFBW(ui->rfBW->value())),
-	            m_channelMarker.getCenterFrequency());
+	            requiredBW(m_settings.m_rfBandwidth),
+	            m_settings.m_inputFrequencyOffset);
 	    m_bfmDemod->getInputMessageQueue()->push(msgChan);
-
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
         BFMDemod::MsgConfigureBFMDemod* msgConfig = BFMDemod::MsgConfigureBFMDemod::create( m_settings, force);
         m_bfmDemod->getInputMessageQueue()->push(msgConfig);

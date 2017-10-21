@@ -59,7 +59,6 @@ public:
 	static const QString m_channelID;
 
 private slots:
-	void channelMarkerChanged();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
@@ -106,6 +105,7 @@ private:
 	void displayUDPAddress();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
+	void channelMarkerUpdate();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
