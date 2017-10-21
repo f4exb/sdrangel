@@ -34,43 +34,12 @@
 #include "dsp/fftfilt.h"
 #include "util/message.h"
 
+#include "atvmodsettings.h"
+
 class ATVMod : public BasebandSampleSource {
     Q_OBJECT
 
 public:
-    typedef enum
-    {
-        ATVStdPAL625,
-		ATVStdPAL525,
-		ATVStd405,
-		ATVStdShortInterleaved,
-		ATVStdShort,
-		ATVStdHSkip,
-    } ATVStd;
-
-    typedef enum
-    {
-        ATVModInputUniform,
-        ATVModInputHBars,
-        ATVModInputVBars,
-        ATVModInputChessboard,
-        ATVModInputHGradient,
-        ATVModInputVGradient,
-        ATVModInputImage,
-        ATVModInputVideo,
-		ATVModInputCamera
-    } ATVModInput;
-
-    typedef enum
-    {
-    	ATVModulationAM,
-		ATVModulationFM,
-		ATVModulationUSB,
-		ATVModulationLSB,
-        ATVModulationVestigialUSB,
-        ATVModulationVestigialLSB
-    } ATVModulation;
-
     class MsgConfigureImageFileName : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -381,12 +350,12 @@ public:
     void configure(MessageQueue* messageQueue,
             Real rfBandwidth,
             Real rfOppBandwidth,
-            ATVStd atvStd,
+            ATVModSettings::ATVStd atvStd,
             int nbLines,
             int fps,
-            ATVModInput atvModInput,
+            ATVModSettings::ATVModInput atvModInput,
             Real uniformLevel,
-			ATVModulation atvModulation,
+            ATVModSettings::ATVModulation atvModulation,
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPLay,
@@ -407,7 +376,7 @@ public:
     void getCameraNumbers(std::vector<int>& numbers);
 
     static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit);
-    static float getRFBandwidthDivisor(ATVModulation modulation);
+    static float getRFBandwidthDivisor(ATVModSettings::ATVModulation modulation);
 
 signals:
     /**
@@ -426,12 +395,12 @@ private:
     public:
         Real getRFBandwidth() const { return m_rfBandwidth; }
         Real getRFOppBandwidth() const { return m_rfOppBandwidth; }
-        ATVStd getATVStd() const { return m_atvStd; }
-        ATVModInput getATVModInput() const { return m_atvModInput; }
+        ATVModSettings::ATVStd getATVStd() const { return m_atvStd; }
+        ATVModSettings::ATVModInput getATVModInput() const { return m_atvModInput; }
         int getNbLines() const { return m_nbLines; }
         int getFPS() const { return m_fps; }
         Real getUniformLevel() const { return m_uniformLevel; }
-        ATVModulation getModulation() const { return m_atvModulation; }
+        ATVModSettings::ATVModulation getModulation() const { return m_atvModulation; }
         bool getVideoPlayLoop() const { return m_videoPlayLoop; }
         bool getVideoPlay() const { return m_videoPlay; }
         bool getCameraPlay() const { return m_cameraPlay; }
@@ -444,12 +413,12 @@ private:
         static MsgConfigureATVMod* create(
             Real rfBandwidth,
             Real rfOppBandwidth,
-            ATVStd atvStd,
+            ATVModSettings::ATVStd atvStd,
             int nbLines,
             int fps,
-            ATVModInput atvModInput,
+            ATVModSettings::ATVModInput atvModInput,
             Real uniformLevel,
-			ATVModulation atvModulation,
+            ATVModSettings::ATVModulation atvModulation,
 			bool videoPlayLoop,
 			bool videoPlay,
 			bool cameraPlay,
@@ -481,12 +450,12 @@ private:
     private:
         Real          m_rfBandwidth;
         Real          m_rfOppBandwidth;
-        ATVStd        m_atvStd;
+        ATVModSettings::ATVStd        m_atvStd;
         int           m_nbLines;
         int           m_fps;
-        ATVModInput   m_atvModInput;
+        ATVModSettings::ATVModInput   m_atvModInput;
         Real          m_uniformLevel;
-        ATVModulation m_atvModulation;
+        ATVModSettings::ATVModulation m_atvModulation;
         bool          m_videoPlayLoop;
         bool          m_videoPlay;
         bool          m_cameraPlay;
@@ -499,12 +468,12 @@ private:
         MsgConfigureATVMod(
                 Real rfBandwidth,
                 Real rfOppBandwidth,
-                ATVStd atvStd,
+                ATVModSettings::ATVStd atvStd,
                 int nbLines,
                 int fps,
-                ATVModInput atvModInput,
+                ATVModSettings::ATVModInput atvModInput,
                 Real uniformLevel,
-				ATVModulation atvModulation,
+                ATVModSettings::ATVModulation atvModulation,
 				bool videoPlayLoop,
 				bool videoPlay,
 				bool cameraPlay,
@@ -573,12 +542,12 @@ private:
         qint64        m_inputFrequencyOffset; //!< offset from baseband center frequency
         Real          m_rfBandwidth;          //!< Bandwidth of modulated signal or direct sideband for SSB / vestigial SSB
         Real          m_rfOppBandwidth;       //!< Bandwidth of opposite sideband for vestigial SSB
-        ATVStd        m_atvStd;               //!< Standard
+        ATVModSettings::ATVStd        m_atvStd;               //!< Standard
         int           m_nbLines;              //!< Number of lines per full frame
         int           m_fps;                  //!< Number of frames per second
-        ATVModInput   m_atvModInput;          //!< Input source type
+        ATVModSettings::ATVModInput   m_atvModInput;          //!< Input source type
         Real          m_uniformLevel;         //!< Percentage between black and white for uniform screen display
-        ATVModulation m_atvModulation;        //!< RF modulation type
+        ATVModSettings::ATVModulation m_atvModulation;        //!< RF modulation type
         bool          m_videoPlayLoop;        //!< Play video in a loop
         bool          m_videoPlay;            //!< True to play video and false to pause
         bool          m_cameraPlay;           //!< True to play camera video and false to pause
@@ -593,12 +562,12 @@ private:
             m_inputFrequencyOffset(0),
             m_rfBandwidth(0),
             m_rfOppBandwidth(0),
-            m_atvStd(ATVStdPAL625),
+            m_atvStd(ATVModSettings::ATVStdPAL625),
             m_nbLines(625),
             m_fps(25),
-            m_atvModInput(ATVModInputHBars),
+            m_atvModInput(ATVModSettings::ATVModInputHBars),
             m_uniformLevel(0.5f),
-			m_atvModulation(ATVModulationAM),
+			m_atvModulation(ATVModSettings::ATVModulationAM),
 			m_videoPlayLoop(false),
 			m_videoPlay(false),
 			m_cameraPlay(false),
@@ -741,22 +710,22 @@ private:
 
             switch(m_running.m_atvModInput)
             {
-            case ATVModInputHBars:
+            case ATVModSettings::ATVModInputHBars:
                 sample = (pointIndex / m_pointsPerHBar) * m_hBarIncrement + m_blackLevel;
                 break;
-            case ATVModInputVBars:
+            case ATVModSettings::ATVModInputVBars:
                 sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
                 break;
-            case ATVModInputChessboard:
+            case ATVModSettings::ATVModInputChessboard:
                 sample = (((iLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
                 break;
-            case ATVModInputHGradient:
+            case ATVModSettings::ATVModInputHGradient:
                 sample = (pointIndex / (float) m_pointsPerImgLine) * m_spanLevel + m_blackLevel;
                 break;
-            case ATVModInputVGradient:
+            case ATVModSettings::ATVModInputVGradient:
                 sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
                 break;
-            case ATVModInputImage:
+            case ATVModSettings::ATVModInputImage:
                 if (!m_imageOK || (iLineImage < -oddity) || m_image.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
@@ -774,7 +743,7 @@ private:
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
                 break;
-            case ATVModInputVideo:
+            case ATVModSettings::ATVModInputVideo:
                 if (!m_videoOK || (iLineImage < -oddity) || m_videoFrame.empty())
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
@@ -792,7 +761,7 @@ private:
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
             	break;
-            case ATVModInputCamera:
+            case ATVModSettings::ATVModInputCamera:
                 if ((iLineImage < -oddity) || (m_cameraIndex < 0))
                 {
                     sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
@@ -819,7 +788,7 @@ private:
                     }
                 }
                 break;
-            case ATVModInputUniform:
+            case ATVModSettings::ATVModInputUniform:
             default:
                 sample = m_spanLevel * m_running.m_uniformLevel + m_blackLevel;
             }

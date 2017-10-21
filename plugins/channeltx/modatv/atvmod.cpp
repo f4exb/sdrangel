@@ -72,8 +72,8 @@ ATVMod::ATVMod() :
     m_config.m_outputSampleRate = 1000000;
     m_config.m_inputFrequencyOffset = 0;
     m_config.m_rfBandwidth = 1000000;
-    m_config.m_atvModInput = ATVModInputHBars;
-    m_config.m_atvStd = ATVStdPAL625;
+    m_config.m_atvModInput = ATVModSettings::ATVModInputHBars;
+    m_config.m_atvStd = ATVModSettings::ATVStdPAL625;
     m_config.m_nbLines = 625;
     m_config.m_fps = 25;
 
@@ -102,12 +102,12 @@ ATVMod::~ATVMod()
 void ATVMod::configure(MessageQueue* messageQueue,
             Real rfBandwidth,
             Real rfOppBandwidth,
-            ATVStd atvStd,
+            ATVModSettings::ATVStd atvStd,
             int nbLines,
             int fps,
-            ATVModInput atvModInput,
+            ATVModSettings::ATVModInput atvModInput,
             Real uniformLevel,
-			ATVModulation atvModulation,
+            ATVModSettings::ATVModulation atvModulation,
             bool videoPlayLoop,
             bool videoPlay,
             bool cameraPlay,
@@ -208,24 +208,24 @@ void ATVMod::modulateSample()
 
     switch (m_running.m_atvModulation)
     {
-    case ATVModulationFM: // FM half bandwidth deviation
+    case ATVModSettings::ATVModulationFM: // FM half bandwidth deviation
     	m_modPhasor += (t - 0.5f) * m_running.m_fmExcursion * 2.0f * M_PI;
     	if (m_modPhasor > 2.0f * M_PI) m_modPhasor -= 2.0f * M_PI; // limit growth
     	if (m_modPhasor < 2.0f * M_PI) m_modPhasor += 2.0f * M_PI; // limit growth
     	m_modSample.real(cos(m_modPhasor) * m_running.m_rfScalingFactor); // -1 dB
     	m_modSample.imag(sin(m_modPhasor) * m_running.m_rfScalingFactor);
     	break;
-    case ATVModulationLSB:
-    case ATVModulationUSB:
+    case ATVModSettings::ATVModulationLSB:
+    case ATVModSettings::ATVModulationUSB:
         m_modSample = modulateSSB(t);
         m_modSample *= m_running.m_rfScalingFactor;
         break;
-    case ATVModulationVestigialLSB:
-    case ATVModulationVestigialUSB:
+    case ATVModSettings::ATVModulationVestigialLSB:
+    case ATVModSettings::ATVModulationVestigialUSB:
         m_modSample = modulateVestigialSSB(t);
         m_modSample *= m_running.m_rfScalingFactor;
         break;
-    case ATVModulationAM: // AM 90%
+    case ATVModSettings::ATVModulationAM: // AM 90%
     default:
         m_modSample.real((t*1.8f + 0.1f) * (m_running.m_rfScalingFactor/2.0f)); // modulate and scale zero frequency carrier
         m_modSample.imag(0.0f);
@@ -238,7 +238,7 @@ Complex& ATVMod::modulateSSB(Real& sample)
     Complex ci(sample, 0.0f);
     fftfilt::cmplx *filtered;
 
-    n_out = m_SSBFilter->runSSB(ci, &filtered, m_running.m_atvModulation == ATVModulationUSB);
+    n_out = m_SSBFilter->runSSB(ci, &filtered, m_running.m_atvModulation == ATVModSettings::ATVModulationUSB);
 
     if (n_out > 0)
     {
@@ -257,7 +257,7 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
     Complex ci(sample, 0.0f);
     fftfilt::cmplx *filtered;
 
-    n_out = m_DSBFilter->runAsym(ci, &filtered, m_running.m_atvModulation == ATVModulationVestigialUSB);
+    n_out = m_DSBFilter->runAsym(ci, &filtered, m_running.m_atvModulation == ATVModSettings::ATVModulationVestigialUSB);
 
     if (n_out > 0)
     {
@@ -272,7 +272,7 @@ Complex& ATVMod::modulateVestigialSSB(Real& sample)
 
 void ATVMod::pullVideo(Real& sample)
 {
-    if ((m_running.m_atvStd == ATVStdHSkip) && (m_lineCount == m_nbLines2)) // last line in skip mode
+    if ((m_running.m_atvStd == ATVModSettings::ATVStdHSkip) && (m_lineCount == m_nbLines2)) // last line in skip mode
     {
         pullImageLine(sample, true); // pull image line without sync
     }
@@ -327,7 +327,7 @@ void ATVMod::pullVideo(Real& sample)
             m_lineCount = 0;
             m_evenImage = !m_evenImage;
 
-            if ((m_running.m_atvModInput == ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay) && !m_videoEOF)
+            if ((m_running.m_atvModInput == ATVModSettings::ATVModInputVideo) && m_videoOK && (m_running.m_videoPlay) && !m_videoEOF)
             {
             	int grabOK = 0;
             	int fpsIncrement = (int) m_videoFPSCount - m_videoPrevFPSCount;
@@ -376,7 +376,7 @@ void ATVMod::pullVideo(Real& sample)
             		m_videoFPSCount = m_videoFPSq;
             	}
             }
-            else if ((m_running.m_atvModInput == ATVModInputCamera) && (m_running.m_cameraPlay))
+            else if ((m_running.m_atvModInput == ATVModSettings::ATVModInputCamera) && (m_running.m_cameraPlay))
             {
                 ATVCamera& camera = m_cameras[m_cameraIndex]; // currently selected canera
 
@@ -806,18 +806,18 @@ void ATVMod::getBaseValues(int outputSampleRate, int linesPerSecond, int& sample
     sampleRateUnits = nbPointsPerRateUnit * linesPerSecond;
 }
 
-float ATVMod::getRFBandwidthDivisor(ATVModulation modulation)
+float ATVMod::getRFBandwidthDivisor(ATVModSettings::ATVModulation modulation)
 {
     switch(modulation)
     {
-    case ATVModulationLSB:
-    case ATVModulationUSB:
-    case ATVModulationVestigialLSB:
-    case ATVModulationVestigialUSB:
+    case ATVModSettings::ATVModulationLSB:
+    case ATVModSettings::ATVModulationUSB:
+    case ATVModSettings::ATVModulationVestigialLSB:
+    case ATVModSettings::ATVModulationVestigialUSB:
         return 1.05f;
         break;
-    case ATVModulationAM:
-    case ATVModulationFM:
+    case ATVModSettings::ATVModulationAM:
+    case ATVModSettings::ATVModulationFM:
     default:
         return 2.2f;
     }
@@ -851,7 +851,7 @@ void ATVMod::applyStandard()
 
     switch(m_config.m_atvStd)
     {
-    case ATVStdHSkip:
+    case ATVModSettings::ATVStdHSkip:
         m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
         m_interleaved       = false;
@@ -866,7 +866,7 @@ void ATVMod::applyStandard()
         m_blankLineLvel    = 0.7f;
         m_nbLines2         = m_nbLines - 1;
         break;
-    case ATVStdShort:
+    case ATVModSettings::ATVStdShort:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
         m_interleaved       = false;
@@ -881,7 +881,7 @@ void ATVMod::applyStandard()
         m_blankLineLvel    = 0.7f;
         m_nbLines2         = m_nbLines; // force non interleaved => treated as even for all lines
         break;
-    case ATVStdShortInterleaved:
+    case ATVModSettings::ATVStdShortInterleaved:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -895,7 +895,7 @@ void ATVMod::applyStandard()
         m_nbBlankLines     = 1;
         m_blankLineLvel    = 0.7f;
         break;
-    case ATVStd405: // Follows loosely the 405 lines standard
+    case ATVModSettings::ATVStd405: // Follows loosely the 405 lines standard
         m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -909,7 +909,7 @@ void ATVMod::applyStandard()
         m_nbBlankLines     = 7; // yields 376 lines (195 - 7) * 2
         m_blankLineLvel    = m_blackLevel;
         break;
-    case ATVStdPAL525: // Follows PAL-M standard
+    case ATVModSettings::ATVStdPAL525: // Follows PAL-M standard
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interleaved       = true;
@@ -923,7 +923,7 @@ void ATVMod::applyStandard()
         m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
         m_blankLineLvel    = m_blackLevel;
         break;
-    case ATVStdPAL625: // Follows PAL-B/G/H standard
+    case ATVModSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;

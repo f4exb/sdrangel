@@ -24,6 +24,7 @@
 #include "util/messagequeue.h"
 
 #include "atvmod.h"
+#include "atvmodsettings.h"
 
 class PluginAPI;
 class DeviceSinkAPI;
@@ -73,7 +74,7 @@ private slots:
     void on_nbLines_currentIndexChanged(int index);
     void on_fps_currentIndexChanged(int index);
     void on_standard_currentIndexChanged(int index);
-    void on_invertVideo_clicked();
+    void on_invertVideo_clicked(bool checked);
     void on_uniformLevel_valueChanged(int value);
     void on_inputSelect_currentIndexChanged(int index);
     void on_imageFileDialog_clicked(bool checked);
@@ -103,6 +104,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceSinkAPI* m_deviceAPI;
     ChannelMarker m_channelMarker;
+    ATVModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
@@ -127,12 +129,15 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings();
+    void displaySettings();
     void updateWithStreamData();
     void updateWithStreamTime();
     void setRFFiltersSlidersRange(int sampleRate);
     void setChannelMarkerBandwidth();
     int getNbLines();
     int getFPS();
+    int getNbLinesIndex(int nbLines);
+    int getFPSIndex(int fps);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

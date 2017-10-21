@@ -445,6 +445,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>RF volume</string>
+        </property>
         <property name="maximum">
          <number>100</number>
         </property>
