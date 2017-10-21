@@ -83,14 +83,14 @@ bool ATVModGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(); // will have true
+        applySettings(true); // will have true
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(); // will have true
+        applySettings(true); // will have true
         return false;
     }
 }
@@ -629,7 +629,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::white);
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
@@ -655,6 +654,9 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
     QChar delta = QChar(0x94, 0x03);
     ui->fmExcursionLabel->setText(delta);
+
+    displaySettings();
+    applySettings(true);
 }
 
 ATVModGUI::~ATVModGUI()
@@ -664,7 +666,6 @@ ATVModGUI::~ATVModGUI()
 	delete m_threadedChannelizer;
 	delete m_channelizer;
 	delete m_atvMod;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -673,7 +674,7 @@ void ATVModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void ATVModGUI::applySettings()
+void ATVModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -681,23 +682,8 @@ void ATVModGUI::applySettings()
 		    m_channelizer->getOutputSampleRate(),
 			m_channelMarker.getCenterFrequency());
 
-        m_atvMod->configure(m_atvMod->getInputMessageQueue(),
-            m_settings.m_rfBandwidth,
-            m_settings.m_rfOppBandwidth,
-            m_settings.m_atvStd,
-            m_settings.m_nbLines,
-            m_settings.m_fps,
-            m_settings.m_atvModInput,
-            m_settings.m_uniformLevel,
-            m_settings.m_atvModulation,
-            m_settings.m_videoPlayLoop,
-            m_settings.m_videoPlay,
-            m_settings.m_cameraPlay,
-            m_settings.m_channelMute,
-            m_settings.m_invertedVideo,
-            m_settings.m_rfScalingFactor,
-            m_settings.m_fmExcursion, // percentage of full bandwidth. Value in pro milli
-            m_settings.m_forceDecimator);
+		ATVMod::MsgConfigureATVMod *msg = ATVMod::MsgConfigureATVMod::create(m_settings, force);
+		m_atvMod->getInputMessageQueue()->push(msg);
 	}
 }
 

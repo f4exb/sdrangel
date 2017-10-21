@@ -128,7 +128,7 @@ private:
     virtual ~ATVModGUI();
 
     void blockApplySettings(bool block);
-    void applySettings();
+    void applySettings(bool force = false);
     void displaySettings();
     void updateWithStreamData();
     void updateWithStreamTime();
