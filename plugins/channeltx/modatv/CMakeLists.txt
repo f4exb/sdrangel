@@ -4,12 +4,14 @@ set(modatv_SOURCES
 	atvmod.cpp
 	atvmodgui.cpp
 	atvmodplugin.cpp
+	atvmodsettings.cpp
 )
 
 set(modatv_HEADERS
 	atvmod.h
 	atvmodgui.h
 	atvmodplugin.h
+	atvmodsettings.h
 )
 
 set(modatv_FORMS

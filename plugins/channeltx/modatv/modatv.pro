@@ -29,11 +29,13 @@ CONFIG(macx):INCLUDEPATH += "/opt/local/include"
 
 SOURCES += atvmod.cpp\
 	atvmodgui.cpp\
-	atvmodplugin.cpp
+	atvmodplugin.cpp\
+	atvmodsettings.cpp
 
 HEADERS += atvmod.h\
 	atvmodgui.h\
-	atvmodplugin.h
+	atvmodplugin.h\
+	atvmodsettings.h
 
 FORMS += atvmodgui.ui
 
