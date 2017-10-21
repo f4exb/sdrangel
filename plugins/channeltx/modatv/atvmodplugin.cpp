@@ -23,7 +23,7 @@
 
 const PluginDescriptor ATVModPlugin::m_pluginDescriptor = {
     QString("ATV Modulator"),
-    QString("3.7.3"),
+    QString("3.7.5"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
