@@ -118,7 +118,7 @@ private:
     SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    static const int m_agcTimeConstant[]; //!< time constant index to value in ms
+    //static const int m_agcTimeConstant[]; //!< time constant index to value in ms
 
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
     virtual ~SSBModGUI();
@@ -129,7 +129,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings();
     void displaySettings();
-    void displayAGCPowerThreshold(int value);
+    void displayAGCPowerThreshold();
     void updateWithStreamData();
     void updateWithStreamTime();
     void channelMarkerUpdate();
