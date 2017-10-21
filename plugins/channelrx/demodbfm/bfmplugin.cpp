@@ -24,7 +24,7 @@
 
 const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
 	QString("Broadcast FM Demodulator"),
-	QString("3.7.4"),
+	QString("3.7.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
