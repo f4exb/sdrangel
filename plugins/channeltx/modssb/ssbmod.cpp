@@ -24,6 +24,8 @@
 #include <dsp/upchannelizer.h>
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/threadedbasebandsamplesource.h"
+#include "device/devicesinkapi.h"
 #include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
@@ -38,7 +40,8 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 const int SSBMod::m_levelNbSamples = 480; // every 10ms
 const int SSBMod::m_ssbFftLen = 1024;
 
-SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
+SSBMod::SSBMod(DeviceSinkAPI *deviceAPI, BasebandSampleSink* sampleSink) :
+    m_deviceAPI(deviceAPI),
     m_SSBFilter(0),
     m_DSBFilter(0),
 	m_SSBFilterBuffer(0),
@@ -59,6 +62,10 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_inAGC(9600, 0.2, 1e-4)
 {
 	setObjectName("SSBMod");
+
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_audioSampleRate, m_settings.m_bandwidth / m_settings.m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_settings.m_audioSampleRate, 2 * m_ssbFftLen);
@@ -111,6 +118,10 @@ SSBMod::~SSBMod()
     }
 
     DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void SSBMod::pull(Sample& sample)
@@ -535,6 +546,19 @@ bool SSBMod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "SSBMod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureSSBMod::match(cmd))
     {
         float band, lowCutoff;

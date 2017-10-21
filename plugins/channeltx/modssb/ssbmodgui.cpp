@@ -23,9 +23,7 @@
 #include "ssbmodgui.h"
 
 #include "device/devicesinkapi.h"
-#include "dsp/upchannelizer.h"
 #include "dsp/spectrumvis.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "ui_ssbmodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -457,12 +455,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbMod = new SSBMod(m_spectrumVis);
+	m_ssbMod = new SSBMod(m_deviceAPI, m_spectrumVis);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
-	m_channelizer = new UpChannelizer(m_ssbMod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
     resetToDefaults();
 
@@ -507,9 +501,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 SSBModGUI::~SSBModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_ssbMod;
 	delete m_spectrumVis;
 	delete ui;
@@ -600,9 +591,9 @@ void SSBModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-			48000,
-			m_channelMarker.getCenterFrequency());
+		SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
+		        48000, m_settings.m_inputFrequencyOffset);
+        m_ssbMod->getInputMessageQueue()->push(msgChan);
 
 		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(m_settings, force);
 		m_ssbMod->getInputMessageQueue()->push(msg);

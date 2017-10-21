@@ -35,6 +35,10 @@
 
 #include "ssbmodsettings.h"
 
+class DeviceSinkAPI;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+
 class SSBMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -222,7 +226,7 @@ public:
 
     //=================================================================
 
-    SSBMod(BasebandSampleSink* sampleSink);
+    SSBMod(DeviceSinkAPI *deviceAPI, BasebandSampleSink* sampleSink);
     ~SSBMod();
 
     virtual void pull(Sample& sample);
@@ -251,6 +255,9 @@ private:
         RSRunning
     };
 
+    DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
     SSBModSettings m_settings;
 
     NCOF m_carrierNco;
