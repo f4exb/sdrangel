@@ -20,6 +20,9 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "dsp/upchannelizer.h"
+#include "dsp/threadedbasebandsamplesource.h"
+#include "device/devicesinkapi.h"
+
 #include "atvmod.h"
 
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureATVMod, Message)
@@ -44,7 +47,8 @@ const int ATVMod::m_nbBars = 6;
 const int ATVMod::m_cameraFPSTestNbFrames = 100;
 const int ATVMod::m_ssbFftLen = 1024;
 
-ATVMod::ATVMod() :
+ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
+    m_deviceAPI(deviceAPI),
 	m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
     m_evenImage(true),
@@ -70,6 +74,10 @@ ATVMod::ATVMod() :
     setObjectName("ATVMod");
     scanCameras();
 
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
     m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_settings.m_outputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
@@ -90,6 +98,9 @@ ATVMod::~ATVMod()
 {
 	if (m_video.isOpened()) m_video.release();
 	releaseCameras();
+    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void ATVMod::pullAudio(int nbSamples __attribute__((unused)))
@@ -492,6 +503,19 @@ bool ATVMod::handleMessage(const Message& cmd)
         qDebug() << "ATVMod::handleMessage: MsgChannelizerNotification:"
                 << " m_outputSampleRate: " << settings.m_outputSampleRate
                 << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+
+        return true;
+    }
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+                m_channelizer->getOutputSampleRate(),
+                cfg.getCenterFrequency());
+
+        qDebug() << "SSBMod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getOutputSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }

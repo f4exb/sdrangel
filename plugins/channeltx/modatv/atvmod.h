@@ -36,6 +36,10 @@
 
 #include "atvmodsettings.h"
 
+class DeviceSinkAPI;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+
 class ATVMod : public BasebandSampleSource {
     Q_OBJECT
 
@@ -67,21 +71,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getSampleRate() const { return m_sampleRate; }
         int getCenterFrequency() const { return m_centerFrequency; }
 
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        static MsgConfigureChannelizer* create(int centerFrequency)
         {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+            return new MsgConfigureChannelizer(centerFrequency);
         }
 
     private:
-        int m_sampleRate;
         int  m_centerFrequency;
 
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+        MsgConfigureChannelizer(int centerFrequency) :
             Message(),
-            m_sampleRate(sampleRate),
             m_centerFrequency(centerFrequency)
         { }
     };
@@ -390,7 +391,7 @@ public:
         { }
     };
 
-    ATVMod();
+    ATVMod(DeviceSinkAPI *deviceAPI);
     ~ATVMod();
 
     virtual void pull(Sample& sample);
@@ -450,6 +451,9 @@ private:
         {}
     };
 
+    DeviceSinkAPI* m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
     ATVModSettings m_settings;
 
     NCO m_carrierNco;

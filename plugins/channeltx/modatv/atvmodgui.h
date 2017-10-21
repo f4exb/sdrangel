@@ -29,8 +29,6 @@
 class PluginAPI;
 class DeviceSinkAPI;
 
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
 class ATVMod;
 class QMessageBox;
 
@@ -60,7 +58,6 @@ public:
 
 private slots:
     void channelMarkerChanged();
-    void channelizerOutputSampleRateChanged();
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
@@ -108,8 +105,6 @@ private:
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
     ATVMod* m_atvMod;
     MovingAverage<double> m_channelPowerDbAvg;
 

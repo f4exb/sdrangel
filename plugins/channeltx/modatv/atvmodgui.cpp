@@ -24,8 +24,6 @@
 #include <cmath>
 
 #include "device/devicesinkapi.h"
-#include "dsp/upchannelizer.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -157,11 +155,6 @@ bool ATVModGUI::handleMessage(const Message& message)
 void ATVModGUI::channelMarkerChanged()
 {
 	applySettings();
-}
-
-void ATVModGUI::channelizerOutputSampleRateChanged()
-{
-    //setRFFiltersSlidersRange(m_channelizer->getOutputSampleRate());
 }
 
 void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
@@ -615,13 +608,8 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_atvMod = new ATVMod();
+	m_atvMod = new ATVMod(m_deviceAPI);
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
-	m_channelizer = new UpChannelizer(m_atvMod);
-	m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-	//m_pluginAPI->addThreadedSink(m_threadedChannelizer);
-    connect(m_channelizer, SIGNAL(outputSampleRateChanged()), this, SLOT(channelizerOutputSampleRateChanged()));
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
 	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -662,9 +650,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 ATVModGUI::~ATVModGUI()
 {
     m_deviceAPI->removeChannelInstance(this);
-	m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
-	delete m_threadedChannelizer;
-	delete m_channelizer;
 	delete m_atvMod;
 	delete ui;
 }
@@ -678,9 +663,9 @@ void ATVModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-		    m_channelizer->getOutputSampleRate(),
-			m_channelMarker.getCenterFrequency());
+		ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
+		        m_channelMarker.getCenterFrequency());
+        m_atvMod->getInputMessageQueue()->push(msgChan);
 
 		ATVMod::MsgConfigureATVMod *msg = ATVMod::MsgConfigureATVMod::create(m_settings, force);
 		m_atvMod->getInputMessageQueue()->push(msg);
