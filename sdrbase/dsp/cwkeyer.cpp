@@ -197,6 +197,7 @@ void CWKeyer::setWPM(int wpm)
         QMutexLocker mutexLocker(&m_mutex);
         m_dotLength = (int) (0.24f * m_sampleRate * (5.0f / wpm));
         m_wpm = wpm;
+        m_cwSmoother.setNbFadeSamples(m_dotLength/5); // 20% the dot time
     }
 }
 

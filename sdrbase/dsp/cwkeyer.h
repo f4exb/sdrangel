@@ -23,6 +23,27 @@
 
 #include "util/export.h"
 
+/**
+ * Ancillary class to smooth out CW transitions with a sine shape
+ */
+class CWSmoother
+{
+public:
+    CWSmoother();
+    ~CWSmoother();
+
+    void setNbFadeSamples(unsigned int nbFadeSamples);
+    bool getFadeSample(bool on, float& sample);
+
+private:
+    QMutex m_mutex;
+    unsigned int m_fadeInCounter;
+    unsigned int m_fadeOutCounter;
+    unsigned int m_nbFadeSamples;
+    float *m_fadeInSamples;
+    float *m_fadeOutSamples;
+};
+
 class SDRANGEL_API CWKeyer : public QObject {
     Q_OBJECT
 
@@ -68,6 +89,7 @@ public:
     void setLoop(bool loop) { m_loop = loop; }
     void reset() { m_keyIambicState = KeySilent; }
 
+    CWSmoother& getCWSmoother() { return m_cwSmoother; }
     int getSample();
     bool eom();
     void resetText() { m_textState = TextStart; }
@@ -93,32 +115,12 @@ private:
     CWMode m_mode;
     CWKeyIambicState m_keyIambicState;
     CWTextState m_textState;
+    CWSmoother m_cwSmoother;
 
     static const signed char m_asciiToMorse[128][7];
 
     void nextStateIambic();
     void nextStateText();
-};
-
-/**
- * Ancillary class to smooth out CW transitions with a sine shape
- */
-class CWSmoother
-{
-public:
-    CWSmoother();
-    ~CWSmoother();
-
-    void setNbFadeSamples(unsigned int nbFadeSamples);
-    bool getFadeSample(bool on, float& sample);
-
-private:
-    QMutex m_mutex;
-    unsigned int m_fadeInCounter;
-    unsigned int m_fadeOutCounter;
-    unsigned int m_nbFadeSamples;
-    float *m_fadeInSamples;
-    float *m_fadeOutSamples;
 };
 
 #endif /* SDRBASE_DSP_CWKEYER_H_ */
