@@ -95,7 +95,6 @@ SSBMod::SSBMod(BasebandSampleSink* sampleSink) :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyer::CWNone);
 
-	m_cwSmoother.setNbFadeSamples(192); // 4 ms at 48 kHz
 	m_inAGC.setGate(m_config.m_agcThresholdGate);
 	m_inAGC.setStepDownDelay(m_config.m_agcThresholdDelay);
 	m_inAGC.setClamping(true);
@@ -355,7 +354,7 @@ void SSBMod::pullAF(Complex& sample)
 
         if (m_cwKeyer.getSample())
         {
-            m_cwSmoother.getFadeSample(true, fadeFactor);
+            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
 
         	if (m_running.m_dsb)
         	{
@@ -374,7 +373,7 @@ void SSBMod::pullAF(Complex& sample)
         }
         else
         {
-        	if (m_cwSmoother.getFadeSample(false, fadeFactor))
+        	if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
         	{
             	if (m_running.m_dsb)
             	{
@@ -627,13 +626,6 @@ bool SSBMod::handleMessage(const Message& cmd)
 		m_config.m_agcThresholdGate = cfg.getAGCThresholdGate(); // ms
 		m_config.m_agcThresholdDelay = cfg.getAGCThresholdDelay(); // ms
 
-//        m_config.m_agcTime = 48 * cfg.getAGCTime(); // ms
-//        m_config.m_agcOrder = cfg.getAGCOrder();
-//        m_config.m_agcThresholdEnable = cfg.getAGCThreshold() != -99;
-//        m_config.m_agcThreshold = CalcDb::powerFromdB(cfg.getAGCThreshold()); // power dB
-//        m_config.m_agcThresholdGate = 48 * cfg.getAGCThresholdGate(); // ms
-//        m_config.m_agcThresholdDelay = 48 * cfg.getAGCThresholdDelay(); // ms
-
         apply();
 
 		m_settingsMutex.unlock();
@@ -747,7 +739,6 @@ void SSBMod::apply()
 	{
         m_settingsMutex.lock();
 	    m_cwKeyer.setSampleRate(m_config.m_audioSampleRate);
-	    m_cwSmoother.setNbFadeSamples(m_config.m_audioSampleRate / 250); // 4 ms
         m_settingsMutex.unlock();
 	}
 

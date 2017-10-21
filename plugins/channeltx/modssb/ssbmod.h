@@ -435,7 +435,6 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
-    CWSmoother m_cwSmoother;
 
     MagAGC m_inAGC;
 
