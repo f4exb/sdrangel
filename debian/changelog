@@ -1,5 +1,7 @@
 sdrangel (3.7.5-1) unstable; urgency=medium
 
+  * CW keyer: make ramp as 20% of dot length to smoothen even more
+  * Fixed BFM demod frequency shift
   * GUI and demod separation step 1 full
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 08 Oct 2017 23:14:18 +0200
