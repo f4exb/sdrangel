@@ -48,6 +48,7 @@ set(sdrgui_SOURCES
     
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp    
+    plugin/plugininterface.cpp
 )
 
 set(sdrgui_HEADERS
@@ -98,6 +99,7 @@ set(sdrgui_HEADERS
     
     plugin/pluginapi.h
     plugin/pluginmanager.h
+    plugin/plugininterface.h
 )
 
 set(sdrgui_SOURCES

@@ -44,8 +44,6 @@ set(sdrbase_SOURCES
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
 
-    plugin/plugininterface.cpp
-
     settings/preferences.cpp
     settings/preset.cpp
     settings/mainsettings.cpp
@@ -122,7 +120,6 @@ set(sdrbase_HEADERS
     dsp/devicesamplesink.h
 
     plugin/plugininstancegui.h
-    plugin/plugininterface.h
 
     settings/preferences.h
     settings/preset.h
