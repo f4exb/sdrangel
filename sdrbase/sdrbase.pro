@@ -45,13 +45,10 @@ win32 {
         dsp/dvserialworker.cpp
 }
 
-SOURCES += mainwindow.cpp\
-        audio/audiodeviceinfo.cpp\
+SOURCES += audio/audiodeviceinfo.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
-        device/devicesourceapi.cpp\
-        device/devicesinkapi.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/downchannelizer.cpp\
@@ -84,50 +81,12 @@ SOURCES += mainwindow.cpp\
         dsp/basebandsamplesink.cpp\
         dsp/basebandsamplesource.cpp\
         dsp/nullsink.cpp\
-        dsp/spectrumscopecombovis.cpp\
-        dsp/spectrumscopengcombovis.cpp\
-        dsp/scopevis.cpp\
-        dsp/scopevisng.cpp\
-        dsp/spectrumvis.cpp\
         dsp/threadedbasebandsamplesink.cpp\
         dsp/threadedbasebandsamplesource.cpp\
         dsp/wfir.cpp\
-        gui/aboutdialog.cpp\
-        gui/addpresetdialog.cpp\
-        gui/basicchannelsettingswidget.cpp\
-        gui/basicchannelsettingsdialog.cpp\
-        gui/buttonswitch.cpp\
-        gui/channelwindow.cpp\
-        gui/clickablelabel.cpp\
-        gui/colormapper.cpp\
-        gui/cwkeyergui.cpp\
-        gui/glscope.cpp\
-        gui/glscopegui.cpp\
-        gui/glscopeng.cpp\
-        gui/glscopenggui.cpp\
-        gui/glshadersimple.cpp\
-        gui/glshadertextured.cpp\
-        gui/glspectrum.cpp\
-        gui/glspectrumgui.cpp\
-        gui/indicator.cpp\
-        gui/levelmeter.cpp\
-        gui/pluginsdialog.cpp\
-        gui/audiodialog.cpp\
-        gui/presetitem.cpp\
-        gui/rollupwidget.cpp\
-        gui/samplingdevicecontrol.cpp\
-        gui/mypositiondialog.cpp\
-        gui/scale.cpp\
-        gui/scaleengine.cpp\
-        gui/transverterbutton.cpp\
-        gui/transverterdialog.cpp\
-        gui/valuedial.cpp\
-        gui/valuedialz.cpp\
         dsp/devicesamplesource.cpp\
         dsp/devicesamplesink.cpp\
-        plugin/pluginapi.cpp\
         plugin/plugininterface.cpp\
-        plugin/pluginmanager.cpp\
         settings/preferences.cpp\
         settings/preset.cpp\
         settings/mainsettings.cpp\
@@ -140,8 +99,7 @@ SOURCES += mainwindow.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp
 
-HEADERS  += mainwindow.h\
-        audio/audiodeviceinfo.h\
+HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
@@ -194,52 +152,13 @@ HEADERS  += mainwindow.h\
         dsp/basebandsamplesink.h\
         dsp/basebandsamplesource.h\
         dsp/nullsink.h\
-        dsp/spectrumscopecombovis.h\
-        dsp/spectrumscopengcombovis.h\        
-        dsp/scopevis.h\
-        dsp/scopevisng.h\
-        dsp/spectrumvis.h\
         dsp/threadedbasebandsamplesink.h\
         dsp/threadedbasebandsamplesource.h\
         dsp/wfir.h\
-        gui/aboutdialog.h\
-        gui/addpresetdialog.h\
-        gui/audiodialog.h\
-        gui/basicchannelsettingswidget.h\
-        gui/basicchannelsettingsdialog.h\
-        gui/buttonswitch.h\
-        gui/channelwindow.h\
-        gui/clickablelabel.h\
-        gui/colormapper.h\
-        gui/cwkeyergui.h\
-        gui/glscope.h\
-        gui/glscopegui.h\
-        gui/glscopeng.h\
-        gui/glscopenggui.h\
-        gui/glshadersimple.h\
-        gui/glshadertextured.h\
-        gui/glspectrum.h\
-        gui/glspectrumgui.h\
-        gui/indicator.h\
-        gui/levelmeter.h\
-        gui/physicalunit.h\
-        gui/pluginsdialog.h\
-        gui/presetitem.h\
-        gui/rollupwidget.h\
-        gui/samplingdevicecontrol.h\
-        gui/mypositiondialog.h\
-        gui/scale.h\
-        gui/scaleengine.h\
-        gui/transverterbutton.h\
-        gui/transverterdialog.h\
-        gui/valuedial.h\
-        gui/valuedialz.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
-        plugin/pluginapi.h\
         plugin/plugininstancegui.h\
         plugin/plugininterface.h\
-        plugin/pluginmanager.h\
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\
@@ -252,25 +171,6 @@ HEADERS  += mainwindow.h\
         util/syncmessenger.h\
         util/samplesourceserializer.h\
         util/simpleserializer.h
-
-FORMS    += mainwindow.ui\
-        gui/scopewindow.ui\
-        gui/addpresetdialog.ui\
-        gui/basicchannelsettingswidget.ui\
-        gui/basicchannelsettingsdialog.ui\
-        gui/cwkeyergui.ui\
-        gui/audiodialog.ui\
-        gui/glscopegui.ui\
-        gui/glscopenggui.ui\
-        gui/aboutdialog.ui\
-        gui/pluginsdialog.ui\
-        gui/samplingdevicecontrol.ui\
-        gui/myposdialog.ui\
-        gui/glspectrumgui.ui\
-        gui/transverterdialog.ui\
-        mainwindow.ui
-
-RESOURCES = resources/res.qrc
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 

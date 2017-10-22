@@ -8,6 +8,7 @@ TEMPLATE = subdirs
 
 SUBDIRS = serialdv
 SUBDIRS += sdrbase
+SUBDIRS += sdrgui
 CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib

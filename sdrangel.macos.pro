@@ -6,6 +6,7 @@
 
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
+SUBDIRS += sdrgui
 SUBDIRS += devices
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib

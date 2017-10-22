@@ -6,6 +6,7 @@
 
 TEMPLATE = subdirs
 SUBDIRS = sdrbase
+SUBDIRS += sdrgui
 #SUBDIRS += librtlsdr
 #SUBDIRS += libhackrf
 #SUBDIRS += libairspy
