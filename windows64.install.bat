@@ -24,6 +24,7 @@ copy "%msys2dir%\mingw64\bin\libwinpthread-1.dll" %2
 copy %msys2dir%\mingw64\bin\libgraphite2.dll %2
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
+copy sdrgui\%1\sdrgui.dll %2
 copy devices\%1\devices.dll %2
 copy cm256cc\%1\cm256cc.dll %2
 copy mbelib\%1\mbelib.dll %2

@@ -18,6 +18,7 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 
 CONFIG(Release):build_subdir = release

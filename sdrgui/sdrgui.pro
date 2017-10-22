@@ -8,13 +8,13 @@ QT += core gui multimedia opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = lib
-TARGET = sdrbase
+TARGET = sdrgui
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../sdrbase
 
 DEFINES += USE_KISSFFT=1
 win32 {
     DEFINES += __WINDOWS__=1
-    DEFINES += DSD_USE_SERIALDV=1
 }
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -115,8 +115,6 @@ HEADERS  += mainwindow.h\
         gui/transverterdialog.h\
         gui/valuedial.h\
         gui/valuedialz.h\
-        dsp/devicesamplesource.h\
-        dsp/devicesamplesink.h\
         plugin/pluginapi.h\
         plugin/pluginmanager.h
         
@@ -136,6 +134,8 @@ FORMS    += mainwindow.ui\
         gui/glspectrumgui.ui\
         gui/transverterdialog.ui\
         mainwindow.ui
+
+LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 
 RESOURCES = resources/res.qrc
 
