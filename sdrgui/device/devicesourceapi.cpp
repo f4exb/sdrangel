@@ -31,7 +31,6 @@ DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
         DSPDeviceSourceEngine *deviceSourceEngine,
         GLSpectrum *glSpectrum,
         ChannelWindow *channelWindow) :
-    m_mainWindow(mainWindow),
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSourceEngine(deviceSourceEngine),
     m_spectrum(glSpectrum),

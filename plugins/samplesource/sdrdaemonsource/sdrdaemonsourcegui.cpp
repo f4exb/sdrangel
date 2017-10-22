@@ -99,7 +99,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* pare
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
-	connect(&(deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
     m_sampleSource = (SDRdaemonSourceInput*) m_deviceAPI->getSampleSource();

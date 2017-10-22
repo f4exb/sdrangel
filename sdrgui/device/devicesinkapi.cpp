@@ -31,7 +31,6 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
         DSPDeviceSinkEngine *deviceSinkEngine,
         GLSpectrum *glSpectrum,
         ChannelWindow *channelWindow) :
-    m_mainWindow(mainWindow),
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSinkEngine(deviceSinkEngine),
     m_spectrum(glSpectrum),

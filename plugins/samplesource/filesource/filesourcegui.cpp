@@ -56,7 +56,7 @@ FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
 
-	connect(&(m_deviceAPI->getMainWindow()->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 

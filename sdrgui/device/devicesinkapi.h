@@ -94,7 +94,6 @@ public:
     void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveChannelSettings(Preset* preset);
 
-    MainWindow *getMainWindow() { return m_mainWindow; }
     DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }
 
     const std::vector<DeviceSourceAPI*>& getSourceBuddies() const { return m_sourceBuddies; }
@@ -141,7 +140,6 @@ protected:
 
     void renameChannelInstances();
 
-    MainWindow *m_mainWindow;
     int m_deviceTabIndex;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     GLSpectrum *m_spectrum;
