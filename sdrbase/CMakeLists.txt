@@ -201,29 +201,18 @@ endif (BUILD_DEBIAN)
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_SHARED)
 
-qt5_wrap_ui(sdrbase_FORMS_HEADERS ${sdrbase_FORMS})
-qt5_add_resources(sdrbase_RESOURCES_RCC ${sdrbase_RESOURCES})
-
-if(WIN32)
-    SET(sdrbase_SOURCES ${sdrbase_SOURCES} resources/sdrangel.rc)
-endif(WIN32)
-
 add_library(sdrbase SHARED
     ${sdrbase_SOURCES}
     ${sdrbase_HEADERS_MOC}
-    ${sdrbase_FORMS_HEADERS}
-    ${sdrbase_RESOURCES_RCC}
 )
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${OPENGL_INCLUDE_DIR}
     .
 )
 
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
-    ${OPENGL_LIBRARIES}
 )
 
 if(FFTW3F_FOUND)
@@ -241,7 +230,7 @@ endif (BUILD_DEBIAN)
 set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrbase Core Widgets OpenGL Multimedia)
+qt5_use_modules(sdrbase Core Multimedia)
 
 install(TARGETS sdrbase DESTINATION lib)
 
