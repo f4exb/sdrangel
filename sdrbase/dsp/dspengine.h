@@ -73,30 +73,10 @@ public:
 
 	// Serial DV methods:
 
-	bool hasDVSerialSupport()
-	{
-#ifdef DSD_USE_SERIALDV
-	    return m_dvSerialSupport;
-#else
-        return false;
-#endif
-	}
-
+	bool hasDVSerialSupport();
 	void setDVSerialSupport(bool support);
-
-	void getDVSerialNames(std::vector<std::string>& deviceNames)
-	{
-#ifdef DSD_USE_SERIALDV
-	    m_dvSerialEngine.getDevicesNames(deviceNames);
-#endif
-	}
-
-	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
-	{
-#ifdef DSD_USE_SERIALDV
-	    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
-#endif
-	}
+	void getDVSerialNames(std::vector<std::string>& deviceNames);
+	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo);
 
 private:
 	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;

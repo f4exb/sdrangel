@@ -192,9 +192,9 @@ DSPDeviceSinkEngine *DSPEngine::getDeviceSinkEngineByUID(uint uid)
     return 0;
 }
 
+#ifdef DSD_USE_SERIALDV
 void DSPEngine::setDVSerialSupport(bool support)
 {
-#ifdef DSD_USE_SERIALDV
     if (support)
     {
         m_dvSerialSupport = m_dvSerialEngine.scan();
@@ -204,5 +204,42 @@ void DSPEngine::setDVSerialSupport(bool support)
         m_dvSerialEngine.release();
         m_dvSerialSupport = false;
     }
+}
+#else
+void DSPEngine::setDVSerialSupport(bool support __attribute__((unused)))
+{}
+#endif
+
+bool DSPEngine::hasDVSerialSupport()
+{
+#ifdef DSD_USE_SERIALDV
+    return m_dvSerialSupport;
+#else
+    return false;
 #endif
 }
+
+#ifdef DSD_USE_SERIALDV
+void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames)
+{
+    m_dvSerialEngine.getDevicesNames(deviceNames);
+}
+#else
+void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames __attribute((unused)))
+{}
+#endif
+
+#ifdef DSD_USE_SERIALDV
+void DSPEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
+{
+    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+}
+#else
+void DSPEngine::pushMbeFrame(
+        const unsigned char *mbeFrame __attribute((unused)),
+        int mbeRateIndex __attribute((unused)),
+        int mbeVolumeIndex __attribute((unused)),
+        unsigned char channels __attribute((unused)),
+        AudioFifo *audioFifo __attribute((unused)))
+{}
+#endif
