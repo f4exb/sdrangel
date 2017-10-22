@@ -54,12 +54,14 @@ target_link_libraries(inputrtlsdr
     ${QT_LIBRARIES}
     rtlsdr
     sdrbase
+    sdrgui
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputrtlsdr
     ${QT_LIBRARIES}
     ${LIBRTLSDR_LIBRARIES}
     sdrbase
+    sdrgui
 )
 endif (BUILD_DEBIAN)
 

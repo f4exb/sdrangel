@@ -20,7 +20,7 @@
 #include <errno.h>
 #include "fcdprothread.h"
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 #include "fcdtraits.h"
 
 FCDProThread::FCDProThread(SampleSinkFifo* sampleFifo, QObject* parent) :

@@ -23,7 +23,7 @@
 #include <QWaitCondition>
 #include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 
 class FCDProPlusThread : public QThread {
 	Q_OBJECT

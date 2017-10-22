@@ -4,7 +4,7 @@
 #include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include "dsp/fftengine.h"
-#include "fftwindow.h"
+#include "dsp/fftwindow.h"
 #include "util/export.h"
 #include "util/message.h"
 

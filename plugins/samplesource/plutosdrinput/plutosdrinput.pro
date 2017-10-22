@@ -22,6 +22,7 @@ CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
+INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../devices
 INCLUDEPATH += ../../../libiio/includemw
 INCLUDEPATH += $$LIBIIOSRC
@@ -44,7 +45,8 @@ HEADERS += plutosdrinputgui.h\
 FORMS += plutosdrinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../libiio/$${build_subdir} -llibiio
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
-RESOURCES = ../../../sdrbase/resources/res.qrc
+RESOURCES = ../../../sdrgui/resources/res.qrc

@@ -39,6 +39,7 @@ add_library(demodudpsrc SHARED
 target_link_libraries(demodudpsrc
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodudpsrc Core Widgets Network)

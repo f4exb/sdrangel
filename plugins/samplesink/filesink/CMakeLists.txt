@@ -40,6 +40,7 @@ add_library(outputfilesink SHARED
 target_link_libraries(outputfilesink
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(outputfilesink Core Widgets)

@@ -68,7 +68,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../../sdrbase/resources/res.qrc">
+            <iconset resource="../../../sdrgui/resources/res.qrc">
              <normaloff>:/play.png</normaloff>
              <normalon>:/stop.png</normalon>:/play.png</iconset>
            </property>
@@ -83,7 +83,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../../sdrbase/resources/res.qrc">
+            <iconset resource="../../../sdrgui/resources/res.qrc">
              <normaloff>:/record_off.png</normaloff>:/record_off.png</iconset>
            </property>
           </widget>
@@ -301,7 +301,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../sdrbase/resources/res.qrc">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
          <normaloff>:/link.png</normaloff>:/link.png</iconset>
        </property>
       </widget>
@@ -684,7 +684,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

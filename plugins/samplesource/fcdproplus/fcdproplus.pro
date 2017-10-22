@@ -18,6 +18,7 @@ QMAKE_CXXFLAGS += -msse4.1
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
+INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../fcdhid
 INCLUDEPATH += ../../../fcdlib
 
@@ -41,3 +42,4 @@ FORMS += fcdproplusgui.ui
 LIBS += -L../../../fcdlib/$${build_subdir} -lfcdlib
 LIBS += -L../../../fcdhid/$${build_subdir} -lfcdhid
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

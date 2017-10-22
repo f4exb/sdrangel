@@ -26,7 +26,7 @@
 #include <errno.h>
 #include "fcdproplusreader.h"
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 #include "fcdtraits.h"
 
 FCDProPlusReader::FCDProPlusReader(SampleSinkFifo* sampleFifo, QObject* parent) :

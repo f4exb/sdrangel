@@ -22,7 +22,7 @@
 #include <QWaitCondition>
 #include <QByteArray>
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 #include "dsp/inthalfbandfilter.h"
 
 class QAudioInput;

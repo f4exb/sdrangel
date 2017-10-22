@@ -507,7 +507,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

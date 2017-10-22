@@ -66,6 +66,7 @@ if (BUILD_DEBIAN)
 target_link_libraries(outputsdrdaemonsink
     ${QT_LIBRARIES}
     sdrbase
+    sdrgui
     cm256cc
     ${LIBNANOMSG_LIBRARIES}
 )
@@ -73,6 +74,7 @@ else (BUILD_DEBIAN)
 target_link_libraries(outputsdrdaemonsink
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
     ${CM256CC_LIBRARIES}	
     ${LIBNANOMSG_LIBRARIES}    
 )

@@ -19,7 +19,7 @@
 
 #include "airspythread.h"
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 
 AirspyThread *AirspyThread::m_this = 0;
 

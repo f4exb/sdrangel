@@ -38,6 +38,7 @@ add_library(modam SHARED
 target_link_libraries(modam
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(modam Core Widgets)

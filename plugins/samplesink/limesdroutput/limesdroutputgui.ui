@@ -65,7 +65,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../../sdrbase/resources/res.qrc">
+            <iconset resource="../../../sdrgui/resources/res.qrc">
              <normaloff>:/play.png</normaloff>
              <normalon>:/stop.png</normalon>:/play.png</iconset>
            </property>
@@ -653,7 +653,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../../sdrbase/resources/res.qrc">:/antenna.png</pixmap>
+        <pixmap resource="../../../sdrgui/resources/res.qrc">:/antenna.png</pixmap>
        </property>
       </widget>
      </item>
@@ -729,7 +729,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../../sdrbase/resources/res.qrc">:/stream.png</pixmap>
+        <pixmap resource="../../../sdrgui/resources/res.qrc">:/stream.png</pixmap>
        </property>
       </widget>
      </item>
@@ -921,35 +921,7 @@ QToolTip{background-color: white; color: black;}</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

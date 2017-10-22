@@ -185,12 +185,14 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 
 ##############################################################################
-# SDRbase library
+# base libraries
 add_subdirectory(sdrbase)
+add_subdirectory(sdrgui)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/sdrbase
+    ${CMAKE_SOURCE_DIR}/sdrgui
     ${OPENGL_INCLUDE_DIR}
 )
 
@@ -208,6 +210,7 @@ add_executable(sdrangel
 
 target_link_libraries(sdrangel
     sdrbase
+    sdrgui
     ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
 )

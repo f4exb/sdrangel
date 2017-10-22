@@ -21,6 +21,7 @@ CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\incl
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
+INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../devices
 INCLUDEPATH += $$LIBBLADERFSRC
 
@@ -42,7 +43,8 @@ HEADERS += bladerfoutputgui.h\
 FORMS += bladerfoutputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
-RESOURCES = ../../../sdrbase/resources/res.qrc
+RESOURCES = ../../../sdrgui/resources/res.qrc

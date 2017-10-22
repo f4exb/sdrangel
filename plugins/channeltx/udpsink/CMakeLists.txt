@@ -43,6 +43,7 @@ add_library(modudpsink SHARED
 target_link_libraries(modudpsink
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(modudpsink Core Widgets Network)

@@ -57,6 +57,7 @@ target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
     hackrf
     sdrbase
+    sdrgui
     hackrfdevice
 )
 else (BUILD_DEBIAN)
@@ -64,6 +65,7 @@ target_link_libraries(inputhackrf
     ${QT_LIBRARIES}
     ${LIBHACKRF_LIBRARIES}
     sdrbase
+    sdrgui
     hackrfdevice
 )
 endif (BUILD_DEBIAN)

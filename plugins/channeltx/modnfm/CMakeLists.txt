@@ -38,6 +38,7 @@ add_library(modnfm SHARED
 target_link_libraries(modnfm
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(modnfm Core Widgets)

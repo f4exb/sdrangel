@@ -38,6 +38,7 @@ add_library(modssb SHARED
 target_link_libraries(modssb
     ${QT_LIBRARIES}
     sdrbase
+    sdrgui
 )
 
 qt5_use_modules(modssb Core Widgets)

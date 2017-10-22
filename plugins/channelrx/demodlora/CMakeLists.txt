@@ -40,6 +40,7 @@ add_library(demodlora SHARED
 target_link_libraries(demodlora
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodlora Core Widgets)

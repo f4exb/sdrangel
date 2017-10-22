@@ -40,6 +40,7 @@ add_library(demodam SHARED
 target_link_libraries(demodam
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodam Core Widgets)

@@ -11,12 +11,14 @@ QMAKE_CXXFLAGS += -std=c++11
 TEMPLATE = app
 TARGET = sdrangel
 INCLUDEPATH += $$PWD/../sdrbase
+INCLUDEPATH += $$PWD/../sdrgui
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 SOURCES += main.cpp
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../sdrgui/$${build_subdir} -lsdrgui
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

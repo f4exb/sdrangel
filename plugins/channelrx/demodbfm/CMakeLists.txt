@@ -47,6 +47,7 @@ add_library(demodbfm SHARED
 target_link_libraries(demodbfm
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodbfm Core Widgets)

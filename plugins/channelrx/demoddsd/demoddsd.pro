@@ -31,6 +31,7 @@ CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
+INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += $$LIBDSDCCSRC
 INCLUDEPATH += $$LIBMBELIBSRC
 
@@ -54,6 +55,7 @@ dsddemodsettings.h
 FORMS = dsddemodgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../dsdcc/$${build_subdir} -ldsdcc
 
-RESOURCES = ../../../sdrbase/resources/res.qrc
+RESOURCES = ../../../sdrgui/resources/res.qrc

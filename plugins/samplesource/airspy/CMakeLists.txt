@@ -55,12 +55,14 @@ target_link_libraries(inputairspy
     ${QT_LIBRARIES}
     airspy
     sdrbase
+    sdrgui
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputairspy
     ${QT_LIBRARIES}
     ${LIBAIRSPY_LIBRARIES}
     sdrbase
+    sdrgui
 )
 endif (BUILD_DEBIAN)
 

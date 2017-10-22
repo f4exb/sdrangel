@@ -55,6 +55,7 @@ if (BUILD_DEBIAN)
 target_link_libraries(demoddsd
     ${QT_LIBRARIES}
     sdrbase
+    sdrgui
     dsdcc
     mbelib
 )
@@ -62,6 +63,7 @@ else (BUILD_DEBIAN)
 target_link_libraries(demoddsd
     ${QT_LIBRARIES}
     sdrbase
+    sdrgui
     ${LIBDSDCC_LIBRARIES}
     ${LIBMBE_LIBRARY}
 )

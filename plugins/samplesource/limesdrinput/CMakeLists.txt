@@ -65,6 +65,7 @@ target_link_libraries(inputlimesdr
     ${QT_LIBRARIES}
     limesuite
     sdrbase
+    sdrgui
     limesdrdevice
 )
 else (BUILD_DEBIAN)
@@ -72,6 +73,7 @@ target_link_libraries(inputlimesdr
 	${QT_LIBRARIES}
 	${LIMESUITE_LIBRARY}
 	sdrbase
+	sdrgui
 	limesdrdevice
 )
 endif (BUILD_DEBIAN)

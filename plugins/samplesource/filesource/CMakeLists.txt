@@ -40,6 +40,7 @@ add_library(inputfilesource SHARED
 target_link_libraries(inputfilesource
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(inputfilesource Core Widgets)

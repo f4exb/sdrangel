@@ -22,7 +22,7 @@
 #include <QWaitCondition>
 #include <libairspy/airspy.h>
 
-#include "../../../sdrbase/dsp/samplesinkfifo.h"
+#include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
 #define AIRSPY_BLOCKSIZE (1<<17)

@@ -479,7 +479,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/sound_off.png</normaloff>
           <normalon>:/sound_on.png</normalon>:/sound_off.png</iconset>
         </property>
@@ -497,7 +497,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/mono.png</normaloff>
           <normalon>:/stereo.png</normalon>:/mono.png</iconset>
         </property>
@@ -776,7 +776,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

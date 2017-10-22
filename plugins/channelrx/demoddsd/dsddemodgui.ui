@@ -237,7 +237,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/unlocked.png</normaloff>
           <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
         </property>
@@ -296,7 +296,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
         </property>
        </widget>
@@ -310,7 +310,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/constellation.png</normaloff>
           <normalon>:/slopep_icon.png</normalon>:/constellation.png</iconset>
         </property>
@@ -673,7 +673,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/slot1_off.png</normaloff>
           <normalon>:/slot1_on.png</normalon>:/slot1_off.png</iconset>
         </property>
@@ -691,7 +691,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/slot2_off.png</normaloff>
           <normalon>:/slot2_on.png</normalon>:/slot2_off.png</iconset>
         </property>
@@ -709,7 +709,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/mono.png</normaloff>
           <normalon>:/stereo.png</normalon>:/mono.png</iconset>
         </property>
@@ -834,7 +834,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/sound_on.png</normaloff>
           <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
         </property>
@@ -1002,27 +1002,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

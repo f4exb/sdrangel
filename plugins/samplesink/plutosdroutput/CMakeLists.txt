@@ -55,6 +55,7 @@ target_link_libraries(outputplutosdr
     ${QT_LIBRARIES}
     iio
     sdrbase
+    sdrgui
     plutosdrdevice
 )
 else (BUILD_DEBIAN)
@@ -62,6 +63,7 @@ target_link_libraries(outputplutosdr
     ${QT_LIBRARIES}
     ${LIBIIO_LIBRARIES}
     sdrbase
+    sdrgui
     plutosdrdevice
 )
 endif (BUILD_DEBIAN)

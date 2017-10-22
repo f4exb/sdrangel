@@ -51,12 +51,14 @@ target_link_libraries(inputsdrplay
     ${QT_LIBRARIES}
     mirisdr
     sdrbase
+    sdrgui
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputsdrplay
     ${QT_LIBRARIES}
     ${LIBMIRISDR_LIBRARIES}
     sdrbase
+    sdrgui
 )
 endif (BUILD_DEBIAN)
 

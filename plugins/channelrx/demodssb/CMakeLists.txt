@@ -40,6 +40,7 @@ add_library(demodssb SHARED
 target_link_libraries(demodssb
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodssb Core Widgets)

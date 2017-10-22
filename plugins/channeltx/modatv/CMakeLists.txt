@@ -42,6 +42,7 @@ target_link_libraries(modatv
     ${OpenCV_LIBS}
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(modatv Core Widgets)

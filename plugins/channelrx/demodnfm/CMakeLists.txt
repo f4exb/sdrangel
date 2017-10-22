@@ -40,6 +40,7 @@ add_library(demodnfm SHARED
 target_link_libraries(demodnfm
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodnfm Core Widgets)

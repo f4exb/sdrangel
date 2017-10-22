@@ -47,6 +47,7 @@ target_link_libraries(inputfcdproplus
 	fcdhid
 	fcdlib
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(inputfcdproplus Core Widgets)

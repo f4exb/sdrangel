@@ -181,7 +181,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrbase/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/mono.png</normaloff>
             <normalon>:/stereo.png</normalon>:/mono.png</iconset>
           </property>
@@ -199,7 +199,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrbase/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/lsb.png</normaloff>:/lsb.png</iconset>
           </property>
           <property name="checkable">
@@ -219,7 +219,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrbase/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
           </property>
           <property name="checkable">
@@ -262,7 +262,7 @@
            <string>.</string>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrbase/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/rds.png</normaloff>:/rds.png</iconset>
           </property>
          </widget>
@@ -801,7 +801,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrbase/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
         </property>
        </widget>
@@ -1889,27 +1889,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
-  <include location="../../../sdrbase/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

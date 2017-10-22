@@ -67,6 +67,7 @@ target_link_libraries(inputsdrdaemonsource
     cm256cc
     ${LIBNANOMSG_LIBRARIES}
     sdrbase
+    sdrgui
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputsdrdaemonsource
@@ -74,6 +75,7 @@ target_link_libraries(inputsdrdaemonsource
     ${CM256CC_LIBRARIES}
     ${LIBNANOMSG_LIBRARIES}
     sdrbase
+    sdrgui
 )
 endif (BUILD_DEBIAN)
 

@@ -38,6 +38,7 @@ add_library(chanalyzer SHARED
 target_link_libraries(chanalyzer
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(chanalyzer Core Widgets )

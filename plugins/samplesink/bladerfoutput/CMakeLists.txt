@@ -56,6 +56,7 @@ target_link_libraries(outputbladerf
     ${QT_LIBRARIES}
     bladerf
     sdrbase
+    sdrgui
     bladerfdevice
 )
 else (BUILD_DEBIAN)
@@ -63,6 +64,7 @@ target_link_libraries(outputbladerf
 	${QT_LIBRARIES}
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
+	sdrgui
 	bladerfdevice
 )
 endif (BUILD_DEBIAN)

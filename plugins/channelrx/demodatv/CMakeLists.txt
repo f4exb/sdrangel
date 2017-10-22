@@ -42,6 +42,7 @@ add_library(demodatv SHARED
 target_link_libraries(demodatv
 	${QT_LIBRARIES}
 	sdrbase
+	sdrgui
 )
 
 qt5_use_modules(demodatv Core Widgets)

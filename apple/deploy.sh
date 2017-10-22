@@ -15,6 +15,7 @@ cp -v fcdhid/libfcdhid.dylib $APP_LIB
 cp -v fcdlib/libfcdlib.dylib $APP_LIB
 cp -v mbelib/libmbelib.dylib $APP_LIB
 cp -v sdrbase/libsdrbase.dylib $APP_LIB
+cp -v sdrbase/libsdrgui.dylib $APP_LIB
 cp -v devices/libdevices.dylib $APP_LIB
 cp -v dsdcc/libdsdcc.dylib $APP_LIB
 
