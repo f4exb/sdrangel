@@ -147,11 +147,6 @@ void DeviceSinkAPI::addChannelMarker(ChannelMarker* channelMarker)
     m_spectrum->addChannelMarker(channelMarker);
 }
 
-ChannelWindow *DeviceSinkAPI::getChannelWindow()
-{
-    return m_channelWindow;
-}
-
 void DeviceSinkAPI::addRollupWidget(QWidget *widget)
 {
     m_channelWindow->addRollupWidget(widget);

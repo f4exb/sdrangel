@@ -139,11 +139,6 @@ void DeviceSourceAPI::addChannelMarker(ChannelMarker* channelMarker)
     m_spectrum->addChannelMarker(channelMarker);
 }
 
-ChannelWindow *DeviceSourceAPI::getChannelWindow()
-{
-    return m_channelWindow;
-}
-
 void DeviceSourceAPI::addRollupWidget(QWidget *widget)
 {
     m_channelWindow->addRollupWidget(widget);

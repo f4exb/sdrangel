@@ -65,7 +65,6 @@ public:
     // device related stuff
     GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
-    ChannelWindow *getChannelWindow();                   //!< Direct channel window getter
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
     void setHardwareId(const QString& id);
