@@ -73,7 +73,8 @@ SOURCES += mainwindow.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
         plugin/pluginapi.cpp\
-        plugin/pluginmanager.cpp
+        plugin/pluginmanager.cpp\
+        plugin/plugininterface.cpp
 
 HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
@@ -116,8 +117,9 @@ HEADERS  += mainwindow.h\
         gui/valuedial.h\
         gui/valuedialz.h\
         plugin/pluginapi.h\
-        plugin/pluginmanager.h
-        
+        plugin/pluginmanager.h\
+        plugin/plugininterface.h
+
 FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\

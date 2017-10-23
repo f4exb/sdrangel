@@ -86,7 +86,6 @@ SOURCES += audio/audiodeviceinfo.cpp\
         dsp/wfir.cpp\
         dsp/devicesamplesource.cpp\
         dsp/devicesamplesink.cpp\
-        plugin/plugininterface.cpp\
         settings/preferences.cpp\
         settings/preset.cpp\
         settings/mainsettings.cpp\
@@ -158,7 +157,6 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/plugininstancegui.h\
-        plugin/plugininterface.h\
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\
