@@ -25,7 +25,6 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "settings/preset.h"
-#include "gui/glspectrum.h"
 #include "util/message.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
