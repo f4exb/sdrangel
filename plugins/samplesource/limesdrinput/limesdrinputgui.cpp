@@ -154,6 +154,18 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportSampleRateDirChange& report = (DeviceLimeSDRShared::MsgReportSampleRateDirChange&) message;
+        m_settings.m_devSampleRate = report.getDevSampleRate();
+        m_settings.m_log2HardDecim = report.getLog2HardDecimInterp();
+
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
     else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
     {
         qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());

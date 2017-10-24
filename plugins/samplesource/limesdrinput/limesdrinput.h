@@ -247,7 +247,7 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const LimeSDRInputSettings& settings, bool force = false);
+    bool applySettings(const LimeSDRInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_ */

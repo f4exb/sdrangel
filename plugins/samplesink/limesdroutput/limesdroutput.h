@@ -230,7 +230,7 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const LimeSDROutputSettings& settings, bool force = false);
+    bool applySettings(const LimeSDROutputSettings& settings, bool force = false, bool forceNCOFrequency = false);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUT_H_ */

@@ -47,6 +47,32 @@ public:
         { }
     };
 
+    class MsgReportSampleRateDirChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int  getDevSampleRate() const { return m_devSampleRate; }
+        int  getLog2HardDecimInterp() const { return m_log2HardDecimInterp; }
+        bool getRxElseTx() const { return m_rxElseTx; }
+
+        static MsgReportSampleRateDirChange* create(int devSampleRate, int log2HardDecimInterp, bool rxElseTx)
+        {
+            return new MsgReportSampleRateDirChange(devSampleRate, log2HardDecimInterp, rxElseTx);
+        }
+
+    private:
+        int  m_devSampleRate;       //!< device/host sample rate
+        int  m_log2HardDecimInterp; //!< log2 of hardware decimation or interpolation
+        bool m_rxElseTx;            //!< tells which side initiated the message
+
+        MsgReportSampleRateDirChange(int devSampleRate, int log2HardDecimInterp, bool rxElseTx) :
+            Message(),
+            m_devSampleRate(devSampleRate),
+            m_log2HardDecimInterp(log2HardDecimInterp),
+            m_rxElseTx(rxElseTx)
+        { }
+    };
+
     class MsgReportDeviceInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 

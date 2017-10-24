@@ -16,6 +16,7 @@
 
 #include "devicelimesdrshared.h"
 
+MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportSampleRateDirChange, Message)
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgCrossReportToBuddy, Message)
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportDeviceInfo, Message)
 
