@@ -19,6 +19,8 @@
 #define INCLUDE_DSPENGINE_H
 
 #include <QObject>
+#include <QTimer>
+
 #include <vector>
 #include "audio/audiooutput.h"
 #include "audio/audioinput.h"
@@ -78,6 +80,8 @@ public:
 	void getDVSerialNames(std::vector<std::string>& deviceNames);
 	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo);
 
+    const QTimer& getMasterTimer() const { return m_masterTimer; }
+
 private:
 	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
 	uint m_deviceSourceEnginesUIDSequence;
@@ -89,6 +93,7 @@ private:
     uint m_audioInputSampleRate;
     int m_audioInputDeviceIndex;
     int m_audioOutputDeviceIndex;
+    QTimer m_masterTimer;
 	bool m_dvSerialSupport;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
