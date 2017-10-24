@@ -36,6 +36,7 @@ CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 SOURCES += mainwindow.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
+        device/deviceuiset.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/spectrumscopengcombovis.cpp\
         dsp/scopevis.cpp\
@@ -79,6 +80,7 @@ SOURCES += mainwindow.cpp\
 HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
         device/devicesinkapi.h\
+        device/deviceuiset.h\
         dsp/spectrumscopecombovis.h\
         dsp/spectrumscopengcombovis.h\        
         dsp/scopevis.h\

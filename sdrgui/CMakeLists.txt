@@ -45,6 +45,7 @@ set(sdrgui_SOURCES
     
     device/devicesourceapi.cpp
     device/devicesinkapi.cpp
+    device/deviceuiset.cpp
     
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp    
@@ -96,6 +97,7 @@ set(sdrgui_HEADERS
     
     device/devicesourceapi.h
     device/devicesinkapi.h
+    device/deviceuiset.h
     
     plugin/pluginapi.h
     plugin/pluginmanager.h
