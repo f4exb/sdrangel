@@ -43,6 +43,12 @@ class SDRANGEL_API DeviceSourceAPI : public QObject {
     Q_OBJECT
 
 public:
+    DeviceSourceAPI(int deviceTabIndex,
+            DSPDeviceSourceEngine *deviceSourceEngine,
+            GLSpectrum *glSpectrum,
+            ChannelWindow *channelWindow);
+    ~DeviceSourceAPI();
+
     // Device engine stuff
     void addSink(BasebandSampleSink* sink);       //!< Add a sample sink to device engine
     void removeSink(BasebandSampleSink* sink);    //!< Remove a sample sink from device engine
@@ -130,11 +136,6 @@ protected:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    DeviceSourceAPI(int deviceTabIndex,
-            DSPDeviceSourceEngine *deviceSourceEngine,
-            GLSpectrum *glSpectrum,
-            ChannelWindow *channelWindow);
-    ~DeviceSourceAPI();
 
     void renameChannelInstances();
 
@@ -159,7 +160,6 @@ protected:
     bool m_isBuddyLeader;
     const QTimer& m_masterTimer;
 
-    friend class MainWindow;
     friend class DeviceSinkAPI;
 };
 
