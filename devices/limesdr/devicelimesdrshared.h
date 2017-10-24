@@ -27,28 +27,43 @@
 class DeviceLimeSDRShared
 {
 public:
-    class MsgReportSampleRateDirChange : public Message {
+    class MsgReportBuddyChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int  getDevSampleRate() const { return m_devSampleRate; }
-        int  getLog2HardDecimInterp() const { return m_log2HardDecimInterp; }
+        int      getDevSampleRate() const { return m_devSampleRate; }
+        int      getLog2HardDecimInterp() const { return m_log2HardDecimInterp; }
+        uint64_t getCenterFrequency() const { return m_centerFrequency; }
         bool getRxElseTx() const { return m_rxElseTx; }
 
-        static MsgReportSampleRateDirChange* create(int devSampleRate, int log2HardDecimInterp, bool rxElseTx)
+        static MsgReportBuddyChange* create(
+                int devSampleRate,
+                int log2HardDecimInterp,
+                uint64_t centerFrequency,
+                bool rxElseTx)
         {
-            return new MsgReportSampleRateDirChange(devSampleRate, log2HardDecimInterp, rxElseTx);
+            return new MsgReportBuddyChange(
+                    devSampleRate,
+                    log2HardDecimInterp,
+                    centerFrequency,
+                    rxElseTx);
         }
 
     private:
-        int  m_devSampleRate;       //!< device/host sample rate
-        int  m_log2HardDecimInterp; //!< log2 of hardware decimation or interpolation
-        bool m_rxElseTx;            //!< tells which side initiated the message
+        int      m_devSampleRate;       //!< device/host sample rate
+        int      m_log2HardDecimInterp; //!< log2 of hardware decimation or interpolation
+        uint64_t m_centerFrequency;     //!< Center frequency
+        bool     m_rxElseTx;            //!< tells which side initiated the message
 
-        MsgReportSampleRateDirChange(int devSampleRate, int log2HardDecimInterp, bool rxElseTx) :
+        MsgReportBuddyChange(
+                int devSampleRate,
+                int log2HardDecimInterp,
+                uint64_t centerFrequency,
+                bool rxElseTx) :
             Message(),
             m_devSampleRate(devSampleRate),
             m_log2HardDecimInterp(log2HardDecimInterp),
+            m_centerFrequency(centerFrequency),
             m_rxElseTx(rxElseTx)
         { }
     };

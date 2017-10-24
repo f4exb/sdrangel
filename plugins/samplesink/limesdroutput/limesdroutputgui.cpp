@@ -141,11 +141,15 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDROutputGUI::handleMessage(const Message& message)
 {
-    if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
+    if (DeviceLimeSDRShared::MsgReportBuddyChange::match(message))
     {
-        DeviceLimeSDRShared::MsgReportSampleRateDirChange& report = (DeviceLimeSDRShared::MsgReportSampleRateDirChange&) message;
+        DeviceLimeSDRShared::MsgReportBuddyChange& report = (DeviceLimeSDRShared::MsgReportBuddyChange&) message;
         m_settings.m_devSampleRate = report.getDevSampleRate();
         m_settings.m_log2HardInterp = report.getLog2HardDecimInterp();
+
+        if (!report.getRxElseTx()) {
+            m_settings.m_centerFrequency = report.getCenterFrequency();
+        }
 
         blockApplySettings(true);
         displaySettings();
