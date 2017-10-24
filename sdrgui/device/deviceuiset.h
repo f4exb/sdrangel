@@ -30,7 +30,7 @@ class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
 
-class DeviceUISet
+struct DeviceUISet
 {
     SpectrumVis *m_spectrumVis;
     GLSpectrum *m_spectrum;

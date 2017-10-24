@@ -15,8 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstancegui.h>
-#include <plugin/plugininstancegui.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -27,10 +25,11 @@
 #include <QDateTime>
 #include <QSysInfo>
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include <plugin/plugininstancegui.h>
+#include <plugin/plugininstancegui.h>
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
@@ -50,6 +49,9 @@
 #include "plugin/pluginapi.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 #include <string>
 #include <QDebug>
@@ -1130,35 +1132,4 @@ void MainWindow::tabInputViewIndexChanged()
 void MainWindow::updateStatus()
 {
     m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss t"));
-}
-
-MainWindow::DeviceUISet::DeviceUISet(QTimer& timer)
-{
-	m_spectrum = new GLSpectrum;
-	m_spectrumVis = new SpectrumVis(m_spectrum);
-	m_spectrum->connectTimer(timer);
-	m_spectrumGUI = new GLSpectrumGUI;
-	m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
-	m_channelWindow = new ChannelWindow;
-	m_samplingDeviceControl = new SamplingDeviceControl;
-	m_deviceSourceEngine = 0;
-	m_deviceSourceAPI = 0;
-	m_deviceSinkEngine = 0;
-	m_deviceSinkAPI = 0;
-
-	// m_spectrum needs to have its font to be set since it cannot be inherited from the main window
-	QFont font;
-    font.setFamily(QStringLiteral("Sans Serif"));
-    font.setPointSize(9);
-    m_spectrum->setFont(font);
-
-}
-
-MainWindow::DeviceUISet::~DeviceUISet()
-{
-	delete m_samplingDeviceControl;
-	delete m_channelWindow;
-	delete m_spectrumGUI;
-	delete m_spectrumVis;
-	delete m_spectrum;
 }

@@ -46,6 +46,7 @@ class ChannelMarker;
 class PluginManager;
 class DeviceSourceAPI;
 class DeviceSinkAPI;
+class DeviceUISet;
 class PluginInterface;
 class QWidget;
 
@@ -57,23 +58,6 @@ class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	struct DeviceUISet
-	{
-		SpectrumVis *m_spectrumVis;
-		GLSpectrum *m_spectrum;
-		GLSpectrumGUI *m_spectrumGUI;
-		ChannelWindow *m_channelWindow;
-		SamplingDeviceControl *m_samplingDeviceControl;
-		DSPDeviceSourceEngine *m_deviceSourceEngine;
-		DeviceSourceAPI *m_deviceSourceAPI;
-		DSPDeviceSinkEngine *m_deviceSinkEngine;
-		DeviceSinkAPI *m_deviceSinkAPI;
-		QByteArray m_mainWindowState;
-
-		DeviceUISet(QTimer& timer);
-		~DeviceUISet();
-	};
-
 	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
