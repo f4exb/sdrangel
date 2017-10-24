@@ -40,7 +40,7 @@ const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.files
 
 PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
 	QObject(parent),
-	m_pluginAPI(this, mainWindow)
+    m_pluginAPI(this)
 {
 }
 

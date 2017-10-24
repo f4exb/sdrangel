@@ -1,12 +1,6 @@
 #include <QDockWidget>
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
-#include "mainwindow.h"
-
-MessageQueue* PluginAPI::getMainWindowMessageQueue()
-{
-	return m_mainWindow->getInputMessageQueue();
-}
 
 void PluginAPI::registerRxChannel(const QString& channelName, PluginInterface* plugin)
 {
@@ -39,10 +33,8 @@ PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
 }
 
 
-PluginAPI::PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow) :
-	QObject(mainWindow),
-	m_pluginManager(pluginManager),
-	m_mainWindow(mainWindow)
+PluginAPI::PluginAPI(PluginManager* pluginManager) :
+	m_pluginManager(pluginManager)
 {
 }
 

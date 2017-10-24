@@ -10,7 +10,6 @@ class QString;
 
 class PluginManager;
 class PluginInterface;
-class MainWindow;
 class MessageQueue;
 class PluginInstanceGUI;
 
@@ -30,9 +29,6 @@ public:
 
     typedef QList<ChannelRegistration> ChannelRegistrations;
 
-	// MainWindow access
-	MessageQueue* getMainWindowMessageQueue();
-
 	// Rx Channel stuff
 	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
 	ChannelRegistrations *getRxChannelRegistrations();
@@ -47,14 +43,10 @@ public:
 	// Sample Sink stuff
 	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
 
-	// R/O access to main window
-	const MainWindow* getMainWindow() const { return m_mainWindow; }
-
 protected:
 	PluginManager* m_pluginManager;
-	MainWindow* m_mainWindow;
 
-	PluginAPI(PluginManager* pluginManager, MainWindow* mainWindow);
+	PluginAPI(PluginManager* pluginManager);
 	~PluginAPI();
 
 	friend class PluginManager;
