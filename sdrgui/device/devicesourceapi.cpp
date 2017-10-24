@@ -22,12 +22,11 @@
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
-#include "mainwindow.h"
 #include "settings/preset.h"
+#include "dsp/dspengine.h"
 
 // TODO: extract GUI dependencies in a separate object
-DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
-        int deviceTabIndex,
+DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
         DSPDeviceSourceEngine *deviceSourceEngine,
         GLSpectrum *glSpectrum,
         ChannelWindow *channelWindow) :
@@ -40,7 +39,7 @@ DeviceSourceAPI::DeviceSourceAPI(MainWindow *mainWindow,
     m_sampleSourcePluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false),
-    m_masterTimer(mainWindow->getMasterTimer()) // TODO: get master timer directly not from main window
+    m_masterTimer(DSPEngine::instance()->getMasterTimer()) // TODO: get master timer directly not from main window
 {
 }
 

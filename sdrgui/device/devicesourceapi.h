@@ -25,7 +25,6 @@
 
 #include "util/export.h"
 
-class MainWindow;
 class GLSpectrum;
 class ChannelWindow;
 class BasebandSampleSink;
@@ -131,8 +130,7 @@ protected:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    DeviceSourceAPI(MainWindow *mainWindow,
-            int deviceTabIndex,
+    DeviceSourceAPI(int deviceTabIndex,
             DSPDeviceSourceEngine *deviceSourceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);

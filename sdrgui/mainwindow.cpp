@@ -203,7 +203,7 @@ void MainWindow::addSourceDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
-    DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(this, deviceTabIndex, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(deviceTabIndex, dspDeviceSourceEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceSourceAPI = deviceSourceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSourceAPI);
