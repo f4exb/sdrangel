@@ -11,7 +11,6 @@
 class QComboBox;
 class QPluginLoader;
 class Preset;
-class MainWindow;
 class Message;
 class MessageQueue;
 class DeviceSourceAPI;
@@ -36,9 +35,10 @@ public:
 
 	typedef QList<Plugin> Plugins;
 
-	explicit PluginManager(MainWindow* mainWindow, QObject* parent = NULL);
+	explicit PluginManager(QObject* parent = 0);
 	~PluginManager();
 
+	PluginAPI *getPluginAPI() { return &m_pluginAPI; }
 	void loadPlugins();
 	const Plugins& getPlugins() const { return m_plugins; }
 
@@ -134,8 +134,6 @@ private:
     static const QString m_fileSinkDeviceTypeID;      //!< FileSink sink plugin ID
 
 	void loadPlugins(const QDir& dir);
-
-	friend class MainWindow;
 };
 
 static inline bool operator<(const PluginManager::Plugin& a, const PluginManager::Plugin& b)

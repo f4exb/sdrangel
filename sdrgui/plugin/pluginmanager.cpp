@@ -14,23 +14,23 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <plugin/plugininstancegui.h>
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
 #include <QApplication>
 #include <QPluginLoader>
 #include <QComboBox>
+#include <QDebug>
+
 #include <cstdio>
 
-#include "plugin/pluginmanager.h"
+#include <plugin/plugininstancegui.h>
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
 #include "settings/preset.h"
-#include "mainwindow.h"
 #include "gui/glspectrum.h"
 #include "util/message.h"
-
-#include <QDebug>
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
+
+#include "plugin/pluginmanager.h"
 
 const QString PluginManager::m_sdrDaemonHardwareID = "SDRdaemonSource";
 const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemonsource";
@@ -38,7 +38,7 @@ const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
 
-PluginManager::PluginManager(MainWindow* mainWindow, QObject* parent) :
+PluginManager::PluginManager(QObject* parent) :
 	QObject(parent),
     m_pluginAPI(this)
 {
