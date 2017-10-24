@@ -334,8 +334,6 @@ bool LimeSDROutput::start()
         return false;
     }
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
     if ((m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo)) == 0)
