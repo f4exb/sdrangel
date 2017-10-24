@@ -587,18 +587,18 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
     {
-        suspendAllThread = true;
+        suspendAllThread = false;
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
-        suspendRxThread = true;
+        suspendRxThread = false;
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) &&
         (m_settings.m_antennaPath == 0))
     {
-        suspendRxThread = true;
+        suspendRxThread = false;
     }
 
     if ((m_settings.m_gain != settings.m_gain) ||

@@ -588,12 +588,12 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_log2HardInterp != settings.m_log2HardInterp) ||force)
     {
-        suspendAllThread = true;
+        suspendAllThread = false;
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
-        suspendTxThread = true;
+        suspendTxThread = false;
     }
 
     if ((m_settings.m_gain != settings.m_gain) ||
