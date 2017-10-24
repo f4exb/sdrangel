@@ -355,11 +355,11 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *de
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(true);
 
-	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
-	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	//m_channelMarker = new ChannelMarker(this);
+    //m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::gray);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);

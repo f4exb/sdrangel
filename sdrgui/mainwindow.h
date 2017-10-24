@@ -76,6 +76,7 @@ public:
 
 	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
+	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
@@ -100,6 +101,7 @@ private:
 	    QString tabName;
 	};
 
+	static MainWindow *m_instance;
 	Ui::MainWindow* ui;
 	AudioDeviceInfo m_audioDeviceInfo;
 	MessageQueue m_inputMessageQueue;

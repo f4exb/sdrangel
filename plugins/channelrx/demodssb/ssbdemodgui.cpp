@@ -319,9 +319,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
-	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
 
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.setVisible(true);
 

@@ -260,9 +260,9 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     ui->glScope->setSampleRate(48000);
     m_scopeVis->setSampleRate(48000);
 
-	ui->glScope->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
+	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
 
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 
@@ -304,8 +304,8 @@ DSDDemodGUI::~DSDDemodGUI()
 
 void DSDDemodGUI::updateMyPosition()
 {
-    float latitude = m_pluginAPI->getMainWindow()->getMainSettings().getLatitude();
-    float longitude = m_pluginAPI->getMainWindow()->getMainSettings().getLongitude();
+    float latitude = MainWindow::getInstance()->getMainSettings().getLatitude();
+    float longitude = MainWindow::getInstance()->getMainSettings().getLongitude();
 
     if ((m_myLatitude != latitude) || (m_myLongitude != longitude))
     {

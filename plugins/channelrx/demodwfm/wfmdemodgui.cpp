@@ -173,7 +173,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	m_wfmDemod = new WFMDemod(m_deviceAPI);
 
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setBandwidth(WFMDemodSettings::getRFBW(4));

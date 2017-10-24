@@ -153,8 +153,8 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	ui->glSpectrum->setDisplayMaxHold(true);
 	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
 
-	ui->glSpectrum->connectTimer(m_pluginAPI->getMainWindow()->getMasterTimer());
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);

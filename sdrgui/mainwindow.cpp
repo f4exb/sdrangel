@@ -54,6 +54,8 @@
 #include <string>
 #include <QDebug>
 
+MainWindow *MainWindow::m_instance = 0;
+
 MainWindow::MainWindow(QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
@@ -68,6 +70,7 @@ MainWindow::MainWindow(QWidget* parent) :
 {
 	qDebug() << "MainWindow::MainWindow: start";
 
+    m_instance = this;
 	m_settings.setAudioDeviceInfo(&m_audioDeviceInfo);
 
 	ui->setupUi(this);

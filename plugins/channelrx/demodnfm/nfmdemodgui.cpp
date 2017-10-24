@@ -241,7 +241,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	m_nfmDemod = new NFMDemod(m_deviceAPI);
 	m_nfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&m_pluginAPI->getMainWindow()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     blockApplySettings(true);
 
