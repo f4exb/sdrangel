@@ -139,38 +139,11 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDRInputGUI::handleMessage(const Message& message)
 {
-    if (LimeSDRInput::MsgReportLimeSDRToBuddy::match(message))
-    {
-        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
-        LimeSDRInput::MsgReportLimeSDRToBuddy& report = (LimeSDRInput::MsgReportLimeSDRToBuddy&) message;
-
-        m_settings.m_centerFrequency = report.getCenterFrequency();
-        m_settings.m_devSampleRate = report.getSampleRate();
-        m_settings.m_log2HardDecim = report.getLog2HardDecim();
-
-        blockApplySettings(true);
-        displaySettings();
-        blockApplySettings(false);
-
-        return true;
-    }
-    else if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
+    if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
     {
         DeviceLimeSDRShared::MsgReportSampleRateDirChange& report = (DeviceLimeSDRShared::MsgReportSampleRateDirChange&) message;
         m_settings.m_devSampleRate = report.getDevSampleRate();
         m_settings.m_log2HardDecim = report.getLog2HardDecimInterp();
-
-        blockApplySettings(true);
-        displaySettings();
-        blockApplySettings(false);
-
-        return true;
-    }
-    else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
-    {
-        qDebug("LimeSDRInputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
-        DeviceLimeSDRShared::MsgCrossReportToBuddy& report = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
-        m_settings.m_devSampleRate = report.getSampleRate(); // TODO: remove from here should be done device to device
 
         blockApplySettings(true);
         displaySettings();

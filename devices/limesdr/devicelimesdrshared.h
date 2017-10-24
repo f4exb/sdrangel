@@ -27,26 +27,6 @@
 class DeviceLimeSDRShared
 {
 public:
-    class MsgCrossReportToBuddy : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-
-        static MsgCrossReportToBuddy* create(int sampleRate)
-        {
-            return new MsgCrossReportToBuddy(sampleRate);
-        }
-
-    private:
-        int m_sampleRate;
-
-        MsgCrossReportToBuddy(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-    };
-
     class MsgReportSampleRateDirChange : public Message {
         MESSAGE_CLASS_DECLARATION
 

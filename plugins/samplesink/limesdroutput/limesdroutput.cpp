@@ -31,7 +31,6 @@
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetDeviceInfo, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportLimeSDRToBuddy, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportStreamInfo, Message)
 
 
@@ -442,20 +441,6 @@ bool LimeSDROutput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgReportLimeSDRToBuddy::match(message))
-    {
-        MsgReportLimeSDRToBuddy& conf = (MsgReportLimeSDRToBuddy&) message;
-        m_settings.m_centerFrequency = conf.getCenterFrequency();
-        m_settings.m_devSampleRate = conf.getSampleRate();
-        m_settings.m_log2HardInterp = conf.getLog2HardInterp();
-
-        qDebug() << "LimeSDRInput::handleMessage: MsgReportLimeSDRToBuddy:"
-                << " m_centerFrequency: " << conf.getCenterFrequency()
-                << " m_devSampleRate: " << conf.getSampleRate()
-                << " m_log2HardDecim: " << conf.getLog2HardInterp();
-
-        return true;
-    }
     else if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
     {
         DeviceLimeSDRShared::MsgReportSampleRateDirChange& report = (DeviceLimeSDRShared::MsgReportSampleRateDirChange&) message;
@@ -486,16 +471,6 @@ bool LimeSDROutput::handleMessage(const Message& message)
         DeviceLimeSDRShared::MsgReportSampleRateDirChange *reportToGUI = DeviceLimeSDRShared::MsgReportSampleRateDirChange::create(
                 m_settings.m_devSampleRate, m_settings.m_log2HardInterp, false);
         getMessageQueueToGUI()->push(reportToGUI);
-
-        return true;
-    }
-    else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
-    {
-        DeviceLimeSDRShared::MsgCrossReportToBuddy& conf = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
-        m_settings.m_devSampleRate = conf.getSampleRate();
-
-        qDebug() << "LimeSDRInput::handleMessage: MsgCrossReportToBuddy:"
-                << " m_devSampleRate: " << conf.getSampleRate();
 
         return true;
     }
@@ -606,23 +581,20 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool suspendTxThread     = false;
     bool suspendAllThread    = false;
     bool doCalibration       = false;
-//    bool forceNCOFrequency   = false;
 //  QMutexLocker mutexLocker(&m_mutex);
 
     // determine if buddies threads or own thread need to be suspended
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2HardInterp != settings.m_log2HardInterp) ||
-        (m_settings.m_centerFrequency != settings.m_centerFrequency) ||force)
+        (m_settings.m_log2HardInterp != settings.m_log2HardInterp) ||force)
     {
         suspendAllThread = true;
     }
 
-//    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) ||
-//        (m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-//    {
-//        suspendTxThread = true;
-//    }
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
+        suspendTxThread = true;
+    }
 
     if ((m_settings.m_gain != settings.m_gain) ||
         (m_settings.m_lpfBW != settings.m_lpfBW) ||
@@ -691,7 +663,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
        || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
     {
-//        forwardChangeTxDSP  = m_settings.m_log2HardInterp != settings.m_log2HardInterp;
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0)
@@ -920,27 +891,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             DeviceLimeSDRShared::MsgReportSampleRateDirChange *report = DeviceLimeSDRShared::MsgReportSampleRateDirChange::create(
                     m_settings.m_devSampleRate, m_settings.m_log2HardInterp, false);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
-
-//            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-//            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
-//            uint32_t buddyLog2SoftInterp = buddySharedPtr->m_log2Soft;
-//            DSPSignalNotification *notif = new DSPSignalNotification(
-//                    m_settings.m_devSampleRate/(1<<buddyLog2SoftInterp),
-//                    m_settings.m_centerFrequency + buddyNCOFreq); // do not change center frequency
-//            (*itSink)->getDeviceEngineInputMessageQueue()->push(notif);
-//
-//            MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
-//                    m_settings.m_centerFrequency,
-//                    m_settings.m_devSampleRate,
-//                    m_settings.m_log2HardInterp);
-//
-//            if ((*itSink)->getSampleSinkGUIMessageQueue())
-//            {
-//                MsgReportLimeSDRToBuddy *reportToGUI = new MsgReportLimeSDRToBuddy(*report);
-//                (*itSink)->getSampleSinkGUIMessageQueue()->push(reportToGUI);
-//            }
-//
-//            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
 
         // send to source buddies
@@ -952,25 +902,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             DeviceLimeSDRShared::MsgReportSampleRateDirChange *report = DeviceLimeSDRShared::MsgReportSampleRateDirChange::create(
                     m_settings.m_devSampleRate, m_settings.m_log2HardInterp, false);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
-
-//            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-//            uint64_t buddyCenterFreq = buddySharedPtr->m_centerFrequency;
-//            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
-//            uint32_t buddyLog2SoftDecim = buddySharedPtr->m_log2Soft;
-//            DSPSignalNotification *notif = new DSPSignalNotification(
-//                    m_settings.m_devSampleRate/(1<<buddyLog2SoftDecim),
-//                    buddyCenterFreq + buddyNCOFreq);
-//            (*itSource)->getDeviceEngineInputMessageQueue()->push(notif);
-//
-//            DeviceLimeSDRShared::MsgCrossReportToBuddy *report = DeviceLimeSDRShared::MsgCrossReportToBuddy::create(m_settings.m_devSampleRate);
-//
-//            if ((*itSource)->getSampleSourceGUIMessageQueue())
-//            {
-//                DeviceLimeSDRShared::MsgCrossReportToBuddy *reportToGUI = new DeviceLimeSDRShared::MsgCrossReportToBuddy(*report);
-//                (*itSource)->getSampleSourceGUIMessageQueue()->push(reportToGUI);
-//            }
-//
-//            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeTxDSP)
@@ -990,23 +921,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
-            uint64_t buddyCenterFreq = buddySharedPtr->m_centerFrequency;
-            int buddyNCOFreq = buddySharedPtr->m_ncoFrequency;
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, buddyCenterFreq + buddyNCOFreq); // do not change center frequency
-            (*itSink)->getDeviceEngineInputMessageQueue()->push(notif);
-
-            MsgReportLimeSDRToBuddy *report = MsgReportLimeSDRToBuddy::create(
-                    m_settings.m_centerFrequency,
-                    m_settings.m_devSampleRate,
-                    m_settings.m_log2HardInterp);
-
-            if ((*itSink)->getSampleSinkGUIMessageQueue())
-            {
-                MsgReportLimeSDRToBuddy *reportToGUI = new MsgReportLimeSDRToBuddy(*report);
-                (*itSink)->getSampleSinkGUIMessageQueue()->push(reportToGUI);
-            }
-
+            DeviceLimeSDRShared::MsgReportSampleRateDirChange *report = DeviceLimeSDRShared::MsgReportSampleRateDirChange::create(
+                    m_settings.m_devSampleRate, m_settings.m_log2HardInterp, false);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }

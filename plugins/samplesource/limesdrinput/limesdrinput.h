@@ -85,32 +85,6 @@ public:
         { }
     };
 
-    class MsgReportLimeSDRToBuddy : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        float    getCenterFrequency() const { return m_centerFrequency; }
-        int      getSampleRate() const { return m_sampleRate; }
-        uint32_t getLog2HardDecim() const { return m_log2HardDecim; }
-
-        static MsgReportLimeSDRToBuddy* create(float centerFrequency, int sampleRate, uint32_t log2HardDecim)
-        {
-            return new MsgReportLimeSDRToBuddy(centerFrequency, sampleRate, log2HardDecim);
-        }
-
-    private:
-        float    m_centerFrequency;
-        int      m_sampleRate;
-        uint32_t m_log2HardDecim;
-
-        MsgReportLimeSDRToBuddy(float centerFrequency, int sampleRate, uint32_t log2HardDecim) :
-            Message(),
-            m_centerFrequency(centerFrequency),
-            m_sampleRate(sampleRate),
-            m_log2HardDecim(log2HardDecim)
-        { }
-    };
-
     class MsgReportStreamInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 

@@ -141,38 +141,11 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDROutputGUI::handleMessage(const Message& message)
 {
-    if (LimeSDROutput::MsgReportLimeSDRToBuddy::match(message))
-    {
-        qDebug("LimeSDROutputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
-        LimeSDROutput::MsgReportLimeSDRToBuddy& report = (LimeSDROutput::MsgReportLimeSDRToBuddy&) message;
-
-        m_settings.m_centerFrequency = report.getCenterFrequency();
-        m_settings.m_devSampleRate = report.getSampleRate();
-        m_settings.m_log2HardInterp = report.getLog2HardInterp();
-
-        blockApplySettings(true);
-        displaySettings();
-        blockApplySettings(false);
-
-        return true;
-    }
-    else if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
+    if (DeviceLimeSDRShared::MsgReportSampleRateDirChange::match(message))
     {
         DeviceLimeSDRShared::MsgReportSampleRateDirChange& report = (DeviceLimeSDRShared::MsgReportSampleRateDirChange&) message;
         m_settings.m_devSampleRate = report.getDevSampleRate();
         m_settings.m_log2HardInterp = report.getLog2HardDecimInterp();
-
-        blockApplySettings(true);
-        displaySettings();
-        blockApplySettings(false);
-
-        return true;
-    }
-    else if (DeviceLimeSDRShared::MsgCrossReportToBuddy::match(message))
-    {
-        qDebug("LimeSDROutputGUI::handleMessagesToGUI: message: %s", message.getIdentifier());
-        DeviceLimeSDRShared::MsgCrossReportToBuddy& report = (DeviceLimeSDRShared::MsgCrossReportToBuddy&) message;
-        m_settings.m_devSampleRate = report.getSampleRate();
 
         blockApplySettings(true);
         displaySettings();
