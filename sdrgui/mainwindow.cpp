@@ -258,7 +258,7 @@ void MainWindow::addSinkDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
 
-    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(this, deviceTabIndex, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(deviceTabIndex, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
 
     m_deviceUIs.back()->m_deviceSourceAPI = 0;
     m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;

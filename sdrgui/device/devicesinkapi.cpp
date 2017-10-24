@@ -22,12 +22,11 @@
 #include "plugin/plugininterface.h"
 #include "gui/glspectrum.h"
 #include "gui/channelwindow.h"
-#include "mainwindow.h"
 #include "settings/preset.h"
+#include "dsp/dspengine.h"
 
 // TODO: extract GUI dependencies in a separate object
-DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
-        int deviceTabIndex,
+DeviceSinkAPI::DeviceSinkAPI(int deviceTabIndex,
         DSPDeviceSinkEngine *deviceSinkEngine,
         GLSpectrum *glSpectrum,
         ChannelWindow *channelWindow) :
@@ -40,7 +39,7 @@ DeviceSinkAPI::DeviceSinkAPI(MainWindow *mainWindow,
     m_sampleSinkPluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false),
-    m_masterTimer(mainWindow->getMasterTimer()) // TODO: get master timer directly not from main window
+    m_masterTimer(DSPEngine::instance()->getMasterTimer())
 {
 }
 

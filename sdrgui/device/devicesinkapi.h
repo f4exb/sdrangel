@@ -23,7 +23,6 @@
 #include "dsp/dspdevicesinkengine.h"
 #include "util/export.h"
 
-class MainWindow;
 class GLSpectrum;
 class ChannelWindow;
 class BasebandSampleSource;
@@ -130,8 +129,7 @@ protected:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    DeviceSinkAPI(MainWindow *mainWindow,
-            int deviceTabIndex,
+    DeviceSinkAPI(int deviceTabIndex,
             DSPDeviceSinkEngine *deviceEngine,
             GLSpectrum *glSpectrum,
             ChannelWindow *channelWindow);

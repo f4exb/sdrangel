@@ -39,7 +39,7 @@ DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
     m_sampleSourcePluginInstanceUI(0),
     m_buddySharedPtr(0),
     m_isBuddyLeader(false),
-    m_masterTimer(DSPEngine::instance()->getMasterTimer()) // TODO: get master timer directly not from main window
+    m_masterTimer(DSPEngine::instance()->getMasterTimer())
 {
 }
 
