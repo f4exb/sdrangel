@@ -532,8 +532,34 @@ bool LimeSDROutput::handleMessage(const Message& message)
 
         if (report.getRxElseTx())
         {
-            int adcdac_rate = report.getDevSampleRate() * (1<<report.getLog2HardDecimInterp());
-            m_settings.m_devSampleRate = adcdac_rate / (1<<m_settings.m_log2HardInterp); // new device to host sample rate
+            double host_Hz;
+            double rf_Hz;
+
+            if (LMS_GetSampleRate(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_TX,
+                    m_deviceShared.m_channel,
+                    &host_Hz,
+                    &rf_Hz) < 0)
+            {
+                qDebug("LimeSDROutput::handleMessage: MsgReportBuddyChange: LMS_GetSampleRate() failed");
+            }
+            else
+            {
+                m_settings.m_devSampleRate = roundf(host_Hz);
+                int hard = roundf(rf_Hz) / m_settings.m_devSampleRate;
+                m_settings.m_log2HardInterp = log2(hard);
+
+                qDebug() << "LimeSDROutput::handleMessage: MsgReportBuddyChange:"
+                         << " host_Hz: " << host_Hz
+                         << " rf_Hz: " << rf_Hz
+                         << " m_devSampleRate: " << m_settings.m_devSampleRate
+                         << " log2Hard: " << hard
+                         << " m_log2HardInterp: " << m_settings.m_log2HardInterp;
+
+//                int adcdac_rate = report.getDevSampleRate() * (1<<report.getLog2HardDecimInterp());
+//                m_settings.m_devSampleRate = adcdac_rate / (1<<m_settings.m_log2HardInterp); // new device to host sample rate
+            }
+
         }
         else
         {
