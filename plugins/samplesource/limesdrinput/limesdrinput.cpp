@@ -198,6 +198,9 @@ bool LimeSDRInput::openDevice()
     m_streamId.isTx = false;                        //RX channel
     m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
 
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
     {
         qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
@@ -207,6 +210,9 @@ bool LimeSDRInput::openDevice()
     {
         qDebug("LimeSDRInput::start: stream set up on Rx channel %d", m_deviceShared.m_channel);
     }
+
+    resumeTxBuddies();
+    resumeRxBuddies();
 
     return true;
 }
@@ -290,9 +296,15 @@ void LimeSDRInput::closeDevice()
 
     if (m_running) { stop(); }
 
+    suspendRxBuddies();
+    suspendTxBuddies();
+
     // destroy the stream
     LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
     m_streamId.handle = 0;
+
+    resumeTxBuddies();
+    resumeRxBuddies();
 
     // release the channel
 
