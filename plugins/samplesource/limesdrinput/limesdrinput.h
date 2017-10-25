@@ -212,11 +212,14 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceLimeSDRShared m_deviceShared;
+    bool m_channelAcquired;
     lms_stream_t m_streamId;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();
     void closeDevice();
+    bool acquireChannel();
+    void releaseChannel();
     void suspendRxBuddies();
     void resumeRxBuddies();
     void suspendTxBuddies();

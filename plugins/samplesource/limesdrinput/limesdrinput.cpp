@@ -41,7 +41,8 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
     m_limeSDRInputThread(0),
     m_deviceDescription("LimeSDRInput"),
-    m_running(false)
+    m_running(false),
+    m_channelAcquired(false)
 {
     m_streamId.handle = 0;
     suspendRxBuddies();
@@ -180,39 +181,39 @@ bool LimeSDRInput::openDevice()
 
     // acquire the channel
 
-    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
-    {
-        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %d", m_deviceShared.m_channel);
-        return false;
-    }
-    else
-    {
-        qDebug("LimeSDRInput::openDevice: Rx channel %d enabled", m_deviceShared.m_channel);
-    }
+//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
+//    {
+//        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %d", m_deviceShared.m_channel);
+//        return false;
+//    }
+//    else
+//    {
+//        qDebug("LimeSDRInput::openDevice: Rx channel %d enabled", m_deviceShared.m_channel);
+//    }
 
     // set up the stream
 
-    m_streamId.channel =  m_deviceShared.m_channel; //channel number
-    m_streamId.fifoSize = 1024 * 1024;              //fifo size in samples
-    m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
-    m_streamId.isTx = false;                        //RX channel
-    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
-
-    suspendRxBuddies();
-    suspendTxBuddies();
-
-    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
-    {
-        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
-        return false;
-    }
-    else
-    {
-        qDebug("LimeSDRInput::start: stream set up on Rx channel %d", m_deviceShared.m_channel);
-    }
-
-    resumeTxBuddies();
-    resumeRxBuddies();
+//    m_streamId.channel =  m_deviceShared.m_channel; //channel number
+//    m_streamId.fifoSize = 1024 * 1024;              //fifo size in samples
+//    m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
+//    m_streamId.isTx = false;                        //RX channel
+//    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
+//
+//    suspendRxBuddies();
+//    suspendTxBuddies();
+//
+//    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
+//    {
+//        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
+//        return false;
+//    }
+//    else
+//    {
+//        qDebug("LimeSDRInput::start: stream set up on Rx channel %d", m_deviceShared.m_channel);
+//    }
+//
+//    resumeTxBuddies();
+//    resumeRxBuddies();
 
     return true;
 }
@@ -221,6 +222,8 @@ void LimeSDRInput::suspendRxBuddies()
 {
     const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
     std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+    qDebug("LimeSDRInput::suspendRxBuddies (%lu)", sourceBuddies.size());
 
     for (; itSource != sourceBuddies.end(); ++itSource)
     {
@@ -243,6 +246,8 @@ void LimeSDRInput::suspendTxBuddies()
     const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
     std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
 
+    qDebug("LimeSDRInput::suspendTxBuddies (%lu)", sinkBuddies.size());
+
     for (; itSink != sinkBuddies.end(); ++itSink)
     {
         DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
@@ -263,6 +268,8 @@ void LimeSDRInput::resumeRxBuddies()
     const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
     std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
+    qDebug("LimeSDRInput::resumeRxBuddies (%lu)", sourceBuddies.size());
+
     for (; itSource != sourceBuddies.end(); ++itSource)
     {
         DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
@@ -277,6 +284,8 @@ void LimeSDRInput::resumeTxBuddies()
 {
     const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
     std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+    qDebug("LimeSDRInput::resumeTxBuddies (%lu)", sinkBuddies.size());
 
     for (; itSink != sinkBuddies.end(); ++itSink)
     {
@@ -296,22 +305,23 @@ void LimeSDRInput::closeDevice()
 
     if (m_running) { stop(); }
 
-    suspendRxBuddies();
-    suspendTxBuddies();
-
     // destroy the stream
-    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
-    m_streamId.handle = 0;
 
-    resumeTxBuddies();
-    resumeRxBuddies();
+//    suspendRxBuddies();
+//    suspendTxBuddies();
+//
+//    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
+//    m_streamId.handle = 0;
+//
+//    resumeTxBuddies();
+//    resumeRxBuddies();
 
     // release the channel
 
-    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
-    {
-        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %d", m_deviceShared.m_channel);
-    }
+//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
+//    {
+//        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %d", m_deviceShared.m_channel);
+//    }
 
     m_deviceShared.m_channel = -1;
 
@@ -325,6 +335,85 @@ void LimeSDRInput::closeDevice()
     }
 }
 
+bool LimeSDRInput::acquireChannel()
+{
+    suspendRxBuddies();
+    suspendTxBuddies();
+
+    // acquire the channel
+
+    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
+    {
+        qCritical("LimeSDRInput::acquireChannel: cannot enable Rx channel %d", m_deviceShared.m_channel);
+        return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::acquireChannel: Rx channel %d enabled", m_deviceShared.m_channel);
+    }
+
+    // set up the stream
+
+    m_streamId.channel =  m_deviceShared.m_channel; // channel number
+    m_streamId.fifoSize = 1024 * 1024;              // fifo size in samples (SR / 10 take ~5MS/s)
+    m_streamId.throughputVsLatency = 0.5;           // optimize for min latency
+    m_streamId.isTx = false;                        // RX channel
+    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
+
+    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
+    {
+        qCritical("LimeSDRInput::acquireChannel: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
+        resumeTxBuddies();
+        resumeRxBuddies();
+        return false;
+    }
+    else
+    {
+        qDebug("LimeSDRInput::acquireChannel: stream set up on Rx channel %d", m_deviceShared.m_channel);
+    }
+
+    resumeTxBuddies();
+    resumeRxBuddies();
+
+    m_channelAcquired = true;
+
+    return true;
+}
+
+void LimeSDRInput::releaseChannel()
+{
+    suspendRxBuddies();
+    suspendTxBuddies();
+
+    // destroy the stream
+    if (LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
+    {
+        qWarning("LimeSDRInput::releaseChannel: cannot destroy the stream on Rx channel %d", m_deviceShared.m_channel);
+    }
+    else
+    {
+        qDebug("LimeSDRInput::releaseChannel: stream destroyed on Rx channel %d", m_deviceShared.m_channel);
+    }
+
+    m_streamId.handle = 0;
+
+    // release the channel
+
+    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
+    {
+        qWarning("LimeSDRInput::releaseChannel: cannot disable Rx channel %d", m_deviceShared.m_channel);
+    }
+    else
+    {
+        qDebug("LimeSDRInput::releaseChannel: Rx channel %d disabled", m_deviceShared.m_channel);
+    }
+
+    resumeTxBuddies();
+    resumeRxBuddies();
+
+    m_channelAcquired = false;
+}
+
 bool LimeSDRInput::start()
 {
     if (!m_deviceShared.m_deviceParams->getDevice()) {
@@ -332,6 +421,11 @@ bool LimeSDRInput::start()
     }
 
     if (m_running) { stop(); }
+
+    if (!acquireChannel())
+    {
+        return false;
+    }
 
     applySettings(m_settings, true);
 
@@ -360,6 +454,8 @@ bool LimeSDRInput::start()
 
 void LimeSDRInput::stop()
 {
+    qDebug("LimeSDRInput::stop");
+
     if (m_limeSDRInputThread != 0)
     {
         m_limeSDRInputThread->stopWork();
@@ -369,6 +465,8 @@ void LimeSDRInput::stop()
 
     m_deviceShared.m_thread = 0;
     m_running = false;
+
+    releaseChannel();
 }
 
 const QString& LimeSDRInput::getDeviceDescription() const
@@ -622,7 +720,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         (m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
         (m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
-        suspendOwnThread = true;
+        suspendOwnThread = false;
     }
 
     // suspend buddies threads or own thread
@@ -679,7 +777,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             m_settings.m_gain = settings.m_gain;
 
-            if (m_deviceShared.m_deviceParams->getDevice() != 0)
+            if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
             {
                 if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
                         LMS_CH_RX,
@@ -701,7 +799,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             m_settings.m_tiaGain = settings.m_tiaGain;
             m_settings.m_pgaGain = settings.m_pgaGain;
 
-            if (m_deviceShared.m_deviceParams->getDevice() != 0)
+            if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
             {
                 if (DeviceLimeSDR::SetRFELNA_dB(m_deviceShared.m_deviceParams->getDevice(),
                         m_deviceShared.m_channel,
@@ -743,7 +841,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_gain = settings.m_gain;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -764,7 +862,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_lnaGain = settings.m_lnaGain;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::SetRFELNA_dB(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
@@ -783,7 +881,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_tiaGain = settings.m_tiaGain;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::SetRFETIA_dB(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
@@ -802,7 +900,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_pgaGain = settings.m_pgaGain;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::SetRBBPGA_dB(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
@@ -825,7 +923,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_settings.m_devSampleRate = settings.m_devSampleRate;
         m_settings.m_log2HardDecim = settings.m_log2HardDecim;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -853,7 +951,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_lpfBW = settings.m_lpfBW;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -876,7 +974,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_settings.m_lpfFIRBW = settings.m_lpfFIRBW;
         m_settings.m_lpfFIREnable = settings.m_lpfFIREnable;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -904,7 +1002,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_settings.m_ncoFrequency = settings.m_ncoFrequency;
         m_settings.m_ncoEnable = settings.m_ncoEnable;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -945,7 +1043,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         m_settings.m_antennaPath = settings.m_antennaPath;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::setRxAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
@@ -969,7 +1067,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         forwardChangeRxDSP = true;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
