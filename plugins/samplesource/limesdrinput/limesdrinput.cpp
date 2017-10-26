@@ -179,42 +179,6 @@ bool LimeSDRInput::openDevice()
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
-    // acquire the channel
-
-//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, true) != 0)
-//    {
-//        qCritical("LimeSDRInput::openDevice: cannot enable Rx channel %d", m_deviceShared.m_channel);
-//        return false;
-//    }
-//    else
-//    {
-//        qDebug("LimeSDRInput::openDevice: Rx channel %d enabled", m_deviceShared.m_channel);
-//    }
-
-    // set up the stream
-
-//    m_streamId.channel =  m_deviceShared.m_channel; //channel number
-//    m_streamId.fifoSize = 1024 * 1024;              //fifo size in samples
-//    m_streamId.throughputVsLatency = 1.0;           //optimize for max throughput
-//    m_streamId.isTx = false;                        //RX channel
-//    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
-//
-//    suspendRxBuddies();
-//    suspendTxBuddies();
-//
-//    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
-//    {
-//        qCritical("LimeSDRInput::start: cannot setup the stream on Rx channel %d", m_deviceShared.m_channel);
-//        return false;
-//    }
-//    else
-//    {
-//        qDebug("LimeSDRInput::start: stream set up on Rx channel %d", m_deviceShared.m_channel);
-//    }
-//
-//    resumeTxBuddies();
-//    resumeRxBuddies();
-
     return true;
 }
 
@@ -304,24 +268,6 @@ void LimeSDRInput::closeDevice()
     }
 
     if (m_running) { stop(); }
-
-    // destroy the stream
-
-//    suspendRxBuddies();
-//    suspendTxBuddies();
-//
-//    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
-//    m_streamId.handle = 0;
-//
-//    resumeTxBuddies();
-//    resumeRxBuddies();
-
-    // release the channel
-
-//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_RX, m_deviceShared.m_channel, false) != 0)
-//    {
-//        qWarning("LimeSDRInput::closeDevice: cannot disable Rx channel %d", m_deviceShared.m_channel);
-//    }
 
     m_deviceShared.m_channel = -1;
 

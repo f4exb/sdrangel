@@ -161,46 +161,6 @@ bool LimeSDROutput::openDevice()
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
-    // acquire the channel
-
-//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_TX, m_deviceShared.m_channel, true) != 0)
-//    {
-//        qCritical("LimeSDROutput::acquireChannel: cannot enable Tx channel %d", m_deviceShared.m_channel);
-//        return false;
-//    }
-//    else
-//    {
-//        qDebug("LimeSDROutput::acquireChannel: Tx channel %d enabled", m_deviceShared.m_channel);
-//    }
-
-    // set up the stream
-
-//    m_streamId.channel =  m_deviceShared.m_channel; // channel number
-//    m_streamId.fifoSize = 512 * 1024;               // fifo size in samples (SR / 10 take ~5MS/s)
-//    m_streamId.throughputVsLatency = 0.0;           // optimize for min latency
-//    m_streamId.isTx = true;                         // TX channel
-//    m_streamId.dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
-//
-//    suspendRxBuddies();
-//    suspendTxBuddies();
-//
-//    if (LMS_SetupStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId) != 0)
-//    {
-//        qCritical("LimeSDROutput::acquireChannel: cannot setup the stream on Tx channel %d", m_deviceShared.m_channel);
-//        resumeTxBuddies();
-//        resumeRxBuddies();
-//        return false;
-//    }
-//    else
-//    {
-//        qDebug("LimeSDROutput::acquireChannel: stream set up on Tx channel %d", m_deviceShared.m_channel);
-//    }
-//
-//    resumeTxBuddies();
-//    resumeRxBuddies();
-
-//    m_channelAcquired = true;
-
     return true;
 }
 
@@ -291,26 +251,6 @@ void LimeSDROutput::closeDevice()
     }
 
     if (m_running) stop();
-
-    // destroy the stream
-
-//    suspendRxBuddies();
-//    suspendTxBuddies();
-//
-//    LMS_DestroyStream(m_deviceShared.m_deviceParams->getDevice(), &m_streamId);
-//    m_streamId.handle = 0;
-//
-//    resumeTxBuddies();
-//    resumeRxBuddies();
-
-    // release the channel
-
-//    if (LMS_EnableChannel(m_deviceShared.m_deviceParams->getDevice(), LMS_CH_TX, m_deviceShared.m_channel, false) != 0)
-//    {
-//        qWarning("LimeSDROutput::releaseChannel: cannot disable Tx channel %d", m_deviceShared.m_channel);
-//    }
-//
-//    m_channelAcquired = false;
 
     // No buddies so effectively close the device
 
@@ -555,9 +495,6 @@ bool LimeSDROutput::handleMessage(const Message& message)
                          << " m_devSampleRate: " << m_settings.m_devSampleRate
                          << " log2Hard: " << hard
                          << " m_log2HardInterp: " << m_settings.m_log2HardInterp;
-
-//                int adcdac_rate = report.getDevSampleRate() * (1<<report.getLog2HardDecimInterp());
-//                m_settings.m_devSampleRate = adcdac_rate / (1<<m_settings.m_log2HardInterp); // new device to host sample rate
             }
 
         }
