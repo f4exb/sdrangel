@@ -655,10 +655,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
-    bool suspendOwnThread    = false;
     bool ownThreadWasRunning = false;
-    bool suspendRxThread     = false;
-    bool suspendAllThread    = false;
     bool doCalibration = false;
     bool setAntennaAuto = false;
     double clockGenFreq      = 0.0;
@@ -671,68 +668,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     else
     {
         qDebug() << "LimeSDRInput::applySettings: clock gen frequency: " << clockGenFreq;
-    }
-
-    // determine if buddies threads or own thread need to be suspended
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
-    {
-        suspendAllThread = false;
-    }
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
-        suspendRxThread = false;
-    }
-
-    if ((m_settings.m_antennaPath != settings.m_antennaPath) &&
-        (m_settings.m_antennaPath == 0))
-    {
-        suspendRxThread = false;
-    }
-
-    if ((m_settings.m_gain != settings.m_gain) ||
-        (m_settings.m_lpfBW != settings.m_lpfBW) ||
-        (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
-        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-        (m_settings.m_ncoEnable != settings.m_ncoEnable) ||
-        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
-        (m_settings.m_antennaPath != settings.m_antennaPath) || force)
-    {
-        suspendOwnThread = false;
-    }
-
-    // suspend buddies threads or own thread
-
-    if (suspendAllThread)
-    {
-        suspendRxBuddies();
-        suspendTxBuddies();
-
-        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
-        {
-            m_limeSDRInputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
-    }
-    else if (suspendRxThread)
-    {
-        suspendRxBuddies();
-
-        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
-        {
-            m_limeSDRInputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
-    }
-    else if (suspendOwnThread)
-    {
-        if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
-        {
-            m_limeSDRInputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
     }
 
     // apply settings
@@ -1078,42 +1013,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         resumeTxBuddies();
         resumeRxBuddies();
 
-        if (ownThreadWasRunning) {
-            m_limeSDRInputThread->startWork();
-        }
-    }
-
-    // resume buddies threads or own thread
-
-    if (suspendAllThread)
-    {
-        resumeTxBuddies();
-        resumeRxBuddies();
-
-        if (ownThreadWasRunning) {
-            m_limeSDRInputThread->startWork();
-        }
-    }
-    else if (suspendRxThread)
-    {
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-        for (; itSource != sourceBuddies.end(); ++itSource)
-        {
-            DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSource)->getBuddySharedPtr();
-
-            if (buddySharedPtr->m_threadWasRunning) {
-                buddySharedPtr->m_thread->startWork();
-            }
-        }
-
-        if (ownThreadWasRunning) {
-            m_limeSDRInputThread->startWork();
-        }
-    }
-    else if (suspendOwnThread)
-    {
         if (ownThreadWasRunning) {
             m_limeSDRInputThread->startWork();
         }

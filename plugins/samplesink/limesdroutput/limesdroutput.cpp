@@ -625,10 +625,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool forwardChangeOwnDSP = false;
     bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
-    bool suspendOwnThread    = false;
     bool ownThreadWasRunning = false;
-    bool suspendTxThread     = false;
-    bool suspendAllThread    = false;
     bool doCalibration       = false;
     double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
@@ -640,62 +637,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     else
     {
         qDebug() << "LimeSDROutput::applySettings: clock gen frequency: " << clockGenFreq;
-    }
-
-    // determine if buddies threads or own thread need to be suspended
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2HardInterp != settings.m_log2HardInterp) ||force)
-    {
-        suspendAllThread = false;
-    }
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
-        suspendTxThread = false;
-    }
-
-    if ((m_settings.m_gain != settings.m_gain) ||
-        (m_settings.m_lpfBW != settings.m_lpfBW) ||
-        (m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
-        (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) ||
-        (m_settings.m_ncoEnable != settings.m_ncoEnable) ||
-        (m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
-        (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
-    {
-        suspendOwnThread = false;
-    }
-
-    // suspend buddies threads or own thread
-
-    if (suspendAllThread)
-    {
-        suspendRxBuddies();
-        suspendTxBuddies();
-
-        if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
-        {
-            m_limeSDROutputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
-    }
-    else if (suspendTxThread)
-    {
-        suspendTxBuddies();
-
-        if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
-        {
-            m_limeSDROutputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
-    }
-    else if (suspendOwnThread)
-    {
-        if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
-        {
-            m_limeSDROutputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
     }
 
     // apply settings
@@ -924,32 +865,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         resumeRxBuddies();
 
         if (ownThreadWasRunning) {
-            m_limeSDROutputThread->startWork();
-        }
-    }
-
-    // resume buddies threads or own thread
-
-    if (suspendAllThread)
-    {
-        resumeTxBuddies();
-        resumeRxBuddies();
-
-        if (ownThreadWasRunning) {
-            m_limeSDROutputThread->startWork();
-        }
-    }
-    else if (suspendTxThread)
-    {
-        resumeTxBuddies();
-
-        if (ownThreadWasRunning) {
-            m_limeSDROutputThread->startWork();
-        }
-    }
-    else if (ownThreadWasRunning)
-    {
-        if (m_limeSDROutputThread) {
             m_limeSDROutputThread->startWork();
         }
     }
