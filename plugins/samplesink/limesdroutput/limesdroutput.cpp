@@ -693,7 +693,17 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool suspendTxThread     = false;
     bool suspendAllThread    = false;
     bool doCalibration       = false;
+    double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
+
+    if (LMS_GetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreq) != 0)
+    {
+        qCritical("LimeSDROutput::applySettings: could not get clock gen frequency");
+    }
+    else
+    {
+        qDebug() << "LimeSDROutput::applySettings: clock gen frequency: " << clockGenFreq;
+    }
 
     // determine if buddies threads or own thread need to be suspended
 
@@ -766,7 +776,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             }
             else
             {
-                //doCalibration = true;
+                doCalibration = true;
                 qDebug() << "LimeSDROutput::applySettings: Gain set to " << settings.m_gain;
             }
         }
@@ -792,7 +802,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             {
                 m_deviceShared.m_deviceParams->m_log2OvSRTx = settings.m_log2HardInterp;
                 m_deviceShared.m_deviceParams->m_sampleRate = settings.m_devSampleRate;
-                doCalibration = true;
+                //doCalibration = true;
                 forceNCOFrequency = true;
                 qDebug("LimeSDROutput::applySettings: set sample rate set to %d with oversampling of %d",
                         settings.m_devSampleRate,
@@ -824,7 +834,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             }
             else
             {
-                doCalibration = true;
+                //doCalibration = true;
                 qDebug("LimeSDROutput::applySettings: LPF set to %f Hz", settings.m_lpfBW);
             }
         }
@@ -847,7 +857,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             }
             else
             {
-                doCalibration = true;
+                //doCalibration = true;
                 qDebug("LimeSDROutput::applySettings: %sd and set LPF FIR to %f Hz",
                         settings.m_lpfFIREnable ? "enable" : "disable",
                         settings.m_lpfFIRBW);
@@ -937,9 +947,29 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     }
 
     m_settings = settings;
+    double clockGenFreqAfter;
+
+    if (LMS_GetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreqAfter) != 0)
+    {
+        qCritical("LimeSDROutput::applySettings: could not get clock gen frequency");
+    }
+    else
+    {
+        qDebug() << "LimeSDROutput::applySettings: clock gen frequency after: " << clockGenFreqAfter;
+        doCalibration = doCalibration || (clockGenFreqAfter != clockGenFreq);
+    }
 
     if (doCalibration && m_channelAcquired)
     {
+        if (m_limeSDROutputThread && m_limeSDROutputThread->isRunning())
+        {
+            m_limeSDROutputThread->stopWork();
+            ownThreadWasRunning = true;
+        }
+
+        suspendRxBuddies();
+        suspendTxBuddies();
+
         if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
                 LMS_CH_TX,
                 m_deviceShared.m_channel,
@@ -951,6 +981,13 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         else
         {
             qDebug("LimeSDROutput::applySettings: calibration successful on Tx channel %d", m_deviceShared.m_channel);
+        }
+
+        resumeTxBuddies();
+        resumeRxBuddies();
+
+        if (ownThreadWasRunning) {
+            m_limeSDROutputThread->startWork();
         }
     }
 
