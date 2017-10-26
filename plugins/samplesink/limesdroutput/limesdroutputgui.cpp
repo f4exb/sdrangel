@@ -163,7 +163,12 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
 
         if (report.getSuccess())
         {
-            ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+            if (report.getActive()) {
+                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+            } else {
+                ui->streamStatusLabel->setStyleSheet("QLabel { background-color : blue; }");
+            }
+
             ui->streamLinkRateText->setText(tr("%1 MB/s").arg(QString::number(report.getLinkRate() / 1000000.0f, 'f', 3)));
 
             if (report.getUnderrun() > 0) {
