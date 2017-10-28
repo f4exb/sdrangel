@@ -57,6 +57,8 @@ Record baseband I/Q stream toggle button
 
 This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before hardware decimation (8). Thus this is the device to host sample rate (10) multiplied by the hardware decimation factor (8).
 
+&#9758; Note that changing the hardware decimation factor (8) or the device to host sample rate (10) may change the DAC clock sample rate and therefore the Tx side hardware interpolation factor and/or host to device sample rate. In fact ADC and DAC sample rates can be equal or related by a factor of 2.
+
 <h4>1.5: Stream sample rate</h4>
 
 Baseband I/Q sample rate in kS/s. This is the device to host sample rate (10) divided by the software decimation factor (9). 

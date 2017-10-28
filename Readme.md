@@ -103,9 +103,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-<b>&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is experimental and not actively supported.</b>
-
-Sometimes changing parameters in one instance or stopping/starting it will make the other fail or block everything. If you are lucky enough and don't change the configuration too much you may make it work but generally this is not reliable.
+<b>&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b>
 
 You will need a minimal installation of LimeSuite:
 

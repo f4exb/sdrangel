@@ -45,6 +45,8 @@ Device start / stop button.
 
 This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (8). Thus this is the host to device sample rate (10) multiplied by the hardware interpolation factor (8).
 
+&#9758; Note that changing the hardware interpolation factor (8) or the host to device sample rate (10) may change the ADC clock sample rate and therefore the Rx side hardware decimation factor and/or device to host sample rate. In fact ADC and DAC sample rates can be equal or related by a factor of 2. 
+
 <h3>2B: Baseband sample rate</h3>
 
 This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the host to device sample rate (10) divided by the software interpolation factor (9).
