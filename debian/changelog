@@ -1,6 +1,9 @@
 sdrangel (3.7.6-1) unstable; urgency=medium
 
-  * Create sdrbase library own CMakeLists.txt 
+  * LimeSDR: attempt to fix lockup conditions when Rx and Tx run concurrently
+  * LimeSDR: handle hardware decimation and sample rate Rx/Tx relation correctly
+  * Create sdrbase library own CMakeLists.txt
+  * Created sdrgui library and split off GUI stuff from sdrbase
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 21 Oct 2017 23:14:18 +0200
 
