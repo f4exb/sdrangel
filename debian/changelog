@@ -1,3 +1,9 @@
+sdrangel (3.7.7-1) unstable; urgency=medium
+
+  * PlutoSDR: removed Tx support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Oct 2017 23:14:18 +0200
+
 sdrangel (3.7.6-1) unstable; urgency=medium
 
   * LimeSDR: attempt to fix lockup conditions when Rx and Tx run concurrently
