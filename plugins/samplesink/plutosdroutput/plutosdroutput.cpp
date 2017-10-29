@@ -187,7 +187,7 @@ bool PlutoSDROutput::openDevice()
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openTx();
-    m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES*2, false); // PlutoSDR buffer size is counted in number of I or Q samples not the combination
+    m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false); // PlutoSDR buffer size is counted in number of (I,Q) samples
 
     return true;
 }

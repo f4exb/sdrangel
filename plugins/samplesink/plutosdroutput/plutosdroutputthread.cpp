@@ -29,7 +29,7 @@ PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlut
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
-    m_buf     = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
+    m_buf = new qint16[blocksizeSamples*2];
 //    m_bufConv = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
 }
 
@@ -86,17 +86,18 @@ void PlutoSDROutputThread::run()
         // I and Q samples are processed one after the other
         // conversion is not needed as samples are little endian
 
-        for (p_dat = m_plutoBox->txBufferFirst(), ihs = 0; p_dat < p_end; p_dat += p_inc, ihs++)
+        for (p_dat = m_plutoBox->txBufferFirst(), ihs = 0; p_dat < p_end; p_dat += p_inc, ihs += 2)
         {
-            *((int16_t*)p_dat) = m_buf[ihs] << 4;
+            m_plutoBox->txChannelConvert((int16_t*) p_dat, &m_buf[ihs]);
+            //*((int16_t*)p_dat) = m_buf[ihs] << 4;
         }
 
         // Schedule TX buffer for sending
         nbytes_tx = m_plutoBox->txBufferPush();
 
-        if (nbytes_tx < 0)
+        if (nbytes_tx != 4*m_blockSizeSamples)
         {
-            qDebug("PlutoSDROutputThread::run: error pushing buf %d\n", (int) nbytes_tx);
+            qDebug("PlutoSDROutputThread::run: error pushing buf %d != %d\n", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
             usleep(200000);
             continue;
         }
