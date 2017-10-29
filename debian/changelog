@@ -1,8 +1,15 @@
+sdrangel (3.7.8-1) unstable; urgency=medium
+
+  * PlutoSDR: restored and fixed Tx support
+  * LimeSDR: reworked the start/stop stream so it does not need the workaround delay
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Oct 2017 18:14:18 +0200
+
 sdrangel (3.7.7-1) unstable; urgency=medium
 
   * PlutoSDR: removed Tx support
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Oct 2017 23:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 27 Oct 2017 23:14:18 +0200
 
 sdrangel (3.7.6-1) unstable; urgency=medium
 

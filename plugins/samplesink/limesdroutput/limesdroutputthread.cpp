@@ -38,6 +38,12 @@ void LimeSDROutputThread::startWork()
 {
     if (m_running) return; // return if running already
 
+    if (LMS_StartStream(m_stream) < 0) {
+        qCritical("LimeSDROutputThread::startWork: could not start stream");
+    } else {
+        qDebug("LimeSDROutputThread::startWork: stream started");
+    }
+
     m_startWaitMutex.lock();
     start();
     while(!m_running)
@@ -51,6 +57,12 @@ void LimeSDROutputThread::stopWork()
 
     m_running = false;
     wait();
+
+    if (LMS_StopStream(m_stream) < 0) {
+        qCritical("LimeSDROutputThread::stopWork: could not stop stream");
+    } else {
+        qDebug("LimeSDROutputThread::stopWork: stream stopped");
+    }
 }
 
 void LimeSDROutputThread::setLog2Interpolation(unsigned int log2_interp)
@@ -65,9 +77,7 @@ void LimeSDROutputThread::setFcPos(int fcPos)
 
 void LimeSDROutputThread::run()
 {
-    //int count, msleep, mdelta;
     int res;
-    //lms_stream_status_t streamStatus;
 
     lms_stream_meta_t metadata;          //Use metadata for additional control over sample receive function behaviour
     metadata.flushPartialPacket = false; //Do not discard data remainder when read size differs from packet size
@@ -75,13 +85,6 @@ void LimeSDROutputThread::run()
 
     m_running = true;
     m_startWaiter.wakeAll();
-
-    if (LMS_StartStream(m_stream) < 0) {
-        qCritical("LimeSDROutputThread::run: could not start stream");
-    } else {
-        usleep(100000);
-        qDebug("LimeSDROutputThread::run: stream started");
-    }
 
     while (m_running)
     {
@@ -98,33 +101,6 @@ void LimeSDROutputThread::run()
         {
             qDebug("LimeSDROutputThread::run written %d/%d samples", res, LIMESDROUTPUT_BLOCKSIZE);
         }
-
-//        usleep(msleep);
-//
-//        if (count < 10)
-//        {
-//            count++;
-//        }
-//        else
-//        {
-//            if (LMS_GetStreamStatus(m_stream, &streamStatus) == 0)
-//            {
-//                if (streamStatus.fifoFilledCount < (4*streamStatus.fifoSize)/5) { // FIFO at 80%
-//                    msleep -= mdelta;
-//                } else {
-//                    msleep += mdelta;
-//                }
-//            }
-//
-//            count = 0;
-//        }
-    }
-
-    if (LMS_StopStream(m_stream) < 0) {
-        qCritical("LimeSDROutputThread::run: could not stop stream");
-    } else {
-        usleep(100000);
-        qDebug("LimeSDROutputThread::run: stream stopped");
     }
 
     m_running = false;
