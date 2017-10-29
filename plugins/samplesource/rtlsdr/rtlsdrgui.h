@@ -37,7 +37,7 @@ class RTLSDRGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit RTLSDRGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~RTLSDRGui();
 	virtual void destroy();
 
@@ -55,7 +55,6 @@ public:
 private:
 	Ui::RTLSDRGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;

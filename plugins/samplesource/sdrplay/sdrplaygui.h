@@ -39,7 +39,7 @@ class SDRPlayGui : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit SDRPlayGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~SDRPlayGui();
     virtual void destroy();
 
@@ -57,7 +57,6 @@ public:
 private:
     Ui::SDRPlayGui* ui;
 
-    DeviceSourceAPI* m_deviceAPI;
     DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     SDRPlaySettings m_settings;

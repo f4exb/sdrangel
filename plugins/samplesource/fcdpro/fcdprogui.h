@@ -37,7 +37,7 @@ class FCDProGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FCDProGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit FCDProGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~FCDProGui();
 	virtual void destroy();
 
@@ -55,7 +55,6 @@ public:
 private:
 	Ui::FCDProGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	FCDProSettings m_settings;

@@ -100,12 +100,11 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
 PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
-        DeviceSourceAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
     if(sourceId == m_deviceTypeID)
     {
-        LimeSDRInputGUI* gui = new LimeSDRInputGUI(deviceAPI, deviceUISet);
+        LimeSDRInputGUI* gui = new LimeSDRInputGUI(deviceUISet);
         *widget = gui;
         return gui;
     }

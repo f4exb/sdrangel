@@ -81,12 +81,11 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
-        DeviceSourceAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		BladerfInputGui* gui = new BladerfInputGui(deviceAPI, deviceUISet);
+		BladerfInputGui* gui = new BladerfInputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

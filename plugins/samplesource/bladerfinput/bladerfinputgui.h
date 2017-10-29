@@ -36,7 +36,7 @@ class BladerfInputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit BladerfInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~BladerfInputGui();
 	virtual void destroy();
 
@@ -54,7 +54,6 @@ public:
 private:
 	Ui::BladerfInputGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	BladeRFInputSettings m_settings;

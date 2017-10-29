@@ -28,10 +28,9 @@
 #include "ui_plutosdrinputgui.h"
 #include "plutosdrinputgui.h"
 
-PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::PlutoSDRInputGUI),
-    m_deviceAPI(deviceAPI),
     m_deviceUISet(deviceUISet),
     m_settings(),
     m_forceSettings(true),
@@ -42,7 +41,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *devi
     m_doApplySettings(true),
     m_statusCounter(0)
 {
-    m_sampleSource = (PlutoSDRInput*) m_deviceAPI->getSampleSource();
+    m_sampleSource = (PlutoSDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -156,15 +155,15 @@ void PlutoSDRInputGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_deviceAPI->initAcquisition())
+        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
         {
-            m_deviceAPI->startAcquisition();
+            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
             DSPEngine::instance()->startAudioOutput();
         }
     }
     else
     {
-        m_deviceAPI->stopAcquisition();
+        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
         DSPEngine::instance()->stopAudioOutput();
     }
 }
@@ -346,7 +345,7 @@ void PlutoSDRInputGui::blockApplySettings(bool block)
 
 void PlutoSDRInputGui::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSourceAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -363,7 +362,7 @@ void PlutoSDRInputGui::updateStatus()
                 break;
             case DSPDeviceSourceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -395,7 +394,7 @@ void PlutoSDRInputGui::updateStatus()
 
     if (m_statusCounter % 10 == 0) // 5s
     {
-        if (m_deviceAPI->isBuddyLeader()) {
+        if (m_deviceUISet->m_deviceSourceAPI->isBuddyLeader()) {
             ((PlutoSDRInput *) m_sampleSource)->fetchTemperature();
         }
 

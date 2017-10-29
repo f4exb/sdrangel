@@ -154,7 +154,6 @@ MainWindow::MainWindow(QWidget* parent) :
     PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(),
             &gui,
-            m_deviceUIs.back()->m_deviceSourceAPI,
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
@@ -241,7 +240,6 @@ void MainWindow::addSourceDevice()
     PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(),
             &gui,
-            m_deviceUIs.back()->m_deviceSourceAPI,
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
@@ -909,7 +907,6 @@ void MainWindow::on_sampleSource_confirmClicked(bool checked __attribute__((unus
         PluginInstanceGUI *pluginUI = deviceUI->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceSourceAPI->getSampleSourceId(),
                 &gui,
-                deviceUI->m_deviceSourceAPI,
                 deviceUI);
         deviceUI->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginUI);

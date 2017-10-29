@@ -36,7 +36,7 @@ class LimeSDRInputGUI : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~LimeSDRInputGUI();
     virtual void destroy();
 
@@ -54,7 +54,6 @@ public:
 private:
     Ui::LimeSDRInputGUI* ui;
 
-    DeviceSourceAPI* m_deviceAPI;
     DeviceUISet* m_deviceUISet;
     LimeSDRInput* m_limeSDRInput; //!< Same object as above but gives easy access to LimeSDRInput methods and attributes that are used intensively
     LimeSDRInputSettings m_settings;

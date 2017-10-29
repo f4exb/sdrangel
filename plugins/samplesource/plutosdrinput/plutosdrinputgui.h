@@ -38,7 +38,7 @@ class PlutoSDRInputGui : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~PlutoSDRInputGui();
 
     virtual void destroy();
@@ -54,7 +54,6 @@ public:
 
 private:
     Ui::PlutoSDRInputGUI* ui;
-    DeviceSourceAPI* m_deviceAPI;
     DeviceUISet* m_deviceUISet;
     PlutoSDRInputSettings m_settings;
     bool m_forceSettings;

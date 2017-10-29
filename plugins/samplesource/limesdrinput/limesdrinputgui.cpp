@@ -29,10 +29,9 @@
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 
-LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::LimeSDRInputGUI),
-    m_deviceAPI(deviceAPI),
     m_deviceUISet(deviceUISet),
     m_settings(),
     m_sampleRate(0),
@@ -42,7 +41,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceSourceAPI *deviceAPI, DeviceUISet *device
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_limeSDRInput = (LimeSDRInput*) m_deviceAPI->getSampleSource();
+    m_limeSDRInput = (LimeSDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
     ui->setupUi(this);
 
@@ -331,7 +330,7 @@ void LimeSDRInputGUI::updateHardware()
 
 void LimeSDRInputGUI::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSourceAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -348,7 +347,7 @@ void LimeSDRInputGUI::updateStatus()
                 break;
             case DSPDeviceSourceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -374,7 +373,7 @@ void LimeSDRInputGUI::updateStatus()
     }
     else
     {
-        if (m_deviceAPI->isBuddyLeader())
+        if (m_deviceUISet->m_deviceSourceAPI->isBuddyLeader())
         {
             LimeSDRInput::MsgGetDeviceInfo* message = LimeSDRInput::MsgGetDeviceInfo::create();
             m_limeSDRInput->getInputMessageQueue()->push(message);
@@ -393,15 +392,15 @@ void LimeSDRInputGUI::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_deviceAPI->initAcquisition())
+        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
         {
-            m_deviceAPI->startAcquisition();
+            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
             DSPEngine::instance()->startAudioOutput();
         }
     }
     else
     {
-        m_deviceAPI->stopAcquisition();
+        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
         DSPEngine::instance()->stopAudioOutput();
     }
 }

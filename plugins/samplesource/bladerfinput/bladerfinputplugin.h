@@ -41,7 +41,6 @@ public:
 	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
 	        const QString& sourceId,
 	        QWidget **widget,
-	        DeviceSourceAPI *deviceAPI,
 	        DeviceUISet *deviceUISet);
 	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
 

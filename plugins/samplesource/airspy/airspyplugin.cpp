@@ -122,12 +122,11 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
-        DeviceSourceAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
 	if (sourceId == m_deviceTypeID)
 	{
-		AirspyGui* gui = new AirspyGui(deviceAPI, deviceUISet);
+		AirspyGui* gui = new AirspyGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

@@ -46,7 +46,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~HackRFInputGui();
 	virtual void destroy();
 
@@ -64,7 +64,6 @@ public:
 private:
 	Ui::HackRFInputGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	HackRFInputSettings m_settings;
 	bool m_forceSettings;

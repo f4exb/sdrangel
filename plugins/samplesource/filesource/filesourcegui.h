@@ -36,7 +36,7 @@ class FileSourceGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSourceGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~FileSourceGui();
 	virtual void destroy();
 
@@ -54,7 +54,6 @@ public:
 private:
 	Ui::FileSourceGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	FileSourceInput::Settings m_settings;
 	QTimer m_statusTimer;
