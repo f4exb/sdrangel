@@ -16,6 +16,7 @@ struct PluginDescriptor {
 
 class PluginAPI;
 class DeviceSourceAPI;
+class DeviceUISet;
 class DeviceSinkAPI;
 class PluginInstanceGUI;
 class QWidget;
@@ -59,7 +60,14 @@ public:
 
 	// device source plugins only
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(const QString& sourceId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; }
+
+	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
+	        const QString& sourceId __attribute__((unused)),
+	        QWidget **widget __attribute__((unused)),
+	        DeviceSourceAPI *deviceAPI __attribute__((unused)),
+	        DeviceUISet *deviceUISet __attribute__((unused)))
+	{ return 0; }
+
 	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the input "core"
 	virtual void deleteSampleSourcePluginInstanceGUI(PluginInstanceGUI *ui);
 	virtual void deleteSampleSourcePluginInstanceInput(DeviceSampleSource *source);

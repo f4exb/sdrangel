@@ -128,11 +128,6 @@ void DeviceSourceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbal
     m_deviceSourceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
 }
 
-GLSpectrum *DeviceSourceAPI::getSpectrum()
-{
-    return m_spectrum;
-}
-
 void DeviceSourceAPI::addChannelMarker(ChannelMarker* channelMarker)
 {
     m_spectrum->addChannelMarker(channelMarker);

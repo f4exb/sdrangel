@@ -29,6 +29,7 @@ class DSPDeviceSourceEngine;
 class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
+class ChannelMarker;
 
 struct DeviceUISet
 {
@@ -45,6 +46,10 @@ struct DeviceUISet
 
     DeviceUISet(QTimer& timer);
     ~DeviceUISet();
+
+    GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
+    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
+    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 };
 
 

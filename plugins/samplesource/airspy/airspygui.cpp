@@ -22,6 +22,7 @@
 #include "airspygui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/filerecord.h>
 
 #include "ui_airspygui.h"
@@ -30,10 +31,11 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
-AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+AirspyGui::AirspyGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::AirspyGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
@@ -150,8 +152,8 @@ void AirspyGui::handleInputMessages()
 
 void AirspyGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 

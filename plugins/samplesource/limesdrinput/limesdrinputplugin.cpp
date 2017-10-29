@@ -97,11 +97,15 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
     return result;
 }
 
-PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceSourceAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
     if(sourceId == m_deviceTypeID)
     {
-        LimeSDRInputGUI* gui = new LimeSDRInputGUI(deviceAPI);
+        LimeSDRInputGUI* gui = new LimeSDRInputGUI(deviceAPI, deviceUISet);
         *widget = gui;
         return gui;
     }

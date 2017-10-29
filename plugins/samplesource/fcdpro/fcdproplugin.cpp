@@ -74,11 +74,15 @@ PluginInterface::SamplingDevices FCDProPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceSourceAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == fcd_traits<Pro>::interfaceIID)
 	{
-		FCDProGui* gui = new FCDProGui(deviceAPI);
+		FCDProGui* gui = new FCDProGui(deviceAPI, deviceUISet);
 		*widget = gui;
 		return gui;
 	}

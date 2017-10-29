@@ -69,11 +69,15 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceSourceAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		FileSourceGui* gui = new FileSourceGui(deviceAPI);
+		FileSourceGui* gui = new FileSourceGui(deviceAPI, deviceUISet);
 		*widget = gui;
 		return gui;
 	}

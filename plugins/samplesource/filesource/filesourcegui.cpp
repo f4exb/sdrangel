@@ -33,11 +33,13 @@
 
 #include "filesourcegui.h"
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 
-FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+FileSourceGui::FileSourceGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSourceGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_acquisition(false),
@@ -186,8 +188,8 @@ bool FileSourceGui::handleMessage(const Message& message)
 
 void FileSourceGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 

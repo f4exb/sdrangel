@@ -22,15 +22,17 @@
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
 #include "plutosdr/deviceplutosdr.h"
 #include "plutosdrinput.h"
 #include "ui_plutosdrinputgui.h"
 #include "plutosdrinputgui.h"
 
-PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+PlutoSDRInputGui::PlutoSDRInputGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::PlutoSDRInputGUI),
     m_deviceAPI(deviceAPI),
+    m_deviceUISet(deviceUISet),
     m_settings(),
     m_forceSettings(true),
     m_sampleSource(NULL),
@@ -464,7 +466,7 @@ void PlutoSDRInputGui::handleInputMessages()
 
 void PlutoSDRInputGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }

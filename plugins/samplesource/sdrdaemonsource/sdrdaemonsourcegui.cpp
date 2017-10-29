@@ -43,12 +43,14 @@
 #include "util/simpleserializer.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include "sdrdaemonsourcegui.h"
 
-SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::SDRdaemonSourceGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_sampleSource(NULL),
 	m_acquisition(false),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
@@ -284,8 +286,8 @@ void SDRdaemonSourceGui::handleInputMessages()
 
 void SDRdaemonSourceGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 

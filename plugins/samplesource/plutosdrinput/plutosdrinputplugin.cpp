@@ -81,11 +81,15 @@ PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceSourceAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		PlutoSDRInputGui* gui = new PlutoSDRInputGui(deviceAPI);
+		PlutoSDRInputGui* gui = new PlutoSDRInputGui(deviceAPI, deviceUISet);
 		*widget = gui;
 		return gui;
 	}

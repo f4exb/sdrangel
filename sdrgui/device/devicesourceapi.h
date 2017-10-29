@@ -68,7 +68,6 @@ public:
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
 
     // device related stuff
-    GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
@@ -113,7 +112,7 @@ public:
     bool isBuddyLeader() const { return m_isBuddyLeader; }
     void setBuddyLeader(bool isBuddyLeader) { m_isBuddyLeader = isBuddyLeader; }
 
-    const QTimer& getMasterTimer() const { return m_masterTimer; }
+    const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
 protected:
     struct ChannelInstanceRegistration
@@ -158,7 +157,7 @@ protected:
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
     void *m_buddySharedPtr;
     bool m_isBuddyLeader;
-    const QTimer& m_masterTimer;
+    const QTimer& m_masterTimer; //!< This is the DSPEngine master timer
 
     friend class DeviceSinkAPI;
 };
