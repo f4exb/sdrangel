@@ -78,7 +78,8 @@ public:
     ssize_t getRxSampleSize();
     ssize_t getTxSampleSize();
     struct iio_channel *getRxChannel0() { return m_chnRx0; }
-    struct iio_channel *getTxChannel0() { return m_chnTx0; }
+    struct iio_channel *getTxChannel0I() { return m_chnTx0i; }
+    struct iio_channel *getTxChannel0Q() { return m_chnTx0q; }
     ssize_t rxBufferRefill();
     ssize_t txBufferPush();
     std::ptrdiff_t rxBufferStep();
@@ -87,6 +88,7 @@ public:
     std::ptrdiff_t txBufferStep();
     char* txBufferEnd();
     char* txBufferFirst();
+    void txChannelConvert(int16_t *dst, int16_t *src);
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setSampleRate(uint32_t sampleRate);
@@ -106,7 +108,8 @@ private:
     struct iio_device  *m_devRx;
     struct iio_device  *m_devTx;
     struct iio_channel *m_chnRx0;
-    struct iio_channel *m_chnTx0;
+    struct iio_channel *m_chnTx0i;
+    struct iio_channel *m_chnTx0q;
     struct iio_buffer  *m_rxBuf;
     struct iio_buffer  *m_txBuf;
     bool m_valid;
