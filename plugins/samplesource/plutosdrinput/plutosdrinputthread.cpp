@@ -34,8 +34,8 @@ PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksizeSamples, DevicePlutoS
     m_fcPos(PlutoSDRInputSettings::FC_POS_CENTER),
     m_phasor(0)
 {
-    m_buf     = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
-    m_bufConv = new qint16[blocksizeSamples*(sizeof(Sample)/sizeof(qint16))];
+    m_buf     = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
+    m_bufConv = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
 }
 
 PlutoSDRInputThread::~PlutoSDRInputThread()
@@ -75,6 +75,13 @@ void PlutoSDRInputThread::setFcPos(int fcPos)
 
 void PlutoSDRInputThread::run()
 {
+    std::ptrdiff_t p_inc = m_plutoBox->rxBufferStep();
+
+    qDebug("PlutoSDRInputThread::run: rxBufferStep: %ld bytes", p_inc);
+    qDebug("PlutoSDRInputThread::run: Rx sample size is %ld bytes", m_plutoBox->getRxSampleSize());
+    qDebug("PlutoSDRInputThread::run: Tx sample size is %ld bytes", m_plutoBox->getTxSampleSize());
+    qDebug("PlutoSDRInputThread::run: nominal nbytes_rx is %d bytes with 2 refills", m_blockSizeSamples*2);
+
     m_running = true;
     m_startWaiter.wakeAll();
 
@@ -82,23 +89,45 @@ void PlutoSDRInputThread::run()
     {
         ssize_t nbytes_rx;
         char *p_dat, *p_end;
-        std::ptrdiff_t p_inc;
         int ihs; // half sample index (I then Q to make a sample)
 
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
 
-        if (nbytes_rx < 0)
+        if (nbytes_rx != m_blockSizeSamples*2)
         {
-            qWarning("PlutoSDRInputThread::run: error refilling buf %d\n",(int) nbytes_rx);
+            qWarning("PlutoSDRInputThread::run: error refilling buf (1) %d / %d\n",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
             usleep(200000);
             continue;
         }
 
         // READ: Get pointers to RX buf and read IQ from RX buf port 0
-        p_inc = m_plutoBox->rxBufferStep();
         p_end = m_plutoBox->rxBufferEnd();
         ihs = 0;
+
+        // p_inc is 2 on a char* buffer therefore each iteration processes only the I or Q sample
+        // I and Q samples are processed one after the other
+        // conversion is not needed as samples are little endian
+
+        for (p_dat = m_plutoBox->rxBufferFirst(); p_dat < p_end; p_dat += p_inc)
+        {
+            m_buf[ihs] = *((int16_t *) p_dat);
+//            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
+            ihs++;
+        }
+
+        // Refill RX buffer again - we still need twice more samples to complete since they come as I followed by Q
+        nbytes_rx = m_plutoBox->rxBufferRefill();
+
+        if (nbytes_rx != m_blockSizeSamples*2)
+        {
+            qWarning("PlutoSDRInputThread::run: error refilling buf (2) %d / %d\n",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
+            usleep(200000);
+            continue;
+        }
+
+        // READ: Get pointers to RX buf and read IQ from RX buf port 0
+        p_end = m_plutoBox->rxBufferEnd();
 
         // p_inc is 2 on a char* buffer therefore each iteration processes only the I or Q sample
         // I and Q samples are processed one after the other

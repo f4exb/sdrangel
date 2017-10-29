@@ -65,6 +65,13 @@ void PlutoSDROutputThread::setLog2Interpolation(unsigned int log2_interp)
 
 void PlutoSDROutputThread::run()
 {
+    std::ptrdiff_t p_inc = m_plutoBox->txBufferStep();
+
+    qDebug("PlutoSDROutputThread::run: txBufferStep: %ld bytes", p_inc);
+    qDebug("PlutoSDROutputThread::run: Rx sample size is %ld bytes", m_plutoBox->getRxSampleSize());
+    qDebug("PlutoSDROutputThread::run: Tx sample size is %ld bytes", m_plutoBox->getTxSampleSize());
+    qDebug("PlutoSDROutputThread::run: nominal nbytes_tx is %d bytes", m_blockSizeSamples*4);
+
     m_running = true;
     m_startWaiter.wakeAll();
 
@@ -72,13 +79,11 @@ void PlutoSDROutputThread::run()
     {
         ssize_t nbytes_tx;
         char *p_dat, *p_end;
-        std::ptrdiff_t p_inc;
         int ihs; // half sample index (I then Q to make a sample)
 
         convert(m_buf, 2*m_blockSizeSamples); // size given in number of int16_t (I and Q interleaved)
 
         // WRITE: Get pointers to TX buf and write IQ to TX buf port 0
-        p_inc = m_plutoBox->txBufferStep();
         p_end = m_plutoBox->txBufferEnd();
         ihs = 0;
 
@@ -97,7 +102,7 @@ void PlutoSDROutputThread::run()
 
         if (nbytes_tx != 4*m_blockSizeSamples)
         {
-            qDebug("PlutoSDROutputThread::run: error pushing buf %d != %d\n", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
+            qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d\n", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
             usleep(200000);
             continue;
         }
