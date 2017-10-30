@@ -28,7 +28,6 @@
 #include "sdrdaemonsinkoutput.h"
 
 
-class DeviceSinkAPI;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -40,7 +39,7 @@ class SDRdaemonSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~SDRdaemonSinkGui();
 	virtual void destroy();
 
@@ -58,7 +57,6 @@ public:
 private:
 	Ui::SDRdaemonSinkGui* ui;
 
-	DeviceSinkAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	SDRdaemonSinkSettings m_settings;        //!< current settings
 	SDRdaemonSinkSettings m_controlSettings; //!< settings last sent to device via control port

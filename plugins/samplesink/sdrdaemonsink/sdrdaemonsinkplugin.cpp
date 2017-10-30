@@ -73,12 +73,11 @@ PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
-        DeviceSinkAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceAPI, deviceUISet);
+	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

@@ -99,12 +99,11 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
 PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
-        DeviceSinkAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
     if(sinkId == m_deviceTypeID)
     {
-        LimeSDROutputGUI* gui = new LimeSDROutputGUI(deviceAPI, deviceUISet);
+        LimeSDROutputGUI* gui = new LimeSDROutputGUI(deviceUISet);
         *widget = gui;
         return gui;
     }

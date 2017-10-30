@@ -27,7 +27,6 @@
 
 #define HACKRF_MAX_DEVICE (32)
 
-class DeviceSinkAPI;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -47,7 +46,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~HackRFOutputGui();
 	virtual void destroy();
 
@@ -65,7 +64,6 @@ public:
 private:
 	Ui::HackRFOutputGui* ui;
 
-	DeviceSinkAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	HackRFOutputSettings m_settings;

@@ -25,7 +25,6 @@
 
 #include "rtlsdrinput.h"
 
-class DeviceSourceAPI;
 class DeviceUISet;
 
 namespace Ui {

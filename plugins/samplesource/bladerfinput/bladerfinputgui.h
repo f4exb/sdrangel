@@ -25,7 +25,6 @@
 
 #include "bladerfinput.h"
 
-class DeviceSourceAPI;
 class DeviceUISet;
 
 namespace Ui {

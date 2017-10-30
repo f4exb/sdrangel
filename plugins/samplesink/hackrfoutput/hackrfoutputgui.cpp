@@ -33,10 +33,9 @@
 
 #include "ui_hackrfoutputgui.h"
 
-HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::HackRFOutputGui),
-	m_deviceAPI(deviceAPI),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
@@ -44,7 +43,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUI
 	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
 	m_doApplySettings(true)
 {
-    m_deviceSampleSink = (HackRFOutput*) m_deviceAPI->getSampleSink();
+    m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -302,21 +301,21 @@ void HackRFOutputGui::on_startStop_toggled(bool checked)
     if (checked)
     {
         // forcibly stop the Rx if present before starting
-        if (m_deviceAPI->getSourceBuddies().size() > 0)
+        if (m_deviceUISet->m_deviceSinkAPI->getSourceBuddies().size() > 0)
         {
-            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+            DeviceSourceAPI *buddy = m_deviceUISet->m_deviceSinkAPI->getSourceBuddies()[0];
             buddy->stopAcquisition();
         }
 
-        if (m_deviceAPI->initGeneration())
+        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
         {
-            m_deviceAPI->startGeneration();
+            m_deviceUISet->m_deviceSinkAPI->startGeneration();
             DSPEngine::instance()->startAudioInput();
         }
     }
     else
     {
-        m_deviceAPI->stopGeneration();
+        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
         DSPEngine::instance()->startAudioInput();
     }
 }
@@ -335,7 +334,7 @@ void HackRFOutputGui::updateHardware()
 
 void HackRFOutputGui::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSinkAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -353,7 +352,7 @@ void HackRFOutputGui::updateStatus()
                 break;
             case DSPDeviceSinkEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
                 break;
             default:
                 break;

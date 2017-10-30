@@ -26,7 +26,6 @@
 
 #include "plutosdrinputsettings.h"
 
-class DeviceSourceAPI;
 class DeviceSampleSource;
 class DeviceUISet;
 

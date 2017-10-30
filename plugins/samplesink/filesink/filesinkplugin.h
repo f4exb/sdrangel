@@ -40,7 +40,6 @@ public:
 	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
 	        const QString& sinkId,
 	        QWidget **widget,
-	        DeviceSinkAPI *deviceAPI,
 	        DeviceUISet *deviceUISet);
 	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
 

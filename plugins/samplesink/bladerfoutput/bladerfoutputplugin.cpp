@@ -80,12 +80,11 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 PluginInstanceGUI* BladerfOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
-        DeviceSinkAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		BladerfOutputGui* gui = new BladerfOutputGui(deviceAPI, deviceUISet);
+		BladerfOutputGui* gui = new BladerfOutputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

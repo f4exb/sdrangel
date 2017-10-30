@@ -26,7 +26,6 @@
 
 #include "plutosdroutputsettings.h"
 
-class DeviceSinkAPI;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -38,7 +37,7 @@ class PlutoSDROutputGUI : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit PlutoSDROutputGUI(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~PlutoSDROutputGUI();
 
     virtual void destroy();
@@ -54,7 +53,6 @@ public:
 
 private:
     Ui::PlutoSDROutputGUI* ui;
-    DeviceSinkAPI* m_deviceAPI;
     DeviceUISet* m_deviceUISet;
     PlutoSDROutputSettings m_settings;
     bool m_forceSettings;

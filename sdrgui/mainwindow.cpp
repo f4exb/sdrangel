@@ -312,7 +312,6 @@ void MainWindow::addSinkDevice()
     PluginInstanceGUI *pluginUI = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(),
             &gui,
-            m_deviceUIs.back()->m_deviceSinkAPI,
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
@@ -1005,7 +1004,6 @@ void MainWindow::on_sampleSink_confirmClicked(bool checked __attribute__((unused
         PluginInstanceGUI *pluginUI = deviceUI->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
                 deviceUI->m_deviceSinkAPI->getSampleSinkId(),
                 &gui,
-                deviceUI->m_deviceSinkAPI,
                 deviceUI);
         deviceUI->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);

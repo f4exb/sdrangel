@@ -25,7 +25,6 @@
 
 #include "fcdproplusinput.h"
 
-class DeviceSourceAPI;
 class DeviceUISet;
 
 namespace Ui {

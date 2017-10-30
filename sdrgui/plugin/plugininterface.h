@@ -81,7 +81,6 @@ public:
 	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
 	        const QString& sinkId __attribute__((unused)),
 	        QWidget **widget __attribute__((unused)),
-	        DeviceSinkAPI *deviceAPI __attribute__((unused)),
 	        DeviceUISet *deviceUISet __attribute__((unused)))
 	{ return 0; }
 

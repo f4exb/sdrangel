@@ -26,7 +26,6 @@
 
 #define AIRSPY_MAX_DEVICE (32)
 
-class DeviceSourceAPI;
 class DeviceUISet;
 
 namespace Ui {

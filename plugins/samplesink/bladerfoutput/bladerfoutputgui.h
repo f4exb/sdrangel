@@ -25,7 +25,6 @@
 
 #include "bladerfoutput.h"
 
-class DeviceSinkAPI;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -37,7 +36,7 @@ class BladerfOutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~BladerfOutputGui();
 	virtual void destroy();
 
@@ -55,7 +54,6 @@ public:
 private:
 	Ui::BladerfOutputGui* ui;
 
-	DeviceSinkAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	BladeRFOutputSettings m_settings;

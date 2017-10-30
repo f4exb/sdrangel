@@ -25,7 +25,6 @@
 
 #include "fcdproinput.h"
 
-class DeviceSourceAPI;
 class QWidget;
 class DeviceUISet;
 

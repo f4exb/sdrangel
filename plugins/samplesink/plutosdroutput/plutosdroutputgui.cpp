@@ -28,10 +28,9 @@
 #include "plutosdroutputgui.h"
 #include "ui_plutosdroutputgui.h"
 
-PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::PlutoSDROutputGUI),
-    m_deviceAPI(deviceAPI),
     m_deviceUISet(deviceUISet),
     m_settings(),
     m_forceSettings(true),
@@ -42,7 +41,7 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceSinkAPI *deviceAPI, DeviceUISet *devi
     m_doApplySettings(true),
     m_statusCounter(0)
 {
-    m_sampleSink = (PlutoSDROutput*) m_deviceAPI->getSampleSink();
+    m_sampleSink = (PlutoSDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -156,15 +155,15 @@ void PlutoSDROutputGUI::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_deviceAPI->initGeneration())
+        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
         {
-            m_deviceAPI->startGeneration();
+            m_deviceUISet->m_deviceSinkAPI->startGeneration();
             DSPEngine::instance()->startAudioOutput();
         }
     }
     else
     {
-        m_deviceAPI->stopGeneration();
+        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
         DSPEngine::instance()->stopAudioOutput();
     }
 }
@@ -306,7 +305,7 @@ void PlutoSDROutputGUI::blockApplySettings(bool block)
 
 void PlutoSDROutputGUI::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSinkAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -323,7 +322,7 @@ void PlutoSDROutputGUI::updateStatus()
                 break;
             case DSPDeviceSinkEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
                 break;
             default:
                 break;
@@ -352,7 +351,7 @@ void PlutoSDROutputGUI::updateStatus()
 
     if (m_statusCounter % 10 == 0) // 5s
     {
-        if (m_deviceAPI->isBuddyLeader()) {
+        if (m_deviceUISet->m_deviceSinkAPI->isBuddyLeader()) {
             ((PlutoSDROutput *) m_sampleSink)->fetchTemperature();
         }
 

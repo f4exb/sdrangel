@@ -27,7 +27,6 @@
 #include "sdrplayinput.h"
 #include "sdrplaysettings.h"
 
-class DeviceSampleSource;
 class DeviceSourceAPI;
 class DeviceUISet;
 

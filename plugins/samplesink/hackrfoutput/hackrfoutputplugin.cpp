@@ -119,12 +119,11 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
-        DeviceSinkAPI *deviceAPI,
         DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		HackRFOutputGui* gui = new HackRFOutputGui(deviceAPI, deviceUISet);
+		HackRFOutputGui* gui = new HackRFOutputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
