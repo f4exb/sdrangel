@@ -300,6 +300,11 @@ void MainWindow::addSinkDevice()
 
     // create a file sink by default
     m_pluginManager->selectSampleSinkBySerialOrSequence("sdrangel.samplesink.filesink", "0", 0, m_deviceUIs.back()->m_deviceSinkAPI);
+
+    // delete previous plugin GUI if it exists
+    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());
+
     DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
             m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkId(), m_deviceUIs.back()->m_deviceSinkAPI);
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSink(sink);

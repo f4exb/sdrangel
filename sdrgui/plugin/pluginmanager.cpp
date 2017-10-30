@@ -498,7 +498,6 @@ int PluginManager::selectSampleSinkBySerialOrSequence(const QString& sinkId, con
             << " seq: " << m_sampleSinkDevices[index].m_deviceSequence;
 
     deviceAPI->stopGeneration();
-    deviceAPI->setSampleSinkPluginInstanceUI(0); // this effectively destroys the previous GUI if it exists
 
 	//	m_sampleSourcePluginGUI = pluginGUI;
     deviceAPI->setSampleSinkSequence(m_sampleSinkDevices[index].m_deviceSequence);
