@@ -1,4 +1,4 @@
-<h1>SDRangel Developper's notes</h1>
+<h1>SDRangel Developer's notes</h1>
 
 <h2>Build options</h2>
 

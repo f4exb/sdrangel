@@ -405,6 +405,6 @@ Other ideas:
   - Level calibration
   - Even more demods. Contributors welcome!
 
-<h1>Developper's notes</h1>
+<h1>Developer's notes</h1>
 
-Please check the developper's specific [readme](./ReadmeDevelopper.md)
+Please check the developper's specific [readme](./ReadmeDeveloper.md)
