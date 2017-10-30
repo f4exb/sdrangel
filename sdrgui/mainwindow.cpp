@@ -147,6 +147,10 @@ MainWindow::MainWindow(QWidget* parent) :
         exit(0);
 	}
 
+	// delete previous plugin GUI
+	m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+	        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
+
 	DeviceSampleSource *source = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
 	        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
 	m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
@@ -233,6 +237,11 @@ void MainWindow::addSourceDevice()
 
     // Create a file source instance by default
     m_pluginManager->selectSampleSourceBySerialOrSequence("sdrangel.samplesource.filesource", "0", 0, m_deviceUIs.back()->m_deviceSourceAPI);
+
+    // delete previous plugin GUI
+    m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
+            m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
+
     DeviceSampleSource *source = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
             m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);

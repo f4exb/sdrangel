@@ -176,10 +176,6 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)
 
 void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui)
 {
-    if (m_sampleSourcePluginInstanceUI && (gui != m_sampleSourcePluginInstanceUI)) {
-        m_sampleSourcePluginInstanceUI->destroy();
-    }
-
     m_sampleSourcePluginInstanceUI = gui;
 }
 
