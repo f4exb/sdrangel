@@ -77,11 +77,15 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceGUI* BladerfOutputPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId,QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* BladerfOutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceSinkAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		BladerfOutputGui* gui = new BladerfOutputGui(deviceAPI);
+		BladerfOutputGui* gui = new BladerfOutputGui(deviceAPI, deviceUISet);
 		*widget = gui;
 		return gui;
 	}

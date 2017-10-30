@@ -29,6 +29,7 @@
 
 class DeviceSinkAPI;
 class DeviceSampleSink;
+class DeviceUISet;
 
 namespace Ui {
 	class FileSinkGui;
@@ -38,7 +39,7 @@ class FileSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	explicit FileSinkGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~FileSinkGui();
 	virtual void destroy();
 
@@ -57,6 +58,7 @@ private:
 	Ui::FileSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	FileSinkSettings m_settings;
     QString m_fileName;

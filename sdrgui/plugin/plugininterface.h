@@ -53,12 +53,15 @@ public:
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
 
 	// channel Rx plugins
+
 	virtual PluginInstanceGUI* createRxChannel(const QString& channelName __attribute__((unused)), DeviceSourceAPI *deviceAPI __attribute__((unused)) ) { return 0; }
 
 	// channel Tx plugins
+
 	virtual PluginInstanceGUI* createTxChannel(const QString& channelName __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused)) ) { return 0; }
 
 	// device source plugins only
+
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
 
 	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
@@ -72,9 +75,17 @@ public:
 	virtual void deleteSampleSourcePluginInstanceInput(DeviceSampleSource *source);
 
 	// device sink plugins only
+
 	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
-	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(const QString& sinkId __attribute__((unused)), QWidget **widget __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; }
-    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the output "core"
+
+	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
+	        const QString& sinkId __attribute__((unused)),
+	        QWidget **widget __attribute__((unused)),
+	        DeviceSinkAPI *deviceAPI __attribute__((unused)),
+	        DeviceUISet *deviceUISet __attribute__((unused)))
+	{ return 0; }
+
+	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused))) { return 0; } // creates the output "core"
     virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
 };

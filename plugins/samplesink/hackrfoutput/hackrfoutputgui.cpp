@@ -27,15 +27,17 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
 #include "ui_hackrfoutputgui.h"
 
-HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+HackRFOutputGui::HackRFOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::HackRFOutputGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(0),
@@ -180,8 +182,8 @@ void HackRFOutputGui::handleInputMessages()
 
 void HackRFOutputGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
 }
 

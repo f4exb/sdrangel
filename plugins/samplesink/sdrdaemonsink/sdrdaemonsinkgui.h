@@ -30,6 +30,7 @@
 
 class DeviceSinkAPI;
 class DeviceSampleSink;
+class DeviceUISet;
 
 namespace Ui {
 	class SDRdaemonSinkGui;
@@ -39,7 +40,7 @@ class SDRdaemonSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	explicit SDRdaemonSinkGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~SDRdaemonSinkGui();
 	virtual void destroy();
 
@@ -58,6 +59,7 @@ private:
 	Ui::SDRdaemonSinkGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	SDRdaemonSinkSettings m_settings;        //!< current settings
 	SDRdaemonSinkSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;

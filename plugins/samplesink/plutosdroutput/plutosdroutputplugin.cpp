@@ -81,11 +81,15 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceSinkAPI *deviceAPI,
+        DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-        PlutoSDROutputGUI* gui = new PlutoSDROutputGUI(deviceAPI);
+        PlutoSDROutputGUI* gui = new PlutoSDROutputGUI(deviceAPI, deviceUISet);
 		*widget = gui;
 		return gui;
 	}

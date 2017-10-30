@@ -25,13 +25,15 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "bladerfoutputgui.h"
 #include "bladerf/devicebladerfvalues.h"
 
-BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+BladerfOutputGui::BladerfOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BladerfOutputGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(NULL),
@@ -166,8 +168,8 @@ void BladerfOutputGui::handleInputMessages()
 
 void BladerfOutputGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
 }
 

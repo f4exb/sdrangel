@@ -29,6 +29,7 @@
 
 class DeviceSinkAPI;
 class DeviceSampleSink;
+class DeviceUISet;
 
 namespace Ui {
 	class HackRFOutputGui;
@@ -46,7 +47,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	explicit HackRFOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~HackRFOutputGui();
 	virtual void destroy();
 
@@ -65,6 +66,7 @@ private:
 	Ui::HackRFOutputGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	HackRFOutputSettings m_settings;
 	QTimer m_updateTimer;

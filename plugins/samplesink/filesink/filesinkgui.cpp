@@ -32,12 +32,14 @@
 #include "mainwindow.h"
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "filesinkgui.h"
 
-FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+FileSinkGui::FileSinkGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSinkGui),
 	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
 	m_fileName("./test.sdriq"),
@@ -177,8 +179,8 @@ void FileSinkGui::handleInputMessages()
 
 void FileSinkGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
 }
 

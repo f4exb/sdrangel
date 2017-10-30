@@ -23,12 +23,14 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "limesdroutputgui.h"
 
-LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::LimeSDROutputGUI),
     m_deviceAPI(deviceAPI),
+    m_deviceUISet(deviceUISet),
     m_settings(),
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSinkEngine::State)-1),
@@ -238,8 +240,8 @@ void LimeSDROutputGUI::handleInputMessages()
 
 void LimeSDROutputGUI::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 

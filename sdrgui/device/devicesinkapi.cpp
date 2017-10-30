@@ -136,11 +136,6 @@ MessageQueue *DeviceSinkAPI::getSampleSinkGUIMessageQueue()
     return getSampleSink()->getMessageQueueToGUI();
 }
 
-GLSpectrum *DeviceSinkAPI::getSpectrum()
-{
-    return m_spectrum;
-}
-
 void DeviceSinkAPI::addChannelMarker(ChannelMarker* channelMarker)
 {
     m_spectrum->addChannelMarker(channelMarker);

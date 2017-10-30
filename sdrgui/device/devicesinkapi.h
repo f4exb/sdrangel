@@ -66,8 +66,8 @@ public:
     MessageQueue *getDeviceEngineInputMessageQueue();
     MessageQueue *getSampleSinkInputMessageQueue();
     MessageQueue *getSampleSinkGUIMessageQueue();
+
     // device related stuff
-    GLSpectrum *getSpectrum();                           //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 

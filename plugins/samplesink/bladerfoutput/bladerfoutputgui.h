@@ -27,6 +27,7 @@
 
 class DeviceSinkAPI;
 class DeviceSampleSink;
+class DeviceUISet;
 
 namespace Ui {
 	class BladerfOutputGui;
@@ -36,7 +37,7 @@ class BladerfOutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfOutputGui(DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+	explicit BladerfOutputGui(DeviceSinkAPI *deviceAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~BladerfOutputGui();
 	virtual void destroy();
 
@@ -55,6 +56,7 @@ private:
 	Ui::BladerfOutputGui* ui;
 
 	DeviceSinkAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	BladeRFOutputSettings m_settings;
 	QTimer m_updateTimer;
