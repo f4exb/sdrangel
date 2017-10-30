@@ -63,6 +63,16 @@ DeviceUISet::~DeviceUISet()
     delete m_spectrum;
 }
 
+void DeviceUISet::addChannelMarker(ChannelMarker* channelMarker)
+{
+    m_spectrum->addChannelMarker(channelMarker);
+}
+
+void DeviceUISet::addRollupWidget(QWidget *widget)
+{
+    m_channelWindow->addRollupWidget(widget);
+}
+
 void DeviceUISet::registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
@@ -136,11 +146,10 @@ void DeviceUISet::loadChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-                        // TOOO: replace m_deviceSourceAPI by this
                         reg = ChannelInstanceRegistration(
                                 channelConfig.m_channel,
                                 (*channelRegistrations)[i].
-                                m_plugin->createRxChannel(channelConfig.m_channel, m_deviceSourceAPI)
+                                m_plugin->createRxChannel(channelConfig.m_channel, this)
                         );
                         break;
                     }

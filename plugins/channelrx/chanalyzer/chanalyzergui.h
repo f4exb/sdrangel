@@ -24,7 +24,7 @@
 #include "util/messagequeue.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -41,7 +41,7 @@ class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -73,7 +73,8 @@ private slots:
 private:
 	Ui::ChannelAnalyzerGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+//	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -89,7 +90,7 @@ private:
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~ChannelAnalyzerGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);
