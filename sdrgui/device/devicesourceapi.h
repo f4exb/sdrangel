@@ -90,13 +90,12 @@ public:
 
     void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void removeChannelInstance(PluginInstanceGUI* pluginGUI);
-
     void freeChannels();
+    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveChannelSettings(Preset* preset);
 
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);
-    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveChannelSettings(Preset* preset);
 
     DSPDeviceSourceEngine *getDeviceSourceEngine() { return m_deviceSourceEngine; }
 

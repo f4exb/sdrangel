@@ -50,6 +50,37 @@ struct DeviceUISet
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
+
+    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
+    void freeChannels();
+    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveChannelSettings(Preset* preset);
+
+private:
+    struct ChannelInstanceRegistration
+    {
+        QString m_channelName;
+        PluginInstanceGUI* m_gui;
+
+        ChannelInstanceRegistration() :
+            m_channelName(),
+            m_gui(NULL)
+        { }
+
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
+            m_channelName(channelName),
+            m_gui(pluginGUI)
+        { }
+
+        bool operator<(const ChannelInstanceRegistration& other) const;
+    };
+
+    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
+
+    ChannelInstanceRegistrations m_channelInstanceRegistrations;
+
+    void renameChannelInstances();
 };
 
 
