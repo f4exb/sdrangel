@@ -27,7 +27,7 @@
 #include "ssbmodsettings.h"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceUISet;
 
 class SSBMod;
 class SpectrumVis;
@@ -40,7 +40,7 @@ class SSBModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static SSBModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
+    static SSBModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -93,7 +93,7 @@ private slots:
 private:
     Ui::SSBModGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     SSBModSettings m_settings;
     bool m_basicSettingsShown;
@@ -113,7 +113,7 @@ private:
     SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+    explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~SSBModGUI();
 
     int  getEffectiveLowCutoff(int lowCutoff);

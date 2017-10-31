@@ -27,7 +27,7 @@
 #include "nfmmodsettings.h"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceUISet;
 class NFMMod;
 
 namespace Ui {
@@ -38,7 +38,7 @@ class NFMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static NFMModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
+    static NFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -86,7 +86,7 @@ private slots:
 private:
     Ui::NFMModGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     NFMModSettings m_settings;
     bool m_basicSettingsShown;
@@ -104,7 +104,7 @@ private:
     NFMMod::NFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit NFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+    explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~NFMModGUI();
 
     void blockApplySettings(bool block);

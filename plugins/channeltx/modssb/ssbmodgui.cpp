@@ -23,6 +23,7 @@
 #include "ssbmodgui.h"
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "ui_ssbmodgui.h"
 #include "plugin/pluginapi.h"
@@ -34,9 +35,9 @@
 
 const QString SSBModGUI::m_channelID = "sdrangel.channeltx.modssb";
 
-SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
+SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    SSBModGUI* gui = new SSBModGUI(pluginAPI, deviceAPI);
+    SSBModGUI* gui = new SSBModGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -439,11 +440,11 @@ void SSBModGUI::onMenuDoubleClicked()
 	}
 }
 
-SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
+SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBModGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -462,7 +463,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbMod = new SSBMod(m_deviceAPI, m_spectrumVis);
+	m_ssbMod = new SSBMod(m_deviceUISet->m_deviceSinkAPI, m_spectrumVis);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
 
     resetToDefaults();
@@ -488,9 +489,9 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+    m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
+    m_deviceUISet->addRollupWidget(this);
 
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
@@ -509,7 +510,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 SSBModGUI::~SSBModGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_ssbMod;
 	delete m_spectrumVis;
 	delete ui;

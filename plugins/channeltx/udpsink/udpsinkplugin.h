@@ -21,7 +21,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class DeviceSinkAPI;
+class DeviceUISet;
 
 class UDPSinkPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -34,7 +34,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginInstanceGUI* createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI);
+	PluginInstanceGUI* createTxChannel(const QString& channelName, DeviceUISet *deviceUISet);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -42,7 +42,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceUDPSink(DeviceSinkAPI *deviceAPI);
+	void createInstanceUDPSink(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_UDPSINKPLUGIN_H

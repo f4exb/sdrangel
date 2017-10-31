@@ -61,12 +61,15 @@ public:
 	{ return 0; }
     virtual PluginInstanceGUI* createRxChannel(
             const QString& channelName __attribute__((unused)),
-            DeviceUISet *deviceAPI __attribute__((unused)) )
+            DeviceUISet *deviceUISet __attribute__((unused)) )
     { return 0; }
 
 	// channel Tx plugins
 
-	virtual PluginInstanceGUI* createTxChannel(const QString& channelName __attribute__((unused)), DeviceSinkAPI *deviceAPI __attribute__((unused)) ) { return 0; }
+	virtual PluginInstanceGUI* createTxChannel(
+	        const QString& channelName __attribute__((unused)),
+	        DeviceUISet *deviceUISet __attribute__((unused)) )
+	{ return 0; }
 
 	// device source plugins only
 

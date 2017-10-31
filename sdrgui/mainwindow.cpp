@@ -485,7 +485,7 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
         {
             deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
             deviceUI->m_deviceSinkAPI->loadSinkSettings(preset);
-            deviceUI->m_deviceSinkAPI->loadChannelSettings(preset, m_pluginManager->getPluginAPI());
+            deviceUI->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
         }
 	}
 
@@ -515,7 +515,7 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
         preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
         preset->clearChannels();
         preset->setSourcePreset(false);
-        deviceUI->m_deviceSinkAPI->saveChannelSettings(preset);
+        deviceUI->saveTxChannelSettings(preset);
         deviceUI->m_deviceSinkAPI->saveSinkSettings(preset);
     }
 
@@ -1034,7 +1034,7 @@ void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
                 QMessageBox::information(this, tr("Message"), tr("%1 channel(s) already in use. Multiple transmission channels is experimental. You may experience performance problems").arg(nbSources));
             }
 
-            m_pluginManager->createTxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSinkAPI);
+            m_pluginManager->createTxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI);
         }
     }
 

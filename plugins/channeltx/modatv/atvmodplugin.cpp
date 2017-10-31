@@ -23,7 +23,7 @@
 
 const PluginDescriptor ATVModPlugin::m_pluginDescriptor = {
     QString("ATV Modulator"),
-    QString("3.7.5"),
+    QString("3.7.9"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -49,20 +49,20 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(ATVModGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* ATVModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* ATVModPlugin::createTxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
     if(channelName == ATVModGUI::m_channelID)
     {
-        ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceAPI);
+        ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceUISet);
         return gui;
     } else {
         return 0;
     }
 }
 
-void ATVModPlugin::createInstanceModATV(DeviceSinkAPI *deviceAPI)
+void ATVModPlugin::createInstanceModATV(DeviceUISet *deviceUISet)
 {
-    ATVModGUI::create(m_pluginAPI, deviceAPI);
+    ATVModGUI::create(m_pluginAPI, deviceUISet);
 }
 
 

@@ -74,7 +74,7 @@ public:
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
 
 	void populateTxChannelComboBox(QComboBox *channels);
-	void createTxChannelInstance(int channelPluginIndex, DeviceSinkAPI *deviceAPI);
+	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
 
 private:
 	struct SamplingDeviceRegistration {

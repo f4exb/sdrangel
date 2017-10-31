@@ -21,6 +21,7 @@
 #include <QDebug>
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "plugin/pluginapi.h"
@@ -35,9 +36,9 @@
 
 const QString WFMModGUI::m_channelID = "sdrangel.channeltx.modwfm";
 
-WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
+WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceAPI);
+    WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -273,11 +274,11 @@ void WFMModGUI::onMenuDoubleClicked()
 	}
 }
 
-WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
+WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMModGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -305,7 +306,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_wfmMod = new WFMMod(m_deviceAPI);
+	m_wfmMod = new WFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_wfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -319,9 +320,9 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
     ui->play->setEnabled(false);
     ui->play->setChecked(false);
@@ -342,7 +343,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 WFMModGUI::~WFMModGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_wfmMod;
 	delete ui;
 }

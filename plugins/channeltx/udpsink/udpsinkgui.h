@@ -28,7 +28,7 @@
 #include "udpsinksettings.h"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceUISet;
 class UDPSink;
 class SpectrumVis;
 
@@ -40,7 +40,7 @@ class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
+    static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -80,7 +80,7 @@ private slots:
 private:
     Ui::UDPSinkGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     SpectrumVis* m_spectrumVis;
     UDPSink* m_udpSink;
     MovingAverage<double> m_channelPowerAvg;
@@ -94,7 +94,7 @@ private:
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
 
-    explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+    explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = NULL);
     virtual ~UDPSinkGUI();
 
     void blockApplySettings(bool block);

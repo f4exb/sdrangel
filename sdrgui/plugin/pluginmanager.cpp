@@ -627,11 +627,11 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     }
 }
 
-void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceSinkAPI *deviceAPI)
+void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet)
 {
     if (channelPluginIndex < m_txChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelName, deviceAPI);
+        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelName, deviceUISet);
     }
 }

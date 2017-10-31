@@ -27,7 +27,7 @@
 #include "ammodsettings.h"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceUISet;
 
 class AMMod;
 
@@ -39,7 +39,7 @@ class AMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static AMModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
+    static AMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -83,7 +83,7 @@ private slots:
 private:
     Ui::AMModGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     AMModSettings m_settings;
     bool m_basicSettingsShown;
@@ -101,7 +101,7 @@ private:
     AMMod::AMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+    explicit AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~AMModGUI();
 
     void blockApplySettings(bool block);
