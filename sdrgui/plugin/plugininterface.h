@@ -54,11 +54,6 @@ public:
 
 	// channel Rx plugins
 
-	// TODO: remove this one when migration is complete
-	virtual PluginInstanceGUI* createRxChannel(
-	        const QString& channelName __attribute__((unused)),
-	        DeviceSourceAPI *deviceAPI __attribute__((unused)) )
-	{ return 0; }
     virtual PluginInstanceGUI* createRxChannel(
             const QString& channelName __attribute__((unused)),
             DeviceUISet *deviceUISet __attribute__((unused)) )

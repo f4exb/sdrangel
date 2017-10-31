@@ -30,6 +30,7 @@ class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
 class ChannelMarker;
+class PluginAPI;
 
 struct DeviceUISet
 {

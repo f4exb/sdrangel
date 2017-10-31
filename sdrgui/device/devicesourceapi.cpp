@@ -18,7 +18,6 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/devicesamplesource.h"
-#include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "settings/preset.h"
 #include "dsp/dspengine.h"

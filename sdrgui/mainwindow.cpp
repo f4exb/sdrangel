@@ -273,7 +273,7 @@ void MainWindow::addSinkDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
 
-    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(deviceTabIndex, dspDeviceSinkEngine, m_deviceUIs.back()->m_spectrum, m_deviceUIs.back()->m_channelWindow);
+    DeviceSinkAPI *deviceSinkAPI = new DeviceSinkAPI(deviceTabIndex, dspDeviceSinkEngine);
 
     m_deviceUIs.back()->m_deviceSourceAPI = 0;
     m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;
@@ -368,7 +368,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
         // deletes old UI and output object
-        m_deviceUIs.back()->m_deviceSinkAPI->freeChannels();
+        m_deviceUIs.back()->freeTxChannels();
         m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
 	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
 	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkPluginInstanceGUI());

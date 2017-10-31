@@ -23,16 +23,11 @@
 #include "dsp/dspdevicesinkengine.h"
 #include "util/export.h"
 
-class GLSpectrum;
-class ChannelWindow;
 class BasebandSampleSource;
 class ThreadedBasebandSampleSource;
 class DeviceSampleSink;
 class MessageQueue;
-class ChannelMarker;
-class QWidget;
 class PluginInstanceGUI;
-class PluginAPI;
 class PluginInterface;
 class Preset;
 class DeviceSourceAPI;
@@ -42,9 +37,7 @@ class SDRANGEL_API DeviceSinkAPI : public QObject {
 
 public:
     DeviceSinkAPI(int deviceTabIndex,
-            DSPDeviceSinkEngine *deviceEngine,
-            GLSpectrum *glSpectrum,
-            ChannelWindow *channelWindow);
+            DSPDeviceSinkEngine *deviceEngine);
     ~DeviceSinkAPI();
 
     // Device engine stuff
@@ -66,13 +59,6 @@ public:
     MessageQueue *getDeviceEngineInputMessageQueue();
     MessageQueue *getSampleSinkInputMessageQueue();
     MessageQueue *getSampleSinkGUIMessageQueue();
-
-    // device GUI related stuff
-    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
-    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
-    void freeChannels();
-    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveChannelSettings(Preset* preset);
 
     void setHardwareId(const QString& id);
     void setSampleSinkId(const QString& id);
@@ -115,32 +101,8 @@ public:
     const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
 protected:
-    struct ChannelInstanceRegistration
-    {
-        QString m_channelName;
-        PluginInstanceGUI* m_gui;
-
-        ChannelInstanceRegistration() :
-            m_channelName(),
-            m_gui(0)
-        { }
-
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
-            m_channelName(channelName),
-            m_gui(pluginGUI)
-        { }
-
-        bool operator<(const ChannelInstanceRegistration& other) const;
-    };
-
-    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
-
-    void renameChannelInstances();
-
     int m_deviceTabIndex;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
-    GLSpectrum *m_spectrum;
-    ChannelWindow *m_channelWindow;
 
     QString m_hardwareId;
     QString m_sampleSinkId;
@@ -149,8 +111,6 @@ protected:
     uint32_t m_sampleSinkSequence;
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSinkPluginInstanceUI;
-
-    ChannelInstanceRegistrations m_channelInstanceRegistrations;
 
     std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
