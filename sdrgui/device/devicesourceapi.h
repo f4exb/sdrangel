@@ -88,12 +88,6 @@ public:
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
     PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
 
-    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
-    void freeChannels();
-    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveChannelSettings(Preset* preset);
-
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);
 
@@ -114,29 +108,6 @@ public:
     const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
 protected:
-    struct ChannelInstanceRegistration
-    {
-        QString m_channelName;
-        PluginInstanceGUI* m_gui;
-
-        ChannelInstanceRegistration() :
-            m_channelName(),
-            m_gui(NULL)
-        { }
-
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
-            m_channelName(channelName),
-            m_gui(pluginGUI)
-        { }
-
-        bool operator<(const ChannelInstanceRegistration& other) const;
-    };
-
-    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
-
-
-    void renameChannelInstances();
-
     int m_deviceTabIndex;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     GLSpectrum *m_spectrum;
@@ -149,8 +120,6 @@ protected:
     uint32_t m_sampleSourceSequence;
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSourcePluginInstanceUI;
-
-    ChannelInstanceRegistrations m_channelInstanceRegistrations;
 
     std::vector<DeviceSourceAPI*> m_sourceBuddies; //!< Device source APIs referencing the same physical device
     std::vector<DeviceSinkAPI*> m_sinkBuddies;     //!< Device sink APIs referencing the same physical device
