@@ -43,13 +43,10 @@ set(sdrgui_SOURCES
     dsp/spectrumscopecombovis.cpp
     dsp/spectrumscopengcombovis.cpp
     
-    device/devicesourceapi.cpp
-    device/devicesinkapi.cpp
     device/deviceuiset.cpp
     
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp    
-    plugin/plugininterface.cpp
 )
 
 set(sdrgui_HEADERS
@@ -95,13 +92,10 @@ set(sdrgui_HEADERS
     dsp/spectrumscopecombovis.h
     dsp/spectrumscopengcombovis.h
     
-    device/devicesourceapi.h
-    device/devicesinkapi.h
     device/deviceuiset.h
     
     plugin/pluginapi.h
     plugin/pluginmanager.h
-    plugin/plugininterface.h
 )
 
 set(sdrgui_SOURCES
