@@ -71,9 +71,7 @@ public:
 	PluginInterface* getPluginInterfaceAt(int index);
 
 	void populateRxChannelComboBox(QComboBox *channels);
-	void createRxChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
-    QString getRxChannelInstanceName(int channelPluginIndex);
 
 	void populateTxChannelComboBox(QComboBox *channels);
 	void createTxChannelInstance(int channelPluginIndex, DeviceSinkAPI *deviceAPI);

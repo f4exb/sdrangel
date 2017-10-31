@@ -618,33 +618,12 @@ void PluginManager::populateTxChannelComboBox(QComboBox *channels)
     }
 }
 
-void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_rxChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelName, deviceAPI);
-    }
-}
-
 void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet)
 {
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
         pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelName, deviceUISet);
-    }
-}
-
-QString PluginManager::getRxChannelInstanceName(int channelPluginIndex)
-{
-    if (channelPluginIndex < m_rxChannelRegistrations.size())
-    {
-        return m_rxChannelRegistrations[channelPluginIndex].m_channelName;
-    }
-    else
-    {
-        return "";
     }
 }
 

@@ -20,20 +20,14 @@
 #include "dsp/devicesamplesource.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
-#include "gui/glspectrum.h"
-#include "gui/channelwindow.h"
 #include "settings/preset.h"
 #include "dsp/dspengine.h"
 
 // TODO: extract GUI dependencies in a separate object
 DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
-        DSPDeviceSourceEngine *deviceSourceEngine,
-        GLSpectrum *glSpectrum,
-        ChannelWindow *channelWindow) :
+        DSPDeviceSourceEngine *deviceSourceEngine) :
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSourceEngine(deviceSourceEngine),
-    m_spectrum(glSpectrum),
-    m_channelWindow(channelWindow),
     m_sampleSourceSequence(0),
     m_pluginInterface(0),
     m_sampleSourcePluginInstanceUI(0),
@@ -126,16 +120,6 @@ MessageQueue *DeviceSourceAPI::getSampleSourceGUIMessageQueue()
 void DeviceSourceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {
     m_deviceSourceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
-}
-
-void DeviceSourceAPI::addChannelMarker(ChannelMarker* channelMarker)
-{
-    m_spectrum->addChannelMarker(channelMarker);
-}
-
-void DeviceSourceAPI::addRollupWidget(QWidget *widget)
-{
-    m_channelWindow->addRollupWidget(widget);
 }
 
 void DeviceSourceAPI::setHardwareId(const QString& id)

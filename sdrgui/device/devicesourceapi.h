@@ -25,14 +25,11 @@
 
 #include "util/export.h"
 
-class GLSpectrum;
-class ChannelWindow;
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class DeviceSampleSource;
 class MessageQueue;
 class ChannelMarker;
-class QWidget;
 class PluginInstanceGUI;
 class PluginAPI;
 class PluginInterface;
@@ -44,9 +41,7 @@ class SDRANGEL_API DeviceSourceAPI : public QObject {
 
 public:
     DeviceSourceAPI(int deviceTabIndex,
-            DSPDeviceSourceEngine *deviceSourceEngine,
-            GLSpectrum *glSpectrum,
-            ChannelWindow *channelWindow);
+            DSPDeviceSourceEngine *deviceSourceEngine);
     ~DeviceSourceAPI();
 
     // Device engine stuff
@@ -66,10 +61,6 @@ public:
     MessageQueue *getSampleSourceInputMessageQueue();
     MessageQueue *getSampleSourceGUIMessageQueue();
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure current device engine DSP corrections
-
-    // device related stuff
-    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
-    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
     void setHardwareId(const QString& id);
     void setSampleSourceId(const QString& id);
@@ -110,8 +101,6 @@ public:
 protected:
     int m_deviceTabIndex;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
-    GLSpectrum *m_spectrum;
-    ChannelWindow *m_channelWindow;
 
     QString m_hardwareId;
     QString m_sampleSourceId;
