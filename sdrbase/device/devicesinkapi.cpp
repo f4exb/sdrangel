@@ -22,7 +22,6 @@
 #include "settings/preset.h"
 #include "dsp/dspengine.h"
 
-// TODO: extract GUI dependencies in a separate object
 DeviceSinkAPI::DeviceSinkAPI(int deviceTabIndex,
         DSPDeviceSinkEngine *deviceSinkEngine) :
     m_deviceTabIndex(deviceTabIndex),

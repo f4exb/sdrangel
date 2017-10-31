@@ -49,6 +49,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
+        device/devicesourceapi.cpp\
+        device/devicesinkapi.cpp\        
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/downchannelizer.cpp\
@@ -96,7 +98,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/prettyprint.cpp\
         util/syncmessenger.cpp\
         util/samplesourceserializer.cpp\
-        util/simpleserializer.cpp
+        util/simpleserializer.cpp\
+        plugin/plugininterface.cpp        
 
 HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
@@ -157,6 +160,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/plugininstancegui.h\
+        plugin/plugininterface.h\        
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\

@@ -34,8 +34,6 @@ CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
 SOURCES += mainwindow.cpp\
-        device/devicesourceapi.cpp\
-        device/devicesinkapi.cpp\
         device/deviceuiset.cpp\
         dsp/spectrumscopecombovis.cpp\
         dsp/spectrumscopengcombovis.cpp\
