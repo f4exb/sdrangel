@@ -407,7 +407,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
@@ -422,7 +422,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 //	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 //	delete m_threadedChannelizer;
 //	delete m_channelizer;

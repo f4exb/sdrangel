@@ -51,11 +51,16 @@ struct DeviceUISet
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
-    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
-    void freeChannels();
-    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveChannelSettings(Preset* preset);
+    void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void freeRxChannels();
+    void freeTxChannels();
+    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveRxChannelSettings(Preset* preset);
+    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveTxChannelSettings(Preset* preset);
 
 private:
     struct ChannelInstanceRegistration
@@ -78,9 +83,11 @@ private:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    ChannelInstanceRegistrations m_channelInstanceRegistrations;
+    ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
+    ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
 
-    void renameChannelInstances();
+    void renameRxChannelInstances();
+    void renameTxChannelInstances();
 };
 
 

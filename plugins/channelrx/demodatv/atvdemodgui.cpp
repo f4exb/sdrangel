@@ -313,7 +313,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-    m_deviceUISet->registerChannelInstance(m_strChannelID, this);
+    m_deviceUISet->registerRxChannelInstance(m_strChannelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -348,7 +348,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
     m_deviceUISet->m_deviceSourceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

@@ -330,7 +330,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
         // deletes old UI and input object
-        m_deviceUIs.back()->freeChannels();      // destroys the channel instances
+        m_deviceUIs.back()->freeRxChannels();      // destroys the channel instances
         m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
@@ -479,7 +479,7 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
         {
             deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
             deviceUI->m_deviceSourceAPI->loadSourceSettings(preset);
-            deviceUI->loadChannelSettings(preset, m_pluginManager->getPluginAPI());
+            deviceUI->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device
         {
@@ -507,7 +507,7 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     {
         preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
         preset->clearChannels();
-        deviceUI->saveChannelSettings(preset);
+        deviceUI->saveRxChannelSettings(preset);
         deviceUI->m_deviceSourceAPI->saveSourceSettings(preset);
     }
     else if (deviceUI->m_deviceSinkEngine) // sink device

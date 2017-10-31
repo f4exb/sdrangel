@@ -165,7 +165,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
@@ -179,7 +179,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 TCPSrcGUI::~TCPSrcGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_tcpSrc;
 	delete m_spectrumVis;
 	delete ui;

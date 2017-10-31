@@ -153,7 +153,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
@@ -168,7 +168,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidg
 
 LoRaDemodGUI::~LoRaDemodGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_LoRaDemod;
 	delete m_spectrumVis;
 	delete ui;

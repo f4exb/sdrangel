@@ -67,9 +67,12 @@ public:
     MessageQueue *getSampleSinkInputMessageQueue();
     MessageQueue *getSampleSinkGUIMessageQueue();
 
-    // device related stuff
+    // device GUI related stuff
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
+    void freeChannels();
+    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveChannelSettings(Preset* preset);
 
     void setHardwareId(const QString& id);
     void setSampleSinkId(const QString& id);
@@ -91,12 +94,9 @@ public:
     void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void removeChannelInstance(PluginInstanceGUI* pluginGUI);
 
-    void freeChannels();
 
     void loadSinkSettings(const Preset* preset);
     void saveSinkSettings(Preset* preset);
-    void loadChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveChannelSettings(Preset* preset);
 
     DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }
 
