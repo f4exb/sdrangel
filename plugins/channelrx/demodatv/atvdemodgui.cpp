@@ -21,6 +21,7 @@
 #include "atvdemodgui.h"
 
 #include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"
@@ -38,9 +39,9 @@
 const QString ATVDemodGUI::m_strChannelID = "sdrangel.channel.demodatv";
 
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
-        DeviceSourceAPI *objDeviceAPI)
+        DeviceUISet *deviceUISet)
 {
-    ATVDemodGUI* gui = new ATVDemodGUI(objPluginAPI, objDeviceAPI);
+    ATVDemodGUI* gui = new ATVDemodGUI(objPluginAPI, deviceUISet);
     return gui;
 }
 
@@ -266,12 +267,12 @@ void ATVDemodGUI::onMenuDoubleClicked()
     }
 }
 
-ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
+ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
         QWidget* objParent) :
         RollupWidget(objParent),
         ui(new Ui::ATVDemodGUI),
         m_pluginAPI(objPluginAPI),
-        m_deviceAPI(objDeviceAPI),
+        m_deviceUISet(deviceUISet),
         m_channelMarker(this),
         m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true),
@@ -284,14 +285,14 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_scopeVis = new ScopeVisNG(ui->glScope);
-    m_atvDemod = new ATVDemod(m_deviceAPI);
+    m_atvDemod = new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
     m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setATVScreen(ui->screenTV);
 
     m_channelizer = new DownChannelizer(m_atvDemod);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceUISet->m_deviceSourceAPI->addThreadedSink(m_threadedChannelizer);
 
     ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -312,9 +313,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-    m_deviceAPI->registerChannelInstance(m_strChannelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+    m_deviceUISet->registerChannelInstance(m_strChannelID, this);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
+    m_deviceUISet->addRollupWidget(this);
 
     //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
@@ -347,8 +348,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI,
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceUISet->removeChannelInstance(this);
+    m_deviceUISet->m_deviceSourceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_atvDemod;

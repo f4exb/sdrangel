@@ -1,13 +1,13 @@
-#include "../../channelrx/tcpsrc/tcpsrcplugin.h"
+#include "tcpsrcplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
-#include "../../channelrx/tcpsrc/tcpsrcgui.h"
+#include "tcpsrcgui.h"
 
 const PluginDescriptor TCPSrcPlugin::m_pluginDescriptor = {
 	QString("TCP Channel Source"),
-	QString("3.7.4"),
+	QString("3.7.9"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -33,11 +33,11 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(TCPSrcGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* TCPSrcPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* TCPSrcPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == TCPSrcGUI::m_channelID)
 	{
-		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceAPI);
+		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceUISet);
 //		deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
 //		m_pluginAPI->addChannelRollup(gui);
 		return gui;
@@ -46,9 +46,9 @@ PluginInstanceGUI* TCPSrcPlugin::createRxChannel(const QString& channelName, Dev
 	}
 }
 
-void TCPSrcPlugin::createInstanceTCPSrc(DeviceSourceAPI *deviceAPI)
+void TCPSrcPlugin::createInstanceTCPSrc(DeviceUISet *deviceUISet)
 {
-	TCPSrcGUI::create(m_pluginAPI, deviceAPI);
+	TCPSrcGUI::create(m_pluginAPI, deviceUISet);
 //	deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
 //	m_pluginAPI->addChannelRollup(gui);
 }

@@ -9,7 +9,7 @@
 #include "amdemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -23,7 +23,7 @@ class AMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -55,7 +55,7 @@ private slots:
 private:
 	Ui::AMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	AMDemodSettings m_settings;
 	bool m_doApplySettings;
@@ -67,7 +67,7 @@ private:
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
-	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~AMDemodGUI();
 
     void blockApplySettings(bool block);

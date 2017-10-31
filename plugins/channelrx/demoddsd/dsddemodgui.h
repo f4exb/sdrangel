@@ -30,7 +30,7 @@
 #include "dsddemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class ScopeVis;
 class DSDDemod;
@@ -43,7 +43,7 @@ class DSDDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static DSDDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static DSDDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -94,7 +94,7 @@ private:
 
 	Ui::DSDDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	DSDDemodSettings m_settings;
 	bool m_doApplySettings;
@@ -118,7 +118,7 @@ private:
 
 	MessageQueue m_inputMessageQueue;
 
-	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~DSDDemodGUI();
 
 	void blockApplySettings(bool block);

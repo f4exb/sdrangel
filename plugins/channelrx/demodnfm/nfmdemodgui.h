@@ -11,7 +11,7 @@
 #include "nfmdemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class NFMDemod;
 
@@ -23,7 +23,7 @@ class NFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -61,7 +61,7 @@ private slots:
 private:
 	Ui::NFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	NFMDemodSettings m_settings;
 	bool m_basicSettingsShown;
@@ -72,7 +72,7 @@ private:
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
-	explicit NFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~NFMDemodGUI();
 
 	void blockApplySettings(bool block);

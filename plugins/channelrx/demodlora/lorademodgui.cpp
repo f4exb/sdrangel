@@ -1,5 +1,6 @@
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -17,9 +18,9 @@
 
 const QString LoRaDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.lora";
 
-LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceAPI);
+	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -120,11 +121,11 @@ void LoRaDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true)
@@ -135,7 +136,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWi
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_LoRaDemod = new LoRaDemod(m_deviceAPI);
+	m_LoRaDemod = new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
 
 	ui->glSpectrum->setCenterFrequency(16000);
@@ -152,9 +153,9 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWi
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -167,7 +168,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWi
 
 LoRaDemodGUI::~LoRaDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeChannelInstance(this);
 	delete m_LoRaDemod;
 	delete m_spectrumVis;
 	delete ui;

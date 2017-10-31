@@ -18,6 +18,7 @@
 #include "dsddemodgui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -39,9 +40,9 @@
 
 const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
 
-DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceAPI);
+    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -230,11 +231,11 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::DSDDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_signalFormat(signalFormatNone),
@@ -253,7 +254,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_scopeVis = new ScopeVis(ui->glScope);
-	m_dsdDemod = new DSDDemod(m_deviceAPI);
+	m_dsdDemod = new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_dsdDemod->setScopeSink(m_scopeVis);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
@@ -280,9 +281,9 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
@@ -297,7 +298,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeChannelInstance(this);
 	delete m_dsdDemod;
 	delete ui;
 }

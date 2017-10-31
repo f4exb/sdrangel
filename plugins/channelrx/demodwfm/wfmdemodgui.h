@@ -10,7 +10,7 @@
 #include "wfmdemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class WFMDemod;
 
@@ -22,7 +22,7 @@ class WFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -53,7 +53,7 @@ private slots:
 private:
 	Ui::WFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	WFMDemodSettings m_settings;
 	bool m_basicSettingsShown;
@@ -65,7 +65,7 @@ private:
 	MovingAverage<double> m_channelPowerDbAvg;
 	MessageQueue m_inputMessageQueue;
 
-	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~WFMDemodGUI();
 
     void blockApplySettings(bool block);

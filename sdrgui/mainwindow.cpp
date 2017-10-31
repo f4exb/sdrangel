@@ -1025,11 +1025,7 @@ void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
             qDebug("MainWindow::on_channel_addClicked: channel name: %s", qPrintable(m_pluginManager->getRxChannelInstanceName(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex())));
-            if (m_pluginManager->getRxChannelInstanceName(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex()) == "org.f4exb.sdrangelove.channel.chanalyzer") {
-                m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI);
-            } else {
-                m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI->m_deviceSourceAPI);
-            }
+            m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {

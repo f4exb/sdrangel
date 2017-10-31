@@ -2,6 +2,7 @@
 #include "ssbdemodgui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <QDockWidget>
 #include <QMainWindow>
 
@@ -18,9 +19,9 @@
 
 const QString SSBDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.ssb";
 
-SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceAPI);
+	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -286,11 +287,11 @@ void SSBDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -308,7 +309,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbDemod = new SSBDemod(m_deviceAPI);
+	m_ssbDemod = new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_ssbDemod->setSampleSink(m_spectrumVis);
 
@@ -330,9 +331,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -343,7 +344,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 SSBDemodGUI::~SSBDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeChannelInstance(this);
 	delete m_ssbDemod;
 	delete m_spectrumVis;
 	delete ui;

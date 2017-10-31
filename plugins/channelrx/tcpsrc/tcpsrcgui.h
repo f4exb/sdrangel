@@ -13,7 +13,7 @@
 #include "tcpsrcsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 class TCPSrc;
 class SpectrumVis;
 
@@ -25,7 +25,7 @@ class TCPSrcGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static TCPSrcGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static TCPSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -57,7 +57,7 @@ private slots:
 private:
 	Ui::TCPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
 	MovingAverage<double> m_channelPowerDbAvg;
@@ -77,7 +77,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);
+	explicit TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~TCPSrcGUI();
 
     void blockApplySettings(bool block);

@@ -1,13 +1,13 @@
-#include "../../channelrx/demodssb/ssbplugin.h"
+#include "ssbplugin.h"
 
 #include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#include "../../channelrx/demodssb/ssbdemodgui.h"
+#include "ssbdemodgui.h"
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 	QString("SSB Demodulator"),
-	QString("3.7.3"),
+	QString("3.7.9"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -33,18 +33,18 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(SSBDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* SSBPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == SSBDemodGUI::m_channelID)
 	{
-		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceAPI);
+		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void SSBPlugin::createInstanceSSB(DeviceSourceAPI *deviceAPI)
+void SSBPlugin::createInstanceSSB(DeviceUISet *deviceUISet)
 {
-	SSBDemodGUI::create(m_pluginAPI, deviceAPI);
+	SSBDemodGUI::create(m_pluginAPI, deviceUISet);
 }

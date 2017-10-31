@@ -17,6 +17,7 @@
 #include "chanalyzernggui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -39,9 +40,9 @@
 
 const QString ChannelAnalyzerNGGUI::m_channelID = "sdrangel.channel.chanalyzerng";
 
-ChannelAnalyzerNGGUI* ChannelAnalyzerNGGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+ChannelAnalyzerNGGUI* ChannelAnalyzerNGGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    ChannelAnalyzerNGGUI* gui = new ChannelAnalyzerNGGUI(pluginAPI, deviceAPI);
+    ChannelAnalyzerNGGUI* gui = new ChannelAnalyzerNGGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -350,11 +351,11 @@ void ChannelAnalyzerNGGUI::onMenuDoubleClicked()
 	}
 }
 
-ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerNGGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -370,7 +371,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVisNG(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeNGComboVis(m_spectrumVis, m_scopeVis);
-	m_channelAnalyzer = new ChannelAnalyzerNG(m_deviceAPI);
+	m_channelAnalyzer = new ChannelAnalyzerNG(m_deviceUISet->m_deviceSourceAPI);
 	m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
 //	m_channelizer = new DownChannelizer(m_channelAnalyzer);
@@ -406,9 +407,9 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
@@ -421,7 +422,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI
 
 ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeChannelInstance(this);
 //	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
 //	delete m_threadedChannelizer;
 //	delete m_channelizer;

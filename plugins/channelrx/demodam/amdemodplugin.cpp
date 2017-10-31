@@ -7,7 +7,7 @@
 
 const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
 	QString("AM Demodulator"),
-	QString("3.7.4"),
+	QString("3.7.9"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -33,18 +33,18 @@ void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(AMDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == AMDemodGUI::m_channelID)
 	{
-		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceAPI);
+		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void AMDemodPlugin::createInstanceDemodAM(DeviceSourceAPI *deviceAPI)
+void AMDemodPlugin::createInstanceDemodAM(DeviceUISet *deviceUISet)
 {
-	AMDemodGUI::create(m_pluginAPI, deviceAPI);
+	AMDemodGUI::create(m_pluginAPI, deviceUISet);
 }

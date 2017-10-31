@@ -25,7 +25,7 @@
 #include "util/messagequeue.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -42,7 +42,7 @@ class ATVDemodGUI : public RollupWidget, public PluginInstanceGUI
 	Q_OBJECT
 
 public:
-    static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI);
+    static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
     void setName(const QString& strName);
@@ -90,7 +90,7 @@ private slots:
 private:
 	Ui::ATVDemodGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSourceAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
@@ -109,7 +109,7 @@ private:
     int m_rfSliderDivisor;
     MessageQueue m_inputMessageQueue;
 
-    explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
+    explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, QWidget* objParent = 0);
 	virtual ~ATVDemodGUI();
 
     void blockApplySettings(bool blnBlock);

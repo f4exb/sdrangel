@@ -26,7 +26,7 @@
 const PluginDescriptor ATVDemodPlugin::m_ptrPluginDescriptor =
 {
 	QString("ATV Demodulator"),
-    QString("3.7.3"),
+    QString("3.7.9"),
     QString("(c) F4HKW for F4EXB / SDRAngel"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -53,11 +53,11 @@ void ATVDemodPlugin::initPlugin(PluginAPI* ptrPluginAPI)
     m_ptrPluginAPI->registerRxChannel(ATVDemodGUI::m_strChannelID, this);
 }
 
-PluginInstanceGUI* ATVDemodPlugin::createRxChannel(const QString& strChannelName, DeviceSourceAPI *ptrDeviceAPI)
+PluginInstanceGUI* ATVDemodPlugin::createRxChannel(const QString& strChannelName, DeviceUISet *deviceUISet)
 {
     if(strChannelName == ATVDemodGUI::m_strChannelID)
 	{
-        ATVDemodGUI* ptrGui = ATVDemodGUI::create(m_ptrPluginAPI, ptrDeviceAPI);
+        ATVDemodGUI* ptrGui = ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet);
         return ptrGui;
     }
     else
@@ -66,7 +66,7 @@ PluginInstanceGUI* ATVDemodPlugin::createRxChannel(const QString& strChannelName
 	}
 }
 
-void ATVDemodPlugin::createInstanceDemodATV(DeviceSourceAPI *ptrDeviceAPI)
+void ATVDemodPlugin::createInstanceDemodATV(DeviceUISet *deviceUISet)
 {
-    ATVDemodGUI::create(m_ptrPluginAPI, ptrDeviceAPI);
+    ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet);
 }
