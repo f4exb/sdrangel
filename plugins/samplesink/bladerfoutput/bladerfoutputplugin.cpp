@@ -66,7 +66,9 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 		        m_hardwareID,
 				m_deviceTypeID,
 				QString(devinfo[i].serial),
-				i));
+				i,
+				false,
+				0));
 	}
 
 	if (devinfo)

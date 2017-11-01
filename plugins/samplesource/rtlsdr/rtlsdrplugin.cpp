@@ -57,7 +57,9 @@ PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources()
 		        m_hardwareID,
 				m_deviceTypeID,
 				QString(serial),
-				i));
+				i,
+				true,
+				0));
 	}
 	return result;
 }

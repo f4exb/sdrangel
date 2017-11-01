@@ -27,22 +27,30 @@ class PluginInterface {
 public:
 	struct SamplingDevice
 	{
-		QString displayedName;
-		QString hardwareId;
-		QString id;
-		QString serial;
-		int sequence;
+		QString displayedName; //!< The human readable name
+		QString hardwareId;    //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
+		QString id;            //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
+		QString serial;        //!< The device serial number
+		int sequence;          //!< The device sequence. >0 when more than one device of the same type is connected
+		bool rxElseTx;         //!< This is the Rx part else the Tx part of the device
+		int deviceItemIndex;   //!< For composite devices this is the Rx or Tx stream index. -1 if not initialized
+		int claimed;           //!< This is the device set index if claimed else -1
 
 		SamplingDevice(const QString& _displayedName,
                 const QString& _hardwareId,
 				const QString& _id,
 				const QString& _serial,
-				int _sequence) :
+				int _sequence,
+				bool _rxElseTx,
+				int _deviceItemIndex) :
 			displayedName(_displayedName),
 			hardwareId(_hardwareId),
 			id(_id),
 			serial(_serial),
-			sequence(_sequence)
+			sequence(_sequence),
+			rxElseTx(_rxElseTx),
+			deviceItemIndex(_deviceItemIndex),
+			claimed(-1)
 		{ }
 	};
 	typedef QList<SamplingDevice> SamplingDevices;

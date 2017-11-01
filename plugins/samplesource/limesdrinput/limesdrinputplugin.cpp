@@ -83,13 +83,22 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
             std::string serial("N/D");
             findSerial((const char *) deviceList[i], serial);
 
-            qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d: %s", i, (char *) deviceList[i]);
-            QString displayedName(QString("LimeSDR[%1] %2").arg(i).arg(serial.c_str()));
-            result.append(SamplingDevice(displayedName,
-                    m_hardwareID,
-                    m_deviceTypeID,
-                    QString(deviceList[i]),
-                    i));
+            DeviceLimeSDRParams limeSDRParams;
+            limeSDRParams.open(deviceList[i]);
+            limeSDRParams.close();
+
+            for (unsigned int j = 0; j < limeSDRParams.m_nbRxChannels; j++)
+            {
+                qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d channel %u: %s", i, j, (char *) deviceList[i]);
+                QString displayedName(QString("LimeSDR[%1:%2] %3").arg(i).arg(j).arg(serial.c_str()));
+                result.append(SamplingDevice(displayedName,
+                        m_hardwareID,
+                        m_deviceTypeID,
+                        QString(deviceList[i]),
+                        i,
+                        true,
+                        j));
+            }
         }
     }
 

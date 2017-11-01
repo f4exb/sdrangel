@@ -73,7 +73,9 @@ PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources()
                 m_hardwareID,
                 m_deviceTypeID,
                 serial_str,
-                i));
+                i,
+                true,
+                0));
 
         qDebug("PlutoSDRInputPlugin::enumSampleSources: enumerated PlutoSDR device #%d", i);
 	}

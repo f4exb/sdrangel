@@ -65,7 +65,9 @@ PluginInterface::SamplingDevices FCDProPlugin::enumSampleSources()
 		        fcd_traits<Pro>::hardwareID,
 		        fcd_traits<Pro>::interfaceIID,
 				serialNumber,
-				i));
+				i,
+				true,
+				0));
 
 		device_info = device_info->next;
 		i++;

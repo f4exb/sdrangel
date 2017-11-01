@@ -99,7 +99,9 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 				        m_hardwareID,
 						m_deviceTypeID,
 						serial_str,
-						i));
+						i,
+						true,
+						0));
 
 				qDebug("AirspyPlugin::enumSampleSources: enumerated Airspy device #%d", i);
 			}
