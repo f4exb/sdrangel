@@ -1070,61 +1070,64 @@ void MainWindow::on_action_removeLastDevice_triggered()
 
 void MainWindow::on_action_reloadDevices_triggered()
 {
-    // all devices must be stopped
-    std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
-    for (; it != m_deviceUIs.end(); ++it)
-    {
-        if ((*it)->m_deviceSourceEngine) // it is a source device
-        {
-            if ((*it)->m_deviceSourceEngine->state() == DSPDeviceSourceEngine::StRunning)
-            {
-                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
-                return;
-            }
-        }
+    QMessageBox::information(this, tr("Message"), tr("Not implemented"));
+    return;
 
-        if ((*it)->m_deviceSinkEngine) // it is a sink device
-        {
-            if ((*it)->m_deviceSinkEngine->state() == DSPDeviceSinkEngine::StRunning)
-            {
-                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
-                return;
-            }
-        }
-    }
-
-    // re-scan devices
-    m_pluginManager->updateSampleSourceDevices();
-    m_pluginManager->updateSampleSinkDevices();
-
-    // re-populate device selectors keeping the same selection
-    it = m_deviceUIs.begin();
-    for (; it != m_deviceUIs.end(); ++it)
-    {
-        if ((*it)->m_deviceSourceEngine) // it is a source device
-        {
-            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
-            bool sampleSourceSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
-            uint dspDeviceSourceEngineUID = (*it)->m_deviceSourceEngine->getUID();
-            m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceSourceEngineUID);
-            m_pluginManager->fillSampleSourceSelector(deviceSelectorComboBox, dspDeviceSourceEngineUID);
-            int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
-            deviceSelectorComboBox->setCurrentIndex(newIndex);
-            deviceSelectorComboBox->blockSignals(sampleSourceSignalsBlocked);
-        }
-
-        if ((*it)->m_deviceSinkEngine) // it is a sink device
-        {
-            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
-            bool sampleSinkSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
-            uint dspDeviceSinkEngineUID = (*it)->m_deviceSinkEngine->getUID();
-            m_pluginManager->duplicateLocalSampleSinkDevices(dspDeviceSinkEngineUID);
-            m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, dspDeviceSinkEngineUID);
-            int newIndex = m_pluginManager->getSampleSinkSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSinkAPI);
-            deviceSelectorComboBox->setCurrentIndex(newIndex);
-            deviceSelectorComboBox->blockSignals(sampleSinkSignalsBlocked);
-        }
-    }
+//    // all devices must be stopped
+//    std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
+//    for (; it != m_deviceUIs.end(); ++it)
+//    {
+//        if ((*it)->m_deviceSourceEngine) // it is a source device
+//        {
+//            if ((*it)->m_deviceSourceEngine->state() == DSPDeviceSourceEngine::StRunning)
+//            {
+//                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
+//                return;
+//            }
+//        }
+//
+//        if ((*it)->m_deviceSinkEngine) // it is a sink device
+//        {
+//            if ((*it)->m_deviceSinkEngine->state() == DSPDeviceSinkEngine::StRunning)
+//            {
+//                QMessageBox::information(this, tr("Message"), tr("Stop all devices for reload to take effect"));
+//                return;
+//            }
+//        }
+//    }
+//
+//    // re-scan devices
+//    m_pluginManager->updateSampleSourceDevices();
+//    m_pluginManager->updateSampleSinkDevices();
+//
+//    // re-populate device selectors keeping the same selection
+//    it = m_deviceUIs.begin();
+//    for (; it != m_deviceUIs.end(); ++it)
+//    {
+//        if ((*it)->m_deviceSourceEngine) // it is a source device
+//        {
+//            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
+//            bool sampleSourceSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
+//            uint dspDeviceSourceEngineUID = (*it)->m_deviceSourceEngine->getUID();
+//            m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceSourceEngineUID);
+//            m_pluginManager->fillSampleSourceSelector(deviceSelectorComboBox, dspDeviceSourceEngineUID);
+//            int newIndex = m_pluginManager->getSampleSourceSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSourceAPI);
+//            deviceSelectorComboBox->setCurrentIndex(newIndex);
+//            deviceSelectorComboBox->blockSignals(sampleSourceSignalsBlocked);
+//        }
+//
+//        if ((*it)->m_deviceSinkEngine) // it is a sink device
+//        {
+//            QComboBox *deviceSelectorComboBox = (*it)->m_samplingDeviceControl->getDeviceSelector();
+//            bool sampleSinkSignalsBlocked = deviceSelectorComboBox->blockSignals(true);
+//            uint dspDeviceSinkEngineUID = (*it)->m_deviceSinkEngine->getUID();
+//            m_pluginManager->duplicateLocalSampleSinkDevices(dspDeviceSinkEngineUID);
+//            m_pluginManager->fillSampleSinkSelector(deviceSelectorComboBox, dspDeviceSinkEngineUID);
+//            int newIndex = m_pluginManager->getSampleSinkSelectorIndex(deviceSelectorComboBox, (*it)->m_deviceSinkAPI);
+//            deviceSelectorComboBox->setCurrentIndex(newIndex);
+//            deviceSelectorComboBox->blockSignals(sampleSinkSignalsBlocked);
+//        }
+//    }
 }
 
 void MainWindow::on_action_Exit_triggered()
