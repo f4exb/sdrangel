@@ -71,6 +71,7 @@ void PluginManager::loadPlugins()
 		it->pluginInterface->initPlugin(&m_pluginAPI);
 	}
 
+	// TODO: enumerate with DeviceEnumerator
 	updateSampleSourceDevices();
 	updateSampleSinkDevices();
 }
@@ -281,23 +282,6 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID
 	}
 }
 
-int PluginManager::getSampleSourceSelectorIndex(QComboBox* comboBox, DeviceSourceAPI *deviceSourceAPI)
-{
-    for (int i = 0; i < comboBox->count(); i++)
-    {
-        SamplingDevice *samplingDevice = (SamplingDevice*) (comboBox->itemData(i)).value<void *>();
-
-        if ((samplingDevice->m_deviceId == deviceSourceAPI->getSampleSourceId()) &&
-            (samplingDevice->m_deviceSerial == deviceSourceAPI->getSampleSourceSerial()) &&
-            (samplingDevice->m_deviceSequence == deviceSourceAPI->getSampleSourceSequence()))
-        {
-            return i;
-        }
-    }
-
-    return 0; // default to first item
-}
-
 void PluginManager::fillSampleSinkSelector(QComboBox* comboBox, uint deviceUID)
 {
 	comboBox->clear();
@@ -314,23 +298,6 @@ void PluginManager::fillSampleSinkSelector(QComboBox* comboBox, uint deviceUID)
 
 		comboBox->addItem(m_sampleSinkDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSinkDevices[i]));
 	}
-}
-
-int PluginManager::getSampleSinkSelectorIndex(QComboBox* comboBox, DeviceSinkAPI *deviceSinkAPI)
-{
-    for (int i = 0; i < comboBox->count(); i++)
-    {
-        SamplingDevice *samplingDevice = (SamplingDevice*) (comboBox->itemData(i)).value<void *>();
-
-        if ((samplingDevice->m_deviceId == deviceSinkAPI->getSampleSinkId()) &&
-            (samplingDevice->m_deviceSerial == deviceSinkAPI->getSampleSinkSerial()) &&
-            (samplingDevice->m_deviceSequence == deviceSinkAPI->getSampleSinkSequence()))
-        {
-            return i;
-        }
-    }
-
-    return 0; // default to first item
 }
 
 int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI)
