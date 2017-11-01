@@ -14,9 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QPluginLoader>
-#include <QComboBox>
+//#include <QComboBox>
 #include <QDebug>
 
 #include <cstdio>
@@ -54,7 +54,7 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins()
 {
-	QString applicationDirPath = QApplication::instance()->applicationDirPath();
+	QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 	QString applicationLibPath = applicationDirPath + "/../lib";
 	qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationDirPath) << ", " << qPrintable(applicationLibPath);
 
@@ -263,41 +263,45 @@ void PluginManager::duplicateLocalSampleSinkDevices(uint deviceUID)
     }
 }
 
-void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID)
+void PluginManager::fillSampleSourceSelector(
+        QComboBox* comboBox __attribute__((unused)),
+        uint deviceUID __attribute__((unused)))
 {
-	comboBox->clear();
-
-	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
-	{
-	    // For "local" devices show only ones that concern this device set
-	    if ((m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonSourceDeviceTypeID)
-	            || (m_sampleSourceDevices[i].m_deviceId == m_fileSourceDeviceTypeID))
-	    {
-	        if (deviceUID != m_sampleSourceDevices[i].m_deviceSequence) {
-	            continue;
-	        }
-	    }
-
-		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSourceDevices[i]));
-	}
+//	comboBox->clear();
+//
+//	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
+//	{
+//	    // For "local" devices show only ones that concern this device set
+//	    if ((m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonSourceDeviceTypeID)
+//	            || (m_sampleSourceDevices[i].m_deviceId == m_fileSourceDeviceTypeID))
+//	    {
+//	        if (deviceUID != m_sampleSourceDevices[i].m_deviceSequence) {
+//	            continue;
+//	        }
+//	    }
+//
+//		comboBox->addItem(m_sampleSourceDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSourceDevices[i]));
+//	}
 }
 
-void PluginManager::fillSampleSinkSelector(QComboBox* comboBox, uint deviceUID)
+void PluginManager::fillSampleSinkSelector(
+        QComboBox* comboBox __attribute__((unused)),
+        uint deviceUID __attribute__((unused)))
 {
-	comboBox->clear();
-
-	for(int i = 0; i < m_sampleSinkDevices.count(); i++)
-	{
-	    // For "local" devices show only ones that concern this device set
-	    if (m_sampleSinkDevices[i].m_deviceId == m_fileSinkDeviceTypeID)
-	    {
-	        if (deviceUID != m_sampleSinkDevices[i].m_deviceSequence) {
-	            continue;
-	        }
-	    }
-
-		comboBox->addItem(m_sampleSinkDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSinkDevices[i]));
-	}
+//	comboBox->clear();
+//
+//	for(int i = 0; i < m_sampleSinkDevices.count(); i++)
+//	{
+//	    // For "local" devices show only ones that concern this device set
+//	    if (m_sampleSinkDevices[i].m_deviceId == m_fileSinkDeviceTypeID)
+//	    {
+//	        if (deviceUID != m_sampleSinkDevices[i].m_deviceSequence) {
+//	            continue;
+//	        }
+//	    }
+//
+//		comboBox->addItem(m_sampleSinkDevices[i].m_displayName, qVariantFromValue((void *) &m_sampleSinkDevices[i]));
+//	}
 }
 
 int PluginManager::selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI)

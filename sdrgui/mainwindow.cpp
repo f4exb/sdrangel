@@ -229,6 +229,7 @@ void MainWindow::addSourceDevice()
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
     m_pluginManager->duplicateLocalSampleSourceDevices(dspDeviceSourceEngineUID);
+    // FIXME: replace with the device selection dialog based on static enumeration
     m_pluginManager->fillSampleSourceSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceSourceEngineUID);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSource_confirmClicked(bool)));
@@ -294,6 +295,7 @@ void MainWindow::addSinkDevice()
 
     bool sampleSourceSignalsBlocked = m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector()->blockSignals(true);
     m_pluginManager->duplicateLocalSampleSinkDevices(dspDeviceSinkEngineUID);
+    // FIXME: replace with the device selection dialog based on static enumeration
     m_pluginManager->fillSampleSinkSelector(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelector(), dspDeviceSinkEngineUID);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getDeviceSelectionConfirm(), SIGNAL(clicked(bool)), this, SLOT(on_sampleSink_confirmClicked(bool)));
