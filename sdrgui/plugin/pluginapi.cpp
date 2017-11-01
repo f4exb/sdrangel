@@ -1,4 +1,3 @@
-#include <QDockWidget>
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 

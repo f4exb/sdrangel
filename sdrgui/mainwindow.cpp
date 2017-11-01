@@ -216,7 +216,10 @@ void MainWindow::addSourceDevice()
     m_deviceUIs.back()->m_deviceSourceAPI = deviceSourceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSourceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
-    m_pluginManager->populateRxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
+    QList<QString> channelNames;
+    m_pluginManager->listRxChannels(channelNames);
+    QStringList channelNamesList(channelNames);
+    m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
 
@@ -279,7 +282,10 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSinkAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
-    m_pluginManager->populateTxChannelComboBox(m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector());
+    QList<QString> channelNames;
+    m_pluginManager->listTxChannels(channelNames);
+    QStringList channelNamesList(channelNames);
+    m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
 

@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <QObject>
 #include <QDir>
+#include <QList>
+#include <QString>
+
 #include "plugin/plugininterface.h"
 #include "plugin/pluginapi.h"
 #include "util/export.h"
@@ -70,11 +73,11 @@ public:
 
 	PluginInterface* getPluginInterfaceAt(int index);
 
-	void populateRxChannelComboBox(QComboBox *channels);
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
+    void listRxChannels(QList<QString>& list);
 
-	void populateTxChannelComboBox(QComboBox *channels);
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
+	void listTxChannels(QList<QString>& list);
 
 private:
 	struct SamplingDeviceRegistration {

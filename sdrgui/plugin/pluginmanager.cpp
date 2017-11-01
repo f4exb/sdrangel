@@ -600,21 +600,25 @@ PluginInterface* PluginManager::getPluginInterfaceAt(int index)
     }
 }
 
-void PluginManager::populateRxChannelComboBox(QComboBox *channels)
+void PluginManager::listTxChannels(QList<QString>& list)
 {
-    for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
-    {
-        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
-        channels->addItem(pluginDescipror.displayedName);
-    }
-}
+    list.clear();
 
-void PluginManager::populateTxChannelComboBox(QComboBox *channels)
-{
     for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
     {
         const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
-        channels->addItem(pluginDescipror.displayedName);
+        list.append(pluginDescipror.displayedName);
+    }
+}
+
+void PluginManager::listRxChannels(QList<QString>& list)
+{
+    list.clear();
+
+    for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+    {
+        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDescipror.displayedName);
     }
 }
 
