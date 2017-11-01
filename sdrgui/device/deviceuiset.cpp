@@ -32,7 +32,7 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
     m_spectrumVis = new SpectrumVis(m_spectrum);
@@ -40,11 +40,12 @@ DeviceUISet::DeviceUISet(QTimer& timer)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
-    m_samplingDeviceControl = new SamplingDeviceControl;
+    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex);
     m_deviceSourceEngine = 0;
     m_deviceSourceAPI = 0;
     m_deviceSinkEngine = 0;
     m_deviceSinkAPI = 0;
+    m_deviceTabIndex = tabIndex;
 
     // m_spectrum needs to have its font to be set since it cannot be inherited from the main window
     QFont font;

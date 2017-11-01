@@ -20,10 +20,11 @@
 #include "ui_samplingdevicecontrol.h"
 
 
-SamplingDeviceControl::SamplingDeviceControl(QWidget* parent) :
+SamplingDeviceControl::SamplingDeviceControl(int tabIndex, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SamplingDeviceControl),
-    m_pluginManager(0)
+    m_pluginManager(0),
+    m_deviceTabIndex(tabIndex)
 {
     ui->setupUi(this);
 }

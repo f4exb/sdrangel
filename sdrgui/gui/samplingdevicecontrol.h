@@ -37,7 +37,7 @@ class SDRANGEL_API SamplingDeviceControl : public QWidget {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceControl(QWidget* parent = NULL);
+    explicit SamplingDeviceControl(int tabIndex, QWidget* parent = 0);
     ~SamplingDeviceControl();
 
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
@@ -49,6 +49,7 @@ public:
 private:
     Ui::SamplingDeviceControl* ui;
     PluginManager *m_pluginManager;
+    int m_deviceTabIndex;
 };
 
 

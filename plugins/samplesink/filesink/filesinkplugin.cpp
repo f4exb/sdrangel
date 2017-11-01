@@ -64,6 +64,7 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 				m_deviceTypeID,
 				QString::null,
 				i,
+				PluginInterface::SamplingDevice::BuiltInDevice,
 				false,
 				0));
 	}

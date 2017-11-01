@@ -64,6 +64,7 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 				m_deviceTypeID,
 				QString::null,
 				i,
+				PluginInterface::SamplingDevice::BuiltInDevice,
 				true,
 				0));
 	}

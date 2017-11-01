@@ -74,6 +74,7 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
                 m_deviceTypeID,
                 serial_str,
                 i,
+                PluginInterface::SamplingDevice::PhysicalDevice,
                 false,
                 0));
 

@@ -31,11 +31,6 @@ PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
     return m_pluginManager->getTxChannelRegistrations();
 }
 
-bool PluginAPI::isBuiltInDevice(QString& deviceTypeID)
-{
-    return m_pluginManager->isBuiltInDevice(deviceTypeID);
-}
-
 PluginAPI::PluginAPI(PluginManager* pluginManager) :
 	m_pluginManager(pluginManager)
 {

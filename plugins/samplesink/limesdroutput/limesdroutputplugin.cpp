@@ -96,6 +96,7 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
                         m_deviceTypeID,
                         QString(deviceList[i]),
                         i,
+                        PluginInterface::SamplingDevice::PhysicalDevice,
                         false,
                         j));
             }

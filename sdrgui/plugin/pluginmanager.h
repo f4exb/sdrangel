@@ -79,8 +79,6 @@ public:
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
 	void listTxChannels(QList<QString>& list);
 
-	bool isBuiltInDevice(QString& deviceTypeID);
-
 private:
 	struct SamplingDeviceRegistration //!< This is the channel registration
 	{

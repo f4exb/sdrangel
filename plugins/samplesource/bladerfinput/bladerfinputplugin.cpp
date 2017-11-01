@@ -68,6 +68,7 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 				m_deviceTypeID,
 				QString(devinfo[i].serial),
 				i,
+				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
 				0));
 	}

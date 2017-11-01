@@ -45,7 +45,7 @@ struct DeviceUISet
     DeviceSinkAPI *m_deviceSinkAPI;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(QTimer& timer);
+    DeviceUISet(int tabIndex, QTimer& timer);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
@@ -86,6 +86,7 @@ private:
 
     ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
+    int m_deviceTabIndex;
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();

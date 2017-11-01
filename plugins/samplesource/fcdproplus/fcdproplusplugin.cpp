@@ -68,6 +68,7 @@ PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 				fcd_traits<ProPlus>::interfaceIID,
 				serialNumber,
 				i,
+				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
 				0));
 

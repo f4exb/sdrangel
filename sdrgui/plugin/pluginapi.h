@@ -5,11 +5,11 @@
 #include <QList>
 
 #include "util/export.h"
+#include "plugin/plugininterface.h"
 
 class QString;
 
 class PluginManager;
-class PluginInterface;
 class MessageQueue;
 class PluginInstanceGUI;
 
@@ -42,9 +42,6 @@ public:
 
 	// Sample Sink stuff
 	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
-
-	// Categories enquiry
-	bool isBuiltInDevice(QString& deviceTypeID);
 
 protected:
 	PluginManager* m_pluginManager;

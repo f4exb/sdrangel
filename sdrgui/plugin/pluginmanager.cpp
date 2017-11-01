@@ -643,12 +643,3 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
         pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
     }
 }
-
-bool PluginManager::isBuiltInDevice(QString& deviceTypeID)
-{
-    return ((deviceTypeID == m_fileSourceDeviceTypeID) ||
-        (deviceTypeID == m_fileSinkDeviceTypeID) ||
-        (deviceTypeID == m_sdrDaemonSourceDeviceTypeID) ||
-        (deviceTypeID == m_sdrDaemonSinkDeviceTypeID));
-}
-
