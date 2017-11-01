@@ -50,7 +50,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         device/devicesourceapi.cpp\
-        device/devicesinkapi.cpp\        
+        device/devicesinkapi.cpp\
+        device/deviceenumerator.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
         dsp/downchannelizer.cpp\
@@ -107,6 +108,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         audio/audioinput.h\
         device/devicesourceapi.h\
         device/devicesinkapi.h\
+        device/deviceenumerator.h\
         dsp/afsquelch.h\
         dsp/downchannelizer.h\
         dsp/upchannelizer.h\

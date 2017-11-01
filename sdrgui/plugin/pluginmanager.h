@@ -79,8 +79,11 @@ public:
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
 	void listTxChannels(QList<QString>& list);
 
+	bool isBuiltInDevice(QString& deviceTypeID);
+
 private:
-	struct SamplingDeviceRegistration {
+	struct SamplingDeviceRegistration //!< This is the channel registration
+	{
 		QString m_deviceId;
 		PluginInterface* m_plugin;
 		SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
@@ -91,7 +94,7 @@ private:
 
 	typedef QList<SamplingDeviceRegistration> SamplingDeviceRegistrations;
 
-	struct SamplingDevice {
+	struct SamplingDevice { //!< This is the device registration
 		PluginInterface* m_plugin;
 		QString m_displayName;
 		QString m_hadrwareId;
@@ -128,12 +131,15 @@ private:
 	SamplingDevices m_sampleSinkDevices;                      //!< Instances of output sinks present in the system
 
 	// "Local" sample source device IDs
-    static const QString m_sdrDaemonHardwareID;       //!< SDRdaemon hardware ID
-	static const QString m_sdrDaemonDeviceTypeID;     //!< SDRdaemon source plugin ID
-    static const QString m_fileSourceHardwareID;      //!< FileSource source hardware ID
-    static const QString m_fileSourceDeviceTypeID;    //!< FileSource source plugin ID
+    static const QString m_sdrDaemonSourceHardwareID;   //!< SDRdaemon source hardware ID
+    static const QString m_sdrDaemonSourceDeviceTypeID; //!< SDRdaemon source plugin ID
+    static const QString m_fileSourceHardwareID;        //!< FileSource source hardware ID
+    static const QString m_fileSourceDeviceTypeID;      //!< FileSource source plugin ID
 
     // "Local" sample sink device IDs
+    static const QString m_sdrDaemonSinkHardwareID;   //!< SDRdaemon source hardware ID
+    static const QString m_sdrDaemonSinkDeviceTypeID; //!< SDRdaemon source plugin ID
+    static const QString m_fileSinkHardwareID;        //!< FileSource source hardware ID
     static const QString m_fileSinkDeviceTypeID;      //!< FileSink sink plugin ID
 
 	void loadPlugins(const QDir& dir);

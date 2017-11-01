@@ -31,10 +31,14 @@
 
 #include "plugin/pluginmanager.h"
 
-const QString PluginManager::m_sdrDaemonHardwareID = "SDRdaemonSource";
-const QString PluginManager::m_sdrDaemonDeviceTypeID = "sdrangel.samplesource.sdrdaemonsource";
+const QString PluginManager::m_sdrDaemonSourceHardwareID = "SDRdaemonSource";
+const QString PluginManager::m_sdrDaemonSourceDeviceTypeID = "sdrangel.samplesource.sdrdaemonsource";
 const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
+
+const QString PluginManager::m_sdrDaemonSinkHardwareID = "SDRdaemonSink";
+const QString PluginManager::m_sdrDaemonSinkDeviceTypeID = "sdrangel.samplesink.sdrdaemonsink";
+const QString PluginManager::m_fileSinkHardwareID = "FileSink";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
 
 PluginManager::PluginManager(QObject* parent) :
@@ -172,7 +176,7 @@ void PluginManager::duplicateLocalSampleSourceDevices(uint deviceUID)
 
     for(int i = 0; i < m_sampleSourceDevices.count(); ++i)
     {
-        if (m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonDeviceTypeID) // SDRdaemon
+        if (m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonSourceDeviceTypeID) // SDRdaemon
         {
             if (m_sampleSourceDevices[i].m_deviceSequence == 0) { // reference to device 0
                 sdrDaemonSSD0 = &m_sampleSourceDevices[i];
@@ -265,7 +269,7 @@ void PluginManager::fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID
 	for(int i = 0; i < m_sampleSourceDevices.count(); i++)
 	{
 	    // For "local" devices show only ones that concern this device set
-	    if ((m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonDeviceTypeID)
+	    if ((m_sampleSourceDevices[i].m_deviceId == m_sdrDaemonSourceDeviceTypeID)
 	            || (m_sampleSourceDevices[i].m_deviceId == m_fileSourceDeviceTypeID))
 	    {
 	        if (deviceUID != m_sampleSourceDevices[i].m_deviceSequence) {
@@ -627,7 +631,7 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelName, deviceUISet);
+        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
     }
 }
 
@@ -636,6 +640,15 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_txChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelName, deviceUISet);
+        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
     }
 }
+
+bool PluginManager::isBuiltInDevice(QString& deviceTypeID)
+{
+    return ((deviceTypeID == m_fileSourceDeviceTypeID) ||
+        (deviceTypeID == m_fileSinkDeviceTypeID) ||
+        (deviceTypeID == m_sdrDaemonSourceDeviceTypeID) ||
+        (deviceTypeID == m_sdrDaemonSinkDeviceTypeID));
+}
+

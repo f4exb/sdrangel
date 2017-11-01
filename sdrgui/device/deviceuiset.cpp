@@ -172,7 +172,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
             {
                 for(int i = 0; i < channelRegistrations->count(); i++)
                 {
-                    if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
+                    if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
                         reg = ChannelInstanceRegistration(
@@ -270,7 +270,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
             {
                 for(int i = 0; i < channelRegistrations->count(); i++)
                 {
-                    if((*channelRegistrations)[i].m_channelName == channelConfig.m_channel)
+                    if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
                         reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createTxChannel(channelConfig.m_channel, this));

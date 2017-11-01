@@ -19,10 +19,10 @@ class SDRANGEL_API PluginAPI : public QObject {
 public:
     struct ChannelRegistration
     {
-        QString m_channelName;
+        QString m_channelId;       //!< Channel or device type ID
         PluginInterface* m_plugin;
-        ChannelRegistration(const QString& channelName, PluginInterface* plugin) :
-            m_channelName(channelName),
+        ChannelRegistration(const QString& channelId, PluginInterface* plugin) :
+            m_channelId(channelId),
             m_plugin(plugin)
         { }
     };
@@ -42,6 +42,9 @@ public:
 
 	// Sample Sink stuff
 	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
+
+	// Categories enquiry
+	bool isBuiltInDevice(QString& deviceTypeID);
 
 protected:
 	PluginManager* m_pluginManager;
