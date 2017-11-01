@@ -1,5 +1,6 @@
-sdrangel (3.7.9-1) unstable; urgency=medium
+sdrangel (3.8.0-1) unstable; urgency=medium
 
+  * Redesigned the device handling
   * Refactoring: Separate DeviceAPI from the GUI
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 Nov 2017 18:14:18 +0200
