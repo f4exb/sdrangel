@@ -23,9 +23,7 @@
 SamplingDeviceControl::SamplingDeviceControl(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SamplingDeviceControl),
-    m_pluginManager(0),
-    m_deviceSourceAPI(0),
-	m_deviceSinkAPI(0)
+    m_pluginManager(0)
 {
     ui->setupUi(this);
 }

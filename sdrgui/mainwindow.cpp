@@ -214,7 +214,6 @@ void MainWindow::addSourceDevice()
     DeviceSourceAPI *deviceSourceAPI = new DeviceSourceAPI(deviceTabIndex, dspDeviceSourceEngine);
 
     m_deviceUIs.back()->m_deviceSourceAPI = deviceSourceAPI;
-    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSourceAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     QList<QString> channelNames;
     m_pluginManager->listRxChannels(channelNames);
@@ -280,7 +279,6 @@ void MainWindow::addSinkDevice()
 
     m_deviceUIs.back()->m_deviceSourceAPI = 0;
     m_deviceUIs.back()->m_deviceSinkAPI = deviceSinkAPI;
-    m_deviceUIs.back()->m_samplingDeviceControl->setDeviceAPI(deviceSinkAPI);
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     QList<QString> channelNames;
     m_pluginManager->listTxChannels(channelNames);
