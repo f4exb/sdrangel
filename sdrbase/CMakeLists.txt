@@ -62,6 +62,8 @@ set(sdrbase_SOURCES
     #util/spinlock.cpp
     
     plugin/plugininterface.cpp    
+    plugin/pluginapi.cpp
+    plugin/pluginmanager.cpp    
 )
 
 set(sdrbase_HEADERS
@@ -129,6 +131,8 @@ set(sdrbase_HEADERS
 
     plugin/plugininstancegui.h
     plugin/plugininterface.h
+    plugin/pluginapi.h
+    plugin/pluginmanager.h
 
     settings/preferences.h
     settings/preset.h
