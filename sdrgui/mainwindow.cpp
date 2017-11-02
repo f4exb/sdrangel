@@ -147,6 +147,7 @@ MainWindow::MainWindow(QWidget* parent) :
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
         m_deviceUIs.back()->m_deviceSourceAPI->resetSampleSourceId();
+        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
