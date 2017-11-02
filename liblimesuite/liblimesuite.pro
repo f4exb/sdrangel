@@ -37,6 +37,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
 SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/API/lms7_api.cpp\
     $$LIBLIMESUITESRC/src/API/lms7_device.cpp\
+    $$LIBLIMESUITESRC/src/API/LimeSDR_mini.cpp\
     $$LIBLIMESUITESRC/src/API/qLimeSDR.cpp\
     src/BuiltinConnections.cpp\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.cpp\
@@ -80,6 +81,7 @@ SOURCES = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     
 HEADERS = $$LIBLIMESUITESRC/src/ADF4002/ADF4002.h\
     $$LIBLIMESUITESRC/src/API/lms7_device.h\
+    $$LIBLIMESUITESRC/src/API/LimeSDR_mini.h\
     $$LIBLIMESUITESRC/src/API/qLimeSDR.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionHandle.h\
     $$LIBLIMESUITESRC/src/ConnectionRegistry/ConnectionRegistry.h\
