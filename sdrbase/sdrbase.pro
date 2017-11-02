@@ -100,7 +100,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/syncmessenger.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
-        plugin/plugininterface.cpp        
+        plugin/plugininterface.cpp\
         plugin/pluginapi.cpp\        
         plugin/pluginmanager.cpp        
 
