@@ -36,7 +36,7 @@ public:
 		QString displayedName;    //!< The human readable name
 		QString hardwareId;       //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
 		QString id;               //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
-		QString serial;           //!< The device serial number
+		QString serial;           //!< The device serial number defined by the vendor or a fake one (SDRplay)
 		int sequence;             //!< The device sequence. >0 when more than one device of the same type is connected
 		SamplingDeviceType type;  //!< The sampling device type for behavior information
 		bool rxElseTx;            //!< This is the Rx part else the Tx part of the device

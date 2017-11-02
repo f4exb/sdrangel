@@ -27,6 +27,7 @@ DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSourceEngine(deviceSourceEngine),
     m_sampleSourceSequence(0),
+    m_itemIndex(0),
     m_pluginInterface(0),
     m_sampleSourcePluginInstanceUI(0),
     m_buddySharedPtr(0),
@@ -149,6 +150,11 @@ void DeviceSourceAPI::setSampleSourceSequence(int sequence)
 {
     m_sampleSourceSequence = sequence;
     m_deviceSourceEngine->setSourceSequence(sequence);
+}
+
+void DeviceSourceAPI::setItemIndex(uint32_t index)
+{
+    m_itemIndex = index;
 }
 
 void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)

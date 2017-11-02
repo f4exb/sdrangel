@@ -66,6 +66,7 @@ public:
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkDisplayName(const QString& serial);
     void setSampleSinkSequence(int sequence);
+    void setItemIndex(uint32_t index);
     void setSampleSinkPluginInterface(PluginInterface *iface);
     void setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui);
 
@@ -73,8 +74,9 @@ public:
     const QString& getSampleSinkId() const { return m_sampleSinkId; }
     const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
     const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
-    PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
+    uint32_t getItemIndex() const { return m_itemIndex; }
+    PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
     void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
@@ -104,11 +106,12 @@ protected:
     int m_deviceTabIndex;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
 
-    QString m_hardwareId;
-    QString m_sampleSinkId;
-    QString m_sampleSinkSerial;
-    QString m_sampleSinkDisplayName;
-    uint32_t m_sampleSinkSequence;
+    QString m_hardwareId;            //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
+    QString m_sampleSinkId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
+    QString m_sampleSinkSerial;      //!< The device serial number defined by the vendor
+    QString m_sampleSinkDisplayName; //!< The human readable name identifying this instance
+    uint32_t m_sampleSinkSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
+    uint32_t m_itemIndex;            //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSinkPluginInstanceUI;
 

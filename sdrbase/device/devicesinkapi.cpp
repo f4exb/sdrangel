@@ -27,6 +27,7 @@ DeviceSinkAPI::DeviceSinkAPI(int deviceTabIndex,
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSinkEngine(deviceSinkEngine),
     m_sampleSinkSequence(0),
+    m_itemIndex(0),
     m_pluginInterface(0),
     m_sampleSinkPluginInstanceUI(0),
     m_buddySharedPtr(0),
@@ -157,6 +158,11 @@ void DeviceSinkAPI::setSampleSinkSequence(int sequence)
 {
     m_sampleSinkSequence = sequence;
     m_deviceSinkEngine->setSinkSequence(sequence);
+}
+
+void DeviceSinkAPI::setItemIndex(uint32_t index)
+{
+    m_itemIndex = index;
 }
 
 void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)

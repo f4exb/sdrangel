@@ -66,6 +66,7 @@ public:
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
+    void setItemIndex(uint32_t index);
     void setSampleSourcePluginInterface(PluginInterface *iface);
     void setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui);
 
@@ -73,8 +74,9 @@ public:
     const QString& getSampleSourceId() const { return m_sampleSourceId; }
     const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
     const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
-    PluginInterface *getPluginInterface() { return m_pluginInterface; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
+    uint32_t getItemIndex() const { return m_itemIndex; }
+    PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
 
     void loadSourceSettings(const Preset* preset);
@@ -100,11 +102,12 @@ protected:
     int m_deviceTabIndex;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
 
-    QString m_hardwareId;
-    QString m_sampleSourceId;
-    QString m_sampleSourceSerial;
-    QString m_sampleSourceDisplayName;
-    uint32_t m_sampleSourceSequence;
+    QString m_hardwareId;              //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
+    QString m_sampleSourceId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
+    QString m_sampleSourceSerial;      //!< The device serial number defined by the vendor or a fake one (SDRplay)
+    QString m_sampleSourceDisplayName; //!< The human readable name identifying this instance
+    uint32_t m_sampleSourceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
+    uint32_t m_itemIndex;              //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSourcePluginInstanceUI;
 
