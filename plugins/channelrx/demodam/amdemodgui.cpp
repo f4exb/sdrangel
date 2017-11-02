@@ -20,6 +20,7 @@
 #include "amdemodgui.h"
 
 #include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"
@@ -35,9 +36,9 @@
 
 const QString AMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.am";
 
-AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceAPI);
+	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -169,11 +170,11 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
@@ -184,7 +185,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amDemod = new AMDemod(m_deviceAPI);
+	m_amDemod = new AMDemod(m_deviceUISet->m_deviceSourceAPI);
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -205,9 +206,9 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
     displaySettings();
 	applySettings(true);
@@ -215,7 +216,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget
 
 AMDemodGUI::~AMDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_amDemod;
 	delete ui;
 }

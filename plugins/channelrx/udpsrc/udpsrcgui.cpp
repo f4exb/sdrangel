@@ -18,6 +18,7 @@
 #include "udpsrcgui.h"
 
 #include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
@@ -31,9 +32,9 @@
 
 const QString UDPSrcGUI::m_channelID = "sdrangel.channel.udpsrc";
 
-UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceAPI);
+	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -131,11 +132,11 @@ void UDPSrcGUI::tick()
 	m_tickCount++;
 }
 
-UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::UDPSrcGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_udpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerAvg(4, 1e-10),
@@ -150,7 +151,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_udpSrc = new UDPSrc(m_deviceAPI);
+	m_udpSrc = new UDPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_udpSrc->setSpectrum(m_spectrumVis);
 
 	ui->fmDeviation->setEnabled(false);
@@ -184,9 +185,9 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -197,7 +198,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 UDPSrcGUI::~UDPSrcGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_udpSrc;
 	delete m_spectrumVis;
 	delete ui;

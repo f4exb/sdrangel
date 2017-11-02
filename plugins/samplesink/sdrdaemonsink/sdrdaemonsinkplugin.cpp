@@ -26,7 +26,7 @@
 
 const PluginDescriptor SDRdaemonSinkPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon sink output"),
-	QString("3.5.0"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -54,27 +54,28 @@ void SDRdaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("SDRdaemonSink[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i));
-	}
+    result.append(SamplingDevice(
+            "SDRdaemonSink",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            false,
+            0));
 
 	return result;
 }
 
-PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceAPI);
+	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

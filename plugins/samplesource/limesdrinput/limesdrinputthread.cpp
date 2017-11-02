@@ -42,6 +42,7 @@ void LimeSDRInputThread::startWork()
     if (LMS_StartStream(m_stream) < 0) {
         qCritical("LimeSDRInputThread::startWork: could not start stream");
     } else {
+        usleep(1000);
         qDebug("LimeSDRInputThread::startWork: stream started");
     }
 
@@ -62,6 +63,7 @@ void LimeSDRInputThread::stopWork()
     if (LMS_StopStream(m_stream) < 0) {
         qCritical("LimeSDRInputThread::stopWork: could not stop stream");
     } else {
+        usleep(1000);
         qDebug("LimeSDRInputThread::stopWork: stream stopped");
     }
 }

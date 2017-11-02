@@ -24,7 +24,7 @@ Use this button to toggle audio mute for this channel. The button will light up 
 
 Copies audio output to UDP. Audio is set at fixed level and is muted by the mute button (13) and squelch (9) is also applied. Output is mono S16LE samples. 
 
-UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
+UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
 <h3>5: Level meter in dB</h3>
 

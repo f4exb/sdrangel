@@ -35,20 +35,29 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="deviceSelectLayout">
      <item>
-      <widget class="QComboBox" name="deviceSelect">
-       <property name="toolTip">
-        <string>Select sampling device</string>
+      <widget class="QLabel" name="deviceSelectedText">
+       <property name="text">
+        <string>Device</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="deviceConfirm">
+      <widget class="QPushButton" name="deviceChange">
        <property name="minimumSize">
         <size>
          <width>24</width>
@@ -62,14 +71,34 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Confirm and change sampling device</string>
+        <string>Change sampling device</string>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
-         <normaloff>:/checkmark.png</normaloff>:/checkmark.png</iconset>
+         <normaloff>:/choose.png</normaloff>:/choose.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deviceReload">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reload sampling device</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
        </property>
       </widget>
      </item>

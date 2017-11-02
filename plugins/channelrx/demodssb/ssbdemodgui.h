@@ -9,7 +9,7 @@
 #include "ssbdemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class AudioFifo;
 class SSBDemod;
@@ -23,7 +23,7 @@ class SSBDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -62,7 +62,7 @@ private slots:
 private:
 	Ui::SSBDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	SSBDemodSettings m_settings;
 	bool m_basicSettingsShown;
@@ -80,7 +80,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI* deviceAPI, QWidget* parent = NULL);
+	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, QWidget* parent = 0);
 	virtual ~SSBDemodGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);

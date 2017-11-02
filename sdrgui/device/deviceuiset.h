@@ -29,6 +29,8 @@ class DSPDeviceSourceEngine;
 class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
+class ChannelMarker;
+class PluginAPI;
 
 struct DeviceUISet
 {
@@ -43,8 +45,51 @@ struct DeviceUISet
     DeviceSinkAPI *m_deviceSinkAPI;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(QTimer& timer);
+    DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer);
     ~DeviceUISet();
+
+    GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
+    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
+    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
+
+    void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void freeRxChannels();
+    void freeTxChannels();
+    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveRxChannelSettings(Preset* preset);
+    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveTxChannelSettings(Preset* preset);
+
+private:
+    struct ChannelInstanceRegistration
+    {
+        QString m_channelName;
+        PluginInstanceGUI* m_gui;
+
+        ChannelInstanceRegistration() :
+            m_channelName(),
+            m_gui(NULL)
+        { }
+
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
+            m_channelName(channelName),
+            m_gui(pluginGUI)
+        { }
+
+        bool operator<(const ChannelInstanceRegistration& other) const;
+    };
+
+    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
+
+    ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
+    ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
+    int m_deviceTabIndex;
+
+    void renameRxChannelInstances();
+    void renameTxChannelInstances();
 };
 
 

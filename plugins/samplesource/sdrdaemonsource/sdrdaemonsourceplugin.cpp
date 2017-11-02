@@ -26,7 +26,7 @@
 
 const PluginDescriptor SDRdaemonSourcePlugin::m_pluginDescriptor = {
 	QString("SDRdaemon source input"),
-	QString("3.5.0"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -54,27 +54,28 @@ void SDRdaemonSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices SDRdaemonSourcePlugin::enumSampleSources()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("SDRdaemonSource[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i));
-	}
+    result.append(SamplingDevice(
+            "SDRdaemonSource",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            true,
+            0));
 
 	return result;
 }
 
-PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		SDRdaemonSourceGui* gui = new SDRdaemonSourceGui(deviceAPI);
+		SDRdaemonSourceGui* gui = new SDRdaemonSourceGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

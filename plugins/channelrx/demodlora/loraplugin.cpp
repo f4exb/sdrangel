@@ -6,7 +6,7 @@
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
 	QString("LoRa Demodulator"),
-	QString("3.7.4"),
+	QString("3.8.0"),
 	QString("(c) 2015 John Greb"),
 	QString("http://www.maintech.de"),
 	true,
@@ -32,18 +32,18 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(LoRaDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* LoRaPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == LoRaDemodGUI::m_channelID)
 	{
-		LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
+		LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void LoRaPlugin::createInstanceLoRa(DeviceSourceAPI *deviceAPI)
+void LoRaPlugin::createInstanceLoRa(DeviceUISet *deviceUISet)
 {
-	LoRaDemodGUI::create(m_pluginAPI, deviceAPI);
+	LoRaDemodGUI::create(m_pluginAPI, deviceUISet);
 }

@@ -26,7 +26,7 @@
 
 #include "sdrdaemonsourceinput.h"
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 namespace Ui {
 	class SDRdaemonSourceGui;
@@ -36,7 +36,7 @@ class SDRdaemonSourceGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonSourceGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~SDRdaemonSourceGui();
 	virtual void destroy();
 
@@ -54,7 +54,7 @@ public:
 private:
 	Ui::SDRdaemonSourceGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
     SDRdaemonSourceSettings m_settings;        //!< current settings
     SDRdaemonSourceSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;

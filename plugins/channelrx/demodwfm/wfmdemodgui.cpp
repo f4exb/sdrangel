@@ -1,6 +1,7 @@
 #include "wfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -19,9 +20,9 @@
 
 const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
 
-WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceAPI);
+	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -143,11 +144,11 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_channelPowerDbAvg(20,0)
@@ -171,7 +172,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_wfmDemod = new WFMDemod(m_deviceAPI);
+	m_wfmDemod = new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -184,9 +185,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	m_settings.setChannelMarker(&m_channelMarker);
 
@@ -196,7 +197,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 WFMDemodGUI::~WFMDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_wfmDemod;
 	//delete m_channelMarker;
 	delete ui;

@@ -29,7 +29,7 @@
 
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),
-	QString("3.5.2"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -98,7 +98,10 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 			        m_hardwareID,
 			        m_deviceTypeID,
 					serial_str,
-					i));
+					i,
+					PluginInterface::SamplingDevice::PhysicalDevice,
+					true,
+					0));
 
 			qDebug("HackRFPlugin::enumSampleSources: enumerated HackRF device #%d", i);
 
@@ -117,11 +120,14 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId, QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		HackRFInputGui* gui = new HackRFInputGui(deviceAPI);
+		HackRFInputGui* gui = new HackRFInputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

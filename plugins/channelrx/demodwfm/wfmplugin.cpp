@@ -7,7 +7,7 @@
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("3.7.4"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -33,18 +33,18 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(WFMDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* WFMPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == WFMDemodGUI::m_channelID)
 	{
-		WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceAPI);
+		WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void WFMPlugin::createInstanceWFM(DeviceSourceAPI *deviceAPI)
+void WFMPlugin::createInstanceWFM(DeviceUISet *deviceUISet)
 {
-	WFMDemodGUI::create(m_pluginAPI, deviceAPI);
+	WFMDemodGUI::create(m_pluginAPI, deviceUISet);
 }

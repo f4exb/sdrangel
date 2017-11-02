@@ -189,7 +189,7 @@ Copies audio output to UDP. Output is stereo S16LE samples. Depending on which s
 
 It cannot mix both channels when slot1+2 are active.
 
-UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
+UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
 <h3>20: Format specific status display</h3>
 

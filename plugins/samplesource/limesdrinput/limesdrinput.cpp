@@ -86,6 +86,8 @@ bool LimeSDRInput::openDevice()
         qDebug("LimeSDRInput::openDevice: allocated SampleFifo");
     }
 
+    int requestedChannel = m_deviceAPI->getItemIndex();
+
     // look for Rx buddies and get reference to common parameters
     // if there is a channel left take the first available
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
@@ -116,7 +118,8 @@ bool LimeSDRInput::openDevice()
             qDebug("LimeSDRInput::openDevice: at least one more Rx channel is available in device");
         }
 
-        // look for unused channel number
+        // check if the requested channel is busy and abort if so (should not happen if device management is working correctly)
+
         char *busyChannels = new char[deviceParams->m_nbRxChannels];
         memset(busyChannels, 0, deviceParams->m_nbRxChannels);
 
@@ -125,21 +128,14 @@ bool LimeSDRInput::openDevice()
             DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
             DeviceLimeSDRShared *buddyShared = (DeviceLimeSDRShared *) buddy->getBuddySharedPtr();
 
-            if (buddyShared->m_channel >= 0) {
-                busyChannels[buddyShared->m_channel] = 1;
+            if (buddyShared->m_channel == requestedChannel)
+            {
+                qCritical("LimeSDRInput::openDevice: cannot open busy channel %u", requestedChannel);
+                return false;
             }
         }
 
-        std::size_t ch = 0;
-
-        for (;ch < deviceParams->m_nbRxChannels; ch++)
-        {
-            if (busyChannels[ch] == 0) {
-                break; // first available is the good one
-            }
-        }
-
-        m_deviceShared.m_channel = ch;
+        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
         delete[] busyChannels;
     }
     // look for Tx buddies and get reference to common parameters
@@ -161,7 +157,7 @@ bool LimeSDRInput::openDevice()
             qDebug("LimeSDRInput::openDevice: getting device parameters from Tx buddy");
         }
 
-        m_deviceShared.m_channel = 0; // take first channel
+        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
     // There are no buddies then create the first LimeSDR common parameters
     // open the device this will also populate common fields
@@ -174,7 +170,7 @@ bool LimeSDRInput::openDevice()
         char serial[256];
         strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
         m_deviceShared.m_deviceParams->open(serial);
-        m_deviceShared.m_channel = 0; // take first channel
+        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
@@ -356,6 +352,8 @@ void LimeSDRInput::releaseChannel()
 
     resumeTxBuddies();
     resumeRxBuddies();
+
+    // The channel will be effectively released to be reused in another device set only at close time
 
     m_channelAcquired = false;
 }
@@ -939,9 +937,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     settings.m_antennaPath))
             {
                 doCalibration = true;
-                setAntennaAuto = (settings.m_antennaPath == 0);
-                qDebug("LimeSDRInput::applySettings: set antenna path to %d",
-                        (int) settings.m_antennaPath);
+                //setAntennaAuto = (settings.m_antennaPath == 0);
+                qDebug("LimeSDRInput::applySettings: set antenna path to %d on channel %d",
+                        (int) settings.m_antennaPath,
+                        m_deviceShared.m_channel);
             }
             else
             {

@@ -40,9 +40,12 @@ set(sdrbase_SOURCES
     dsp/threadedbasebandsamplesink.cpp
     dsp/threadedbasebandsamplesource.cpp
     dsp/wfir.cpp
-
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
+
+    device/devicesourceapi.cpp
+    device/devicesinkapi.cpp
+    device/deviceenumerator.cpp
 
     settings/preferences.cpp
     settings/preset.cpp
@@ -57,6 +60,10 @@ set(sdrbase_SOURCES
     util/samplesourceserializer.cpp
     util/simpleserializer.cpp
     #util/spinlock.cpp
+    
+    plugin/plugininterface.cpp    
+    plugin/pluginapi.cpp
+    plugin/pluginmanager.cpp    
 )
 
 set(sdrbase_HEADERS
@@ -115,11 +122,17 @@ set(sdrbase_HEADERS
     dsp/threadedbasebandsamplesink.h
     dsp/threadedbasebandsamplesource.h
     dsp/wfir.h
-
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h
 
+    device/devicesourceapi.h
+    device/devicesinkapi.h
+    device/deviceenumerator.h
+
     plugin/plugininstancegui.h
+    plugin/plugininterface.h
+    plugin/pluginapi.h
+    plugin/pluginmanager.h
 
     settings/preferences.h
     settings/preset.h

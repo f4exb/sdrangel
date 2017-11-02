@@ -26,7 +26,7 @@
 #include "bfmdemodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 class RDSParser;
 
 class ThreadedBasebandSampleSink;
@@ -42,7 +42,7 @@ class BFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -82,7 +82,7 @@ private slots:
 private:
 	Ui::BFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	BFMDemodSettings m_settings;
 	bool m_doApplySettings;
@@ -96,7 +96,7 @@ private:
 	std::vector<unsigned int> m_g14ComboIndex;
 	MessageQueue m_inputMessageQueue;
 
-	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);

@@ -25,6 +25,8 @@ public:
 	Preset* getWorkingPreset() { return &m_workingPreset; }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
 	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }
+	const QString& getSourceDeviceId() const { return m_preferences.getSourceDevice(); }
+	void setSourceDeviceId(const QString& deviceId) { m_preferences.setSourceDevice(deviceId); }
 
 	void setLatitude(float latitude) { m_preferences.setLatitude(latitude); }
 	void setLongitude(float longitude) { m_preferences.setLongitude(longitude); }

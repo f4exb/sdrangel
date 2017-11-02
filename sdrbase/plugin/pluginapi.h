@@ -5,11 +5,11 @@
 #include <QList>
 
 #include "util/export.h"
+#include "plugin/plugininterface.h"
 
 class QString;
 
 class PluginManager;
-class PluginInterface;
 class MessageQueue;
 class PluginInstanceGUI;
 
@@ -17,12 +17,24 @@ class SDRANGEL_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:
+    struct SamplingDeviceRegistration //!< This is the device registration
+    {
+        QString m_deviceId;
+        PluginInterface* m_plugin;
+        SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
+            m_deviceId(deviceId),
+            m_plugin(plugin)
+        { }
+    };
+
+    typedef QList<SamplingDeviceRegistration> SamplingDeviceRegistrations;
+
     struct ChannelRegistration
     {
-        QString m_channelName;
+        QString m_channelId;       //!< Channel or device type ID
         PluginInterface* m_plugin;
-        ChannelRegistration(const QString& channelName, PluginInterface* plugin) :
-            m_channelName(channelName),
+        ChannelRegistration(const QString& channelId, PluginInterface* plugin) :
+            m_channelId(channelId),
             m_plugin(plugin)
         { }
     };

@@ -25,7 +25,7 @@
 
 const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
 	QString("File sink output"),
-	QString("3.7.4"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -53,27 +53,28 @@ void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("FileSink[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i));
-	}
+    result.append(SamplingDevice(
+            "FileSink",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            false,
+            0));
 
 	return result;
 }
 
-PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-		FileSinkGui* gui = new FileSinkGui(deviceAPI);
+		FileSinkGui* gui = new FileSinkGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

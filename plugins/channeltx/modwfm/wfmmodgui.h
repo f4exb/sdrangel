@@ -27,7 +27,7 @@
 #include "wfmmodsettings.h"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceUISet;
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -41,7 +41,7 @@ class WFMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static WFMModGUI* create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI);
+    static WFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -86,7 +86,7 @@ private slots:
 private:
     Ui::WFMModGUI* ui;
     PluginAPI* m_pluginAPI;
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     WFMModSettings m_settings;
     bool m_basicSettingsShown;
@@ -106,7 +106,7 @@ private:
     WFMMod::WFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit WFMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent = NULL);
+    explicit WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~WFMModGUI();
 
     void blockApplySettings(bool block);

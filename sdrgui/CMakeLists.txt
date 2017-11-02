@@ -29,6 +29,7 @@ set(sdrgui_SOURCES
     gui/presetitem.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicecontrol.cpp
+    gui/samplingdevicedialog.cpp
     gui/scale.cpp
     gui/scaleengine.cpp
     gui/transverterbutton.cpp
@@ -43,13 +44,7 @@ set(sdrgui_SOURCES
     dsp/spectrumscopecombovis.cpp
     dsp/spectrumscopengcombovis.cpp
     
-    device/devicesourceapi.cpp
-    device/devicesinkapi.cpp
     device/deviceuiset.cpp
-    
-    plugin/pluginapi.cpp
-    plugin/pluginmanager.cpp    
-    plugin/plugininterface.cpp
 )
 
 set(sdrgui_HEADERS
@@ -81,6 +76,7 @@ set(sdrgui_HEADERS
     gui/presetitem.h
     gui/rollupwidget.h
     gui/samplingdevicecontrol.h
+    gui/samplingdevicedialog.h
     gui/scale.h
     gui/scaleengine.h
     gui/transverterbutton.h
@@ -95,13 +91,7 @@ set(sdrgui_HEADERS
     dsp/spectrumscopecombovis.h
     dsp/spectrumscopengcombovis.h
     
-    device/devicesourceapi.h
-    device/devicesinkapi.h
     device/deviceuiset.h
-    
-    plugin/pluginapi.h
-    plugin/pluginmanager.h
-    plugin/plugininterface.h
 )
 
 set(sdrgui_SOURCES
@@ -123,6 +113,7 @@ set(sdrgui_FORMS
     gui/pluginsdialog.ui
     gui/audiodialog.ui
     gui/samplingdevicecontrol.ui
+    gui/samplingdevicedialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
 )

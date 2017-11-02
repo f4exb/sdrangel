@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -28,9 +29,9 @@
 
 const QString UDPSinkGUI::m_channelID = "sdrangel.channeltx.udpsink";
 
-UDPSinkGUI* UDPSinkGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
+UDPSinkGUI* UDPSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    UDPSinkGUI* gui = new UDPSinkGUI(pluginAPI, deviceAPI);
+    UDPSinkGUI* gui = new UDPSinkGUI(pluginAPI, deviceUISet);
     return gui;
 }
 
@@ -102,11 +103,11 @@ void UDPSinkGUI::handleSourceMessages()
     }
 }
 
-UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
+UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
         RollupWidget(parent),
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
-        m_deviceAPI(deviceAPI),
+        m_deviceUISet(deviceUISet),
         m_channelPowerAvg(4, 1e-10),
         m_inPowerAvg(4, 1e-10),
         m_tickCount(0),
@@ -120,7 +121,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-    m_udpSink = new UDPSink(m_deviceAPI, m_spectrumVis);
+    m_udpSink = new UDPSink(m_deviceUISet->m_deviceSinkAPI, m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->fmDeviation->setEnabled(false);
@@ -146,9 +147,9 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-    m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+    m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
+    m_deviceUISet->addRollupWidget(this);
 
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -161,7 +162,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* 
 
 UDPSinkGUI::~UDPSinkGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
     delete m_udpSink;
     delete m_spectrumVis;
     delete ui;

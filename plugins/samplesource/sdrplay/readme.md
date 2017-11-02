@@ -18,7 +18,7 @@ As mentioned already the plugin depends on libmirisdr-4. You will have to compil
 
 <h3>1. Common controls</h3>
 
-Controls common to all source plugins. See [main interface description](../../../sdrbase/readme.md).
+Controls common to all source plugins. See [main interface description](../../../sdrgui/readme.md).
 
 <h3>2. Local oscillator frequency correction</h3>
 

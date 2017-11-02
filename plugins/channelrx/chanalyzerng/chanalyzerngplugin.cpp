@@ -22,7 +22,7 @@
 
 const PluginDescriptor ChannelAnalyzerNGPlugin::m_pluginDescriptor = {
 	QString("Channel Analyzer NG"),
-	QString("3.5.3"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -48,18 +48,18 @@ void ChannelAnalyzerNGPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChannelAnalyzerNGGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* ChannelAnalyzerNGPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* ChannelAnalyzerNGPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == ChannelAnalyzerNGGUI::m_channelID)
 	{
-	    ChannelAnalyzerNGGUI* gui = ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceAPI);
+	    ChannelAnalyzerNGGUI* gui = ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
 }
 
-void ChannelAnalyzerNGPlugin::createInstanceChannelAnalyzer(DeviceSourceAPI *deviceAPI)
+void ChannelAnalyzerNGPlugin::createInstanceChannelAnalyzer(DeviceUISet *deviceUISet)
 {
-    ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceAPI);
+    ChannelAnalyzerNGGUI::create(m_pluginAPI, deviceUISet);
 }

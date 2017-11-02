@@ -18,6 +18,7 @@
 #include "bfmdemodgui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
@@ -44,9 +45,9 @@
 
 const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
 
-BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset)
 {
-	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceAPI);
+	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceUIset);
 	return gui;
 }
 
@@ -315,11 +316,11 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     }
 }
 
-BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::BFMDemodGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_rdsTimerCount(0),
 	m_channelPowerDbAvg(20,0),
@@ -337,7 +338,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_bfmDemod = new BFMDemod(m_deviceAPI);
+	m_bfmDemod = new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_bfmDemod->setSampleSink(m_spectrumVis);
 
@@ -363,9 +364,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -382,7 +383,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidg
 
 BFMDemodGUI::~BFMDemodGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_bfmDemod;
 	delete ui;
 }

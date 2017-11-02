@@ -20,6 +20,7 @@
 #include "sdrplaygui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 
 #include "ui_sdrplaygui.h"
 #include "gui/colormapper.h"
@@ -28,13 +29,13 @@
 #include "dsp/dspcommands.h"
 
 
-SDRPlayGui::SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent) :
+SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SDRPlayGui),
-    m_deviceAPI(deviceAPI),
+    m_deviceUISet(deviceUISet),
     m_forceSettings(true)
 {
-    m_sampleSource = (SDRPlayInput*) m_deviceAPI->getSampleSource();
+    m_sampleSource = (SDRPlayInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -198,8 +199,8 @@ void SDRPlayGui::handleInputMessages()
 
 void SDRPlayGui::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
@@ -275,7 +276,7 @@ void SDRPlayGui::updateHardware()
 
 void SDRPlayGui::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSourceAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -292,7 +293,7 @@ void SDRPlayGui::updateStatus()
                 break;
             case DSPDeviceSourceEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -434,15 +435,15 @@ void SDRPlayGui::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_deviceAPI->initAcquisition())
+        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
         {
-            m_deviceAPI->startAcquisition();
+            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
             DSPEngine::instance()->startAudioOutput();
         }
     }
     else
     {
-        m_deviceAPI->stopAcquisition();
+        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
         DSPEngine::instance()->stopAudioOutput();
     }
 }

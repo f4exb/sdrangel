@@ -23,6 +23,7 @@
 #include "ammodgui.h"
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "dsp/upchannelizer.h"
 
 #include "ui_ammodgui.h"
@@ -35,9 +36,9 @@
 
 const QString AMModGUI::m_channelID = "sdrangel.channeltx.modam";
 
-AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
+AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	AMModGUI* gui = new AMModGUI(pluginAPI, deviceAPI);
+	AMModGUI* gui = new AMModGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -267,11 +268,11 @@ void AMModGUI::onMenuDoubleClicked()
 	}
 }
 
-AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
+AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMModGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -288,7 +289,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_amMod = new AMMod(m_deviceAPI);
+	m_amMod = new AMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_amMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -305,9 +306,9 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
     ui->play->setEnabled(false);
     ui->play->setChecked(false);
@@ -326,7 +327,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pare
 
 AMModGUI::~AMModGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_amMod;
 	delete ui;
 }

@@ -37,22 +37,30 @@ class SDRANGEL_API SamplingDeviceControl : public QWidget {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceControl(QWidget* parent = NULL);
+    explicit SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidget* parent = 0);
     ~SamplingDeviceControl();
 
+    int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
+    void setSelectedDeviceIndex(int index);
+    void removeSelectedDeviceIndex();
+
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
-    void setDeviceAPI(DeviceSourceAPI *deviceAPI) { m_deviceSourceAPI = deviceAPI; }
-    void setDeviceAPI(DeviceSinkAPI *deviceAPI) { m_deviceSinkAPI = deviceAPI; }
-    QComboBox *getDeviceSelector();
-    QPushButton *getDeviceSelectionConfirm();
     QComboBox *getChannelSelector();
     QPushButton *getAddChannelButton();
+
+private slots:
+    void on_deviceChange_clicked();
+    void on_deviceReload_clicked();
 
 private:
     Ui::SamplingDeviceControl* ui;
     PluginManager *m_pluginManager;
-    DeviceSourceAPI *m_deviceSourceAPI;
-    DeviceSinkAPI *m_deviceSinkAPI;
+    int m_deviceTabIndex;
+    bool m_rxElseTx;
+    int m_selectedDeviceIndex;
+
+signals:
+    void changed();
 };
 
 

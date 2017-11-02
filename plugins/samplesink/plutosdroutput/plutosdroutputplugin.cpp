@@ -28,7 +28,7 @@ class DeviceSourceAPI;
 
 const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Output"),
-	QString("3.7.8"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -73,7 +73,10 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
                 m_hardwareID,
                 m_deviceTypeID,
                 serial_str,
-                i));
+                i,
+                PluginInterface::SamplingDevice::PhysicalDevice,
+                false,
+                0));
 
         qDebug("PlutoSDROutputPlugin::enumSampleSources: enumerated PlutoSDR device #%d", i);
 	}
@@ -81,11 +84,14 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
 	return result;
 }
 
-PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(const QString& sinkId, QWidget **widget, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-        PlutoSDROutputGUI* gui = new PlutoSDROutputGUI(deviceAPI);
+        PlutoSDROutputGUI* gui = new PlutoSDROutputGUI(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

@@ -23,7 +23,7 @@
 
 const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
     QString("AM Modulator"),
-    QString("3.5.4"),
+    QString("3.8.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -49,18 +49,18 @@ void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(AMModGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* AMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* AMModPlugin::createTxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == AMModGUI::m_channelID)
 	{
-		AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceAPI);
+		AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
 }
 
-void AMModPlugin::createInstanceModAM(DeviceSinkAPI *deviceAPI)
+void AMModPlugin::createInstanceModAM(DeviceUISet *deviceUISet)
 {
-	AMModGUI::create(m_pluginAPI, deviceAPI);
+	AMModGUI::create(m_pluginAPI, deviceUISet);
 }

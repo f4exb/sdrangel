@@ -27,7 +27,7 @@
 
 #define HACKRF_MAX_DEVICE (32)
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 namespace Ui {
 	class HackRFInputGui;
@@ -45,7 +45,7 @@ public:
 		HACKRF_IMGREJ_NB
 	} HackRFImgRejValue;
 
-	explicit HackRFInputGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~HackRFInputGui();
 	virtual void destroy();
 
@@ -63,7 +63,7 @@ public:
 private:
 	Ui::HackRFInputGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	HackRFInputSettings m_settings;
 	bool m_forceSettings;
 	QTimer m_updateTimer;

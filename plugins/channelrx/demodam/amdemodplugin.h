@@ -20,7 +20,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class AMDemodPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -33,7 +33,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
+	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceUISet *deviceUISet);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -41,7 +41,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceDemodAM(DeviceSourceAPI *deviceAPI);
+	void createInstanceDemodAM(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_AMPLUGIN_H

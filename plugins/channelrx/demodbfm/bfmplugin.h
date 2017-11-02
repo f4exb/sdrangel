@@ -21,7 +21,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class BFMPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -34,7 +34,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
+	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceUISet *deviceUISet);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -42,7 +42,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceBFM(DeviceSourceAPI *deviceAPI);
+	void createInstanceBFM(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_BFMPLUGIN_H

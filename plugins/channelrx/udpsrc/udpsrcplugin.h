@@ -21,7 +21,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class UDPSrcPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -34,7 +34,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
+	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceUISet *deviceUISet);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
@@ -42,7 +42,7 @@ private:
 	PluginAPI* m_pluginAPI;
 
 private slots:
-	void createInstanceUDPSrc(DeviceSourceAPI *deviceAPI);
+	void createInstanceUDPSrc(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_UDPSRCPLUGIN_H

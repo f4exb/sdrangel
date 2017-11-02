@@ -26,7 +26,7 @@
 
 #define AIRSPY_MAX_DEVICE (32)
 
-class DeviceSourceAPI;
+class DeviceUISet;
 
 namespace Ui {
 	class AirspyGui;
@@ -37,7 +37,7 @@ class AirspyGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit AirspyGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit AirspyGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~AirspyGui();
 	virtual void destroy();
 
@@ -57,7 +57,7 @@ public:
 private:
 	Ui::AirspyGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	AirspySettings m_settings;
 	QTimer m_updateTimer;

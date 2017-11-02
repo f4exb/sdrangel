@@ -23,12 +23,13 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "limesdroutputgui.h"
 
-LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
+LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::LimeSDROutputGUI),
-    m_deviceAPI(deviceAPI),
+    m_deviceUISet(deviceUISet),
     m_settings(),
     m_sampleRate(0),
     m_lastEngineState((DSPDeviceSinkEngine::State)-1),
@@ -37,7 +38,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_limeSDROutput = (LimeSDROutput*) m_deviceAPI->getSampleSink();
+    m_limeSDROutput = (LimeSDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 
     ui->setupUi(this);
 
@@ -72,7 +73,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceSinkAPI *deviceAPI, QWidget* parent) :
     displaySettings();
 
     char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
+    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceUISet->m_deviceSinkAPI->getDeviceUID());
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
@@ -238,8 +239,8 @@ void LimeSDROutputGUI::handleInputMessages()
 
 void LimeSDROutputGUI::updateSampleRateAndFrequency()
 {
-    m_deviceAPI->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceAPI->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
 }
 
@@ -309,7 +310,7 @@ void LimeSDROutputGUI::updateHardware()
 
 void LimeSDROutputGUI::updateStatus()
 {
-    int state = m_deviceAPI->state();
+    int state = m_deviceUISet->m_deviceSinkAPI->state();
 
     if(m_lastEngineState != state)
     {
@@ -326,7 +327,7 @@ void LimeSDROutputGUI::updateStatus()
                 break;
             case DSPDeviceSinkEngine::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
                 break;
             default:
                 break;
@@ -352,7 +353,7 @@ void LimeSDROutputGUI::updateStatus()
     }
     else
     {
-        if (m_deviceAPI->isBuddyLeader())
+        if (m_deviceUISet->m_deviceSinkAPI->isBuddyLeader())
         {
             LimeSDROutput::MsgGetDeviceInfo* message = LimeSDROutput::MsgGetDeviceInfo::create();
             m_limeSDROutput->getInputMessageQueue()->push(message);
@@ -371,15 +372,15 @@ void LimeSDROutputGUI::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
-        if (m_deviceAPI->initGeneration())
+        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
         {
-            m_deviceAPI->startGeneration();
+            m_deviceUISet->m_deviceSinkAPI->startGeneration();
             DSPEngine::instance()->startAudioInput();
         }
     }
     else
     {
-        m_deviceAPI->stopGeneration();
+        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
         DSPEngine::instance()->stopAudioInput();
     }
 }

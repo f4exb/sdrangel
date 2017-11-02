@@ -1,3 +1,10 @@
+sdrangel (3.8.0-1) unstable; urgency=medium
+
+  * Redesigned the device handling to accomodate multi channel devices like LimeSDR
+  * Refactoring: Separate DeviceAPI from the GUI
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 Nov 2017 18:14:18 +0200
+
 sdrangel (3.7.8-1) unstable; urgency=medium
 
   * PlutoSDR: restored and fixed Tx support

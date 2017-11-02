@@ -9,7 +9,7 @@
 #include "lorademodsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 class LoRaDemod;
 class SpectrumVis;
 
@@ -21,7 +21,7 @@ class LoRaDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -47,7 +47,7 @@ private slots:
 private:
 	Ui::LoRaDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	LoRaDemodSettings m_settings;
 	bool m_basicSettingsShown;
@@ -57,7 +57,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = NULL);
 	virtual ~LoRaDemodGUI();
 
     void blockApplySettings(bool block);

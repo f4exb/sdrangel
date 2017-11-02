@@ -27,7 +27,7 @@
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
-	QString("3.5.0"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -67,7 +67,10 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 		        m_hardwareID,
 				m_deviceTypeID,
 				QString(devinfo[i].serial),
-				i));
+				i,
+				PluginInterface::SamplingDevice::PhysicalDevice,
+				true,
+				0));
 	}
 
 	if (devinfo)
@@ -78,11 +81,14 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(const QString& sourceId,QWidget **widget, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		BladerfInputGui* gui = new BladerfInputGui(deviceAPI);
+		BladerfInputGui* gui = new BladerfInputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}

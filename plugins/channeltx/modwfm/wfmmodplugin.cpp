@@ -23,7 +23,7 @@
 
 const PluginDescriptor WFMModPlugin::m_pluginDescriptor = {
     QString("WFM Modulator"),
-    QString("3.7.4"),
+    QString("3.8.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -49,18 +49,18 @@ void WFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(WFMModGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* WFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+PluginInstanceGUI* WFMModPlugin::createTxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == WFMModGUI::m_channelID)
 	{
-	    WFMModGUI* gui = WFMModGUI::create(m_pluginAPI, deviceAPI);
+	    WFMModGUI* gui = WFMModGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
 }
 
-void WFMModPlugin::createInstanceModWFM(DeviceSinkAPI *deviceAPI)
+void WFMModPlugin::createInstanceModWFM(DeviceUISet *deviceUISet)
 {
-    WFMModGUI::create(m_pluginAPI, deviceAPI);
+    WFMModGUI::create(m_pluginAPI, deviceUISet);
 }

@@ -27,8 +27,8 @@
 #include "sdrplayinput.h"
 #include "sdrplaysettings.h"
 
-class DeviceSampleSource;
 class DeviceSourceAPI;
+class DeviceUISet;
 
 namespace Ui {
     class SDRPlayGui;
@@ -38,7 +38,7 @@ class SDRPlayGui : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit SDRPlayGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+    explicit SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~SDRPlayGui();
     virtual void destroy();
 
@@ -56,7 +56,7 @@ public:
 private:
     Ui::SDRPlayGui* ui;
 
-    DeviceSourceAPI* m_deviceAPI;
+    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     SDRPlaySettings m_settings;
     QTimer m_updateTimer;

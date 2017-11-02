@@ -6,20 +6,20 @@
 
 void PluginInterface::deleteSampleSourcePluginInstanceGUI(PluginInstanceGUI *ui)
 {
-    ui->destroy();
+    if (ui) { ui->destroy(); }
 }
 
 void PluginInterface::deleteSampleSourcePluginInstanceInput(DeviceSampleSource *source)
 {
-    source->destroy();
+    if (source) { source->destroy(); }
 }
 
 void PluginInterface::deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui)
 {
-    ui->destroy();
+    if (ui) { ui->destroy(); }
 }
 
 void PluginInterface::deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink)
 {
-    sink->destroy();
+    if (sink) { sink->destroy(); }
 }

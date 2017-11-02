@@ -25,8 +25,8 @@
 
 #include "fcdproinput.h"
 
-class DeviceSourceAPI;
 class QWidget;
+class DeviceUISet;
 
 namespace Ui {
 	class FCDProGui;
@@ -36,7 +36,7 @@ class FCDProGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FCDProGui(DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit FCDProGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~FCDProGui();
 	virtual void destroy();
 
@@ -54,7 +54,7 @@ public:
 private:
 	Ui::FCDProGui* ui;
 
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	FCDProSettings m_settings;
 	QTimer m_updateTimer;

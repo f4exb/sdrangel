@@ -24,7 +24,7 @@
 
 const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
 	QString("Broadcast FM Demodulator"),
-	QString("3.7.5"),
+	QString("3.8.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -50,18 +50,18 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(BFMDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* BFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+PluginInstanceGUI* BFMPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == BFMDemodGUI::m_channelID)
 	{
-		BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceAPI);
+		BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
 }
 
-void BFMPlugin::createInstanceBFM(DeviceSourceAPI *deviceAPI)
+void BFMPlugin::createInstanceBFM(DeviceUISet *deviceUISet)
 {
-	BFMDemodGUI::create(m_pluginAPI, deviceAPI);
+	BFMDemodGUI::create(m_pluginAPI, deviceUISet);
 }

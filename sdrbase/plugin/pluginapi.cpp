@@ -1,4 +1,3 @@
-#include <QDockWidget>
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 
@@ -31,7 +30,6 @@ PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
 {
     return m_pluginManager->getTxChannelRegistrations();
 }
-
 
 PluginAPI::PluginAPI(PluginManager* pluginManager) :
 	m_pluginManager(pluginManager)

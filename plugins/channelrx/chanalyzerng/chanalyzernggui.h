@@ -24,7 +24,7 @@
 #include "util/messagequeue.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -41,7 +41,7 @@ class ChannelAnalyzerNGGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -75,7 +75,7 @@ private slots:
 private:
 	Ui::ChannelAnalyzerNGGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
@@ -91,7 +91,7 @@ private:
 	ScopeVisNG* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = NULL);
+	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~ChannelAnalyzerNGGUI();
 
 	int  getRequestedChannelSampleRate();

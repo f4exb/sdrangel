@@ -1,6 +1,7 @@
 #include "tcpsrcgui.h"
 
 #include <device/devicesourceapi.h>
+#include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
@@ -13,9 +14,9 @@
 
 const QString TCPSrcGUI::m_channelID = "sdrangel.channel.tcpsrc";
 
-TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI)
+TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceAPI);
+	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -121,11 +122,11 @@ void TCPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent) :
+TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_tcpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
@@ -140,7 +141,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_tcpSrc = new TCPSrc(m_deviceAPI);
+	m_tcpSrc = new TCPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_tcpSrc->setSpectrum(m_spectrumVis);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
@@ -164,9 +165,9 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-	m_deviceAPI->addChannelMarker(&m_channelMarker);
-	m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -178,7 +179,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* 
 
 TCPSrcGUI::~TCPSrcGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_tcpSrc;
 	delete m_spectrumVis;
 	delete ui;

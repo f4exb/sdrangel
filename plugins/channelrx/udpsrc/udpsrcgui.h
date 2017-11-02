@@ -29,7 +29,7 @@
 #include "udpsrcsettings.h"
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceUISet;
 class UDPSrc;
 class SpectrumVis;
 
@@ -41,7 +41,7 @@ class UDPSrcGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI);
+	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -79,7 +79,7 @@ private slots:
 private:
 	Ui::UDPSrcGUI* ui;
 	PluginAPI* m_pluginAPI;
-	DeviceSourceAPI* m_deviceAPI;
+	DeviceUISet* m_deviceUISet;
 	UDPSrc* m_udpSrc;
 	UDPSrcSettings m_settings;
 	ChannelMarker m_channelMarker;
@@ -95,7 +95,7 @@ private:
 	// RF path
 	SpectrumVis* m_spectrumVis;
 
-	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceSourceAPI *deviceAPI, QWidget* parent = 0);
+	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
 	virtual ~UDPSrcGUI();
 
     void blockApplySettings(bool block);

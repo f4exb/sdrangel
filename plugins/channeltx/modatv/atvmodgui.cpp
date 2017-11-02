@@ -24,6 +24,7 @@
 #include <cmath>
 
 #include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "gui/basicchannelsettingswidget.h"
@@ -36,9 +37,9 @@
 
 const QString ATVModGUI::m_channelID = "sdrangel.channeltx.modatv";
 
-ATVModGUI* ATVModGUI::create(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI)
+ATVModGUI* ATVModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
-    ATVModGUI* gui = new ATVModGUI(pluginAPI, deviceAPI);
+    ATVModGUI* gui = new ATVModGUI(pluginAPI, deviceUISet);
 	return gui;
 }
 
@@ -586,11 +587,11 @@ void ATVModGUI::onMenuDoubleClicked()
 	}
 }
 
-ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* parent) :
+ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ATVModGUI),
 	m_pluginAPI(pluginAPI),
-	m_deviceAPI(deviceAPI),
+	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
@@ -608,7 +609,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_atvMod = new ATVMod(m_deviceAPI);
+	m_atvMod = new ATVMod(m_deviceUISet->m_deviceSinkAPI);
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -624,9 +625,9 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceAPI->registerChannelInstance(m_channelID, this);
-    m_deviceAPI->addChannelMarker(&m_channelMarker);
-    m_deviceAPI->addRollupWidget(this);
+	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->addChannelMarker(&m_channelMarker);
+	m_deviceUISet->addRollupWidget(this);
 
     resetToDefaults();
 
@@ -649,7 +650,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceSinkAPI *deviceAPI, QWidget* pa
 
 ATVModGUI::~ATVModGUI()
 {
-    m_deviceAPI->removeChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_atvMod;
 	delete ui;
 }

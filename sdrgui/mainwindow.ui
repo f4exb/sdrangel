@@ -20,7 +20,7 @@
    <string>SDRangel</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../sdrgui/resources/res.qrc">
+   <iconset resource="resources/res.qrc">
     <normaloff>:/sdrangel_icon.png</normaloff>:/sdrangel_icon.png</iconset>
   </property>
   <property name="animated">
@@ -103,7 +103,6 @@
     <addaction name="action_addSourceDevice"/>
     <addaction name="action_addSinkDevice"/>
     <addaction name="action_removeLastDevice"/>
-    <addaction name="action_reloadDevices"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="font">
@@ -327,7 +326,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/preset-save.png</normaloff>:/preset-save.png</iconset>
        </property>
        <property name="iconSize">
@@ -347,7 +346,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
        </property>
        <property name="iconSize">
@@ -380,7 +379,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/preset-delete.png</normaloff>:/preset-delete.png</iconset>
        </property>
        <property name="iconSize">
@@ -434,7 +433,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/preset-update.png</normaloff>:/preset-update.png</iconset>
        </property>
        <property name="iconSize">
@@ -467,7 +466,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/preset-last.png</normaloff>:/preset-last.png</iconset>
        </property>
        <property name="iconSize">
@@ -487,7 +486,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/export.png</normaloff>:/export.png</iconset>
        </property>
       </widget>
@@ -514,7 +513,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../sdrgui/resources/res.qrc">
+        <iconset resource="resources/res.qrc">
          <normaloff>:/import.png</normaloff>:/import.png</iconset>
        </property>
       </widget>
@@ -680,11 +679,6 @@
     <string>Add sink device</string>
    </property>
   </action>
-  <action name="action_reloadDevices">
-   <property name="text">
-    <string>Reload devices</string>
-   </property>
-  </action>
   <zorder>presetDock</zorder>
   <zorder>channelDock</zorder>
  </widget>
@@ -696,7 +690,7 @@
   <tabstop>presetLoad</tabstop>
  </tabstops>
  <resources>
-  <include location="../sdrgui/resources/res.qrc"/>
+  <include location="resources/res.qrc"/>
  </resources>
  <connections>
   <connection>
