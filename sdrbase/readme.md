@@ -146,19 +146,37 @@ This is where the sampling device for one device set is selected and the channel
 
 ![Sampling Devices control](../doc/img/MainWindow_SDControl.png)
 
-<h4>3.1. Sampling device selector</h4>
+<h4>3.1. Currently sampling device name</h4>
 
-Use this combo box to select one sampling device
+This label shows the human readable sampling device name
 
-<h4>3.2. Sampling device selection confirmation</h4>
+<h4>3.2. Open sampling device change dialog</h4>
 
-Use this push button to confirm the selection and change the sampling device
+Use this push button to open the device selection dialog to change the sampling device. This dialog will open:
 
-<h4>3.3. Channel selector</h4>
+![Main Window sampling devices dialog](../doc/img/MainWindow_SDDialog.png)
+
+<h5>3.2.1. Device selection combo</h5>
+
+Use this combo box to select the device. Only available devices will appear in the list. For devices having more than one channel (ex: LimeSDR) the channel number will appear next to the device sequence number inside the brackets. Ex: `LimeSDR[0:1] 0009060B00473419` designates the second Rx (Rx #1) of the first encountered LimeSDR which serial number is 0009060B00473419.
+
+<h5>3.2.2. Device selection confirmation</h5>
+
+Use the `OK` button to confirm your choice and exit the dialog
+
+<h5>3.2.3. Device selection cancellation</h5>
+
+Use the `Cancel` button to exit the dialog without any change
+
+<h4>3.3. Reload currently selected device</h4>
+
+This button activates a close/open sequence to recycle the device. It may be useful when the device is not streaming anymore or in an attempt to clear possible errors. Make sure the streaming is stopeed first.
+
+<h4>3.4. Channel selector</h4>
 
 Use this combo box to select a channel plugin to create a new channel
 
-<h4>3.4. Add a new channel</h4>
+<h4>3.5. Add a new channel</h4>
 
 Use this push button to add a new channel with the selected plugin
 
