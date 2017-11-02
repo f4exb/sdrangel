@@ -51,25 +51,10 @@ public:
 	void registerTxChannel(const QString& channelName, PluginInterface* plugin);
 	void registerSampleSink(const QString& sourceName, PluginInterface* plugin);
 
+	PluginAPI::SamplingDeviceRegistrations& getSourceDeviceRegistrations() { return m_sampleSourceRegistrations; }
+	PluginAPI::SamplingDeviceRegistrations& getSinkDeviceRegistrations() { return m_sampleSinkRegistrations; }
 	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
-
-	void updateSampleSourceDevices();
-	void duplicateLocalSampleSourceDevices(uint deviceUID);
-	void fillSampleSourceSelector(QComboBox* comboBox, uint deviceUID);
-
-	void updateSampleSinkDevices();
-	void duplicateLocalSampleSinkDevices(uint deviceUID);
-	void fillSampleSinkSelector(QComboBox* comboBox, uint deviceUID);
-
-	int selectSampleSourceByIndex(int index, DeviceSourceAPI *deviceAPI);
-	int selectSampleSourceBySerialOrSequence(const QString& sourceId, const QString& sourceSerial, uint32_t sourceSequence, DeviceSourceAPI *deviceAPI);
-	void selectSampleSourceByDevice(void *devicePtr, DeviceSourceAPI *deviceAPI);
-
-	int selectSampleSinkBySerialOrSequence(const QString& sinkId, const QString& sinkSerial, uint32_t sinkSequence, DeviceSinkAPI *deviceAPI);
-	void selectSampleSinkByDevice(void *devicePtr, DeviceSinkAPI *deviceAPI);
-
-	PluginInterface* getPluginInterfaceAt(int index);
 
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
     void listRxChannels(QList<QString>& list);
@@ -77,19 +62,10 @@ public:
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
 	void listTxChannels(QList<QString>& list);
 
+	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }
+	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }
+
 private:
-	struct SamplingDeviceRegistration //!< This is the channel registration
-	{
-		QString m_deviceId;
-		PluginInterface* m_plugin;
-		SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
-			m_deviceId(deviceId),
-			m_plugin(plugin)
-		{ }
-	};
-
-	typedef QList<SamplingDeviceRegistration> SamplingDeviceRegistrations;
-
 	struct SamplingDevice { //!< This is the device registration
 		PluginInterface* m_plugin;
 		QString m_displayName;
@@ -118,13 +94,11 @@ private:
 	PluginAPI m_pluginAPI;
 	Plugins m_plugins;
 
-	PluginAPI::ChannelRegistrations m_rxChannelRegistrations; //!< Channel plugins register here
-	SamplingDeviceRegistrations m_sampleSourceRegistrations;  //!< Input source plugins (one per device kind) register here
-	SamplingDevices m_sampleSourceDevices;                    //!< Instances of input sources present in the system
+	PluginAPI::ChannelRegistrations m_rxChannelRegistrations;           //!< Channel plugins register here
+	PluginAPI::SamplingDeviceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
 
-	PluginAPI::ChannelRegistrations m_txChannelRegistrations; //!< Channel plugins register here
-	SamplingDeviceRegistrations m_sampleSinkRegistrations;    //!< Output sink plugins (one per device kind) register here
-	SamplingDevices m_sampleSinkDevices;                      //!< Instances of output sinks present in the system
+	PluginAPI::ChannelRegistrations m_txChannelRegistrations;         //!< Channel plugins register here
+	PluginAPI::SamplingDeviceRegistrations m_sampleSinkRegistrations; //!< Output sink plugins (one per device kind) register here
 
 	// "Local" sample source device IDs
     static const QString m_sdrDaemonSourceHardwareID;   //!< SDRdaemon source hardware ID

@@ -32,7 +32,7 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
     m_spectrumVis = new SpectrumVis(m_spectrum);
@@ -40,7 +40,7 @@ DeviceUISet::DeviceUISet(int tabIndex, QTimer& timer)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
-    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex);
+    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, rxElseTx);
     m_deviceSourceEngine = 0;
     m_deviceSourceAPI = 0;
     m_deviceSinkEngine = 0;

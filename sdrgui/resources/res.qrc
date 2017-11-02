@@ -79,5 +79,6 @@
         <file>stream.png</file>
         <file>antenna.png</file>
         <file>link.png</file>
+        <file>choose.png</file>
     </qresource>
 </RCC>

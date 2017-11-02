@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2017 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,17 +14,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "gui/samplingdevicecontrol.h"
-#include "gui/pluginsdialog.h"
+#include "samplingdevicecontrol.h"
+#include "samplingdevicedialog.h"
 #include "plugin/pluginmanager.h"
+#include "device/deviceenumerator.h"
 #include "ui_samplingdevicecontrol.h"
 
 
-SamplingDeviceControl::SamplingDeviceControl(int tabIndex, QWidget* parent) :
+SamplingDeviceControl::SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SamplingDeviceControl),
     m_pluginManager(0),
-    m_deviceTabIndex(tabIndex)
+    m_deviceTabIndex(tabIndex),
+    m_rxElseTx(rxElseTx),
+    m_selectedDeviceIndex(-1)
 {
     ui->setupUi(this);
 }
@@ -34,14 +37,40 @@ SamplingDeviceControl::~SamplingDeviceControl()
     delete ui;
 }
 
-QComboBox *SamplingDeviceControl::getDeviceSelector()
+void SamplingDeviceControl::on_deviceChange_clicked()
 {
-    return ui->deviceSelect;
+    SamplingDeviceDialog dialog(m_rxElseTx, m_deviceTabIndex, this);
+    dialog.exec();
+
+    if (dialog.getSelectedDeviceIndex() >= 0)
+    {
+        m_selectedDeviceIndex = dialog.getSelectedDeviceIndex();
+        setSelectedDeviceIndex(m_selectedDeviceIndex);
+        emit changed();
+    }
 }
 
-QPushButton *SamplingDeviceControl::getDeviceSelectionConfirm()
+void SamplingDeviceControl::on_deviceReload_clicked()
 {
-    return ui->deviceConfirm;
+    if (m_selectedDeviceIndex >= 0) {
+        emit changed();
+    }
+}
+
+void SamplingDeviceControl::setSelectedDeviceIndex(int index)
+{
+    if (m_rxElseTx)
+    {
+        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(index);
+        ui->deviceSelectedText->setText(samplingDevice.displayedName);
+    }
+    else
+    {
+        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(index);
+        ui->deviceSelectedText->setText(samplingDevice.displayedName);
+    }
+
+    m_selectedDeviceIndex = index;
 }
 
 QComboBox *SamplingDeviceControl::getChannelSelector()

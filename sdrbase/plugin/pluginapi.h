@@ -17,6 +17,18 @@ class SDRANGEL_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:
+    struct SamplingDeviceRegistration //!< This is the device registration
+    {
+        QString m_deviceId;
+        PluginInterface* m_plugin;
+        SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
+            m_deviceId(deviceId),
+            m_plugin(plugin)
+        { }
+    };
+
+    typedef QList<SamplingDeviceRegistration> SamplingDeviceRegistrations;
+
     struct ChannelRegistration
     {
         QString m_channelId;       //!< Channel or device type ID

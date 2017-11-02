@@ -140,8 +140,8 @@ private slots:
 	void on_action_Audio_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
-	void on_sampleSource_confirmClicked(bool checked);
-	void on_sampleSink_confirmClicked(bool checked);
+	void on_sampleSource_changed();
+	void on_sampleSink_changed();
     void on_channel_addClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();

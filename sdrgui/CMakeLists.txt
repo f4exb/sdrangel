@@ -29,6 +29,7 @@ set(sdrgui_SOURCES
     gui/presetitem.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicecontrol.cpp
+    gui/samplingdevicedialog.cpp
     gui/scale.cpp
     gui/scaleengine.cpp
     gui/transverterbutton.cpp
@@ -75,6 +76,7 @@ set(sdrgui_HEADERS
     gui/presetitem.h
     gui/rollupwidget.h
     gui/samplingdevicecontrol.h
+    gui/samplingdevicedialog.h
     gui/scale.h
     gui/scaleengine.h
     gui/transverterbutton.h
@@ -111,6 +113,7 @@ set(sdrgui_FORMS
     gui/pluginsdialog.ui
     gui/audiodialog.ui
     gui/samplingdevicecontrol.ui
+    gui/samplingdevicedialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
 )

@@ -1,5 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// OpenGL interface modernization.                                               //
+// See: http://doc.qt.io/qt-5/qopenglshaderprogram.html                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,53 +18,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_
-#define SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_
+#ifndef SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_
+#define SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_
 
-
-#include <QWidget>
-#include <QComboBox>
-#include <QPushButton>
-
-#include "util/export.h"
+#include <QDialog>
+#include <vector>
 
 namespace Ui {
-    class SamplingDeviceControl;
+    class SamplingDeviceDialog;
 }
 
-class ChannelMarker;
-class PluginManager;
-class DeviceSourceAPI;
-class DeviceSinkAPI;
-
-class SDRANGEL_API SamplingDeviceControl : public QWidget {
+class SamplingDeviceDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidget* parent = 0);
-    ~SamplingDeviceControl();
-
+    explicit SamplingDeviceDialog(bool rxElseTx, int deviceTabIndex, QWidget* parent = 0);
+    ~SamplingDeviceDialog();
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
-    void setSelectedDeviceIndex(int index);
-
-    void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
-    QComboBox *getChannelSelector();
-    QPushButton *getAddChannelButton();
-
-private slots:
-    void on_deviceChange_clicked();
-    void on_deviceReload_clicked();
 
 private:
-    Ui::SamplingDeviceControl* ui;
-    PluginManager *m_pluginManager;
-    int m_deviceTabIndex;
+    Ui::SamplingDeviceDialog* ui;
     bool m_rxElseTx;
+    int m_deviceTabIndex;
     int m_selectedDeviceIndex;
+    std::vector<int> m_deviceIndexes;
 
-signals:
-    void changed();
+private slots:
+    void accept();
 };
 
-
-#endif /* SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_ */
+#endif /* SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_ */
