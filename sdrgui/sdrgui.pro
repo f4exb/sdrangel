@@ -64,16 +64,14 @@ SOURCES += mainwindow.cpp\
         gui/presetitem.cpp\
         gui/rollupwidget.cpp\
         gui/samplingdevicecontrol.cpp\
+        gui/samplingdevicedialog.cpp\
         gui/mypositiondialog.cpp\
         gui/scale.cpp\
         gui/scaleengine.cpp\
         gui/transverterbutton.cpp\
         gui/transverterdialog.cpp\
         gui/valuedial.cpp\
-        gui/valuedialz.cpp\
-        plugin/pluginapi.cpp\
-        plugin/pluginmanager.cpp\
-        plugin/plugininterface.cpp
+        gui/valuedialz.cpp
 
 HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
@@ -109,16 +107,14 @@ HEADERS  += mainwindow.h\
         gui/presetitem.h\
         gui/rollupwidget.h\
         gui/samplingdevicecontrol.h\
+        gui/samplingdevicedialog.h\
         gui/mypositiondialog.h\
         gui/scale.h\
         gui/scaleengine.h\
         gui/transverterbutton.h\
         gui/transverterdialog.h\
         gui/valuedial.h\
-        gui/valuedialz.h\
-        plugin/pluginapi.h\
-        plugin/pluginmanager.h\
-        plugin/plugininterface.h
+        gui/valuedialz.h
 
 FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
@@ -132,6 +128,7 @@ FORMS    += mainwindow.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
         gui/samplingdevicecontrol.ui\
+        gui/samplingdevicedialog.ui\
         gui/myposdialog.ui\
         gui/glspectrumgui.ui\
         gui/transverterdialog.ui\

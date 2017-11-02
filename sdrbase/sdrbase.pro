@@ -101,6 +101,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
         plugin/plugininterface.cpp        
+        plugin/pluginapi.cpp\        
+        plugin/pluginmanager.cpp        
 
 HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
@@ -162,7 +164,9 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/plugininstancegui.h\
-        plugin/plugininterface.h\        
+        plugin/plugininterface.h\   
+        plugin/pluginapi.h\   
+        plugin/pluginmanager.h\   
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\
