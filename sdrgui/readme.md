@@ -35,8 +35,7 @@ The following items are presented hierarchically from left to right:
   - Devices:
     - _Add source device_: adds a new source (receiver) device slot to the device stack (last position)
     - _Add sink device_: adds a new sink (transmitter) device slot to the device stack (last position)
-    - _Remove device_: removes the last device slot from thte device stack
-    - _Reload devices_: re-scan the system for devices. Devices selectors are updated with new devices and missing devices are removed. All devices must be stopped for this to take effect. 
+    - _Remove last device_: removes the last device slot from thte device stack
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
     - _Sampling devices control_: control of which sampling devices is used and add channels
     - _Sampling devices_: the sampling devices UIs
