@@ -37,6 +37,8 @@ public:
     void listTxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void changeRxSelection(int tabIndex, int deviceIndex);
     void changeTxSelection(int tabIndex, int deviceIndex);
+    void removeRxSelection(int tabIndex);
+    void removeTxSelection(int tabIndex);
     PluginInterface::SamplingDevice getRxSamplingDevice(int deviceIndex) const { return m_rxEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface::SamplingDevice getTxSamplingDevice(int deviceIndex) const { return m_txEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface *getRxPluginInterface(int deviceIndex) { return m_rxEnumeration[deviceIndex].m_pluginInterface; }

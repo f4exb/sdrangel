@@ -42,6 +42,7 @@ public:
 
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
     void setSelectedDeviceIndex(int index);
+    void removeSelectedDeviceIndex();
 
     void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
     QComboBox *getChannelSelector();

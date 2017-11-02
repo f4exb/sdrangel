@@ -360,6 +360,7 @@ void MainWindow::removeLastDevice()
         m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
+        m_deviceUIs.back()->m_samplingDeviceControl->removeSelectedDeviceIndex(); // This releases the device in the device list
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
@@ -398,6 +399,7 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
 	            m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
+        m_deviceUIs.back()->m_samplingDeviceControl->removeSelectedDeviceIndex(); // This releases the device in the device list
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 

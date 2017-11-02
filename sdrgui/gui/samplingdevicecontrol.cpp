@@ -30,6 +30,7 @@ SamplingDeviceControl::SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidge
     m_selectedDeviceIndex(-1)
 {
     ui->setupUi(this);
+    ui->deviceSelectedText->setText("None");
 }
 
 SamplingDeviceControl::~SamplingDeviceControl()
@@ -73,6 +74,22 @@ void SamplingDeviceControl::setSelectedDeviceIndex(int index)
     }
 
     m_selectedDeviceIndex = index;
+}
+
+void SamplingDeviceControl::removeSelectedDeviceIndex()
+{
+    if (m_rxElseTx)
+    {
+        DeviceEnumerator::instance()->removeRxSelection(m_deviceTabIndex);
+        ui->deviceSelectedText->setText("None");
+    }
+    else
+    {
+        DeviceEnumerator::instance()->removeTxSelection(m_deviceTabIndex);
+        ui->deviceSelectedText->setText("None");
+    }
+
+    m_selectedDeviceIndex = -1;
 }
 
 QComboBox *SamplingDeviceControl::getChannelSelector()

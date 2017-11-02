@@ -129,6 +129,26 @@ void DeviceEnumerator::changeTxSelection(int tabIndex, int deviceIndex)
     }
 }
 
+void DeviceEnumerator::removeRxSelection(int tabIndex)
+{
+    for (DevicesEnumeration::iterator it = m_rxEnumeration.begin(); it != m_rxEnumeration.end(); ++it)
+    {
+        if (it->m_samplingDevice.claimed == tabIndex) {
+            it->m_samplingDevice.claimed = -1;
+        }
+    }
+}
+
+void DeviceEnumerator::removeTxSelection(int tabIndex)
+{
+    for (DevicesEnumeration::iterator it = m_txEnumeration.begin(); it != m_txEnumeration.end(); ++it)
+    {
+        if (it->m_samplingDevice.claimed == tabIndex) {
+            it->m_samplingDevice.claimed = -1;
+        }
+    }
+}
+
 int DeviceEnumerator::getFileSourceDeviceIndex() const
 {
     for (DevicesEnumeration::const_iterator it = m_rxEnumeration.begin(); it != m_rxEnumeration.end(); ++it)
