@@ -63,11 +63,11 @@ void DeviceEnumerator::enumerateTxDevices(PluginManager *pluginManager)
 
     for (int i = 0; i < txDeviceRegistrations.count(); i++)
     {
-        PluginInterface::SamplingDevices samplingDevices = txDeviceRegistrations[i].m_plugin->enumSampleSources();
+        PluginInterface::SamplingDevices samplingDevices = txDeviceRegistrations[i].m_plugin->enumSampleSinks();
 
         for (int j = 0; j < samplingDevices.count(); j++)
         {
-            m_rxEnumeration.push_back(
+            m_txEnumeration.push_back(
                 DeviceEnumeration(
                     samplingDevices[j],
                     txDeviceRegistrations[i].m_plugin,
