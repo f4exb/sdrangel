@@ -53,21 +53,16 @@ void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("FileSink[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i,
-				PluginInterface::SamplingDevice::BuiltInDevice,
-				false,
-				0));
-	}
+    result.append(SamplingDevice(
+            "FileSink",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            false,
+            0));
 
 	return result;
 }

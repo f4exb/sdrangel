@@ -53,21 +53,16 @@ void FileSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("FileSource[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i,
-				PluginInterface::SamplingDevice::BuiltInDevice,
-				true,
-				0));
-	}
+    result.append(SamplingDevice(
+            "FileSource",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            true,
+            0));
 
 	return result;
 }

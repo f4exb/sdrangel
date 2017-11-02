@@ -54,21 +54,16 @@ void SDRdaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
-	int count = 1;
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("SDRdaemonSink[%1]").arg(i));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString::null,
-				i,
-				PluginInterface::SamplingDevice::BuiltInDevice,
-				false,
-				0));
-	}
+    result.append(SamplingDevice(
+            "SDRdaemonSink",
+            m_hardwareID,
+            m_deviceTypeID,
+            QString::null,
+            0,
+            PluginInterface::SamplingDevice::BuiltInDevice,
+            false,
+            0));
 
 	return result;
 }
