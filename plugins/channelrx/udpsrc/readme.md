@@ -28,7 +28,7 @@ Total power in dB relative to a +/- 1.0 amplitude signal sent over UDP.
 
 <h3>4: UDP address and ports</h3>
 
-These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
+These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
 The display is in the format `address:audio port/data port` 
 

@@ -30,7 +30,7 @@ Use this button to switch off the RF on the channel. The background of the butto
 
 <h3>5: UDP address and port</h3>
 
-These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrbase/readme.md#6-channels)
+These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
 The display is in the format `address:data port` 
 
