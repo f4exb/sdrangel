@@ -67,11 +67,8 @@ private:
 	SSBDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
-	int m_rate;
-	int m_spanLog2;
 	bool m_audioBinaural;
 	bool m_audioFlipChannels;
-	bool m_dsb;
 	bool m_audioMute;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
@@ -83,11 +80,9 @@ private:
 	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, QWidget* parent = 0);
 	virtual ~SSBDemodGUI();
 
-	int  getEffectiveLowCutoff(int lowCutoff);
-	bool setNewRate(int spanLog2);
-
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+	void applyBandwidths(bool force = false);
 	void displaySettings();
     void displayUDPAddress();
 
