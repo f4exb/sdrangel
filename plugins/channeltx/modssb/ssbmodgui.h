@@ -116,11 +116,9 @@ private:
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~SSBModGUI();
 
-    int  getEffectiveLowCutoff(int lowCutoff);
-    bool setNewRate(int spanLog2);
-
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
+    void applyBandwidths(bool force = false);
     void displaySettings();
     void displayAGCPowerThreshold();
     void updateWithStreamData();

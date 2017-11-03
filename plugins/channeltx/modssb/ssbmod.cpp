@@ -591,6 +591,10 @@ bool SSBMod::handleMessage(const Message& cmd)
             lowCutoff = 0;
         }
 
+        if (band - lowCutoff < 100.0f) {
+            lowCutoff = band - 100.0f;
+        }
+
         settings.m_bandwidth = band;
         settings.m_lowCutoff = lowCutoff;
 

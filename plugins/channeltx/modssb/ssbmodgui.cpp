@@ -151,45 +151,9 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void SSBModGUI::on_dsb_toggled(bool checked)
+void SSBModGUI::on_dsb_toggled(bool checked __attribute__((unused)))
 {
-    m_settings.m_dsb = checked;
-
-    if (checked)
-    {
-        if (ui->BW->value() < 0) {
-            ui->BW->setValue(-ui->BW->value());
-        }
-
-        m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-        QString bwStr = QString::number(ui->BW->value()/10.0, 'f', 1);
-        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
-        ui->lowCut->setValue(0);
-        ui->lowCut->setEnabled(false);
-
-        m_settings.m_bandwidth = ui->BW->value() * 100.0;
-        m_settings.m_lowCutoff = 0;
-
-        applySettings();
-    }
-    else
-    {
-        if (ui->BW->value() < 0) {
-            m_channelMarker.setSidebands(ChannelMarker::lsb);
-        } else {
-            m_channelMarker.setSidebands(ChannelMarker::usb);
-        }
-
-        QString bwStr = QString::number(ui->BW->value()/10.0, 'f', 1);
-        ui->BWText->setText(tr("%1k").arg(bwStr));
-        ui->lowCut->setEnabled(true);
-        m_settings.m_bandwidth = ui->BW->value() * 100.0;
-
-        on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-    }
-
-    setNewRate(m_settings.m_spanLog2);
+    applyBandwidths();
 }
 
 void SSBModGUI::on_audioBinaural_toggled(bool checked)
@@ -206,74 +170,21 @@ void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
 
 void SSBModGUI::on_spanLog2_valueChanged(int value)
 {
-    if (setNewRate(value))
-    {
-        m_settings.m_spanLog2 = value;
-        applySettings();
+    if ((value < 1) || (value > 5)) {
+        return;
     }
 
+    applyBandwidths();
 }
 
-void SSBModGUI::on_BW_valueChanged(int value)
+void SSBModGUI::on_BW_valueChanged(int value __attribute__((unused)))
 {
-    QString s = QString::number(value/10.0, 'f', 1);
-    m_channelMarker.setBandwidth(value * 200);
-
-    if (ui->dsb->isChecked())
-    {
-        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
-    }
-    else
-    {
-        ui->BWText->setText(tr("%1k").arg(s));
-    }
-
-    m_settings.m_bandwidth = value * 100;
-    on_lowCut_valueChanged(m_channelMarker.getLowCutoff()/100);
-	setNewRate(m_settings.m_spanLog2);
+    applyBandwidths();
 }
 
-void SSBModGUI::on_lowCut_valueChanged(int value)
+void SSBModGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
 {
-    int lowCutoff = getEffectiveLowCutoff(value * 100);
-    m_channelMarker.setLowCutoff(lowCutoff);
-    QString s = QString::number(lowCutoff/1000.0, 'f', 1);
-    ui->lowCutText->setText(tr("%1k").arg(s));
-    ui->lowCut->setValue(lowCutoff/100);
-    m_settings.m_lowCutoff = ui->lowCut->value() * 100.0;
-    applySettings();
-}
-
-int SSBModGUI::getEffectiveLowCutoff(int lowCutoff)
-{
-    int ssbBW = m_channelMarker.getBandwidth() / 2;
-    int effectiveLowCutoff = lowCutoff;
-    const int guard = 100;
-
-    if (ssbBW < 0)
-    {
-        if (effectiveLowCutoff < ssbBW + guard)
-        {
-            effectiveLowCutoff = ssbBW + guard;
-        }
-        if (effectiveLowCutoff > 0)
-        {
-            effectiveLowCutoff = 0;
-        }
-    }
-    else
-    {
-        if (effectiveLowCutoff > ssbBW - guard)
-        {
-            effectiveLowCutoff = ssbBW - guard;
-        }
-        if (effectiveLowCutoff < 0)
-        {
-            effectiveLowCutoff = 0;
-        }
-    }
-
-    return effectiveLowCutoff;
+    applyBandwidths();
 }
 
 void SSBModGUI::on_toneFrequency_valueChanged(int value)
@@ -501,8 +412,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
     displaySettings();
-	applySettings(true);
-	setNewRate(m_settings.m_spanLog2);
+    applyBandwidths(true); // does applySettings(true)
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
@@ -514,82 +424,6 @@ SSBModGUI::~SSBModGUI()
 	delete m_ssbMod;
 	delete m_spectrumVis;
 	delete ui;
-}
-
-bool SSBModGUI::setNewRate(int spanLog2)
-{
-	if ((spanLog2 < 1) || (spanLog2 > 5))
-	{
-		return false;
-	}
-
-	m_settings.m_spanLog2 = spanLog2;
-	m_rate = 48000 / (1<<spanLog2);
-
-	if (ui->BW->value() < -m_rate/100)
-	{
-		ui->BW->setValue(-m_rate/100);
-		m_channelMarker.setBandwidth(-m_rate*2);
-	}
-	else if (ui->BW->value() > m_rate/100)
-	{
-		ui->BW->setValue(m_rate/100);
-		m_channelMarker.setBandwidth(m_rate*2);
-	}
-
-	if (ui->lowCut->value() < -m_rate/100)
-	{
-		ui->lowCut->setValue(-m_rate/100);
-		m_channelMarker.setLowCutoff(-m_rate);
-	}
-	else if (ui->lowCut->value() > m_rate/100)
-	{
-		ui->lowCut->setValue(m_rate/100);
-		m_channelMarker.setLowCutoff(m_rate);
-	}
-
-	QString s = QString::number(m_rate/1000.0, 'f', 1);
-
-	if (ui->dsb->isChecked())
-	{
-        ui->BW->setMinimum(0);
-        ui->BW->setMaximum(m_rate/100);
-        ui->lowCut->setMinimum(0);
-        ui->lowCut->setMaximum(m_rate/100);
-
-        m_channelMarker.setSidebands(ChannelMarker::dsb);
-
-        ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
-        ui->glSpectrum->setCenterFrequency(0);
-        ui->glSpectrum->setSampleRate(2*m_rate);
-        ui->glSpectrum->setSsbSpectrum(false);
-        ui->glSpectrum->setLsbDisplay(false);
-	}
-	else
-	{
-        ui->BW->setMinimum(-m_rate/100);
-        ui->BW->setMaximum(m_rate/100);
-        ui->lowCut->setMinimum(-m_rate/100);
-        ui->lowCut->setMaximum(m_rate/100);
-
-        if (ui->BW->value() < 0)
-        {
-            m_channelMarker.setSidebands(ChannelMarker::lsb);
-            ui->glSpectrum->setLsbDisplay(true);
-        }
-        else
-        {
-            m_channelMarker.setSidebands(ChannelMarker::usb);
-            ui->glSpectrum->setLsbDisplay(false);
-        }
-
-        ui->spanText->setText(tr("%1k").arg(s));
-        ui->glSpectrum->setCenterFrequency(m_rate/2);
-        ui->glSpectrum->setSampleRate(m_rate);
-        ui->glSpectrum->setSsbSpectrum(true);
-	}
-
-	return true;
 }
 
 void SSBModGUI::blockApplySettings(bool block)
@@ -608,6 +442,75 @@ void SSBModGUI::applySettings(bool force)
 		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(m_settings, force);
 		m_ssbMod->getInputMessageQueue()->push(msg);
 	}
+}
+
+void SSBModGUI::applyBandwidths(bool force)
+{
+    bool dsb = ui->dsb->isChecked();
+    int spanLog2 = ui->spanLog2->value();
+    int bw = ui->BW->value();
+    int lw = ui->lowCut->value();
+    int bwMax = 480/(1<<spanLog2);
+
+    bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
+
+    if (bw < 0) {
+        lw = lw < bw+1 ? bw+1 : lw < 0 ? lw : 0;
+    } else if (bw > 0) {
+        lw = lw > bw-1 ? bw-1 : lw < 0 ? 0 : lw;
+    } else {
+        lw = 0;
+    }
+
+    if (dsb)
+    {
+        bw = bw < 0 ? -bw : bw;
+        lw = 0;
+    }
+
+    QString spanStr = QString::number(bwMax/10.0, 'f', 1);
+    QString bwStr   = QString::number(bw/10.0, 'f', 1);
+    QString lwStr   = QString::number(lw/10.0, 'f', 1);
+
+    if (dsb)
+    {
+        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
+        ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(spanStr));
+    }
+    else
+    {
+        ui->BWText->setText(tr("%1k").arg(bwStr));
+        ui->spanText->setText(tr("%1k").arg(spanStr));
+    }
+
+    ui->lowCutText->setText(tr("%1k").arg(lwStr));
+
+
+    ui->BW->blockSignals(true);
+    ui->lowCut->blockSignals(true);
+
+    ui->BW->setMaximum(bwMax);
+    ui->BW->setMinimum(dsb ? 0 : -bwMax);
+    ui->BW->setValue(bw);
+
+    ui->lowCut->setMaximum(dsb ? 0 :  bwMax);
+    ui->lowCut->setMinimum(dsb ? 0 : -bwMax);
+    ui->lowCut->setValue(lw);
+
+    ui->lowCut->blockSignals(false);
+    ui->BW->blockSignals(false);
+
+
+    m_settings.m_dsb = dsb;
+    m_settings.m_spanLog2 = spanLog2;
+    m_settings.m_bandwidth = bw * 100;
+    m_settings.m_lowCutoff = lw * 100;
+
+    applySettings(force);
+
+    blockApplySettings(true);
+    m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
+    blockApplySettings(false);
 }
 
 void SSBModGUI::displaySettings()
