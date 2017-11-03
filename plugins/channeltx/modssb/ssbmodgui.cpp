@@ -359,7 +359,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
-	m_rate(6000),
+	m_spectrumRate(6000),
 	m_channelPowerDbAvg(20,0),
     m_recordLength(0),
     m_recordSampleRate(48000),
@@ -379,8 +379,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
     resetToDefaults();
 
-	ui->glSpectrum->setCenterFrequency(m_rate/2);
-	ui->glSpectrum->setSampleRate(m_rate);
+	ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
+	ui->glSpectrum->setSampleRate(m_spectrumRate);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(true);
@@ -393,7 +393,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	m_channelMarker.setColor(Qt::green);
-	m_channelMarker.setBandwidth(m_rate);
+	m_channelMarker.setBandwidth(m_spectrumRate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("SSB Modulator");
@@ -404,7 +404,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-    m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerTxChannelInstance(m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -430,9 +430,11 @@ SSBModGUI::~SSBModGUI()
 	delete ui;
 }
 
-void SSBModGUI::blockApplySettings(bool block)
+bool SSBModGUI::blockApplySettings(bool block)
 {
+    bool ret = !m_doApplySettings;
     m_doApplySettings = !block;
+    return ret;
 }
 
 void SSBModGUI::applySettings(bool force)
@@ -452,6 +454,7 @@ void SSBModGUI::applyBandwidths(bool force)
 {
     bool dsb = ui->dsb->isChecked();
     int spanLog2 = ui->spanLog2->value();
+    m_spectrumRate = 48000 / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = 480/(1<<spanLog2);
@@ -480,11 +483,19 @@ void SSBModGUI::applyBandwidths(bool force)
     {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
         ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(spanStr));
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(2*m_spectrumRate);
+        ui->glSpectrum->setSsbSpectrum(false);
+        ui->glSpectrum->setLsbDisplay(false);
     }
     else
     {
         ui->BWText->setText(tr("%1k").arg(bwStr));
         ui->spanText->setText(tr("%1k").arg(spanStr));
+        ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
+        ui->glSpectrum->setSampleRate(m_spectrumRate);
+        ui->glSpectrum->setSsbSpectrum(true);
+        ui->glSpectrum->setLsbDisplay(bw < 0);
     }
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
@@ -512,14 +523,17 @@ void SSBModGUI::applyBandwidths(bool force)
 
     applySettings(force);
 
-    blockApplySettings(true);
+    bool applySettingsWereBlocked = blockApplySettings(true);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
-    blockApplySettings(false);
+    blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::displaySettings()
 {
+    bool applySettingsWereBlocked = blockApplySettings(true);
+
     m_channelMarker.blockSignals(true);
+
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_bandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
@@ -540,8 +554,6 @@ void SSBModGUI::displaySettings()
 
     setWindowTitle(m_channelMarker.getTitle());
 
-    blockApplySettings(true);
-
     QString s = QString::number(m_settings.m_agcTime / 48, 'f', 0);
     ui->agcTimeText->setText(s);
     ui->agcTime->setValue(SSBModSettings::getAGCTimeConstantIndex(m_settings.m_agcTime / 48));
@@ -560,8 +572,15 @@ void SSBModGUI::displaySettings()
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
-    ui->dsb->setChecked(m_settings.m_dsb);
     ui->playLoop->setChecked(m_settings.m_playLoop);
+
+    // Prevent uncontrolled triggering of applyBandwidths
+    ui->spanLog2->blockSignals(true);
+    ui->dsb->blockSignals(true);
+    ui->BW->blockSignals(true);
+
+    ui->dsb->setChecked(m_settings.m_dsb);
+    ui->spanLog2->setValue(m_settings.m_spanLog2);
 
     ui->BW->setValue(roundf(m_settings.m_bandwidth/100.0));
     s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
@@ -575,12 +594,17 @@ void SSBModGUI::displaySettings()
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
 
+    ui->spanLog2->blockSignals(false);
+    ui->dsb->blockSignals(false);
+    ui->BW->blockSignals(false);
+
+    // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
+    // set correctly and therefore validate the settings and apply them to dependent widgets
     ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
     ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
 
-    ui->spanLog2->setValue(m_settings.m_spanLog2);
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
 
     ui->toneFrequency->setValue(roundf(m_settings.m_toneFrequency / 10.0));
     ui->toneFrequencyText->setText(QString("%1k").arg(m_settings.m_toneFrequency / 1000.0, 0, 'f', 2));
@@ -588,7 +612,7 @@ void SSBModGUI::displaySettings()
     ui->volume->setValue(m_settings.m_volumeFactor * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
 
-    blockApplySettings(false);
+    blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::displayAGCPowerThreshold()
@@ -608,16 +632,16 @@ void SSBModGUI::displayAGCPowerThreshold()
 
 void SSBModGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
+	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
+	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
+	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
+	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::tick()

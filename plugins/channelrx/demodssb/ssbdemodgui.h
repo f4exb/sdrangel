@@ -67,6 +67,7 @@ private:
 	SSBDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;
+    int m_spectrumRate;
 	bool m_audioBinaural;
 	bool m_audioFlipChannels;
 	bool m_audioMute;

@@ -98,7 +98,7 @@ private:
     SSBModSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
-	int m_rate;
+	int m_spectrumRate;
 
     SpectrumVis* m_spectrumVis;
     SSBMod* m_ssbMod;
@@ -116,7 +116,7 @@ private:
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~SSBModGUI();
 
-    void blockApplySettings(bool block);
+    bool blockApplySettings(bool block);
     void applySettings(bool force = false);
     void applyBandwidths(bool force = false);
     void displaySettings();

@@ -209,6 +209,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	m_channelMarker(this),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
+    m_spectrumRate(6000),
 	m_audioBinaural(false),
 	m_audioFlipChannels(false),
     m_audioMute(false),
@@ -229,8 +230,11 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
+    ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
+    ui->glSpectrum->setSampleRate(m_spectrumRate);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
+    ui->glSpectrum->setSsbSpectrum(true);
 	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -294,6 +298,7 @@ void SSBDemodGUI::applyBandwidths(bool force)
 {
     bool dsb = ui->dsb->isChecked();
     int spanLog2 = ui->spanLog2->value();
+    m_spectrumRate = 48000 / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = 480/(1<<spanLog2);
@@ -322,11 +327,19 @@ void SSBDemodGUI::applyBandwidths(bool force)
     {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
         ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(spanStr));
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(2*m_spectrumRate);
+        ui->glSpectrum->setSsbSpectrum(false);
+        ui->glSpectrum->setLsbDisplay(false);
     }
     else
     {
         ui->BWText->setText(tr("%1k").arg(bwStr));
         ui->spanText->setText(tr("%1k").arg(spanStr));
+        ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
+        ui->glSpectrum->setSampleRate(m_spectrumRate);
+        ui->glSpectrum->setSsbSpectrum(true);
+        ui->glSpectrum->setLsbDisplay(bw < 0);
     }
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
@@ -417,7 +430,7 @@ void SSBDemodGUI::displaySettings()
     ui->BW->blockSignals(false);
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
-    // set correctly and therefore validate the settings
+    // set correctly and therefore validate the settings and apply them to dependent widgets
     ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
     ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
 
