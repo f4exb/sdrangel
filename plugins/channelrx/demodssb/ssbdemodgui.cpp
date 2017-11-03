@@ -267,9 +267,11 @@ SSBDemodGUI::~SSBDemodGUI()
 	delete ui;
 }
 
-void SSBDemodGUI::blockApplySettings(bool block)
+bool SSBDemodGUI::blockApplySettings(bool block)
 {
+    bool ret = !m_doApplySettings;
     m_doApplySettings = !block;
+    return ret;
 }
 
 void SSBDemodGUI::applySettings(bool force)
@@ -352,15 +354,18 @@ void SSBDemodGUI::applyBandwidths(bool force)
 
     applySettings(force);
 
-    blockApplySettings(true);
+    bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
-    blockApplySettings(false);
+    blockApplySettings(wasBlocked);
 }
 
 void SSBDemodGUI::displaySettings()
 {
+    bool applySettingsWereBlocked = blockApplySettings(true);
+
     m_channelMarker.blockSignals(true);
+
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
@@ -380,15 +385,18 @@ void SSBDemodGUI::displaySettings()
     m_channelMarker.blockSignals(false);
 
     setWindowTitle(m_channelMarker.getTitle());
-
-    blockApplySettings(true);
-
     ui->agc->setChecked(m_settings.m_agc);
     ui->agcClamping->setChecked(m_settings.m_agcClamping);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+
+    // Prevent uncontrolled triggering of applyBandwidths
+    ui->spanLog2->blockSignals(true);
+    ui->dsb->blockSignals(true);
+    ui->BW->blockSignals(true);
+
     ui->dsb->setChecked(m_settings.m_dsb);
     ui->spanLog2->setValue(m_settings.m_spanLog2);
 
@@ -404,6 +412,12 @@ void SSBDemodGUI::displaySettings()
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
+    ui->spanLog2->blockSignals(false);
+    ui->dsb->blockSignals(false);
+    ui->BW->blockSignals(false);
+
+    // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
+    // set correctly and therefore validate the settings
     ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
     ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
 
@@ -421,7 +435,7 @@ void SSBDemodGUI::displaySettings()
     s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
     ui->agcThresholdGateText->setText(s);
 
-    blockApplySettings(false);
+    blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBDemodGUI::displayUDPAddress()
@@ -444,16 +458,16 @@ void SSBDemodGUI::displayAGCPowerThreshold(int value)
 
 void SSBDemodGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
+    bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
+	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBDemodGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
+	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
+	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBDemodGUI::tick()

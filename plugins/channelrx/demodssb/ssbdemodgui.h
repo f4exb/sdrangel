@@ -80,7 +80,7 @@ private:
 	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, QWidget* parent = 0);
 	virtual ~SSBDemodGUI();
 
-    void blockApplySettings(bool block);
+    bool blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void applyBandwidths(bool force = false);
 	void displaySettings();
