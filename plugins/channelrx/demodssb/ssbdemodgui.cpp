@@ -260,7 +260,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	displaySettings();
-	applyBandwidths(true);
+	applyBandwidths(true); // does applySettings(true)
 }
 
 SSBDemodGUI::~SSBDemodGUI()
@@ -302,6 +302,14 @@ void SSBDemodGUI::applyBandwidths(bool force)
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = 480/(1<<spanLog2);
+
+    qDebug() << "SSBDemodGUI::applyBandwidths:"
+            << " dsb: " << dsb
+            << " spanLog2: " << spanLog2
+            << " m_spectrumRate: " << m_spectrumRate
+            << " bw: " << bw
+            << " lw: " << lw
+            << " bwMax: " << bwMax;
 
     bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
 

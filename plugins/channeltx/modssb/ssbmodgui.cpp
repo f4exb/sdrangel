@@ -80,15 +80,16 @@ bool SSBModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
+        qDebug("SSBModGUI::deserialize");
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(true); // does applySettings(true)
         return false;
     }
 }
@@ -415,11 +416,11 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
-    displaySettings();
-    applyBandwidths(true); // does applySettings(true)
-
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+
+    displaySettings();
+    applyBandwidths(true); // does applySettings(true)
 }
 
 SSBModGUI::~SSBModGUI()
@@ -458,6 +459,14 @@ void SSBModGUI::applyBandwidths(bool force)
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = 480/(1<<spanLog2);
+
+    qDebug() << "SSBModGUI::applyBandwidths:"
+            << " dsb: " << dsb
+            << " spanLog2: " << spanLog2
+            << " m_spectrumRate: " << m_spectrumRate
+            << " bw: " << bw
+            << " lw: " << lw
+            << " bwMax: " << bwMax;
 
     bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
 
@@ -530,7 +539,7 @@ void SSBModGUI::applyBandwidths(bool force)
 
 void SSBModGUI::displaySettings()
 {
-    bool applySettingsWereBlocked = blockApplySettings(true);
+   bool applySettingsWereBlocked = blockApplySettings(true);
 
     m_channelMarker.blockSignals(true);
 
