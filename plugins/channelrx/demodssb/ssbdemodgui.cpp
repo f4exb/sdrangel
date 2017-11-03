@@ -235,7 +235,14 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_channelMarker.setVisible(true);
+    m_channelMarker.setColor(Qt::green);
+    m_channelMarker.setBandwidth(6000);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle("SSB Demodulator");
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.setVisible(true);
+    setTitleColor(m_channelMarker.getColor());
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
