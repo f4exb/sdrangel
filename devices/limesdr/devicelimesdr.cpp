@@ -344,3 +344,33 @@ bool DeviceLimeSDR::setTxAntennaPath(lms_device_t *device, std::size_t chan, int
 
     return true;
 }
+
+bool DeviceLimeSDR::setClockSource(lms_device_t *device, bool extClock, uint32_t extClockFrequency)
+{
+    if (extClock)
+    {
+        if (LMS_SetClockFreq(device, LMS_CLOCK_EXTREF, (float) extClockFrequency) < 0)
+        {
+            fprintf(stderr, "DeviceLimeSDR::setClockSource: cannot set to external\n");
+            return false;
+        }
+    }
+    else
+    {
+        uint16_t vcoTrimValue;
+
+        if (LMS_VCTCXORead(device, &vcoTrimValue))
+        {
+            fprintf(stderr, "DeviceLimeSDR::setClockSource: cannot read VCTXO trim value\n");
+            return false;
+        }
+
+        if (LMS_VCTCXOWrite(device, vcoTrimValue))
+        {
+            fprintf(stderr, "DeviceLimeSDR::setClockSource: cannot write VCTXO trim value\n");
+            return false;
+        }
+    }
+
+    return true;
+}

@@ -68,6 +68,35 @@ public:
         { }
     };
 
+    class MsgReportClockSourceChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool     getExtClock() const { return m_extClock; }
+        uint32_t getExtClockFeq() const { return m_extClockFreq; }
+
+        static MsgReportClockSourceChange* create(
+                bool extClock,
+                uint32_t m_extClockFreq)
+        {
+            return new MsgReportClockSourceChange(
+                    extClock,
+                    m_extClockFreq);
+        }
+
+    private:
+        bool     m_extClock;      //!< True if external clock source
+        uint32_t m_extClockFreq;  //!< Frequency (Hz) of external clock source
+
+        MsgReportClockSourceChange(
+                bool extClock,
+                uint32_t m_extClockFreq) :
+            Message(),
+            m_extClock(extClock),
+            m_extClockFreq(m_extClockFreq)
+        { }
+    };
+
     class MsgReportDeviceInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 

@@ -52,6 +52,8 @@ struct LimeSDROutputSettings
     bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
     int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathRFE  m_antennaPath;
+    bool     m_extClock;     //!< True if external clock source
+    uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
 
     LimeSDROutputSettings();
     void resetToDefaults();

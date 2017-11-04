@@ -41,6 +41,8 @@ void LimeSDRInputSettings::resetToDefaults()
     m_lnaGain = 15;
     m_tiaGain = 2;
     m_pgaGain = 16;
+    m_extClock = false;
+    m_extClockFreq = 10000000; // 10 MHz
 }
 
 QByteArray LimeSDRInputSettings::serialize() const
@@ -63,6 +65,8 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeU32(15, m_lnaGain);
     s.writeU32(16, m_tiaGain);
     s.writeU32(17, m_pgaGain);
+    s.writeBool(18, m_extClock);
+    s.writeU32(19, m_extClockFreq);
 
     return s.final();
 }
@@ -99,6 +103,8 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readU32(15, &m_lnaGain, 15);
         d.readU32(16, &m_tiaGain, 2);
         d.readU32(17, &m_pgaGain, 16);
+        d.readBool(18, &m_extClock, false);
+        d.readU32(19, &m_extClockFreq, 10000000);
 
         return true;
     }

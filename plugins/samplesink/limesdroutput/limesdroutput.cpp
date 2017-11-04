@@ -519,6 +519,19 @@ bool LimeSDROutput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceLimeSDRShared::MsgReportClockSourceChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportClockSourceChange& report = (DeviceLimeSDRShared::MsgReportClockSourceChange&) message;
+
+        m_settings.m_extClock     = report.getExtClock();
+        m_settings.m_extClockFreq = report.getExtClockFeq();
+
+        DeviceLimeSDRShared::MsgReportClockSourceChange *reportToGUI = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                m_settings.m_extClock, m_settings.m_extClockFreq);
+        getMessageQueueToGUI()->push(reportToGUI);
+
+        return true;
+    }
     else if (MsgGetStreamInfo::match(message))
     {
 //        qDebug() << "LimeSDROutput::handleMessage: MsgGetStreamInfo";
@@ -621,6 +634,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool forwardChangeOwnDSP = false;
     bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
+    bool forwardClockSource  = false;
     bool ownThreadWasRunning = false;
     bool doCalibration       = false;
     double clockGenFreq      = 0.0;
@@ -820,6 +834,28 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         }
     }
 
+    if ((m_settings.m_extClock != settings.m_extClock) ||
+        (m_settings.m_extClockFreq != settings.m_extClockFreq) || force)
+    {
+
+        if (DeviceLimeSDR::setClockSource(m_deviceShared.m_deviceParams->getDevice(),
+                settings.m_extClock,
+                settings.m_extClockFreq))
+        {
+            forwardClockSource = true;
+            doCalibration = true;
+            qDebug("LimeSDRInput::applySettings: clock set to %s (Ext: %d Hz)",
+                    settings.m_extClock ? "external" : "internal",
+                    settings.m_extClockFreq);
+        }
+        else
+        {
+            qCritical("LimeSDRInput::applySettings: could not set clock to %s (Ext: %d Hz)",
+                    settings.m_extClock ? "external" : "internal",
+                    settings.m_extClockFreq);
+        }
+    }
+
     m_settings = settings;
     double clockGenFreqAfter;
 
@@ -933,6 +969,31 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
+    if (forwardClockSource)
+    {
+        // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *report = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+        }
+
+        // send to sink buddies
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *report = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+        }
+    }
+
     qDebug() << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
             << " sample rate with soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp) << "S/s"
@@ -942,7 +1003,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
             << " m_ncoEnable: " << m_settings.m_ncoEnable
             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
-            << " m_antennaPath: " << m_settings.m_antennaPath;
+            << " m_antennaPath: " << m_settings.m_antennaPath
+            << " m_extClock: " << m_settings.m_extClock
+            << " m_extClockFreq: " << m_settings.m_extClockFreq;
 
     return true;
 }

@@ -51,6 +51,8 @@ public:
     static bool setRxAntennaPath(lms_device_t *device, std::size_t chan, int path);
     /** Set Tx antenna path **/
     static bool setTxAntennaPath(lms_device_t *device, std::size_t chan, int path);
+    /** Set clock source and external clock frequency if required */
+    static bool setClockSource(lms_device_t *device, bool extClock, uint32_t extClockFrequency);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDR_H_ */
