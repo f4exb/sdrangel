@@ -80,5 +80,6 @@
         <file>antenna.png</file>
         <file>link.png</file>
         <file>choose.png</file>
+        <file>clocksource.png</file>
     </qresource>
 </RCC>

@@ -325,6 +325,20 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="ButtonSwitch" name="extClock">
+       <property name="toolTip">
+        <string>External clock source selection</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/clocksource.png</normaloff>:/clocksource.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
