@@ -987,7 +987,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     }
 
     if ((m_settings.m_extClock != settings.m_extClock) ||
-        (m_settings.m_extClockFreq != settings.m_extClockFreq) || force)
+        (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
 
         if (DeviceLimeSDR::setClockSource(m_deviceShared.m_deviceParams->getDevice(),

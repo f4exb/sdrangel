@@ -835,7 +835,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     }
 
     if ((m_settings.m_extClock != settings.m_extClock) ||
-        (m_settings.m_extClockFreq != settings.m_extClockFreq) || force)
+        (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
 
         if (DeviceLimeSDR::setClockSource(m_deviceShared.m_deviceParams->getDevice(),
@@ -844,13 +844,13 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         {
             forwardClockSource = true;
             doCalibration = true;
-            qDebug("LimeSDRInput::applySettings: clock set to %s (Ext: %d Hz)",
+            qDebug("LimeSDROutput::applySettings: clock set to %s (Ext: %d Hz)",
                     settings.m_extClock ? "external" : "internal",
                     settings.m_extClockFreq);
         }
         else
         {
-            qCritical("LimeSDRInput::applySettings: could not set clock to %s (Ext: %d Hz)",
+            qCritical("LimeSDROutput::applySettings: could not set clock to %s (Ext: %d Hz)",
                     settings.m_extClock ? "external" : "internal",
                     settings.m_extClockFreq);
         }
