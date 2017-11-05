@@ -22,6 +22,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QLocale>
+
 #include "gui/valuedialz.h"
 
 ValueDialZ::ValueDialZ(bool positiveOnly, QWidget* parent, ColorMapper colorMapper) :
@@ -193,7 +195,8 @@ QString ValueDialZ::formatText(qint64 value)
 	    int ipoint = m_numDigits + (m_positiveOnly ? 0 : 1) - 3 - 3 * i;
 
 	    if (ipoint != 0) { // do not insert leading point
-	        str.insert(ipoint, ".");
+	        const QLocale & cLocale = QLocale::c();
+	        str.insert(ipoint, cLocale.groupSeparator());
 	    }
 	}
 

@@ -19,6 +19,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QLocale>
+
 #include "gui/valuedial.h"
 
 ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
@@ -165,7 +167,8 @@ QString ValueDial::formatText(quint64 value)
 	    int ipoint = m_numDigits - 3 - 3 * i;
 
 	    if (ipoint != 0) { // do not insert leading point
-	        str.insert(ipoint, ".");
+            const QLocale & cLocale = QLocale::c();
+	        str.insert(ipoint, cLocale.groupSeparator());
 	    }
 	}
 
