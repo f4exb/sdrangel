@@ -140,6 +140,7 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDRInputGUI::handleMessage(const Message& message)
 {
+
     if (DeviceLimeSDRShared::MsgReportBuddyChange::match(message))
     {
         DeviceLimeSDRShared::MsgReportBuddyChange& report = (DeviceLimeSDRShared::MsgReportBuddyChange&) message;
@@ -152,6 +153,19 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
 
         blockApplySettings(true);
         displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (DeviceLimeSDRShared::MsgReportClockSourceChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportClockSourceChange& report = (DeviceLimeSDRShared::MsgReportClockSourceChange&) message;
+        m_settings.m_extClockFreq = report.getExtClockFeq();
+        m_settings.m_extClock = report.getExtClock();
+
+        blockApplySettings(true);
+        ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
+        ui->extClock->setExternalClockActive(m_settings.m_extClock);
         blockApplySettings(false);
 
         return true;

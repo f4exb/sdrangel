@@ -158,6 +158,19 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceLimeSDRShared::MsgReportClockSourceChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportClockSourceChange& report = (DeviceLimeSDRShared::MsgReportClockSourceChange&) message;
+        m_settings.m_extClockFreq = report.getExtClockFeq();
+        m_settings.m_extClock = report.getExtClock();
+
+        blockApplySettings(true);
+        ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
+        ui->extClock->setExternalClockActive(m_settings.m_extClock);
+        blockApplySettings(false);
+
+        return true;
+    }
     else if (LimeSDROutput::MsgReportStreamInfo::match(message))
     {
         LimeSDROutput::MsgReportStreamInfo& report = (LimeSDROutput::MsgReportStreamInfo&) message;
