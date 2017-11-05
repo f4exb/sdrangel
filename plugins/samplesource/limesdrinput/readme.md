@@ -69,6 +69,8 @@ LimeSDR is a 2x2 MIMO device so it has two receiving channels. This shows the co
 
 <h3>2: NCO, DC/IQ correction and external clock controls</h3>
 
+![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_2.png)
+
 <h4>2.1: NCO toggle</h4>
 
 The button is lit when NCO is active and dark when inactive.
