@@ -83,6 +83,30 @@ This is the center frequency of the mix of LO and NCO combined and is the sink p
 
 &#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hadrware interpolation of 16 (8) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
 
+<h3>7A: External clock control</h3>
+
+Use this button to open a dialog that lets you choose the external clock frequency and enable or disable it. When disabled the internal 30.72 MHz VCTCXO is used.
+
+![LimeSDR input plugin gain GUI](../../../doc/img/LimeSDR_plugin_extclock.png)
+
+<h4>7A.1: Exrernal clock frequency</h4>
+
+Can be varied from 5 to 300 MHz
+
+Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
+
+<h4>7A.2: Enable/disable external clock input</h7A>
+
+Use this checkbox to enable or disable the external clock input
+
+<h4>7A.3: Confirm changes</h4>
+
+Use the "OK" button to confirm your changes
+  
+<h4>7A.4: Dismiss changes</h4>
+
+Use the "Cancel" button to dismiss your changes
+
 <h3>8: LMS7002M hardware interpolation factor</h3>
 
 The TSP block in the LMS7002M hardware has an interpolation chain that acts on both Tx channels. It is composed of 5 halfband interpolation stages and therefore can achieve interpolation between 1 (no interpolation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32.
