@@ -24,7 +24,7 @@
 ExternalClockButton::ExternalClockButton(QWidget* parent) :
     QPushButton(parent),
     m_externalClockFrequency(0),
-    m_externalClockFrequencyActive(false)
+    m_externalClockActive(false)
 {
     setObjectName("ExternalClockButton");
     connect(this, SIGNAL(clicked()), this, SLOT(onClicked()));
@@ -32,7 +32,7 @@ ExternalClockButton::ExternalClockButton(QWidget* parent) :
 
 void ExternalClockButton::onClicked()
 {
-    ExternalClockDialog externalClockDialog(m_externalClockFrequency, m_externalClockFrequencyActive, this);
+    ExternalClockDialog externalClockDialog(m_externalClockFrequency, m_externalClockActive, this);
     externalClockDialog.exec();
     updateState();
 }
@@ -41,9 +41,9 @@ void ExternalClockButton::updateState()
 {
     setToolTip(tr("External clock dialog. External clock frequency %1 MHz %2")
             .arg(m_externalClockFrequency/1000000.0)
-            .arg(m_externalClockFrequencyActive ? "enabled" : "disabled"));
+            .arg(m_externalClockActive ? "enabled" : "disabled"));
 
-    if(m_externalClockFrequencyActive)
+    if(m_externalClockActive)
     {
         setStyleSheet("ExternalClockButton { background:rgb(128, 70, 0); }");
     }

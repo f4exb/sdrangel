@@ -29,7 +29,7 @@ class ExternalClockButton : public QPushButton {
 public:
     ExternalClockButton(QWidget* parent = 0);
     qint64 getExternalClockFrequency() const { return m_externalClockFrequency; }
-    bool getExternalClockFrequencyActive() const { return m_externalClockFrequencyActive; }
+    bool getExternalClockActive() const { return m_externalClockActive; }
 
     void setExternalClockFrequency(qint64 deltaFrequency)
     {
@@ -37,9 +37,9 @@ public:
         updateState();
     }
 
-    void setExternalcClockFrequencyActive(bool active)
+    void setExternalClockActive(bool active)
     {
-        m_externalClockFrequencyActive = active;
+        m_externalClockActive = active;
         updateState();
     }
 
@@ -48,7 +48,7 @@ private slots:
 
 private:
     qint64 m_externalClockFrequency;
-    bool m_externalClockFrequencyActive;
+    bool m_externalClockActive;
 
     void updateState();
 };

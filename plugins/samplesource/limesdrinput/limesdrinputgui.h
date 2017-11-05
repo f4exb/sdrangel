@@ -96,6 +96,7 @@ private slots:
     void on_tiaGain_currentIndexChanged(int index);
     void on_pgaGain_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
+    void on_extClock_clicked();
 
     void updateHardware();
     void updateStatus();

@@ -257,6 +257,9 @@ void LimeSDROutputGUI::updateDACRate()
 
 void LimeSDROutputGUI::displaySettings()
 {
+    ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
+    ui->extClock->setExternalClockActive(m_settings.m_extClock);
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
@@ -470,3 +473,12 @@ void LimeSDROutputGUI::on_antenna_currentIndexChanged(int index)
     m_settings.m_antennaPath = (LimeSDROutputSettings::PathRFE) index;
     sendSettings();
 }
+
+void LimeSDROutputGUI::on_extClock_clicked()
+{
+    m_settings.m_extClock = ui->extClock->getExternalClockActive();
+    m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
+    qDebug("LimeSDROutputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
+    sendSettings();
+}
+
