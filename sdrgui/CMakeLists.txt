@@ -11,6 +11,8 @@ set(sdrgui_SOURCES
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/cwkeyergui.cpp
+    gui/externalclockbutton.cpp
+    gui/externalclockdialog.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glscopeng.cpp
@@ -57,6 +59,8 @@ set(sdrgui_HEADERS
     gui/channelwindow.h
     gui/colormapper.h
     gui/cwkeyergui.h
+    gui/externalclockbutton.h
+    gui/externalclockdialog.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glscopeng.h
@@ -106,6 +110,7 @@ set(sdrgui_FORMS
     gui/basicchannelsettingswidget.ui
     gui/basicchannelsettingsdialog.ui
     gui/cwkeyergui.ui
+    gui/externalclockdialog.ui
     gui/glscopegui.ui
     gui/glscopenggui.ui
     gui/glscopemultigui.ui

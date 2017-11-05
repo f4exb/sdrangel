@@ -49,6 +49,8 @@ SOURCES += mainwindow.cpp\
         gui/clickablelabel.cpp\
         gui/colormapper.cpp\
         gui/cwkeyergui.cpp\
+        gui/externalclockbutton.cpp\
+        gui/externalclockdialog.cpp\
         gui/glscope.cpp\
         gui/glscopegui.cpp\
         gui/glscopeng.cpp\
@@ -92,6 +94,8 @@ HEADERS  += mainwindow.h\
         gui/clickablelabel.h\
         gui/colormapper.h\
         gui/cwkeyergui.h\
+        gui/externalclockbutton.h\
+        gui/externalclockdialog.h\
         gui/glscope.h\
         gui/glscopegui.h\
         gui/glscopeng.h\
@@ -122,6 +126,7 @@ FORMS    += mainwindow.ui\
         gui/basicchannelsettingswidget.ui\
         gui/basicchannelsettingsdialog.ui\
         gui/cwkeyergui.ui\
+        gui/externalclockdialog.ui\
         gui/audiodialog.ui\
         gui/glscopegui.ui\
         gui/glscopenggui.ui\
