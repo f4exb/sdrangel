@@ -48,10 +48,6 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 {
 	setObjectName("WFMDemod");
 
-	m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 	m_phaseDiscri.setFMScaling(384000/75000);
 
@@ -60,7 +56,12 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 	m_movingAverage.resize(16, 0);
 
+	m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+
 	applySettings(m_settings, true);
 }
 
@@ -209,6 +210,20 @@ bool WFMDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+            cfg.getSampleRate(),
+            cfg.getCenterFrequency());
+
+        qDebug() << "WFMDemod::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " inputFrequencyOffset: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureWFMDemod::match(cmd))
     {
         MsgConfigureWFMDemod& cfg = (MsgConfigureWFMDemod&) cmd;
