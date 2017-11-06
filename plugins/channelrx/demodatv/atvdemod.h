@@ -39,6 +39,8 @@
 #include "atvscreen.h"
 
 class DeviceSourceAPI;
+class ThreadedBasebandSampleSink;
+class DownChannelizer;
 
 class ATVDemod : public BasebandSampleSink
 {
@@ -123,6 +125,26 @@ public:
         }
     };
 
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getCenterFrequency() const { return m_centerFrequency; }
+
+        static MsgConfigureChannelizer* create(int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(centerFrequency);
+        }
+
+    private:
+        int m_centerFrequency;
+
+        MsgConfigureChannelizer(int centerFrequency) :
+            Message(),
+            m_centerFrequency(centerFrequency)
+        { }
+    };
+
     class MsgReportEffectiveSampleRate : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -204,6 +226,9 @@ public:
     int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
+
+private slots:
+    void channelSampleRateChanged();
 
 private:
     struct ATVConfigPrivate
@@ -362,6 +387,8 @@ private:
     };
 
     DeviceSourceAPI* m_deviceAPI;
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
     //*************** SCOPE  ***************
 

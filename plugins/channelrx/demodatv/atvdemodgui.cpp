@@ -219,6 +219,18 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
 
         return true;
     }
+    else if (ATVDemod::MsgReportChannelSampleRateChanged::match(objMessage))
+    {
+        ATVDemod::MsgReportChannelSampleRateChanged report = (ATVDemod::MsgReportChannelSampleRateChanged&) objMessage;
+        m_inputSampleRate = report.getSampleRate();
+
+        qDebug("ATVDemodGUI::handleMessage: MsgReportChannelSampleRateChanged: %d", m_inputSampleRate);
+
+        applySettings();
+        applyRFSettings();
+
+        return true;
+    }
     else
     {
         return false;
@@ -228,14 +240,6 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
 void ATVDemodGUI::viewChanged()
 {
     qDebug("ATVDemodGUI::viewChanged");
-    applySettings();
-    applyRFSettings();
-}
-
-void ATVDemodGUI::channelSampleRateChanged()
-{
-    qDebug("ATVDemodGUI::channelSampleRateChanged");
-    m_inputSampleRate = m_channelizer->getInputSampleRate();
     applySettings();
     applyRFSettings();
 }
@@ -288,13 +292,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 
     m_scopeVis = new ScopeVisNG(ui->glScope);
     m_atvDemod = new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
-    m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setATVScreen(ui->screenTV);
-
-    m_channelizer = new DownChannelizer(m_atvDemod);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceUISet->m_deviceSourceAPI->addThreadedSink(m_threadedChannelizer);
 
     ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -303,9 +303,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-
-    //m_objPluginAPI->addThreadedSink(m_objThreadedChannelizer);
     m_channelMarker.setColor(Qt::white);
     m_channelMarker.setMovable(false);
     m_channelMarker.setBandwidth(6000000);
@@ -318,8 +315,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
     m_deviceUISet->registerRxChannelInstance(m_strChannelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
-
-    //ui->screenTV->connectTimer(m_objPluginAPI->getMainWindow()->getMasterTimer());
 
     m_objMagSqAverage.resize(4, 1.0);
 
@@ -351,9 +346,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 ATVDemodGUI::~ATVDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-    m_deviceUISet->m_deviceSourceAPI->removeThreadedSink(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
     delete m_atvDemod;
     delete m_scopeVis;
     delete ui;
@@ -370,9 +362,9 @@ void ATVDemodGUI::applySettings()
     {
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-                m_channelizer->getInputSampleRate(), // always use maximum available bandwidth
+        ATVDemod::MsgConfigureChannelizer *msgChan = ATVDemod::MsgConfigureChannelizer::create(
                 m_channelMarker.getCenterFrequency());
+        m_atvDemod->getInputMessageQueue()->push(msgChan);
 
         m_atvDemod->configure(m_atvDemod->getInputMessageQueue(),
                 getNominalLineTime(ui->nbLines->currentIndex(), ui->fps->currentIndex()) + ui->lineTime->value() * m_fltLineTimeMultiplier,
@@ -389,7 +381,7 @@ void ATVDemodGUI::applySettings()
 				ui->screenTabWidget->currentIndex());
 
         qDebug() << "ATVDemodGUI::applySettings:"
-                << " m_objChannelizer.inputSampleRate: " << m_channelizer->getInputSampleRate()
+                << " m_objChannelizer.inputSampleRate: " << m_inputSampleRate
                 << " m_objATVDemod.sampleRate: " << m_atvDemod->getSampleRate();
     }
 }
@@ -431,7 +423,6 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
         if (ui->decimatorEnable->isChecked()) {
             m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
         } else {
-//            m_channelMarker.setBandwidth(m_channelizer->getInputSampleRate());
             m_channelMarker.setBandwidth(m_inputSampleRate);
         }
 

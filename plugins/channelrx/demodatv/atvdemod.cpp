@@ -15,26 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "atvdemod.h"
-
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/pidcontroller.h"
+#include "dsp/downchannelizer.h"
+#include "dsp/threadedbasebandsamplesink.h"
+#include "device/devicesourceapi.h"
+
+#include "atvdemod.h"
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportChannelSampleRateChanged, Message)
 
 const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_registeredATVScreen(NULL),
+    m_registeredATVScreen(0),
     m_intNumberSamplePerTop(0),
     m_intImageIndex(0),
     m_intSynchroPoints(0),
@@ -80,11 +85,20 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
 
     m_objPhaseDiscri.setFMScaling(1.0f);
 
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
+
     applyStandard();
 }
 
 ATVDemod::~ATVDemod()
 {
+    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    delete m_threadedChannelizer;
+    delete m_channelizer;
 }
 
 void ATVDemod::setATVScreen(ATVScreen *objScreen)
@@ -450,6 +464,19 @@ bool ATVDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
+                m_channelizer->getInputSampleRate(),
+                cfg.getCenterFrequency());
+
+        qDebug() << "ATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
+        return true;
+    }
     else if (MsgConfigureATVDemod::match(cmd))
     {
         MsgConfigureATVDemod& objCfg = (MsgConfigureATVDemod&) cmd;
@@ -575,10 +602,13 @@ void ATVDemod::applySettings()
         m_configPrivate.m_intNumberSamplePerLine = (int) (m_config.m_fltLineDuration * m_config.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_config.m_fltTopDuration * m_config.m_intSampleRate);
 
-        m_registeredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
-        m_registeredATVScreen->resizeATVScreen(
-                m_configPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
-                m_intNumberOfLines - m_intNumberOfBlackLines);
+        if (m_registeredATVScreen)
+        {
+            m_registeredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
+            m_registeredATVScreen->resizeATVScreen(
+                    m_configPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
+                    m_intNumberOfLines - m_intNumberOfBlackLines);
+        }
 
         qDebug() << "ATVDemod::applySettings:"
                 << " m_fltLineDuration: " << m_config.m_fltLineDuration
@@ -632,7 +662,7 @@ void ATVDemod::applySettings()
     m_rfRunning = m_rfConfig;
     m_runningPrivate = m_configPrivate;
 
-    if (forwardSampleRateChange)
+    if (forwardSampleRateChange && getMessageQueueToGUI())
     {
         int sampleRate = m_rfRunning.m_blndecimatorEnable ? m_runningPrivate.m_intTVSampleRate : m_running.m_intSampleRate;
         MsgReportEffectiveSampleRate *report;
@@ -729,6 +759,16 @@ float ATVDemod::getRFBandwidthDivisor(ATVModulation modulation)
     case ATV_AM:
     default:
         return 2.2f;
+    }
+}
+
+void ATVDemod::channelSampleRateChanged()
+{
+    qDebug("ATVDemod::channelSampleRateChanged");
+    if (getMessageQueueToGUI())
+    {
+        MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create(m_channelizer->getInputSampleRate());
+        getMessageQueueToGUI()->push(msg);
     }
 }
 

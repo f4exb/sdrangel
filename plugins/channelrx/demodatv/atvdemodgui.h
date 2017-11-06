@@ -27,8 +27,6 @@
 class PluginAPI;
 class DeviceUISet;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class ATVDemod;
 class ScopeVisNG;
 
@@ -60,7 +58,6 @@ public:
 
 private slots:
 	void viewChanged();
-    void channelSampleRateChanged();
     void handleSourceMessages();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
@@ -92,8 +89,6 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
     ATVDemod* m_atvDemod;
 
     bool m_blnBasicSettingsShown;
