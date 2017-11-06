@@ -25,10 +25,10 @@
 #include <algorithm>
 
 template <typename T, typename Total, int N>
-class MovingAverage
+class MovingAverageUtil
 {
   public:
-    MovingAverage()
+    MovingAverageUtil()
       : m_num_samples(0), m_total(0)
     { }
 

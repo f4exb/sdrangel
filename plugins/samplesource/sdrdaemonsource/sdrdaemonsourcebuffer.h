@@ -197,9 +197,9 @@ private:
     int                  m_minOriginalBlocks;    //!< (stats) minimum number of original blocks received since last poll
     int                  m_curNbRecovery;        //!< (stats) instantaneous number of recovery blocks used
     int                  m_maxNbRecovery;        //!< (stats) maximum number of recovery blocks used since last poll
-    MovingAverage<int, int, 10> m_avgNbBlocks;   //!< (stats) average number of blocks received
-    MovingAverage<int, int, 10> m_avgOrigBlocks; //!< (stats) average number of original blocks received
-    MovingAverage<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
+    MovingAverageUtil<int, int, 10> m_avgNbBlocks;   //!< (stats) average number of blocks received
+    MovingAverageUtil<int, int, 10> m_avgOrigBlocks; //!< (stats) average number of original blocks received
+    MovingAverageUtil<int, int, 10> m_avgNbRecovery; //!< (stats) average number of recovery blocks used
     bool                 m_framesDecoded;        //!< [stats] true if all frames were decoded since last poll
     int                  m_readIndex;            //!< current byte read index in frames buffer
     int                  m_wrDeltaEstimate;      //!< Sampled estimate of write to read indexes difference
