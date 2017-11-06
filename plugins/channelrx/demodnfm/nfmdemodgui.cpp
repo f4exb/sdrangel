@@ -271,15 +271,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
-	//m_channelMarker = new ChannelMarker(this);
-//	m_channelMarker.setColor(Qt::red);
-//	m_channelMarker.setBandwidth(12500);
-//	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
     m_channelMarker.setTitle("NFM Demodulator");
-//    m_channelMarker.setUDPAddress("127.0.0.1");
-//    m_channelMarker.setUDPSendPort(9999);
-//    setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
@@ -301,7 +294,6 @@ NFMDemodGUI::~NFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_nfmDemod;
-	//delete m_channelMarker;
 	delete ui;
 }
 

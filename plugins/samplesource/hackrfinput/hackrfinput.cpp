@@ -255,14 +255,10 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	qDebug() << "HackRFInput::applySettings";
 
-	if (m_settings.m_dcBlock != settings.m_dcBlock)
+	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
 	{
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
-	}
-
-	if (m_settings.m_iqCorrection != settings.m_iqCorrection)
-	{
 		m_settings.m_iqCorrection = settings.m_iqCorrection;
 		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}

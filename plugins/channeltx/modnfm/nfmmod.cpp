@@ -417,7 +417,8 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
     }
 
     if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
