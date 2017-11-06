@@ -66,6 +66,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	HackRFInputSettings m_settings;
 	bool m_forceSettings;
+	bool m_doApplySettings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSource* m_sampleSource;
@@ -78,6 +79,7 @@ private:
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void blockApplySettings(bool block);
 
 private slots:
     void handleInputMessages();

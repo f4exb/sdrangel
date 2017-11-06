@@ -34,6 +34,7 @@ BladerfInputGui::BladerfInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui(new Ui::BladerfInputGui),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
+	m_doApplySettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_sampleRate(0),
@@ -158,7 +159,9 @@ void BladerfInputGui::updateSampleRateAndFrequency()
 
 void BladerfInputGui::displaySettings()
 {
-	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    blockApplySettings(true);
+
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
@@ -180,6 +183,8 @@ void BladerfInputGui::displaySettings()
 	ui->vga2->setValue(m_settings.m_vga2);
 
 	ui->xb200->setCurrentIndex(getXb200Index(m_settings.m_xb200, m_settings.m_xb200Path, m_settings.m_xb200Filter));
+
+	blockApplySettings(false);
 }
 
 void BladerfInputGui::sendSettings()
@@ -363,11 +368,19 @@ void BladerfInputGui::on_record_toggled(bool checked)
 
 void BladerfInputGui::updateHardware()
 {
-	qDebug() << "BladerfGui::updateHardware";
-	BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create(m_settings, m_forceSettings);
-	m_sampleSource->getInputMessageQueue()->push(message);
-	m_forceSettings = false;
-	m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "BladerfGui::updateHardware";
+        BladerfInput::MsgConfigureBladerf* message = BladerfInput::MsgConfigureBladerf::create(m_settings, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
+}
+
+void BladerfInputGui::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
 }
 
 void BladerfInputGui::updateStatus()

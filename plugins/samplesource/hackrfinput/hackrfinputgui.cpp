@@ -38,6 +38,7 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_forceSettings(true),
+	m_doApplySettings(true),
 	m_sampleSource(NULL),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
@@ -172,6 +173,8 @@ void HackRFInputGui::updateSampleRateAndFrequency()
 
 void HackRFInputGui::displaySettings()
 {
+    blockApplySettings(true);
+
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
@@ -197,6 +200,8 @@ void HackRFInputGui::displaySettings()
 
 	ui->vgaText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->vga->setValue(m_settings.m_vgaGain);
+
+	blockApplySettings(false);
 }
 
 void HackRFInputGui::displayBandwidths()
@@ -364,11 +369,19 @@ void HackRFInputGui::on_record_toggled(bool checked)
 
 void HackRFInputGui::updateHardware()
 {
-	qDebug() << "HackRFGui::updateHardware";
-	HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
-	m_sampleSource->getInputMessageQueue()->push(message);
-    m_forceSettings = false;
-	m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "HackRFGui::updateHardware";
+        HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
+}
+
+void HackRFInputGui::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
 }
 
 void HackRFInputGui::updateStatus()
