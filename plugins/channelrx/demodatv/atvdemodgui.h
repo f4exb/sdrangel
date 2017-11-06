@@ -107,6 +107,7 @@ private:
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
+    int m_inputSampleRate;
     MessageQueue m_inputMessageQueue;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, QWidget* objParent = 0);

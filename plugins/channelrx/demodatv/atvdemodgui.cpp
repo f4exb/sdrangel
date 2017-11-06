@@ -235,6 +235,7 @@ void ATVDemodGUI::viewChanged()
 void ATVDemodGUI::channelSampleRateChanged()
 {
     qDebug("ATVDemodGUI::channelSampleRateChanged");
+    m_inputSampleRate = m_channelizer->getInputSampleRate();
     applySettings();
     applyRFSettings();
 }
@@ -277,7 +278,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
         m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true),
         m_objMagSqAverage(40, 0),
-        m_intTickCount(0)
+        m_intTickCount(0),
+        m_inputSampleRate(48000)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -429,7 +431,8 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
         if (ui->decimatorEnable->isChecked()) {
             m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
         } else {
-            m_channelMarker.setBandwidth(m_channelizer->getInputSampleRate());
+//            m_channelMarker.setBandwidth(m_channelizer->getInputSampleRate());
+            m_channelMarker.setBandwidth(m_inputSampleRate);
         }
 
         m_channelMarker.setSidebands(ChannelMarker::dsb);

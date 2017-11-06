@@ -28,6 +28,7 @@
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureRFATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportChannelSampleRateChanged, Message)
 
 const int ATVDemod::m_ssbFftLen = 1024;
 

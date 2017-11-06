@@ -147,6 +147,26 @@ public:
         { }
     };
 
+    class MsgReportChannelSampleRateChanged : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportChannelSampleRateChanged* create(int sampleRate)
+        {
+            return new MsgReportChannelSampleRateChanged(sampleRate);
+        }
+
+    private:
+        int m_sampleRate;
+
+        MsgReportChannelSampleRateChanged(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     ATVDemod(DeviceSourceAPI *deviceAPI);
 	~ATVDemod();
 	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
