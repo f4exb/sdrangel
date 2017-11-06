@@ -1,6 +1,13 @@
+sdrangel (3.8.2-1) unstable; urgency=medium
+
+  * WFM Demod: fixed segfault due to sequence of actions in demod constructor
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 08 Nov 2017 18:14:18 +0100
+
 sdrangel (3.8.1-1) unstable; urgency=medium
 
   * SSB Mod: refactored bandwidths settings and fixed segfault
+  * LimeSDR: implemented external clock reference input option
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 Nov 2017 18:14:18 +0100
 

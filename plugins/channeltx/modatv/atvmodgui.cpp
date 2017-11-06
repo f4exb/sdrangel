@@ -618,10 +618,13 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-	m_channelMarker.setColor(Qt::white);
+	m_channelMarker.setColor(m_settings.m_rgbColor);
+	m_channelMarker.setTitle("ATV Modulator");
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
+    setTitleColor(m_channelMarker.getColor());
+    m_settings.setChannelMarker(&m_channelMarker);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 

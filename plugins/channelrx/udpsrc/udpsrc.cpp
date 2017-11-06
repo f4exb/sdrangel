@@ -72,10 +72,6 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 	m_magsq = 0;
 	m_inMagsq = 0;
 
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
 	UDPFilter = new fftfilt(0.0, (m_settings.m_rfBandwidth / 2.0) / m_settings.m_outputSampleRate, udpBlockSize);
 
 	m_phaseDiscri.setFMScaling((float) m_settings. m_outputSampleRate / (2.0f * m_settings.m_fmDeviation));
@@ -94,6 +90,11 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_agc.setClamping(true);
 
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
     applySettings(m_settings, true);
 }
 

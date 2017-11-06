@@ -43,8 +43,9 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_squelchCount(0),
-	m_squelchGate(2400),
+	m_squelchGate(2),
 	m_audioMute(false),
+	m_squelchLevel(-990),
 	m_squelchOpen(false),
 	m_afSquelchOpen(false),
 	m_magsq(0.0f),
@@ -59,10 +60,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 {
 	setObjectName("NFMDemod");
 
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
@@ -74,6 +71,10 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	applySettings(m_settings, true);
 }
@@ -455,7 +456,10 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         else
         { // input is a value in centi-Bels
             m_squelchLevel = std::pow(10.0, settings.m_squelch / 100.0);
+            m_movingAverage.fill(0.0);
         }
+
+        m_squelchCount = 0; // reset squelch open counter
         //m_squelchLevel *= m_squelchLevel;
         //m_afSquelch.setThreshold(m_squelchLevel);
     }

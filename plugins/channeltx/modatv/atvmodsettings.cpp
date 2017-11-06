@@ -48,7 +48,7 @@ void ATVModSettings::resetToDefaults()
     m_fmExcursion = 0.5f;         // half bandwidth
     m_forceDecimator = false;
     m_overlayText = "ATV";
-    m_rgbColor = Qt::white;
+    m_rgbColor = QColor(255, 255, 255).rgb();
 }
 
 QByteArray ATVModSettings::serialize() const

@@ -59,10 +59,6 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 {
 	setObjectName("WFMod");
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
     memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
@@ -84,6 +80,10 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
     m_cwKeyer.setWPM(13);
     m_cwKeyer.setMode(CWKeyer::CWNone);
     m_cwKeyer.reset();
+
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
 
     applySettings(m_settings, true);
 }

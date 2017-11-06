@@ -63,10 +63,6 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI, BasebandSampleSink* sampleSink) :
 {
 	setObjectName("SSBMod");
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_audioSampleRate, m_settings.m_bandwidth / m_settings.m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_settings.m_audioSampleRate, 2 * m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
@@ -96,6 +92,11 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI, BasebandSampleSink* sampleSink) :
 	m_inAGC.setGate(m_settings.m_agcThresholdGate);
 	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
 	m_inAGC.setClamping(true);
+
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
     applySettings(m_settings, true);
 }
 

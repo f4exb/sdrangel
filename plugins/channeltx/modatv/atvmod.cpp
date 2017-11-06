@@ -74,10 +74,6 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     setObjectName("ATVMod");
     scanCameras();
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-
     m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_settings.m_outputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
@@ -89,9 +85,13 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;
 
-    applySettings(m_settings, true); // does applyStandard() too;
-
     m_movingAverage.resize(16, 0);
+
+    m_channelizer = new UpChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
+    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+
+    applySettings(m_settings, true); // does applyStandard() too;
 }
 
 ATVMod::~ATVMod()

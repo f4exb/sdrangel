@@ -154,12 +154,18 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	m_channelPowerDbAvg(20,0)
 {
 	ui->setupUi(this);
-    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+	setAttribute(Qt::WA_DeleteOnClose, true);
+	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+
+	m_wfmDemod = new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
+
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
-
-	setAttribute(Qt::WA_DeleteOnClose, true);
 
     blockApplySettings(true);
     ui->rfBW->clear();
@@ -169,27 +175,21 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
     ui->rfBW->setCurrentIndex(6);
     blockApplySettings(false);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
-
-	m_wfmDemod = new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
-
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
-
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setBandwidth(WFMDemodSettings::getRFBW(4));
 	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
+    m_channelMarker.setTitle("WFM Demodulator");
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.setColor(m_settings.m_rgbColor);
+	m_channelMarker.setVisible(true);
     setTitleColor(m_channelMarker.getColor());
+    m_settings.setChannelMarker(&m_channelMarker);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
-
-	m_settings.setChannelMarker(&m_channelMarker);
 
     displaySettings();
 	applySettings(true);

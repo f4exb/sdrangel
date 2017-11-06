@@ -56,13 +56,12 @@ TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
 	m_volume = 0;
 	m_magsq = 0;
 
+	m_sampleBufferSSB.resize(tcpFftLen);
+	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
-	m_sampleBufferSSB.resize(tcpFftLen);
-	TCPFilter = new fftfilt(0.3 / 48.0, 16.0 / 48.0, tcpFftLen);
-	// if (!TCPFilter) segfault;
 }
 
 TCPSrc::~TCPSrc()

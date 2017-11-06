@@ -56,11 +56,11 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 	m_movingAverage.resize(16, 0);
 
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 
 	applySettings(m_settings, true);
 }

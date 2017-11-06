@@ -82,11 +82,11 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
+	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 
 	applySettings(m_settings, true);
 }

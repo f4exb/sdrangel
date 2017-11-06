@@ -54,16 +54,16 @@ LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
 	m_time = 0;
 	m_tune = 0;
 
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-
 	loraFilter = new sfft(LORA_SFFT_LEN);
 	negaFilter = new sfft(LORA_SFFT_LEN);
 
 	mov = new float[4*LORA_SFFT_LEN];
 	history = new short[1024];
 	finetune = new short[16];
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 }
 
 LoRaDemod::~LoRaDemod()

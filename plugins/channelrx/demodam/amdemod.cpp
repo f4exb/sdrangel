@@ -45,11 +45,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_audioFifo(48000),
     m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("AMDemod");
-
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    setObjectName("AMDemod");
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -60,6 +56,10 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
     m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+
+    m_channelizer = new DownChannelizer(this);
+    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
+    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
     applySettings(m_settings, true);
 }
@@ -136,8 +136,6 @@ void AMDemod::stop()
 
 bool AMDemod::handleMessage(const Message& cmd)
 {
-	qDebug() << "AMDemod::handleMessage";
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -162,6 +160,10 @@ bool AMDemod::handleMessage(const Message& cmd)
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
+
+        qDebug() << "AMDemod::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " inputFrequencyOffset: " << cfg.getCenterFrequency();
 
         return true;
 	}
