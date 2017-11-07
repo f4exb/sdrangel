@@ -39,9 +39,6 @@ private:
     static const PluginDescriptor m_pluginDescriptor;
 
     PluginAPI* m_pluginAPI;
-
-private slots:
-    void createInstanceModATV(DeviceUISet *deviceUISet);
 };
 
 #endif /* PLUGINS_CHANNELTX_MODATV_ATVMODPLUGIN_H_ */

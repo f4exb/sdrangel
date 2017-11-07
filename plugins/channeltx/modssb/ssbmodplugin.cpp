@@ -59,8 +59,3 @@ PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, 
 		return 0;
 	}
 }
-
-void SSBModPlugin::createInstanceModSSB(DeviceUISet *deviceUISet)
-{
-    SSBModGUI::create(m_pluginAPI, deviceUISet);
-}

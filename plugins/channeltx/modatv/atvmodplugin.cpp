@@ -60,10 +60,5 @@ PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, 
     }
 }
 
-void ATVModPlugin::createInstanceModATV(DeviceUISet *deviceUISet)
-{
-    ATVModGUI::create(m_pluginAPI, deviceUISet);
-}
-
 
 

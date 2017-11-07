@@ -59,8 +59,3 @@ PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, 
 		return 0;
 	}
 }
-
-void NFMModPlugin::createInstanceModNFM(DeviceUISet *deviceUISet)
-{
-    NFMModGUI::create(m_pluginAPI, deviceUISet);
-}

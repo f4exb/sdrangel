@@ -59,8 +59,3 @@ PluginInstanceGUI* AMModPlugin::createTxChannelGUI(const QString& channelName, D
 		return 0;
 	}
 }
-
-void AMModPlugin::createInstanceModAM(DeviceUISet *deviceUISet)
-{
-	AMModGUI::create(m_pluginAPI, deviceUISet);
-}

@@ -39,9 +39,6 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 
 	PluginAPI* m_pluginAPI;
-
-private slots:
-	void createInstanceModNFM(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_NFMMODPLUGIN_H

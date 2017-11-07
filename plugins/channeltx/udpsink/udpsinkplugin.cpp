@@ -62,10 +62,3 @@ PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(const QString& channelName,
 		return 0;
 	}
 }
-
-void UDPSinkPlugin::createInstanceUDPSink(DeviceUISet *deviceUISet)
-{
-    UDPSinkGUI::create(m_pluginAPI, deviceUISet);
-//	deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
-//	m_pluginAPI->addChannelRollup(gui);
-}

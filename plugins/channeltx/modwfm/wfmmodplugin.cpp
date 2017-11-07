@@ -59,8 +59,3 @@ PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(const QString& channelName, 
 		return 0;
 	}
 }
-
-void WFMModPlugin::createInstanceModWFM(DeviceUISet *deviceUISet)
-{
-    WFMModGUI::create(m_pluginAPI, deviceUISet);
-}
