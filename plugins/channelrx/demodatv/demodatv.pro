@@ -31,14 +31,15 @@ CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 SOURCES += atvdemod.cpp\
 	atvdemodgui.cpp\
 	atvdemodplugin.cpp\
-        atvscreen.cpp\
-        glshaderarray.cpp
+    atvscreen.cpp\
+    glshaderarray.cpp
 
 HEADERS += atvdemod.h\
 	atvdemodgui.h\
 	atvdemodplugin.h\
-        atvscreen.h\
-        glshaderarray.h
+    atvscreen.h\
+    atvscreeninterface.h\
+    glshaderarray.h
 
 FORMS += atvdemodgui.ui
 

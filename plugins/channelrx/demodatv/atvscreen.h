@@ -33,28 +33,29 @@
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
+#include "atvscreeninterface.h"
 
 class QPainter;
 
 
 
-class SDRANGEL_API ATVScreen: public QGLWidget
+class SDRANGEL_API ATVScreen: public QGLWidget, public ATVScreenInterface
 {
 	Q_OBJECT
 
 public:
 
 	ATVScreen(QWidget* parent = NULL);
-	~ATVScreen();
+	virtual ~ATVScreen();
 
-    void resizeATVScreen(int intCols, int intRows);
-    void renderImage(unsigned char * objData);
+	virtual void resizeATVScreen(int intCols, int intRows);
+	virtual void renderImage(unsigned char * objData);
     QRgb* getRowBuffer(int intRow);
     void resetImage();
 
-    bool selectRow(int intLine);
-    bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
-    void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
+    virtual bool selectRow(int intLine);
+    virtual bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
+    //void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
 
     void connectTimer(const QTimer& timer);
 
@@ -76,7 +77,7 @@ private:
     QTimer m_objTimer;
     QMutex m_objMutex;
     bool m_blnDataChanged;
-    bool m_blnRenderImmediate;
+    //bool m_blnRenderImmediate;
     bool m_blnConfigChanged;
 
     GLShaderArray m_objGLShaderArray;

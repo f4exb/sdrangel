@@ -36,7 +36,7 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include "atvscreen.h"
+#include "atvscreeninterface.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
@@ -221,7 +221,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    void setATVScreen(ATVScreen *objScreen);
+    void setATVScreen(ATVScreenInterface *objScreen);
     int getSampleRate();
     int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
@@ -396,7 +396,7 @@ private:
     SampleVector m_scopeSampleBuffer;
 
     //*************** ATV PARAMETERS  ***************
-    ATVScreen * m_registeredATVScreen;
+    ATVScreenInterface * m_registeredATVScreen;
 
     //int m_intNumberSamplePerLine;
     int m_intNumberSamplePerTop;

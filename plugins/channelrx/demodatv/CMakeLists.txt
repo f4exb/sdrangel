@@ -13,6 +13,7 @@ set(atv_HEADERS
 	atvdemodgui.h
 	atvdemodplugin.h
 	atvscreen.h
+	atvscreeninterface.h
 	glshaderarray.h
 )
 

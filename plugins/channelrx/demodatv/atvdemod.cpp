@@ -101,7 +101,7 @@ ATVDemod::~ATVDemod()
     delete m_channelizer;
 }
 
-void ATVDemod::setATVScreen(ATVScreen *objScreen)
+void ATVDemod::setATVScreen(ATVScreenInterface *objScreen)
 {
     m_registeredATVScreen = objScreen;
 }
