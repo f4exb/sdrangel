@@ -37,7 +37,6 @@ ATVScreen::ATVScreen(QWidget* parent) :
     m_chrLastData = NULL;
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
-    //m_blnRenderImmediate = false;
     m_blnGLContextInitialized = false;
 
     //Par défaut
@@ -170,14 +169,6 @@ void ATVScreen::tick()
     if (m_blnDataChanged) {
         update();
     }
-}
-
-void ATVScreen::connectTimer(const QTimer& objTimer)
-{
-     qDebug() << "ATVScreen::connectTimer";
-     disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-     connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-     m_objTimer.stop();
 }
 
 void ATVScreen::cleanup()
