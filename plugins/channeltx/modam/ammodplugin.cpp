@@ -49,7 +49,7 @@ void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(AMModGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* AMModPlugin::createTxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* AMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == AMModGUI::m_channelID)
 	{

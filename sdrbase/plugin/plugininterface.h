@@ -78,7 +78,7 @@ public:
 
 	// channel Tx plugins
 
-	virtual PluginInstanceGUI* createTxChannel(
+	virtual PluginInstanceGUI* createTxChannelGUI(
 	        const QString& channelName __attribute__((unused)),
 	        DeviceUISet *deviceUISet __attribute__((unused)) )
 	{ return 0; }

@@ -50,7 +50,7 @@ void UDPSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(UDPSinkGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* UDPSinkPlugin::createTxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == UDPSinkGUI::m_channelID)
 	{

@@ -191,6 +191,6 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_txChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
+        pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
     }
 }
