@@ -43,8 +43,3 @@ PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, Dev
 		return NULL;
 	}
 }
-
-void SSBPlugin::createInstanceSSB(DeviceUISet *deviceUISet)
-{
-	SSBDemodGUI::create(m_pluginAPI, deviceUISet);
-}

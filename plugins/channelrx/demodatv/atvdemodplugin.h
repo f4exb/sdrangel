@@ -41,9 +41,6 @@ private:
     static const PluginDescriptor m_ptrPluginDescriptor;
 
     PluginAPI* m_ptrPluginAPI;
-
-private slots:
-    void createInstanceDemodATV(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_ATVPLUGIN_H

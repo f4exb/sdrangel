@@ -43,8 +43,3 @@ PluginInstanceGUI* WFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 		return NULL;
 	}
 }
-
-void WFMPlugin::createInstanceWFM(DeviceUISet *deviceUISet)
-{
-	WFMDemodGUI::create(m_pluginAPI, deviceUISet);
-}

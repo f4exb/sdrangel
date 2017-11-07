@@ -60,8 +60,3 @@ PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName
 		return NULL;
 	}
 }
-
-void DSDDemodPlugin::createInstanceDSDDemod(DeviceUISet *deviceUISet)
-{
-    DSDDemodGUI::create(m_pluginAPI, deviceUISet);
-}

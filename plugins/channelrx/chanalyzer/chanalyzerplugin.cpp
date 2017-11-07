@@ -43,8 +43,3 @@ PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& chan
 		return NULL;
 	}
 }
-
-void ChannelAnalyzerPlugin::createInstanceChannelAnalyzer(DeviceUISet *deviceUISet)
-{
-	ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet);
-}

@@ -23,9 +23,6 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 
 	PluginAPI* m_pluginAPI;
-
-private slots:
-	void createInstanceWFM(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_WFMPLUGIN_H

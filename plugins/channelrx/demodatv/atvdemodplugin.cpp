@@ -65,8 +65,3 @@ PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(const QString& strChannelN
 		return NULL;
 	}
 }
-
-void ATVDemodPlugin::createInstanceDemodATV(DeviceUISet *deviceUISet)
-{
-    ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet);
-}

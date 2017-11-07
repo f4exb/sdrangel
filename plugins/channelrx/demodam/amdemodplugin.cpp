@@ -43,8 +43,3 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName,
 		return NULL;
 	}
 }
-
-void AMDemodPlugin::createInstanceDemodAM(DeviceUISet *deviceUISet)
-{
-	AMDemodGUI::create(m_pluginAPI, deviceUISet);
-}

@@ -42,8 +42,3 @@ PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(const QString& channelName, De
 		return NULL;
 	}
 }
-
-void LoRaPlugin::createInstanceLoRa(DeviceUISet *deviceUISet)
-{
-	LoRaDemodGUI::create(m_pluginAPI, deviceUISet);
-}

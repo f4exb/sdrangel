@@ -60,8 +60,3 @@ PluginInstanceGUI* BFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 		return 0;
 	}
 }
-
-void BFMPlugin::createInstanceBFM(DeviceUISet *deviceUISet)
-{
-	BFMDemodGUI::create(m_pluginAPI, deviceUISet);
-}

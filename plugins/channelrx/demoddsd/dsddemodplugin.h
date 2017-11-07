@@ -40,9 +40,6 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 
 	PluginAPI* m_pluginAPI;
-
-private slots:
-	void createInstanceDSDDemod(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_DSDDEMODLUGIN_H

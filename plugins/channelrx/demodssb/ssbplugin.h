@@ -23,9 +23,6 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 
 	PluginAPI* m_pluginAPI;
-
-private slots:
-	void createInstanceSSB(DeviceUISet *deviceUISet);
 };
 
 #endif // INCLUDE_SSBPLUGIN_H

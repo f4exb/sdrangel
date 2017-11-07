@@ -41,8 +41,3 @@ PluginInstanceGUI* NFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 		return NULL;
 	}
 }
-
-void NFMPlugin::createInstanceNFM(DeviceUISet *deviceUISet)
-{
-	NFMDemodGUI::create(m_pluginAPI, deviceUISet);
-}
