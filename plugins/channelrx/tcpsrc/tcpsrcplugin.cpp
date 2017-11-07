@@ -33,7 +33,7 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(TCPSrcGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* TCPSrcPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* TCPSrcPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == TCPSrcGUI::m_channelID)
 	{

@@ -50,7 +50,7 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(UDPSrcGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* UDPSrcPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* UDPSrcPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == UDPSrcGUI::m_channelID)
 	{

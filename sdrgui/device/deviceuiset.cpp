@@ -179,7 +179,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                         reg = ChannelInstanceRegistration(
                                 channelConfig.m_channel,
                                 (*channelRegistrations)[i].
-                                m_plugin->createRxChannel(channelConfig.m_channel, this)
+                                m_plugin->createRxChannelGUI(channelConfig.m_channel, this)
                         );
                         break;
                     }

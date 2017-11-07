@@ -50,7 +50,7 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(DSDDemodGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* DSDDemodPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == DSDDemodGUI::m_channelID)
 	{

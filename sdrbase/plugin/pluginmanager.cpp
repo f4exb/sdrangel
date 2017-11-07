@@ -182,7 +182,7 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
+        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
     }
 }
 

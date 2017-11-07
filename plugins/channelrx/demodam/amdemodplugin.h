@@ -33,7 +33,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	PluginInstanceGUI* createRxChannel(const QString& channelName, DeviceUISet *deviceUISet);
+	PluginInstanceGUI* createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

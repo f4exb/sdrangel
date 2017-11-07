@@ -48,7 +48,7 @@ void ChannelAnalyzerNGPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChannelAnalyzerNGGUI::m_channelID, this);
 }
 
-PluginInstanceGUI* ChannelAnalyzerNGPlugin::createRxChannel(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* ChannelAnalyzerNGPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
 	if(channelName == ChannelAnalyzerNGGUI::m_channelID)
 	{

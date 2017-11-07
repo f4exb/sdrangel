@@ -71,7 +71,7 @@ public:
 
 	// channel Rx plugins
 
-    virtual PluginInstanceGUI* createRxChannel(
+    virtual PluginInstanceGUI* createRxChannelGUI(
             const QString& channelName __attribute__((unused)),
             DeviceUISet *deviceUISet __attribute__((unused)) )
     { return 0; }
