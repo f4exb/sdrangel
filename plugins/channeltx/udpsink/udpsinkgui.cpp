@@ -27,8 +27,6 @@
 #include "udpsinkgui.h"
 #include "ui_udpsinkgui.h"
 
-const QString UDPSinkGUI::m_channelID = "sdrangel.channeltx.udpsink";
-
 UDPSinkGUI* UDPSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     UDPSinkGUI* gui = new UDPSinkGUI(pluginAPI, deviceUISet);
@@ -121,7 +119,8 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-    m_udpSink = new UDPSink(m_deviceUISet->m_deviceSinkAPI, m_spectrumVis);
+    m_udpSink = new UDPSink(m_deviceUISet->m_deviceSinkAPI);
+    m_udpSink->setSpectrumSink(m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->fmDeviation->setEnabled(false);
@@ -147,7 +146,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-    m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerTxChannelInstance(UDPSink::m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

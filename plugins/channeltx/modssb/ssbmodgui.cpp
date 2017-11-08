@@ -33,8 +33,6 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-const QString SSBModGUI::m_channelID = "sdrangel.channeltx.modssb";
-
 SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     SSBModGUI* gui = new SSBModGUI(pluginAPI, deviceUISet);
@@ -375,7 +373,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbMod = new SSBMod(m_deviceUISet->m_deviceSinkAPI, m_spectrumVis);
+	m_ssbMod = new SSBMod(m_deviceUISet->m_deviceSinkAPI);
+	m_ssbMod->setSpectrumSampleSink(m_spectrumVis);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
 
     resetToDefaults();
@@ -405,7 +404,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-    m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerTxChannelInstance(SSBMod::m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

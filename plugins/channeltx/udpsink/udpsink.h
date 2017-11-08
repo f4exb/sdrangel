@@ -85,8 +85,10 @@ public:
         { }
     };
 
-    UDPSink(DeviceSinkAPI *deviceAPI, BasebandSampleSink* spectrum);
+    UDPSink(DeviceSinkAPI *deviceAPI);
     virtual ~UDPSink();
+
+    void setSpectrumSink(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
     virtual void start();
     virtual void stop();
@@ -100,6 +102,8 @@ public:
 
     void setSpectrum(bool enabled);
     void resetReadIndex();
+
+    static const QString m_channelID;
 
 signals:
     /**

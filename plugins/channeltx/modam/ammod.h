@@ -238,6 +238,8 @@ public:
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 
+    static const QString m_channelID;
+
 signals:
 	/**
 	 * Level changed

@@ -29,10 +29,12 @@ MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
-UDPSink::UDPSink(DeviceSinkAPI *deviceAPI, BasebandSampleSink* spectrum) :
+const QString UDPSink::m_channelID = "sdrangel.channeltx.udpsink";
+
+UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_squelch(1e-6),
-    m_spectrum(spectrum),
+    m_spectrum(0),
     m_spectrumEnabled(false),
     m_spectrumChunkSize(2160),
     m_spectrumChunkCounter(0),
@@ -255,7 +257,7 @@ void UDPSink::modulateSample()
         m_sampleBuffer.push_back(s);
         m_spectrumChunkCounter++;
     }
-    else
+    else if (m_spectrum)
     {
         m_spectrum->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
         m_sampleBuffer.clear();

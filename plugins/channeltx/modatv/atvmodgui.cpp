@@ -35,8 +35,6 @@
 #include "ui_atvmodgui.h"
 #include "atvmodgui.h"
 
-const QString ATVModGUI::m_channelID = "sdrangel.channeltx.modatv";
-
 ATVModGUI* ATVModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     ATVModGUI* gui = new ATVModGUI(pluginAPI, deviceUISet);
@@ -628,7 +626,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerTxChannelInstance(ATVMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

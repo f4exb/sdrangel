@@ -36,6 +36,7 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
+const QString AMMod::m_channelID = "sdrangel.channeltx.modam";
 const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod(DeviceSinkAPI *deviceAPI) :

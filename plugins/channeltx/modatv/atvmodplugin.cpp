@@ -19,6 +19,7 @@
 #include "plugin/pluginapi.h"
 
 #include "atvmodgui.h"
+#include "atvmod.h"
 #include "atvmodplugin.h"
 
 const PluginDescriptor ATVModPlugin::m_pluginDescriptor = {
@@ -46,12 +47,12 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI = pluginAPI;
 
     // register ATV modulator
-    m_pluginAPI->registerTxChannel(ATVModGUI::m_channelID, this);
+    m_pluginAPI->registerTxChannel(ATVMod::m_channelID, this);
 }
 
 PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-    if(channelName == ATVModGUI::m_channelID)
+    if(channelName == ATVMod::m_channelID)
     {
         ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceUISet);
         return gui;
@@ -60,5 +61,15 @@ PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, 
     }
 }
 
+BasebandSampleSource* ATVModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+{
+    if(channelName == ATVMod::m_channelID)
+    {
+        ATVMod* source = new ATVMod(deviceAPI);
+        return source;
+    } else {
+        return 0;
+    }
+}
 
 

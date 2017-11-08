@@ -226,8 +226,10 @@ public:
 
     //=================================================================
 
-    SSBMod(DeviceSinkAPI *deviceAPI, BasebandSampleSink* sampleSink);
+    SSBMod(DeviceSinkAPI *deviceAPI);
     ~SSBMod();
+
+    void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
     virtual void pull(Sample& sample);
     virtual void pullAudio(int nbSamples);
@@ -238,6 +240,8 @@ public:
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
+
+    static const QString m_channelID;
 
 signals:
 	/**

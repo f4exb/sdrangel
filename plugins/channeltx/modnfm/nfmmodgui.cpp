@@ -32,8 +32,6 @@
 #include "ui_nfmmodgui.h"
 #include "nfmmodgui.h"
 
-const QString NFMModGUI::m_channelID = "sdrangel.channeltx.modnfm";
-
 
 NFMModGUI* NFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
@@ -331,7 +329,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerTxChannelInstance(NFMMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

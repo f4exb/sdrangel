@@ -34,8 +34,6 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-const QString AMModGUI::m_channelID = "sdrangel.channeltx.modam";
-
 AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	AMModGUI* gui = new AMModGUI(pluginAPI, deviceUISet);
@@ -306,7 +304,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pare
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerTxChannelInstance(AMMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

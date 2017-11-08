@@ -46,16 +46,27 @@ void NFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register AM modulator
-	m_pluginAPI->registerTxChannel(NFMModGUI::m_channelID, this);
+	m_pluginAPI->registerTxChannel(NFMMod::m_channelID, this);
 }
 
 PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == NFMModGUI::m_channelID)
+	if(channelName == NFMMod::m_channelID)
 	{
 	    NFMModGUI* gui = NFMModGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
+}
+
+BasebandSampleSource* NFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+{
+    if(channelName == NFMMod::m_channelID)
+    {
+        NFMMod* source = new NFMMod(deviceAPI);
+        return source;
+    } else {
+        return 0;
+    }
 }

@@ -19,6 +19,7 @@
 #include "plugin/pluginapi.h"
 
 #include "ssbmodgui.h"
+#include "ssbmod.h"
 #include "ssbmodplugin.h"
 
 const PluginDescriptor SSBModPlugin::m_pluginDescriptor = {
@@ -46,16 +47,27 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register SSB modulator
-	m_pluginAPI->registerTxChannel(SSBModGUI::m_channelID, this);
+    m_pluginAPI->registerTxChannel(SSBMod::m_channelID, this);
 }
 
 PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == SSBModGUI::m_channelID)
+    if(channelName == SSBMod::m_channelID)
 	{
 	    SSBModGUI* gui = SSBModGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
+}
+
+BasebandSampleSource* SSBModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+{
+    if(channelName == SSBMod::m_channelID)
+    {
+        SSBMod* source = new SSBMod(deviceAPI);
+        return source;
+    } else {
+        return 0;
+    }
 }

@@ -39,6 +39,7 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
 
+const QString WFMMod::m_channelID = "sdrangel.channeltx.modwfm";
 const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 

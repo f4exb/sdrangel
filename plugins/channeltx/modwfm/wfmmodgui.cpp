@@ -34,8 +34,6 @@
 #include "ui_wfmmodgui.h"
 #include "wfmmodgui.h"
 
-const QString WFMModGUI::m_channelID = "sdrangel.channeltx.modwfm";
-
 WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceUISet);
@@ -320,7 +318,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerTxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerTxChannelInstance(WFMMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

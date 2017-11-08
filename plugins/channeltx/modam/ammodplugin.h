@@ -21,6 +21,7 @@
 #include "plugin/plugininterface.h"
 
 class DeviceUISet;
+class BasebandSampleSource;
 
 class AMModPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -34,6 +35,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	PluginInstanceGUI* createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet);
+	BasebandSampleSource* createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
