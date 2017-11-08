@@ -59,7 +59,7 @@ public:
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
     void listRxChannels(QList<QString>& list);
 
-	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
+	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSinkAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
 
 	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }

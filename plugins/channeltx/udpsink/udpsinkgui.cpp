@@ -27,14 +27,15 @@
 #include "udpsinkgui.h"
 #include "ui_udpsinkgui.h"
 
-UDPSinkGUI* UDPSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+UDPSinkGUI* UDPSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    UDPSinkGUI* gui = new UDPSinkGUI(pluginAPI, deviceUISet);
+    UDPSinkGUI* gui = new UDPSinkGUI(pluginAPI, deviceUISet, channelTx);
     return gui;
 }
 
 void UDPSinkGUI::destroy()
 {
+    delete this;
 }
 
 void UDPSinkGUI::setName(const QString& name)
@@ -101,7 +102,7 @@ void UDPSinkGUI::handleSourceMessages()
     }
 }
 
-UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
         RollupWidget(parent),
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
@@ -119,7 +120,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-    m_udpSink = new UDPSink(m_deviceUISet->m_deviceSinkAPI);
+    m_udpSink = (UDPSink*) channelTx; //new UDPSink(m_deviceUISet->m_deviceSinkAPI);
     m_udpSink->setSpectrumSink(m_spectrumVis);
     m_udpSink->setMessageQueueToGUI(getInputMessageQueue());
 
@@ -162,7 +163,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
 UDPSinkGUI::~UDPSinkGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-    delete m_udpSink;
+    delete m_udpSink; // TODO: check this: when the GUI closes it has to delete the modulator
     delete m_spectrumVis;
     delete ui;
 }

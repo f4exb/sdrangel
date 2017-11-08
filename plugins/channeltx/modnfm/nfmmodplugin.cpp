@@ -49,11 +49,11 @@ void NFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(NFMMod::m_channelID, this);
 }
 
-PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
 	if(channelName == NFMMod::m_channelID)
 	{
-	    NFMModGUI* gui = NFMModGUI::create(m_pluginAPI, deviceUISet);
+	    NFMModGUI* gui = NFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 		return gui;
 	} else {
 		return 0;

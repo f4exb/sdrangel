@@ -29,7 +29,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-class UDPSink;
+class BasebandSampleSource;
 class SpectrumVis;
 
 namespace Ui {
@@ -40,7 +40,7 @@ class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -92,7 +92,7 @@ private:
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
 
-    explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = NULL);
+    explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = NULL);
     virtual ~UDPSinkGUI();
 
     void blockApplySettings(bool block);

@@ -35,14 +35,15 @@
 #include "ui_atvmodgui.h"
 #include "atvmodgui.h"
 
-ATVModGUI* ATVModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+ATVModGUI* ATVModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    ATVModGUI* gui = new ATVModGUI(pluginAPI, deviceUISet);
+    ATVModGUI* gui = new ATVModGUI(pluginAPI, deviceUISet, channelTx);
 	return gui;
 }
 
 void ATVModGUI::destroy()
 {
+    delete this;
 }
 
 void ATVModGUI::setName(const QString& name)
@@ -585,7 +586,7 @@ void ATVModGUI::onMenuDoubleClicked()
 	}
 }
 
-ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ATVModGUI),
 	m_pluginAPI(pluginAPI),
@@ -607,7 +608,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_atvMod = new ATVMod(m_deviceUISet->m_deviceSinkAPI);
+	m_atvMod = (ATVMod*) channelTx; //new ATVMod(m_deviceUISet->m_deviceSinkAPI);
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -652,7 +653,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 ATVModGUI::~ATVModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-	delete m_atvMod;
+	delete m_atvMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

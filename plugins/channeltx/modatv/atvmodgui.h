@@ -28,8 +28,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
-class ATVMod;
+class BasebandSampleSource;
 class QMessageBox;
 
 namespace Ui {
@@ -40,7 +39,7 @@ class ATVModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static ATVModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static ATVModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -117,7 +116,7 @@ private:
     int m_rfSliderDivisor;
     MessageQueue m_inputMessageQueue;
 
-    explicit ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~ATVModGUI();
 
     void blockApplySettings(bool block);

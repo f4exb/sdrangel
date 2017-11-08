@@ -28,8 +28,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
-class SSBMod;
+class BasebandSampleSource;
 class SpectrumVis;
 
 namespace Ui {
@@ -40,7 +39,7 @@ class SSBModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static SSBModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static SSBModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -111,7 +110,7 @@ private:
     SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~SSBModGUI();
 
     bool blockApplySettings(bool block);

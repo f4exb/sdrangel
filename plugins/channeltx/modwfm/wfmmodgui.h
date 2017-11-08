@@ -28,10 +28,9 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSource;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
-class WFMMod;
 
 namespace Ui {
     class WFMModGUI;
@@ -41,7 +40,7 @@ class WFMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static WFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static WFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -104,7 +103,7 @@ private:
     WFMMod::WFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~WFMModGUI();
 
     void blockApplySettings(bool block);

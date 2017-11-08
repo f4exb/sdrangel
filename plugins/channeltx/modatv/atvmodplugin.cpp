@@ -50,11 +50,11 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(ATVMod::m_channelID, this);
 }
 
-PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
     if(channelName == ATVMod::m_channelID)
     {
-        ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceUISet);
+        ATVModGUI* gui = ATVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
         return gui;
     } else {
         return 0;

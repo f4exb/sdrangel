@@ -30,6 +30,7 @@ class PluginAPI;
 class DeviceUISet;
 
 class AMMod;
+class BasebandSampleSource;
 
 namespace Ui {
     class AMModGUI;
@@ -39,7 +40,7 @@ class AMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static AMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static AMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -99,7 +100,7 @@ private:
     AMMod::AMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~AMModGUI();
 
     void blockApplySettings(bool block);

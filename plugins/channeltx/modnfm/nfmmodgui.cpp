@@ -33,14 +33,15 @@
 #include "nfmmodgui.h"
 
 
-NFMModGUI* NFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+NFMModGUI* NFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    NFMModGUI* gui = new NFMModGUI(pluginAPI, deviceUISet);
+    NFMModGUI* gui = new NFMModGUI(pluginAPI, deviceUISet, channelTx);
 	return gui;
 }
 
 void NFMModGUI::destroy()
 {
+    delete this;
 }
 
 void NFMModGUI::setName(const QString& name)
@@ -283,7 +284,7 @@ void NFMModGUI::onMenuDoubleClicked()
 	}
 }
 
-NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMModGUI),
 	m_pluginAPI(pluginAPI),
@@ -315,7 +316,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_nfmMod = new NFMMod(m_deviceUISet->m_deviceSinkAPI);
+	m_nfmMod = (NFMMod*) channelTx; //new NFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -358,7 +359,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 NFMModGUI::~NFMModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-	delete m_nfmMod;
+	delete m_nfmMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

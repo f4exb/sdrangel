@@ -34,14 +34,15 @@
 #include "ui_wfmmodgui.h"
 #include "wfmmodgui.h"
 
-WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+WFMModGUI* WFMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceUISet);
+    WFMModGUI* gui = new WFMModGUI(pluginAPI, deviceUISet, channelTx);
 	return gui;
 }
 
 void WFMModGUI::destroy()
 {
+    delete this;
 }
 
 void WFMModGUI::setName(const QString& name)
@@ -272,7 +273,7 @@ void WFMModGUI::onMenuDoubleClicked()
 	}
 }
 
-WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMModGUI),
 	m_pluginAPI(pluginAPI),
@@ -304,7 +305,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_wfmMod = new WFMMod(m_deviceUISet->m_deviceSinkAPI);
+	m_wfmMod = (WFMMod*) channelTx; //new WFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_wfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -342,7 +343,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 WFMModGUI::~WFMModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-	delete m_wfmMod;
+	delete m_wfmMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

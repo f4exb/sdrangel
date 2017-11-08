@@ -28,7 +28,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-class NFMMod;
+class BasebandSampleSource;
 
 namespace Ui {
     class NFMModGUI;
@@ -38,7 +38,7 @@ class NFMModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static NFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+    static NFMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -102,7 +102,7 @@ private:
     NFMMod::NFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
-    explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+    explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~NFMModGUI();
 
     void blockApplySettings(bool block);

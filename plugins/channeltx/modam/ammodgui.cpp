@@ -34,14 +34,15 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-	AMModGUI* gui = new AMModGUI(pluginAPI, deviceUISet);
+	AMModGUI* gui = new AMModGUI(pluginAPI, deviceUISet, channelTx);
 	return gui;
 }
 
 void AMModGUI::destroy()
 {
+    delete this;
 }
 
 void AMModGUI::setName(const QString& name)
@@ -266,7 +267,7 @@ void AMModGUI::onMenuDoubleClicked()
 	}
 }
 
-AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMModGUI),
 	m_pluginAPI(pluginAPI),
@@ -287,7 +288,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pare
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
-	m_amMod = new AMMod(m_deviceUISet->m_deviceSinkAPI);
+	m_amMod = (AMMod*) channelTx; //new AMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_amMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -326,7 +327,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pare
 AMModGUI::~AMModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-	delete m_amMod;
+	delete m_amMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

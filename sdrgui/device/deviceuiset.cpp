@@ -274,7 +274,13 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-                        reg = ChannelInstanceRegistration(channelConfig.m_channel, (*channelRegistrations)[i].m_plugin->createTxChannelGUI(channelConfig.m_channel, this));
+                        // TODO: create modulator core
+                        BasebandSampleSource *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannel(
+                                channelConfig.m_channel, m_deviceSinkAPI);
+                        PluginInstanceGUI *txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(
+                                channelConfig.m_channel, this, txChannel);
+                        reg = ChannelInstanceRegistration(
+                                channelConfig.m_channel, txChannelGUI);
                         break;
                     }
                 }
