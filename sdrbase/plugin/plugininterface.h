@@ -22,6 +22,8 @@ class PluginInstanceGUI;
 class QWidget;
 class DeviceSampleSource;
 class DeviceSampleSink;
+class BasebandSampleSink;
+class BasebandSampleSource;
 
 class PluginInterface {
 public:
@@ -76,12 +78,22 @@ public:
             DeviceUISet *deviceUISet __attribute__((unused)) )
     { return 0; }
 
-	// channel Tx plugins
+    virtual BasebandSampleSink* createRxChannel(
+            const QString& channelName __attribute__((unused)),
+            DeviceSourceAPI *deviceAPI __attribute__((unused)) )
+    { return 0; }
+
+    // channel Tx plugins
 
 	virtual PluginInstanceGUI* createTxChannelGUI(
 	        const QString& channelName __attribute__((unused)),
 	        DeviceUISet *deviceUISet __attribute__((unused)) )
 	{ return 0; }
+
+    virtual BasebandSampleSource* createTxChannel(
+            const QString& channelName __attribute__((unused)),
+            DeviceSinkAPI *deviceAPI __attribute__((unused)) )
+    { return 0; }
 
 	// device source plugins only
 

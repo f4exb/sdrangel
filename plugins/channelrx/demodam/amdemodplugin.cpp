@@ -3,6 +3,7 @@
 #include "plugin/pluginapi.h"
 
 #include "amdemodgui.h"
+#include "amdemod.h"
 #include "amdemodplugin.h"
 
 const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
@@ -40,6 +41,17 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName,
 		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
+}
+
+BasebandSampleSink* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == AMDemodGUI::m_channelID)
+    {
+        AMDemod* sink = new AMDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }
