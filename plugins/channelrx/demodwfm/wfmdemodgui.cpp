@@ -18,8 +18,6 @@
 
 #include "wfmdemod.h"
 
-const QString WFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.wfm";
-
 WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceUISet);
@@ -187,7 +185,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(WFMDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

@@ -43,8 +43,6 @@
 #include "rdstmc.h"
 #include "ui_bfmdemodgui.h"
 
-const QString BFMDemodGUI::m_channelID = "sdrangel.channel.bfm";
-
 BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset)
 {
 	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceUIset);
@@ -364,7 +362,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(BFMDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

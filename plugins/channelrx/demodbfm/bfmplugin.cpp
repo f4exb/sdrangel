@@ -21,6 +21,7 @@
 #include "plugin/pluginapi.h"
 
 #include "bfmdemodgui.h"
+#include "bfmdemod.h"
 
 const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
 	QString("Broadcast FM Demodulator"),
@@ -47,16 +48,28 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register BFM demodulator
-	m_pluginAPI->registerRxChannel(BFMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(BFMDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* BFMPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == BFMDemodGUI::m_channelID)
+	if(channelName == BFMDemod::m_channelID)
 	{
 		BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return 0;
 	}
+}
+
+
+BasebandSampleSink* BFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == BFMDemod::m_channelID)
+    {
+        BFMDemod* sink = new BFMDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

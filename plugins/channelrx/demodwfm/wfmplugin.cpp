@@ -4,6 +4,7 @@
 #include "plugin/pluginapi.h"
 
 #include "wfmdemodgui.h"
+#include "wfmdemod.h"
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
@@ -30,16 +31,27 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register WFM demodulator
-	m_pluginAPI->registerRxChannel(WFMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(WFMDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* WFMPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == WFMDemodGUI::m_channelID)
+	if(channelName == WFMDemod::m_channelID)
 	{
 		WFMDemodGUI* gui = WFMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
+}
+
+BasebandSampleSink* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == WFMDemod::m_channelID)
+    {
+        WFMDemod* sink = new WFMDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

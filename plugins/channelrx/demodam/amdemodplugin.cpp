@@ -31,12 +31,12 @@ void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register AM demodulator
-	m_pluginAPI->registerRxChannel(AMDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(AMDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == AMDemodGUI::m_channelID)
+	if(channelName == AMDemod::m_channelID)
 	{
 		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
@@ -47,7 +47,7 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName,
 
 BasebandSampleSink* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == AMDemodGUI::m_channelID)
+    if(channelName == AMDemod::m_channelID)
     {
         AMDemod* sink = new AMDemod(deviceAPI);
         return sink;

@@ -34,8 +34,6 @@
 
 #include "amdemod.h"
 
-const QString AMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.am";
-
 AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceUISet);
@@ -206,7 +204,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerRxChannelInstance(AMDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

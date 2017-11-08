@@ -31,6 +31,8 @@
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureChannelizer, Message)
 
+const QString LoRaDemod::m_channelID = "de.maintech.sdrangelove.channel.lora";
+
 LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_sampleSink(0),

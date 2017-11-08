@@ -34,6 +34,7 @@ MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgReportChannelSampleRateChanged, Message)
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
+const QString BFMDemod::m_channelID = "sdrangel.channel.bfm";
 const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 

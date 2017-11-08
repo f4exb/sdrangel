@@ -25,10 +25,11 @@
 #include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
 
-
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Message)
+
+const QString ChannelAnalyzer::m_channelID = "org.f4exb.sdrangelove.channel.chanalyzer";
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),

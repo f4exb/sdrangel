@@ -32,6 +32,7 @@
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureChannelizer, Message)
 
+const QString AMDemod::m_channelID = "de.maintech.sdrangelove.channel.am";
 const int AMDemod::m_udpBlockSize = 512;
 
 AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :

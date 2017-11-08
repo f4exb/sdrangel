@@ -16,8 +16,6 @@
 #include "mainwindow.h"
 #include "nfmdemod.h"
 
-const QString NFMDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.nfm";
-
 NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceUISet);
@@ -277,7 +275,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerRxChannelInstance(NFMDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

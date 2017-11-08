@@ -16,8 +16,6 @@
 #include "lorademod.h"
 #include "lorademodgui.h"
 
-const QString LoRaDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.lora";
-
 LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceUISet);
@@ -153,7 +151,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidg
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(LoRaDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

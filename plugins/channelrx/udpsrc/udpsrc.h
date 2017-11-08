@@ -104,6 +104,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    static const QString m_channelID;
 	static const int udpBlockSize = 512; // UDP block size in number of bytes
 
 public slots:

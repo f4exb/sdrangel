@@ -38,8 +38,6 @@
 
 #include "chanalyzerng.h"
 
-const QString ChannelAnalyzerNGGUI::m_channelID = "sdrangel.channel.chanalyzerng";
-
 ChannelAnalyzerNGGUI* ChannelAnalyzerNGGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     ChannelAnalyzerNGGUI* gui = new ChannelAnalyzerNGGUI(pluginAPI, deviceUISet);
@@ -407,7 +405,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+    m_deviceUISet->registerRxChannelInstance(ChannelAnalyzerNG::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

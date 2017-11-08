@@ -33,6 +33,8 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureUDPSrc, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
+const QString UDPSrc::m_channelID = "sdrangel.channel.udpsrc";
+
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_outMovingAverage(480, 1e-10),

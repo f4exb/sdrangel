@@ -35,6 +35,8 @@ MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgReportCTCSSFreq, Message)
 
+const QString NFMDemod::m_channelID = "de.maintech.sdrangelove.channel.nfm";
+
 static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 const int NFMDemod::m_udpBlockSize = 512;
 

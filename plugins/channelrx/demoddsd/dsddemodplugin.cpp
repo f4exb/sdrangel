@@ -21,6 +21,7 @@
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 #include "dsddemodgui.h"
+#include "dsddemod.h"
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 	QString("DSD Demodulator"),
@@ -47,16 +48,27 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register DSD demodulator
-	m_pluginAPI->registerRxChannel(DSDDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(DSDDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == DSDDemodGUI::m_channelID)
+	if(channelName == DSDDemod::m_channelID)
 	{
 		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
+}
+
+BasebandSampleSink* DSDDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == DSDDemod::m_channelID)
+    {
+        DSDDemod* sink = new DSDDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

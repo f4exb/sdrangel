@@ -38,8 +38,6 @@
 #include "dsddemodbaudrates.h"
 #include "dsddemod.h"
 
-const QString DSDDemodGUI::m_channelID = "sdrangel.channel.dsddemod";
-
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
     DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceUISet);
@@ -281,7 +279,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(DSDDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

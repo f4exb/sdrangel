@@ -4,6 +4,7 @@
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 #include "ssbdemodgui.h"
+#include "ssbdemod.h"
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 	QString("SSB Demodulator"),
@@ -30,16 +31,27 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerRxChannel(SSBDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(SSBDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == SSBDemodGUI::m_channelID)
+	if(channelName == SSBDemod::m_channelID)
 	{
 		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
+}
+
+BasebandSampleSink* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == SSBDemod::m_channelID)
+    {
+        SSBDemod* sink = new SSBDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

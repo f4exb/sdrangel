@@ -21,6 +21,7 @@
 #include "plugin/pluginapi.h"
 
 #include "atvdemodgui.h"
+#include "atvdemod.h"
 #include "atvdemodplugin.h"
 
 const PluginDescriptor ATVDemodPlugin::m_ptrPluginDescriptor =
@@ -50,18 +51,30 @@ void ATVDemodPlugin::initPlugin(PluginAPI* ptrPluginAPI)
     m_ptrPluginAPI = ptrPluginAPI;
 
 	// register ATV demodulator
-    m_ptrPluginAPI->registerRxChannel(ATVDemodGUI::m_strChannelID, this);
+    m_ptrPluginAPI->registerRxChannel(ATVDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(const QString& strChannelName, DeviceUISet *deviceUISet)
 {
-    if(strChannelName == ATVDemodGUI::m_strChannelID)
+    if(strChannelName == ATVDemod::m_channelID)
 	{
         ATVDemodGUI* ptrGui = ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet);
         return ptrGui;
     }
     else
     {
-		return NULL;
+		return 0;
 	}
 }
+
+BasebandSampleSink* ATVDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == ATVDemod::m_channelID)
+    {
+        ATVDemod* sink = new ATVDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
+}
+

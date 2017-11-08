@@ -54,8 +54,6 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& objMessage);
 
-    static const QString m_strChannelID;
-
 private slots:
 	void viewChanged();
     void handleSourceMessages();

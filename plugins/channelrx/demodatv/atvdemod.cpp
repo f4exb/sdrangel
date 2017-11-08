@@ -35,6 +35,7 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportChannelSampleRateChanged, Message)
 
+const QString ATVDemod::m_channelID = "sdrangel.channel.demodatv";
 const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :

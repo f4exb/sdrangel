@@ -33,6 +33,8 @@
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureChannelizer, Message)
 
+const QString WFMDemod::m_channelID = "de.maintech.sdrangelove.channel.wfm";
+
 WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_squelchOpen(false),

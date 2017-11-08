@@ -96,6 +96,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    static const QString m_channelID;
+
 private:
 	int  detect(Complex sample, Complex angle);
 	void dumpRaw(void);

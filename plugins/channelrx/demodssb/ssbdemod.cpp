@@ -34,6 +34,8 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureChannelizer, Message)
 
+const QString SSBDemod::m_channelID = "de.maintech.sdrangelove.channel.ssb";
+
 SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_audioBinaual(false),

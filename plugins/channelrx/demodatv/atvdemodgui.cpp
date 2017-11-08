@@ -36,8 +36,6 @@
 
 #include "atvdemod.h"
 
-const QString ATVDemodGUI::m_strChannelID = "sdrangel.channel.demodatv";
-
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
         DeviceUISet *deviceUISet)
 {
@@ -312,7 +310,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 
     connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-    m_deviceUISet->registerRxChannelInstance(m_strChannelID, this);
+    m_deviceUISet->registerRxChannelInstance(ATVDemod::m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

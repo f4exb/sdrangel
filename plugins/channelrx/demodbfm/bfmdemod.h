@@ -144,6 +144,8 @@ public:
 
     RDSParser& getRDSParser() { return m_rdsParser; }
 
+    static const QString m_channelID;
+
 private slots:
     void channelSampleRateChanged();
 

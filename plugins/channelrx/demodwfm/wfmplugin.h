@@ -5,6 +5,7 @@
 #include "plugin/plugininterface.h"
 
 class DeviceUISet;
+class BasebandSampleSink;
 
 class WFMPlugin : public QObject, PluginInterface {
 	Q_OBJECT
@@ -18,6 +19,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	PluginInstanceGUI* createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet);
+    BasebandSampleSink* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

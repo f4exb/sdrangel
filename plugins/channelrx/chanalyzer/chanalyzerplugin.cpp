@@ -4,6 +4,7 @@
 #include "plugin/pluginapi.h"
 
 #include "chanalyzergui.h"
+#include "chanalyzer.h"
 
 const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
 	QString("Channel Analyzer"),
@@ -30,16 +31,28 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerRxChannel(ChannelAnalyzerGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(ChannelAnalyzer::m_channelID, this);
 }
 
 PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == ChannelAnalyzerGUI::m_channelID)
+	if(channelName == ChannelAnalyzer::m_channelID)
 	{
 		ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
 		return NULL;
 	}
+}
+
+
+BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == ChannelAnalyzer::m_channelID)
+    {
+        ChannelAnalyzer* sink = new ChannelAnalyzer(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

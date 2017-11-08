@@ -30,8 +30,6 @@
 
 #include "udpsrc.h"
 
-const QString UDPSrcGUI::m_channelID = "sdrangel.channel.udpsrc";
-
 UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceUISet);
@@ -185,7 +183,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(UDPSrc::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

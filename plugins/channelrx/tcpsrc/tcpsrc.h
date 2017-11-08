@@ -113,6 +113,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    static const QString m_channelID;
+
 protected:
 	class MsgTCPSrcSpectrum : public Message {
 		MESSAGE_CLASS_DECLARATION

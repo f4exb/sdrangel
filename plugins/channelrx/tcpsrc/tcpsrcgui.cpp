@@ -12,8 +12,6 @@
 #include "mainwindow.h"
 #include "tcpsrc.h"
 
-const QString TCPSrcGUI::m_channelID = "sdrangel.channel.tcpsrc";
-
 TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceUISet);
@@ -165,7 +163,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(TCPSrc::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

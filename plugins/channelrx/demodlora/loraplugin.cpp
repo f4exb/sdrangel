@@ -3,6 +3,7 @@
 
 #include "loraplugin.h"
 #include "lorademodgui.h"
+#include "lorademod.h"
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
 	QString("LoRa Demodulator"),
@@ -29,16 +30,27 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerRxChannel(LoRaDemodGUI::m_channelID, this);
+	m_pluginAPI->registerRxChannel(LoRaDemod::m_channelID, this);
 }
 
 PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
 {
-	if(channelName == LoRaDemodGUI::m_channelID)
+	if(channelName == LoRaDemod::m_channelID)
 	{
 		LoRaDemodGUI* gui = LoRaDemodGUI::create(m_pluginAPI, deviceUISet);
 		return gui;
 	} else {
-		return NULL;
+		return 0;
 	}
+}
+
+BasebandSampleSink* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == LoRaDemod::m_channelID)
+    {
+        LoRaDemod* sink = new LoRaDemod(deviceAPI);
+        return sink;
+    } else {
+        return 0;
+    }
 }

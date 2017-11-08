@@ -17,8 +17,6 @@
 #include "mainwindow.h"
 #include "ssbdemod.h"
 
-const QString SSBDemodGUI::m_channelID = "de.maintech.sdrangelove.channel.ssb";
-
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
 {
 	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceUISet);
@@ -253,7 +251,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(SSBDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
