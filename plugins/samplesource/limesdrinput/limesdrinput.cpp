@@ -669,6 +669,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardClockSource  = false;
     bool ownThreadWasRunning = false;
     bool doCalibration = false;
+    bool doLPCalibration = false;
     bool setAntennaAuto = false;
     double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
@@ -863,18 +864,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     {
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
-            if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
-                    LMS_CH_RX,
-                    m_deviceShared.m_channel,
-                    settings.m_lpfBW) < 0)
-            {
-                qCritical("LimeSDRInput::applySettings: could not set LPF to %f Hz", settings.m_lpfBW);
-            }
-            else
-            {
-                doCalibration = true;
-                qDebug("LimeSDRInput::applySettings: LPF set to %f Hz", settings.m_lpfBW);
-            }
+            doLPCalibration = true;
         }
     }
 
@@ -1021,7 +1011,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         doCalibration = doCalibration || (clockGenFreqAfter != clockGenFreq);
     }
 
-    if (doCalibration)
+    if (doCalibration || doLPCalibration)
     {
         if (m_limeSDRInputThread && m_limeSDRInputThread->isRunning())
         {
@@ -1032,17 +1022,35 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         suspendRxBuddies();
         suspendTxBuddies();
 
-        if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
-                LMS_CH_RX,
-                m_deviceShared.m_channel,
-                m_settings.m_lpfBW,
-                0) < 0)
+        if (doCalibration)
         {
-            qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %d", m_deviceShared.m_channel);
+            if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_devSampleRate,
+                    0) < 0)
+            {
+                qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %d", m_deviceShared.m_channel);
+            }
+            else
+            {
+                qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %d", m_deviceShared.m_channel);
+            }
         }
-        else
+        else if (doLPCalibration)
         {
-            qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %d", m_deviceShared.m_channel);
+            if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
+                    LMS_CH_RX,
+                    m_deviceShared.m_channel,
+                    m_settings.m_lpfBW) < 0)
+            {
+                qCritical("LimeSDRInput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
+            }
+            else
+            {
+                doCalibration = true;
+                qDebug("LimeSDRInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
+            }
         }
 
         resumeTxBuddies();
