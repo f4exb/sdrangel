@@ -18,9 +18,9 @@
 
 #include "wfmdemod.h"
 
-WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+WFMDemodGUI* WFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceUISet);
+	WFMDemodGUI* gui = new WFMDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -142,7 +142,7 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -156,7 +156,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_wfmDemod = new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_wfmDemod = (WFMDemod*) rxChannel; //new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -196,7 +196,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 WFMDemodGUI::~WFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_wfmDemod;
+	delete m_wfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	//delete m_channelMarker;
 	delete ui;
 }

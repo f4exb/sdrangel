@@ -30,9 +30,9 @@
 
 #include "udpsrc.h"
 
-UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+UDPSrcGUI* UDPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceUISet);
+	UDPSrcGUI* gui = new UDPSrcGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -130,7 +130,7 @@ void UDPSrcGUI::tick()
 	m_tickCount++;
 }
 
-UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::UDPSrcGUI),
 	m_pluginAPI(pluginAPI),
@@ -149,7 +149,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_udpSrc = new UDPSrc(m_deviceUISet->m_deviceSourceAPI);
+	m_udpSrc = (UDPSrc*) rxChannel; //new UDPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_udpSrc->setSpectrum(m_spectrumVis);
 
 	ui->fmDeviation->setEnabled(false);
@@ -197,7 +197,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 UDPSrcGUI::~UDPSrcGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_udpSrc;
+	delete m_udpSrc; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete ui;
 }

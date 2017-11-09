@@ -1060,7 +1060,7 @@ void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
 
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
-            m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI);
+            m_pluginManager->createRxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceSourceAPI);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {

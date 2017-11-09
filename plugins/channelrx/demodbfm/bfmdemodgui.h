@@ -33,6 +33,7 @@ class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class SpectrumVis;
 class BFMDemod;
+class BasebandSampleSink;
 
 namespace Ui {
 	class BFMDemodGUI;
@@ -42,7 +43,7 @@ class BFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI);
+	static BFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -94,7 +95,7 @@ private:
 	std::vector<unsigned int> m_g14ComboIndex;
 	MessageQueue m_inputMessageQueue;
 
-	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);

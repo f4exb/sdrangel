@@ -41,7 +41,7 @@ class UDPSrcGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -93,7 +93,7 @@ private:
 	// RF path
 	SpectrumVis* m_spectrumVis;
 
-	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~UDPSrcGUI();
 
     void blockApplySettings(bool block);

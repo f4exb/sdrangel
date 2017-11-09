@@ -12,6 +12,7 @@ class PluginAPI;
 class DeviceUISet;
 class LoRaDemod;
 class SpectrumVis;
+class BasebandSampleSink;
 
 namespace Ui {
 	class LoRaDemodGUI;
@@ -21,7 +22,7 @@ class LoRaDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI);
+	static LoRaDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceAPI, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -55,7 +56,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = NULL);
+	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~LoRaDemodGUI();
 
     void blockApplySettings(bool block);

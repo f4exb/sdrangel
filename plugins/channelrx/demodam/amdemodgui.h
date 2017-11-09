@@ -14,6 +14,7 @@ class DeviceUISet;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class AMDemod;
+class BasebandSampleSink;
 
 namespace Ui {
 	class AMDemodGUI;
@@ -23,7 +24,7 @@ class AMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static AMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -65,7 +66,7 @@ private:
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
-	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~AMDemodGUI();
 
     void blockApplySettings(bool block);

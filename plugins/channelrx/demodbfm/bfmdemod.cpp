@@ -71,7 +71,6 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 
     m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
 
-    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
 	m_deemphasisFilterX.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
 	m_deemphasisFilterY.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
@@ -86,6 +85,8 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+
+    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
     applySettings(m_settings, true);
 }

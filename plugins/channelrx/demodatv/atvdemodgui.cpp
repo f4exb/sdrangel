@@ -37,9 +37,10 @@
 #include "atvdemod.h"
 
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
-        DeviceUISet *deviceUISet)
+        DeviceUISet *deviceUISet,
+        BasebandSampleSink *rxChannel)
 {
-    ATVDemodGUI* gui = new ATVDemodGUI(objPluginAPI, deviceUISet);
+    ATVDemodGUI* gui = new ATVDemodGUI(objPluginAPI, deviceUISet, rxChannel);
     return gui;
 }
 
@@ -270,8 +271,7 @@ void ATVDemodGUI::onMenuDoubleClicked()
     }
 }
 
-ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
-        QWidget* objParent) :
+ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
         RollupWidget(objParent),
         ui(new Ui::ATVDemodGUI),
         m_pluginAPI(objPluginAPI),
@@ -289,7 +289,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
     connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_scopeVis = new ScopeVisNG(ui->glScope);
-    m_atvDemod = new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
+    m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setATVScreen(ui->screenTV);
@@ -344,7 +344,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet,
 ATVDemodGUI::~ATVDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-    delete m_atvDemod;
+    delete m_atvDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete m_scopeVis;
     delete ui;
 }

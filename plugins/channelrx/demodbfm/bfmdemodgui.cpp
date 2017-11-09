@@ -43,9 +43,9 @@
 #include "rdstmc.h"
 #include "ui_bfmdemodgui.h"
 
-BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset)
+BFMDemodGUI* BFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset, BasebandSampleSink *rxChannel)
 {
-	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceUIset);
+	BFMDemodGUI* gui = new BFMDemodGUI(pluginAPI, deviceUIset, rxChannel);
 	return gui;
 }
 
@@ -314,7 +314,7 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     }
 }
 
-BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::BFMDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -336,7 +336,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_bfmDemod = new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_bfmDemod = (BFMDemod*) rxChannel; //new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_bfmDemod->setSampleSink(m_spectrumVis);
 
@@ -382,7 +382,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 BFMDemodGUI::~BFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_bfmDemod;
+	delete m_bfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

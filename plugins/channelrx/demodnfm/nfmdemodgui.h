@@ -12,7 +12,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class NFMDemod;
 
 namespace Ui {
@@ -23,7 +23,7 @@ class NFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -70,7 +70,7 @@ private:
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
-	explicit NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~NFMDemodGUI();
 
 	void blockApplySettings(bool block);

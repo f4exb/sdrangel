@@ -176,11 +176,12 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                        BasebandSampleSink *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannel(
+                                channelConfig.m_channel, m_deviceSourceAPI);
+                        PluginInstanceGUI *rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(
+                                channelConfig.m_channel, this, rxChannel);
                         reg = ChannelInstanceRegistration(
-                                channelConfig.m_channel,
-                                (*channelRegistrations)[i].
-                                m_plugin->createRxChannelGUI(channelConfig.m_channel, this)
-                        );
+                                channelConfig.m_channel, rxChannelGUI);
                         break;
                     }
                 }
@@ -274,7 +275,6 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
-                        // TODO: create modulator core
                         BasebandSampleSource *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannel(
                                 channelConfig.m_channel, m_deviceSinkAPI);
                         PluginInstanceGUI *txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(

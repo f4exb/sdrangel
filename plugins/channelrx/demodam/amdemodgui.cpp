@@ -34,15 +34,15 @@
 
 #include "amdemod.h"
 
-AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceUISet);
+	AMDemodGUI* gui = new AMDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
 void AMDemodGUI::destroy()
 {
-	delete this; // TODO: is this really useful?
+	delete this;
 }
 
 void AMDemodGUI::setName(const QString& name)
@@ -168,7 +168,7 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -183,7 +183,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amDemod = new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod = (AMDemod*) rxChannel; //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -215,7 +215,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* 
 AMDemodGUI::~AMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_amDemod;
+	delete m_amDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

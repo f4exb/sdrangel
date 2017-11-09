@@ -40,6 +40,7 @@ const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_scopeSink(0),
     m_registeredATVScreen(0),
     m_intNumberSamplePerTop(0),
     m_intImageIndex(0),

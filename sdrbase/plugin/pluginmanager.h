@@ -56,7 +56,7 @@ public:
 	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
 
-    void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet);
+    void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSourceAPI *deviceAPI);
     void listRxChannels(QList<QString>& list);
 
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSinkAPI *deviceAPI);

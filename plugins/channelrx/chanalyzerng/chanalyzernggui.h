@@ -25,7 +25,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class ChannelAnalyzerNG;
@@ -41,7 +41,7 @@ class ChannelAnalyzerNGGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -89,7 +89,7 @@ private:
 	ScopeVisNG* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~ChannelAnalyzerNGGUI();
 
 	int  getRequestedChannelSampleRate();

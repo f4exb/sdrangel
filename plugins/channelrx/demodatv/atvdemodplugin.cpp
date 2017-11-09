@@ -54,11 +54,11 @@ void ATVDemodPlugin::initPlugin(PluginAPI* ptrPluginAPI)
     m_ptrPluginAPI->registerRxChannel(ATVDemod::m_channelID, this);
 }
 
-PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(const QString& strChannelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(const QString& strChannelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
     if(strChannelName == ATVDemod::m_channelID)
 	{
-        ATVDemodGUI* ptrGui = ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet);
+        ATVDemodGUI* ptrGui = ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
         return ptrGui;
     }
     else

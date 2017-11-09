@@ -14,6 +14,7 @@ class DeviceUISet;
 class AudioFifo;
 class SSBDemod;
 class SpectrumVis;
+class BasebandSampleSink;
 
 namespace Ui {
 	class SSBDemodGUI;
@@ -23,7 +24,7 @@ class SSBDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static SSBDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -76,7 +77,7 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, QWidget* parent = 0);
+	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~SSBDemodGUI();
 
     bool blockApplySettings(bool block);

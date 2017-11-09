@@ -12,9 +12,9 @@
 #include "mainwindow.h"
 #include "tcpsrc.h"
 
-TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+TCPSrcGUI* TCPSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceUISet);
+	TCPSrcGUI* gui = new TCPSrcGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -120,7 +120,7 @@ void TCPSrcGUI::tick()
 	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 }
 
-TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::TCPSrcGUI),
 	m_pluginAPI(pluginAPI),
@@ -139,7 +139,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_tcpSrc = new TCPSrc(m_deviceUISet->m_deviceSourceAPI);
+	m_tcpSrc = (TCPSrc*) rxChannel; //new TCPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_tcpSrc->setSpectrum(m_spectrumVis);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
@@ -178,7 +178,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* pa
 TCPSrcGUI::~TCPSrcGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_tcpSrc;
+	delete m_tcpSrc; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete ui;
 }

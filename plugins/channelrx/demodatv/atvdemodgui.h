@@ -26,7 +26,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class ATVDemod;
 class ScopeVisNG;
 
@@ -40,7 +40,7 @@ class ATVDemodGUI : public RollupWidget, public PluginInstanceGUI
 	Q_OBJECT
 
 public:
-    static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet);
+    static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
     void setName(const QString& strName);
@@ -103,7 +103,7 @@ private:
     int m_inputSampleRate;
     MessageQueue m_inputMessageQueue;
 
-    explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, QWidget* objParent = 0);
+    explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
 	virtual ~ATVDemodGUI();
 
     void blockApplySettings(bool blnBlock);

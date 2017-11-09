@@ -16,9 +16,9 @@
 #include "lorademod.h"
 #include "lorademodgui.h"
 
-LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+LoRaDemodGUI* LoRaDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceUISet);
+	LoRaDemodGUI* gui = new LoRaDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -119,7 +119,7 @@ void LoRaDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -134,7 +134,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidg
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_LoRaDemod = new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_LoRaDemod = (LoRaDemod*) rxChannel; //new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
 
 	ui->glSpectrum->setCenterFrequency(16000);
@@ -167,7 +167,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidg
 LoRaDemodGUI::~LoRaDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_LoRaDemod;
+	delete m_LoRaDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete ui;
 }

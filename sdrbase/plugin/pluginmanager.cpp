@@ -177,12 +177,14 @@ void PluginManager::listRxChannels(QList<QString>& list)
     }
 }
 
-void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet)
+void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSourceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet);
+        BasebandSampleSink *rxChannel = pluginInterface->createRxChannel(
+                m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceAPI);
+        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet, rxChannel);
     }
 }
 

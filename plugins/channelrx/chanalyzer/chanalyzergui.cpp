@@ -38,9 +38,9 @@
 
 #include "chanalyzer.h"
 
-ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	ChannelAnalyzerGUI* gui = new ChannelAnalyzerGUI(pluginAPI, deviceUISet);
+	ChannelAnalyzerGUI* gui = new ChannelAnalyzerGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -321,7 +321,7 @@ void ChannelAnalyzerGUI::onMenuDoubleClicked()
 	}
 }
 
-ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
@@ -342,7 +342,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
-	m_channelAnalyzer = new ChannelAnalyzer(m_deviceUISet->m_deviceSourceAPI);
+	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel; //new ChannelAnalyzer(m_deviceUISet->m_deviceSourceAPI);
 	m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
 
@@ -384,7 +384,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_channelAnalyzer;
+	delete m_channelAnalyzer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;

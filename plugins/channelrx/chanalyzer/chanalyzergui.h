@@ -25,7 +25,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class ChannelAnalyzer;
@@ -41,7 +41,7 @@ class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset);
+	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUIset, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -88,7 +88,7 @@ private:
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~ChannelAnalyzerGUI();
 
 	int  getEffectiveLowCutoff(int lowCutoff);

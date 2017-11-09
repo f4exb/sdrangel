@@ -38,9 +38,9 @@
 
 #include "chanalyzerng.h"
 
-ChannelAnalyzerNGGUI* ChannelAnalyzerNGGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+ChannelAnalyzerNGGUI* ChannelAnalyzerNGGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-    ChannelAnalyzerNGGUI* gui = new ChannelAnalyzerNGGUI(pluginAPI, deviceUISet);
+    ChannelAnalyzerNGGUI* gui = new ChannelAnalyzerNGGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -349,7 +349,7 @@ void ChannelAnalyzerNGGUI::onMenuDoubleClicked()
 	}
 }
 
-ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerNGGUI),
 	m_pluginAPI(pluginAPI),
@@ -369,13 +369,9 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVisNG(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeNGComboVis(m_spectrumVis, m_scopeVis);
-	m_channelAnalyzer = new ChannelAnalyzerNG(m_deviceUISet->m_deviceSourceAPI);
+	m_channelAnalyzer = (ChannelAnalyzerNG*) rxChannel; //new ChannelAnalyzerNG(m_deviceUISet->m_deviceSourceAPI);
 	m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
-//	m_channelizer = new DownChannelizer(m_channelAnalyzer);
-//	m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-//	connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
-//	m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -396,7 +392,6 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	//m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::gray);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
@@ -421,14 +416,10 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 ChannelAnalyzerNGGUI::~ChannelAnalyzerNGGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-//	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
-//	delete m_threadedChannelizer;
-//	delete m_channelizer;
-	delete m_channelAnalyzer;
+	delete m_channelAnalyzer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;
-	//delete m_channelMarker;
 	delete ui;
 }
 

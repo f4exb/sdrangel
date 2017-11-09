@@ -17,9 +17,9 @@
 #include "mainwindow.h"
 #include "ssbdemod.h"
 
-SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceUISet);
+	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -199,7 +199,7 @@ void SSBDemodGUI::onMenuDoubleClicked()
 	}
 }
 
-SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -219,7 +219,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
-	m_ssbDemod = new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_ssbDemod = (SSBDemod*) rxChannel; //new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_ssbDemod->setSampleSink(m_spectrumVis);
 
@@ -264,7 +264,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 SSBDemodGUI::~SSBDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_ssbDemod;
+	delete m_ssbDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete ui;
 }

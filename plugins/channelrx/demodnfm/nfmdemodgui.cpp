@@ -16,9 +16,9 @@
 #include "mainwindow.h"
 #include "nfmdemod.h"
 
-NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceUISet);
+	NFMDemodGUI* gui = new NFMDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -220,7 +220,7 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -237,7 +237,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_nfmDemod = new NFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_nfmDemod = (NFMDemod*) rxChannel; //new NFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_nfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -291,7 +291,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 NFMDemodGUI::~NFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_nfmDemod;
+	delete m_nfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

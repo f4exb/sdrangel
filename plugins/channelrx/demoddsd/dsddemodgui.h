@@ -31,7 +31,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class ScopeVis;
 class DSDDemod;
 
@@ -43,7 +43,7 @@ class DSDDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static DSDDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static DSDDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -116,7 +116,7 @@ private:
 
 	MessageQueue m_inputMessageQueue;
 
-	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~DSDDemodGUI();
 
 	void blockApplySettings(bool block);

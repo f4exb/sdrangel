@@ -34,11 +34,11 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(SSBDemod::m_channelID, this);
 }
 
-PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet)
+PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
 	if(channelName == SSBDemod::m_channelID)
 	{
-		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceUISet);
+		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 		return gui;
 	} else {
 		return 0;

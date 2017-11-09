@@ -11,7 +11,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-
+class BasebandSampleSink;
 class WFMDemod;
 
 namespace Ui {
@@ -22,7 +22,7 @@ class WFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet);
+	static WFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -63,7 +63,7 @@ private:
 	MovingAverage<double> m_channelPowerDbAvg;
 	MessageQueue m_inputMessageQueue;
 
-	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~WFMDemodGUI();
 
     void blockApplySettings(bool block);

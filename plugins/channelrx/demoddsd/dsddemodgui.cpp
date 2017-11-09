@@ -38,9 +38,9 @@
 #include "dsddemodbaudrates.h"
 #include "dsddemod.h"
 
-DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet)
+DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceUISet);
+    DSDDemodGUI* gui = new DSDDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -229,7 +229,7 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 }
 
-DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget* parent) :
+DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::DSDDemodGUI),
 	m_pluginAPI(pluginAPI),
@@ -252,7 +252,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_scopeVis = new ScopeVis(ui->glScope);
-	m_dsdDemod = new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_dsdDemod->setScopeSink(m_scopeVis);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
@@ -297,7 +297,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, QWidget
 DSDDemodGUI::~DSDDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_dsdDemod;
+	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 
