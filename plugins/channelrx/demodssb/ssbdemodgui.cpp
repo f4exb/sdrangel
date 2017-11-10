@@ -376,6 +376,7 @@ void SSBDemodGUI::applyBandwidths(bool force)
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
+    if (!dsb) { m_channelMarker.setLowCutoff(lw * 100); }
     blockApplySettings(wasBlocked);
 }
 
