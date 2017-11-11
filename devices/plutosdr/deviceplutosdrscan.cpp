@@ -20,6 +20,8 @@
 #include <regex>
 #include <iio.h>
 
+#include <QtGlobal>
+
 #include "deviceplutosdrbox.h"
 #include "deviceplutosdrscan.h"
 
@@ -33,7 +35,7 @@ void DevicePlutoSDRScan::scan()
 
     if (!scan_ctx)
     {
-        std::cerr << "PlutoSDRScan::scan: could not create scan context" << std::endl;
+        qCritical("PlutoSDRScan::scan: could not create scan context");
         return;
     }
 
@@ -41,7 +43,7 @@ void DevicePlutoSDRScan::scan()
 
     if (num_contexts < 0)
     {
-        std::cerr << "PlutoSDRScan::scan: could not get contexts" << std::endl;
+        qCritical("PlutoSDRScan::scan: could not get contexts");
         return;
     }
 
@@ -56,7 +58,7 @@ void DevicePlutoSDRScan::scan()
             continue;
         }
 
-        printf("PlutoSDRScan::scan: %d: %s [%s]\n", i, description, uri);
+        qDebug("PlutoSDRScan::scan: %d: %s [%s]", i, description, uri);
         char *pch = strstr(const_cast<char*>(description), "PlutoSDR");
 
         if (pch)

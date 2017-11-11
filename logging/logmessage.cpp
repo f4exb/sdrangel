@@ -43,20 +43,20 @@ QString LogMessage::toString(const QString& msgFormat, const QString& timestampF
     switch (type)
     {
         case QtDebugMsg:
-            decorated.replace("{type}","DEBUG   ");
+            decorated.replace("{type}","(D)");
             break;
         case QtWarningMsg:
-            decorated.replace("{type}","WARNING ");
+            decorated.replace("{type}","(W)");
             break;
         case QtCriticalMsg:
-            decorated.replace("{type}","CRITICAL");
+            decorated.replace("{type}","(C)");
             break;
         case QtFatalMsg:
-            decorated.replace("{type}","FATAL   ");
+            decorated.replace("{type}","(F)");
             break;
     #if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
         case QtInfoMsg:
-            decorated.replace("{type}","INFO    ");
+            decorated.replace("{type}","(I)");
             break;
     #endif
         default:

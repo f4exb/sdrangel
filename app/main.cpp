@@ -20,9 +20,11 @@
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QFontDatabase>
+
+#include "logger.h"
 #include "mainwindow.h"
 
-static int runQtApplication(int argc, char* argv[])
+static int runQtApplication(int argc, char* argv[], qtwebapp::Logger *logger)
 {
 	QApplication a(argc, argv);
 /*
@@ -87,7 +89,8 @@ static int runQtApplication(int argc, char* argv[])
 #endif
 
 #endif
-	MainWindow w;
+
+	MainWindow w(logger);
 	w.show();
 
 	return a.exec();
@@ -95,7 +98,9 @@ static int runQtApplication(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-	int res = runQtApplication(argc, argv);
+	qtwebapp::Logger *logger = new qtwebapp::Logger(qApp);
+    logger->installMsgHandler();
+	int res = runQtApplication(argc, argv, logger);
 	qWarning("SDRangel quit.");
 	return res;
 }

@@ -60,7 +60,7 @@
 
 MainWindow *MainWindow::m_instance = 0;
 
-MainWindow::MainWindow(QWidget* parent) :
+MainWindow::MainWindow(qtwebapp::Logger *logger, QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	m_settings(),
@@ -70,11 +70,9 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_sampleFileName(std::string("./test.sdriq"))
+	m_sampleFileName(std::string("./test.sdriq")),
+	m_logger(logger)
 {
-    m_logger = new qtwebapp::Logger(this);
-    m_logger->installMsgHandler();
-
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;

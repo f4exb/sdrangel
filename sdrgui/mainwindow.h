@@ -62,7 +62,7 @@ class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget* parent = 0);
+	explicit MainWindow(qtwebapp::Logger *logger, QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 

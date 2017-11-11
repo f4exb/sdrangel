@@ -194,7 +194,7 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
     }
     else
     {
-        qDebug("DeviceSourceAPI::loadSourceSettings: Loading preset [%s | %s] is not a source preset\n", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSourceAPI::loadSourceSettings: Loading preset [%s | %s] is not a source preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     }
 }
 
