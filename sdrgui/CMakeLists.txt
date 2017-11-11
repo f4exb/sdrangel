@@ -147,6 +147,7 @@ add_library(sdrgui SHARED
 include_directories(
     .
     ${CMAKE_SOURCE_DIR}/sdrbase
+    ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENGL_INCLUDE_DIR}
 )
@@ -155,6 +156,7 @@ target_link_libraries(sdrgui
     ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
     sdrbase
+    logging
 )
 
 set_target_properties(sdrgui PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")

@@ -50,6 +50,10 @@ class DeviceUISet;
 class PluginInterface;
 class QWidget;
 
+namespace qtwebapp {
+    class Logger;
+}
+
 namespace Ui {
 	class MainWindow;
 }
@@ -109,6 +113,8 @@ private:
 	int m_sampleRate;
 	quint64 m_centerFrequency;
 	std::string m_sampleFileName;
+
+	qtwebapp::Logger *m_logger;
 
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);

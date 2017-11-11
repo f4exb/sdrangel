@@ -50,6 +50,7 @@
 #include "plugin/pluginapi.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
+#include "logger.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -71,6 +72,9 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_centerFrequency(0),
 	m_sampleFileName(std::string("./test.sdriq"))
 {
+    m_logger = new qtwebapp::Logger(this);
+    m_logger->installMsgHandler();
+
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;
@@ -202,6 +206,9 @@ MainWindow::~MainWindow()
 	delete m_showSystemWidget;
 
 	delete ui;
+
+	qDebug() << "MainWindow::~MainWindow: end";
+	delete m_logger;
 }
 
 void MainWindow::addSourceDevice()

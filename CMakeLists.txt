@@ -243,6 +243,7 @@ if (BUILD_DEBIAN)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(httpserver)
+add_subdirectory(logging)
 add_subdirectory(devices)
 add_subdirectory(plugins)
 
