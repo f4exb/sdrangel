@@ -48,7 +48,6 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelizerInputSampleRateChanged()));
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
 	apply(true);
@@ -118,12 +117,6 @@ void ChannelAnalyzerNG::stop()
 {
 }
 
-void ChannelAnalyzerNG::channelizerInputSampleRateChanged()
-{
-    MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create();
-    getMessageQueueToGUI()->push(msg);
-}
-
 bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
 	qDebug() << "ChannelAnalyzerNG::handleMessage: " << cmd.getIdentifier();
@@ -140,7 +133,14 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
                 << " frequencyOffset: " << m_config.m_frequency;
 
 		apply();
-		return true;
+
+		if (getMessageQueueToGUI())
+		{
+            MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create();
+            getMessageQueueToGUI()->push(msg);
+		}
+
+	    return true;
 	}
     else if (MsgConfigureChannelizer::match(cmd))
     {

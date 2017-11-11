@@ -26,8 +26,6 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class ChannelAnalyzerNG;
 class SpectrumScopeNGComboVis;
 class SpectrumVis;
@@ -56,8 +54,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private slots:
-	void viewChanged();
-//	void channelizerInputSampleRateChanged();
+	void channelMarkerChanged();
 	void on_deltaFrequency_changed(qint64 value);
     void on_channelSampleRate_changed(quint64 value);
     void on_useRationalDownsampler_toggled(bool checked);
@@ -81,8 +78,6 @@ private:
 	int m_spanLog2;
 	MovingAverage<double> m_channelPowerDbAvg;
 
-//	ThreadedBasebandSampleSink* m_threadedChannelizer;
-//	DownChannelizer* m_channelizer;
 	ChannelAnalyzerNG* m_channelAnalyzer;
 	SpectrumScopeNGComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;

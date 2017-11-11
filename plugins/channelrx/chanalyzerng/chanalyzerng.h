@@ -145,9 +145,6 @@ public:
 
     static const QString m_channelID;
 
-private slots:
-    void channelizerInputSampleRateChanged();
-
 private:
 
 	struct Config
