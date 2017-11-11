@@ -2,6 +2,7 @@ sdrangel (3.8.3-1) unstable; urgency=medium
 
   * ChannelAnalyzerNG: fixed GUI displays when channel sample rate changes
   * SSB demod: fixed low cutoff channel marker display
+  * LimeSDR: increased start/stop stream wait time to 50ms
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 12 Nov 2017 18:14:18 +0100
 
