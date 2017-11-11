@@ -2,6 +2,7 @@ project(logging)
 
 set(logging_SOURCES
    dualfilelogger.cpp
+   loggerwithfile.cpp
    filelogger.cpp
    logger.cpp
    logmessage.cpp
@@ -9,6 +10,7 @@ set(logging_SOURCES
 
 set(httpserver_HEADERS
    dualfilelogger.h
+   loggerwithfile.h
    filelogger.h
    logger.h
    logmessage.h
