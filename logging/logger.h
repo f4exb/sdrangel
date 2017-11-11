@@ -93,6 +93,13 @@ public:
     void installMsgHandler();
 
     /**
+     * Sets the minimum message level on the fly
+     */
+    void setMinMessageLevel(const QtMsgType& minMsgLevel) {
+        minLevel = minMsgLevel;
+    }
+
+    /**
       Sets a thread-local variable that may be used to decorate log messages.
       This method is thread safe.
       @param name Name of the variable

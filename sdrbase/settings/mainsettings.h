@@ -33,6 +33,13 @@ public:
 	float getLatitude() const { return m_preferences.getLatitude(); }
 	float getLongitude() const { return m_preferences.getLongitude(); }
 
+    void setMinLogLevel(const QtMsgType& minLogLevel) { m_preferences.setMinLogLevel(minLogLevel); }
+    void setUseLogFile(bool useLogFile) { m_preferences.setUseLogFile(useLogFile); }
+    void setLogFileName(const QString& value) { m_preferences.setLogFileName(value); }
+    QtMsgType getMinLogLevel() const { return m_preferences.getMinLogLevel(); }
+    bool getUseLogFile() const { return m_preferences.getUseLogFile(); }
+    const QString& getLogFileName() const { return m_preferences.getLogFileName(); }
+
 	const AudioDeviceInfo *getAudioDeviceInfo() const { return m_audioDeviceInfo; }
 	void setAudioDeviceInfo(AudioDeviceInfo *audioDeviceInfo) { m_audioDeviceInfo = audioDeviceInfo; }
 

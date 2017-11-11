@@ -15,6 +15,8 @@ void Preferences::resetToDefaults()
 	m_sourceIndex = 0;
 	m_latitude = 0.0;
 	m_longitude = 0.0;
+	m_useLogFile = false;
+	m_logFileName = "sdrangel.log";
 }
 
 QByteArray Preferences::serialize() const
@@ -27,11 +29,16 @@ QByteArray Preferences::serialize() const
 	s.writeS32(5, m_sourceIndex);
 	s.writeFloat(6, m_latitude);
 	s.writeFloat(7, m_longitude);
+	s.writeS32(8, (int) m_minLogLevel);
+	s.writeBool(9, m_useLogFile);
+	s.writeString(10, m_logFileName);
 	return s.final();
 }
 
 bool Preferences::deserialize(const QByteArray& data)
 {
+    int tmpInt;
+
 	SimpleDeserializer d(data);
 
 	if(!d.isValid()) {
@@ -47,6 +54,21 @@ bool Preferences::deserialize(const QByteArray& data)
 		d.readS32(5, &m_sourceIndex, 0);
 		d.readFloat(6, &m_latitude, 0.0);
 		d.readFloat(7, &m_longitude, 0.0);
+
+		d.readS32(8, &tmpInt, (int) QtDebugMsg);
+
+		if ((tmpInt == (int) QtDebugMsg) ||
+		    (tmpInt == (int) QtInfoMsg) ||
+		    (tmpInt == (int) QtWarningMsg) ||
+		    (tmpInt == (int) QtCriticalMsg) ||
+		    (tmpInt == (int) QtFatalMsg)) {
+            m_minLogLevel = (QtMsgType) tmpInt;
+		} else {
+		    m_minLogLevel = QtDebugMsg;
+		}
+
+		d.readBool(9, &m_useLogFile, false);
+		d.readString(10, &m_logFileName, "sdrangel.log");
 		return true;
 	} else {
 		resetToDefaults();

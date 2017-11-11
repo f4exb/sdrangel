@@ -25,6 +25,7 @@ set(sdrgui_SOURCES
     gui/glspectrumgui.cpp
     gui/indicator.cpp
     gui/levelmeter.cpp
+    gui/loggingdialog.cpp
     gui/mypositiondialog.cpp
     gui/pluginsdialog.cpp
     gui/audiodialog.cpp
@@ -72,7 +73,8 @@ set(sdrgui_HEADERS
     gui/glspectrum.h
     gui/glspectrumgui.h
     gui/indicator.h
-    gui/levelmeter.h    
+    gui/levelmeter.h
+    gui/loggingdialog.h    
     gui/mypositiondialog.h
     gui/physicalunit.h
     gui/pluginsdialog.h
@@ -121,6 +123,7 @@ set(sdrgui_FORMS
     gui/samplingdevicedialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
+    gui/loggingdialog.ui
 )
 
 set(sdrgui_RESOURCES

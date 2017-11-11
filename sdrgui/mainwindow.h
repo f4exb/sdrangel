@@ -130,6 +130,8 @@ private:
 	void addSinkDevice();
     void removeLastDevice();
 
+    void setLoggingOpions();
+
 private slots:
 	void handleMessages();
 	void updateStatus();
@@ -144,6 +146,7 @@ private slots:
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
 	void on_action_Audio_triggered();
+    void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
 	void on_sampleSource_changed();

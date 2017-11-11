@@ -40,6 +40,7 @@
 #include "gui/rollupwidget.h"
 #include "gui/channelwindow.h"
 #include "gui/audiodialog.h"
+#include "gui/loggingdialog.h"
 #include "gui/samplingdevicecontrol.h"
 #include "gui/mypositiondialog.h"
 #include "dsp/dspengine.h"
@@ -493,6 +494,8 @@ void MainWindow::loadSettings()
     {
         ui->presetTree->setCurrentItem(addPresetToTree(m_settings.getPreset(i)));
     }
+
+    setLoggingOpions();
 }
 
 void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
@@ -847,6 +850,13 @@ void MainWindow::on_action_Audio_triggered()
 	m_dspEngine->setAudioOutputDeviceIndex(m_audioDeviceInfo.getOutputDeviceIndex());
 }
 
+void MainWindow::on_action_Logging_triggered()
+{
+    LoggingDialog loggingDialog(m_settings, this);
+    loggingDialog.exec();
+    setLoggingOpions();
+}
+
 void MainWindow::on_action_My_Position_triggered()
 {
 	MyPositionDialog myPositionDialog(m_settings, this);
@@ -1143,4 +1153,9 @@ void MainWindow::tabInputViewIndexChanged()
 void MainWindow::updateStatus()
 {
     m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss t"));
+}
+
+void MainWindow::setLoggingOpions()
+{
+    m_logger->setMinMessageLevel(m_settings.getMinLogLevel());
 }

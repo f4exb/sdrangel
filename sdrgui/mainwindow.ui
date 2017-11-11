@@ -146,6 +146,7 @@
      <string>&amp;Preferences</string>
     </property>
     <addaction name="action_Audio"/>
+    <addaction name="action_Logging"/>
     <addaction name="action_DV_Serial"/>
     <addaction name="action_My_Position"/>
    </widget>
@@ -660,6 +661,9 @@
    <property name="text">
     <string>&amp;Audio</string>
    </property>
+   <property name="toolTip">
+    <string>Audio devices setting</string>
+   </property>
   </action>
   <action name="action_DV_Serial">
    <property name="checkable">
@@ -668,15 +672,29 @@
    <property name="text">
     <string>DV Serial</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle AMBE DV serial device usage</string>
+   </property>
   </action>
   <action name="action_My_Position">
    <property name="text">
     <string>My Position</string>
    </property>
+   <property name="toolTip">
+    <string>Set my geo position</string>
+   </property>
   </action>
   <action name="action_addSinkDevice">
    <property name="text">
     <string>Add sink device</string>
+   </property>
+  </action>
+  <action name="action_Logging">
+   <property name="text">
+    <string>Logging</string>
+   </property>
+   <property name="toolTip">
+    <string>Message logging options</string>
    </property>
   </action>
   <zorder>presetDock</zorder>
