@@ -232,7 +232,7 @@
          <widget class="QComboBox" name="spanLog2">
           <property name="maximumSize">
            <size>
-            <width>40</width>
+            <width>50</width>
             <height>16777215</height>
            </size>
           </property>
@@ -278,11 +278,17 @@
         </item>
         <item>
          <widget class="QLabel" name="spanText">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Channel final sample rate</string>
           </property>
           <property name="text">
-           <string>6.0k</string>
+           <string>00000.0 kS/s</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
