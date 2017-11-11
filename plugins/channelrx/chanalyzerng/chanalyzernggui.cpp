@@ -162,8 +162,8 @@ bool ChannelAnalyzerNGGUI::handleMessage(const Message& message)
     {
         int newRate = getRequestedChannelSampleRate() / (1<<m_spanLog2);
 
-        int newBW = (ui->BW->value() * 100 * m_rate) / newRate;
-        int newLC = (ui->lowCut->value() * 100 * m_rate) / newRate;
+        uint64_t newBW = (ui->BW->value() * 100L * m_rate) / newRate;
+        uint64_t newLC = (ui->lowCut->value() * 100L * m_rate) / newRate;
 
         qDebug() << "ChannelAnalyzerNGGUI::handleMessage: MsgReportChannelSampleRateChanged:"
                 << " newRate: " << newRate
