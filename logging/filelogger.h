@@ -78,6 +78,18 @@ public:
     */
     virtual ~FileLogger();
 
+    /**
+     * Get a file logger settings copy
+     * @return The current file logger settings
+     */
+    FileLoggerSettings getFileLoggerSettings() const { return fileLoggerSettings; }
+
+    /**
+     * Set new file logger settings data
+     * @param File logger settings to replace current data
+     */
+    void setFileLoggerSettings(const FileLoggerSettings& settings) { fileLoggerSettings = settings; }
+
     /** Write a message to the log file */
     virtual void write(const LogMessage* logMessage);
 
