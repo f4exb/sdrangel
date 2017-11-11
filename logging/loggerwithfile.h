@@ -64,6 +64,8 @@ public:
      */
     void setFileLoggerSettings(const FileLoggerSettings& settings) { fileLogger->setFileLoggerSettings(settings); }
 
+    void setMinMessageLevel(QtMsgType& msgLevel);
+
 private:
     /** First console logger */
     Logger* consoleLogger;

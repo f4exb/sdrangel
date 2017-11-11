@@ -37,3 +37,12 @@ void LoggerWithFile::clear(const bool buffer, const bool variables)
         fileLogger->clear(buffer,variables);
     }
 }
+
+void LoggerWithFile::setMinMessageLevel(QtMsgType& msgLevel)
+{
+    consoleLogger->setMinMessageLevel(msgLevel);
+
+    if (fileLogger) {
+        fileLogger->setMinMessageLevel(msgLevel);
+    }
+}
