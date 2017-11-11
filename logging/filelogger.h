@@ -13,6 +13,7 @@
 #include <QBasicTimer>
 #include "logglobal.h"
 #include "logger.h"
+#include "fileloggersettings.h"
 
 namespace qtwebapp {
 
@@ -65,6 +66,14 @@ public:
     FileLogger(QSettings* settings, const int refreshInterval=10000, QObject* parent = 0);
 
     /**
+      Constructor.
+      @param settings Configuration settings as a simple structure (see: FileLoggerSettings).
+      @param refreshInterval Interval of checking for changed config settings in msec, or 0=disabled
+      @param parent Parent object
+    */
+    FileLogger(const FileLoggerSettings& settings, const int refreshInterval=10000, QObject* parent = 0);
+
+    /**
       Destructor. Closes the file.
     */
     virtual ~FileLogger();
@@ -96,6 +105,9 @@ private:
     /** Pointer to the configuration settings */
     QSettings* settings;
 
+    /** Pointer to the configuration settings */
+    FileLoggerSettings fileLoggerSettings;
+
     /** Output file, or 0=disabled */
     QFile* file;
 
@@ -104,6 +116,9 @@ private:
 
     /** Timer for flushing the file I/O buffer */
     QBasicTimer flushTimer;
+
+    /** Use of Qt settings or simple structure settings */
+    bool useQtSettings;
 
     /** Open the output file */
     void open();
@@ -119,6 +134,16 @@ private:
       This method is thread-safe.
     */
     void refreshSettings();
+
+    /**
+      Refreshes the configuration settings with Qt settings.
+    */
+    void refreshQtSettings();
+
+    /**
+      Refreshes the configuration settings with file log settings structure.
+    */
+    void refreshFileLogSettings();
 
 };
 

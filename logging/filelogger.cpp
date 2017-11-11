@@ -19,6 +19,18 @@ using namespace qtwebapp;
 void FileLogger::refreshSettings()
 {
     mutex.lock();
+
+    if (useQtSettings) {
+        refreshQtSettings();
+    } else {
+        refreshFileLogSettings();
+    }
+
+    mutex.unlock();
+}
+
+void FileLogger::refreshQtSettings()
+{
     // Save old file name for later comparision with new settings
     QString oldFileName=fileName;
 
@@ -49,16 +61,59 @@ void FileLogger::refreshSettings()
         close();
         open();
     }
-    mutex.unlock();
 }
 
+void FileLogger::refreshFileLogSettings()
+{
+    // Save old file name for later comparision with new settings
+    QString oldFileName = fileLoggerSettings.fileName;
+
+    // Load new config settings
+
+    fileName = fileLoggerSettings.fileName;
+
+    // Convert relative fileName to absolute, based on the current working directory
+    if (QDir::isRelativePath(fileName))
+    {
+        fileName = QFileInfo(QDir::currentPath(), fileName).absoluteFilePath();
+    }
+
+    maxSize = fileLoggerSettings.maxSize;
+    maxBackups = fileLoggerSettings.maxBackups;
+    msgFormat = fileLoggerSettings.msgFormat;
+    timestampFormat = fileLoggerSettings.timestampFormat;
+    minLevel = fileLoggerSettings.minLevel;
+    bufferSize = fileLoggerSettings.bufferSize;
+
+    // Create new file if the filename has been changed
+    if (oldFileName != fileName)
+    {
+        fprintf(stderr,"Logging to %s\n",qPrintable(fileName));
+        close();
+        open();
+    }
+}
 
 FileLogger::FileLogger(QSettings* settings, const int refreshInterval, QObject* parent)
-    : Logger(parent)
+    : Logger(parent), useQtSettings(true)
 {
     Q_ASSERT(settings!=0);
     Q_ASSERT(refreshInterval>=0);
     this->settings=settings;
+    file=0;
+    if (refreshInterval>0)
+    {
+        refreshTimer.start(refreshInterval,this);
+    }
+    flushTimer.start(1000,this);
+    refreshSettings();
+}
+
+FileLogger::FileLogger(const FileLoggerSettings& settings, const int refreshInterval, QObject* parent)
+    : Logger(parent), useQtSettings(false)
+{
+    Q_ASSERT(refreshInterval>=0);
+    fileLoggerSettings = settings;
     file=0;
     if (refreshInterval>0)
     {
