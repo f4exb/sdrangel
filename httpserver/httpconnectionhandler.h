@@ -17,7 +17,7 @@
 #include "httprequest.h"
 #include "httprequesthandler.h"
 
-namespace stefanfrings {
+namespace qtwebapp {
 
 /** Alias type definition, for compatibility to different Qt versions */
 #if QT_VERSION >= 0x050000

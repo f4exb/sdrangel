@@ -5,7 +5,7 @@
 
 #include "httpcookie.h"
 
-using namespace stefanfrings;
+using namespace qtwebapp;
 
 HttpCookie::HttpCookie()
 {

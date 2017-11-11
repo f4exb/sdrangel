@@ -6,7 +6,7 @@
 #include "httpconnectionhandler.h"
 #include "httpresponse.h"
 
-using namespace stefanfrings;
+using namespace qtwebapp;
 
 HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration)
     : QThread()

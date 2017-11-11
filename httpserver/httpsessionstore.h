@@ -15,7 +15,7 @@
 #include "httpresponse.h"
 #include "httprequest.h"
 
-namespace stefanfrings {
+namespace qtwebapp {
 
 /**
   Stores HTTP sessions and deletes them when they have expired.

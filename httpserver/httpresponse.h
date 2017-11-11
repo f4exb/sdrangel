@@ -12,7 +12,7 @@
 #include "httpglobal.h"
 #include "httpcookie.h"
 
-namespace stefanfrings {
+namespace qtwebapp {
 
 /**
   This object represents a HTTP response, used to return something to the web client.

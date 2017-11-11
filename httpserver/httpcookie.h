@@ -10,7 +10,7 @@
 #include <QByteArray>
 #include "httpglobal.h"
 
-namespace stefanfrings {
+namespace qtwebapp {
 
 /**
   HTTP cookie as defined in RFC 2109. This class can also parse
