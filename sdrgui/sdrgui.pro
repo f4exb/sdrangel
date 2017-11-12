@@ -11,6 +11,7 @@ TEMPLATE = lib
 TARGET = sdrgui
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../sdrbase
+INCLUDEPATH += ../logging
 
 DEFINES += USE_KISSFFT=1
 win32 {
@@ -61,6 +62,7 @@ SOURCES += mainwindow.cpp\
         gui/glspectrumgui.cpp\
         gui/indicator.cpp\
         gui/levelmeter.cpp\
+        gui/loggingdialog.cpp\
         gui/pluginsdialog.cpp\
         gui/audiodialog.cpp\
         gui/presetitem.cpp\
@@ -106,6 +108,7 @@ HEADERS  += mainwindow.h\
         gui/glspectrumgui.h\
         gui/indicator.h\
         gui/levelmeter.h\
+        gui/loggingdialog.h\
         gui/physicalunit.h\
         gui/pluginsdialog.h\
         gui/presetitem.h\
@@ -135,11 +138,13 @@ FORMS    += mainwindow.ui\
         gui/samplingdevicecontrol.ui\
         gui/samplingdevicedialog.ui\
         gui/myposdialog.ui\
+        gui/loggingdialog.ui\
         gui/glspectrumgui.ui\
         gui/transverterdialog.ui\
         mainwindow.ui
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
+LIBS += -L../logging/$${build_subdir} -llogging
 
 RESOURCES = resources/res.qrc
 
