@@ -146,9 +146,6 @@ public:
 
     static const QString m_channelID;
 
-private slots:
-    void channelSampleRateChanged();
-
 private:
 	enum RateState {
 		RSInitialFill,

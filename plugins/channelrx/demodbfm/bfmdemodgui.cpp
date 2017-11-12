@@ -112,6 +112,7 @@ bool BFMDemodGUI::handleMessage(const Message& message)
     {
         BFMDemod::MsgReportChannelSampleRateChanged& report = (BFMDemod::MsgReportChannelSampleRateChanged&) message;
         m_rate = report.getSampleRate();
+        qDebug("BFMDemodGUI::handleMessage: MsgReportChannelSampleRateChanged: %d S/s", m_rate);
         ui->glSpectrum->setCenterFrequency(m_rate / 4);
         ui->glSpectrum->setSampleRate(m_rate / 2);
         return true;
@@ -128,8 +129,6 @@ void BFMDemodGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()) != 0)
     {
-        qDebug("BFMDemodGUI::handleInputMessages: message: %s", message->getIdentifier());
-
         if (handleMessage(*message))
         {
             delete message;

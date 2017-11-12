@@ -86,8 +86,6 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
 
-    connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-
     applySettings(m_settings, true);
 }
 
@@ -302,12 +300,6 @@ void BFMDemod::stop()
 {
 }
 
-void BFMDemod::channelSampleRateChanged()
-{
-    MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create(getSampleRate());
-    getMessageQueueToGUI()->push(msg);
-}
-
 bool BFMDemod::handleMessage(const Message& cmd)
 {
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
@@ -324,6 +316,12 @@ bool BFMDemod::handleMessage(const Message& cmd)
         qDebug() << "BFMDemod::handleMessage: MsgChannelizerNotification:"
                 << " m_inputSampleRate: " << settings.m_inputSampleRate
                 << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportChannelSampleRateChanged *msg = MsgReportChannelSampleRateChanged::create(getSampleRate());
+            getMessageQueueToGUI()->push(msg);
+        }
 
 		return true;
 	}
