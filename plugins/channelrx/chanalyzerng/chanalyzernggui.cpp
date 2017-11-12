@@ -373,22 +373,12 @@ void ChannelAnalyzerNGGUI::onWidgetRolled(QWidget* widget __attribute__((unused)
 	*/
 }
 
-void ChannelAnalyzerNGGUI::onMenuDoubleClicked()
-{
-	if(!m_basicSettingsShown) {
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
-}
-
 ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerNGGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
 	m_spanLog2(0),
@@ -397,7 +387,6 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVisNG(ui->glScope);

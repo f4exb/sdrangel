@@ -84,7 +84,6 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     AMModSettings m_settings;
-    bool m_basicSettingsShown;
     bool m_doApplySettings;
 
     AMMod* m_amMod;

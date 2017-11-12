@@ -183,20 +183,6 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 
 void SSBDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
-	/*
-	if((widget == ui->spectrumContainer) && (m_ssbDemod != NULL))
-		m_ssbDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
-	*/
-}
-
-void SSBDemodGUI::onMenuDoubleClicked()
-{
-	if(!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
 }
 
 SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -205,7 +191,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
     m_spectrumRate(6000),
 	m_audioBinaural(false),
@@ -216,7 +201,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_ssbDemod = (SSBDemod*) rxChannel; //new SSBDemod(m_deviceUISet->m_deviceSourceAPI);

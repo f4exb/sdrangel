@@ -63,7 +63,6 @@ private slots:
 	void on_spanLog2_currentIndexChanged(int index);
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
     void handleInputMessages();
 	void tick();
 
@@ -72,7 +71,6 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
 	int m_spanLog2;

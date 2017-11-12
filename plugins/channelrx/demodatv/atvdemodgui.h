@@ -58,7 +58,6 @@ private slots:
 	void viewChanged();
     void handleSourceMessages();
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
     void tick();
     void on_synchLevel_valueChanged(int value);
     void on_blackLevel_valueChanged(int value);
@@ -89,7 +88,6 @@ private:
     ChannelMarker m_channelMarker;
     ATVDemod* m_atvDemod;
 
-    bool m_blnBasicSettingsShown;
     bool m_blnDoApplySettings;
 
     MovingAverage<double> m_objMagSqAverage;

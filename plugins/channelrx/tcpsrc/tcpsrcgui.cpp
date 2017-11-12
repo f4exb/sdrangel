@@ -128,14 +128,12 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_tcpSrc(0),
 	m_channelMarker(this),
 	m_channelPowerDbAvg(40,0),
-	m_basicSettingsShown(false),
 	m_rfBandwidthChanged(false),
 	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	ui->connectedClientsBox->hide();
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
@@ -367,16 +365,6 @@ void TCPSrcGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	if ((widget == ui->spectrumBox) && (m_tcpSrc != 0))
 	{
 		m_tcpSrc->setSpectrum(m_tcpSrc->getInputMessageQueue(), rollDown);
-	}
-}
-
-void TCPSrcGUI::onMenuDoubleClicked()
-{
-	if (!m_basicSettingsShown)
-	{
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
 	}
 }
 

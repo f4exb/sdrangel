@@ -8,7 +8,7 @@
 
 const PluginDescriptor TCPSrcPlugin::m_pluginDescriptor = {
 	QString("TCP Channel Source"),
-	QString("3.8.2"),
+	QString("3.8.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

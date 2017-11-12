@@ -26,8 +26,6 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class ChannelAnalyzer;
 class SpectrumScopeComboVis;
 class SpectrumVis;
@@ -64,24 +62,19 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
     void handleInputMessages();
 	void tick();
 
 private:
 	Ui::ChannelAnalyzerGUI* ui;
 	PluginAPI* m_pluginAPI;
-//	DeviceSourceAPI* m_deviceAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
 	MovingAverage<Real> m_channelPowerDbAvg;
 
-//	ThreadedBasebandSampleSink* m_threadedChannelizer;
-//	DownChannelizer* m_channelizer;
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;

@@ -41,7 +41,6 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_Spread_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
 
 private:
 	Ui::LoRaDemodGUI* ui;
@@ -49,7 +48,6 @@ private:
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	LoRaDemodSettings m_settings;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
 
 	LoRaDemod* m_LoRaDemod;

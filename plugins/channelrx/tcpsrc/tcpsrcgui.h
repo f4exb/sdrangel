@@ -48,7 +48,6 @@ private slots:
 	void on_tcpPort_textEdited(const QString& arg1);
 	void on_applyBtn_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
 	void on_volume_valueChanged(int value);
 	void tick();
 
@@ -67,7 +66,6 @@ private:
 	Real m_rfBandwidth;
 	int m_boost;
 	int m_tcpPort;
-	bool m_basicSettingsShown;
 	bool m_rfBandwidthChanged;
 	bool m_doApplySettings;
 

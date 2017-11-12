@@ -55,7 +55,6 @@ private slots:
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDoubleClicked();
 	void tick();
 
 private:
@@ -64,7 +63,6 @@ private:
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	SSBDemodSettings m_settings;
-	bool m_basicSettingsShown;
 	bool m_doApplySettings;
     int m_spectrumRate;
 	bool m_audioBinaural;

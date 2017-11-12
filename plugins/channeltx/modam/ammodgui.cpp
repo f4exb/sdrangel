@@ -264,7 +264,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_channelPowerDbAvg(20,0),
     m_recordLength(0),

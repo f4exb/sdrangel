@@ -98,7 +98,6 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     ATVModSettings m_settings;
-    bool m_basicSettingsShown;
     bool m_doApplySettings;
 
     ATVMod* m_atvMod;

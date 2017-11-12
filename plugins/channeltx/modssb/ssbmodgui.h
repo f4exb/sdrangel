@@ -92,7 +92,6 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     SSBModSettings m_settings;
-    bool m_basicSettingsShown;
     bool m_doApplySettings;
 	int m_spectrumRate;
 

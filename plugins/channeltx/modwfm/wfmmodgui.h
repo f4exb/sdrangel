@@ -85,7 +85,6 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     WFMModSettings m_settings;
-    bool m_basicSettingsShown;
     bool m_doApplySettings;
 
 //    ThreadedBasebandSampleSource* m_threadedChannelizer;

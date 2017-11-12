@@ -260,24 +260,12 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool r
 {
 }
 
-void ATVDemodGUI::onMenuDoubleClicked()
-{
-    if (!m_blnBasicSettingsShown)
-    {
-        m_blnBasicSettingsShown = true;
-        BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(
-                &m_channelMarker, this);
-        bcsw->show();
-    }
-}
-
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
         RollupWidget(objParent),
         ui(new Ui::ATVDemodGUI),
         m_pluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
-        m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true),
         m_objMagSqAverage(40, 0),
         m_intTickCount(0),
@@ -286,7 +274,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-    connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
     m_scopeVis = new ScopeVisNG(ui->glScope);
     m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);

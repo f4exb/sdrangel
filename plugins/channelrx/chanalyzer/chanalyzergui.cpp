@@ -312,23 +312,12 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget __attribute__((unused)),
 	*/
 }
 
-void ChannelAnalyzerGUI::onMenuDoubleClicked()
-{
-	if(!m_basicSettingsShown) {
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
-}
-
 ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
-//	m_deviceAPI(deviceAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_rate(6000),
 	m_spanLog2(3),
@@ -337,7 +326,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
@@ -359,7 +347,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    //m_channelMarker = new ChannelMarker(this);
 	m_channelMarker.setColor(Qt::gray);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
@@ -388,7 +375,6 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 	delete m_spectrumVis;
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;
-	//delete m_channelMarker;
 	delete ui;
 }
 
@@ -401,7 +387,6 @@ bool ChannelAnalyzerGUI::setNewRate(int spanLog2)
 	}
 
 	m_spanLog2 = spanLog2;
-	//m_rate = 48000 / (1<<spanLog2);
 	m_rate = m_channelAnalyzer->getSampleRate() / (1<<spanLog2);
 
 	if (ui->BW->value() < -m_rate/200) {

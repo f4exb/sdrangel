@@ -104,19 +104,6 @@ void LoRaDemodGUI::on_Spread_valueChanged(int value __attribute__((unused)))
 
 void LoRaDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
-	/*
-	if((widget == ui->spectrumContainer) && (m_LoRaDemod != NULL))
-		m_LoRaDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
-	*/
-}
-
-void LoRaDemodGUI::onMenuDoubleClicked()
-{
-	if(!m_basicSettingsShown) {
-		m_basicSettingsShown = true;
-		BasicChannelSettingsWidget* bcsw = new BasicChannelSettingsWidget(&m_channelMarker, this);
-		bcsw->show();
-	}
 }
 
 LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -125,13 +112,11 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
 	m_doApplySettings(true)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	connect(this, SIGNAL(menuDoubleClickEvent()), this, SLOT(onMenuDoubleClicked()));
 
 	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
 	m_LoRaDemod = (LoRaDemod*) rxChannel; //new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
@@ -142,11 +127,6 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
-//	setTitleColor(Qt::magenta);
-//
-//	m_channelMarker.setColor(Qt::magenta);
-//	m_channelMarker.setBandwidth(LoRaDemodSettings::bandwidths[0]);
-//	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setVisible(true);
 
 	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
