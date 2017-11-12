@@ -114,7 +114,7 @@ bool RTLSDRInput::openDevice()
         return false;
     }
 
-    qWarning("RTLSDRInput::openDevice: open: %s %s, SN: %s", vendor, product, serial);
+    qInfo("RTLSDRInput::openDevice: open: %s %s, SN: %s", vendor, product, serial);
     m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
     if ((res = rtlsdr_set_sample_rate(m_dev, 1152000)) < 0)
@@ -324,11 +324,12 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         {
             if (rtlsdr_set_freq_correction(m_dev, settings.m_loPpmCorrection) < 0)
             {
-                qCritical("could not set LO ppm correction: %d", settings.m_loPpmCorrection);
+                qCritical("RTLSDRInput::applySettings: could not set LO ppm correction: %d", settings.m_loPpmCorrection);
             }
             else
             {
                 m_settings.m_loPpmCorrection = settings.m_loPpmCorrection;
+                qDebug("RTLSDRInput::applySettings: LO ppm correction set to: %d", settings.m_loPpmCorrection);
             }
         }
     }

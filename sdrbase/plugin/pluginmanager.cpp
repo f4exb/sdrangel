@@ -127,7 +127,7 @@ void PluginManager::loadPlugins(const QDir& dir)
 
 			if (loader->isLoaded())
 			{
-				qWarning("PluginManager::loadPlugins: loaded plugin %s", qPrintable(fileName));
+				qInfo("PluginManager::loadPlugins: loaded plugin %s", qPrintable(fileName));
 			}
 			else
 			{
