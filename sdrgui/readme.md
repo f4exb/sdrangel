@@ -44,10 +44,11 @@ The following items are presented hierarchically from left to right:
     - _Channels_: the channels active for each device
   - Preferences:
     - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
+    - _Logging_: opens a dialog to choose logging options (see 1.2 below for details)
     - _DV Serial_: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channel/demoddsd/readme.md) for details on how to decode Digital Voice modes.
   - Help:
-    - _Loaded Plugins_: shows details about the loaded plugins (see 1.2 below for details)
+    - _Loaded Plugins_: shows details about the loaded plugins (see 1.3 below for details)
     - _About_: current version and blah blah.    
 
 <h4>1.1. Preferences - Audio</h4>
@@ -68,7 +69,62 @@ In addition you can adjust the global volume using the dial knob at the bottom. 
 
 Eventually select "OK" to confirm the settings or "Cancel" to dismiss without change.
 
-<h4>1.2. Loaded plugins display</h4>
+<h4>1.2. Logging preferences</h4>
+
+![Main Window logging preferences](../doc/img/MainWindow_logging.png)
+
+Log message will appear as follows:
+
+```
+12.11.2017 15:03:37.864 (D) DownChannelizer::applyConfiguration in= 300000 , req= 375000 , out= 300000 , fc= 0
+----------------------- --- ----------------------------------------------------------------------------------
+(1)                     (2) (3)
+```
+
+  - 1: Timestamp in `dd.MM.yyyy hh:mm:ss.zzz` format
+  - 2: Message level: `(D)`: debug, `(I)`: info, `(W)`: warning, `(C)`: critical, `(F)`: fatal
+  - 3: Message text
+
+<h5>1.2.1. Console log minimum message level</h5>
+
+This sets the minimum message level for a message do be displayed on the console:
+
+  - Debug: all messages with QtDebug level and above
+  - Info: all messages with QtInfo level and above
+  - Warning: all messages with QtWarning level and above
+  - Error: all messages with QtCritical level and above. Includes QtFatal.
+
+<h5>1.2.2. File log minimum message level</h5>
+
+This sets the minimum message level for a message do be logged to file:
+
+  - Debug: all messages with QtDebug level and above
+  - Info: all messages with QtInfo level and above
+  - Warning: all messages with QtWarning level and above
+  - Error: all messages with QtCritical level and above. Includes QtFatal.
+
+<h5>1.2.3. File log enable</h5>
+
+Use the checkbox to enable (check) or disable (uncheck) the dual logging to file
+
+<h5>1.2.4. Log file selection</h5>
+
+Use this button to open a file dialog to choose or create a new log file. There is a 2s delay before a file change is effective.
+
+<h5>1.2.5. Log file name</h5>
+
+The full path of the log file appears here
+
+<h5>1.2.6. Confirm changes</h5>
+
+Use the "OK" button to validate all changes
+
+<h5>1.2.7. Dismiss changes</h5>
+
+Use the "Cancel" button to dismiss all changes
+
+
+<h4>1.3. Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
