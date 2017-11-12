@@ -4,7 +4,6 @@ set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
     gui/addpresetdialog.cpp
-    gui/basicchannelsettingswidget.cpp
     gui/basicchannelsettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channelwindow.cpp
@@ -54,7 +53,6 @@ set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
     gui/addpresetdialog.h
-    gui/basicchannelsettingswidget.h
     gui/basicchannelsettingsdialog.h
     gui/buttonswitch.h
     gui/channelwindow.h
@@ -109,7 +107,6 @@ set(sdrgui_FORMS
     mainwindow.ui
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
-    gui/basicchannelsettingswidget.ui
     gui/basicchannelsettingsdialog.ui
     gui/cwkeyergui.ui
     gui/externalclockdialog.ui

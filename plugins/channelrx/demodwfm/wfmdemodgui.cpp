@@ -12,7 +12,6 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 

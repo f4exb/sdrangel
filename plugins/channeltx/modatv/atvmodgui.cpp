@@ -27,7 +27,6 @@
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 #include "util/db.h"
 #include "mainwindow.h"

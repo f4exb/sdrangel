@@ -10,7 +10,6 @@
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "gui/basicchannelsettingswidget.h"
 #include "dsp/dspengine.h"
 
 #include "lorademod.h"

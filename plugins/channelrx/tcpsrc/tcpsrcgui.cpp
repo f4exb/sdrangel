@@ -7,7 +7,6 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "gui/basicchannelsettingswidget.h"
 #include "ui_tcpsrcgui.h"
 #include "mainwindow.h"
 #include "tcpsrc.h"
