@@ -76,7 +76,6 @@ private slots:
     void on_ctcssOn_toggled(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
 
     void configureFileName();
     void tick();

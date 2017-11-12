@@ -82,7 +82,6 @@ private slots:
     void on_showFileDialog_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
 
     void configureFileName();
     void tick();

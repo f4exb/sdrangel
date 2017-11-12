@@ -87,7 +87,6 @@ private slots:
     void on_overlayText_textEdited(const QString& arg1);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
 
     void configureImageFileName();
     void configureVideoFileName();
