@@ -23,16 +23,22 @@
    <item>
     <layout class="QHBoxLayout" name="levelLayout">
      <item>
-      <widget class="QLabel" name="levelLabel">
+      <widget class="QLabel" name="consoleLevelLabel">
        <property name="text">
-        <string>Log level</string>
+        <string>Console log level</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="level">
+      <widget class="QComboBox" name="consoleLevel">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Choose minimum message severity level for logging</string>
+        <string>Choose minimum message severity level for logging to console</string>
        </property>
        <item>
         <property name="text">
@@ -68,6 +74,43 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="fileLevelLabel">
+       <property name="text">
+        <string>File log level</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fileLevel">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Debug</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Info</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Warning</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Error</string>
+        </property>
+       </item>
+      </widget>
      </item>
     </layout>
    </item>

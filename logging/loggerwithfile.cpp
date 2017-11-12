@@ -15,9 +15,28 @@ LoggerWithFile::LoggerWithFile(QObject* parent)
      consoleLogger = new Logger(this);
 }
 
-void LoggerWithFile::createFileLogger(const FileLoggerSettings& settings, const int refreshInterval)
+LoggerWithFile::~LoggerWithFile()
 {
-     fileLogger = new FileLogger(settings, refreshInterval, this);
+    destroyFileLogger();
+    delete consoleLogger;
+}
+
+void LoggerWithFile::createOrSetFileLogger(const FileLoggerSettings& settings, const int refreshInterval)
+{
+    if (!fileLogger) {
+        fileLogger = new FileLogger(settings, refreshInterval, this);
+    } else {
+        fileLogger->setFileLoggerSettings(settings);
+    }
+}
+
+void LoggerWithFile::destroyFileLogger()
+{
+    if (fileLogger)
+    {
+        delete fileLogger;
+        fileLogger = 0;
+    }
 }
 
 void LoggerWithFile::log(const QtMsgType type, const QString& message, const QString &file, const QString &function, const int line)
@@ -38,10 +57,13 @@ void LoggerWithFile::clear(const bool buffer, const bool variables)
     }
 }
 
-void LoggerWithFile::setMinMessageLevel(QtMsgType& msgLevel)
+void LoggerWithFile::setConsoleMinMessageLevel(const QtMsgType& msgLevel)
 {
     consoleLogger->setMinMessageLevel(msgLevel);
+}
 
+void LoggerWithFile::setFileMinMessageLevel(const QtMsgType& msgLevel)
+{
     if (fileLogger) {
         fileLogger->setMinMessageLevel(msgLevel);
     }

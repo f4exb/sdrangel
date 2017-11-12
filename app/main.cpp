@@ -21,10 +21,10 @@
 #include <QStyleFactory>
 #include <QFontDatabase>
 
-#include "logger.h"
+#include "loggerwithfile.h"
 #include "mainwindow.h"
 
-static int runQtApplication(int argc, char* argv[], qtwebapp::Logger *logger)
+static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
 	QApplication a(argc, argv);
 /*
@@ -98,7 +98,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::Logger *logger)
 
 int main(int argc, char* argv[])
 {
-	qtwebapp::Logger *logger = new qtwebapp::Logger(qApp);
+	qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
     logger->installMsgHandler();
 	int res = runQtApplication(argc, argv, logger);
 	qWarning("SDRangel quit.");

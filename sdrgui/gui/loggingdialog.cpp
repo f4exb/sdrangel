@@ -26,7 +26,8 @@ LoggingDialog::LoggingDialog(MainSettings& mainSettings, QWidget* parent) :
     m_mainSettings(mainSettings)
 {
     ui->setupUi(this);
-    ui->level->setCurrentIndex(msgLevelToIndex(m_mainSettings.getMinLogLevel()));
+    ui->consoleLevel->setCurrentIndex(msgLevelToIndex(m_mainSettings.getConsoleMinLogLevel()));
+    ui->fileLevel->setCurrentIndex(msgLevelToIndex(m_mainSettings.getFileMinLogLevel()));
     ui->logToFile->setChecked(m_mainSettings.getUseLogFile());
     ui->logFileNameText->setText(m_mainSettings.getLogFileName());
     m_fileName = m_mainSettings.getLogFileName();
@@ -39,7 +40,8 @@ LoggingDialog::~LoggingDialog()
 
 void LoggingDialog::accept()
 {
-    m_mainSettings.setMinLogLevel(msgLevelFromIndex(ui->level->currentIndex()));
+    m_mainSettings.setConsoleMinLogLevel(msgLevelFromIndex(ui->consoleLevel->currentIndex()));
+    m_mainSettings.setFileMinLogLevel(msgLevelFromIndex(ui->fileLevel->currentIndex()));
     m_mainSettings.setUseLogFile(ui->logToFile->isChecked());
     m_mainSettings.setLogFileName(m_fileName);
     QDialog::accept();

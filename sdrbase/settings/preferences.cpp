@@ -17,6 +17,8 @@ void Preferences::resetToDefaults()
 	m_longitude = 0.0;
 	m_useLogFile = false;
 	m_logFileName = "sdrangel.log";
+	m_consoleMinLogLevel = QtDebugMsg;
+    m_fileMinLogLevel = QtDebugMsg;
 }
 
 QByteArray Preferences::serialize() const
@@ -29,9 +31,10 @@ QByteArray Preferences::serialize() const
 	s.writeS32(5, m_sourceIndex);
 	s.writeFloat(6, m_latitude);
 	s.writeFloat(7, m_longitude);
-	s.writeS32(8, (int) m_minLogLevel);
+	s.writeS32(8, (int) m_consoleMinLogLevel);
 	s.writeBool(9, m_useLogFile);
 	s.writeString(10, m_logFileName);
+    s.writeS32(11, (int) m_fileMinLogLevel);
 	return s.final();
 }
 
@@ -46,7 +49,8 @@ bool Preferences::deserialize(const QByteArray& data)
 		return false;
 	}
 
-	if(d.getVersion() == 1) {
+	if(d.getVersion() == 1)
+	{
 		d.readString(1, &m_sourceType);
 		d.readString(2, &m_sourceDevice);
 		d.readString(3, &m_audioType);
@@ -62,15 +66,29 @@ bool Preferences::deserialize(const QByteArray& data)
 		    (tmpInt == (int) QtWarningMsg) ||
 		    (tmpInt == (int) QtCriticalMsg) ||
 		    (tmpInt == (int) QtFatalMsg)) {
-            m_minLogLevel = (QtMsgType) tmpInt;
+            m_consoleMinLogLevel = (QtMsgType) tmpInt;
 		} else {
-		    m_minLogLevel = QtDebugMsg;
+		    m_consoleMinLogLevel = QtDebugMsg;
 		}
 
 		d.readBool(9, &m_useLogFile, false);
 		d.readString(10, &m_logFileName, "sdrangel.log");
+
+        d.readS32(11, &tmpInt, (int) QtDebugMsg);
+
+        if ((tmpInt == (int) QtDebugMsg) ||
+            (tmpInt == (int) QtInfoMsg) ||
+            (tmpInt == (int) QtWarningMsg) ||
+            (tmpInt == (int) QtCriticalMsg) ||
+            (tmpInt == (int) QtFatalMsg)) {
+            m_fileMinLogLevel = (QtMsgType) tmpInt;
+        } else {
+            m_fileMinLogLevel = QtDebugMsg;
+        }
+
 		return true;
-	} else {
+	} else
+	{
 		resetToDefaults();
 		return false;
 	}

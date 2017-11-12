@@ -26,8 +26,10 @@ class DECLSPEC LoggerWithFile : public Logger {
 
 public:
     LoggerWithFile(QObject *parent = 0);
+    virtual ~LoggerWithFile();
 
-    void createFileLogger(const FileLoggerSettings& settings, const int refreshInterval=10000);
+    void createOrSetFileLogger(const FileLoggerSettings& settings, const int refreshInterval=10000);
+    void destroyFileLogger();
 
     /**
       Decorate and log the message, if type>=minLevel.
@@ -51,6 +53,7 @@ public:
 
     bool getUseFileLogger() const { return useFileFlogger; }
     void setUseFileLogger(bool use) { useFileFlogger = use; }
+    bool hasFileLogger() const { return fileLogger != 0; }
 
     /**
      * Get a file logger settings copy
@@ -64,7 +67,8 @@ public:
      */
     void setFileLoggerSettings(const FileLoggerSettings& settings) { fileLogger->setFileLoggerSettings(settings); }
 
-    void setMinMessageLevel(QtMsgType& msgLevel);
+    void setConsoleMinMessageLevel(const QtMsgType& msgLevel);
+    void setFileMinMessageLevel(const QtMsgType& msgLevel);
 
 private:
     /** First console logger */

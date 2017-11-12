@@ -51,7 +51,7 @@
 #include "plugin/pluginapi.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
-#include "logger.h"
+#include "loggerwithfile.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -61,7 +61,7 @@
 
 MainWindow *MainWindow::m_instance = 0;
 
-MainWindow::MainWindow(qtwebapp::Logger *logger, QWidget* parent) :
+MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	m_settings(),
@@ -1157,5 +1157,23 @@ void MainWindow::updateStatus()
 
 void MainWindow::setLoggingOpions()
 {
-    m_logger->setMinMessageLevel(m_settings.getMinLogLevel());
+    m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
+
+    if (m_settings.getUseLogFile())
+    {
+        qtwebapp::FileLoggerSettings fileLoggerSettings; // default values
+
+        if (m_logger->hasFileLogger()) {
+            fileLoggerSettings = m_logger->getFileLoggerSettings(); // values from file logger if it exists
+        }
+
+        fileLoggerSettings.fileName = m_settings.getLogFileName(); // put new values
+        m_logger->createOrSetFileLogger(fileLoggerSettings, 2000); // create file logger if it does not exist and apply settings in any case
+    }
+
+    if (m_logger->hasFileLogger()) {
+        m_logger->setFileMinMessageLevel(m_settings.getFileMinLogLevel());
+    }
+
+    m_logger->setUseFileLogger(m_settings.getUseLogFile());
 }

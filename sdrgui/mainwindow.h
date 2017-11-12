@@ -51,7 +51,7 @@ class PluginInterface;
 class QWidget;
 
 namespace qtwebapp {
-    class Logger;
+    class LoggerWithFile;
 }
 
 namespace Ui {
@@ -62,7 +62,7 @@ class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(qtwebapp::Logger *logger, QWidget* parent = 0);
+	explicit MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 
@@ -114,7 +114,7 @@ private:
 	quint64 m_centerFrequency;
 	std::string m_sampleFileName;
 
-	qtwebapp::Logger *m_logger;
+	qtwebapp::LoggerWithFile *m_logger;
 
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
