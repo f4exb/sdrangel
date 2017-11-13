@@ -5,7 +5,6 @@
 
 #include "httpconnectionhandler.h"
 #include "httpresponse.h"
-#include "httplistenersettings.h"
 
 using namespace qtwebapp;
 
@@ -15,7 +14,6 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     Q_ASSERT(settings!=0);
     Q_ASSERT(requestHandler!=0);
     this->settings=settings;
-    this->listenerSettings=0;
     this->requestHandler=requestHandler;
     this->sslConfiguration=sslConfiguration;
     currentRequest=0;
@@ -39,13 +37,12 @@ HttpConnectionHandler::HttpConnectionHandler(QSettings* settings, HttpRequestHan
     this->start();
 }
 
-HttpConnectionHandler::HttpConnectionHandler(HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration)
+HttpConnectionHandler::HttpConnectionHandler(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration)
     : QThread(), useQtSettings(false)
 {
-    Q_ASSERT(settings!=0);
     Q_ASSERT(requestHandler!=0);
     this->settings=0;
-    this->listenerSettings=settings;
+    listenerSettings=settings;
     this->requestHandler=requestHandler;
     this->sslConfiguration=sslConfiguration;
     currentRequest=0;
@@ -141,7 +138,7 @@ void HttpConnectionHandler::handleConnection(tSocketDescriptor socketDescriptor)
     #endif
 
     // Start timer for read timeout
-    int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings->readTimeout;
+    int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings.readTimeout;
     readTimer.start(readTimeout);
     // delete previous request
     delete currentRequest;
@@ -205,7 +202,7 @@ void HttpConnectionHandler::read()
             {
                 // Restart timer for read timeout, otherwise it would
                 // expire during large file uploads.
-                int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings->readTimeout;
+                int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings.readTimeout;
                 readTimer.start(readTimeout);
             }
         }
@@ -299,7 +296,7 @@ void HttpConnectionHandler::read()
             else
             {
                 // Start timer for next request
-                int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings->readTimeout;
+                int readTimeout = useQtSettings ? settings->value("readTimeout",10000).toInt() : listenerSettings.readTimeout;
                 readTimer.start(readTimeout);
             }
             delete currentRequest;

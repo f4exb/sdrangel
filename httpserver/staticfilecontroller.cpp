@@ -38,12 +38,12 @@ StaticFileController::StaticFileController(QSettings* settings, QObject* parent)
     qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
 }
 
-StaticFileController::StaticFileController(HttpDocrootSettings* settings, QObject* parent)
+StaticFileController::StaticFileController(const HttpDocrootSettings& settings, QObject* parent)
     :HttpRequestHandler(parent), useQtSettings(false)
 {
-    maxAge=settings->maxAge;
-    encoding=settings->encoding;
-    docroot=settings->path;
+    maxAge=settings.maxAge;
+    encoding=settings.encoding;
+    docroot=settings.path;
     if(!(docroot.startsWith(":/") || docroot.startsWith("qrc://")))
     {
         // Convert relative path to absolute, based on the directory of the config file.
@@ -53,9 +53,9 @@ StaticFileController::StaticFileController(HttpDocrootSettings* settings, QObjec
         }
     }
     qDebug("StaticFileController: docroot=%s, encoding=%s, maxAge=%i",qPrintable(docroot),qPrintable(encoding),maxAge);
-    maxCachedFileSize=settings->maxCachedFileSize;
-    cache.setMaxCost(settings->cacheSize);
-    cacheTimeout=settings->cacheTime;
+    maxCachedFileSize=settings.maxCachedFileSize;
+    cache.setMaxCost(settings.cacheSize);
+    cacheTimeout=settings.cacheTime;
     qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
 }
 

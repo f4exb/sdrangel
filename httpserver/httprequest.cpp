@@ -12,24 +12,24 @@
 
 using namespace qtwebapp;
 
-HttpRequest::HttpRequest(QSettings* settings) : useQtSettings(true)
+HttpRequest::HttpRequest(QSettings* settings)
 {
     status=waitForRequest;
     currentSize=0;
     expectedBodySize=0;
     maxSize=settings->value("maxRequestSize","16000").toInt();
     maxMultiPartSize=settings->value("maxMultiPartSize","1000000").toInt();
-    tempFile=NULL;
+    tempFile=0;
 }
 
-HttpRequest::HttpRequest(HttpListenerSettings* settings) : useQtSettings(false)
+HttpRequest::HttpRequest(const HttpListenerSettings& settings)
 {
     status=waitForRequest;
     currentSize=0;
     expectedBodySize=0;
-    maxSize=settings->maxRequestSize;
-    maxMultiPartSize=settings->maxMultiPartSize;
-    tempFile=NULL;
+    maxSize=settings.maxRequestSize;
+    maxMultiPartSize=settings.maxMultiPartSize;
+    tempFile=0;
 }
 
 

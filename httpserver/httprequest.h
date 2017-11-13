@@ -15,6 +15,7 @@
 #include <QTemporaryFile>
 #include <QUuid>
 #include "httpglobal.h"
+#include "httplistenersettings.h"
 
 namespace qtwebapp {
 
@@ -35,8 +36,6 @@ namespace qtwebapp {
   The body is always a little larger than the file itself.
 */
 
-class HttpListenerSettings;
-
 class DECLSPEC HttpRequest {
     Q_DISABLE_COPY(HttpRequest)
     friend class HttpSessionStore;
@@ -51,7 +50,12 @@ public:
       @param settings Configuration settings
     */
     HttpRequest(QSettings* settings);
-    HttpRequest(HttpListenerSettings* settings);
+
+    /**
+      Constructor.
+      @param settings Configuration settings as a structure
+    */
+    HttpRequest(const HttpListenerSettings& settings);
 
     /**
       Destructor.
@@ -234,9 +238,6 @@ private:
 
     /** Buffer for collecting characters of request and header lines */
     QByteArray lineBuffer;
-
-    /** settings flag */
-    bool useQtSettings;
 
 };
 

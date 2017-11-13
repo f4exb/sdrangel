@@ -6,7 +6,6 @@
 #endif
 #include <QDir>
 #include "httpconnectionhandlerpool.h"
-#include "httplistenersettings.h"
 
 using namespace qtwebapp;
 
@@ -15,7 +14,6 @@ HttpConnectionHandlerPool::HttpConnectionHandlerPool(QSettings* settings, HttpRe
 {
     Q_ASSERT(settings!=0);
     this->settings=settings;
-    this->listenerSettings=0;
     this->requestHandler=requestHandler;
     this->sslConfiguration=NULL;
     loadSslConfig();
@@ -23,16 +21,15 @@ HttpConnectionHandlerPool::HttpConnectionHandlerPool(QSettings* settings, HttpRe
     connect(&cleanupTimer, SIGNAL(timeout()), SLOT(cleanup()));
 }
 
-HttpConnectionHandlerPool::HttpConnectionHandlerPool(HttpListenerSettings* settings, HttpRequestHandler* requestHandler)
-    : QObject()
+HttpConnectionHandlerPool::HttpConnectionHandlerPool(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler)
+    : QObject(), useQtSettings(false)
 {
-    Q_ASSERT(settings!=0);
     this->settings=0;
-    this->listenerSettings=settings;
+    listenerSettings=settings;
     this->requestHandler=requestHandler;
     this->sslConfiguration=NULL;
     loadSslConfig();
-    cleanupTimer.start(settings->cleanupInterval);
+    cleanupTimer.start(settings.cleanupInterval);
     connect(&cleanupTimer, SIGNAL(timeout()), SLOT(cleanup()));
 }
 
@@ -66,7 +63,7 @@ HttpConnectionHandler* HttpConnectionHandlerPool::getConnectionHandler()
     // create a new handler, if necessary
     if (!freeHandler)
     {
-        int maxConnectionHandlers = useQtSettings ? settings->value("maxThreads",100).toInt() : listenerSettings->maxThreads;
+        int maxConnectionHandlers = useQtSettings ? settings->value("maxThreads",100).toInt() : listenerSettings.maxThreads;
         if (pool.count()<maxConnectionHandlers)
         {
             freeHandler=new HttpConnectionHandler(settings,requestHandler,sslConfiguration);
@@ -81,7 +78,7 @@ HttpConnectionHandler* HttpConnectionHandlerPool::getConnectionHandler()
 
 void HttpConnectionHandlerPool::cleanup()
 {
-    int maxIdleHandlers = useQtSettings ? settings->value("minThreads",1).toInt() : listenerSettings->minThreads;
+    int maxIdleHandlers = useQtSettings ? settings->value("minThreads",1).toInt() : listenerSettings.minThreads;
     int idleCounter=0;
     mutex.lock();
     foreach(HttpConnectionHandler* handler, pool)
@@ -104,8 +101,8 @@ void HttpConnectionHandlerPool::cleanup()
 void HttpConnectionHandlerPool::loadSslConfig()
 {
     // If certificate and key files are configured, then load them
-    QString sslKeyFileName = useQtSettings ? settings->value("sslKeyFile","").toString() : listenerSettings->sslKeyFile;
-    QString sslCertFileName = useQtSettings ? settings->value("sslCertFile","").toString() : listenerSettings->sslCertFile;
+    QString sslKeyFileName = useQtSettings ? settings->value("sslKeyFile","").toString() : listenerSettings.sslKeyFile;
+    QString sslCertFileName = useQtSettings ? settings->value("sslCertFile","").toString() : listenerSettings.sslCertFile;
     if (!sslKeyFileName.isEmpty() && !sslCertFileName.isEmpty())
     {
         #ifdef QT_NO_OPENSSL

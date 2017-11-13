@@ -49,11 +49,11 @@ class DECLSPEC StaticFileController : public HttpRequestHandler  {
     Q_DISABLE_COPY(StaticFileController)
 public:
 
-    /** Constructor */
+    /** Constructor with Qt settings*/
     StaticFileController(QSettings* settings, QObject* parent = NULL);
 
-    /** Constructor */
-    StaticFileController(HttpDocrootSettings* settings, QObject* parent = NULL);
+    /** Constructor with settings structure */
+    StaticFileController(const HttpDocrootSettings& settings, QObject* parent = NULL);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);

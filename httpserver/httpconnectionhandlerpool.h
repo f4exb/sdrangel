@@ -7,6 +7,7 @@
 #include <QMutex>
 #include "httpglobal.h"
 #include "httpconnectionhandler.h"
+#include "httplistenersettings.h"
 
 namespace qtwebapp {
 
@@ -45,8 +46,6 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
-class HttpListenerSettings;
-
 class DECLSPEC HttpConnectionHandlerPool : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(HttpConnectionHandlerPool)
@@ -59,7 +58,14 @@ public:
       @warning The requestMapper gets deleted by the destructor of this pool
     */
     HttpConnectionHandlerPool(QSettings* settings, HttpRequestHandler* requestHandler);
-    HttpConnectionHandlerPool(HttpListenerSettings* settings, HttpRequestHandler* requestHandler);
+
+    /**
+      Constructor.
+      @param settings Configuration settings for the HTTP server as structure
+      @param requestHandler The handler that will process each received HTTP request.
+      @warning The requestMapper gets deleted by the destructor of this pool
+    */
+    HttpConnectionHandlerPool(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler);
 
     /** Destructor */
     virtual ~HttpConnectionHandlerPool();
@@ -67,11 +73,25 @@ public:
     /** Get a free connection handler, or 0 if not available. */
     HttpConnectionHandler* getConnectionHandler();
 
+    /**
+     * Get a listener settings copy
+     * @return The current listener settings
+     */
+    HttpListenerSettings getListenerSettings() const { return listenerSettings; }
+
+    /**
+     * Set new listener settings data
+     * @param Listener settings to replace current data
+     */
+    void setListenerSettings(const HttpListenerSettings& settings) { listenerSettings = settings; }
+
 private:
 
-    /** Settings for this pool */
+    /** Settings for this pool as Qt settings*/
     QSettings* settings;
-    HttpListenerSettings* listenerSettings;
+
+    /** Settings for this pool as structure*/
+    HttpListenerSettings listenerSettings;
 
     /** Will be assigned to each Connectionhandler during their creation */
     HttpRequestHandler* requestHandler;

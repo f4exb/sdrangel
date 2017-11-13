@@ -16,10 +16,9 @@
 #include "httpglobal.h"
 #include "httprequest.h"
 #include "httprequesthandler.h"
+#include "httplistenersettings.h"
 
 namespace qtwebapp {
-
-class HttpListenerSettings;
 
 /** Alias type definition, for compatibility to different Qt versions */
 #if QT_VERSION >= 0x050000
@@ -56,12 +55,19 @@ public:
 
     /**
       Constructor.
-      @param settings Configuration settings of the HTTP webserver
+      @param settings Configuration settings of the HTTP webserver as Qt settings
       @param requestHandler Handler that will process each incoming HTTP request
       @param sslConfiguration SSL (HTTPS) will be used if not NULL
     */
     HttpConnectionHandler(QSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
-    HttpConnectionHandler(HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
+
+    /**
+      Constructor.
+      @param settings Configuration settings of the HTTP webserver as a structure
+      @param requestHandler Handler that will process each incoming HTTP request
+      @param sslConfiguration SSL (HTTPS) will be used if not NULL
+    */
+    HttpConnectionHandler(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
 
     /** Destructor */
     virtual ~HttpConnectionHandler();
@@ -72,11 +78,26 @@ public:
     /** Mark this handler as busy */
     void setBusy();
 
+    /**
+     * Get a listener settings copy
+     * @return The current listener settings
+     */
+    HttpListenerSettings getListenerSettings() const { return listenerSettings; }
+
+    /**
+     * Set new listener settings data
+     * @param Listener settings to replace current data
+     */
+    void setListenerSettings(const HttpListenerSettings& settings) { listenerSettings = settings; }
+
+
 private:
 
     /** Configuration settings */
     QSettings* settings;
-    HttpListenerSettings* listenerSettings;
+
+    /** Configuration settings */
+    HttpListenerSettings listenerSettings;
 
     /** TCP socket of the current connection  */
     QTcpSocket* socket;
