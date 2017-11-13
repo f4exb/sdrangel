@@ -53,18 +53,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-    void on_channelSampleRate_changed(quint64 value);
-    void on_useRationalDownsampler_toggled(bool checked);
-	void on_BW_valueChanged(int value);
-	void on_lowCut_valueChanged(int value);
-	void on_spanLog2_currentIndexChanged(int index);
-	void on_ssb_toggled(bool checked);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-    void handleInputMessages();
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::ChannelAnalyzerNGGUI* ui;
@@ -96,6 +86,18 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+    void on_channelSampleRate_changed(quint64 value);
+    void on_useRationalDownsampler_toggled(bool checked);
+	void on_BW_valueChanged(int value);
+	void on_lowCut_valueChanged(int value);
+	void on_spanLog2_currentIndexChanged(int index);
+	void on_ssb_toggled(bool checked);
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void handleInputMessages();
+	void tick();
 };
 
 #endif // INCLUDE_CHANNELANALYZERNGGUI_H

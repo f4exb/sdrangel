@@ -11,8 +11,6 @@
 class PluginAPI;
 class DeviceUISet;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class AMDemod;
 class BasebandSampleSink;
 
@@ -38,18 +36,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_bandpassEnable_toggled(bool checked);
-	void on_rfBW_valueChanged(int value);
-	void on_volume_valueChanged(int value);
-	void on_squelch_valueChanged(int value);
-	void on_audioMute_toggled(bool checked);
-    void on_copyAudioToUDP_toggled(bool copy);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDialogCalled(const QPoint& p);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::AMDemodGUI* ui;
@@ -59,8 +47,6 @@ private:
 	AMDemodSettings m_settings;
 	bool m_doApplySettings;
 
-//	ThreadedBasebandSampleSink* m_threadedChannelizer;
-//	DownChannelizer* m_channelizer;
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
@@ -76,6 +62,18 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_bandpassEnable_toggled(bool checked);
+	void on_rfBW_valueChanged(int value);
+	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
+	void on_audioMute_toggled(bool checked);
+    void on_copyAudioToUDP_toggled(bool copy);
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+	void tick();
 };
 
 #endif // INCLUDE_AMDEMODGUI_H

@@ -140,6 +140,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 
 		blockApplySettings(false);
 	    m_channelMarker.blockSignals(false);
+	    m_channelMarker.emitChangedByAPI();
 
         ui->spanLog2->setCurrentIndex(spanLog2);
         setNewFinalRate(spanLog2);
@@ -220,8 +221,9 @@ void ChannelAnalyzerNGGUI::handleInputMessages()
     }
 }
 
-void ChannelAnalyzerNGGUI::channelMarkerChanged()
+void ChannelAnalyzerNGGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 	applySettings();
 }
 
@@ -413,13 +415,14 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::gray);
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
-
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+    m_channelMarker.blockSignals(false);
+	m_channelMarker.setVisible(true); // activate signal on the last setting only
+	setTitleColor(m_channelMarker.getColor());
 
     m_deviceUISet->registerRxChannelInstance(ChannelAnalyzerNG::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -428,6 +431,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	applySettings();
@@ -554,9 +558,6 @@ void ChannelAnalyzerNGGUI::applySettings()
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
         int sampleRate = getRequestedChannelSampleRate();
 
         ChannelAnalyzerNG::MsgConfigureChannelizer *msgChannelizer = ChannelAnalyzerNG::MsgConfigureChannelizer::create(sampleRate, m_channelMarker.getCenterFrequency());
@@ -579,15 +580,11 @@ void ChannelAnalyzerNGGUI::applySettings()
 
 void ChannelAnalyzerNGGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
 }
 
 void ChannelAnalyzerNGGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
 }
 
