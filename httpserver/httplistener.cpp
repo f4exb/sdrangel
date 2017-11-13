@@ -6,18 +6,36 @@
 #include "httplistener.h"
 #include "httpconnectionhandler.h"
 #include "httpconnectionhandlerpool.h"
+#include "httplistenersettings.h"
+
 #include <QCoreApplication>
 
 using namespace qtwebapp;
 
 HttpListener::HttpListener(QSettings* settings, HttpRequestHandler* requestHandler, QObject *parent)
-    : QTcpServer(parent)
+    : QTcpServer(parent), useQtSettings(true)
 {
-    Q_ASSERT(settings!=0);
-    Q_ASSERT(requestHandler!=0);
-    pool=NULL;
-    this->settings=settings;
-    this->requestHandler=requestHandler;
+    Q_ASSERT(settings != 0);
+    Q_ASSERT(requestHandler != 0);
+    pool = 0;
+    this->settings = settings;
+    this->listenerSettings = 0;
+    this->requestHandler = requestHandler;
+    // Reqister type of socketDescriptor for signal/slot handling
+    qRegisterMetaType<tSocketDescriptor>("tSocketDescriptor");
+    // Start listening
+    listen();
+}
+
+HttpListener::HttpListener(HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QObject *parent)
+    : QTcpServer(parent), useQtSettings(false)
+{
+    Q_ASSERT(settings != 0);
+    Q_ASSERT(requestHandler != 0);
+    pool = 0;
+    this->settings = 0;
+    this->listenerSettings = settings;
+    this->requestHandler = requestHandler;
     // Reqister type of socketDescriptor for signal/slot handling
     qRegisterMetaType<tSocketDescriptor>("tSocketDescriptor");
     // Start listening
@@ -38,8 +56,8 @@ void HttpListener::listen()
     {
         pool=new HttpConnectionHandlerPool(settings,requestHandler);
     }
-    QString host = settings->value("host").toString();
-    int port=settings->value("port").toInt();
+    QString host = useQtSettings ? settings->value("host").toString() : listenerSettings->host;
+    int port = useQtSettings ? settings->value("port").toInt() : listenerSettings->port;
     QTcpServer::listen(host.isEmpty() ? QHostAddress::Any : QHostAddress(host), port);
     if (!isListening())
     {

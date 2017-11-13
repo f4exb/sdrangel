@@ -4,19 +4,31 @@
 */
 
 #include "httprequest.h"
+#include "httplistenersettings.h"
+
 #include <QList>
 #include <QDir>
 #include "httpcookie.h"
 
 using namespace qtwebapp;
 
-HttpRequest::HttpRequest(QSettings* settings)
+HttpRequest::HttpRequest(QSettings* settings) : useQtSettings(true)
 {
     status=waitForRequest;
     currentSize=0;
     expectedBodySize=0;
     maxSize=settings->value("maxRequestSize","16000").toInt();
     maxMultiPartSize=settings->value("maxMultiPartSize","1000000").toInt();
+    tempFile=NULL;
+}
+
+HttpRequest::HttpRequest(HttpListenerSettings* settings) : useQtSettings(false)
+{
+    status=waitForRequest;
+    currentSize=0;
+    expectedBodySize=0;
+    maxSize=settings->maxRequestSize;
+    maxMultiPartSize=settings->maxMultiPartSize;
     tempFile=NULL;
 }
 

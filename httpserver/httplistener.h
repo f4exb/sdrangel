@@ -41,6 +41,8 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
+class HttpListenerSettings;
+
 class DECLSPEC HttpListener : public QTcpServer {
     Q_OBJECT
     Q_DISABLE_COPY(HttpListener)
@@ -55,6 +57,7 @@ public:
       @warning Ensure to close or delete the listener before deleting the request handler.
     */
     HttpListener(QSettings* settings, HttpRequestHandler* requestHandler, QObject* parent = NULL);
+    HttpListener(HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QObject* parent = NULL);
 
     /** Destructor */
     virtual ~HttpListener();
@@ -79,12 +82,16 @@ private:
 
     /** Configuration settings for the HTTP server */
     QSettings* settings;
+    HttpListenerSettings* listenerSettings;
 
     /** Point to the reuqest handler which processes all HTTP requests */
     HttpRequestHandler* requestHandler;
 
     /** Pool of connection handlers */
     HttpConnectionHandlerPool* pool;
+
+    /** Settings flag */
+    bool useQtSettings;
 
 signals:
 
