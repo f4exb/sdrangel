@@ -17,6 +17,8 @@
 
 namespace qtwebapp {
 
+class HttpSessionsSettings;
+
 /**
   Stores HTTP sessions and deletes them when they have expired.
   The following configuration settings are required in the config file:
@@ -39,6 +41,7 @@ public:
 
     /** Constructor. */
     HttpSessionStore(QSettings* settings, QObject* parent=NULL);
+    HttpSessionStore(HttpSessionsSettings* settings, QObject* parent=NULL);
 
     /** Destructor */
     virtual ~HttpSessionStore();
@@ -86,6 +89,7 @@ private:
 
     /** Configuration settings */
     QSettings* settings;
+    HttpSessionsSettings *sessionsSettings;
 
     /** Timer to remove expired sessions */
     QTimer cleanupTimer;
@@ -98,6 +102,9 @@ private:
 
     /** Used to synchronize threads */
     QMutex mutex;
+
+    /** Settings flag */
+    bool useQtSettings;
 
 private slots:
 
