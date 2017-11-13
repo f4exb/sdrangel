@@ -45,6 +45,8 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
+class HttpListenerSettings;
+
 class DECLSPEC HttpConnectionHandlerPool : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(HttpConnectionHandlerPool)
@@ -57,6 +59,7 @@ public:
       @warning The requestMapper gets deleted by the destructor of this pool
     */
     HttpConnectionHandlerPool(QSettings* settings, HttpRequestHandler* requestHandler);
+    HttpConnectionHandlerPool(HttpListenerSettings* settings, HttpRequestHandler* requestHandler);
 
     /** Destructor */
     virtual ~HttpConnectionHandlerPool();
@@ -68,6 +71,7 @@ private:
 
     /** Settings for this pool */
     QSettings* settings;
+    HttpListenerSettings* listenerSettings;
 
     /** Will be assigned to each Connectionhandler during their creation */
     HttpRequestHandler* requestHandler;
@@ -86,6 +90,9 @@ private:
 
     /** Load SSL configuration */
     void loadSslConfig();
+
+    /** Settings flag */
+    bool useQtSettings;
 
 private slots:
 

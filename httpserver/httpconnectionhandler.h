@@ -19,6 +19,8 @@
 
 namespace qtwebapp {
 
+class HttpListenerSettings;
+
 /** Alias type definition, for compatibility to different Qt versions */
 #if QT_VERSION >= 0x050000
     typedef qintptr tSocketDescriptor;
@@ -59,6 +61,7 @@ public:
       @param sslConfiguration SSL (HTTPS) will be used if not NULL
     */
     HttpConnectionHandler(QSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
+    HttpConnectionHandler(HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
 
     /** Destructor */
     virtual ~HttpConnectionHandler();
@@ -73,6 +76,7 @@ private:
 
     /** Configuration settings */
     QSettings* settings;
+    HttpListenerSettings* listenerSettings;
 
     /** TCP socket of the current connection  */
     QTcpSocket* socket;
@@ -97,6 +101,9 @@ private:
 
     /**  Create SSL or TCP socket */
     void createSocket();
+
+    /** Settings flag */
+    bool useQtSettings;
 
 public slots:
 
