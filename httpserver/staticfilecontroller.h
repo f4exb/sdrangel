@@ -42,6 +42,8 @@ namespace qtwebapp {
   received a related HTTP request.
 */
 
+class HttpDocrootSettings;
+
 class DECLSPEC StaticFileController : public HttpRequestHandler  {
     Q_OBJECT
     Q_DISABLE_COPY(StaticFileController)
@@ -49,6 +51,9 @@ public:
 
     /** Constructor */
     StaticFileController(QSettings* settings, QObject* parent = NULL);
+
+    /** Constructor */
+    StaticFileController(HttpDocrootSettings* settings, QObject* parent = NULL);
 
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);
@@ -81,6 +86,9 @@ private:
 
     /** Used to synchronize cache access for threads */
     QMutex mutex;
+
+    /** Settings flag */
+    bool useQtSettings;
 
     /** Set a content-type header in the response depending on the ending of the filename */
     void setContentType(QString file, HttpResponse& response) const;

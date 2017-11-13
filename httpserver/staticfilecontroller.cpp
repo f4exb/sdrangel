@@ -4,6 +4,8 @@
 */
 
 #include "staticfilecontroller.h"
+#include "httpdocrootsettings.h"
+
 #include <QFileInfo>
 #include <QDir>
 #include <QDateTime>
@@ -11,7 +13,7 @@
 using namespace qtwebapp;
 
 StaticFileController::StaticFileController(QSettings* settings, QObject* parent)
-    :HttpRequestHandler(parent)
+    :HttpRequestHandler(parent), useQtSettings(true)
 {
     maxAge=settings->value("maxAge","60000").toInt();
     encoding=settings->value("encoding","UTF-8").toString();
@@ -36,6 +38,26 @@ StaticFileController::StaticFileController(QSettings* settings, QObject* parent)
     qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
 }
 
+StaticFileController::StaticFileController(HttpDocrootSettings* settings, QObject* parent)
+    :HttpRequestHandler(parent), useQtSettings(false)
+{
+    maxAge=settings->maxAge;
+    encoding=settings->encoding;
+    docroot=settings->path;
+    if(!(docroot.startsWith(":/") || docroot.startsWith("qrc://")))
+    {
+        // Convert relative path to absolute, based on the directory of the config file.
+        if (QDir::isRelativePath(docroot))
+        {
+            docroot = QFileInfo(QDir::currentPath(), docroot).absoluteFilePath();
+        }
+    }
+    qDebug("StaticFileController: docroot=%s, encoding=%s, maxAge=%i",qPrintable(docroot),qPrintable(encoding),maxAge);
+    maxCachedFileSize=settings->maxCachedFileSize;
+    cache.setMaxCost(settings->cacheSize);
+    cacheTimeout=settings->cacheTime;
+    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
+}
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)
 {

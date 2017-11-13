@@ -26,6 +26,9 @@ set(httpserver_HEADERS
    httpsession.h
    httpsessionstore.h
    staticfilecontroller.h
+   httplistenersettings.h
+   httpdocrootsettings.h
+   httpsessionssettings.h
 )
 
 include_directories(
