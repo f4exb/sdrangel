@@ -49,6 +49,7 @@ void BasicChannelSettingsDialog::on_colorBtn_clicked()
 
 void BasicChannelSettingsDialog::accept()
 {
+    m_channelMarker->blockSignals(true);
     m_channelMarker->setTitle(ui->title->text());
 
     if(m_color.isValid()) {
@@ -74,9 +75,9 @@ void BasicChannelSettingsDialog::accept()
         udpPort = 9999;
     }
 
-    m_channelMarker->setUDPSendPort(udpPort);
-
     m_channelMarker->setFrequencyScaleDisplayType((ChannelMarker::frequencyScaleDisplay_t) ui->fScaleDisplayType->currentIndex());
+    m_channelMarker->blockSignals(false);
+    m_channelMarker->setUDPSendPort(udpPort); // activate signal on the last setting only
 
     m_hasChanged = true;
     QDialog::accept();

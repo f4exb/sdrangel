@@ -216,7 +216,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 
 		m_settingsMutex.unlock();
 
-		qDebug() << "  - MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
+		qDebug() << "ChannelAnalyzer::handleMessage: MsgConfigureChannelAnalyzer: m_Bandwidth: " << m_Bandwidth
 				<< " m_LowCutoff: " << m_LowCutoff
 				<< " m_spanLog2: " << m_spanLog2
 				<< " m_ssb: " << m_ssb;

@@ -47,58 +47,75 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	setUDPAddress("127.0.0.1");
 }
 
+void ChannelMarker::emitChangedByAPI()
+{
+    emit changedByAPI();
+}
+
 void ChannelMarker::setTitle(const QString& title)
 {
 	m_title = title;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setCenterFrequency(int centerFrequency)
 {
 	m_centerFrequency = centerFrequency;
-	emit changed();
+	emit changedByAPI();
+}
+
+void ChannelMarker::setCenterFrequencyByCursor(int centerFrequency)
+{
+    m_centerFrequency = centerFrequency;
+    emit changedByCursor();
 }
 
 void ChannelMarker::setBandwidth(int bandwidth)
 {
 	m_bandwidth = bandwidth;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setOppositeBandwidth(int bandwidth)
 {
     m_oppositeBandwidth = bandwidth;
-    emit changed();
+    emit changedByAPI();
 }
 
 void ChannelMarker::setLowCutoff(int lowCutoff)
 {
 	m_lowCutoff = lowCutoff;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setSidebands(sidebands_t sidebands)
 {
 	m_sidebands = sidebands;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setVisible(bool visible)
 {
 	m_visible = visible;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setHighlighted(bool highlighted)
 {
 	m_highlighted = highlighted;
-	emit changed();
+	emit changedByAPI();
+}
+
+void ChannelMarker::setHighlightedByCursor(bool highlighted)
+{
+    m_highlighted = highlighted;
+    emit highlightedByCursor();
 }
 
 void ChannelMarker::setColor(const QColor& color)
 {
 	m_color = color;
-	emit changed();
+	emit changedByAPI();
 }
 
 void ChannelMarker::setUDPAddress(const QString& udpAddress)
@@ -106,21 +123,21 @@ void ChannelMarker::setUDPAddress(const QString& udpAddress)
     m_udpAddress = udpAddress;
     m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
     m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
-    emit changed();
+    emit changedByAPI();
 }
 
 void ChannelMarker::setUDPReceivePort(quint16 port)
 {
     m_udpReceivePort = port;
     m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
-    emit changed();
+    emit changedByAPI();
 }
 
 void ChannelMarker::setUDPSendPort(quint16 port)
 {
     m_udpSendPort = port;
     m_displayAddressSend = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
-    emit changed();
+    emit changedByAPI();
 }
 
 void ChannelMarker::resetToDefaults()

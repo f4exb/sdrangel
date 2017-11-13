@@ -32,10 +32,13 @@ public:
 
 	ChannelMarker(QObject* parent = NULL);
 
+	void emitChangedByAPI();
+
 	void setTitle(const QString& title);
 	const QString& getTitle() const { return m_title; }
 
 	void setCenterFrequency(int centerFrequency);
+    void setCenterFrequencyByCursor(int centerFrequency);
 	int getCenterFrequency() const { return m_centerFrequency; }
 
 	void setBandwidth(int bandwidth);
@@ -54,6 +57,7 @@ public:
 	bool getVisible() const { return m_visible; }
 
 	void setHighlighted(bool highlighted);
+    void setHighlightedByCursor(bool highlighted);
 	bool getHighlighted() const { return m_highlighted; }
 
 	void setColor(const QColor& color);
@@ -104,7 +108,9 @@ protected:
     void resetToDefaults();
 
 signals:
-	void changed();
+	void changedByAPI();
+    void changedByCursor();
+    void highlightedByCursor();
 };
 
 #endif // INCLUDE_CHANNELMARKER_H

@@ -280,7 +280,7 @@ void GLSpectrum::addChannelMarker(ChannelMarker* channelMarker)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	connect(channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+	connect(channelMarker, SIGNAL(changedByAPI()), this, SLOT(channelMarkerChanged()));
 	connect(channelMarker, SIGNAL(destroyed(QObject*)), this, SLOT(channelMarkerDestroyed(QObject*)));
 	m_channelMarkerStates.append(new ChannelMarkerState(channelMarker));
 	m_changesPending = true;
@@ -1476,7 +1476,7 @@ void GLSpectrum::applyChanges()
 					switch (dv->m_channelMarker->getFrequencyScaleDisplayType())
 					{
 					case ChannelMarker::FScaleDisplay_freq:
-	                    ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6); // TODO
+	                    ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
 	                    break;
                     case ChannelMarker::FScaleDisplay_title:
                         ftext = dv->m_channelMarker->getTitle();
@@ -1597,45 +1597,73 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 		}
 	}
 
-	if(m_cursorState == CSSplitterMoving) {
-		float newShare;
-		if(!m_invertedWaterfall)
-			newShare = (float)(event->y() - m_frequencyScaleRect.height()) / (float)height();
-		else newShare = 1.0 - (float)(event->y() + m_frequencyScaleRect.height()) / (float)height();
-		if(newShare < 0.1)
-			newShare = 0.1f;
-		else if(newShare > 0.8)
-			newShare = 0.8f;
-		m_waterfallShare = newShare;
-		m_changesPending = true;
-		update();
-		return;
-	} else if(m_cursorState == CSChannelMoving) {
-		Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
-		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable())
-			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequency(freq);
-	}
+    if (m_cursorState == CSSplitterMoving)
+    {
+        float newShare;
 
-	if(m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
-		for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
-			if(m_channelMarkerStates[i]->m_rect.contains(event->pos())) {
-				if(m_cursorState == CSNormal) {
-					setCursor(Qt::SizeHorCursor);
-					m_cursorState = CSChannel;
-					m_cursorChannel = i;
-					m_channelMarkerStates[i]->m_channelMarker->setHighlighted(true);
-					return;
-				} else if(m_cursorState == CSChannel) {
-					return;
-				}
-			} else if (m_channelMarkerStates[i]->m_channelMarker->getHighlighted()) {
-				m_channelMarkerStates[i]->m_channelMarker->setHighlighted(false);
-			}
-		}
-	}
-	if(m_cursorState == CSChannel) {
+        if (!m_invertedWaterfall) {
+            newShare = (float) (event->y() - m_frequencyScaleRect.height()) / (float) height();
+        } else {
+            newShare = 1.0 - (float) (event->y() + m_frequencyScaleRect.height()) / (float) height();
+        }
+
+        if (newShare < 0.1) {
+            newShare = 0.1f;
+        } else if (newShare > 0.8) {
+            newShare = 0.8f;
+        }
+
+        m_waterfallShare = newShare;
+        m_changesPending = true;
+
+        update();
+        return;
+    }
+    else if (m_cursorState == CSChannelMoving)
+    {
+        Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
+
+        if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable())
+        {
+            m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequencyByCursor(freq);
+            channelMarkerChanged();
+        }
+    }
+
+    if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)
+    {
+        for (int i = 0; i < m_channelMarkerStates.size(); ++i)
+        {
+            if (m_channelMarkerStates[i]->m_rect.contains(event->pos()))
+            {
+                if (m_cursorState == CSNormal)
+                {
+                    setCursor(Qt::SizeHorCursor);
+                    m_cursorState = CSChannel;
+                    m_cursorChannel = i;
+                    m_channelMarkerStates[i]->m_channelMarker->setHighlightedByCursor(true);
+                    channelMarkerChanged();
+
+                    return;
+                }
+                else if (m_cursorState == CSChannel)
+                {
+                    return;
+                }
+            }
+            else if (m_channelMarkerStates[i]->m_channelMarker->getHighlighted())
+            {
+                m_channelMarkerStates[i]->m_channelMarker->setHighlightedByCursor(false);
+                channelMarkerChanged();
+            }
+        }
+    }
+
+	if(m_cursorState == CSChannel)
+	{
 		setCursor(Qt::ArrowCursor);
 		m_cursorState = CSNormal;
+
 		return;
 	}
 }
@@ -1645,22 +1673,32 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 	if(event->button() != 1)
 		return;
 
-	if(m_cursorState == CSSplitter) {
+	if(m_cursorState == CSSplitter)
+	{
 		grabMouse();
 		m_cursorState = CSSplitterMoving;
 		return;
-	} else if(m_cursorState == CSChannel) {
+	}
+	else if(m_cursorState == CSChannel)
+	{
 		grabMouse();
 		m_cursorState = CSChannelMoving;
 		return;
-	} else if((m_cursorState == CSNormal) && (m_channelMarkerStates.size() == 1)) {
+	}
+	else if((m_cursorState == CSNormal) && (m_channelMarkerStates.size() == 1))
+	{
 		grabMouse();
 		setCursor(Qt::SizeHorCursor);
 		m_cursorState = CSChannelMoving;
 		m_cursorChannel = 0;
 		Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
+
 		if(m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable())
-			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequency(freq);
+		{
+			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequencyByCursor(freq);
+			channelMarkerChanged();
+		}
+
 		return;
 	}
 }
