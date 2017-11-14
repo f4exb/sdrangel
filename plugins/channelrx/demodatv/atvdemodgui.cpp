@@ -189,6 +189,7 @@ bool ATVDemodGUI::deserialize(const QByteArray& arrData)
 
         blockApplySettings(false);
         m_channelMarker.blockSignals(false);
+        m_channelMarker.emitChangedByAPI();
 
         lineTimeUpdate();
         topTimeUpdate();
@@ -235,9 +236,11 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
     }
 }
 
-void ATVDemodGUI::viewChanged()
+void ATVDemodGUI::channelMarkerChangedByCursor()
 {
-    qDebug("ATVDemodGUI::viewChanged");
+    qDebug("ATVDemodGUI::channelMarkerChangedByCursor");
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+
     applySettings();
     applyRFSettings();
 }
@@ -287,14 +290,14 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(Qt::white);
-    m_channelMarker.setMovable(false);
     m_channelMarker.setBandwidth(6000000);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setVisible(true);
-    setTitleColor(m_channelMarker.getColor());
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true); // activate signal on the last setting only
 
-    connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+    setTitleColor(m_channelMarker.getColor());
 
     m_deviceUISet->registerRxChannelInstance(ATVDemod::m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -321,6 +324,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
+    connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     QChar delta = QChar(0x94, 0x03);
@@ -344,8 +348,6 @@ void ATVDemodGUI::applySettings()
 {
     if (m_blnDoApplySettings)
     {
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
         ATVDemod::MsgConfigureChannelizer *msgChan = ATVDemod::MsgConfigureChannelizer::create(
                 m_channelMarker.getCenterFrequency());
         m_atvDemod->getInputMessageQueue()->push(msgChan);
@@ -375,6 +377,7 @@ void ATVDemodGUI::applyRFSettings()
     if (m_blnDoApplySettings)
     {
         m_atvDemod->configureRF(m_atvDemod->getInputMessageQueue(),
+                m_channelMarker.getCenterFrequency(),
                 (ATVDemod::ATVModulation) ui->modulation->currentIndex(),
                 ui->rfBW->value() * m_rfSliderDivisor * 1.0f,
                 ui->rfOppBW->value() * m_rfSliderDivisor * 1.0f,
@@ -388,6 +391,7 @@ void ATVDemodGUI::applyRFSettings()
 void ATVDemodGUI::setChannelMarkerBandwidth()
 {
     m_blnDoApplySettings = false; // avoid infinite recursion
+    m_channelMarker.blockSignals(true);
 
     if (ui->rfFiltering->isChecked()) // FFT filter
     {
@@ -413,6 +417,8 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     }
 
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.emitChangedByAPI();
     m_blnDoApplySettings = true;
 }
 
@@ -443,16 +449,12 @@ void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
 
 void ATVDemodGUI::leaveEvent(QEvent*)
 {
-    blockApplySettings(true);
     m_channelMarker.setHighlighted(false);
-    blockApplySettings(false);
 }
 
 void ATVDemodGUI::enterEvent(QEvent*)
 {
-    blockApplySettings(true);
     m_channelMarker.setHighlighted(true);
-    blockApplySettings(false);
 }
 
 void ATVDemodGUI::tick()
@@ -589,6 +591,7 @@ void ATVDemodGUI::on_decimatorEnable_toggled(bool checked __attribute__((unused)
 void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    applyRFSettings();
 }
 
 void ATVDemodGUI::on_bfo_valueChanged(int value)

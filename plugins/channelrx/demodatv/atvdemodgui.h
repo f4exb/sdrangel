@@ -54,32 +54,8 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& objMessage);
 
-private slots:
-	void viewChanged();
-    void handleSourceMessages();
-    void onWidgetRolled(QWidget* widget, bool rollDown);
-    void tick();
-    void on_synchLevel_valueChanged(int value);
-    void on_blackLevel_valueChanged(int value);
-    void on_lineTime_valueChanged(int value);
-    void on_topTime_valueChanged(int value);
-    void on_hSync_clicked();
-    void on_vSync_clicked();
-    void on_invertVideo_clicked();
-    void on_halfImage_clicked();
-    void on_modulation_currentIndexChanged(int index);
-    void on_nbLines_currentIndexChanged(int index);
-    void on_fps_currentIndexChanged(int index);
-    void on_standard_currentIndexChanged(int index);
-    void on_reset_clicked(bool checked);
-    void on_rfBW_valueChanged(int value);
-    void on_rfOppBW_valueChanged(int value);
-    void on_rfFiltering_toggled(bool checked);
-    void on_decimatorEnable_toggled(bool checked);
-    void on_deltaFrequency_changed(qint64 value);
-    void on_bfo_valueChanged(int value);
-    void on_fmDeviation_valueChanged(int value);
-    void on_screenTabWidget_currentChanged(int index);
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::ATVDemodGUI* ui;
@@ -117,6 +93,32 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void tick();
+    void on_synchLevel_valueChanged(int value);
+    void on_blackLevel_valueChanged(int value);
+    void on_lineTime_valueChanged(int value);
+    void on_topTime_valueChanged(int value);
+    void on_hSync_clicked();
+    void on_vSync_clicked();
+    void on_invertVideo_clicked();
+    void on_halfImage_clicked();
+    void on_modulation_currentIndexChanged(int index);
+    void on_nbLines_currentIndexChanged(int index);
+    void on_fps_currentIndexChanged(int index);
+    void on_standard_currentIndexChanged(int index);
+    void on_reset_clicked(bool checked);
+    void on_rfBW_valueChanged(int value);
+    void on_rfOppBW_valueChanged(int value);
+    void on_rfFiltering_toggled(bool checked);
+    void on_decimatorEnable_toggled(bool checked);
+    void on_deltaFrequency_changed(qint64 value);
+    void on_bfo_valueChanged(int value);
+    void on_fmDeviation_valueChanged(int value);
+    void on_screenTabWidget_currentChanged(int index);
 };
 
 #endif // INCLUDE_ATVDEMODGUI_H

@@ -141,6 +141,7 @@ void ATVDemod::configure(
 
 void ATVDemod::configureRF(
         MessageQueue* objMessageQueue,
+        int64_t frequencyOffset,
         ATVModulation enmModulation,
         float fltRFBandwidth,
         float fltRFOppBandwidth,
@@ -150,6 +151,7 @@ void ATVDemod::configureRF(
         float fmDeviation)
 {
     Message* msgCmd = MsgConfigureRFATVDemod::create(
+            frequencyOffset,
             enmModulation,
             fltRFBandwidth,
             fltRFOppBandwidth,
@@ -506,6 +508,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_rfConfig = objCfg.m_objMsgConfig;
 
         qDebug()  << "ATVDemod::handleMessage: MsgConfigureRFATVDemod:"
+                << " m_intFrequencyOffset:" << m_rfConfig.m_intFrequencyOffset
                 << " m_enmModulation:" << m_rfConfig.m_enmModulation
                 << " m_fltRFBandwidth:" << m_rfConfig.m_fltRFBandwidth
                 << " m_fltRFOppBandwidth:" << m_rfConfig.m_fltRFOppBandwidth

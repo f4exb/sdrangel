@@ -208,6 +208,7 @@ public:
 			int intVideoTabIndex);
 
     void configureRF(MessageQueue* objMessageQueue,
+            int64_t frequencyOffset,
             ATVModulation enmModulation,
             float fltRFBandwidth,
             float fltRFOppBandwidth,
@@ -317,6 +318,7 @@ private:
 
         public:
             static MsgConfigureRFATVDemod* create(
+                    int64_t frequencyOffset,
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
@@ -326,6 +328,7 @@ private:
                     float fmDeviation)
             {
                 return new MsgConfigureRFATVDemod(
+                        frequencyOffset,
                         enmModulation,
                         fltRFBandwidth,
                         fltRFOppBandwidth,
@@ -339,6 +342,7 @@ private:
 
         private:
             MsgConfigureRFATVDemod(
+                    int64_t frequencyOffset,
                     ATVModulation enmModulation,
                     float fltRFBandwidth,
                     float fltRFOppBandwidth,
@@ -348,6 +352,7 @@ private:
                     float fmDeviation) :
                 Message()
             {
+                m_objMsgConfig.m_intFrequencyOffset = frequencyOffset;
                 m_objMsgConfig.m_enmModulation = enmModulation;
                 m_objMsgConfig.m_fltRFBandwidth = fltRFBandwidth;
                 m_objMsgConfig.m_fltRFOppBandwidth = fltRFOppBandwidth;
