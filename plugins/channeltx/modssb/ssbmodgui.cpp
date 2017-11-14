@@ -114,10 +114,10 @@ bool SSBModGUI::handleMessage(const Message& message)
     }
 }
 
-void SSBModGUI::channelMarkerChanged()
+void SSBModGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    displaySettings();
     applySettings();
 }
 
@@ -375,6 +375,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::green);
 	m_channelMarker.setBandwidth(m_spectrumRate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
@@ -382,14 +383,16 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_channelMarker.setTitle("SSB Modulator");
     m_channelMarker.setUDPAddress("127.0.0.1");
     m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true);
-    setTitleColor(m_channelMarker.getColor());
 
-    connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+    setTitleColor(m_channelMarker.getColor());
 
     m_deviceUISet->registerTxChannelInstance(SSBMod::m_channelID, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
+
+    connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
     ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
@@ -523,15 +526,10 @@ void SSBModGUI::applyBandwidths(bool force)
 
 void SSBModGUI::displaySettings()
 {
-   bool applySettingsWereBlocked = blockApplySettings(true);
-
     m_channelMarker.blockSignals(true);
-
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_bandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
 
     if (m_settings.m_dsb) {
         m_channelMarker.setSidebands(ChannelMarker::dsb);
@@ -544,8 +542,12 @@ void SSBModGUI::displaySettings()
     }
 
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
 
+    setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
 
     QString s = QString::number(m_settings.m_agcTime / 48, 'f', 0);
     ui->agcTimeText->setText(s);
@@ -587,7 +589,6 @@ void SSBModGUI::displaySettings()
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
-
     ui->spanLog2->blockSignals(false);
     ui->dsb->blockSignals(false);
     ui->BW->blockSignals(false);
@@ -605,7 +606,7 @@ void SSBModGUI::displaySettings()
     ui->volume->setValue(m_settings.m_volumeFactor * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
 
-    blockApplySettings(applySettingsWereBlocked);
+    blockApplySettings(false);
 }
 
 void SSBModGUI::displayAGCPowerThreshold()
@@ -625,16 +626,12 @@ void SSBModGUI::displayAGCPowerThreshold()
 
 void SSBModGUI::leaveEvent(QEvent*)
 {
-	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::enterEvent(QEvent*)
 {
-	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBModGUI::tick()

@@ -53,38 +53,8 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
-private slots:
-    void handleSourceMessages();
-    void channelMarkerChanged();
-    void on_deltaFrequency_changed(qint64 value);
-    void on_dsb_toggled(bool checked);
-    void on_audioBinaural_toggled(bool checked);
-    void on_audioFlipChannels_toggled(bool checked);
-    void on_spanLog2_valueChanged(int value);
-    void on_BW_valueChanged(int value);
-    void on_lowCut_valueChanged(int value);
-    void on_volume_valueChanged(int value);
-    void on_audioMute_toggled(bool checked);
-    void on_tone_toggled(bool checked);
-    void on_toneFrequency_valueChanged(int value);
-    void on_mic_toggled(bool checked);
-    void on_agc_toggled(bool checked);
-    void on_agcOrder_valueChanged(int value);
-    void on_agcTime_valueChanged(int value);
-    void on_agcThreshold_valueChanged(int value);
-    void on_agcThresholdGate_valueChanged(int value);
-    void on_agcThresholdDelay_valueChanged(int value);
-    void on_play_toggled(bool checked);
-    void on_playLoop_toggled(bool checked);
-    void on_morseKeyer_toggled(bool checked);
-
-    void on_navTimeSlider_valueChanged(int value);
-    void on_showFileDialog_clicked(bool checked);
-
-    void onWidgetRolled(QWidget* widget, bool rollDown);
-
-    void configureFileName();
-    void tick();
+public slots:
+    void channelMarkerChangedByCursor();
 
 private:
     Ui::SSBModGUI* ui;
@@ -122,6 +92,38 @@ private:
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+    void on_deltaFrequency_changed(qint64 value);
+    void on_dsb_toggled(bool checked);
+    void on_audioBinaural_toggled(bool checked);
+    void on_audioFlipChannels_toggled(bool checked);
+    void on_spanLog2_valueChanged(int value);
+    void on_BW_valueChanged(int value);
+    void on_lowCut_valueChanged(int value);
+    void on_volume_valueChanged(int value);
+    void on_audioMute_toggled(bool checked);
+    void on_tone_toggled(bool checked);
+    void on_toneFrequency_valueChanged(int value);
+    void on_mic_toggled(bool checked);
+    void on_agc_toggled(bool checked);
+    void on_agcOrder_valueChanged(int value);
+    void on_agcTime_valueChanged(int value);
+    void on_agcThreshold_valueChanged(int value);
+    void on_agcThresholdGate_valueChanged(int value);
+    void on_agcThresholdDelay_valueChanged(int value);
+    void on_play_toggled(bool checked);
+    void on_playLoop_toggled(bool checked);
+    void on_morseKeyer_toggled(bool checked);
+
+    void on_navTimeSlider_valueChanged(int value);
+    void on_showFileDialog_clicked(bool checked);
+
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+
+    void configureFileName();
+    void tick();
 };
 
 #endif /* PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_ */
