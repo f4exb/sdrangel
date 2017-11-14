@@ -126,9 +126,10 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
+	m_channelMarker.setMovable(false);
 	m_channelMarker.setVisible(true);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(viewChanged()));
 
 	m_deviceUISet->registerRxChannelInstance(LoRaDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
