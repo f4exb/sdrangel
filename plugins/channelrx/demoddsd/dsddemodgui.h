@@ -57,28 +57,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void formatStatusText();
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_rfBW_valueChanged(int index);
-	void on_demodGain_valueChanged(int value);
-    void on_volume_valueChanged(int value);
-    void on_baudRate_currentIndexChanged(int index);
-    void on_enableCosineFiltering_toggled(bool enable);
-    void on_syncOrConstellation_toggled(bool checked);
-    void on_slot1On_toggled(bool checked);
-    void on_slot2On_toggled(bool checked);
-    void on_tdmaStereoSplit_toggled(bool checked);
-	void on_fmDeviation_valueChanged(int value);
-	void on_squelchGate_valueChanged(int value);
-	void on_squelch_valueChanged(int value);
-    void on_audioMute_toggled(bool checked);
-    void on_symbolPLLLock_toggled(bool checked);
-    void on_udpOutput_toggled(bool checked);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDialogCalled(const QPoint& p);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	typedef enum
@@ -127,6 +107,28 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+    void formatStatusText();
+    void on_deltaFrequency_changed(qint64 value);
+    void on_rfBW_valueChanged(int index);
+    void on_demodGain_valueChanged(int value);
+    void on_volume_valueChanged(int value);
+    void on_baudRate_currentIndexChanged(int index);
+    void on_enableCosineFiltering_toggled(bool enable);
+    void on_syncOrConstellation_toggled(bool checked);
+    void on_slot1On_toggled(bool checked);
+    void on_slot2On_toggled(bool checked);
+    void on_tdmaStereoSplit_toggled(bool checked);
+    void on_fmDeviation_valueChanged(int value);
+    void on_squelchGate_valueChanged(int value);
+    void on_squelch_valueChanged(int value);
+    void on_audioMute_toggled(bool checked);
+    void on_symbolPLLLock_toggled(bool checked);
+    void on_udpOutput_toggled(bool checked);
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+    void tick();
 };
 
 #endif // INCLUDE_DSDDEMODGUI_H
