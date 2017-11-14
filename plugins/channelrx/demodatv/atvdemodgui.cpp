@@ -245,6 +245,11 @@ void ATVDemodGUI::channelMarkerChangedByCursor()
     applyRFSettings();
 }
 
+void ATVDemodGUI::channelMarkerHighlightedByCursor()
+{
+    setHighlighted(m_channelMarker.getHighlighted());
+}
+
 void ATVDemodGUI::handleSourceMessages()
 {
     Message* message;
@@ -325,6 +330,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
+    connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     QChar delta = QChar(0x94, 0x03);

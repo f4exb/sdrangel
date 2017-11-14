@@ -56,6 +56,7 @@ public:
 
 public slots:
 	void channelMarkerChangedByCursor();
+    void channelMarkerHighlightedByCursor();
 
 private:
 	Ui::ATVDemodGUI* ui;

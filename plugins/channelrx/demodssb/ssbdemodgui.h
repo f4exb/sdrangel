@@ -40,6 +40,7 @@ public:
 
 public slots:
 	void channelMarkerChangedByCursor();
+    void channelMarkerHighlightedByCursor();
 
 private:
 	Ui::SSBDemodGUI* ui;

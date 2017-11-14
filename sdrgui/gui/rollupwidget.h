@@ -10,6 +10,7 @@ class SDRANGEL_API RollupWidget : public QWidget {
 public:
 	RollupWidget(QWidget* parent = NULL);
 	void setTitleColor(const QColor& c);
+	void setHighlighted(bool highlighted);
 
 signals:
 	void widgetRolled(QWidget* widget, bool rollDown);
@@ -21,6 +22,7 @@ protected:
 
 	QColor m_titleColor;
 	QColor m_titleTextColor;
+	bool m_highlighted;
 
 	int arrangeRollups();
 

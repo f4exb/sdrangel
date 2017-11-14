@@ -5,7 +5,8 @@
 #include "ui_glspectrumgui.h"
 
 RollupWidget::RollupWidget(QWidget* parent) :
-	QWidget(parent)
+	QWidget(parent),
+	m_highlighted(false)
 {
 	setMinimumSize(250, 150);
 	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -99,6 +100,15 @@ void RollupWidget::setTitleColor(const QColor& c)
 	update();
 }
 
+void RollupWidget::setHighlighted(bool highlighted)
+{
+    if (m_highlighted != highlighted)
+    {
+        m_highlighted = highlighted;
+        update();
+    }
+}
+
 int RollupWidget::arrangeRollups()
 {
 	QFontMetrics fm(font());
@@ -153,7 +163,7 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	p.drawRect(width() - 5, height() - 5, 5, 5);
 
 	// Rahmen
-	p.setPen(frame);
+	p.setPen(m_highlighted ? Qt::white : frame);
 	p.setBrush(palette().window());
 	QRectF r(rect());
 	r.adjust(0.5, 0.5, -0.5, -0.5);
