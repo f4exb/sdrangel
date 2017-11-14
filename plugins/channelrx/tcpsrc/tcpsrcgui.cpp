@@ -107,8 +107,10 @@ bool TCPSrcGUI::handleMessage(const Message& message)
 	}
 }
 
-void TCPSrcGUI::channelMarkerChanged()
+void TCPSrcGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -152,23 +154,27 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+	m_channelMarker.blockSignals(true);
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_channelMarker.getColor());
+    m_channelMarker.blockSignals(false);
+	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+	setTitleColor(m_channelMarker.getColor());
 
 	m_deviceUISet->registerRxChannelInstance(TCPSrc::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setChannelMarker(&m_channelMarker);
 
+    displaySettings();
     applySettings();
 }
 
@@ -296,13 +302,17 @@ void TCPSrcGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
+    setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
+    blockApplySettings(true);
+
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+
     ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));
     setSampleFormatIndex(m_settings.m_sampleFormat);
 
@@ -312,6 +322,8 @@ void TCPSrcGUI::displaySettings()
     ui->volumeText->setText(QString("%1").arg(ui->volume->value()));
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
+
+    blockApplySettings(false);
 }
 
 void TCPSrcGUI::setSampleFormatIndex(const TCPSrcSettings::SampleFormat& sampleFormat)

@@ -39,17 +39,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_sampleFormat_currentIndexChanged(int index);
-	void on_sampleRate_textEdited(const QString& arg1);
-	void on_rfBandwidth_textEdited(const QString& arg1);
-	void on_tcpPort_textEdited(const QString& arg1);
-	void on_applyBtn_clicked();
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void on_volume_valueChanged(int value);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::TCPSrcGUI* ui;
@@ -84,6 +75,17 @@ private:
 
 	void addConnection(quint32 id, const QHostAddress& peerAddress, int peerPort);
 	void delConnection(quint32 id);
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_sampleFormat_currentIndexChanged(int index);
+	void on_sampleRate_textEdited(const QString& arg1);
+	void on_rfBandwidth_textEdited(const QString& arg1);
+	void on_tcpPort_textEdited(const QString& arg1);
+	void on_applyBtn_clicked();
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+	void on_volume_valueChanged(int value);
+	void tick();
 };
 
 #endif // INCLUDE_TCPSRCGUI_H
