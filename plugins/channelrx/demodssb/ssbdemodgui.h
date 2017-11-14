@@ -38,24 +38,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void viewChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_audioBinaural_toggled(bool binaural);
-	void on_audioFlipChannels_toggled(bool flip);
-	void on_dsb_toggled(bool dsb);
-	void on_BW_valueChanged(int value);
-	void on_lowCut_valueChanged(int value);
-	void on_volume_valueChanged(int value);
-	void on_agc_toggled(bool checked);
-    void on_agcClamping_toggled(bool checked);
-	void on_agcTimeLog2_valueChanged(int value);
-    void on_agcPowerThreshold_valueChanged(int value);
-    void on_agcThresholdGate_valueChanged(int value);
-	void on_audioMute_toggled(bool checked);
-	void on_spanLog2_valueChanged(int value);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::SSBDemodGUI* ui;
@@ -88,6 +72,24 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_audioBinaural_toggled(bool binaural);
+	void on_audioFlipChannels_toggled(bool flip);
+	void on_dsb_toggled(bool dsb);
+	void on_BW_valueChanged(int value);
+	void on_lowCut_valueChanged(int value);
+	void on_volume_valueChanged(int value);
+	void on_agc_toggled(bool checked);
+    void on_agcClamping_toggled(bool checked);
+	void on_agcTimeLog2_valueChanged(int value);
+    void on_agcPowerThreshold_valueChanged(int value);
+    void on_agcThresholdGate_valueChanged(int value);
+	void on_audioMute_toggled(bool checked);
+	void on_spanLog2_valueChanged(int value);
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+	void tick();
 };
 
 #endif // INCLUDE_SSBDEMODGUI_H

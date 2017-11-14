@@ -81,9 +81,11 @@ bool SSBDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 	return false;
 }
 
-void SSBDemodGUI::viewChanged()
+void SSBDemodGUI::channelMarkerChangedByCursor()
 {
-	applySettings();
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
@@ -220,23 +222,26 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    m_channelMarker.setColor(Qt::green);
+	m_channelMarker.blockSignals(true);
+	m_channelMarker.setColor(Qt::green);
     m_channelMarker.setBandwidth(6000);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("SSB Demodulator");
     m_channelMarker.setUDPAddress("127.0.0.1");
     m_channelMarker.setUDPSendPort(9999);
-    m_channelMarker.setVisible(true);
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true); // activate signal on the last setting only
+
     setTitleColor(m_channelMarker.getColor());
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(viewChanged()));
-
 	m_deviceUISet->registerRxChannelInstance(SSBDemod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -263,9 +268,6 @@ void SSBDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
         SSBDemod::MsgConfigureChannelizer* channelConfigMsg = SSBDemod::MsgConfigureChannelizer::create(
                 48000, m_channelMarker.getCenterFrequency());
         m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
@@ -365,15 +367,10 @@ void SSBDemodGUI::applyBandwidths(bool force)
 
 void SSBDemodGUI::displaySettings()
 {
-    bool applySettingsWereBlocked = blockApplySettings(true);
-
     m_channelMarker.blockSignals(true);
-
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
 
     if (m_settings.m_dsb) {
         m_channelMarker.setSidebands(ChannelMarker::dsb);
@@ -386,8 +383,16 @@ void SSBDemodGUI::displaySettings()
     }
 
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
+    setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    displayUDPAddress();
+
+    blockApplySettings(true);
+
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+
     ui->agc->setChecked(m_settings.m_agc);
     ui->agcClamping->setChecked(m_settings.m_agcClamping);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
@@ -438,12 +443,12 @@ void SSBDemodGUI::displaySettings()
     s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
     ui->agcThresholdGateText->setText(s);
 
-    blockApplySettings(applySettingsWereBlocked);
+    blockApplySettings(false);
 }
 
 void SSBDemodGUI::displayUDPAddress()
 {
-    //TODO: ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+    //TODO: ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)
@@ -461,16 +466,12 @@ void SSBDemodGUI::displayAGCPowerThreshold(int value)
 
 void SSBDemodGUI::leaveEvent(QEvent*)
 {
-    bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBDemodGUI::enterEvent(QEvent*)
 {
-	bool applySettingsWereBlocked = blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(applySettingsWereBlocked);
 }
 
 void SSBDemodGUI::tick()
