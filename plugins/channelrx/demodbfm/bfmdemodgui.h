@@ -29,8 +29,6 @@ class PluginAPI;
 class DeviceUISet;
 class RDSParser;
 
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 class SpectrumVis;
 class BFMDemod;
 class BasebandSampleSink;
@@ -57,26 +55,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void on_deltaFrequency_changed(qint64 value);
-	void on_rfBW_valueChanged(int value);
-	void on_afBW_valueChanged(int value);
-	void on_volume_valueChanged(int value);
-	void on_squelch_valueChanged(int value);
-	void on_audioStereo_toggled(bool stereo);
-	void on_lsbStereo_toggled(bool lsb);
-	void on_showPilot_clicked();
-	void on_rds_clicked();
-	void on_copyAudioToUDP_toggled(bool copy);
-	void on_g14ProgServiceNames_currentIndexChanged(int index);
-	void on_clearData_clicked(bool checked);
-	void on_g00AltFrequenciesBox_activated(int index);
-	void on_g14MappedFrequencies_activated(int index);
-	void on_g14AltFrequencies_activated(int index);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDialogCalled(const QPoint& p);
-    void handleInputMessages();
-	void tick();
+public slots:
+    void channelMarkerChangedByCursor();
 
 private:
 	Ui::BFMDemodGUI* ui;
@@ -104,7 +84,6 @@ private:
 	void displayUDPAddress();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
-	void channelMarkerUpdate();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -119,6 +98,27 @@ private:
             return (3*rfBW)/2;
         }
     }
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_rfBW_valueChanged(int value);
+	void on_afBW_valueChanged(int value);
+	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
+	void on_audioStereo_toggled(bool stereo);
+	void on_lsbStereo_toggled(bool lsb);
+	void on_showPilot_clicked();
+	void on_rds_clicked();
+	void on_copyAudioToUDP_toggled(bool copy);
+	void on_g14ProgServiceNames_currentIndexChanged(int index);
+	void on_clearData_clicked(bool checked);
+	void on_g00AltFrequenciesBox_activated(int index);
+	void on_g14MappedFrequencies_activated(int index);
+	void on_g14AltFrequencies_activated(int index);
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
+	void tick();
 };
 
 #endif // INCLUDE_BFMDEMODGUI_H

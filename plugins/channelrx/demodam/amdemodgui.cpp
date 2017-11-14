@@ -97,6 +97,7 @@ bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 void AMDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -236,8 +237,6 @@ void AMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-
 		AMDemod::MsgConfigureChannelizer* channelConfigMsg = AMDemod::MsgConfigureChannelizer::create(
 		        48000, m_channelMarker.getCenterFrequency());
 		m_amDemod->getInputMessageQueue()->push(channelConfigMsg);
