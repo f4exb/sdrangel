@@ -55,6 +55,8 @@ void NFMModSettings::resetToDefaults()
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;
+    m_ctcssOn = false;
+    m_ctcssIndex = 0;
     m_rgbColor = QColor(255, 0, 0).rgb();
 }
 
