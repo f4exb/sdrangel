@@ -1,3 +1,9 @@
+sdrangel (3.8.4-1) unstable; urgency=medium
+
+  * Optimize channel marker signal handling. Applied to all mods and demods
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 19 Nov 2017 18:14:18 +0100
+
 sdrangel (3.8.3-1) unstable; urgency=medium
 
   * ChannelAnalyzerNG: fixed GUI displays when channel sample rate changes
