@@ -110,8 +110,10 @@ bool WFMModGUI::handleMessage(const Message& message)
     }
 }
 
-void WFMModGUI::channelMarkerChanged()
+void WFMModGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -302,14 +304,21 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setColor(Qt::blue);
+    m_channelMarker.setBandwidth(125000);
+    m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("WFM Modulator");
-    m_channelMarker.setVisible(true);
-
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true); // activate signal on the last setting only
 
 	m_deviceUISet->registerTxChannelInstance(WFMMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
     ui->play->setEnabled(false);
     ui->play->setChecked(false);
@@ -363,13 +372,15 @@ void WFMModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
+    setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->rfBW->setCurrentIndex(WFMModSettings::getRFBWIndex(m_settings.m_rfBandwidth));
 
@@ -393,16 +404,12 @@ void WFMModGUI::displaySettings()
 
 void WFMModGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
 }
 
 void WFMModGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
 }
 
 void WFMModGUI::tick()
