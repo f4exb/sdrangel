@@ -36,17 +36,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_rfBW_currentIndexChanged(int index);
-	void on_afBW_valueChanged(int value);
-	void on_volume_valueChanged(int value);
-	void on_squelch_valueChanged(int value);
-    void on_audioMute_toggled(bool checked);
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDialogCalled(const QPoint& p);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::WFMDemodGUI* ui;
@@ -82,6 +73,17 @@ private:
 	        return (3*rfBW)/2;
 	    }
 	}
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_rfBW_currentIndexChanged(int index);
+	void on_afBW_valueChanged(int value);
+	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
+    void on_audioMute_toggled(bool checked);
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+	void tick();
 };
 
 #endif // INCLUDE_WFMDEMODGUI_H
