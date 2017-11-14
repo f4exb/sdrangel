@@ -151,8 +151,10 @@ bool ATVModGUI::handleMessage(const Message& message)
     }
 }
 
-void ATVModGUI::channelMarkerChanged()
+void ATVModGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -344,6 +346,7 @@ void ATVModGUI::handleSourceMessages()
 void ATVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    applySettings();
 }
 
 void ATVModGUI::on_modulation_currentIndexChanged(int index)
@@ -605,19 +608,24 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(m_settings.m_rgbColor);
-	m_channelMarker.setTitle("ATV Modulator");
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
-	m_channelMarker.setVisible(true);
+	m_channelMarker.setTitle("ATV Modulator");
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+	m_channelMarker.blockSignals(false);
+	m_channelMarker.setVisible(true); // activate signal on the last setting only
+
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
-
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
 
 	m_deviceUISet->registerTxChannelInstance(ATVMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
     resetToDefaults();
 
@@ -667,13 +675,16 @@ void ATVModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
+    setChannelMarkerBandwidth();
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
 
     ui->modulation->setCurrentIndex((int) m_settings.m_atvModulation);
     setRFFiltersSlidersRange(m_atvMod->getEffectiveSampleRate());
@@ -684,9 +695,6 @@ void ATVModGUI::displaySettings()
     ui->rfOppBW->setValue(roundf(m_settings.m_rfOppBandwidth / m_rfSliderDivisor));
     ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 
-    setChannelMarkerBandwidth();
-
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
 
     ui->forceDecimator->setChecked(m_settings.m_forceDecimator);
     ui->channelMute->setChecked(m_settings.m_channelMute);
@@ -722,16 +730,12 @@ void ATVModGUI::displaySettings()
 
 void ATVModGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
 }
 
 void ATVModGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
 }
 
 void ATVModGUI::tick()

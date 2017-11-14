@@ -54,29 +54,8 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
-private slots:
-    void channelMarkerChanged();
-    void handleSourceMessages();
-
-    void on_deltaFrequency_changed(qint64 value);
-    void on_rfBW_valueChanged(int value);
-    void on_modPercent_valueChanged(int value);
-    void on_volume_valueChanged(int value);
-    void on_channelMute_toggled(bool checked);
-    void on_tone_toggled(bool checked);
-    void on_toneFrequency_valueChanged(int value);
-    void on_mic_toggled(bool checked);
-    void on_play_toggled(bool checked);
-    void on_morseKeyer_toggled(bool checked);
-
-    void on_playLoop_toggled(bool checked);
-    void on_navTimeSlider_valueChanged(int value);
-    void on_showFileDialog_clicked(bool checked);
-
-    void onWidgetRolled(QWidget* widget, bool rollDown);
-
-    void configureFileName();
-    void tick();
+public slots:
+    void channelMarkerChangedByCursor();
 
 private:
     Ui::AMModGUI* ui;
@@ -109,6 +88,29 @@ private:
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+
+    void on_deltaFrequency_changed(qint64 value);
+    void on_rfBW_valueChanged(int value);
+    void on_modPercent_valueChanged(int value);
+    void on_volume_valueChanged(int value);
+    void on_channelMute_toggled(bool checked);
+    void on_tone_toggled(bool checked);
+    void on_toneFrequency_valueChanged(int value);
+    void on_mic_toggled(bool checked);
+    void on_play_toggled(bool checked);
+    void on_morseKeyer_toggled(bool checked);
+
+    void on_playLoop_toggled(bool checked);
+    void on_navTimeSlider_valueChanged(int value);
+    void on_showFileDialog_clicked(bool checked);
+
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+
+    void configureFileName();
+    void tick();
 };
 
 #endif /* PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_ */

@@ -53,44 +53,8 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
-private slots:
-    void channelMarkerChanged();
-    void handleSourceMessages();
-
-    void on_deltaFrequency_changed(qint64 value);
-    void on_channelMute_toggled(bool checked);
-    void on_forceDecimator_toggled(bool checked);
-    void on_modulation_currentIndexChanged(int index);
-    void on_rfScaling_valueChanged(int value);
-    void on_fmExcursion_valueChanged(int value);
-    void on_rfBW_valueChanged(int value);
-    void on_rfOppBW_valueChanged(int value);
-    void on_nbLines_currentIndexChanged(int index);
-    void on_fps_currentIndexChanged(int index);
-    void on_standard_currentIndexChanged(int index);
-    void on_invertVideo_clicked(bool checked);
-    void on_uniformLevel_valueChanged(int value);
-    void on_inputSelect_currentIndexChanged(int index);
-    void on_imageFileDialog_clicked(bool checked);
-    void on_videoFileDialog_clicked(bool checked);
-
-    void on_playVideo_toggled(bool checked);
-    void on_playLoop_toggled(bool checked);
-    void on_navTimeSlider_valueChanged(int value);
-
-    void on_playCamera_toggled(bool checked);
-    void on_camSelect_currentIndexChanged(int index);
-    void on_cameraManualFPSEnable_toggled(bool checked);
-    void on_cameraManualFPS_valueChanged(int value);
-
-    void on_overlayTextShow_toggled(bool checked);
-    void on_overlayText_textEdited(const QString& arg1);
-
-    void onWidgetRolled(QWidget* widget, bool rollDown);
-
-    void configureImageFileName();
-    void configureVideoFileName();
-    void tick();
+public slots:
+    void channelMarkerChangedByCursor();
 
 private:
     Ui::ATVModGUI* ui;
@@ -131,6 +95,44 @@ private:
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+
+    void on_deltaFrequency_changed(qint64 value);
+    void on_channelMute_toggled(bool checked);
+    void on_forceDecimator_toggled(bool checked);
+    void on_modulation_currentIndexChanged(int index);
+    void on_rfScaling_valueChanged(int value);
+    void on_fmExcursion_valueChanged(int value);
+    void on_rfBW_valueChanged(int value);
+    void on_rfOppBW_valueChanged(int value);
+    void on_nbLines_currentIndexChanged(int index);
+    void on_fps_currentIndexChanged(int index);
+    void on_standard_currentIndexChanged(int index);
+    void on_invertVideo_clicked(bool checked);
+    void on_uniformLevel_valueChanged(int value);
+    void on_inputSelect_currentIndexChanged(int index);
+    void on_imageFileDialog_clicked(bool checked);
+    void on_videoFileDialog_clicked(bool checked);
+
+    void on_playVideo_toggled(bool checked);
+    void on_playLoop_toggled(bool checked);
+    void on_navTimeSlider_valueChanged(int value);
+
+    void on_playCamera_toggled(bool checked);
+    void on_camSelect_currentIndexChanged(int index);
+    void on_cameraManualFPSEnable_toggled(bool checked);
+    void on_cameraManualFPS_valueChanged(int value);
+
+    void on_overlayTextShow_toggled(bool checked);
+    void on_overlayText_textEdited(const QString& arg1);
+
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+
+    void configureImageFileName();
+    void configureVideoFileName();
+    void tick();
 };
 
 #endif /* PLUGINS_CHANNELTX_MODAM_AMMODGUI_H_ */

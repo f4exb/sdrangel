@@ -110,8 +110,10 @@ bool AMModGUI::handleMessage(const Message& message)
     }
 }
 
-void AMModGUI::channelMarkerChanged()
+void AMModGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
@@ -285,17 +287,24 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setColor(Qt::yellow);
+    m_channelMarker.setBandwidth(5000);
+    m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("AM Modulator");
-	m_channelMarker.setVisible(true);
+    m_channelMarker.setUDPAddress("127.0.0.1");
+    m_channelMarker.setUDPSendPort(9999);
+    m_channelMarker.blockSignals(false);
+	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
-	connect(&m_channelMarker, SIGNAL(changed()), this, SLOT(channelMarkerChanged()));
-
 	m_deviceUISet->registerTxChannelInstance(AMMod::m_channelID, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
     ui->play->setEnabled(false);
     ui->play->setChecked(false);
@@ -334,8 +343,6 @@ void AMModGUI::applySettings(bool force __attribute((unused)))
 		        48000, m_channelMarker.getCenterFrequency());
         m_amMod->getInputMessageQueue()->push(msgConfigure);
 
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
         AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
         m_amMod->getInputMessageQueue()->push(message);
 	}
@@ -346,11 +353,15 @@ void AMModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
-    setTitleColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
+
+    setTitleColor(m_settings.m_rgbColor);
+    setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->rfBW->setValue(roundf(m_settings.m_rfBandwidth / 100.0));
     ui->rfBWText->setText(QString("%1 kHz").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
@@ -373,16 +384,12 @@ void AMModGUI::displaySettings()
 
 void AMModGUI::leaveEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(false);
-	blockApplySettings(false);
 }
 
 void AMModGUI::enterEvent(QEvent*)
 {
-	blockApplySettings(true);
 	m_channelMarker.setHighlighted(true);
-	blockApplySettings(false);
 }
 
 void AMModGUI::tick()
