@@ -55,24 +55,8 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
-private slots:
-	void channelMarkerChanged();
-	void on_deltaFrequency_changed(qint64 value);
-	void on_sampleFormat_currentIndexChanged(int index);
-	void on_sampleRate_textEdited(const QString& arg1);
-	void on_rfBandwidth_textEdited(const QString& arg1);
-	void on_fmDeviation_textEdited(const QString& arg1);
-	void on_audioActive_toggled(bool active);
-	void on_audioStereo_toggled(bool stereo);
-	void on_applyBtn_clicked();
-	void onWidgetRolled(QWidget* widget, bool rollDown);
-	void onMenuDialogCalled(const QPoint& p);
-	void on_gain_valueChanged(int value);
-	void on_volume_valueChanged(int value);
-	void on_squelch_valueChanged(int value);
-    void on_squelchGate_valueChanged(int value);
-	void on_agc_toggled(bool agc);
-	void tick();
+public slots:
+	void channelMarkerChangedByCursor();
 
 private:
 	Ui::UDPSrcGUI* ui;
@@ -106,6 +90,24 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+
+private slots:
+	void on_deltaFrequency_changed(qint64 value);
+	void on_sampleFormat_currentIndexChanged(int index);
+	void on_sampleRate_textEdited(const QString& arg1);
+	void on_rfBandwidth_textEdited(const QString& arg1);
+	void on_fmDeviation_textEdited(const QString& arg1);
+	void on_audioActive_toggled(bool active);
+	void on_audioStereo_toggled(bool stereo);
+	void on_applyBtn_clicked();
+	void onWidgetRolled(QWidget* widget, bool rollDown);
+	void onMenuDialogCalled(const QPoint& p);
+	void on_gain_valueChanged(int value);
+	void on_volume_valueChanged(int value);
+	void on_squelch_valueChanged(int value);
+    void on_squelchGate_valueChanged(int value);
+	void on_agc_toggled(bool agc);
+	void tick();
 };
 
 #endif // INCLUDE_UDPSRCGUI_H
