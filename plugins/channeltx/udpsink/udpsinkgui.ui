@@ -800,7 +800,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>UDP &lt;address&gt;:&lt;data port&gt;</string>
+         <string>Receiving UDP address and port</string>
         </property>
         <property name="text">
          <string>000.000.000.000:00000</string>

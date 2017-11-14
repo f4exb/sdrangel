@@ -53,27 +53,8 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
-private slots:
-    void handleSourceMessages();
-    void channelMarkerChanged();
-    void on_deltaFrequency_changed(qint64 value);
-    void on_sampleFormat_currentIndexChanged(int index);
-    void on_sampleRate_textEdited(const QString& arg1);
-    void on_rfBandwidth_textEdited(const QString& arg1);
-    void on_fmDeviation_textEdited(const QString& arg1);
-    void on_amModPercent_textEdited(const QString& arg1);
-    void on_applyBtn_clicked();
-    void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDialogCalled(const QPoint& p);
-    void on_gainIn_valueChanged(int value);
-    void on_gainOut_valueChanged(int value);
-    void on_squelch_valueChanged(int value);
-    void on_squelchGate_valueChanged(int value);
-    void on_channelMute_toggled(bool checked);
-    void on_resetUDPReadIndex_clicked();
-    void on_autoRWBalance_toggled(bool checked);
-    void on_stereoInput_toggled(bool checked);
-    void tick();
+public slots:
+    void channelMarkerChangedByCursor();
 
 private:
     Ui::UDPSinkGUI* ui;
@@ -98,12 +79,32 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void displayUDPSettings();
     void setSampleFormat(int index);
     void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+    void on_deltaFrequency_changed(qint64 value);
+    void on_sampleFormat_currentIndexChanged(int index);
+    void on_sampleRate_textEdited(const QString& arg1);
+    void on_rfBandwidth_textEdited(const QString& arg1);
+    void on_fmDeviation_textEdited(const QString& arg1);
+    void on_amModPercent_textEdited(const QString& arg1);
+    void on_applyBtn_clicked();
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+    void on_gainIn_valueChanged(int value);
+    void on_gainOut_valueChanged(int value);
+    void on_squelch_valueChanged(int value);
+    void on_squelchGate_valueChanged(int value);
+    void on_channelMute_toggled(bool checked);
+    void on_resetUDPReadIndex_clicked();
+    void on_autoRWBalance_toggled(bool checked);
+    void on_stereoInput_toggled(bool checked);
+    void tick();
 };
 
 #endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_ */
