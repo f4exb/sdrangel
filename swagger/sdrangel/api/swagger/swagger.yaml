@@ -1,0 +1,229 @@
+swagger: "2.0"
+info:
+  version: "4.0.0"
+  title: SDRangel
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /sdrangel:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: instance
+    get:
+      description: SDRangel instance summary
+      # used as the method name of the controller
+      operationId: instanceSummary
+      # parameters:
+      #   - name: name
+      #     in: query
+      #     description: The name of the person to whom to say hello
+      #     required: false
+      #     type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/InstanceSummaryResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/devices:
+    x-swagger-router-controller: instance
+    get:
+      description: Get a list of sampling devices
+      operationId: instanceDevices
+      parameters:
+        - name: direction
+          in: query
+          description: gives Rx or Tx direction
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/InstanceDevicesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/channels:
+    x-swagger-router-controller: instance
+    get:
+      description: Get a list of channel plugins
+      operationId: instanceChannels
+      parameters:
+        - name: direction
+          in: query
+          description: gives Rx or Tx direction
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/InstanceChannelsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  InstanceSummaryResponse:
+    required:
+      - version
+      - devicesetcount
+    properties:
+      version:
+        type: string
+      logging:
+        $ref: "#/definitions/LoggingInfo"
+      devicesetcount:
+        type: integer
+      devicesets:
+        type: array
+        items:
+          $ref: "#/definitions/DeviceSet"
+      user:
+        $ref: "http://localhost:8080/User.yaml#/User"
+  InstanceDevicesResponse:
+    required:
+      - devicecount
+    properties:
+      devicecount:
+        type: integer
+      devices:
+        type: array
+        items:
+          $ref: "#/definitions/DeviceListItem"
+  InstanceChannelsResponse:
+    required:
+      - channelcount
+    properties:
+      channelcount:
+        type: integer
+      channels:
+        type: array
+        items:
+          $ref: "#/definitions/ChannelListItem"
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  LoggingInfo:
+    required:
+      - consoleLevel
+      - fileLevel
+      - dumpToFile
+    properties:
+      consoleLevel:
+        type: string
+      fileLevel:
+        type: string
+      dumpToFile:
+        type: boolean
+      fileName:
+        type: string
+  DeviceListItem:
+    required:
+      - hwType
+      - rx
+      - streamIndex
+      - sequence
+      - serial
+    properties:
+      hwType:
+        type: string
+      rx:
+        type: boolean
+      streamIndex:
+        type: integer
+      sequence:
+        type: integer
+      serial:
+        type: string
+  ChannelListItem:
+    required:
+      - name
+      - id
+      - rx
+    properties:
+      name:
+        type: string
+      id:
+        type: string
+      rx:
+        type: boolean
+      version:
+        type: string
+  DeviceSet:
+    required:
+      - samplingDevice
+      - channelcount
+    properties:
+      samplingDevice:
+        $ref: "#/definitions/SamplingDevice"
+      channelcount:
+        type: integer
+      channels:
+        type: array
+        items:
+          $ref:  "#/definitions/Channel"
+  SamplingDevice:
+    required:
+      - index
+      - hwType
+      - rx
+      - streamIndex
+      - sequence
+      - serial
+      - centerFrequency
+      - bandwidth
+    properties:
+      index:
+        type: integer
+      hwType:
+        type: string
+      rx:
+        type: boolean
+      streamIndex:
+        type: integer
+      sequence:
+        type: integer
+      serial:
+        type: string
+      centerFrequency:
+        type: integer
+      bandwidth:
+        type: integer
+  Channel:
+    required:
+      - index
+      - id
+      - deltaFrequency
+    properties:
+      index:
+        type: integer
+      id:
+        type: string
+      deltaFrequency:
+        type: integer
