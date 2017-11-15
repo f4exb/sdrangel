@@ -40,7 +40,7 @@ cd api/swagger/include
 http-server --cors .
 ```
 
-To start on a different port than 8080 use the `--port` option
+To start on a different port than 8080 use the `-p` option
 
 Then in the directory where this README.md is start the swagger editor
 

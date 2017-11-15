@@ -29,12 +29,6 @@ paths:
       description: SDRangel instance summary
       # used as the method name of the controller
       operationId: instanceSummary
-      # parameters:
-      #   - name: name
-      #     in: query
-      #     description: The name of the person to whom to say hello
-      #     required: false
-      #     type: string
       responses:
         "200":
           description: Success
@@ -52,11 +46,11 @@ paths:
       description: Get a list of sampling devices that can be used to take part in a device set
       operationId: instanceDevices
       parameters:
-        - name: direction
+        - name: tx
           in: query
-          description: Gives Rx (rx or none) or Tx (tx) direction
+          description: Set to true for Tx direction
           required: false
-          type: string
+          type: boolean
       responses:
         "200":
           description: Success
@@ -72,11 +66,11 @@ paths:
       description: Get a list of channel plugins available in this instance
       operationId: instanceChannels
       parameters:
-        - name: direction
+        - name: tx
           in: query
-          description: gives Rx (rx or none) or Tx (tx) direction
+          description: Set to true for Tx channels
           required: false
-          type: string
+          type: boolean
       responses:
         "200":
           description: Success
@@ -86,6 +80,263 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /sdrangel/logging:
+    x-swagger-router-controller: instance
+    get:
+      description: Get logging information for this instance
+      operationId: instanceLoggingGet
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      description: Change logging parmeters for this instance
+      operationId: instanceLoggingPut
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Logging information
+          required: true
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+      responses:
+        "200":
+          description: Return new data on success
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+        "400":
+          description: Invallid data
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/audio:
+    x-swagger-router-controller: instance
+    get:
+      description: Get audio devices list available to this instance
+      operationId: instanceAudioGet
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AudioDevices"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      description: Set audio devices
+      operationId: instanceAudioPatch
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Select audio devices to use for this instance
+          required: true
+          schema:
+            $ref: "#/definitions/AudioDevicesSelect"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AudioDevicesSelect"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/location:
+    x-swagger-router-controller: instance
+    get:
+      description: Get instance geolocation information
+      operationId: instanceLocationGet
+      responses:
+        "200":
+          description: On success return location
+          schema:
+            $ref: "#/definitions/LocationInformation"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      description: Set instance geolocation information
+      operationId: instanceLocationPut
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Location of instance in latitude and longitude
+          required: true
+          schema:
+            $ref: "#/definitions/LocationInformation"
+      responses:
+        "200":
+          description: On success return location
+          schema:
+            $ref: "#/definitions/LocationInformation"
+        "400":
+          description: Location invalid
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/dvserial:
+    x-swagger-router-controller: instance
+    patch:
+      description: Set or reset DV serial processing for AMBE frames decoding in digital voice modes
+      operationId: instanceDVSerialPatch
+      parameters:
+        - name: dvserial
+          in: query
+          description: Set to true to set DV serial processing
+          required: false
+          type: boolean
+      responses:
+        "200":
+          description: On success return list of devices or empty list if unset
+          schema:
+            $ref: "#/definitions/DVSeralDevices"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sdrangel/preset:
+    x-swagger-router-controller: instance
+    get:
+      description: List all presets in the instance
+      operationId: instancePresetGet
+      responses:
+        "200":
+          description: On success return preset list
+          schema:
+            $ref: "#/definitions/Presets"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      description: Load a preset in a device set
+      operationId: instancePresetPatch
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Load this preset
+          required: true
+          schema:
+            required:
+              - deviceSetIndex
+              - preset
+            properties:
+              deviceSetIndex:
+                description: "Index of the device set" 
+                type: integer
+              preset:
+                $ref: "#/definitions/PresetIdentifier"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid frequency
+        "404":
+          description: No preset or device set found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      description: Save device set settings on a preset
+      operationId: instancePresetPut
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: save device set settings on this preset
+          required: true
+          schema:
+            required:
+              - deviceSetIndex
+              - preset
+            properties:
+              deviceSetIndex:
+                description: "Index of the device set" 
+                type: integer
+              preset:
+                $ref: "#/definitions/PresetIdentifier"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid frequency
+        "404":
+          description: No preset or device set found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      description: Create a new preset from a device set settings
+      operationId: instancePresetPost
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: save current settings on a new preset
+          required: true
+          schema:
+            required:
+              - deviceSetIndex
+              - preset
+            properties:
+              deviceSetIndex:
+                description: "Index of the device set" 
+                type: integer
+              preset:
+                $ref: "#/definitions/PresetIdentifier"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid frequency
+        "404":
+          description: Device set not found
+        "409":
+          description: Preset already exists
+    delete:
+      description: Deletes a preset
+      operationId: instancePresetDelete
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: delete this preset
+          required: true
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+      responses:
+        "200":
+          description: On success return deleted preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid frequency
+        "404":
+          description: Preset not found
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
@@ -145,7 +396,6 @@ definitions:
     required:
       - consoleLevel
       - fileLevel
-      - dumpToFile
     properties:
       consoleLevel:
         description: "Minimum level of messages printed to console: debug, info, warning, error"
@@ -154,7 +404,7 @@ definitions:
         description: "Minimum level of messages written to file: debug, info, warning, error"
         type: string
       dumpToFile:
-        description: "True if messages are written to file else false to log to console only"
+        description: "True if messages are written to file"
         type: boolean
       fileName:
         description: "Name of the log file"
@@ -163,7 +413,6 @@ definitions:
     description: "Summarized information about attached hardware device"
     required:
       - hwType
-      - rx
       - streamIndex
       - sequence
       - serial
@@ -171,8 +420,8 @@ definitions:
       hwType:
         description: "Key to identify the type of hardware device"
         type: string
-      rx:
-        description: "True if this is an Rx device else false for Tx"
+      tx:
+        description: "Set to true if this is a Tx device"
         type: boolean
       nbStreams: 
         description: "Number of channels or streams in the device"
@@ -191,7 +440,6 @@ definitions:
     required:
       - name
       - id
-      - rx
     properties:
       name:
         description: "Displayable name of the channel plugin"
@@ -199,8 +447,8 @@ definitions:
       id:
         description: "Key to identify the channel plugin type"
         type: string
-      rx:
-        description: "True if this is an Rx channel else false for Tx"
+      tx:
+        description: "True if this is a Tx channel"
         type: boolean
       version:
         description: "Channel plugin version number"
@@ -226,7 +474,6 @@ definitions:
     required:
       - index
       - hwType
-      - rx
       - streamIndex
       - sequence
       - serial
@@ -238,8 +485,8 @@ definitions:
       hwType:
         description: "Key to identify the type of hardware device"
         type: string
-      rx:
-        description: "True if this is an Rx device else false for Tx"
+      tx:
+        description: "True if this is a Tx device"
         type: boolean
       nbStreams: 
         description: "Number of channels or streams in the device"
@@ -276,3 +523,123 @@ definitions:
       deltaFrequency:
         description: "Channel shift frequency in Hz from the center of baseband"
         type: integer
+  AudioDevices:
+    description: "List of audio devices available in the system"
+    required:
+      - nbInputDevices
+      - nbOutputDevices
+    properties:
+      nbInputDevices:
+        description: "Number of input audio devices"
+        type: integer
+      inputDevices:
+        description: "Names of input devices"
+        type: array
+        items:
+          type: string
+      nbOutputDevices:
+        description: "Number of output audio devices"
+        type: integer
+      outputDevices:
+        description: "Names of output devices"
+        type: array
+        items:
+          type: string
+  AudioDevicesSelect:
+    description: "Audio devices selected"
+    properties:
+      input:
+        description: "Name of the audio input device"
+        type: string
+      output:
+        description: "Name of the audio output device"
+        type: string
+  LocationInformation:
+    description: "Instance geolocation information"
+    required:
+      - latitude
+      - longitude
+    properties:
+      latitude:
+        description: "Lautitude in decimal degrees positive to the north"
+        type: number
+      longitude:
+        description: "Longitude in decimal degrees positive to the east"
+        type: number
+  DVSeralDevices:
+    description: "List of DV serial devices available in the system"
+    required:
+      - nbDevices
+    properties:
+      nbDevices:
+        description: "Number of DV serial devices"
+        type: integer
+      dvSerialDevices:
+        description: "Device names of DV serial devices"
+        type: array
+        items:
+          type: string
+  Presets:
+    description: "Settings presets"
+    required:
+      - nbGroups
+    properties:
+      nbGroups:
+        description: "Number of preset groups"
+        type: integer
+      groups:
+        type: array
+        items: 
+          $ref: "#/definitions/PresetGroup" 
+  PresetGroup:
+    description: "Group of presets"
+    required:
+      - groupName
+      - nbPresets
+    properties:
+      groupName:
+        description: "Name of the preset group"
+        type: string
+      nbPresets:
+        description: "Number of presets in the group"
+        type: integer
+      presets:
+        type: array
+        items:
+          $ref: "#/definitions/PresetItem" 
+  PresetIdentifier:
+    description: "Settings preset item"
+    required:
+      - groupName
+      - centerFrequency
+      - type
+      - name
+    properties:
+      groupName:
+        description: "Name of the preset group"
+        type: string
+      centerFrequency:
+        description: "Center freqeuency in MHz"
+        type: number
+      type:
+        description: "Type of device set (R: Rx, T: Tx)"
+        type: string
+      name:
+        description: "Descriptive name of the preset"
+        type: string
+  PresetItem:
+    description: "Settings preset item"
+    required:
+      - centerFrequency
+      - type
+      - name
+    properties:
+      centerFrequency:
+        description: "Center freqeuency in MHz"
+        type: number
+      type:
+        description: "Type of device set (R: Rx, T: Tx)"
+        type: string
+      name:
+        description: "Descriptive name of the preset"
+        type: string

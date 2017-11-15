@@ -3,18 +3,26 @@
 module.exports = {
   instanceSummary: instanceSummary,
   instanceDevices: instanceDevices,
-  instanceChannels: instanceChannels
+  instanceChannels: instanceChannels,
+  instanceLoggingGet: instanceLoggingGet,
+  instanceLoggingPut: instanceLoggingPut,
+  instanceAudioGet: instanceAudioGet,
+  instanceAudioPatch: instanceAudioPatch,
+  instanceLocationGet: instanceLocationGet,
+  instanceLocationPut: instanceLocationPut,
+  instanceDVSerialPatch: instanceDVSerialPatch,
+  instancePresetGet: instancePresetGet,
+  instancePresetPatch: instancePresetPatch
 };
 
 function instanceSummary(req, res, next) {
 
-  res.json([
+  res.json(
     {
         "version":"4.0.0",
         "logging": {
             "consoleLevel": "info",
-            "fileLevel": "debug",
-            "dumpToFile": false
+            "fileLevel": "debug"
         },
         "devicesetcount":2,
         "devicesets":[
@@ -22,7 +30,6 @@ function instanceSummary(req, res, next) {
                 "samplingDevice": {
                     "index":0,
                     "hwType":"RTLSDR",
-                    "rx":true,
                     "streamIndex":0,
                     "sequence":0,
                     "serial":"R820T2005",
@@ -39,7 +46,7 @@ function instanceSummary(req, res, next) {
                 "samplingDevice": {
                     "index":1,
                     "hwType":"HackRF",
-                    "rx":false,
+                    "tx":true,
                     "streamIndex":0,
                     "sequence":0,
                     "serial":"453c64c8257a608f",
@@ -53,159 +60,288 @@ function instanceSummary(req, res, next) {
             }
 
         ],
-        "user":{"index":1,"name":"Sample text"}}
-    ]);
+        "user":{"index":1,"name":"Sample text"}
+    });
 }
 
 function instanceDevices(req, res, next) {
-    var direction = req.swagger.params.direction.value || "rx";
-    //console.log(direction.value)
+    var directionTx = req.swagger.params.tx.value || false;
+    //console.log(tx.value)
     
-    if (direction === "tx") {
-        res.json([
+    if (directionTx) {
+        res.json(
         {
             "devicecount": 1,
             "devices": [
                 {
                     "hwType":"HackRF",
-                    "rx":false,
+                    "tx":true,
                     "streamIndex":0,
                     "sequence":0,
                     "serial":"453c64c8257a608f"
                 }
             ]
-        }]);
+        });
     } else {
-        res.json([
+        res.json(
         {
             "devicecount": 2,
             "devices": [
                 {
                     "hwType":"RTLSDR",
-                    "rx":true,
                     "streamIndex":0,
                     "sequence":0,
                     "serial":"R820T2005"
                 },
                 {
                     "hwType":"HackRF",
-                    "rx":true,
                     "streamIndex":0,
                     "sequence":0,
                     "serial":"453c64c8257a608f"
                 }
             ]
-        }]);
+        });
     }
 }
 
 function instanceChannels(req, res, next) {
-    var direction = req.swagger.params.direction.value || "rx";
+    var directionTx = req.swagger.params.direction.value || false;
     
-    if (direction === "tx") {
-        res.json([
+    if (directionTx) {
+        res.json(
         {
             "channelcount": 6,
             "channels": [
                 {
                     "name":"AM Modulator",
                     "id": "AMMod",
-                    "rx":false,
+                    "tx":true,
                     "version": "3.9.0"
                 },
                 {
                     "name":"ATV Modulator",
                     "id": "ATVMod",
-                    "rx":false,
+                    "tx":true,
                     "version": "3.9.0"
                 },
                 {
                     "name":"NFM Modulator",
                     "id": "NFMMod",
-                    "rx":false,
+                    "tx":true,
                     "version": "3.9.0"
                 },
                 {
                     "name":"SSB Modulator",
                     "id": "SSBMod",
-                    "rx":false,
+                    "tx":true,
                     "version": "3.9.0"
                 },
                 {
                     "name":"UDP Channel Sink",
                     "id": "UDPSink",
-                    "rx":false,
+                    "tx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"WFM Modulator",
                     "id": "WFMMod",
-                    "rx":false,
+                    "tx":true,
                     "version": "3.9.0"
                 }
             ]
-        }]);
+        });
     } else {
-        res.json([
+        res.json(
         {
             "channelcount": 9,
             "channels": [
                 {
                     "name":"AM Demodulator",
                     "id": "AMemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"Broadcast FM Demodulator",
                     "id": "BFMDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"ATV Demodulator",
                     "id": "ATVDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"DSD Demodulator",
                     "id": "DSDDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"NFM Demodulator",
                     "id": "NFDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"SSB Demodulator",
                     "id": "SSBDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"TCP Channel Source",
                     "id": "TCPSource",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"UDP Channel Source",
                     "id": "UDPSource",
-                    "rx":true,
                     "version": "4.0.0"
                 },
                 {
                     "name":"WFM Demodulator",
                     "id": "WFMDemod",
-                    "rx":true,
                     "version": "4.0.0"
                 }
             ]
-        }]);
+        });
     }
-        
+}
+
+function instanceLoggingGet(req, res, next) {
+  res.json(
+    {
+        "consoleLevel":"info",
+        "fileLevel":"debug",
+        "dumpToFile": true,
+        "fileName":"sdrangel.log"
+    }
+  );
+}
+
+function instanceLoggingPut(req, res, next) {
+    console.log(req.swagger.params.body.value);
+    res.json(req.swagger.params.body.value);
+}
+
+function instanceAudioGet(req, res, next) {
+  res.json(
+    {
+        "nbInputDevices":7,
+        "inputDevices": [
+            "Default (use first suitable device)",
+            "HDA Intel HDMI",
+            "HDA Intel PCH",
+            "default",
+            "alsa_input.pci-0000_00_1b.0.analog-stereo",
+            "alsa_output.pci-0000_00_03.0.hdmi-stereo.monitor",
+            "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
+        ],
+        "nbOutputDevices":6,
+        "outputDevices": [
+            "Default (use first suitable device)",
+            "HDA Intel HDMI",
+            "HDA Intel PCH",
+            "default",
+            "alsa_output.pci-0000_00_03.0.hdmi-stereo",
+            "alsa_output.pci-0000_00_1b.0.analog-stereo"
+        ]
+    }
+  );
+}
+
+function instanceAudioPatch(req, res, next) {
+    console.log(req.swagger.params.body.value);
+    res.json(req.swagger.params.body.value);
+}
+
+function instanceLocationGet(req, res, next) {
+  res.json(
+    {
+        "latitude":43.523774, 
+        "longitude":7.044443
+    }
+  );
+}
+
+function instanceLocationPut(req, res, next) {
+    res.json(req.swagger.params.body.value);
+}
+
+function instanceDVSerialPatch(req, res, next) {
+    var setDVSerial = req.swagger.params.dvserial.value || false;
+    
+    if (setDVSerial) {
+        res.json(
+        {
+            "nbDevices":2,
+            "dvSerialDevices": [
+                "/dev/ttyUSB0",
+                "/dev/ttyUSB1"
+            ]
+        });        
+    } else {
+        res.json(
+        {
+            "nbDevices":0
+        });                
+    }
+}
+
+function instancePresetGet(req, res, next) {
+    res.json(
+        {
+          "nbGroups": 2,
+          "groups": [
+            {
+              "groupName": "ATV",
+              "nbPresets": 3,
+              "presets": [
+                {
+                  "centerFrequency": 435.995,
+                  "type": "R",
+                  "name": "Test Rx 90/2 25k"
+                },
+                {
+                  "centerFrequency": 436.0,
+                  "type": "T",
+                  "name": "Test Rx 90/2 25k"
+                },
+                {
+                  "centerFrequency": 1243.0,
+                  "type": "R",
+                  "name": "Mont Agel"
+                }                
+              ]
+            },            
+            {
+              "groupName": "BFM",
+              "nbPresets": 4,
+              "presets": [
+                {
+                  "centerFrequency": 91.5,
+                  "type": "R",
+                  "name": "Cannes Radio"
+                },
+                {
+                  "centerFrequency": 96.4,
+                  "type": "R",
+                  "name": "Kiss FM"
+                },
+                {
+                  "centerFrequency": 103.2,
+                  "type": "R",
+                  "name": "Radio Monaco"
+                },
+                {
+                  "centerFrequency": 103.4,
+                  "type": "R",
+                  "name": "Frequence K"
+                }                
+              ]
+            }
+          ]
+        }
+    );
+}
+
+function instancePresetPatch(req, res, next) {
+    res.json(req.swagger.params.body.value);
 }
