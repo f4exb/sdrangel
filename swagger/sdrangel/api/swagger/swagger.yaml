@@ -1,7 +1,11 @@
 swagger: "2.0"
 info:
+  description: "This is the web API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube"
   version: "4.0.0"
   title: SDRangel
+  contact:
+    url: "https://github.com/f4exb/sdrangel"
+    email: "f4exb06@gmail.com"  
 # during dev, should point to your local machine
 host: localhost:10010
 # basePath prefixes all resource paths 
@@ -45,12 +49,12 @@ paths:
   /sdrangel/devices:
     x-swagger-router-controller: instance
     get:
-      description: Get a list of sampling devices
+      description: Get a list of sampling devices that can be used to take part in a device set
       operationId: instanceDevices
       parameters:
         - name: direction
           in: query
-          description: gives Rx or Tx direction
+          description: Gives Rx (rx or none) or Tx (tx) direction
           required: false
           type: string
       responses:
@@ -65,12 +69,12 @@ paths:
   /sdrangel/channels:
     x-swagger-router-controller: instance
     get:
-      description: Get a list of channel plugins
+      description: Get a list of channel plugins available in this instance
       operationId: instanceChannels
       parameters:
         - name: direction
           in: query
-          description: gives Rx or Tx direction
+          description: gives Rx (rx or none) or Tx (tx) direction
           required: false
           type: string
       responses:
@@ -87,37 +91,44 @@ paths:
 # complex objects have schema definitions
 definitions:
   InstanceSummaryResponse:
+    description: "Summarized information about this SDRangel instance"
     required:
       - version
       - devicesetcount
     properties:
       version:
+        description: "Current software version"
         type: string
       logging:
         $ref: "#/definitions/LoggingInfo"
       devicesetcount:
+        description: "Number of device sets currently opened"
         type: integer
       devicesets:
         type: array
         items:
           $ref: "#/definitions/DeviceSet"
       user:
-        $ref: "http://localhost:8080/User.yaml#/User"
+        $ref: "http://localhost:8081/User.yaml#/User"
   InstanceDevicesResponse:
+    description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
     required:
       - devicecount
     properties:
       devicecount:
+        description: "Number of devices attached"
         type: integer
       devices:
         type: array
         items:
           $ref: "#/definitions/DeviceListItem"
   InstanceChannelsResponse:
+    description: "Summarized information about channel plugins available in this SDRangel instance"
     required:
       - channelcount
     properties:
       channelcount:
+        description: "Number of plugins available"
         type: integer
       channels:
         type: array
@@ -130,20 +141,26 @@ definitions:
       message:
         type: string
   LoggingInfo:
+    description: "Logging parameters setting"
     required:
       - consoleLevel
       - fileLevel
       - dumpToFile
     properties:
       consoleLevel:
+        description: "Minimum level of messages printed to console: debug, info, warning, error"
         type: string
       fileLevel:
+        description: "Minimum level of messages written to file: debug, info, warning, error"
         type: string
       dumpToFile:
+        description: "True if messages are written to file else false to log to console only"
         type: boolean
       fileName:
+        description: "Name of the log file"
         type: string
   DeviceListItem:
+    description: "Summarized information about attached hardware device"
     required:
       - hwType
       - rx
@@ -152,30 +169,44 @@ definitions:
       - serial
     properties:
       hwType:
+        description: "Key to identify the type of hardware device"
         type: string
       rx:
+        description: "True if this is an Rx device else false for Tx"
         type: boolean
+      nbStreams: 
+        description: "Number of channels or streams in the device"
+        type: integer
       streamIndex:
+        description: "Index of the channel in the device"
         type: integer
       sequence:
+        description: "Sequence in the enumeration of same device types"
         type: integer
       serial:
+        description: "Serial number of the hardware device"
         type: string
   ChannelListItem:
+    description: "Summarized information about channel plugin"
     required:
       - name
       - id
       - rx
     properties:
       name:
+        description: "Displayable name of the channel plugin"
         type: string
       id:
+        description: "Key to identify the channel plugin type"
         type: string
       rx:
+        description: "True if this is an Rx channel else false for Tx"
         type: boolean
       version:
+        description: "Channel plugin version number"
         type: string
   DeviceSet:
+    description: "Sampling device and its associated channels"
     required:
       - samplingDevice
       - channelcount
@@ -183,12 +214,15 @@ definitions:
       samplingDevice:
         $ref: "#/definitions/SamplingDevice"
       channelcount:
+        description: "Number of channels in the set"
         type: integer
       channels:
+        description: "Channels list"
         type: array
         items:
           $ref:  "#/definitions/Channel"
   SamplingDevice:
+    description: "Information about a logical device available from an attached hardware device that can be used as a sampling device"
     required:
       - index
       - hwType
@@ -202,28 +236,43 @@ definitions:
       index:
         type: integer
       hwType:
+        description: "Key to identify the type of hardware device"
         type: string
       rx:
+        description: "True if this is an Rx device else false for Tx"
         type: boolean
+      nbStreams: 
+        description: "Number of channels or streams in the device"
+        type: integer
       streamIndex:
+        description: "Index of the channel in the device"
         type: integer
       sequence:
+        description: "Sequence in the enumeration of same device types"
         type: integer
       serial:
+        description: "Serial number of the hardware device"
         type: string
       centerFrequency:
+        description: "Center frequency in Hz at which the device is tuned possibly taking NCO into account"
         type: integer
+        format: int64
       bandwidth:
+        description: "Bandwidth in Hz or complex S/s of baseband"
         type: integer
   Channel:
+    description: "Channel summarized information"
     required:
       - index
       - id
       - deltaFrequency
     properties:
       index:
+        description: "Index in the list of channels"
         type: integer
       id:
+        description: "Key to identify the type of channel"
         type: string
       deltaFrequency:
+        description: "Channel shift frequency in Hz from the center of baseband"
         type: integer
