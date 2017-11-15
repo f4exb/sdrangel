@@ -269,6 +269,7 @@ int ChannelAnalyzerNGGUI::getRequestedChannelSampleRate()
 void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    applySettings();
 }
 
 void ChannelAnalyzerNGGUI::on_BW_valueChanged(int value)

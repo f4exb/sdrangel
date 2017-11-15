@@ -218,6 +218,8 @@ void ChannelAnalyzerGUI::on_deltaFrequency_changed(quint64 value)
 	} else {
 		m_channelMarker.setCenterFrequency(value);
 	}
+
+	applySettings();
 }
 
 void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
