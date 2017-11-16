@@ -337,6 +337,46 @@ paths:
           description: Invalid frequency
         "404":
           description: Preset not found
+  /sdrangel/devicesets:
+    x-swagger-router-controller: instance
+    get:
+      description: Get summary information about device sets opened in the instance
+      operationId: instanceDeviceSetsGet
+      responses:
+        "200":
+          description: On success return device set list
+          schema:
+            $ref: "#/definitions/DeviceSetList"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      description: Add (append) a new device set
+      operationId: instanceDeviceSetsPost
+      responses:
+        "200":
+          description: On success return new device set
+          schema:
+            $ref: "#/definitions/DeviceSet"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      description: "Remove last device set"
+      operationId: instanceDeviceSetsDelete
+      responses:
+        "200":
+          description: On success return new list of device sets
+          schema:
+            $ref: "#/definitions/DeviceSetList"
+        "404":
+          description: "No more device sets opened in this instance"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
@@ -345,20 +385,15 @@ definitions:
     description: "Summarized information about this SDRangel instance"
     required:
       - version
-      - devicesetcount
+      - devicesetlist
     properties:
       version:
         description: "Current software version"
         type: string
       logging:
         $ref: "#/definitions/LoggingInfo"
-      devicesetcount:
-        description: "Number of device sets currently opened"
-        type: integer
-      devicesets:
-        type: array
-        items:
-          $ref: "#/definitions/DeviceSet"
+      devicesetlist:
+        $ref: "#/definitions/DeviceSetList"
       user:
         $ref: "http://localhost:8081/User.yaml#/User"
   InstanceDevicesResponse:
@@ -469,6 +504,19 @@ definitions:
         type: array
         items:
           $ref:  "#/definitions/Channel"
+  DeviceSetList:
+    description: "List of device sets opened in this instance"
+    required:
+      - devicesetcount
+    properties:
+      devicesetcount:
+        description: "Number of device sets opened in this instance"
+        type: integer
+      deviceSets:
+        type: array
+        items:
+          $ref: "#/definitions/DeviceSet"
+  
   SamplingDevice:
     description: "Information about a logical device available from an attached hardware device that can be used as a sampling device"
     required:
@@ -481,6 +529,7 @@ definitions:
       - bandwidth
     properties:
       index:
+        description: "Index in the list of device sets opened in this instance"
         type: integer
       hwType:
         description: "Key to identify the type of hardware device"
