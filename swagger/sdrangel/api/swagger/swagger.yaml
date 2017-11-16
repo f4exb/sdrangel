@@ -231,18 +231,10 @@ paths:
       parameters:
         - name: body
           in: body
-          description: Load this preset
+          description: Load preset settings to the device set
           required: true
           schema:
-            required:
-              - deviceSetIndex
-              - preset
-            properties:
-              deviceSetIndex:
-                description: "Index of the device set" 
-                type: integer
-              preset:
-                $ref: "#/definitions/PresetIdentifier"
+            $ref: "#/definitions/PresetTransfer"
       responses:
         "200":
           description: On success return preset identification
@@ -262,18 +254,10 @@ paths:
       parameters:
         - name: body
           in: body
-          description: save device set settings on this preset
+          description: save device set settings to the preset
           required: true
           schema:
-            required:
-              - deviceSetIndex
-              - preset
-            properties:
-              deviceSetIndex:
-                description: "Index of the device set" 
-                type: integer
-              preset:
-                $ref: "#/definitions/PresetIdentifier"
+            $ref: "#/definitions/PresetTransfer"
       responses:
         "200":
           description: On success return preset identification
@@ -293,18 +277,10 @@ paths:
       parameters:
         - name: body
           in: body
-          description: save current settings on a new preset
+          description: save device set settings on a new preset
           required: true
           schema:
-            required:
-              - deviceSetIndex
-              - preset
-            properties:
-              deviceSetIndex:
-                description: "Index of the device set" 
-                type: integer
-              preset:
-                $ref: "#/definitions/PresetIdentifier"
+            $ref: "#/definitions/PresetTransfer"
       responses:
         "200":
           description: On success return preset identification
@@ -354,6 +330,12 @@ paths:
     post:
       description: Add (append) a new device set
       operationId: instanceDeviceSetsPost
+      parameters:
+        - name: tx
+          in: query
+          description: Set to true for a Tx device set
+          required: false
+          type: boolean
       responses:
         "200":
           description: On success return new device set
@@ -692,3 +674,14 @@ definitions:
       name:
         description: "Descriptive name of the preset"
         type: string
+  PresetTransfer:
+    description: "Preset transfer to or from a device set"
+    required:
+      - deviceSetIndex
+      - preset
+    properties:
+      deviceSetIndex:
+        description: "Index of the device set" 
+        type: integer
+      preset:
+        $ref: "#/definitions/PresetIdentifier"    

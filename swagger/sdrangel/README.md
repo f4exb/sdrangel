@@ -96,5 +96,8 @@ The language option `-l` allows to generate code or documentation in a lot of la
   - python: Python client
   - angular2: Typescript for Angular2 client
 
+<h3>Links</h3>
 
+  - [Github repository](https://github.com/swagger-api/swagger-codegen)
+  - [Server side code generation](https://github.com/swagger-api/swagger-codegen/wiki/Server-stub-generator-HOWTO) although not useful in this case
 
