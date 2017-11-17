@@ -52,6 +52,8 @@
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
 #include "loggerwithfile.h"
+#include "webapi/webapirequestmapper.h"
+#include "webapi/webapiserver.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -195,11 +197,19 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent) :
 
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
 
+	m_requestMapper = new WebAPIRequestMapper(qApp);
+	m_apiServer = new WebAPIServer(m_requestMapper);
+	m_apiServer->start();
+
     qDebug() << "MainWindow::MainWindow: end";
 }
 
 MainWindow::~MainWindow()
 {
+    m_apiServer->stop();
+    delete m_apiServer;
+    delete m_requestMapper;
+
     delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;

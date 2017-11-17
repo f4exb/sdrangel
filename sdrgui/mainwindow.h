@@ -49,6 +49,8 @@ class DeviceSinkAPI;
 class DeviceUISet;
 class PluginInterface;
 class QWidget;
+class WebAPIRequestMapper;
+class WebAPIServer;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -115,6 +117,9 @@ private:
 	std::string m_sampleFileName;
 
 	qtwebapp::LoggerWithFile *m_logger;
+
+	WebAPIRequestMapper *m_requestMapper;
+	WebAPIServer *m_apiServer;
 
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);

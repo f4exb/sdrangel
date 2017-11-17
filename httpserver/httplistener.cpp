@@ -51,7 +51,11 @@ void HttpListener::listen()
 {
     if (!pool)
     {
-        pool=new HttpConnectionHandlerPool(settings,requestHandler);
+        if (useQtSettings) {
+            pool = new HttpConnectionHandlerPool(settings, requestHandler);
+        } else {
+            pool = new HttpConnectionHandlerPool(listenerSettings, requestHandler);
+        }
     }
     QString host = useQtSettings ? settings->value("host").toString() : listenerSettings.host;
     int port = useQtSettings ? settings->value("port").toInt() : listenerSettings.port;

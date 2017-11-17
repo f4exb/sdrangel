@@ -12,7 +12,8 @@
 
 using namespace qtwebapp;
 
-HttpRequest::HttpRequest(QSettings* settings)
+HttpRequest::HttpRequest(QSettings* settings) :
+        useQtSettings(true)
 {
     status=waitForRequest;
     currentSize=0;
@@ -22,7 +23,8 @@ HttpRequest::HttpRequest(QSettings* settings)
     tempFile=0;
 }
 
-HttpRequest::HttpRequest(const HttpListenerSettings& settings)
+HttpRequest::HttpRequest(const HttpListenerSettings& settings) :
+        useQtSettings(false)
 {
     status=waitForRequest;
     currentSize=0;

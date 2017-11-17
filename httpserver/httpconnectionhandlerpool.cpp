@@ -66,7 +66,12 @@ HttpConnectionHandler* HttpConnectionHandlerPool::getConnectionHandler()
         int maxConnectionHandlers = useQtSettings ? settings->value("maxThreads",100).toInt() : listenerSettings.maxThreads;
         if (pool.count()<maxConnectionHandlers)
         {
-            freeHandler=new HttpConnectionHandler(settings,requestHandler,sslConfiguration);
+            if (useQtSettings) {
+                freeHandler = new HttpConnectionHandler(settings, requestHandler, sslConfiguration);
+            } else {
+                freeHandler = new HttpConnectionHandler(listenerSettings, requestHandler, sslConfiguration);
+            }
+
             freeHandler->setBusy();
             pool.append(freeHandler);
         }

@@ -239,6 +239,8 @@ private:
     /** Buffer for collecting characters of request and header lines */
     QByteArray lineBuffer;
 
+    /** Settings flag */
+    bool useQtSettings;
 };
 
 } // end of namespace

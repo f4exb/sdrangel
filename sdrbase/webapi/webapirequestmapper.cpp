@@ -27,7 +27,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 {
     if (m_adapter == 0) // format service unavailable if adapter is null
     {
-
+        response.setStatus(500,"Service not available");
     }
     else // normal processing
     {
@@ -36,6 +36,10 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
         if (path == "/sdrangel")
         {
 
+        }
+        else
+        {
+            response.setStatus(404,"Not found");
         }
     }
 }
