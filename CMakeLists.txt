@@ -190,6 +190,7 @@ add_subdirectory(sdrbase)
 add_subdirectory(sdrgui)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
+add_subdirectory(swagger)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}

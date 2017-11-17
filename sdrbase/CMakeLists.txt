@@ -63,7 +63,9 @@ set(sdrbase_SOURCES
     
     plugin/plugininterface.cpp    
     plugin/pluginapi.cpp
-    plugin/pluginmanager.cpp    
+    plugin/pluginmanager.cpp
+    
+    webapi/webapirequestmapper.cpp 
 )
 
 set(sdrbase_HEADERS
@@ -150,6 +152,9 @@ set(sdrbase_HEADERS
     util/samplesourceserializer.h
     util/simpleserializer.h
     #util/spinlock.h
+    
+    webapi/webapiadapterinterface.h
+    webapi/webapirequestmapper.h
 )
 
 set(sdrbase_SOURCES
@@ -222,10 +227,13 @@ add_library(sdrbase SHARED
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     .
+    ${CMAKE_SOURCE_DIR}/httpserver
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
+    httpserver
 )
 
 if(FFTW3F_FOUND)
