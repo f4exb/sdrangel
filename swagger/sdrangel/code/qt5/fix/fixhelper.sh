@@ -1,2 +1,3 @@
 #!/bin/sh
-sed -i '1s/^/#include <QDateTime>\n/' ${1}
+BASEDIR=$(dirname "$0")
+sed -i '1s/^/#include <QDateTime>\n/' ${BASEDIR}/../client/SWGHelpers.cpp
