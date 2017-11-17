@@ -11,6 +11,7 @@ SUBDIRS += sdrbase
 SUBDIRS += sdrgui
 SUBDIRS += httpserver
 SUBDIRS += logging
+SUBDIRS += swagger
 CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
