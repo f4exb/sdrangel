@@ -4,12 +4,14 @@
 #
 #--------------------------------------------------------
 
-QT += core gui multimedia opengl
+QT += core multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = lib
 TARGET = sdrbase
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../httpserver
+INCLUDEPATH += ../swagger/sdrangel/code/qt5/client
 
 DEFINES += USE_KISSFFT=1
 win32 {
@@ -102,7 +104,9 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/simpleserializer.cpp\
         plugin/plugininterface.cpp\
         plugin/pluginapi.cpp\        
-        plugin/pluginmanager.cpp        
+        plugin/pluginmanager.cpp\
+        webapi/webapirequestmapper.cpp\
+        webapi/webapiserver.cpp
 
 HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
@@ -178,9 +182,13 @@ HEADERS  += audio/audiodeviceinfo.h\
         util/prettyprint.h\
         util/syncmessenger.h\
         util/samplesourceserializer.h\
-        util/simpleserializer.h
+        util/simpleserializer.h\
+        webapi/webapiadapterinterface.h\
+        webapi/webapirequestmapper.h\
+        webapi/webapiserver.h   
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
+LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

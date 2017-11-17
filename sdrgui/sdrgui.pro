@@ -12,6 +12,8 @@ TARGET = sdrgui
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += ../logging
+INCLUDEPATH += ../httpserver
+INCLUDEPATH += ../swagger/sdrangel/code/qt5/client
 
 DEFINES += USE_KISSFFT=1
 win32 {
