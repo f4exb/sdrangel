@@ -1,5 +1,7 @@
 project (swagger)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 file(GLOB swagger_SOURCES
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client/*.cpp
 )
