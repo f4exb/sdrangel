@@ -16,44 +16,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "webapirequestmapper.h"
-#include "SWGInstanceSummaryResponse.h"
-#include "SWGErrorResponse.h"
+#ifndef SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
+#define SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
 
-WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
-    HttpRequestHandler(parent),
-    m_adapter(0)
-{ }
+#include "webapi/webapiadapterinterface.h"
 
-void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+class MainWindow;
+
+class WebAPIAdapterGUI: public WebAPIAdapterInterface
 {
-    if (m_adapter == 0) // format service unavailable if adapter is null
-    {
-        response.write("Service not available");
-        response.setStatus(500,"Service not available");
-    }
-    else // normal processing
-    {
-        QByteArray path=request.getPath();
+public:
+    WebAPIAdapterGUI(MainWindow& mainWindow);
+    virtual ~WebAPIAdapterGUI();
 
-        if (path == WebAPIAdapterInterface::instanceSummaryURL)
-        {
-            Swagger::SWGInstanceSummaryResponse normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
+    virtual int instanceSummary(
+            Swagger::SWGInstanceSummaryResponse& response,
+            Swagger::SWGErrorResponse& error);
 
-            int status = m_adapter->instanceSummary(normalResponse, errorResponse);
+private:
+    MainWindow& m_mainWindow;
+};
 
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
-                response.write(errorResponse.asJson().toUtf8());
-            }
-
-            response.setStatus(status);
-        }
-        else
-        {
-            response.setStatus(404,"Not found");
-        }
-    }
-}
+#endif /* SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_ */

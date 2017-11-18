@@ -54,6 +54,7 @@
 #include "loggerwithfile.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
+#include "webapi/webapiadaptergui.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -197,7 +198,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
 
+	m_apiAdapter = new WebAPIAdapterGUI(*this);
 	m_requestMapper = new WebAPIRequestMapper(qApp);
+	m_requestMapper->setAdapter(m_apiAdapter);
 	m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
 	m_apiServer->start();
 
@@ -209,6 +212,7 @@ MainWindow::~MainWindow()
     m_apiServer->stop();
     delete m_apiServer;
     delete m_requestMapper;
+    delete m_apiAdapter;
 
     delete m_pluginManager;
 	delete m_dateTimeWidget;

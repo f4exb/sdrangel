@@ -105,6 +105,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         plugin/plugininterface.cpp\
         plugin/pluginapi.cpp\        
         plugin/pluginmanager.cpp\
+        webapi/webapiadapterinterface.cpp\
         webapi/webapirequestmapper.cpp\
         webapi/webapiserver.cpp\
         mainparser.cpp

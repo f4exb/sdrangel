@@ -52,6 +52,7 @@ class PluginInterface;
 class QWidget;
 class WebAPIRequestMapper;
 class WebAPIServer;
+class WebAPIAdapterGUI;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -78,6 +79,8 @@ public:
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }
+
+	friend class WebAPIAdapterGUI;
 
 private:
 	enum {
@@ -121,6 +124,7 @@ private:
 
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
+	WebAPIAdapterGUI *m_apiAdapter;
 
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);

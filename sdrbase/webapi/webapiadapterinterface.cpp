@@ -16,44 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "webapirequestmapper.h"
-#include "SWGInstanceSummaryResponse.h"
-#include "SWGErrorResponse.h"
+#include "webapiadapterinterface.h"
 
-WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
-    HttpRequestHandler(parent),
-    m_adapter(0)
-{ }
+QString WebAPIAdapterInterface::instanceSummaryURL = "/sdrangel";
 
-void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    if (m_adapter == 0) // format service unavailable if adapter is null
-    {
-        response.write("Service not available");
-        response.setStatus(500,"Service not available");
-    }
-    else // normal processing
-    {
-        QByteArray path=request.getPath();
-
-        if (path == WebAPIAdapterInterface::instanceSummaryURL)
-        {
-            Swagger::SWGInstanceSummaryResponse normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
-
-            int status = m_adapter->instanceSummary(normalResponse, errorResponse);
-
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
-                response.write(errorResponse.asJson().toUtf8());
-            }
-
-            response.setStatus(status);
-        }
-        else
-        {
-            response.setStatus(404,"Not found");
-        }
-    }
-}

@@ -76,7 +76,8 @@ SOURCES += mainwindow.cpp\
         gui/transverterbutton.cpp\
         gui/transverterdialog.cpp\
         gui/valuedial.cpp\
-        gui/valuedialz.cpp
+        gui/valuedialz.cpp\
+        webapi/webapiadapergui.cpp
 
 HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
@@ -121,7 +122,8 @@ HEADERS  += mainwindow.h\
         gui/transverterbutton.h\
         gui/transverterdialog.h\
         gui/valuedial.h\
-        gui/valuedialz.h
+        gui/valuedialz.h\
+        webapi/webapiadapergui.h
 
 FORMS    += mainwindow.ui\
         gui/scopewindow.ui\

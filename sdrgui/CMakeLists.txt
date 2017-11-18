@@ -47,6 +47,8 @@ set(sdrgui_SOURCES
     dsp/spectrumscopengcombovis.cpp
     
     device/deviceuiset.cpp
+    
+    webapi/webapiadaptergui.cpp
 )
 
 set(sdrgui_HEADERS
@@ -96,6 +98,8 @@ set(sdrgui_HEADERS
     dsp/spectrumscopengcombovis.h
     
     device/deviceuiset.h
+    
+    webapi/webapiadaptergui.h
 )
 
 set(sdrgui_SOURCES

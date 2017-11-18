@@ -19,9 +19,13 @@
 #ifndef SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 #define SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 
-#include "SWGInstanceSummaryResponse.h"
-#include "SWGErrorResponse.h"
-#include "SWGErrorResponse.h"
+#include <QString>
+
+namespace Swagger
+{
+    class SWGInstanceSummaryResponse;
+    class SWGErrorResponse;
+}
 
 class WebAPIAdapterInterface
 {
@@ -36,6 +40,8 @@ public:
             Swagger::SWGInstanceSummaryResponse& response __attribute__((unused)),
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
+
+    static QString instanceSummaryURL;
 };
 
 

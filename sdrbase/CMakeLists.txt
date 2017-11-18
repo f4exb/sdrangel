@@ -65,6 +65,7 @@ set(sdrbase_SOURCES
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp
     
+    webapi/webapiadapterinterface.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
     
@@ -240,6 +241,7 @@ include_directories(
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
     httpserver
+    swagger
 )
 
 if(FFTW3F_FOUND)
