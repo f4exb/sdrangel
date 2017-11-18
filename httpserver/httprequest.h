@@ -55,7 +55,7 @@ public:
       Constructor.
       @param settings Configuration settings as a structure
     */
-    HttpRequest(const HttpListenerSettings& settings);
+    HttpRequest(const HttpListenerSettings* settings);
 
     /**
       Destructor.

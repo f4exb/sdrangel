@@ -67,7 +67,7 @@ public:
       @param requestHandler Handler that will process each incoming HTTP request
       @param sslConfiguration SSL (HTTPS) will be used if not NULL
     */
-    HttpConnectionHandler(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
+    HttpConnectionHandler(const HttpListenerSettings* settings, HttpRequestHandler* requestHandler, QSslConfiguration* sslConfiguration=NULL);
 
     /** Destructor */
     virtual ~HttpConnectionHandler();
@@ -79,16 +79,10 @@ public:
     void setBusy();
 
     /**
-     * Get a listener settings copy
+     * Get a listener settings constant reference. Can be changed on the HttpListener only.
      * @return The current listener settings
      */
-    HttpListenerSettings getListenerSettings() const { return listenerSettings; }
-
-    /**
-     * Set new listener settings data
-     * @param Listener settings to replace current data
-     */
-    void setListenerSettings(const HttpListenerSettings& settings) { listenerSettings = settings; }
+    const HttpListenerSettings *getListenerSettings() const { return listenerSettings; }
 
 
 private:
@@ -97,7 +91,7 @@ private:
     QSettings* settings;
 
     /** Configuration settings */
-    HttpListenerSettings listenerSettings;
+    const HttpListenerSettings* listenerSettings;
 
     /** TCP socket of the current connection  */
     QTcpSocket* socket;

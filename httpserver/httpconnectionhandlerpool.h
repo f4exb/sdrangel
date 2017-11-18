@@ -65,7 +65,7 @@ public:
       @param requestHandler The handler that will process each received HTTP request.
       @warning The requestMapper gets deleted by the destructor of this pool
     */
-    HttpConnectionHandlerPool(const HttpListenerSettings& settings, HttpRequestHandler* requestHandler);
+    HttpConnectionHandlerPool(const HttpListenerSettings* settings, HttpRequestHandler* requestHandler);
 
     /** Destructor */
     virtual ~HttpConnectionHandlerPool();
@@ -74,16 +74,10 @@ public:
     HttpConnectionHandler* getConnectionHandler();
 
     /**
-     * Get a listener settings copy
+     * Get a listener settings const reference. Can be changed on the HttpListener only.
      * @return The current listener settings
      */
-    HttpListenerSettings getListenerSettings() const { return listenerSettings; }
-
-    /**
-     * Set new listener settings data
-     * @param Listener settings to replace current data
-     */
-    void setListenerSettings(const HttpListenerSettings& settings) { listenerSettings = settings; }
+    const HttpListenerSettings* getListenerSettings() const { return listenerSettings; }
 
 private:
 
@@ -91,7 +85,7 @@ private:
     QSettings* settings;
 
     /** Settings for this pool as structure*/
-    HttpListenerSettings listenerSettings;
+    const HttpListenerSettings *listenerSettings;
 
     /** Will be assigned to each Connectionhandler during their creation */
     HttpRequestHandler* requestHandler;

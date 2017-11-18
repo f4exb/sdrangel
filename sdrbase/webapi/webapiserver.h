@@ -37,6 +37,8 @@ public:
     void stop();
 
     void setHostAndPort(const QString& host, uint16_t port);
+    const QString& getHost() const { return m_settings.host; }
+    int getPort() const { return m_settings.port; }
 
 private:
     WebAPIRequestMapper *m_requestMapper;
