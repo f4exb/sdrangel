@@ -68,3 +68,54 @@ void LoggerWithFile::setFileMinMessageLevel(const QtMsgType& msgLevel)
         fileLogger->setMinMessageLevel(msgLevel);
     }
 }
+
+void LoggerWithFile::getConsoleMinMessageLevelStr(QString& levelStr)
+{
+    switch (consoleLogger->getMinMessageLevel())
+    {
+    case QtDebugMsg:
+        levelStr = "debug";
+        break;
+    case QtInfoMsg:
+        levelStr = "info";
+        break;
+    case QtWarningMsg:
+        levelStr = "warning";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        levelStr = "error";
+        break;
+    default:
+        levelStr = "debug";
+        break;
+    }
+}
+
+void LoggerWithFile::getFileMinMessageLevelStr(QString& levelStr)
+{
+    switch (fileLogger->getMinMessageLevel())
+    {
+    case QtDebugMsg:
+        levelStr = "debug";
+        break;
+    case QtInfoMsg:
+        levelStr = "info";
+        break;
+    case QtWarningMsg:
+        levelStr = "warning";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        levelStr = "error";
+        break;
+    default:
+        levelStr = "debug";
+        break;
+    }
+}
+
+void LoggerWithFile::getLogFileName(QString& fileName)
+{
+    fileName = fileLogger->getFileLoggerSettings().fileName;
+}

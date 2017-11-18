@@ -70,6 +70,10 @@ public:
     void setConsoleMinMessageLevel(const QtMsgType& msgLevel);
     void setFileMinMessageLevel(const QtMsgType& msgLevel);
 
+    void getConsoleMinMessageLevelStr(QString& levelStr);
+    void getFileMinMessageLevelStr(QString& levelStr);
+    void getLogFileName(QString& fileName);
+
 private:
     /** First console logger */
     Logger* consoleLogger;

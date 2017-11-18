@@ -100,6 +100,13 @@ public:
     }
 
     /**
+     * Get the current message level
+     */
+    QtMsgType getMinMessageLevel() const {
+        return minLevel;
+    }
+
+    /**
       Sets a thread-local variable that may be used to decorate log messages.
       This method is thread safe.
       @param name Name of the variable
