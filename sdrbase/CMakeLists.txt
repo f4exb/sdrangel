@@ -67,6 +67,8 @@ set(sdrbase_SOURCES
     
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
+    
+    mainparser.cpp
 )
 
 set(sdrbase_HEADERS
@@ -157,6 +159,8 @@ set(sdrbase_HEADERS
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
     webapi/webapiserver
+    
+    mainparser.h
 )
 
 set(sdrbase_SOURCES

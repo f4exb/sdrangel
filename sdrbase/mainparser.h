@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
-//                                                                               //
-// Swagger server adapter interface                                              //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,34 +15,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_WEBAPI_WEBAPISERVER_H_
-#define SDRBASE_WEBAPI_WEBAPISERVER_H_
+#ifndef SDRBASE_MAINPARSER_H_
+#define SDRBASE_MAINPARSER_H_
 
-namespace qtwebapp
-{
-    class HttpListener;
-    class HttpListenerSettings;
-}
+#include <QCommandLineParser>
+#include <stdint.h>
 
-class WebAPIRequestMapper;
-
-class WebAPIServer
+class MainParser
 {
 public:
-    WebAPIServer(const QString& host, uint16_t port, WebAPIRequestMapper *requestMapper);
-    ~WebAPIServer();
+    MainParser();
+    ~MainParser();
 
-    void start();
-    void stop();
+    void parse(const QCoreApplication& app);
 
-    void setHostAndPort(const QString& host, uint16_t port);
+    const QString& getServerAddress() const { return m_serverAddress; }
+    uint16_t getServerPort() const { return m_serverPort; }
 
 private:
-    WebAPIRequestMapper *m_requestMapper;
-    qtwebapp::HttpListener *m_listener;
-    qtwebapp::HttpListenerSettings m_settings;
+    QString  m_serverAddress;
+    uint16_t m_serverPort;
+
+    QCommandLineParser m_parser;
+    QCommandLineOption m_serverAddressOption;
+    QCommandLineOption m_serverPortOption;
 };
 
 
 
-#endif /* SDRBASE_WEBAPI_WEBAPISERVER_H_ */
+#endif /* SDRBASE_MAINPARSER_H_ */

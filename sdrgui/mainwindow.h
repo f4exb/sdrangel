@@ -25,6 +25,7 @@
 #include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
+#include "mainparser.h"
 
 class QLabel;
 class QTreeWidgetItem;
@@ -64,7 +65,7 @@ class SDRANGEL_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent = 0);
+	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 

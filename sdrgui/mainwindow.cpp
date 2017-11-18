@@ -63,7 +63,7 @@
 
 MainWindow *MainWindow::m_instance = 0;
 
-MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent) :
+MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	m_settings(),
@@ -198,7 +198,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, QWidget* parent) :
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
 
 	m_requestMapper = new WebAPIRequestMapper(qApp);
-	m_apiServer = new WebAPIServer(m_requestMapper);
+	m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
 	m_apiServer->start();
 
     qDebug() << "MainWindow::MainWindow: end";

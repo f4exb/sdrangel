@@ -22,12 +22,12 @@
 #include "webapirequestmapper.h"
 #include "webapiserver.h"
 
-WebAPIServer::WebAPIServer(WebAPIRequestMapper *requestMapper) :
+WebAPIServer::WebAPIServer(const QString& host, uint16_t port, WebAPIRequestMapper *requestMapper) :
     m_requestMapper(requestMapper),
     m_listener(0)
 {
-    m_settings.host = "127.0.0.1";
-    m_settings.port = 8001;
+    m_settings.host = host;
+    m_settings.port = port;
 }
 
 WebAPIServer::~WebAPIServer()
@@ -40,6 +40,7 @@ void WebAPIServer::start()
     if (!m_listener)
     {
         m_listener = new qtwebapp::HttpListener(m_settings, m_requestMapper, qApp);
+        qInfo("WebAPIServer::start: starting web API server at http://%s:%d", qPrintable(m_settings.host), m_settings.port);
     }
 }
 
@@ -49,5 +50,14 @@ void WebAPIServer::stop()
     {
         delete m_listener;
         m_listener = 0;
+        qInfo("WebAPIServer::stop: stopped web API server at http://%s:%d", qPrintable(m_settings.host), m_settings.port);
     }
+}
+
+void WebAPIServer::setHostAndPort(const QString& host, uint16_t port)
+{
+    stop();
+    m_settings.host = host;
+    m_settings.port = port;
+    m_listener = new qtwebapp::HttpListener(m_settings, m_requestMapper, qApp);
 }

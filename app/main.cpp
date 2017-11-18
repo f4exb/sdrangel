@@ -90,8 +90,10 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #endif
 
 #endif
+	MainParser parser;
+	parser.parse(*qApp);
 
-	MainWindow w(logger);
+	MainWindow w(logger, parser);
 	w.show();
 
 	return a.exec();

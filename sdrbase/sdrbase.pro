@@ -106,7 +106,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         plugin/pluginapi.cpp\        
         plugin/pluginmanager.cpp\
         webapi/webapirequestmapper.cpp\
-        webapi/webapiserver.cpp
+        webapi/webapiserver.cpp\
+        mainparser.cpp
 
 HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
@@ -185,7 +186,8 @@ HEADERS  += audio/audiodeviceinfo.h\
         util/simpleserializer.h\
         webapi/webapiadapterinterface.h\
         webapi/webapirequestmapper.h\
-        webapi/webapiserver.h   
+        webapi/webapiserver.h\
+        mainparser.h
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
