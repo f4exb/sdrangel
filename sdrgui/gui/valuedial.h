@@ -56,6 +56,7 @@ private:
 	int m_animationState;
 	QTimer m_animationTimer;
 	QTimer m_blinkTimer;
+	QChar m_groupSeparator;
 
 	ColorMapper m_colorMapper;
 

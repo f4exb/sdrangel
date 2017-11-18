@@ -60,6 +60,9 @@ ValueDialZ::ValueDialZ(bool positiveOnly, QWidget* parent, ColorMapper colorMapp
 	m_text = formatText(m_value);
 	m_cursorState = false;
 
+	const QLocale & cLocale = QLocale::c();
+	m_groupSeparator = cLocale.groupSeparator();
+
 	connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 	connect(&m_blinkTimer, SIGNAL(timeout()), this, SLOT(blink()));
 }
@@ -195,8 +198,7 @@ QString ValueDialZ::formatText(qint64 value)
 	    int ipoint = m_numDigits + (m_positiveOnly ? 0 : 1) - 3 - 3 * i;
 
 	    if (ipoint != 0) { // do not insert leading point
-	        const QLocale & cLocale = QLocale::c();
-	        str.insert(ipoint, cLocale.groupSeparator());
+	        str.insert(ipoint, m_groupSeparator);
 	    }
 	}
 
@@ -251,7 +253,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
             painter.setPen(m_colorMapper.getSecondaryForegroundColor());
             painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
-            if(m_text[i] != QChar('.'))
+            if(m_text[i] != m_groupSeparator)
             {
                 painter.setPen(m_colorMapper.getForegroundColor());
                 painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
@@ -280,7 +282,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
                     painter.setPen(m_colorMapper.getSecondaryForegroundColor());
                     painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
-                    if(m_text[i] != QChar('.'))
+                    if(m_text[i] != m_groupSeparator)
                     {
                         painter.setPen(m_colorMapper.getForegroundColor());
                         painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
@@ -294,7 +296,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
                     painter.setPen(m_colorMapper.getSecondaryForegroundColor());
                     painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
-                    if(m_text[i] != QChar('.'))
+                    if(m_text[i] != m_groupSeparator)
                     {
                         painter.setPen(m_colorMapper.getForegroundColor());
                         painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
@@ -314,7 +316,7 @@ void ValueDialZ::mousePressEvent(QMouseEvent* event)
 
     if (m_positiveOnly)
 
-    if ((m_text[i] == QChar('.')) || (m_text[i] == QChar('+')) || (m_text[i] == QChar('-')))
+    if ((m_text[i] == m_groupSeparator) || (m_text[i] == QChar('+')) || (m_text[i] == QChar('-')))
     {
         i++;
 
@@ -358,7 +360,7 @@ void ValueDialZ::mouseMoveEvent(QMouseEvent* event)
 
     i = (event->x() - 1) / m_digitWidth;
 
-    if(m_text[i] == QChar('.'))
+    if(m_text[i] == m_groupSeparator)
     {
         i = -1;
     }
@@ -376,7 +378,7 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
 
     i = (event->x() - 1) / m_digitWidth;
 
-    if (m_text[i] != QChar('.'))
+    if (m_text[i] != m_groupSeparator)
     {
         m_hightlightedDigit = i;
     }
@@ -455,7 +457,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
     {
         m_cursor = m_hightlightedDigit;
 
-        if (m_text[m_cursor] == QChar('.')) {
+        if (m_text[m_cursor] == m_groupSeparator) {
            m_cursor++;
         }
 
@@ -478,7 +480,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         {
             m_cursor--;
 
-            if (m_text[m_cursor] == QChar('.')) {
+            if (m_text[m_cursor] == m_groupSeparator) {
                 m_cursor--;
             }
 
@@ -497,7 +499,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         {
             m_cursor++;
 
-            if (m_text[m_cursor] == QChar('.')) {
+            if (m_text[m_cursor] == m_groupSeparator) {
                 m_cursor++;
             }
 
@@ -577,7 +579,19 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
 
     QChar c = value->text()[0];
 
-    if(c >= QChar('0') && (c <= QChar('9')))
+    if ((c == QChar('+')) && (m_cursor == 0) && (m_text[m_cursor] == QChar('-'))) // change sign to positive
+    {
+        setValue(-m_value);
+        emit changed(m_valueNew);
+        update();
+    }
+    else if ((c == QChar('-')) && (m_cursor == 0) && (m_text[m_cursor] == QChar('+'))) // change sign to negative
+    {
+        setValue(-m_value);
+        emit changed(m_valueNew);
+        update();
+    }
+    else if ((c >= QChar('0')) && (c <= QChar('9')) && (m_cursor > 0)) // digits
     {
         int d = c.toLatin1() - '0';
         quint64 e = findExponent(m_cursor);
@@ -590,7 +604,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         emit changed(m_valueNew);
         m_cursor++;
 
-        if ((m_text[m_cursor] == QChar('.')) || (m_text[m_cursor] == QChar('+')) || (m_text[m_cursor] == QChar('-'))) {
+        if (m_text[m_cursor] == m_groupSeparator) {
            m_cursor++;
         }
 

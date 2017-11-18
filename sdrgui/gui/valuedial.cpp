@@ -45,16 +45,6 @@ ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
 		m_background.setColorAt(cmit->first, cmit->second);
 	}
 
-	/*
-	m_background.setColorAt(0.0, QColor(0x40, 0x40, 0x40));
-	m_background.setColorAt(0.1, QColor(0xc0, 0xc0, 0xc0));
-	m_background.setColorAt(0.2, QColor(0xf0, 0xf0, 0xf0));
-	m_background.setColorAt(0.5, QColor(0xff, 0xff, 0xff));
-	m_background.setColorAt(0.8, QColor(0xd0, 0xd0, 0xd0));
-	m_background.setColorAt(0.9, QColor(0xa0, 0xa0, 0xa0));
-	m_background.setColorAt(1.0, QColor(0x40, 0x40, 0x40));
-	*/
-
 	m_value =  0;
 	m_valueMin = 0;
 	m_valueMax = 2200000;
@@ -66,7 +56,10 @@ ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
 	m_text = formatText(m_value);
 	m_cursorState = false;
 
-	connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
+    const QLocale & cLocale = QLocale::c();
+    m_groupSeparator = cLocale.groupSeparator();
+
+    connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 	connect(&m_blinkTimer, SIGNAL(timeout()), this, SLOT(blink()));
 }
 
@@ -216,7 +209,7 @@ void ValueDial::paintEvent(QPaintEvent*)
 			painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
 			painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 			painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
-			if(m_text[i] != QChar('.')) {
+			if(m_text[i] != m_groupSeparator) {
 				painter.setPen(m_colorMapper.getForegroundColor());
 				painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 				painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
@@ -235,7 +228,7 @@ void ValueDial::paintEvent(QPaintEvent*)
 					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
 					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 					painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
-					if(m_text[i] != QChar('.')) {
+					if(m_text[i] != m_groupSeparator) {
 						painter.setPen(m_colorMapper.getForegroundColor());
 						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
@@ -245,7 +238,7 @@ void ValueDial::paintEvent(QPaintEvent*)
 					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
 					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
 					painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
-					if(m_text[i] != QChar('.')) {
+					if(m_text[i] != m_groupSeparator) {
 						painter.setPen(m_colorMapper.getForegroundColor());
 						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
 						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
@@ -262,7 +255,7 @@ void ValueDial::mousePressEvent(QMouseEvent* event)
 
 	i = (event->x() - 1) / m_digitWidth;
 
-	if(m_text[i] == QChar('.'))
+	if(m_text[i] == m_groupSeparator)
 	{
 		i++;
 
@@ -303,7 +296,7 @@ void ValueDial::mouseMoveEvent(QMouseEvent* event)
 	int i;
 
 	i = (event->x() - 1) / m_digitWidth;
-	if(m_text[i] == QChar('.'))
+	if(m_text[i] == m_groupSeparator)
 		i = -1;
 
 	if(i != m_hightlightedDigit) {
@@ -317,7 +310,7 @@ void ValueDial::wheelEvent(QWheelEvent* event)
 	int i;
 
 	i = (event->x() - 1) / m_digitWidth;
-	if(m_text[i] != QChar('.'))
+	if(m_text[i] != m_groupSeparator)
 		m_hightlightedDigit = i;
 	else
 		return;
@@ -376,7 +369,7 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 
 	if((m_cursor < 0) && (m_hightlightedDigit >= 0)) {
 		m_cursor = m_hightlightedDigit;
-		if(m_text[m_cursor] == QChar('.'))
+		if(m_text[m_cursor] == m_groupSeparator)
 		   m_cursor++;
 		if(m_cursor >= m_numDigits + m_numDecimalPoints)
 			return;
@@ -391,7 +384,7 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 	if((value->key() == Qt::Key_Left) || (value->key() == Qt::Key_Backspace)) {
 		if(m_cursor > 0) {
 			m_cursor--;
-			if(m_text[m_cursor] == QChar('.'))
+			if(m_text[m_cursor] == m_groupSeparator)
 				m_cursor--;
 			if(m_cursor < 0)
 				m_cursor++;
@@ -402,7 +395,7 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 	} else if(value->key() == Qt::Key_Right) {
 		if(m_cursor < m_numDecimalPoints + m_numDigits) {
 			m_cursor++;
-			if(m_text[m_cursor] == QChar('.'))
+			if(m_text[m_cursor] == m_groupSeparator)
 				m_cursor++;
 			if(m_cursor >= m_numDecimalPoints + m_numDigits)
 				m_cursor--;
@@ -455,7 +448,7 @@ void ValueDial::keyPressEvent(QKeyEvent* value)
 		setValue(v);
 		emit changed(m_valueNew);
 		m_cursor++;
-		if(m_text[m_cursor] == QChar('.'))
+		if(m_text[m_cursor] == m_groupSeparator)
 		   m_cursor++;
 		if(m_cursor >= m_numDigits + m_numDecimalPoints) {
 			m_cursor = -1;
