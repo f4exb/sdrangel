@@ -28,10 +28,14 @@ class WebAPIAdapterInterface
 public:
     virtual ~WebAPIAdapterInterface() {}
 
+    /**
+     * Handler of /sdrangel (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
+     * returns the Http status code (default 501: not implemented)
+     */
     virtual int instanceSummary(
             Swagger::SWGInstanceSummaryResponse& response __attribute__((unused)),
             Swagger::SWGErrorResponse& error __attribute__((unused)))
-    { return 0; }
+    { return 501; }
 };
 
 

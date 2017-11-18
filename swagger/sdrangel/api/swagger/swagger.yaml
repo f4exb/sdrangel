@@ -36,10 +36,12 @@ paths:
             # a pointer to a definition
             $ref: "#/definitions/InstanceSummaryResponse"
         # responses may fall through to errors
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/devices:
     x-swagger-router-controller: instance
     get:
@@ -56,10 +58,12 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/InstanceDevicesResponse"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/channels:
     x-swagger-router-controller: instance
     get:
@@ -76,10 +80,12 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/InstanceChannelsResponse"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/logging:
     x-swagger-router-controller: instance
     get:
@@ -90,10 +96,12 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/LoggingInfo"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     put:
       description: Change logging parmeters for this instance
       operationId: instanceLoggingPut
@@ -113,10 +121,12 @@ paths:
             $ref: "#/definitions/LoggingInfo"
         "400":
           description: Invallid data
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/audio:
     x-swagger-router-controller: instance
     get:
@@ -127,10 +137,12 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/AudioDevices"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     patch:
       description: Set audio devices
       operationId: instanceAudioPatch
@@ -148,10 +160,12 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/AudioDevicesSelect"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/location:
     x-swagger-router-controller: instance
     get:
@@ -162,10 +176,12 @@ paths:
           description: On success return location
           schema:
             $ref: "#/definitions/LocationInformation"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     put:
       description: Set instance geolocation information
       operationId: instanceLocationPut
@@ -185,10 +201,12 @@ paths:
             $ref: "#/definitions/LocationInformation"
         "400":
           description: Location invalid
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/dvserial:
     x-swagger-router-controller: instance
     patch:
@@ -205,10 +223,12 @@ paths:
           description: On success return list of devices or empty list if unset
           schema:
             $ref: "#/definitions/DVSeralDevices"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/preset:
     x-swagger-router-controller: instance
     get:
@@ -219,10 +239,12 @@ paths:
           description: On success return preset list
           schema:
             $ref: "#/definitions/Presets"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     patch:
       description: Load a preset in a device set
       operationId: instancePresetPatch
@@ -246,6 +268,12 @@ paths:
           description: No preset or device set found
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     put:
       description: Save device set settings on a preset
       operationId: instancePresetPut
@@ -269,6 +297,12 @@ paths:
           description: No preset or device set found
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     post:
       description: Create a new preset from a device set settings
       operationId: instancePresetPost
@@ -292,6 +326,12 @@ paths:
           description: Device set not found
         "409":
           description: Preset already exists
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     delete:
       description: Deletes a preset
       operationId: instancePresetDelete
@@ -313,6 +353,12 @@ paths:
           description: Invalid frequency
         "404":
           description: Preset not found
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/devicesets:
     x-swagger-router-controller: instance
     get:
@@ -323,10 +369,12 @@ paths:
           description: On success return device set list
           schema:
             $ref: "#/definitions/DeviceSetList"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     post:
       description: Add (append) a new device set
       operationId: instanceDeviceSetsPost
@@ -341,10 +389,12 @@ paths:
           description: On success return new device set
           schema:
             $ref: "#/definitions/DeviceSet"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
     delete:
       description: "Remove last device set"
       operationId: instanceDeviceSetsDelete
@@ -355,10 +405,12 @@ paths:
             $ref: "#/definitions/DeviceSetList"
         "404":
           description: "No more device sets opened in this instance"
-        default:
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
