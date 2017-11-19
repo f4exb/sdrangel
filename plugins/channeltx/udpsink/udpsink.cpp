@@ -64,6 +64,7 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     applySettings(m_settings, true);
 }
@@ -72,6 +73,7 @@ UDPSink::~UDPSink()
 {
     delete[] m_SSBFilterBuffer;
     delete m_SSBFilter;
+    m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

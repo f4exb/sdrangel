@@ -92,6 +92,7 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     applySettings(m_settings, true); // does applyStandard() too;
 }
@@ -100,6 +101,7 @@ ATVMod::~ATVMod()
 {
 	if (m_video.isOpened()) m_video.release();
 	releaseCameras();
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
