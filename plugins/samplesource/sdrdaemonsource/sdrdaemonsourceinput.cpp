@@ -44,8 +44,6 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
 	m_port(9090),
 	m_SDRdaemonUDPHandler(0),
 	m_deviceDescription(),
-	m_sampleRate(0),
-	m_centerFrequency(0),
 	m_startingTimeStamp(0),
     m_masterTimer(deviceAPI->getMasterTimer()),
     m_autoFollowRate(false),
@@ -96,12 +94,12 @@ const QString& SDRdaemonSourceInput::getDeviceDescription() const
 
 int SDRdaemonSourceInput::getSampleRate() const
 {
-	return m_sampleRate;
+	return m_settings.m_sampleRate;
 }
 
 quint64 SDRdaemonSourceInput::getCenterFrequency() const
 {
-	return m_centerFrequency;
+	return m_settings.m_centerFrequency;
 }
 
 std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const

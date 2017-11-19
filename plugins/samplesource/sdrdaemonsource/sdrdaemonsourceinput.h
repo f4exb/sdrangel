@@ -323,12 +323,11 @@ public:
 private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
+	SDRdaemonSourceSettings m_settings;
 	QString m_address;
 	quint16 m_port;
 	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
 	QString m_deviceDescription;
-	int m_sampleRate;
-	quint64 m_centerFrequency;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
     bool m_autoFollowRate;
