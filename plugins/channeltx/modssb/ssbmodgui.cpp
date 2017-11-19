@@ -477,6 +477,9 @@ void SSBModGUI::applyBandwidths(bool force)
     {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
         ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(spanStr));
+        ui->scaleMinus->setText("0");
+        ui->scaleCenter->setText("");
+        ui->scalePlus->setText(tr("%1").arg(QChar(0xB1, 0x00)));
         ui->glSpectrum->setCenterFrequency(0);
         ui->glSpectrum->setSampleRate(2*m_spectrumRate);
         ui->glSpectrum->setSsbSpectrum(false);
@@ -486,6 +489,9 @@ void SSBModGUI::applyBandwidths(bool force)
     {
         ui->BWText->setText(tr("%1k").arg(bwStr));
         ui->spanText->setText(tr("%1k").arg(spanStr));
+        ui->scaleMinus->setText("-");
+        ui->scaleCenter->setText("0");
+        ui->scalePlus->setText("+");
         ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
         ui->glSpectrum->setSampleRate(m_spectrumRate);
         ui->glSpectrum->setSsbSpectrum(true);
