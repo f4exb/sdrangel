@@ -101,7 +101,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
@@ -151,11 +151,12 @@ private:
 		RSRunning
 	};
 
-	DSDDemodSettings m_settings;
-
 	DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
+
+	DSDDemodSettings m_settings;
+	int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

@@ -44,6 +44,7 @@ struct NFMDemodSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
     quint32 m_rgbColor;
+    QString m_title;
 
     Serializable *m_channelMarker;
 

@@ -21,7 +21,8 @@
 #include <QMutex>
 #include <vector>
 
-#include <dsp/basebandsamplesink.h>
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
@@ -39,7 +40,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class LoRaDemod : public BasebandSampleSink {
+class LoRaDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureLoRaDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -95,6 +96,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return 0; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
     static const QString m_channelID;
 

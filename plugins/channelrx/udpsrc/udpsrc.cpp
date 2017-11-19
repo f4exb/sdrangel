@@ -37,6 +37,7 @@ const QString UDPSrc::m_channelID = "sdrangel.channel.udpsrc";
 
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
     m_outMovingAverage(480, 1e-10),
     m_inMovingAverage(480, 1e-10),
     m_amMovingAverage(1200, 1e-10),
@@ -96,6 +97,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     applySettings(m_settings, true);
 }
@@ -108,6 +110,7 @@ UDPSrc::~UDPSrc()
 	delete[] m_udpAudioBuf;
 	if (UDPFilter) delete UDPFilter;
 	if (m_settings.m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
@@ -353,6 +356,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
         UDPSrcSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

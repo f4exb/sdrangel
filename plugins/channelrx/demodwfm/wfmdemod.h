@@ -18,9 +18,11 @@
 #ifndef INCLUDE_WFMDEMOD_H
 #define INCLUDE_WFMDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -38,7 +40,7 @@ class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class DeviceSourceAPI;
 
-class WFMDemod : public BasebandSampleSink {
+class WFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureWFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -95,6 +97,10 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+
 	double getMagSq() const { return m_movingAverage.average(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
@@ -120,7 +126,9 @@ private:
     DeviceSourceAPI* m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
+
     WFMDemodSettings m_settings;
+    int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)

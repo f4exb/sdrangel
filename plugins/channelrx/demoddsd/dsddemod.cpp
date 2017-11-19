@@ -40,6 +40,7 @@ const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	m_deviceAPI(deviceAPI),
+	m_absoluteFrequencyOffset(0),
     m_interpolatorDistance(0.0f),
     m_interpolatorDistanceRemain(0.0f),
     m_sampleCount(0),
@@ -349,6 +350,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
         DSDDemodSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

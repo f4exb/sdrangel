@@ -145,8 +145,9 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
     m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
 
-    setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
     displayUDPAddress();
 
@@ -240,6 +241,7 @@ void WFMDemodGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 

@@ -54,6 +54,8 @@ struct TCPSrcSettings
     uint16_t m_udpPort;
     uint16_t m_audioPort;
 
+    QString m_title;
+
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
 

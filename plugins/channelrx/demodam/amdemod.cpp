@@ -37,6 +37,7 @@ const int AMDemod::m_udpBlockSize = 512;
 
 AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
     m_squelchOpen(false),
 	m_magsqSum(0.0f),
 	m_magsqPeak(0.0f),
@@ -177,6 +178,7 @@ bool AMDemod::handleMessage(const Message& cmd)
         AMDemodSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
 	    settings.m_inputSampleRate = m_settings.m_inputSampleRate;
 	    settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

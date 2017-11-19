@@ -55,6 +55,7 @@ void NFMDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(255, 0, 0).rgb();
+    m_title = "NFM Demodulator";
 }
 
 QByteArray NFMDemodSettings::serialize() const
@@ -75,6 +76,9 @@ QByteArray NFMDemodSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(13, m_channelMarker->serialize());
     }
+
+    s.writeString(14, m_title);
+
     return s.final();
 }
 
@@ -116,6 +120,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         d.readBool(10, &m_audioMute, false);
         d.readS32(11, &m_squelchGate, 5);
         d.readBool(12, &m_deltaSquelch, false);
+        d.readString(14, &m_title, "NFM Demodulator");
 
         return true;
     }

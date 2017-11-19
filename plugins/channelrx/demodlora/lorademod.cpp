@@ -66,6 +66,7 @@ LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 }
 
 LoRaDemod::~LoRaDemod()
@@ -81,6 +82,7 @@ LoRaDemod::~LoRaDemod()
 	if (finetune)
 		delete [] finetune;
 
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

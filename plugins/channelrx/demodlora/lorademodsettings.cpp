@@ -22,6 +22,7 @@ void LoRaDemodSettings::resetToDefaults()
     m_bandwidthIndex = 0;
     m_spread = 0;
     m_rgbColor = QColor(255, 0, 255).rgb();
+    m_title = "LoRa Demodulator";
 }
 
 QByteArray LoRaDemodSettings::serialize() const
@@ -38,6 +39,8 @@ QByteArray LoRaDemodSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(5, m_channelMarker->serialize());
     }
+
+    s.writeString(6, m_title);
 
     return s.final();
 }
@@ -69,6 +72,8 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(5, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readString(6, &m_title, "LoRa Demodulator");
 
         return true;
     }

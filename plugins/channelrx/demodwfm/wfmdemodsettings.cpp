@@ -48,6 +48,7 @@ void WFMDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 0, 255).rgb();
+    m_title = "WFM Demodulator";
 }
 
 QByteArray WFMDemodSettings::serialize() const
@@ -59,6 +60,7 @@ QByteArray WFMDemodSettings::serialize() const
     s.writeS32(4, m_volume*10.0);
     s.writeS32(5, m_squelch);
     s.writeU32(7, m_rgbColor);
+    s.writeString(8, m_title);
 
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
@@ -94,6 +96,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(5, &tmp, -60);
         m_squelch = tmp;
         d.readU32(7, &m_rgbColor);
+        d.readString(8, &m_title, "WFM Demodulator");
 
         d.readBlob(11, &bytetmp);
 

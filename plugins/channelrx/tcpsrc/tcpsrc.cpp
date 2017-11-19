@@ -34,6 +34,7 @@ const QString TCPSrc::m_channelID = "sdrangel.channel.tcpsrc";
 
 TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
 	m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName("TCPSrc");
@@ -64,12 +65,14 @@ TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 }
 
 TCPSrc::~TCPSrc()
 {
 	if (TCPFilter) delete TCPFilter;
 
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
@@ -226,6 +229,7 @@ bool TCPSrc::handleMessage(const Message& cmd)
         TCPSrcSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

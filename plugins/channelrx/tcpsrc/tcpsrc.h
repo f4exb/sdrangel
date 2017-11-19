@@ -4,7 +4,8 @@
 #include <QMutex>
 #include <QHostAddress>
 
-#include <dsp/basebandsamplesink.h>
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
@@ -21,7 +22,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class TCPSrc : public BasebandSampleSink {
+class TCPSrc : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
 
 public:
@@ -113,6 +114,10 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+
     static const QString m_channelID;
 
 protected:
@@ -155,10 +160,12 @@ protected:
 		{ }
 	};
 
-    TCPSrcSettings m_settings;
-    DeviceSourceAPI* m_deviceAPI;
+	DeviceSourceAPI* m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
+
+    TCPSrcSettings m_settings;
+    int m_absoluteFrequencyOffset;
 
     int m_inputSampleRate;
 

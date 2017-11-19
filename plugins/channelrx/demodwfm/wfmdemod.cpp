@@ -37,6 +37,7 @@ const QString WFMDemod::m_channelID = "de.maintech.sdrangelove.channel.wfm";
 
 WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
     m_squelchOpen(false),
     m_magsq(0.0f),
     m_magsqSum(0.0f),
@@ -63,6 +64,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
 	applySettings(m_settings, true);
 }
@@ -76,6 +78,7 @@ WFMDemod::~WFMDemod()
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 
+	m_deviceAPI->removeChannelAPI(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
@@ -233,6 +236,7 @@ bool WFMDemod::handleMessage(const Message& cmd)
         WFMDemodSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

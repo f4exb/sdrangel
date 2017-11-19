@@ -40,6 +40,7 @@ const int BFMDemod::m_udpBlockSize = 512;
 
 BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
 	m_audioFifo(250000),
 	m_settingsMutex(QMutex::Recursive),
 	m_pilotPLL(19000/384000, 50/384000, 0.01),
@@ -347,6 +348,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
         BFMDemodSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

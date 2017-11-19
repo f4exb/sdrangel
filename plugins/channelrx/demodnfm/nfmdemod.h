@@ -18,10 +18,12 @@
 #ifndef INCLUDE_NFMDEMOD_H
 #define INCLUDE_NFMDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
-#include <dsp/phasediscri.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
+#include "dsp/phasediscri.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -39,7 +41,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class NFMDemod : public BasebandSampleSink {
+class NFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureNFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -115,6 +117,10 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
 		return m_ctcssDetector.getToneSet();
@@ -151,6 +157,7 @@ private:
     DownChannelizer* m_channelizer;
 
 	NFMDemodSettings m_settings;
+	int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

@@ -3,6 +3,8 @@
 #define PLUGINS_CHANNELRX_DEMODLORA_LORADEMODSETTINGS_H_
 
 #include <QByteArray>
+#include <QString>
+
 #include <stdint.h>
 
 class Serializable;
@@ -13,6 +15,7 @@ struct LoRaDemodSettings
     int m_bandwidthIndex;
     int m_spread;
     uint32_t m_rgbColor;
+    QString m_title;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

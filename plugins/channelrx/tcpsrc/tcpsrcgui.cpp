@@ -53,16 +53,6 @@ void TCPSrcGUI::resetToDefaults()
 QByteArray TCPSrcGUI::serialize() const
 {
     return m_settings.serialize();
-//	SimpleSerializer s(1);
-//	s.writeS32(2, m_channelMarker.getCenterFrequency());
-//	s.writeS32(3, m_sampleFormat);
-//	s.writeReal(4, m_outputSampleRate);
-//	s.writeReal(5, m_rfBandwidth);
-//	s.writeS32(6, m_tcpPort);
-//	s.writeBlob(7, ui->spectrumGUI->serialize());
-//	s.writeS32(8, (qint32)m_boost);
-//	s.writeS32(9, m_channelMarker.getCenterFrequency());
-//	return s.final();
 }
 
 bool TCPSrcGUI::deserialize(const QByteArray& data)
@@ -309,6 +299,7 @@ void TCPSrcGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 

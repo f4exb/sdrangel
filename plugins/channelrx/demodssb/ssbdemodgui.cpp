@@ -375,6 +375,7 @@ void SSBDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
 

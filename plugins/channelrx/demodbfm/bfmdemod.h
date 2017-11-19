@@ -122,7 +122,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
@@ -163,6 +163,7 @@ private:
     DownChannelizer* m_channelizer;
 
     BFMDemodSettings m_settings;
+    int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)

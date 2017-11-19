@@ -42,6 +42,7 @@ const int NFMDemod::m_udpBlockSize = 512;
 
 NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
     m_deviceAPI(devieAPI),
+    m_absoluteFrequencyOffset(0),
 	m_ctcssIndex(0),
 	m_sampleCount(0),
 	m_squelchCount(0),
@@ -77,6 +78,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
 	applySettings(m_settings, true);
 }
@@ -85,6 +87,7 @@ NFMDemod::~NFMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 	delete m_udpBufferAudio;
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
@@ -345,6 +348,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 	    NFMDemodSettings settings = cfg.getSettings();
 
+	    m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

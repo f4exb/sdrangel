@@ -50,6 +50,7 @@ void TCPSrcSettings::resetToDefaults()
     m_udpPort = 9999;
     m_audioPort = 9998;
     m_rgbColor = QColor(225, 25, 99).rgb();
+    m_title = "TCP Source";
 }
 
 QByteArray TCPSrcSettings::serialize() const
@@ -78,6 +79,8 @@ QByteArray TCPSrcSettings::serialize() const
     s.writeS32(16, m_squelchdB);
     s.writeS32(17, m_squelchGate);
     s.writeBool(18, m_agc);
+    s.writeString(19, m_title);
+
     return s.final();
 
 }
@@ -134,6 +137,8 @@ bool TCPSrcSettings::deserialize(const QByteArray& data)
         d.readS32(16, &m_squelchdB, -60);
         d.readS32(17, &m_squelchGate, 5);
         d.readBool(18, &m_agc, false);
+        d.readString(19, &m_title, "TCP Source");
+
         return true;
     }
     else

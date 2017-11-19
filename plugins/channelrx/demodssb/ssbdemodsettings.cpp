@@ -47,6 +47,7 @@ void SSBDemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_rgbColor = QColor(0, 255, 0).rgb();
+    m_title = "SSB Demodulator";
 }
 
 QByteArray SSBDemodSettings::serialize() const
@@ -71,6 +72,8 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeS32(13, m_agcPowerThreshold);
     s.writeS32(14, m_agcThresholdGate);
     s.writeBool(15, m_agcClamping);
+    s.writeString(16, m_title);
+
     return s.final();
 }
 
@@ -113,6 +116,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(13, &m_agcPowerThreshold, -40);
         d.readS32(14, &m_agcThresholdGate, 4);
         d.readBool(15, &m_agcClamping, false);
+        d.readString(16, &m_title, "SSB Demodulator");
 
         return true;
     }

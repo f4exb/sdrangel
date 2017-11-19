@@ -60,8 +60,8 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_volume = 2.0;
 	m_spanLog2 = 3;
 	m_sampleRate = 96000;
-	m_frequency = 0;
-	m_nco.setFreq(m_frequency, m_sampleRate);
+	m_absoluteFrequencyOffset = 0;
+	m_nco.setFreq(m_absoluteFrequencyOffset, m_sampleRate);
 	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
 	m_interpolator.create(16, m_sampleRate, 5000);
@@ -89,6 +89,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
 	applySettings(m_settings, true);
 }
@@ -100,6 +101,7 @@ SSBDemod::~SSBDemod()
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
@@ -318,7 +320,8 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
         SSBDemodSettings settings = cfg.getSettings();
 
-        // These settings are set with DownChannelizer::MsgChannelizerNotification
+        // These settings are set with DownChannelizer::MsgChannelizerNotificatione
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset; // save as absolut frequency shift in baseband
         settings.m_inputSampleRate = m_settings.m_inputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

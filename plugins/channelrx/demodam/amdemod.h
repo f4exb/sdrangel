@@ -92,7 +92,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
@@ -121,6 +121,7 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_absoluteFrequencyOffset;
     AMDemodSettings m_settings;
 
 	NCO m_nco;

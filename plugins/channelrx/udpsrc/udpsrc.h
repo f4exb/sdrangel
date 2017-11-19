@@ -18,9 +18,11 @@
 #ifndef INCLUDE_UDPSRC_H
 #define INCLUDE_UDPSRC_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <QHostAddress>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/fftfilt.h"
 #include "dsp/interpolator.h"
@@ -39,7 +41,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class UDPSrc : public BasebandSampleSink {
+class UDPSrc : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
 
 public:
@@ -104,6 +106,10 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+
     static const QString m_channelID;
 	static const int udpBlockSize = 512; // UDP block size in number of bytes
 
@@ -131,11 +137,12 @@ protected:
 		{ }
 	};
 
-    UDPSrcSettings m_settings;
-
     DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
+
+    UDPSrcSettings m_settings;
+    int m_absoluteFrequencyOffset;
 
 	QUdpSocket *m_audioSocket;
 
