@@ -27,6 +27,7 @@ DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSourceEngine(deviceSourceEngine),
     m_sampleSourceSequence(0),
+    m_nbItems(1),
     m_itemIndex(0),
     m_pluginInterface(0),
     m_sampleSourcePluginInstanceUI(0),
@@ -152,6 +153,11 @@ void DeviceSourceAPI::setSampleSourceSequence(int sequence)
     m_deviceSourceEngine->setSourceSequence(sequence);
 }
 
+void DeviceSourceAPI::setNbItems(uint32_t nbItems)
+{
+    m_nbItems = nbItems;
+}
+
 void DeviceSourceAPI::setItemIndex(uint32_t index)
 {
     m_itemIndex = index;
@@ -165,6 +171,38 @@ void DeviceSourceAPI::setSampleSourcePluginInterface(PluginInterface *iface)
 void DeviceSourceAPI::setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui)
 {
     m_sampleSourcePluginInstanceUI = gui;
+}
+
+void DeviceSourceAPI::getDeviceEngineStateStr(QString& state)
+{
+    if (m_deviceSourceEngine)
+    {
+        switch(m_deviceSourceEngine->state())
+        {
+        case DSPDeviceSourceEngine::StNotStarted:
+            state = "notStarted";
+            break;
+        case DSPDeviceSourceEngine::StIdle:
+            state = "idle";
+            break;
+        case DSPDeviceSourceEngine::StReady:
+            state = "ready";
+            break;
+        case DSPDeviceSourceEngine::StRunning:
+            state = "running";
+            break;
+        case DSPDeviceSourceEngine::StError:
+            state = "error";
+            break;
+        default:
+            state = "notStarted";
+            break;
+        }
+    }
+    else
+    {
+        state = "notStarted";
+    }
 }
 
 void DeviceSourceAPI::loadSourceSettings(const Preset* preset)

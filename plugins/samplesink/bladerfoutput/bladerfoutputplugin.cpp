@@ -69,6 +69,7 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
 				false,
+				1,
 				0));
 	}
 

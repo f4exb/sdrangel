@@ -66,6 +66,7 @@ public:
     void setSampleSourceSerial(const QString& serial);
     void setSampleSourceDisplayName(const QString& serial);
     void setSampleSourceSequence(int sequence);
+    void setNbItems(uint32_t nbItems);
     void setItemIndex(uint32_t index);
     void setSampleSourcePluginInterface(PluginInterface *iface);
     void setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui);
@@ -75,9 +76,11 @@ public:
     const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
     const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
+    uint32_t getNbItems() const { return m_nbItems; }
     uint32_t getItemIndex() const { return m_itemIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
+    void getDeviceEngineStateStr(QString& state);
 
     void loadSourceSettings(const Preset* preset);
     void saveSourceSettings(Preset* preset);
@@ -107,6 +110,7 @@ protected:
     QString m_sampleSourceSerial;      //!< The device serial number defined by the vendor or a fake one (SDRplay)
     QString m_sampleSourceDisplayName; //!< The human readable name identifying this instance
     uint32_t m_sampleSourceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
+    uint32_t m_nbItems;                //!< Number of items or streams in the device. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
     uint32_t m_itemIndex;              //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSourcePluginInstanceUI;

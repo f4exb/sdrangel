@@ -63,6 +63,7 @@ PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
             0,
             PluginInterface::SamplingDevice::BuiltInDevice,
             false,
+            1,
             0));
 
 	return result;

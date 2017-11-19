@@ -80,6 +80,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
+				1,
 				0));
 	}
 

@@ -38,18 +38,26 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 
         if (path == WebAPIAdapterInterface::instanceSummaryURL)
         {
-            Swagger::SWGInstanceSummaryResponse normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
+            if (request.getMethod() == "GET")
+            {
+                Swagger::SWGInstanceSummaryResponse normalResponse;
+                Swagger::SWGErrorResponse errorResponse;
 
-            int status = m_adapter->instanceSummary(normalResponse, errorResponse);
+                int status = m_adapter->instanceSummary(normalResponse, errorResponse);
 
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
-                response.write(errorResponse.asJson().toUtf8());
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+
+                response.setStatus(status);
             }
-
-            response.setStatus(status);
+            else
+            {
+                response.write("Invalid HTTP method");
+                response.setStatus(405,"Invalid HTTP method");
+            }
         }
         else
         {

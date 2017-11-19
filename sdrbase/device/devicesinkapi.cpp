@@ -27,6 +27,7 @@ DeviceSinkAPI::DeviceSinkAPI(int deviceTabIndex,
     m_deviceTabIndex(deviceTabIndex),
     m_deviceSinkEngine(deviceSinkEngine),
     m_sampleSinkSequence(0),
+    m_nbItems(1),
     m_itemIndex(0),
     m_pluginInterface(0),
     m_sampleSinkPluginInstanceUI(0),
@@ -160,6 +161,11 @@ void DeviceSinkAPI::setSampleSinkSequence(int sequence)
     m_deviceSinkEngine->setSinkSequence(sequence);
 }
 
+void DeviceSinkAPI::setNbItems(uint32_t nbItems)
+{
+    m_nbItems = nbItems;
+}
+
 void DeviceSinkAPI::setItemIndex(uint32_t index)
 {
     m_itemIndex = index;
@@ -173,6 +179,38 @@ void DeviceSinkAPI::setSampleSinkPluginInterface(PluginInterface *iface)
 void DeviceSinkAPI::setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui)
 {
     m_sampleSinkPluginInstanceUI = gui;
+}
+
+void DeviceSinkAPI::getDeviceEngineStateStr(QString& state)
+{
+    if (m_deviceSinkEngine)
+    {
+        switch(m_deviceSinkEngine->state())
+        {
+        case DSPDeviceSinkEngine::StNotStarted:
+            state = "notStarted";
+            break;
+        case DSPDeviceSinkEngine::StIdle:
+            state = "idle";
+            break;
+        case DSPDeviceSinkEngine::StReady:
+            state = "ready";
+            break;
+        case DSPDeviceSinkEngine::StRunning:
+            state = "running";
+            break;
+        case DSPDeviceSinkEngine::StError:
+            state = "error";
+            break;
+        default:
+            state = "notStarted";
+            break;
+        }
+    }
+    else
+    {
+        state = "notStarted";
+    }
 }
 
 void DeviceSinkAPI::loadSinkSettings(const Preset* preset)

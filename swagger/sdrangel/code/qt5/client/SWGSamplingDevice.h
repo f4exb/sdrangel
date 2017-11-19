@@ -69,6 +69,9 @@ public:
     qint32 getBandwidth();
     void setBandwidth(qint32 bandwidth);
 
+    QString* getState();
+    void setState(QString* state);
+
 
 private:
     qint32 index;
@@ -80,6 +83,7 @@ private:
     QString* serial;
     qint64 center_frequency;
     qint32 bandwidth;
+    QString* state;
 };
 
 }

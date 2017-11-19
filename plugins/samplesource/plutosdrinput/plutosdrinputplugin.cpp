@@ -76,6 +76,7 @@ PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources()
                 i,
                 PluginInterface::SamplingDevice::PhysicalDevice,
                 true,
+                1,
                 0));
 
         qDebug("PlutoSDRInputPlugin::enumSampleSources: enumerated PlutoSDR device #%d", i);

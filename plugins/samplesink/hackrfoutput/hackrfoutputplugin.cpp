@@ -100,6 +100,7 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 					i,
 					PluginInterface::SamplingDevice::PhysicalDevice,
 					false,
+					1,
 					0));
 
 			qDebug("HackRFOutputPlugin::enumSampleSinks: enumerated HackRF device #%d", i);

@@ -70,6 +70,7 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
+				1,
 				0));
 	}
 

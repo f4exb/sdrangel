@@ -42,6 +42,7 @@ public:
 		int sequence;             //!< The device sequence. >0 when more than one device of the same type is connected
 		SamplingDeviceType type;  //!< The sampling device type for behavior information
 		bool rxElseTx;            //!< This is the Rx part else the Tx part of the device
+		int deviceNbItems;        //!< Number of items (or streams) in the device. >1 for composite devices.
 		int deviceItemIndex;      //!< For composite devices this is the Rx or Tx stream index. -1 if not initialized
 		int claimed;              //!< This is the device set index if claimed else -1
 
@@ -52,6 +53,7 @@ public:
 				int _sequence,
 				SamplingDeviceType _type,
 				bool _rxElseTx,
+				int _deviceNbItems,
 				int _deviceItemIndex) :
 			displayedName(_displayedName),
 			hardwareId(_hardwareId),
@@ -60,6 +62,7 @@ public:
 			sequence(_sequence),
 			type(_type),
 			rxElseTx(_rxElseTx),
+			deviceNbItems(_deviceNbItems),
 			deviceItemIndex(_deviceItemIndex),
 			claimed(-1)
 		{ }

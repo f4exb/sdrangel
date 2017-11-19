@@ -98,6 +98,7 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
                         i,
                         PluginInterface::SamplingDevice::PhysicalDevice,
                         true,
+                        limeSDRParams.m_nbRxChannels,
                         j));
             }
         }

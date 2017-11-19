@@ -561,6 +561,7 @@ definitions:
       - serial
       - centerFrequency
       - bandwidth
+      - state
     properties:
       index:
         description: "Index in the list of device sets opened in this instance"
@@ -590,6 +591,9 @@ definitions:
       bandwidth:
         description: "Bandwidth in Hz or complex S/s of baseband"
         type: integer
+      state:
+        description: "State: notStarted, idle, ready, running, error"
+        type: string
   Channel:
     description: "Channel summarized information"
     required:

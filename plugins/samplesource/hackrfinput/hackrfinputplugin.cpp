@@ -101,6 +101,7 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 					i,
 					PluginInterface::SamplingDevice::PhysicalDevice,
 					true,
+					1,
 					0));
 
 			qDebug("HackRFPlugin::enumSampleSources: enumerated HackRF device #%d", i);

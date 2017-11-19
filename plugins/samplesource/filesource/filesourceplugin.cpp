@@ -62,6 +62,7 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
             0,
             PluginInterface::SamplingDevice::BuiltInDevice,
             true,
+            1,
             0));
 
 	return result;

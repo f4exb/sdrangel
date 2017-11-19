@@ -102,6 +102,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 						i,
 						PluginInterface::SamplingDevice::PhysicalDevice,
 						true,
+						1,
 						0));
 
 				qDebug("AirspyPlugin::enumSampleSources: enumerated Airspy device #%d", i);

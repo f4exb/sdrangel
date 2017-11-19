@@ -70,6 +70,7 @@ PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
+				1,
 				0));
 
 		device_info = device_info->next;

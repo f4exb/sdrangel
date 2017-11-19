@@ -66,6 +66,7 @@ public:
     void setSampleSinkSerial(const QString& serial);
     void setSampleSinkDisplayName(const QString& serial);
     void setSampleSinkSequence(int sequence);
+    void setNbItems(uint32_t nbItems);
     void setItemIndex(uint32_t index);
     void setSampleSinkPluginInterface(PluginInterface *iface);
     void setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui);
@@ -75,9 +76,11 @@ public:
     const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
     const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
     uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
+    uint32_t getNbItems() const { return m_nbItems; }
     uint32_t getItemIndex() const { return m_itemIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
+    void getDeviceEngineStateStr(QString& state);
 
     void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void removeChannelInstance(PluginInstanceGUI* pluginGUI);
@@ -111,7 +114,8 @@ protected:
     QString m_sampleSinkSerial;      //!< The device serial number defined by the vendor
     QString m_sampleSinkDisplayName; //!< The human readable name identifying this instance
     uint32_t m_sampleSinkSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
-    uint32_t m_itemIndex;            //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
+    uint32_t m_nbItems;              //!< Number of items or streams in the device. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
+    uint32_t m_itemIndex;            //!< The Tx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
     PluginInterface* m_pluginInterface;
     PluginInstanceGUI* m_sampleSinkPluginInstanceUI;
 

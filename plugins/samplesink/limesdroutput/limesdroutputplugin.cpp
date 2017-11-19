@@ -98,6 +98,7 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
                         i,
                         PluginInterface::SamplingDevice::PhysicalDevice,
                         false,
+                        limeSDRParams.m_nbTxChannels,
                         j));
             }
         }

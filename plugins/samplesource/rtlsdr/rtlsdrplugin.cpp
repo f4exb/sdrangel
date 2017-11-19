@@ -60,6 +60,7 @@ PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources()
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
 				true,
+				1,
 				0));
 	}
 	return result;

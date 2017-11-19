@@ -46,6 +46,7 @@ SWGSamplingDevice::init() {
     serial = new QString("");
     center_frequency = 0L;
     bandwidth = 0;
+    state = new QString("");
 }
 
 void
@@ -65,6 +66,10 @@ SWGSamplingDevice::cleanup() {
     }
 
 
+
+    if(state != nullptr) {
+        delete state;
+    }
 }
 
 SWGSamplingDevice*
@@ -87,6 +92,7 @@ SWGSamplingDevice::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&serial, pJson["serial"], "QString", "QString");
     ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     ::Swagger::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
+    ::Swagger::setValue(&state, pJson["state"], "QString", "QString");
 }
 
 QString
@@ -120,6 +126,8 @@ SWGSamplingDevice::asJsonObject() {
     obj->insert("centerFrequency", QJsonValue(center_frequency));
 
     obj->insert("bandwidth", QJsonValue(bandwidth));
+
+    toJsonValue(QString("state"), state, obj, QString("QString"));
 
     return obj;
 }
@@ -203,6 +211,15 @@ SWGSamplingDevice::getBandwidth() {
 void
 SWGSamplingDevice::setBandwidth(qint32 bandwidth) {
     this->bandwidth = bandwidth;
+}
+
+QString*
+SWGSamplingDevice::getState() {
+    return state;
+}
+void
+SWGSamplingDevice::setState(QString* state) {
+    this->state = state;
 }
 
 
