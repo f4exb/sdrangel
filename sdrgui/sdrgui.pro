@@ -77,7 +77,7 @@ SOURCES += mainwindow.cpp\
         gui/transverterdialog.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
-        webapi/webapiadapergui.cpp
+        webapi/webapiadaptergui.cpp
 
 HEADERS  += mainwindow.h\
         device/devicesourceapi.h\
@@ -123,7 +123,7 @@ HEADERS  += mainwindow.h\
         gui/transverterdialog.h\
         gui/valuedial.h\
         gui/valuedialz.h\
-        webapi/webapiadapergui.h
+        webapi/webapiadaptergui.h
 
 FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
@@ -146,6 +146,7 @@ FORMS    += mainwindow.ui\
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../logging/$${build_subdir} -llogging
+LIBS += -L../swagger/$${build_subdir} -lswagger
 
 RESOURCES = resources/res.qrc
 

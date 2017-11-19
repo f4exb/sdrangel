@@ -12,6 +12,7 @@ copy mbelib\%1\mbelib.dll %2
 copy dsdcc\%1\dsdcc.dll %2
 copy serialdv\%1\serialdv.dll %2
 copy httpserver\%1\httpserver.dll %2
+copy swagger\%1\swagger.dll %2
 copy logging\%1\logging.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2

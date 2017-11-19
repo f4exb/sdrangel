@@ -33,6 +33,7 @@ copy serialdv\%1\serialdv.dll %2
 copy nanomsg\%1\nanomsg.dll %2
 copy httpserver\%1\httpserver.dll %2
 copy logging\%1\logging.dll %2
+copy swagger\%1\swagger.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2

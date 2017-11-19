@@ -7,11 +7,11 @@
 TEMPLATE = subdirs
 
 SUBDIRS = serialdv
-SUBDIRS += sdrbase
-SUBDIRS += sdrgui
 SUBDIRS += httpserver
 SUBDIRS += logging
 SUBDIRS += swagger
+SUBDIRS += sdrbase
+SUBDIRS += sdrgui
 CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib

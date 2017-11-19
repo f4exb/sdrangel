@@ -198,6 +198,7 @@ HEADERS  += audio/audiodeviceinfo.h\
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
+LIBS += -L../swagger/$${build_subdir} -lswagger
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
