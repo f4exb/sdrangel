@@ -25,6 +25,8 @@
 #include "device/deviceuiset.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
+#include "channel/channelsinkapi.h"
+#include "channel/channelsourceapi.h"
 
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGErrorResponse.h"
@@ -86,7 +88,18 @@ int WebAPIAdapterGUI::instanceSummary(
                 samplingDevice->setBandwidth(sampleSink->getSampleRate());
             }
 
-            deviceSet->back()->setChannelcount(0);
+            deviceSet->back()->setChannelcount((*it)->m_deviceSinkAPI->getNbChannels());
+            QList<Swagger::SWGChannel*> *channels = deviceSet->back()->getChannels();
+
+            for (int i = 0; i <  deviceSet->back()->getChannelcount(); i++)
+            {
+                channels->append(new Swagger::SWGChannel);
+                ChannelSourceAPI *channel = (*it)->m_deviceSinkAPI->getChanelAPIAt(i);
+                channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+                channels->back()->setIndex(channel->getIndexInDeviceSet());
+                channel->getIdentifier(*channels->back()->getId());
+                channel->getTitle(*channels->back()->getTitle());
+            }
         }
 
         if ((*it)->m_deviceSourceEngine) // Rx data
@@ -104,7 +117,18 @@ int WebAPIAdapterGUI::instanceSummary(
                 samplingDevice->setBandwidth(sampleSource->getSampleRate());
             }
 
-            deviceSet->back()->setChannelcount(0);
+            deviceSet->back()->setChannelcount((*it)->m_deviceSourceAPI->getNbChannels());
+            QList<Swagger::SWGChannel*> *channels = deviceSet->back()->getChannels();
+
+            for (int i = 0; i <  deviceSet->back()->getChannelcount(); i++)
+            {
+                channels->append(new Swagger::SWGChannel);
+                ChannelSinkAPI *channel = (*it)->m_deviceSourceAPI->getChanelAPIAt(i);
+                channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+                channels->back()->setIndex(channel->getIndexInDeviceSet());
+                channel->getIdentifier(*channels->back()->getId());
+                channel->getTitle(*channels->back()->getTitle());
+            }
         }
     }
 

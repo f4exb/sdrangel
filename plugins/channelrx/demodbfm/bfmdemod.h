@@ -18,9 +18,11 @@
 #ifndef INCLUDE_BFMDEMOD_H
 #define INCLUDE_BFMDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -42,7 +44,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class BFMDemod : public BasebandSampleSink {
+class BFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureBFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -119,6 +121,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
 	double getMagSq() const { return m_magsq; }
 

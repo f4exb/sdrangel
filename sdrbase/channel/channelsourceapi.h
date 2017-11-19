@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// API for Tx channels                                                           //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,37 +16,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef SDRBASE_CHANNEL_CHANNELSOURCEAPI_H_
+#define SDRBASE_CHANNEL_CHANNELSOURCEAPI_H_
 
-#include <QByteArray>
+#include <QString>
+#include "util/export.h"
 
-class Serializable;
+class SDRANGEL_API ChannelSourceAPI {
+public:
+    ChannelSourceAPI();
+    virtual ~ChannelSourceAPI() {}
 
-struct AMDemodSettings
-{
-    int m_inputSampleRate;
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    quint32 m_audioSampleRate;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
+    virtual int getDeltaFrequency() const = 0;
+    virtual void getIdentifier(QString& id) = 0;
+    virtual void getTitle(QString& title) = 0;
 
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
+    void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
+
+private:
+    int m_indexInDeviceSet;
 };
 
 
 
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* SDRBASE_CHANNEL_CHANNELSOURCEAPI_H_ */

@@ -17,9 +17,11 @@
 #ifndef INCLUDE_AMDEMOD_H
 #define INCLUDE_AMDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
@@ -33,7 +35,7 @@ class DeviceSourceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
 
-class AMDemod : public BasebandSampleSink {
+class AMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
 public:
     class MsgConfigureAMDemod : public Message {
@@ -89,6 +91,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }

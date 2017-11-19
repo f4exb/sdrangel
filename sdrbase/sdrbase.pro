@@ -51,6 +51,8 @@ SOURCES += audio/audiodeviceinfo.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
+        channel/channelsinkapi.cpp\
+        channel/channelsourceapi.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
         device/deviceenumerator.cpp\
@@ -114,6 +116,8 @@ HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
+        channel/channelsinkapi.h\
+        channel/channelsourceapi.h\        
         device/devicesourceapi.h\
         device/devicesinkapi.h\
         device/deviceenumerator.h\

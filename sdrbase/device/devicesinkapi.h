@@ -31,6 +31,7 @@ class PluginInstanceGUI;
 class PluginInterface;
 class Preset;
 class DeviceSourceAPI;
+class ChannelSourceAPI;
 
 class SDRANGEL_API DeviceSinkAPI : public QObject {
     Q_OBJECT
@@ -47,6 +48,8 @@ public:
     void removeSource(BasebandSampleSource* sink);                 //!< Remove a baseband sample source from device engine
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine
     void removeThreadedSource(ThreadedBasebandSampleSource* sink); //!< Remove a baseband sample source that runs on its own thread from device engine
+    void addChannelAPI(ChannelSourceAPI* channelAPI);
+    void removeChannelAPI(ChannelSourceAPI* channelAPI);
     uint32_t getNumberOfSources();
     void setSampleSink(DeviceSampleSink* sink);                    //!< Set device engine sample sink type
     DeviceSampleSink *getSampleSink();                             //!< Return pointer to the device sample sink
@@ -81,6 +84,8 @@ public:
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
     void getDeviceEngineStateStr(QString& state);
+    ChannelSourceAPI *getChanelAPIAt(int index);
+    int getNbChannels() const { return m_channelAPIs.size(); }
 
     void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void removeChannelInstance(PluginInstanceGUI* pluginGUI);
@@ -125,7 +130,12 @@ protected:
     bool m_isBuddyLeader;
     const QTimer& m_masterTimer; //!< This is the DSPEngine master timer
 
+    QList<ChannelSourceAPI*> m_channelAPIs;
+
     friend class DeviceSourceAPI;
+
+private:
+    void renumerateChannels();
 };
 
 

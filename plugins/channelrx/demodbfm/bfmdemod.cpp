@@ -85,6 +85,7 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     applySettings(m_settings, true);
 }
@@ -99,6 +100,7 @@ BFMDemod::~BFMDemod()
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
 	delete m_udpBufferAudio;
 
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

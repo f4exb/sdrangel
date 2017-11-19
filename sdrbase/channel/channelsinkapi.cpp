@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// API for Rx channels                                                           //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,37 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#include "channelsinkapi.h"
 
-#include <QByteArray>
-
-class Serializable;
-
-struct AMDemodSettings
-{
-    int m_inputSampleRate;
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    quint32 m_audioSampleRate;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
-
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-};
-
-
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+ChannelSinkAPI::ChannelSinkAPI() :
+    m_indexInDeviceSet(-1)
+{ }

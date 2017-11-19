@@ -36,6 +36,8 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
 	m_sampleSink(0),
 	m_settingsMutex(QMutex::Recursive)
 {
+    setObjectName("ChannelAnalyzer");
+
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
 	m_spanLog2 = 3;
@@ -54,12 +56,14 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 }
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
 	if (SSBFilter) delete SSBFilter;
 	if (DSBFilter) delete DSBFilter;
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

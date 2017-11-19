@@ -90,6 +90,7 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 
@@ -98,6 +99,7 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
 
 ATVDemod::~ATVDemod()
 {
+    m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

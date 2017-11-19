@@ -17,10 +17,11 @@
 #ifndef INCLUDE_CHANALYZERNG_H
 #define INCLUDE_CHANALYZERNG_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
 #include <vector>
 
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
@@ -33,7 +34,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class ChannelAnalyzerNG : public BasebandSampleSink {
+class ChannelAnalyzerNG : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureChannelAnalyzer : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -142,6 +143,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+	virtual int getDeltaFrequency() const { return m_running.m_frequency; }
+	virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = objectName(); }
 
     static const QString m_channelID;
 

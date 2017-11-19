@@ -599,6 +599,7 @@ definitions:
     required:
       - index
       - id
+      - title
       - deltaFrequency
     properties:
       index:
@@ -606,6 +607,9 @@ definitions:
         type: integer
       id:
         description: "Key to identify the type of channel"
+        type: string
+      title:
+        description: "Freeform title of the channel"
         type: string
       deltaFrequency:
         description: "Channel shift frequency in Hz from the center of baseband"

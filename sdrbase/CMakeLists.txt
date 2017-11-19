@@ -6,6 +6,9 @@ set(sdrbase_SOURCES
     audio/audiooutput.cpp
     audio/audioinput.cpp
 
+    channel/channelsinkapi.cpp
+    channel/channelsourceapi.cpp
+
     dsp/afsquelch.cpp
     dsp/agc.cpp
     dsp/downchannelizer.cpp
@@ -77,6 +80,9 @@ set(sdrbase_HEADERS
     audio/audiofifo.h
     audio/audiooutput.h
     audio/audioinput.h
+
+    channel/channelsinkapi.h
+    channel/channelsourceapi.h
 
     dsp/afsquelch.h
     dsp/downchannelizer.h

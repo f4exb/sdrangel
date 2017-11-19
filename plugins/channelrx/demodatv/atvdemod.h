@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
@@ -42,7 +43,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class ATVDemod : public BasebandSampleSink
+class ATVDemod : public BasebandSampleSink, public ChannelSinkAPI
 {
 	Q_OBJECT
 
@@ -221,6 +222,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return m_rfRunning.m_intFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = objectName(); }
 
     void setATVScreen(ATVScreenInterface *objScreen);
     int getSampleRate();

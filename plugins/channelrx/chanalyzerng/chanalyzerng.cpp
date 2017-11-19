@@ -36,6 +36,8 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_sampleSink(0),
 	m_settingsMutex(QMutex::Recursive)
 {
+    setObjectName("ChannelAnalyzerNG");
+
 	m_undersampleCount = 0;
 	m_sum = 0;
 	m_usb = true;
@@ -49,6 +51,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
 	apply(true);
 }
@@ -57,6 +60,7 @@ ChannelAnalyzerNG::~ChannelAnalyzerNG()
 {
 	if (SSBFilter) delete SSBFilter;
 	if (DSBFilter) delete DSBFilter;
+	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

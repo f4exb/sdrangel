@@ -41,6 +41,7 @@ void AMDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(255, 255, 0).rgb();
+    m_title = "AM Demodulator";
 }
 
 QByteArray AMDemodSettings::serialize() const
@@ -57,6 +58,7 @@ QByteArray AMDemodSettings::serialize() const
 
     s.writeU32(7, m_rgbColor);
     s.writeBool(8, m_bandpassEnable);
+    s.writeString(9, m_title);
     return s.final();
 }
 
@@ -91,6 +93,8 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
 
         d.readU32(7, &m_rgbColor);
         d.readBool(8, &m_bandpassEnable, false);
+        d.readString(9, &m_title, "AM Demodulator");
+
         return true;
     }
     else

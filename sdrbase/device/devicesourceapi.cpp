@@ -21,6 +21,7 @@
 #include "plugin/plugininterface.h"
 #include "settings/preset.h"
 #include "dsp/dspengine.h"
+#include "channel/channelsinkapi.h"
 
 DeviceSourceAPI::DeviceSourceAPI(int deviceTabIndex,
         DSPDeviceSourceEngine *deviceSourceEngine) :
@@ -59,6 +60,37 @@ void DeviceSourceAPI::addThreadedSink(ThreadedBasebandSampleSink* sink)
 void DeviceSourceAPI::removeThreadedSink(ThreadedBasebandSampleSink* sink)
 {
     m_deviceSourceEngine->removeThreadedSink(sink);
+}
+
+void DeviceSourceAPI::addChannelAPI(ChannelSinkAPI* channelAPI)
+{
+    m_channelAPIs.append(channelAPI);
+    renumerateChannels();
+}
+
+void DeviceSourceAPI::removeChannelAPI(ChannelSinkAPI* channelAPI)
+{
+    if (m_channelAPIs.removeOne(channelAPI)) {
+        renumerateChannels();
+    }
+
+    channelAPI->setIndexInDeviceSet(-1);
+}
+
+ChannelSinkAPI *DeviceSourceAPI::getChanelAPIAt(int index)
+{
+    if (index < m_channelAPIs.size()) {
+        return m_channelAPIs.at(index);
+    } else {
+        return 0;
+    }
+}
+
+void DeviceSourceAPI::renumerateChannels()
+{
+    for (int i = 0; i < m_channelAPIs.size(); ++i) {
+        m_channelAPIs.at(i)->setIndexInDeviceSet(i);
+    }
 }
 
 void DeviceSourceAPI::setSampleSource(DeviceSampleSource* source)

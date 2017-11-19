@@ -51,6 +51,7 @@ void BFMDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(80, 120, 228).rgb();
+    m_title = "Broadcast FM Demod";
 }
 
 QByteArray BFMDemodSettings::serialize() const
@@ -73,6 +74,8 @@ QByteArray BFMDemodSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
     }
+
+    s.writeString(12, m_title);
 
     return s.final();
 }
@@ -119,6 +122,8 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         if (m_channelMarker) {
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readString(12, &m_title, "Broadcast FM Demod");
 
         return true;
     }

@@ -737,7 +737,7 @@ margin-bottom: 20px;
   "description" : "Audio devices selected"
 };
             defs.Channel = {
-  "required" : [ "deltaFrequency", "id", "index" ],
+  "required" : [ "deltaFrequency", "id", "index", "title" ],
   "properties" : {
     "index" : {
       "type" : "integer",
@@ -746,6 +746,10 @@ margin-bottom: 20px;
     "id" : {
       "type" : "string",
       "description" : "Key to identify the type of channel"
+    },
+    "title" : {
+      "type" : "string",
+      "description" : "Freeform title of the channel"
     },
     "deltaFrequency" : {
       "type" : "integer",
@@ -7293,7 +7297,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-19T00:43:35.861+01:00
+              Generated 2017-11-19T03:28:56.995+01:00
             </div>
           </div>
       </div>

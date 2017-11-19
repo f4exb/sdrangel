@@ -48,6 +48,9 @@ public:
     QString* getId();
     void setId(QString* id);
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getDeltaFrequency();
     void setDeltaFrequency(qint32 delta_frequency);
 
@@ -55,6 +58,7 @@ public:
 private:
     qint32 index;
     QString* id;
+    QString* title;
     qint32 delta_frequency;
 };
 
