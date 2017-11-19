@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
-// API for Rx channels                                                           //
+// Object unique id calculator loosely inspired by MongoDB object id             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,33 +16,30 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+#ifndef SDRBASE_UTIL_UID_H_
+#define SDRBASE_UTIL_UID_H_
 
-#ifndef SDRBASE_CHANNEL_CHANNELSINKAPI_H_
-#define SDRBASE_CHANNEL_CHANNELSINKAPI_H_
-
-#include <QString>
 #include <stdint.h>
 
-#include "util/export.h"
-
-class SDRANGEL_API ChannelSinkAPI {
+class UidCalculator
+{
 public:
-    ChannelSinkAPI();
-    virtual ~ChannelSinkAPI() {}
+    /**
+     * Get a new object unique Id. It is the addition of:
+     *   - 6 digit microseconds in current second
+     *   - 4 byte Unix epoch multiplied by 1000000
+     */
+    static uint64_t getNewObjectId();
 
-    virtual int getDeltaFrequency() const = 0;
-    virtual void getIdentifier(QString& id) = 0;
-    virtual void getTitle(QString& title) = 0;
-
-    int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
-    void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
-    uint64_t getUID() const { return m_uid; }
+    /**
+     * Get a new instance unique Id. It is made of from LSB to MSB:
+     *   - 2 byte process id
+     *   - 2 byte hashed host name
+     */
+    static uint32_t getNewInstanceId();
 
 private:
-    int m_indexInDeviceSet;
-    uint64_t m_uid;
+    static uint64_t getCurrentMiroseconds();
 };
 
-
-
-#endif /* SDRBASE_CHANNEL_CHANNELSINKAPI_H_ */
+#endif /* SDRBASE_UTIL_UID_H_ */

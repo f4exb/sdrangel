@@ -51,6 +51,7 @@ void DSDDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 255, 255).rgb();
+    m_title = "DSD Demodulator";
 }
 
 QByteArray DSDDemodSettings::serialize() const
@@ -80,6 +81,8 @@ QByteArray DSDDemodSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(17, m_channelMarker->serialize());
     }
+
+    s.writeString(18, m_title);
 
     return s.final();
 }
@@ -132,6 +135,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_slot1On, false);
         d.readBool(15, &m_slot2On, false);
         d.readBool(16, &m_tdmaStereo, false);
+        d.readString(18, &m_title, "DSD Demodulator");
 
         return true;
     }

@@ -97,6 +97,7 @@ int WebAPIAdapterGUI::instanceSummary(
                 ChannelSourceAPI *channel = (*it)->m_deviceSinkAPI->getChanelAPIAt(i);
                 channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
                 channels->back()->setIndex(channel->getIndexInDeviceSet());
+                channels->back()->setUid(channel->getUID());
                 channel->getIdentifier(*channels->back()->getId());
                 channel->getTitle(*channels->back()->getTitle());
             }
@@ -126,6 +127,7 @@ int WebAPIAdapterGUI::instanceSummary(
                 ChannelSinkAPI *channel = (*it)->m_deviceSourceAPI->getChanelAPIAt(i);
                 channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
                 channels->back()->setIndex(channel->getIndexInDeviceSet());
+                channels->back()->setUid(channel->getUID());
                 channel->getIdentifier(*channels->back()->getId());
                 channel->getTitle(*channels->back()->getTitle());
             }

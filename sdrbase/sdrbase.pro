@@ -104,6 +104,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/syncmessenger.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
+        util/uid.cpp\
         plugin/plugininterface.cpp\
         plugin/pluginapi.cpp\        
         plugin/pluginmanager.cpp\
@@ -189,6 +190,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         util/syncmessenger.h\
         util/samplesourceserializer.h\
         util/simpleserializer.h\
+        util/uid.h\
         webapi/webapiadapterinterface.h\
         webapi/webapirequestmapper.h\
         webapi/webapiserver.h\

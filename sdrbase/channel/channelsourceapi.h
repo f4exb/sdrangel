@@ -20,6 +20,8 @@
 #define SDRBASE_CHANNEL_CHANNELSOURCEAPI_H_
 
 #include <QString>
+#include <stdint.h>
+
 #include "util/export.h"
 
 class SDRANGEL_API ChannelSourceAPI {
@@ -33,9 +35,11 @@ public:
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
+    uint64_t getUID() const { return m_uid; }
 
 private:
     int m_indexInDeviceSet;
+    uint64_t m_uid;
 };
 
 

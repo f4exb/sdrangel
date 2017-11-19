@@ -39,6 +39,7 @@ void
 SWGChannel::init() {
     index = 0;
     id = new QString("");
+    uid = 0L;
     title = new QString("");
     delta_frequency = 0;
 }
@@ -50,6 +51,7 @@ SWGChannel::cleanup() {
     if(id != nullptr) {
         delete id;
     }
+
 
     if(title != nullptr) {
         delete title;
@@ -70,6 +72,7 @@ void
 SWGChannel::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&index, pJson["index"], "qint32", "");
     ::Swagger::setValue(&id, pJson["id"], "QString", "QString");
+    ::Swagger::setValue(&uid, pJson["uid"], "qint64", "");
     ::Swagger::setValue(&title, pJson["title"], "QString", "QString");
     ::Swagger::setValue(&delta_frequency, pJson["deltaFrequency"], "qint32", "");
 }
@@ -91,6 +94,8 @@ SWGChannel::asJsonObject() {
     obj->insert("index", QJsonValue(index));
 
     toJsonValue(QString("id"), id, obj, QString("QString"));
+
+    obj->insert("uid", QJsonValue(uid));
 
     toJsonValue(QString("title"), title, obj, QString("QString"));
 
@@ -115,6 +120,15 @@ SWGChannel::getId() {
 void
 SWGChannel::setId(QString* id) {
     this->id = id;
+}
+
+qint64
+SWGChannel::getUid() {
+    return uid;
+}
+void
+SWGChannel::setUid(qint64 uid) {
+    this->uid = uid;
 }
 
 QString*

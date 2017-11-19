@@ -599,6 +599,7 @@ definitions:
     required:
       - index
       - id
+      - uid
       - title
       - deltaFrequency
     properties:
@@ -608,6 +609,10 @@ definitions:
       id:
         description: "Key to identify the type of channel"
         type: string
+      uid:
+        description: "Channel instance unique id"
+        type: integer
+        format: int64
       title:
         description: "Freeform title of the channel"
         type: string

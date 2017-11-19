@@ -80,6 +80,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelAPI(this);
 
     applySettings(m_settings, true);
 }
@@ -91,6 +92,7 @@ DSDDemod::~DSDDemod()
     DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
     delete m_udpBufferAudio;
 
+    m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;

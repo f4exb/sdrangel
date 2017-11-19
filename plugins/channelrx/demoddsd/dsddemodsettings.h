@@ -44,6 +44,7 @@ struct DSDDemodSettings
     QString m_udpAddress;
     quint16 m_udpPort;
     quint32 m_rgbColor;
+    QString m_title;
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;

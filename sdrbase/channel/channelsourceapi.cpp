@@ -16,9 +16,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "util/uid.h"
 #include "channelsourceapi.h"
 
 ChannelSourceAPI::ChannelSourceAPI() :
-    m_indexInDeviceSet(-1)
+    m_indexInDeviceSet(-1),
+    m_uid(UidCalculator::getNewObjectId())
 { }
 

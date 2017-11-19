@@ -18,10 +18,12 @@
 #ifndef INCLUDE_DSDDEMOD_H
 #define INCLUDE_DSDDEMOD_H
 
-#include <dsp/basebandsamplesink.h>
-#include <dsp/phasediscri.h>
 #include <QMutex>
 #include <vector>
+
+#include "dsp/basebandsamplesink.h"
+#include "channel/channelsinkapi.h"
+#include "dsp/phasediscri.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
@@ -40,7 +42,7 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class DSDDemod : public BasebandSampleSink {
+class DSDDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureDSDDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -98,6 +100,10 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
 	double getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
