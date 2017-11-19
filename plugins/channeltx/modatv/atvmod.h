@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "dsp/basebandsamplesource.h"
+#include "channel/channelsourceapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
@@ -40,7 +41,7 @@ class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
-class ATVMod : public BasebandSampleSource {
+class ATVMod : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
@@ -400,6 +401,10 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+
     int getEffectiveSampleRate() const { return m_tvSampleRate; };
     double getMagSq() const { return m_movingAverage.average(); }
     void getCameraNumbers(std::vector<int>& numbers);
@@ -456,7 +461,9 @@ private:
     DeviceSinkAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
+
     ATVModSettings m_settings;
+    int m_absoluteFrequencyOffset;
 
     NCO m_carrierNco;
     Complex m_modSample;

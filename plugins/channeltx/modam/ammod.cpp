@@ -41,6 +41,7 @@ const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
     m_audioFifo(4800),
@@ -296,6 +297,7 @@ bool AMMod::handleMessage(const Message& cmd)
         AMModSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;

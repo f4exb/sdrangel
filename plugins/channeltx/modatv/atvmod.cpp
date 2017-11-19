@@ -50,6 +50,7 @@ const int ATVMod::m_ssbFftLen = 1024;
 
 ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
     m_evenImage(true),
@@ -527,6 +528,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         ATVModSettings settings = cfg.getSettings();
 
         // These settings are set with UpChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

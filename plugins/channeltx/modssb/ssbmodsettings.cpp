@@ -70,6 +70,7 @@ void SSBModSettings::resetToDefaults()
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
+    m_title = "SSB Modulator";
 }
 
 QByteArray SSBModSettings::serialize() const
@@ -105,6 +106,8 @@ QByteArray SSBModSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(18, m_channelMarker->serialize());
     }
+
+    s.writeString(19, m_title);
 
     return s.final();
 }
@@ -163,6 +166,13 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         m_agcThresholdDelay = tmp * 48;
         d.readS32(17, &tmp, 20);
         m_agcOrder = tmp / 100.0;
+
+        if (m_channelMarker) {
+            d.readBlob(18, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
+
+        d.readString(19, &m_title, "SSB Modulator");
 
         return true;
     }

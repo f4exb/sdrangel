@@ -49,6 +49,7 @@ void WFMModSettings::resetToDefaults()
     m_channelMute = false;
     m_playLoop = false;
     m_rgbColor = QColor(0, 0, 255).rgb();
+    m_title = "WFM Modulator";
 }
 
 QByteArray WFMModSettings::serialize() const
@@ -70,6 +71,8 @@ QByteArray WFMModSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(9, m_channelMarker->serialize());
     }
+
+    s.writeString(10, m_title);
 
     return s.final();
 }
@@ -107,6 +110,8 @@ bool WFMModSettings::deserialize(const QByteArray& data)
             d.readBlob(9, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readString(10, &m_title, "WFM Modulator");
 
         return true;
     }

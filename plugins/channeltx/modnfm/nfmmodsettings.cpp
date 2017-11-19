@@ -58,6 +58,7 @@ void NFMModSettings::resetToDefaults()
     m_ctcssOn = false;
     m_ctcssIndex = 0;
     m_rgbColor = QColor(255, 0, 0).rgb();
+    m_title = "NFM Modulator";
 }
 
 QByteArray NFMModSettings::serialize() const
@@ -82,6 +83,7 @@ QByteArray NFMModSettings::serialize() const
 
     s.writeBool(9, m_ctcssOn);
     s.writeS32(10, m_ctcssIndex);
+    s.writeString(12, m_title);
 
     return s.final();
 }
@@ -122,6 +124,8 @@ bool NFMModSettings::deserialize(const QByteArray& data)
             d.readBlob(11, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readString(12, &m_title, "NFM Modulator");
 
         return true;
     }

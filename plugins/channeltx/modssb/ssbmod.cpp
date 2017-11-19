@@ -43,6 +43,7 @@ const int SSBMod::m_ssbFftLen = 1024;
 
 SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_absoluteFrequencyOffset(0),
     m_SSBFilter(0),
     m_DSBFilter(0),
 	m_SSBFilterBuffer(0),
@@ -569,6 +570,7 @@ bool SSBMod::handleMessage(const Message& cmd)
         SSBModSettings settings = cfg.getSettings();
 
         // These settings are set with UpChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;

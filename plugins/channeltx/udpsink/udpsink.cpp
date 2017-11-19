@@ -346,6 +346,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         UDPSinkSettings settings = cfg.getSettings();
 
         // These settings are set with DownChannelizer::MsgChannelizerNotification
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;

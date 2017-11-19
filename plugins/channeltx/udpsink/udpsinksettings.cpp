@@ -48,6 +48,7 @@ void UDPSinkSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(225, 25, 99).rgb();
+    m_title = "UDP Sample Sink";
 }
 
 QByteArray UDPSinkSettings::serialize() const
@@ -76,6 +77,8 @@ QByteArray UDPSinkSettings::serialize() const
     s.writeS32(17, roundf(m_gainIn * 10.0));
     s.writeString(18, m_udpAddress);
     s.writeU32(19, m_udpPort);
+    s.writeString(20, m_title);
+
     return s.final();
 }
 
@@ -149,6 +152,8 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9999;
         }
+
+        d.readString(20, &m_title, "UDP Sample Sink");
 
         return true;
     }

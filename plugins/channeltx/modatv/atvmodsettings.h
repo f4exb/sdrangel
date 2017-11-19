@@ -78,6 +78,7 @@ struct ATVModSettings
     bool          m_forceDecimator;       //!< Forces decimator even when channel and source sample rates are equal
     QString       m_overlayText;
     quint32       m_rgbColor;
+    QString       m_title;
 
     QString m_udpAddress;
     uint16_t m_udpPort;

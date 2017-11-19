@@ -55,6 +55,8 @@ struct SSBModSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
 
+    QString m_title;
+
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
     Serializable *m_cwKeyerGUI;

@@ -44,6 +44,7 @@ const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
 NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 	m_deviceAPI(deviceAPI),
+	m_absoluteFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_movingAverage(40, 0),
     m_volumeAGC(40, 0),
@@ -309,6 +310,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 
         NFMModSettings settings = cfg.getSettings();
 
+        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
         settings.m_outputSampleRate = m_settings.m_outputSampleRate;
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 

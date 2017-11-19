@@ -20,6 +20,7 @@
 #include <QObject>
 
 #include "dsp/basebandsamplesource.h"
+#include "channel/channelsourceapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
@@ -34,7 +35,7 @@ class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
-class UDPSink : public BasebandSampleSource {
+class UDPSink : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
@@ -94,6 +95,10 @@ public:
     virtual void stop();
     virtual void pull(Sample& sample);
     virtual bool handleMessage(const Message& cmd);
+
+    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
     double getMagSq() const { return m_magsq; }
     double getInMagSq() const { return m_inMagsq; }
@@ -157,6 +162,8 @@ private:
     UpChannelizer* m_channelizer;
 
     UDPSinkSettings m_settings;
+    int m_absoluteFrequencyOffset;
+
     Real m_squelch;
 
     NCO m_carrierNco;

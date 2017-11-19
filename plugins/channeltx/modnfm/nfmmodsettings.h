@@ -42,6 +42,7 @@ struct NFMModSettings
     bool m_ctcssOn;
     int  m_ctcssIndex;
     quint32 m_rgbColor;
+    QString m_title;
 
     Serializable *m_channelMarker;
     Serializable *m_cwKeyerGUI;

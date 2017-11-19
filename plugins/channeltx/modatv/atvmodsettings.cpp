@@ -49,6 +49,7 @@ void ATVModSettings::resetToDefaults()
     m_forceDecimator = false;
     m_overlayText = "ATV";
     m_rgbColor = QColor(255, 255, 255).rgb();
+    m_title = "ATV Modulator";
 }
 
 QByteArray ATVModSettings::serialize() const
@@ -73,6 +74,8 @@ QByteArray ATVModSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(15, m_channelMarker->serialize());
     }
+
+    s.writeString(16, m_title);
 
     return s.final();
 }
@@ -119,6 +122,8 @@ bool ATVModSettings::deserialize(const QByteArray& data)
             d.readBlob(15, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readString(16, &m_title, "ATV Modulator");
 
         return true;
     }
