@@ -29,10 +29,10 @@ MainParser::MainParser() :
     m_serverPortOption(QStringList() << "p" << "api-port",
         "Web API server port.",
         "port",
-        "8001")
+        "8091")
 {
     m_serverAddress = "127.0.0.1";
-    m_serverPort = 8001;
+    m_serverPort = 8091;
 
     m_parser.setApplicationDescription("Software Defined Radio application");
     m_parser.addHelpOption();

@@ -433,7 +433,7 @@
        <widget class="QLabel" name="scaleCenter">
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>12</width>
           <height>10</height>
          </size>
         </property>
