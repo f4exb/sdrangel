@@ -55,8 +55,11 @@ public:
     /** Constructor with settings structure */
     StaticFileController(const HttpDocrootSettings& settings, QObject* parent = NULL);
 
-    /** Generates the response */
+    /** Generates the response from HTTP request */
     void service(HttpRequest& request, HttpResponse& response);
+
+    /** Generates the response directly from the path */
+    void service(QByteArray& path, HttpResponse& response);
 
 private:
 

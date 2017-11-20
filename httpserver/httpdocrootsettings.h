@@ -8,6 +8,8 @@
 #ifndef HTTPSERVER_HTTPDOCROOTSETTINGS_H_
 #define HTTPSERVER_HTTPDOCROOTSETTINGS_H_
 
+#include <QString>
+
 namespace qtwebapp {
 
 struct HttpDocrootSettings

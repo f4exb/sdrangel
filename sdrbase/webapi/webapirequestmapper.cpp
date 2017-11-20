@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGErrorResponse.h"
@@ -23,7 +24,16 @@
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
     m_adapter(0)
-{ }
+{
+    qtwebapp::HttpDocrootSettings docrootSettings;
+    docrootSettings.path = ":/";
+    m_staticFileController = new qtwebapp::StaticFileController(docrootSettings, parent);
+}
+
+WebAPIRequestMapper::~WebAPIRequestMapper()
+{
+    delete m_staticFileController;
+}
 
 void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
@@ -61,7 +71,9 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
         }
         else
         {
-            response.setStatus(404,"Not found");
+            QByteArray path = "/";
+            m_staticFileController->service(path, response);
+            //response.setStatus(404,"Not found");
         }
     }
 }

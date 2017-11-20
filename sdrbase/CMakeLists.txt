@@ -234,9 +234,16 @@ endif (BUILD_DEBIAN)
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_SHARED)
 
+set(sdrbase_RESOURCES
+    resources/res.qrc
+)
+
+qt5_add_resources(sdrbase_RESOURCES_RCC ${sdrbase_RESOURCES})
+
 add_library(sdrbase SHARED
     ${sdrbase_SOURCES}
     ${sdrbase_HEADERS_MOC}
+    ${sdrbase_RESOURCES_RCC}
 )
 
 include_directories(

@@ -61,7 +61,13 @@ StaticFileController::StaticFileController(const HttpDocrootSettings& settings, 
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)
 {
-    QByteArray path=request.getPath();
+    QByteArray path = request.getPath();
+    service(path, response);
+}
+
+void StaticFileController::service(QByteArray& path, HttpResponse& response)
+{
+    //QByteArray path=request.getPath();
     // Check if we have the file in cache
     qint64 now=QDateTime::currentMSecsSinceEpoch();
     mutex.lock();
@@ -114,7 +120,8 @@ void StaticFileController::service(HttpRequest& request, HttpResponse& response)
                 entry->created=now;
                 entry->filename=path;
                 mutex.lock();
-                cache.insert(request.getPath(),entry,entry->document.size());
+                //cache.insert(request.getPath(),entry,entry->document.size());
+                cache.insert(path,entry,entry->document.size());
                 mutex.unlock();
             }
             else

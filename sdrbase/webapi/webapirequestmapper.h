@@ -22,17 +22,20 @@
 #include "httprequesthandler.h"
 #include "httprequest.h"
 #include "httpresponse.h"
+#include "staticfilecontroller.h"
 #include "webapiadapterinterface.h"
 
 class WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
     Q_OBJECT
 public:
     WebAPIRequestMapper(QObject* parent=0);
+    ~WebAPIRequestMapper();
     void service(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void setAdapter(WebAPIAdapterInterface *adapter) { m_adapter = adapter; }
 
 private:
     WebAPIAdapterInterface *m_adapter;
+    qtwebapp::StaticFileController *m_staticFileController;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

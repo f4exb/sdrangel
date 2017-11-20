@@ -200,5 +200,7 @@ HEADERS  += audio/audiodeviceinfo.h\
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 LIBS += -L../swagger/$${build_subdir} -lswagger
 
+RESOURCES = resources/res.qrc
+
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
