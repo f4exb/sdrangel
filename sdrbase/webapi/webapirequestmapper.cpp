@@ -71,7 +71,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
         }
         else
         {
-            QByteArray path = "/";
+            QByteArray path = "/index.html";
             m_staticFileController->service(path, response);
             //response.setStatus(404,"Not found");
         }

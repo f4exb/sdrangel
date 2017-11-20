@@ -231,12 +231,12 @@ if (BUILD_DEBIAN)
     include_directories(${LIBSERIALDVSRC})
 endif (BUILD_DEBIAN)
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
-
 set(sdrbase_RESOURCES
     resources/res.qrc
 )
+
+add_definitions(${QT_DEFINITIONS})
+add_definitions(-DQT_SHARED)
 
 qt5_add_resources(sdrbase_RESOURCES_RCC ${sdrbase_RESOURCES})
 
