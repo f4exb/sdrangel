@@ -75,6 +75,7 @@ SOURCES += mainwindow.cpp\
         gui/scaleengine.cpp\
         gui/transverterbutton.cpp\
         gui/transverterdialog.cpp\
+        gui/tickedslider.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
         webapi/webapiadaptergui.cpp
@@ -119,6 +120,7 @@ HEADERS  += mainwindow.h\
         gui/mypositiondialog.h\
         gui/scale.h\
         gui/scaleengine.h\
+        gui/tickedslider.h\
         gui/transverterbutton.h\
         gui/transverterdialog.h\
         gui/valuedial.h\
