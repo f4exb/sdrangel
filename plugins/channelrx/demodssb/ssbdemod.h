@@ -268,6 +268,8 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
+	UDPSink<qint16> *m_udpBufferAudio;
+	static const int m_udpBlockSize;
 
 	QMutex m_settingsMutex;
 

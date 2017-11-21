@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>385</width>
-    <height>160</height>
+    <height>190</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>385</width>
-     <height>151</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -359,6 +359,12 @@
       </item>
       <item>
        <widget class="TickedSlider" name="BW">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Lowpass filter cutoff frequency</string>
         </property>
@@ -542,6 +548,12 @@
       </item>
       <item>
        <widget class="TickedSlider" name="lowCut">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Highpass filter cutoff frequency (SSB)</string>
         </property>
@@ -820,6 +832,16 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="copyAudioToUDP">
+        <property name="toolTip">
+         <string>Copy audio to UDP</string>
+        </property>
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QToolButton" name="audioMute">

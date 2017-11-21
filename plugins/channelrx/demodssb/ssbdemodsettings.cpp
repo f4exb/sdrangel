@@ -36,6 +36,7 @@ void SSBDemodSettings::resetToDefaults()
     m_audioMute = false;
     m_agc = false;
     m_agcClamping = false;
+    m_copyAudioToUDP = false;
     m_agcPowerThreshold = -40;
     m_agcThresholdGate = 4;
     m_agcTimeLog2 = 7;
@@ -46,6 +47,8 @@ void SSBDemodSettings::resetToDefaults()
     m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9999;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Demodulator";
 }
