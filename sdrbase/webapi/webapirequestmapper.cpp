@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+//#include <QDirIterator>
+
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
 #include "SWGInstanceSummaryResponse.h"
@@ -71,6 +73,11 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
         }
         else
         {
+//            QDirIterator it(":", QDirIterator::Subdirectories);
+//            while (it.hasNext()) {
+//                qDebug() << "WebAPIRequestMapper::service: " << it.next();
+//            }
+
             QByteArray path = "/index.html";
             m_staticFileController->service(path, response);
             //response.setStatus(404,"Not found");

@@ -143,6 +143,7 @@ void StaticFileController::service(QByteArray& path, HttpResponse& response)
             }
             else
             {
+                qWarning("StaticFileController: File %s not found",qPrintable(file.fileName()));
                 response.setStatus(404,"not found");
                 response.write("404 not found",true);
             }
