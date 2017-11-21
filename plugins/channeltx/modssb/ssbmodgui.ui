@@ -206,6 +206,27 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="flipSidebands">
+          <property name="toolTip">
+           <string>Flip sidebands in SSB mode (LSB-&gt;USB or USB-&gt;LSB)</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/flip_sidebands.png</normaloff>:/flip_sidebands.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QToolButton" name="dsb">
           <property name="toolTip">
            <string>DSB/SSB toggle</string>
@@ -301,7 +322,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="BW">
+       <widget class="TickedSlider" name="BW">
         <property name="toolTip">
          <string>Lowpass filter cutoff frequency</string>
         </property>
@@ -319,6 +340,12 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksBelow</enum>
+        </property>
+        <property name="tickInterval">
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -481,7 +508,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="lowCut">
+       <widget class="TickedSlider" name="lowCut">
         <property name="toolTip">
          <string>Highpass filter cutoff frequency (SSB)</string>
         </property>
@@ -499,6 +526,12 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksAbove</enum>
+        </property>
+        <property name="tickInterval">
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -1224,6 +1257,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TickedSlider</class>
+   <extends>QSlider</extends>
+   <header>gui/tickedslider.h</header>
   </customwidget>
  </customwidgets>
  <resources>

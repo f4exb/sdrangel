@@ -1,7 +1,9 @@
 #ifndef INCLUDE_SSBDEMODGUI_H
 #define INCLUDE_SSBDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <QIcon>
+
+#include "plugin/plugininstancegui.h"
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -60,6 +62,9 @@ private:
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
 
+	QIcon m_iconDSBUSB;
+	QIcon m_iconDSBLSB;
+
 	explicit SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~SSBDemodGUI();
 
@@ -89,6 +94,7 @@ private slots:
     void on_agcThresholdGate_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
+	void on_flipSidebands_clicked(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void tick();
 };

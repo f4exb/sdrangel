@@ -1,10 +1,10 @@
+#include <QPixmap>
+
 #include "ssbdemodgui.h"
 #include "ssbdemodgui.h"
 
 #include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
-#include <QDockWidget>
-#include <QMainWindow>
 
 #include "ui_ssbdemodgui.h"
 #include "dsp/spectrumvis.h"
@@ -107,8 +107,9 @@ void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 	applySettings();
 }
 
-void SSBDemodGUI::on_dsb_toggled(bool dsb __attribute__((unused)))
+void SSBDemodGUI::on_dsb_toggled(bool dsb)
 {
+    ui->flipSidebands->setEnabled(!dsb);
     applyBandwidths();
 }
 
@@ -187,6 +188,14 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths();
 }
 
+void SSBDemodGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
+{
+    int bwValue = ui->BW->value();
+    int lcValue = ui->lowCut->value();
+    ui->BW->setValue(-bwValue);
+    ui->lowCut->setValue(-lcValue);
+}
+
 void SSBDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
@@ -250,6 +259,11 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+
+	m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);
+	m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
 	displaySettings();
 	applyBandwidths(true); // does applySettings(true)
@@ -373,6 +387,7 @@ void SSBDemodGUI::applyBandwidths(bool force)
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
+    ui->dsb->setIcon(bw < 0 ? m_iconDSBLSB: m_iconDSBUSB);
     if (!dsb) { m_channelMarker.setLowCutoff(lw * 100); }
     blockApplySettings(wasBlocked);
 }
@@ -385,13 +400,17 @@ void SSBDemodGUI::displaySettings()
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
 
+    ui->flipSidebands->setEnabled(!m_settings.m_dsb);
+
     if (m_settings.m_dsb) {
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     } else {
         if (m_settings.m_rfBandwidth < 0) {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
+            ui->dsb->setIcon(m_iconDSBLSB);
         } else {
             m_channelMarker.setSidebands(ChannelMarker::usb);
+            ui->dsb->setIcon(m_iconDSBUSB);
         }
     }
 

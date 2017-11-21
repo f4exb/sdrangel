@@ -17,6 +17,8 @@
 #ifndef PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 #define PLUGINS_CHANNELTX_MODSSB_SSBMODGUI_H_
 
+#include <QIcon>
+
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
@@ -78,6 +80,9 @@ private:
     SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
+    QIcon m_iconDSBUSB;
+    QIcon m_iconDSBLSB;
+
     explicit SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~SSBModGUI();
 
@@ -96,6 +101,7 @@ private:
 private slots:
     void handleSourceMessages();
     void on_deltaFrequency_changed(qint64 value);
+    void on_flipSidebands_clicked(bool checked);
     void on_dsb_toggled(bool checked);
     void on_audioBinaural_toggled(bool checked);
     void on_audioFlipChannels_toggled(bool checked);

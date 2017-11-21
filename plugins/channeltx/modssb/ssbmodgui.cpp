@@ -150,8 +150,17 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void SSBModGUI::on_dsb_toggled(bool checked __attribute__((unused)))
+void SSBModGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
 {
+    int bwValue = ui->BW->value();
+    int lcValue = ui->lowCut->value();
+    ui->BW->setValue(-bwValue);
+    ui->lowCut->setValue(-lcValue);
+}
+
+void SSBModGUI::on_dsb_toggled(bool dsb)
+{
+    ui->flipSidebands->setEnabled(!dsb);
     applyBandwidths();
 }
 
@@ -404,6 +413,11 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
 
+    m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);
+    m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
+
     displaySettings();
     applyBandwidths(true); // does applySettings(true)
 }
@@ -526,6 +540,7 @@ void SSBModGUI::applyBandwidths(bool force)
     bool applySettingsWereBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
+    ui->dsb->setIcon(bw < 0 ? m_iconDSBLSB : m_iconDSBUSB);
     if (!dsb) { m_channelMarker.setLowCutoff(lw * 100); }
     blockApplySettings(applySettingsWereBlocked);
 }
@@ -537,13 +552,17 @@ void SSBModGUI::displaySettings()
     m_channelMarker.setBandwidth(m_settings.m_bandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
 
+    ui->flipSidebands->setEnabled(!m_settings.m_dsb);
+
     if (m_settings.m_dsb) {
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     } else {
         if (m_settings.m_bandwidth < 0) {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
+            ui->dsb->setIcon(m_iconDSBLSB);
         } else {
             m_channelMarker.setSidebands(ChannelMarker::usb);
+            ui->dsb->setIcon(m_iconDSBUSB);
         }
     }
 
