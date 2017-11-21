@@ -195,11 +195,11 @@ void UDPSinkGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth((int)m_settings.m_rfBandwidth);
-    m_channelMarker.setColor(m_settings.m_rgbColor);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.blockSignals(false);
     m_channelMarker.setUDPReceivePort(m_settings.m_udpPort); // activate signal on the last setting only
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
 
     setTitleColor(m_settings.m_rgbColor);
     this->setWindowTitle(m_channelMarker.getTitle());
@@ -295,12 +295,17 @@ void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((un
     bool ok;
     Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 
-    if ((!ok) || (rfBandwidth > m_settings.m_inputSampleRate)) {
+    if ((!ok) || (rfBandwidth > m_settings.m_inputSampleRate))
+    {
         m_settings.m_rfBandwidth = m_settings.m_inputSampleRate;
         ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
-    } else {
+    }
+    else
+    {
         m_settings.m_rfBandwidth = rfBandwidth;
     }
+
+    m_rfBandwidthChanged = true;
 
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
@@ -384,13 +389,13 @@ void UDPSinkGUI::on_applyBtn_clicked()
 {
     if (m_rfBandwidthChanged)
     {
-        m_channelMarker.setBandwidth(m_settings.m_rfBandwidth); // will call apply settings
+        m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
         m_rfBandwidthChanged = false;
     }
-    else
-    {
-        applySettings();
-    }
+
+    ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
+
+    applySettings();
 }
 
 void UDPSinkGUI::on_resetUDPReadIndex_clicked()

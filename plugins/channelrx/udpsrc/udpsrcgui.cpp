@@ -419,7 +419,7 @@ void UDPSrcGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unu
     bool ok;
     Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 
-    if((!ok) || (rfBandwidth > m_settings.m_outputSampleRate))
+    if ((!ok) || (rfBandwidth > m_settings.m_outputSampleRate))
     {
         m_settings.m_rfBandwidth = m_settings.m_outputSampleRate;
         ui->rfBandwidth->setText(QString("%1").arg(m_settings.m_rfBandwidth, 0));
@@ -458,10 +458,8 @@ void UDPSrcGUI::on_applyBtn_clicked()
 {
     if (m_rfBandwidthChanged)
     {
-        blockApplySettings(true);
         m_channelMarker.setBandwidth((int) m_settings.m_rfBandwidth);
         m_rfBandwidthChanged = false;
-        blockApplySettings(false);
     }
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
