@@ -19,6 +19,8 @@
 #include <QStylePainter>
 #include <QStyleOptionSlider>
 
+#include <math.h>
+
 #include "tickedslider.h"
 
 TickedSlider::TickedSlider(QWidget* parent) :
