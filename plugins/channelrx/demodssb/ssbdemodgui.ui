@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>370</width>
+    <width>385</width>
     <height>160</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>370</width>
+    <width>385</width>
     <height>0</height>
    </size>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>360</width>
+     <width>385</width>
      <height>151</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>360</width>
+     <width>385</width>
      <height>0</height>
     </size>
    </property>
@@ -95,7 +95,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>32</width>
+            <width>125</width>
             <height>16</height>
            </size>
           </property>
@@ -559,6 +559,9 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="invertedAppearance">
+         <bool>false</bool>
         </property>
         <property name="tickPosition">
          <enum>QSlider::TicksAbove</enum>
