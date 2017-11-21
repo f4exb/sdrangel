@@ -34,9 +34,9 @@ struct SSBDemodSettings
     bool m_audioFlipChannels;
     bool m_dsb;
     bool m_audioMute;
+    bool m_copyAudioToUDP;
     bool m_agc;
     bool m_agcClamping;
-    bool m_copyAudioToUDP;
     int  m_agcTimeLog2;
     int  m_agcPowerThreshold;
     int  m_agcThresholdGate;

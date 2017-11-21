@@ -34,6 +34,7 @@ MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureChannelizer, Message)
 
 const QString WFMDemod::m_channelID = "de.maintech.sdrangelove.channel.wfm";
+const int WFMDemod::m_udpBlockSize = 512;
 
 WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -60,6 +61,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 	m_movingAverage.resize(16, 0);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
 
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -82,6 +84,8 @@ WFMDemod::~WFMDemod()
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+
+    delete m_udpBufferAudio;
 }
 
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -141,10 +145,13 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if(m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
-				quint16 sample = (qint16)(ci.real() * 3276.8f * m_settings.m_volume);
+				qint16 sample = (qint16)(ci.real() * 3276.8f * m_settings.m_volume);
 				m_sampleBuffer.push_back(Sample(sample, sample));
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
+
+				if (m_settings.m_copyAudioToUDP) { m_udpBufferAudio->write(sample); }
+
 				++m_audioBufferFill;
 
 				if(m_audioBufferFill >= m_audioBuffer.size())
@@ -176,7 +183,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		m_audioBufferFill = 0;
 	}
 
-	if(m_sampleSink != NULL)
+	if(m_sampleSink != 0)
 	{
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
 	}
@@ -301,6 +308,13 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         qDebug() << "WFMDemod::applySettings: set m_squelchLevel";
         m_squelchLevel = pow(10.0, settings.m_squelch / 20.0);
         m_squelchLevel *= m_squelchLevel;
+    }
+
+    if ((m_settings.m_udpAddress != settings.m_udpAddress)
+        || (m_settings.m_udpPort != settings.m_udpPort) || force)
+    {
+        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
+        m_udpBufferAudio->setPort(settings.m_udpPort);
     }
 
     m_settings = settings;

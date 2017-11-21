@@ -131,6 +131,12 @@ void WFMDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
+void WFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
+{
+    m_settings.m_copyAudioToUDP = checked;
+    applySettings();
+}
+
 void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
@@ -269,7 +275,7 @@ void WFMDemodGUI::displaySettings()
 
 void WFMDemodGUI::displayUDPAddress()
 {
-    //ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()));
+    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void WFMDemodGUI::leaveEvent(QEvent*)

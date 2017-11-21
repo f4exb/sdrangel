@@ -150,6 +150,7 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
+    UDPSink<qint16> *m_udpBufferAudio;
 
 	BasebandSampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
@@ -158,7 +159,9 @@ private:
 
 	PhaseDiscriminators m_phaseDiscri;
 
-	void applySettings(const WFMDemodSettings& settings, bool force = false);
+    static const int m_udpBlockSize;
+
+    void applySettings(const WFMDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_WFMDEMOD_H

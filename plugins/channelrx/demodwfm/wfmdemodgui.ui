@@ -375,6 +375,16 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="copyAudioToUDP">
+        <property name="toolTip">
+         <string>Copy audio to UDP</string>
+        </property>
+        <property name="text">
+         <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="text">
          <string/>
@@ -412,6 +422,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>
