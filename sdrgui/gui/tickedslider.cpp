@@ -47,7 +47,7 @@ void TickedSlider::paintEvent(QPaintEvent *ev __attribute__((unused)))
     {
         for (int i = minimum(); i <= maximum(); i += interval)
         {
-            int x = round((double)((double)((double)(i - this->minimum()) / (double)(this->maximum() - this->minimum())) * (double)(this->width() - handle.width()) + (double)(handle.width() / 2.0))) - 1;
+            int x = roundf((double)((double)((double)(i - this->minimum()) / (double)(this->maximum() - this->minimum())) * (double)(this->width() - handle.width()) + (double)(handle.width() / 2.0))) - 1;
             int h = 4;
             p.setPen(m_tickColor);
             if (tickPosition() == TicksBothSides || tickPosition() == TicksAbove)
