@@ -24,6 +24,7 @@
 namespace Swagger
 {
     class SWGInstanceSummaryResponse;
+    class SWGInstanceDevicesResponse;
     class SWGErrorResponse;
 }
 
@@ -41,7 +42,18 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/devices (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceDevices
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDevices(
+            bool tx __attribute__((unused)),
+            Swagger::SWGInstanceDevicesResponse& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
+    static QString instanceDevicesURL;
 };
 
 

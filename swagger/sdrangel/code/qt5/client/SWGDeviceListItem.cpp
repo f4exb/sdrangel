@@ -37,28 +37,35 @@ SWGDeviceListItem::~SWGDeviceListItem() {
 
 void
 SWGDeviceListItem::init() {
+    displayed_name = new QString("");
     hw_type = new QString("");
+    serial = new QString("");
+    sequence = 0;
     tx = false;
     nb_streams = 0;
     stream_index = 0;
-    sequence = 0;
-    serial = new QString("");
+    device_set_index = 0;
 }
 
 void
 SWGDeviceListItem::cleanup() {
     
+    if(displayed_name != nullptr) {
+        delete displayed_name;
+    }
+
     if(hw_type != nullptr) {
         delete hw_type;
     }
 
-
-
-
-
     if(serial != nullptr) {
         delete serial;
     }
+
+
+
+
+
 }
 
 SWGDeviceListItem*
@@ -72,12 +79,14 @@ SWGDeviceListItem::fromJson(QString &json) {
 
 void
 SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
+    ::Swagger::setValue(&displayed_name, pJson["displayedName"], "QString", "QString");
     ::Swagger::setValue(&hw_type, pJson["hwType"], "QString", "QString");
+    ::Swagger::setValue(&serial, pJson["serial"], "QString", "QString");
+    ::Swagger::setValue(&sequence, pJson["sequence"], "qint32", "");
     ::Swagger::setValue(&tx, pJson["tx"], "bool", "");
     ::Swagger::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
     ::Swagger::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
-    ::Swagger::setValue(&sequence, pJson["sequence"], "qint32", "");
-    ::Swagger::setValue(&serial, pJson["serial"], "QString", "QString");
+    ::Swagger::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
 }
 
 QString
@@ -94,7 +103,13 @@ QJsonObject*
 SWGDeviceListItem::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
+    toJsonValue(QString("displayedName"), displayed_name, obj, QString("QString"));
+
     toJsonValue(QString("hwType"), hw_type, obj, QString("QString"));
+
+    toJsonValue(QString("serial"), serial, obj, QString("QString"));
+
+    obj->insert("sequence", QJsonValue(sequence));
 
     obj->insert("tx", QJsonValue(tx));
 
@@ -102,11 +117,18 @@ SWGDeviceListItem::asJsonObject() {
 
     obj->insert("streamIndex", QJsonValue(stream_index));
 
-    obj->insert("sequence", QJsonValue(sequence));
-
-    toJsonValue(QString("serial"), serial, obj, QString("QString"));
+    obj->insert("deviceSetIndex", QJsonValue(device_set_index));
 
     return obj;
+}
+
+QString*
+SWGDeviceListItem::getDisplayedName() {
+    return displayed_name;
+}
+void
+SWGDeviceListItem::setDisplayedName(QString* displayed_name) {
+    this->displayed_name = displayed_name;
 }
 
 QString*
@@ -116,6 +138,24 @@ SWGDeviceListItem::getHwType() {
 void
 SWGDeviceListItem::setHwType(QString* hw_type) {
     this->hw_type = hw_type;
+}
+
+QString*
+SWGDeviceListItem::getSerial() {
+    return serial;
+}
+void
+SWGDeviceListItem::setSerial(QString* serial) {
+    this->serial = serial;
+}
+
+qint32
+SWGDeviceListItem::getSequence() {
+    return sequence;
+}
+void
+SWGDeviceListItem::setSequence(qint32 sequence) {
+    this->sequence = sequence;
 }
 
 bool
@@ -146,21 +186,12 @@ SWGDeviceListItem::setStreamIndex(qint32 stream_index) {
 }
 
 qint32
-SWGDeviceListItem::getSequence() {
-    return sequence;
+SWGDeviceListItem::getDeviceSetIndex() {
+    return device_set_index;
 }
 void
-SWGDeviceListItem::setSequence(qint32 sequence) {
-    this->sequence = sequence;
-}
-
-QString*
-SWGDeviceListItem::getSerial() {
-    return serial;
-}
-void
-SWGDeviceListItem::setSerial(QString* serial) {
-    this->serial = serial;
+SWGDeviceListItem::setDeviceSetIndex(qint32 device_set_index) {
+    this->device_set_index = device_set_index;
 }
 
 

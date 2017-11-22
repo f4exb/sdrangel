@@ -42,8 +42,17 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGDeviceListItem* fromJson(QString &jsonString);
 
+    QString* getDisplayedName();
+    void setDisplayedName(QString* displayed_name);
+
     QString* getHwType();
     void setHwType(QString* hw_type);
+
+    QString* getSerial();
+    void setSerial(QString* serial);
+
+    qint32 getSequence();
+    void setSequence(qint32 sequence);
 
     bool getTx();
     void setTx(bool tx);
@@ -54,20 +63,19 @@ public:
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
-    qint32 getSequence();
-    void setSequence(qint32 sequence);
-
-    QString* getSerial();
-    void setSerial(QString* serial);
+    qint32 getDeviceSetIndex();
+    void setDeviceSetIndex(qint32 device_set_index);
 
 
 private:
+    QString* displayed_name;
     QString* hw_type;
+    QString* serial;
+    qint32 sequence;
     bool tx;
     qint32 nb_streams;
     qint32 stream_index;
-    qint32 sequence;
-    QString* serial;
+    qint32 device_set_index;
 };
 
 }

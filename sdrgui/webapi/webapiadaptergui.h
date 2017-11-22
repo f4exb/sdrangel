@@ -33,6 +33,11 @@ public:
             Swagger::SWGInstanceSummaryResponse& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceDevices(
+            bool tx,
+            Swagger::SWGInstanceDevicesResponse& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 };

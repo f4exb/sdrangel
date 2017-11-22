@@ -17,18 +17,22 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QApplication>
+#include <QList>
 
 #include "mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
+#include "device/deviceenumerator.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "channel/channelsinkapi.h"
 #include "channel/channelsourceapi.h"
 
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInstanceDevicesResponse.h"
+#include "SWGDeviceListItem.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -137,4 +141,27 @@ int WebAPIAdapterGUI::instanceSummary(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceDevices(
+            bool tx,
+            Swagger::SWGInstanceDevicesResponse& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
+    response.setDevicecount(nbSamplingDevices);
+    QList<Swagger::SWGDeviceListItem*> *devices = response.getDevices();
 
+    for (int i = 0; i < nbSamplingDevices; i++)
+    {
+        PluginInterface::SamplingDevice samplingDevice = tx ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
+        devices->append(new Swagger::SWGDeviceListItem);
+        *devices->back()->getDisplayedName() = samplingDevice.displayedName;
+        *devices->back()->getHwType() = samplingDevice.hardwareId;
+        *devices->back()->getSerial() = samplingDevice.serial;
+        devices->back()->setSequence(samplingDevice.sequence);
+        devices->back()->setTx(!samplingDevice.rxElseTx);
+        devices->back()->setNbStreams(samplingDevice.deviceNbItems);
+        devices->back()->setDeviceSetIndex(samplingDevice.claimed);
+    }
+
+    return 200;
+}

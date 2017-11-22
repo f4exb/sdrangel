@@ -19,4 +19,5 @@
 #include "webapiadapterinterface.h"
 
 QString WebAPIAdapterInterface::instanceSummaryURL = "/sdrangel";
+QString WebAPIAdapterInterface::instanceDevicesURL = "/sdrangel/devices";
 

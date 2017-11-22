@@ -39,6 +39,8 @@ public:
     void changeTxSelection(int tabIndex, int deviceIndex);
     void removeRxSelection(int tabIndex);
     void removeTxSelection(int tabIndex);
+    int getNbRxSamplingDevices() const { return m_rxEnumeration.size(); }
+    int getNbTxSamplingDevices() const { return m_txEnumeration.size(); }
     PluginInterface::SamplingDevice getRxSamplingDevice(int deviceIndex) const { return m_rxEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface::SamplingDevice getTxSamplingDevice(int deviceIndex) const { return m_txEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface *getRxPluginInterface(int deviceIndex) { return m_rxEnumeration[deviceIndex].m_pluginInterface; }
