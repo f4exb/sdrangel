@@ -161,6 +161,7 @@ int WebAPIAdapterGUI::instanceDevices(
         devices->back()->setTx(!samplingDevice.rxElseTx);
         devices->back()->setNbStreams(samplingDevice.deviceNbItems);
         devices->back()->setDeviceSetIndex(samplingDevice.claimed);
+        devices->back()->setIndex(i);
     }
 
     return 200;

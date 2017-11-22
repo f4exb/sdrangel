@@ -45,6 +45,7 @@ SWGDeviceListItem::init() {
     nb_streams = 0;
     stream_index = 0;
     device_set_index = 0;
+    index = 0;
 }
 
 void
@@ -61,6 +62,7 @@ SWGDeviceListItem::cleanup() {
     if(serial != nullptr) {
         delete serial;
     }
+
 
 
 
@@ -87,6 +89,7 @@ SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
     ::Swagger::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     ::Swagger::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
+    ::Swagger::setValue(&index, pJson["index"], "qint32", "");
 }
 
 QString
@@ -118,6 +121,8 @@ SWGDeviceListItem::asJsonObject() {
     obj->insert("streamIndex", QJsonValue(stream_index));
 
     obj->insert("deviceSetIndex", QJsonValue(device_set_index));
+
+    obj->insert("index", QJsonValue(index));
 
     return obj;
 }
@@ -192,6 +197,15 @@ SWGDeviceListItem::getDeviceSetIndex() {
 void
 SWGDeviceListItem::setDeviceSetIndex(qint32 device_set_index) {
     this->device_set_index = device_set_index;
+}
+
+qint32
+SWGDeviceListItem::getIndex() {
+    return index;
+}
+void
+SWGDeviceListItem::setIndex(qint32 index) {
+    this->index = index;
 }
 
 

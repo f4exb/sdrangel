@@ -66,6 +66,9 @@ public:
     qint32 getDeviceSetIndex();
     void setDeviceSetIndex(qint32 device_set_index);
 
+    qint32 getIndex();
+    void setIndex(qint32 index);
+
 
 private:
     QString* displayed_name;
@@ -76,6 +79,7 @@ private:
     qint32 nb_streams;
     qint32 stream_index;
     qint32 device_set_index;
+    qint32 index;
 };
 
 }

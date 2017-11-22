@@ -482,7 +482,6 @@ definitions:
     description: "Summarized information about attached hardware device"
     required:
       - hwType
-      
     properties:
       displayedName:
         description: "Displayable name that uniquely identifies this device instance"
@@ -507,6 +506,9 @@ definitions:
         type: integer
       deviceSetIndex: 
         description: "Index of the device set that claimed this device (-1 if not claimed)"
+        type: integer
+      index: 
+        description: "Index of the device in the list of registered devices"
         type: integer
   ChannelListItem:
     description: "Summarized information about channel plugin"
