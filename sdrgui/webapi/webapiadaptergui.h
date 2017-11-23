@@ -19,6 +19,8 @@
 #ifndef SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
 #define SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
 
+#include <QtGlobal>
+
 #include "webapi/webapiadapterinterface.h"
 
 class MainWindow;
@@ -43,8 +45,19 @@ public:
             Swagger::SWGInstanceChannelsResponse& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceLoggingGet(
+            Swagger::SWGLoggingInfo& response,
+            Swagger::SWGErrorResponse& error);
+
+    virtual int instanceLoggingPut(
+            Swagger::SWGLoggingInfo& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
+
+    static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
+    static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };
 
 #endif /* SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_ */

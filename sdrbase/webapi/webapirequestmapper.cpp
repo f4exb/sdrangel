@@ -125,6 +125,52 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 response.setStatus(405,"Invalid HTTP method");
             }
         }
+        else if (path == WebAPIAdapterInterface::instanceLoggingURL)
+        {
+            Swagger::SWGLoggingInfo normalResponse;
+            Swagger::SWGErrorResponse errorResponse;
+
+            if (request.getMethod() == "GET")
+            {
+                int status = m_adapter->instanceLoggingGet(normalResponse, errorResponse);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+
+                response.setStatus(status);
+            }
+            else if (request.getMethod() == "PUT")
+            {
+                try
+                {
+                    QString jsonStr = request.getBody();
+                    qDebug("WebAPIRequestMapper::service: /sdrangel/logging (PUT): %s", qPrintable(jsonStr));
+                    normalResponse.fromJson(jsonStr);
+                    int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
+
+                    if (status == 200) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+
+                    response.setStatus(status);
+                }
+                catch (const std::exception& ex)
+                {
+                    response.write("Invalid input format");
+                    response.setStatus(400,"Invalid input format");
+                }
+            }
+            else
+            {
+                response.write("Invalid HTTP method");
+                response.setStatus(405,"Invalid HTTP method");
+            }
+        }
         else
         {
 //            QDirIterator it(":", QDirIterator::Subdirectories);

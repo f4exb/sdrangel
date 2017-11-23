@@ -196,3 +196,97 @@ int WebAPIAdapterGUI::instanceChannels(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceLoggingGet(
+            Swagger::SWGLoggingInfo& response,
+            Swagger::SWGErrorResponse& error)
+{
+    response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger());
+
+    if (response.getDumpToFile()) {
+        m_mainWindow.m_logger->getLogFileName(*response.getFileName());
+        m_mainWindow.m_logger->getFileMinMessageLevelStr(*response.getFileLevel());
+    }
+
+    m_mainWindow.m_logger->getConsoleMinMessageLevelStr(*response.getConsoleLevel());
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLoggingPut(
+            Swagger::SWGLoggingInfo& response,
+            Swagger::SWGErrorResponse& error)
+{
+    // response input is the query actually
+    bool dumpToFile = response.getDumpToFile();
+    QString* consoleLevel = response.getConsoleLevel();
+    QString* fileLevel = response.getFileLevel();
+    QString* fileName = response.getFileName();
+
+    // perform actions
+    if (consoleLevel) {
+        m_mainWindow.m_settings.setConsoleMinLogLevel(getMsgTypeFromString(*consoleLevel));
+    }
+
+    if (fileLevel) {
+        m_mainWindow.m_settings.setFileMinLogLevel(getMsgTypeFromString(*fileLevel));
+    }
+
+    m_mainWindow.m_settings.setUseLogFile(dumpToFile);
+
+    if (fileName) {
+        m_mainWindow.m_settings.setLogFileName(*fileLevel);
+    }
+
+    m_mainWindow.setLoggingOpions();
+
+    // build response
+    response.setDumpToFile(m_mainWindow.m_settings.getUseLogFile());
+
+    if (response.getDumpToFile())
+    {
+        *response.getFileName() = m_mainWindow.m_settings.getLogFileName();
+        getMsgTypeString(m_mainWindow.m_settings.getFileMinLogLevel(), *response.getFileLevel());
+    }
+
+    getMsgTypeString(m_mainWindow.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
+
+    return 200;
+}
+
+QtMsgType WebAPIAdapterGUI::getMsgTypeFromString(const QString& msgTypeString)
+{
+    if (msgTypeString == "debug") {
+        return QtDebugMsg;
+    } else if (msgTypeString == "info") {
+        return QtInfoMsg;
+    } else if (msgTypeString == "warning") {
+        return QtWarningMsg;
+    } else if (msgTypeString == "error") {
+        return QtCriticalMsg;
+    } else {
+        return QtDebugMsg;
+    }
+}
+
+void WebAPIAdapterGUI::getMsgTypeString(const QtMsgType& msgType, QString& levelStr)
+{
+    switch (msgType)
+    {
+    case QtDebugMsg:
+        levelStr = "debug";
+        break;
+    case QtInfoMsg:
+        levelStr = "info";
+        break;
+    case QtWarningMsg:
+        levelStr = "warning";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        levelStr = "error";
+        break;
+    default:
+        levelStr = "debug";
+        break;
+    }
+}
