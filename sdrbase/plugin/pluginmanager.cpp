@@ -76,22 +76,22 @@ void PluginManager::loadPlugins()
 	DeviceEnumerator::instance()->enumerateTxDevices(this);
 }
 
-void PluginManager::registerRxChannel(const QString& channelName, PluginInterface* plugin)
+void PluginManager::registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
 {
     qDebug() << "PluginManager::registerRxChannel "
             << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-            << " with channel name " << channelName;
+            << " with channel name " << channelIdURI;
 
-	m_rxChannelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
+	m_rxChannelRegistrations.append(PluginAPI::ChannelRegistration(channelIdURI, channelId, plugin));
 }
 
-void PluginManager::registerTxChannel(const QString& channelName, PluginInterface* plugin)
+void PluginManager::registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
 {
     qDebug() << "PluginManager::registerTxChannel "
             << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-            << " with channel name " << channelName;
+            << " with channel name " << channelIdURI;
 
-	m_txChannelRegistrations.append(PluginAPI::ChannelRegistration(channelName, plugin));
+	m_txChannelRegistrations.append(PluginAPI::ChannelRegistration(channelIdURI, channelId, plugin));
 }
 
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
@@ -172,8 +172,8 @@ void PluginManager::listRxChannels(QList<QString>& list)
 
     for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
-        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
-        list.append(pluginDescipror.displayedName);
+        const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDesciptor.displayedName);
     }
 }
 
@@ -183,8 +183,8 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
         BasebandSampleSink *rxChannel = pluginInterface->createRxChannel(
-                m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceAPI);
-        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet, rxChannel);
+                m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
+        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, rxChannel);
     }
 }
 
@@ -194,7 +194,7 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
         BasebandSampleSource *txChannel = pluginInterface->createTxChannel(
-                m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceAPI);
-        pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelId, deviceUISet, txChannel);
+                m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
+        pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, txChannel);
     }
 }

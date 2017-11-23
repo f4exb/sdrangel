@@ -32,7 +32,8 @@
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureChannelizer, Message)
 
-const QString AMDemod::m_channelID = "de.maintech.sdrangelove.channel.am";
+const QString AMDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.am";
+const QString AMDemod::m_channelId = "AMDemod";
 const int AMDemod::m_udpBlockSize = 512;
 
 AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
@@ -47,7 +48,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_audioFifo(48000),
     m_settingsMutex(QMutex::Recursive)
 {
-    setObjectName("AMDemod");
+    setObjectName(m_channelId);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

@@ -621,7 +621,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
 
-	m_deviceUISet->registerTxChannelInstance(ATVMod::m_channelID, this);
+	m_deviceUISet->registerTxChannelInstance(ATVMod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

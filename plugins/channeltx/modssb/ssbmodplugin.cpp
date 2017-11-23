@@ -47,12 +47,12 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register SSB modulator
-    m_pluginAPI->registerTxChannel(SSBMod::m_channelID, this);
+    m_pluginAPI->registerTxChannel(SSBMod::m_channelIdURI, SSBMod::m_channelId, this);
 }
 
 PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-    if(channelName == SSBMod::m_channelID)
+    if(channelName == SSBMod::m_channelIdURI)
 	{
 	    SSBModGUI* gui = SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 		return gui;
@@ -63,7 +63,7 @@ PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, 
 
 BasebandSampleSource* SSBModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == SSBMod::m_channelID)
+    if(channelName == SSBMod::m_channelIdURI)
     {
         SSBMod* source = new SSBMod(deviceAPI);
         return source;

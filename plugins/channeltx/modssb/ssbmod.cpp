@@ -37,7 +37,8 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString SSBMod::m_channelID = "sdrangel.channeltx.modssb";
+const QString SSBMod::m_channelIdURI = "sdrangel.channeltx.modssb";
+const QString SSBMod::m_channelId = "SSBMod";
 const int SSBMod::m_levelNbSamples = 480; // every 10ms
 const int SSBMod::m_ssbFftLen = 1024;
 
@@ -63,7 +64,7 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_levelSum(0.0f),
 	m_inAGC(9600, 0.2, 1e-4)
 {
-	setObjectName("SSBMod");
+	setObjectName(m_channelId);
 
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_audioSampleRate, m_settings.m_bandwidth / m_settings.m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_settings.m_audioSampleRate, 2 * m_ssbFftLen);

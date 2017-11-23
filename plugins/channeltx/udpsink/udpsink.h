@@ -108,7 +108,8 @@ public:
     void setSpectrum(bool enabled);
     void resetReadIndex();
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 signals:
     /**

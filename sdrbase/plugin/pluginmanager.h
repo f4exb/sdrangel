@@ -46,9 +46,9 @@ public:
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins
-	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
+	void registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
-	void registerTxChannel(const QString& channelName, PluginInterface* plugin);
+	void registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	void registerSampleSink(const QString& sourceName, PluginInterface* plugin);
 
 	PluginAPI::SamplingDeviceRegistrations& getSourceDeviceRegistrations() { return m_sampleSourceRegistrations; }

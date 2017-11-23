@@ -30,14 +30,15 @@ MESSAGE_CLASS_DEFINITION(TCPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcConnection, Message)
 MESSAGE_CLASS_DEFINITION(TCPSrc::MsgTCPSrcSpectrum, Message)
 
-const QString TCPSrc::m_channelID = "sdrangel.channel.tcpsrc";
+const QString TCPSrc::m_channelIdURI = "sdrangel.channel.tcpsrc";
+const QString TCPSrc::m_channelId = "TCPSrc";
 
 TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_absoluteFrequencyOffset(0),
 	m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("TCPSrc");
+	setObjectName(m_channelId);
 
 	m_inputSampleRate = 96000;
 	m_sampleFormat = TCPSrcSettings::FormatSSB;

@@ -144,7 +144,8 @@ public:
         m_magsqCount = 0;
     }
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 private:
 	enum RateState {

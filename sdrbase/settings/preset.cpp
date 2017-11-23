@@ -66,7 +66,7 @@ QByteArray Preset::serialize() const
 	{
 //		qDebug("Preset::serialize:  channel: id: %s", qPrintable(m_channelConfigs[i].m_channel));
 
-		s.writeString(201 + i * 2, m_channelConfigs[i].m_channel);
+		s.writeString(201 + i * 2, m_channelConfigs[i].m_channelIdURI);
 		s.writeBlob(202 + i * 2, m_channelConfigs[i].m_config);
 	}
 

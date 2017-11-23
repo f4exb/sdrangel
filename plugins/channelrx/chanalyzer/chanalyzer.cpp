@@ -29,14 +29,15 @@ MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Message)
 
-const QString ChannelAnalyzer::m_channelID = "org.f4exb.sdrangelove.channel.chanalyzer";
+const QString ChannelAnalyzer::m_channelIdURI = "org.f4exb.sdrangelove.channel.chanalyzer";
+const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_sampleSink(0),
 	m_settingsMutex(QMutex::Recursive)
 {
-    setObjectName("ChannelAnalyzer");
+    setObjectName(m_channelId);
 
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;

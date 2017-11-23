@@ -29,7 +29,8 @@ MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
 
-const QString UDPSink::m_channelID = "sdrangel.channeltx.udpsink";
+const QString UDPSink::m_channelIdURI = "sdrangel.channeltx.udpsink";
+const QString UDPSink::m_channelId = "UDPSink";
 
 UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -55,7 +56,7 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_SSBFilterBufferIndex(0),
     m_settingsMutex(QMutex::Recursive)
 {
-    setObjectName("UDPSink");
+    setObjectName(m_channelId);
 
     m_udpHandler.setFeedbackMessageQueue(&m_inputMessageQueue);
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / m_settings.m_inputSampleRate, m_ssbFftLen);

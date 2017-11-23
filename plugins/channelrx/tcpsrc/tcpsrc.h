@@ -118,7 +118,8 @@ public:
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 protected:
 	class MsgTCPSrcSpectrum : public Message {

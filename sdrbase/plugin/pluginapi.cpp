@@ -1,9 +1,9 @@
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 
-void PluginAPI::registerRxChannel(const QString& channelName, PluginInterface* plugin)
+void PluginAPI::registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
 {
-	m_pluginManager->registerRxChannel(channelName, plugin);
+	m_pluginManager->registerRxChannel(channelIdURI, channelId, plugin);
 }
 
 void PluginAPI::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
@@ -16,9 +16,9 @@ PluginAPI::ChannelRegistrations *PluginAPI::getRxChannelRegistrations()
     return m_pluginManager->getRxChannelRegistrations();
 }
 
-void PluginAPI::registerTxChannel(const QString& channelName, PluginInterface* plugin)
+void PluginAPI::registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
 {
-	m_pluginManager->registerTxChannel(channelName, plugin);
+	m_pluginManager->registerTxChannel(channelIdURI, channelId, plugin);
 }
 
 void PluginAPI::registerSampleSink(const QString& sinkName, PluginInterface* plugin)

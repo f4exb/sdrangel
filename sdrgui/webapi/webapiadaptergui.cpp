@@ -27,11 +27,14 @@
 #include "device/deviceenumerator.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
+#include "plugin/pluginapi.h"
+#include "plugin/pluginmanager.h"
 #include "channel/channelsinkapi.h"
 #include "channel/channelsourceapi.h"
 
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGErrorResponse.h"
 
@@ -166,3 +169,30 @@ int WebAPIAdapterGUI::instanceDevices(
 
     return 200;
 }
+
+int WebAPIAdapterGUI::instanceChannels(
+            bool tx,
+            Swagger::SWGInstanceChannelsResponse& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainWindow.m_pluginManager->getTxChannelRegistrations() : m_mainWindow.m_pluginManager->getRxChannelRegistrations();
+    int nbChannelDevices = channelRegistrations->size();
+    response.setChannelcount(nbChannelDevices);
+    QList<Swagger::SWGChannelListItem*> *channels = response.getChannels();
+
+    for (int i = 0; i < nbChannelDevices; i++)
+    {
+        channels->append(new Swagger::SWGChannelListItem);
+        PluginInterface *channelInterface = channelRegistrations->at(i).m_plugin;
+        const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
+        *channels->back()->getVersion() = pluginDescriptor.version;
+        *channels->back()->getName() = pluginDescriptor.displayedName;
+        channels->back()->setTx(tx);
+        *channels->back()->getIdUri() = channelRegistrations->at(i).m_channelIdURI;
+        *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
+        channels->back()->setIndex(i);
+    }
+
+    return 200;
+}
+

@@ -25,7 +25,7 @@
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 	QString("DSD Demodulator"),
-	QString("3.8.4"),
+	QString("3.8.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -48,12 +48,12 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register DSD demodulator
-	m_pluginAPI->registerRxChannel(DSDDemod::m_channelID, this);
+	m_pluginAPI->registerRxChannel(DSDDemod::m_channelIdURI, DSDDemod::m_channelId, this);
 }
 
 PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == DSDDemod::m_channelID)
+	if(channelName == DSDDemod::m_channelIdURI)
 	{
 		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 		return gui;
@@ -64,7 +64,7 @@ PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName
 
 BasebandSampleSink* DSDDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == DSDDemod::m_channelID)
+    if(channelName == DSDDemod::m_channelIdURI)
     {
         DSDDemod* sink = new DSDDemod(deviceAPI);
         return sink;

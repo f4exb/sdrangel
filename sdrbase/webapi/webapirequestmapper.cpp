@@ -22,6 +22,7 @@
 #include "webapirequestmapper.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGInstanceChannelsResponse.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -83,6 +84,32 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 bool tx = (txStr == "true");
 
                 int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+
+                response.setStatus(status);
+            }
+            else
+            {
+                response.write("Invalid HTTP method");
+                response.setStatus(405,"Invalid HTTP method");
+            }
+        }
+        else if (path == WebAPIAdapterInterface::instanceChannelsURL)
+        {
+            Swagger::SWGInstanceChannelsResponse normalResponse;
+            Swagger::SWGErrorResponse errorResponse;
+
+            if (request.getMethod() == "GET")
+            {
+                QByteArray txStr = request.getParameter("tx");
+                bool tx = (txStr == "true");
+
+                int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
 
                 if (status == 200) {
                     response.write(normalResponse.asJson().toUtf8());

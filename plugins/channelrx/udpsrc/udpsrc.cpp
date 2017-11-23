@@ -33,7 +33,8 @@ MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureUDPSrc, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
 
-const QString UDPSrc::m_channelID = "sdrangel.channel.udpsrc";
+const QString UDPSrc::m_channelIdURI = "sdrangel.channel.udpsrc";
+const QString UDPSrc::m_channelId = "UDPSrc";
 
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -52,7 +53,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_agc(9600, m_agcTarget, 1e-6),
     m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("UDPSrc");
+	setObjectName(m_channelId);
 
 	m_udpBuffer = new UDPSink<Sample>(this, udpBlockSize, m_settings.m_udpPort);
 	m_udpBufferMono = new UDPSink<FixReal>(this, udpBlockSize, m_settings.m_udpPort);

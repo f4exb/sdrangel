@@ -770,9 +770,13 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Displayable name of the channel plugin"
     },
+    "idURI" : {
+      "type" : "string",
+      "description" : "Key to identify the channel plugin type in URI form"
+    },
     "id" : {
       "type" : "string",
-      "description" : "Key to identify the channel plugin type"
+      "description" : "Key to identify the channel plugin type as short object name"
     },
     "tx" : {
       "type" : "boolean",
@@ -781,6 +785,10 @@ margin-bottom: 20px;
     "version" : {
       "type" : "string",
       "description" : "Channel plugin version number"
+    },
+    "index" : {
+      "type" : "integer",
+      "description" : "Index of the channel in the list of registered channels"
     }
   },
   "description" : "Summarized information about channel plugin"
@@ -803,11 +811,23 @@ margin-bottom: 20px;
   "description" : "List of DV serial devices available in the system"
 };
             defs.DeviceListItem = {
-  "required" : [ "hwType", "sequence", "serial", "streamIndex" ],
+  "required" : [ "hwType" ],
   "properties" : {
+    "displayedName" : {
+      "type" : "string",
+      "description" : "Displayable name that uniquely identifies this device instance"
+    },
     "hwType" : {
       "type" : "string",
       "description" : "Key to identify the type of hardware device"
+    },
+    "serial" : {
+      "type" : "string",
+      "description" : "Serial number of the hardware device"
+    },
+    "sequence" : {
+      "type" : "integer",
+      "description" : "Sequence in the enumeration of same device types"
     },
     "tx" : {
       "type" : "boolean",
@@ -821,13 +841,13 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Index of the channel in the device"
     },
-    "sequence" : {
+    "deviceSetIndex" : {
       "type" : "integer",
-      "description" : "Sequence in the enumeration of same device types"
+      "description" : "Index of the device set that claimed this device (-1 if not claimed)"
     },
-    "serial" : {
-      "type" : "string",
-      "description" : "Serial number of the hardware device"
+    "index" : {
+      "type" : "integer",
+      "description" : "Index of the device in the list of registered devices"
     }
   },
   "description" : "Summarized information about attached hardware device"
@@ -7302,7 +7322,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-19T10:38:58.684+01:00
+              Generated 2017-11-23T00:55:26.644+01:00
             </div>
           </div>
       </div>

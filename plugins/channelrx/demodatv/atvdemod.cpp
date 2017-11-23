@@ -35,7 +35,8 @@ MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportEffectiveSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgReportChannelSampleRateChanged, Message)
 
-const QString ATVDemod::m_channelID = "sdrangel.channel.demodatv";
+const QString ATVDemod::m_channelIdURI = "sdrangel.channel.demodatv";
+const QString ATVDemod::m_channelId = "ATVDemod";
 const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
@@ -68,7 +69,7 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
     m_DSBFilterBufferIndex(0),
     m_objSettingsMutex(QMutex::Recursive)
 {
-    setObjectName("ATVDemod");
+    setObjectName(m_channelId);
 
     //*************** ATV PARAMETERS  ***************
     //m_intNumberSamplePerLine=0;

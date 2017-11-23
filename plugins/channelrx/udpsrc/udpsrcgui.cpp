@@ -183,7 +183,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setSpectrumGUI(ui->spectrumGUI);
 
-	m_deviceUISet->registerRxChannelInstance(UDPSrc::m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(UDPSrc::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

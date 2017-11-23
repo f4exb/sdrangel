@@ -148,7 +148,8 @@ public:
 	virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 private:
 

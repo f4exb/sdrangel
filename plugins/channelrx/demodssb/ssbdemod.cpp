@@ -34,7 +34,8 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureChannelizer, Message)
 
-const QString SSBDemod::m_channelID = "de.maintech.sdrangelove.channel.ssb";
+const QString SSBDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.ssb";
+const QString SSBDemod::m_channelId = "SSBDemod";
 const int SSBDemod::m_udpBlockSize = 512;
 
 SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
@@ -54,7 +55,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
     m_audioFifo(24000),
     m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("SSBDemod");
+	setObjectName(m_channelId);
 
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;

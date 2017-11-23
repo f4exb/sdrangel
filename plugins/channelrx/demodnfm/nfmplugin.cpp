@@ -7,7 +7,7 @@
 
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
 	QString("NFM Demodulator"),
-	QString("3.8.4"),
+	QString("3.8.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -30,12 +30,12 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register NFM demodulator
-	m_pluginAPI->registerRxChannel(NFMDemod::m_channelID, this);
+	m_pluginAPI->registerRxChannel(NFMDemod::m_channelIdURI, NFMDemod::m_channelId, this);
 }
 
 PluginInstanceGUI* NFMPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == NFMDemod::m_channelID) {
+	if(channelName == NFMDemod::m_channelIdURI) {
 		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 		return gui;
 	} else {
@@ -45,7 +45,7 @@ PluginInstanceGUI* NFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 
 BasebandSampleSink* NFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == NFMDemod::m_channelID)
+    if(channelName == NFMDemod::m_channelIdURI)
     {
         NFMDemod* sink = new NFMDemod(deviceAPI);
         return sink;

@@ -38,6 +38,11 @@ public:
             Swagger::SWGInstanceDevicesResponse& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceChannels(
+            bool tx,
+            Swagger::SWGInstanceChannelsResponse& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 };

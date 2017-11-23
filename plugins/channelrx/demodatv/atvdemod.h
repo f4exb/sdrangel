@@ -233,7 +233,8 @@ public:
     double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 private slots:
     void channelSampleRateChanged();

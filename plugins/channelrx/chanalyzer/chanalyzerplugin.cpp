@@ -8,7 +8,7 @@
 
 const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
 	QString("Channel Analyzer"),
-	QString("3.8.4"),
+	QString("3.8.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -31,12 +31,12 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerRxChannel(ChannelAnalyzer::m_channelID, this);
+	m_pluginAPI->registerRxChannel(ChannelAnalyzer::m_channelIdURI, ChannelAnalyzer::m_channelId, this);
 }
 
 PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == ChannelAnalyzer::m_channelID)
+	if(channelName == ChannelAnalyzer::m_channelIdURI)
 	{
 		ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 		return gui;
@@ -48,7 +48,7 @@ PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& chan
 
 BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == ChannelAnalyzer::m_channelID)
+    if(channelName == ChannelAnalyzer::m_channelIdURI)
     {
         ChannelAnalyzer* sink = new ChannelAnalyzer(deviceAPI);
         return sink;

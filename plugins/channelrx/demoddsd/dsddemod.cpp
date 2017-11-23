@@ -35,7 +35,8 @@ MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureMyPosition, Message)
 
-const QString DSDDemod::m_channelID = "sdrangel.channel.dsddemod";
+const QString DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
+const QString DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
@@ -57,7 +58,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_dsdDecoder(),
     m_settingsMutex(QMutex::Recursive)
 {
-	setObjectName("DSDDemod");
+	setObjectName(m_channelId);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

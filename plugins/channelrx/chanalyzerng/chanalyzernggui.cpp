@@ -430,7 +430,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 	setTitleColor(m_channelMarker.getColor());
 
-    m_deviceUISet->registerRxChannelInstance(ChannelAnalyzerNG::m_channelID, this);
+    m_deviceUISet->registerRxChannelInstance(ChannelAnalyzerNG::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

@@ -8,7 +8,7 @@
 
 const PluginDescriptor TCPSrcPlugin::m_pluginDescriptor = {
 	QString("TCP Channel Source"),
-	QString("3.8.3"),
+	QString("3.8.5"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -31,12 +31,12 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	m_pluginAPI->registerRxChannel(TCPSrc::m_channelID, this);
+	m_pluginAPI->registerRxChannel(TCPSrc::m_channelIdURI, TCPSrc::m_channelId, this);
 }
 
 PluginInstanceGUI* TCPSrcPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == TCPSrc::m_channelID)
+	if(channelName == TCPSrc::m_channelIdURI)
 	{
 		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 //		deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
@@ -49,7 +49,7 @@ PluginInstanceGUI* TCPSrcPlugin::createRxChannelGUI(const QString& channelName, 
 
 BasebandSampleSink* TCPSrcPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == TCPSrc::m_channelID)
+    if(channelName == TCPSrc::m_channelIdURI)
     {
         TCPSrc* sink = new TCPSrc(deviceAPI);
         return sink;

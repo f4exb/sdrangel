@@ -150,7 +150,8 @@ public:
 
     RDSParser& getRDSParser() { return m_rdsParser; }
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 private:
 	enum RateState {

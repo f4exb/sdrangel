@@ -40,7 +40,8 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportEffectiveSampleRate, Message)
 
-const QString ATVMod::m_channelID = "sdrangel.channeltx.modatv";
+const QString ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
+const QString ATVMod::m_channelId = "ATVMod";
 const float ATVMod::m_blackLevel = 0.3f;
 const float ATVMod::m_spanLevel = 0.7f;
 const int ATVMod::m_levelNbSamples = 10000; // every 10ms
@@ -73,7 +74,7 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_DSBFilterBuffer(0),
     m_DSBFilterBufferIndex(0)
 {
-    setObjectName("ATVMod");
+    setObjectName(m_channelId);
     scanCameras();
 
     m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_settings.m_outputSampleRate, m_ssbFftLen);

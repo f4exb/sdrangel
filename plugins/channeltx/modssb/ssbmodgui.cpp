@@ -397,7 +397,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     setTitleColor(m_channelMarker.getColor());
 
-    m_deviceUISet->registerTxChannelInstance(SSBMod::m_channelID, this);
+    m_deviceUISet->registerTxChannelInstance(SSBMod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

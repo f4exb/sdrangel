@@ -39,7 +39,8 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString NFMMod::m_channelID = "sdrangel.channeltx.modnfm";
+const QString NFMMod::m_channelIdURI = "sdrangel.channeltx.modnfm";
+const QString NFMMod::m_channelId = "NFMMod";
 const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
 NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
@@ -58,7 +59,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
 {
-	setObjectName("NFMod");
+	setObjectName(m_channelId);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

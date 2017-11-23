@@ -34,7 +34,8 @@ MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgReportChannelSampleRateChanged, Message)
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
-const QString BFMDemod::m_channelID = "sdrangel.channel.bfm";
+const QString BFMDemod::m_channelIdURI = "sdrangel.channel.bfm";
+const QString BFMDemod::m_channelId = "BFMDemod";
 const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
@@ -48,7 +49,7 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
 	m_fmExcursion(default_excursion)
 {
-	setObjectName("BFMDemod");
+	setObjectName(m_channelId);
 
     m_magsq = 0.0f;
     m_magsqSum = 0.0f;

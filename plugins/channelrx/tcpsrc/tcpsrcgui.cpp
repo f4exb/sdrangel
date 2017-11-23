@@ -158,7 +158,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	setTitleColor(m_channelMarker.getColor());
 
-	m_deviceUISet->registerRxChannelInstance(TCPSrc::m_channelID, this);
+	m_deviceUISet->registerRxChannelInstance(TCPSrc::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

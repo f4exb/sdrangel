@@ -412,7 +412,8 @@ public:
     static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit);
     static float getRFBandwidthDivisor(ATVModSettings::ATVModulation modulation);
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 signals:
     /**

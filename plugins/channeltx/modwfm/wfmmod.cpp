@@ -39,7 +39,8 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString WFMMod::m_channelID = "sdrangel.channeltx.modwfm";
+const QString WFMMod::m_channelIdURI = "sdrangel.channeltx.modwfm";
+const QString WFMMod::m_channelId = "WFMMod";
 const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 
@@ -58,7 +59,7 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
 {
-	setObjectName("WFMod");
+	setObjectName(m_channelId);
 
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];

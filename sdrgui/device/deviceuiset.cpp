@@ -156,9 +156,9 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             for(int i = 0; i < openChannels.count(); i++)
             {
-                qDebug("DeviceUISet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+                qDebug("DeviceUISet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
-                if(openChannels[i].m_channelName == channelConfig.m_channel)
+                if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
                 {
                     qDebug("DeviceSourceAPI::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
@@ -173,15 +173,15 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
             {
                 for(int i = 0; i < channelRegistrations->count(); i++)
                 {
-                    if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
+                    if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
-                        qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                        qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                         BasebandSampleSink *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannel(
-                                channelConfig.m_channel, m_deviceSourceAPI);
+                                channelConfig.m_channelIdURI, m_deviceSourceAPI);
                         PluginInstanceGUI *rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(
-                                channelConfig.m_channel, this, rxChannel);
+                                channelConfig.m_channelIdURI, this, rxChannel);
                         reg = ChannelInstanceRegistration(
-                                channelConfig.m_channel, rxChannelGUI);
+                                channelConfig.m_channelIdURI, rxChannelGUI);
                         break;
                     }
                 }
@@ -189,7 +189,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             if(reg.m_gui != NULL)
             {
-                qDebug("DeviceUISet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+                qDebug("DeviceUISet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                 reg.m_gui->deserialize(channelConfig.m_config);
             }
         }
@@ -255,9 +255,9 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             for(int i = 0; i < openChannels.count(); i++)
             {
-                qDebug("DeviceUISet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channel));
+                qDebug("DeviceUISet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
-                if(openChannels[i].m_channelName == channelConfig.m_channel)
+                if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
                 {
                     qDebug("DeviceUISet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
@@ -272,15 +272,15 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
             {
                 for(int i = 0; i < channelRegistrations->count(); i++)
                 {
-                    if((*channelRegistrations)[i].m_channelId == channelConfig.m_channel)
+                    if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
-                        qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channel));
+                        qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                         BasebandSampleSource *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannel(
-                                channelConfig.m_channel, m_deviceSinkAPI);
+                                channelConfig.m_channelIdURI, m_deviceSinkAPI);
                         PluginInstanceGUI *txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(
-                                channelConfig.m_channel, this, txChannel);
+                                channelConfig.m_channelIdURI, this, txChannel);
                         reg = ChannelInstanceRegistration(
-                                channelConfig.m_channel, txChannelGUI);
+                                channelConfig.m_channelIdURI, txChannelGUI);
                         break;
                     }
                 }
@@ -288,7 +288,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             if(reg.m_gui != 0)
             {
-                qDebug("DeviceUISet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channel));
+                qDebug("DeviceUISet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                 reg.m_gui->deserialize(channelConfig.m_config);
             }
         }

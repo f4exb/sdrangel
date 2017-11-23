@@ -31,9 +31,11 @@ public:
 
     struct ChannelRegistration
     {
-        QString m_channelId;       //!< Channel or device type ID
+        QString m_channelIdURI;       //!< Channel type ID in URI form
+        QString m_channelId;          //!< Channel type ID in short form from object name
         PluginInterface* m_plugin;
-        ChannelRegistration(const QString& channelId, PluginInterface* plugin) :
+        ChannelRegistration(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin) :
+            m_channelIdURI(channelIdURI),
             m_channelId(channelId),
             m_plugin(plugin)
         { }
@@ -42,11 +44,11 @@ public:
     typedef QList<ChannelRegistration> ChannelRegistrations;
 
 	// Rx Channel stuff
-	void registerRxChannel(const QString& channelName, PluginInterface* plugin);
+	void registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	ChannelRegistrations *getRxChannelRegistrations();
 
 	// Tx Channel stuff
-	void registerTxChannel(const QString& channelName, PluginInterface* plugin);
+	void registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	ChannelRegistrations *getTxChannelRegistrations();
 
 	// Sample Source stuff

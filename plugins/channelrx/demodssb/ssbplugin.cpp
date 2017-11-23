@@ -31,12 +31,12 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI = pluginAPI;
 
 	// register demodulator
-	m_pluginAPI->registerRxChannel(SSBDemod::m_channelID, this);
+	m_pluginAPI->registerRxChannel(SSBDemod::m_channelIdURI, SSBDemod::m_channelId, this);
 }
 
 PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == SSBDemod::m_channelID)
+	if(channelName == SSBDemod::m_channelIdURI)
 	{
 		SSBDemodGUI* gui = SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 		return gui;
@@ -47,7 +47,7 @@ PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, Dev
 
 BasebandSampleSink* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == SSBDemod::m_channelID)
+    if(channelName == SSBDemod::m_channelIdURI)
     {
         SSBDemod* sink = new SSBDemod(deviceAPI);
         return sink;

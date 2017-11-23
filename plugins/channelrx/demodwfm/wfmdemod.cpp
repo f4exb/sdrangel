@@ -33,7 +33,8 @@
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureChannelizer, Message)
 
-const QString WFMDemod::m_channelID = "de.maintech.sdrangelove.channel.wfm";
+const QString WFMDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.wfm";
+const QString WFMDemod::m_channelId = "WFMDemod";
 const int WFMDemod::m_udpBlockSize = 512;
 
 WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
@@ -50,7 +51,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_settingsMutex(QMutex::Recursive)
 
 {
-	setObjectName("WFMDemod");
+	setObjectName(m_channelId);
 
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, rfFilterFftLength);
 	m_phaseDiscri.setFMScaling(384000/75000);

@@ -519,8 +519,11 @@ definitions:
       name:
         description: "Displayable name of the channel plugin"
         type: string
+      idURI:
+        description: "Key to identify the channel plugin type in URI form"
+        type: string
       id:
-        description: "Key to identify the channel plugin type"
+        description: "Key to identify the channel plugin type as short object name"
         type: string
       tx:
         description: "True if this is a Tx channel"
@@ -528,6 +531,9 @@ definitions:
       version:
         description: "Channel plugin version number"
         type: string
+      index:
+        description: "Index of the channel in the list of registered channels"
+        type: integer
   DeviceSet:
     description: "Sampling device and its associated channels"
     required:

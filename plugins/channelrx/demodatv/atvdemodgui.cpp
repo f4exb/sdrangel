@@ -304,7 +304,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
     setTitleColor(m_channelMarker.getColor());
 
-    m_deviceUISet->registerRxChannelInstance(ATVDemod::m_channelID, this);
+    m_deviceUISet->registerRxChannelInstance(ATVDemod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

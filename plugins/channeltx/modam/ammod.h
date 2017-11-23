@@ -243,7 +243,8 @@ public:
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 
-    static const QString m_channelID;
+    static const QString m_channelIdURI;
+    static const QString m_channelId;
 
 signals:
 	/**
