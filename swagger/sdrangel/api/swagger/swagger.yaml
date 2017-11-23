@@ -50,9 +50,9 @@ paths:
       parameters:
         - name: tx
           in: query
-          description: Set to true for Tx direction
+          description: Set to non zero (true) for Tx direction (default Rx)
           required: false
-          type: boolean
+          type: integer
       responses:
         "200":
           description: Success
@@ -72,9 +72,9 @@ paths:
       parameters:
         - name: tx
           in: query
-          description: Set to true for Tx channels
+          description: Set to non zero (true) for Tx channels (default Rx)
           required: false
-          type: boolean
+          type: integer
       responses:
         "200":
           description: Success
@@ -217,9 +217,9 @@ paths:
       parameters:
         - name: dvserial
           in: query
-          description: Set to true to set DV serial processing
+          description: Set to non zero (true) to set DV serial processing
           required: false
-          type: boolean
+          type: integer
       responses:
         "200":
           description: On success return list of devices or empty list if unset
@@ -383,9 +383,9 @@ paths:
       parameters:
         - name: tx
           in: query
-          description: Set to true for a Tx device set
+          description: Set to non zero (true) for a Tx device set (default Rx)
           required: false
-          type: boolean
+          type: integer
       responses:
         "200":
           description: On success return new device set

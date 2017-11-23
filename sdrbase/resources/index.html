@@ -1925,7 +1925,7 @@ public class DefaultApiExample {
     public static void main(String[] args) {
         
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for Tx channels
+        Integer tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
         try {
             InstanceChannelsResponse result = apiInstance.instanceChannels(tx);
             System.out.println(result);
@@ -1944,7 +1944,7 @@ public class DefaultApiExample {
 
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for Tx channels
+        Integer tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
         try {
             InstanceChannelsResponse result = apiInstance.instanceChannels(tx);
             System.out.println(result);
@@ -1960,7 +1960,7 @@ public class DefaultApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Default-instanceChannels-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Boolean *tx = true; // Set to true for Tx channels (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for Tx channels (default Rx) (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
@@ -1982,7 +1982,7 @@ DefaultApi *apiInstance = [[DefaultApi alloc] init];
 var api = new SdRangel.DefaultApi()
 
 var opts = { 
-  'tx': true // {Boolean} Set to true for Tx channels
+  'tx': 56 // {Integer} Set to non zero (true) for Tx channels (default Rx)
 };
 
 var callback = function(error, data, response) {
@@ -2014,7 +2014,7 @@ namespace Example
         {
             
             var apiInstance = new DefaultApi();
-            var tx = true;  // Boolean | Set to true for Tx channels (optional) 
+            var tx = 56;  // Integer | Set to non zero (true) for Tx channels (default Rx) (optional) 
 
             try
             {
@@ -2036,7 +2036,7 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DefaultApi();
-$tx = true; // Boolean | Set to true for Tx channels
+$tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
 
 try {
     $result = $api_instance->instanceChannels($tx);
@@ -2053,7 +2053,7 @@ use WWW::SwaggerClient::Configuration;
 use WWW::SwaggerClient::DefaultApi;
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $tx = true; # Boolean | Set to true for Tx channels
+my $tx = 56; # Integer | Set to non zero (true) for Tx channels (default Rx)
 
 eval { 
     my $result = $api_instance->instanceChannels(tx => $tx);
@@ -2073,7 +2073,7 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.DefaultApi()
-tx = true # Boolean | Set to true for Tx channels (optional)
+tx = 56 # Integer | Set to non zero (true) for Tx channels (default Rx) (optional)
 
 try: 
     api_response = api_instance.instance_channels(tx=tx)
@@ -2103,11 +2103,11 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Boolean
+                    Integer
                 </span>
 
                     <div class="inner description">
-                        Set to true for Tx channels
+                        Set to non zero (true) for Tx channels (default Rx)
                     </div>
             </div>
         </div>
@@ -2263,7 +2263,7 @@ public class DefaultApiExample {
     public static void main(String[] args) {
         
         DefaultApi apiInstance = new DefaultApi();
-        Boolean dvserial = true; // Boolean | Set to true to set DV serial processing
+        Integer dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
         try {
             DVSeralDevices result = apiInstance.instanceDVSerialPatch(dvserial);
             System.out.println(result);
@@ -2282,7 +2282,7 @@ public class DefaultApiExample {
 
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        Boolean dvserial = true; // Boolean | Set to true to set DV serial processing
+        Integer dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
         try {
             DVSeralDevices result = apiInstance.instanceDVSerialPatch(dvserial);
             System.out.println(result);
@@ -2298,7 +2298,7 @@ public class DefaultApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Default-instanceDVSerialPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Boolean *dvserial = true; // Set to true to set DV serial processing (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *dvserial = 56; // Set to non zero (true) to set DV serial processing (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
@@ -2320,7 +2320,7 @@ DefaultApi *apiInstance = [[DefaultApi alloc] init];
 var api = new SdRangel.DefaultApi()
 
 var opts = { 
-  'dvserial': true // {Boolean} Set to true to set DV serial processing
+  'dvserial': 56 // {Integer} Set to non zero (true) to set DV serial processing
 };
 
 var callback = function(error, data, response) {
@@ -2352,7 +2352,7 @@ namespace Example
         {
             
             var apiInstance = new DefaultApi();
-            var dvserial = true;  // Boolean | Set to true to set DV serial processing (optional) 
+            var dvserial = 56;  // Integer | Set to non zero (true) to set DV serial processing (optional) 
 
             try
             {
@@ -2374,7 +2374,7 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DefaultApi();
-$dvserial = true; // Boolean | Set to true to set DV serial processing
+$dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
 
 try {
     $result = $api_instance->instanceDVSerialPatch($dvserial);
@@ -2391,7 +2391,7 @@ use WWW::SwaggerClient::Configuration;
 use WWW::SwaggerClient::DefaultApi;
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $dvserial = true; # Boolean | Set to true to set DV serial processing
+my $dvserial = 56; # Integer | Set to non zero (true) to set DV serial processing
 
 eval { 
     my $result = $api_instance->instanceDVSerialPatch(dvserial => $dvserial);
@@ -2411,7 +2411,7 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.DefaultApi()
-dvserial = true # Boolean | Set to true to set DV serial processing (optional)
+dvserial = 56 # Integer | Set to non zero (true) to set DV serial processing (optional)
 
 try: 
     api_response = api_instance.instance_dv_serial_patch(dvserial=dvserial)
@@ -2441,11 +2441,11 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Boolean
+                    Integer
                 </span>
 
                     <div class="inner description">
-                        Set to true to set DV serial processing
+                        Set to non zero (true) to set DV serial processing
                     </div>
             </div>
         </div>
@@ -3209,7 +3209,7 @@ public class DefaultApiExample {
     public static void main(String[] args) {
         
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for a Tx device set
+        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
         try {
             DeviceSet result = apiInstance.instanceDeviceSetsPost(tx);
             System.out.println(result);
@@ -3228,7 +3228,7 @@ public class DefaultApiExample {
 
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for a Tx device set
+        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
         try {
             DeviceSet result = apiInstance.instanceDeviceSetsPost(tx);
             System.out.println(result);
@@ -3244,7 +3244,7 @@ public class DefaultApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Default-instanceDeviceSetsPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Boolean *tx = true; // Set to true for a Tx device set (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for a Tx device set (default Rx) (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
@@ -3266,7 +3266,7 @@ DefaultApi *apiInstance = [[DefaultApi alloc] init];
 var api = new SdRangel.DefaultApi()
 
 var opts = { 
-  'tx': true // {Boolean} Set to true for a Tx device set
+  'tx': 56 // {Integer} Set to non zero (true) for a Tx device set (default Rx)
 };
 
 var callback = function(error, data, response) {
@@ -3298,7 +3298,7 @@ namespace Example
         {
             
             var apiInstance = new DefaultApi();
-            var tx = true;  // Boolean | Set to true for a Tx device set (optional) 
+            var tx = 56;  // Integer | Set to non zero (true) for a Tx device set (default Rx) (optional) 
 
             try
             {
@@ -3320,7 +3320,7 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DefaultApi();
-$tx = true; // Boolean | Set to true for a Tx device set
+$tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
 
 try {
     $result = $api_instance->instanceDeviceSetsPost($tx);
@@ -3337,7 +3337,7 @@ use WWW::SwaggerClient::Configuration;
 use WWW::SwaggerClient::DefaultApi;
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $tx = true; # Boolean | Set to true for a Tx device set
+my $tx = 56; # Integer | Set to non zero (true) for a Tx device set (default Rx)
 
 eval { 
     my $result = $api_instance->instanceDeviceSetsPost(tx => $tx);
@@ -3357,7 +3357,7 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.DefaultApi()
-tx = true # Boolean | Set to true for a Tx device set (optional)
+tx = 56 # Integer | Set to non zero (true) for a Tx device set (default Rx) (optional)
 
 try: 
     api_response = api_instance.instance_device_sets_post(tx=tx)
@@ -3387,11 +3387,11 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Boolean
+                    Integer
                 </span>
 
                     <div class="inner description">
-                        Set to true for a Tx device set
+                        Set to non zero (true) for a Tx device set (default Rx)
                     </div>
             </div>
         </div>
@@ -3547,7 +3547,7 @@ public class DefaultApiExample {
     public static void main(String[] args) {
         
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for Tx direction
+        Integer tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
         try {
             InstanceDevicesResponse result = apiInstance.instanceDevices(tx);
             System.out.println(result);
@@ -3566,7 +3566,7 @@ public class DefaultApiExample {
 
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        Boolean tx = true; // Boolean | Set to true for Tx direction
+        Integer tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
         try {
             InstanceDevicesResponse result = apiInstance.instanceDevices(tx);
             System.out.println(result);
@@ -3582,7 +3582,7 @@ public class DefaultApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Default-instanceDevices-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Boolean *tx = true; // Set to true for Tx direction (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for Tx direction (default Rx) (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
@@ -3604,7 +3604,7 @@ DefaultApi *apiInstance = [[DefaultApi alloc] init];
 var api = new SdRangel.DefaultApi()
 
 var opts = { 
-  'tx': true // {Boolean} Set to true for Tx direction
+  'tx': 56 // {Integer} Set to non zero (true) for Tx direction (default Rx)
 };
 
 var callback = function(error, data, response) {
@@ -3636,7 +3636,7 @@ namespace Example
         {
             
             var apiInstance = new DefaultApi();
-            var tx = true;  // Boolean | Set to true for Tx direction (optional) 
+            var tx = 56;  // Integer | Set to non zero (true) for Tx direction (default Rx) (optional) 
 
             try
             {
@@ -3658,7 +3658,7 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DefaultApi();
-$tx = true; // Boolean | Set to true for Tx direction
+$tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
 
 try {
     $result = $api_instance->instanceDevices($tx);
@@ -3675,7 +3675,7 @@ use WWW::SwaggerClient::Configuration;
 use WWW::SwaggerClient::DefaultApi;
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $tx = true; # Boolean | Set to true for Tx direction
+my $tx = 56; # Integer | Set to non zero (true) for Tx direction (default Rx)
 
 eval { 
     my $result = $api_instance->instanceDevices(tx => $tx);
@@ -3695,7 +3695,7 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.DefaultApi()
-tx = true # Boolean | Set to true for Tx direction (optional)
+tx = 56 # Integer | Set to non zero (true) for Tx direction (default Rx) (optional)
 
 try: 
     api_response = api_instance.instance_devices(tx=tx)
@@ -3725,11 +3725,11 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Boolean
+                    Integer
                 </span>
 
                     <div class="inner description">
-                        Set to true for Tx direction
+                        Set to non zero (true) for Tx direction (default Rx)
                     </div>
             </div>
         </div>
@@ -7356,7 +7356,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-24T00:44:01.796+01:00
+              Generated 2017-11-24T00:55:01.257+01:00
             </div>
           </div>
       </div>

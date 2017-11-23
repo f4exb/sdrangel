@@ -127,7 +127,7 @@ SWGDefaultApi::instanceAudioPatchCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceChannels(bool tx) {
+SWGDefaultApi::instanceChannels(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/channels");
 
@@ -183,7 +183,7 @@ SWGDefaultApi::instanceChannelsCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDVSerialPatch(bool dvserial) {
+SWGDefaultApi::instanceDVSerialPatch(qint32 dvserial) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/dvserial");
 
@@ -335,7 +335,7 @@ SWGDefaultApi::instanceDeviceSetsGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsPost(bool tx) {
+SWGDefaultApi::instanceDeviceSetsPost(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devicesets");
 
@@ -391,7 +391,7 @@ SWGDefaultApi::instanceDeviceSetsPostCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDevices(bool tx) {
+SWGDefaultApi::instanceDevices(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devices");
 

@@ -82,7 +82,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             if (request.getMethod() == "GET")
             {
                 QByteArray txStr = request.getParameter("tx");
-                bool tx = (txStr == "true");
+                bool tx = (txStr == "1");
 
                 int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
                 response.setStatus(status);
@@ -107,7 +107,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             if (request.getMethod() == "GET")
             {
                 QByteArray txStr = request.getParameter("tx");
-                bool tx = (txStr == "true");
+                bool tx = (txStr == "1");
 
                 int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
                 response.setStatus(status);

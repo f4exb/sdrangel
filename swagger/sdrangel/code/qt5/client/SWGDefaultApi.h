@@ -48,12 +48,12 @@ public:
 
     void instanceAudioGet();
     void instanceAudioPatch(SWGAudioDevicesSelect body);
-    void instanceChannels(bool tx);
-    void instanceDVSerialPatch(bool dvserial);
+    void instanceChannels(qint32 tx);
+    void instanceDVSerialPatch(qint32 dvserial);
     void instanceDeviceSetsDelete();
     void instanceDeviceSetsGet();
-    void instanceDeviceSetsPost(bool tx);
-    void instanceDevices(bool tx);
+    void instanceDeviceSetsPost(qint32 tx);
+    void instanceDevices(qint32 tx);
     void instanceLocationGet();
     void instanceLocationPut(SWGLocationInformation body);
     void instanceLoggingGet();
