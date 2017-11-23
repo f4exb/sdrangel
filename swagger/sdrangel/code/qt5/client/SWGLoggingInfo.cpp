@@ -39,7 +39,7 @@ void
 SWGLoggingInfo::init() {
     console_level = new QString("");
     file_level = new QString("");
-    dump_to_file = false;
+    dump_to_file = 0;
     file_name = new QString("");
 }
 
@@ -73,7 +73,7 @@ void
 SWGLoggingInfo::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&console_level, pJson["consoleLevel"], "QString", "QString");
     ::Swagger::setValue(&file_level, pJson["fileLevel"], "QString", "QString");
-    ::Swagger::setValue(&dump_to_file, pJson["dumpToFile"], "bool", "");
+    ::Swagger::setValue(&dump_to_file, pJson["dumpToFile"], "qint32", "");
     ::Swagger::setValue(&file_name, pJson["fileName"], "QString", "QString");
 }
 
@@ -120,12 +120,12 @@ SWGLoggingInfo::setFileLevel(QString* file_level) {
     this->file_level = file_level;
 }
 
-bool
+qint32
 SWGLoggingInfo::getDumpToFile() {
     return dump_to_file;
 }
 void
-SWGLoggingInfo::setDumpToFile(bool dump_to_file) {
+SWGLoggingInfo::setDumpToFile(qint32 dump_to_file) {
     this->dump_to_file = dump_to_file;
 }
 

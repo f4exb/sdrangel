@@ -58,7 +58,7 @@ int WebAPIAdapterGUI::instanceSummary(
 
     Swagger::SWGLoggingInfo *logging = response.getLogging();
     logging->init();
-    logging->setDumpToFile(m_mainWindow.m_logger->getUseFileLogger());
+    logging->setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
     if (logging->getDumpToFile()) {
         m_mainWindow.m_logger->getLogFileName(*logging->getFileName());
         m_mainWindow.m_logger->getFileMinMessageLevelStr(*logging->getFileLevel());
@@ -198,9 +198,9 @@ int WebAPIAdapterGUI::instanceChannels(
 
 int WebAPIAdapterGUI::instanceLoggingGet(
             Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error)
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
 {
-    response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger());
+    response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
 
     if (response.getDumpToFile()) {
         m_mainWindow.m_logger->getLogFileName(*response.getFileName());
@@ -214,10 +214,10 @@ int WebAPIAdapterGUI::instanceLoggingGet(
 
 int WebAPIAdapterGUI::instanceLoggingPut(
             Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error)
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
 {
     // response input is the query actually
-    bool dumpToFile = response.getDumpToFile();
+    bool dumpToFile = (response.getDumpToFile() != 0);
     QString* consoleLevel = response.getConsoleLevel();
     QString* fileLevel = response.getFileLevel();
     QString* fileName = response.getFileName();
@@ -234,21 +234,17 @@ int WebAPIAdapterGUI::instanceLoggingPut(
     m_mainWindow.m_settings.setUseLogFile(dumpToFile);
 
     if (fileName) {
-        m_mainWindow.m_settings.setLogFileName(*fileLevel);
+        m_mainWindow.m_settings.setLogFileName(*fileName);
     }
 
     m_mainWindow.setLoggingOpions();
 
     // build response
-    response.setDumpToFile(m_mainWindow.m_settings.getUseLogFile());
-
-    if (response.getDumpToFile())
-    {
-        *response.getFileName() = m_mainWindow.m_settings.getLogFileName();
-        getMsgTypeString(m_mainWindow.m_settings.getFileMinLogLevel(), *response.getFileLevel());
-    }
-
+    response.init();
     getMsgTypeString(m_mainWindow.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
+    response.setDumpToFile(m_mainWindow.m_settings.getUseLogFile() ? 1 : 0);
+    getMsgTypeString(m_mainWindow.m_settings.getFileMinLogLevel(), *response.getFileLevel());
+    *response.getFileName() = m_mainWindow.m_settings.getLogFileName();
 
     return 200;
 }

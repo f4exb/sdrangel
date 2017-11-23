@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 //#include <QDirIterator>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
@@ -43,8 +45,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 {
     if (m_adapter == 0) // format service unavailable if adapter is null
     {
-        response.write("Service not available");
         response.setStatus(500,"Service not available");
+        response.write("Service not available");
     }
     else // normal processing
     {
@@ -58,19 +60,18 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 Swagger::SWGErrorResponse errorResponse;
 
                 int status = m_adapter->instanceSummary(normalResponse, errorResponse);
+                response.setStatus(status);
 
                 if (status == 200) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
                 }
-
-                response.setStatus(status);
             }
             else
             {
-                response.write("Invalid HTTP method");
                 response.setStatus(405,"Invalid HTTP method");
+                response.write("Invalid HTTP method");
             }
         }
         else if (path == WebAPIAdapterInterface::instanceDevicesURL)
@@ -84,19 +85,18 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 bool tx = (txStr == "true");
 
                 int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
+                response.setStatus(status);
 
                 if (status == 200) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
                 }
-
-                response.setStatus(status);
             }
             else
             {
-                response.write("Invalid HTTP method");
                 response.setStatus(405,"Invalid HTTP method");
+                response.write("Invalid HTTP method");
             }
         }
         else if (path == WebAPIAdapterInterface::instanceChannelsURL)
@@ -110,19 +110,18 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 bool tx = (txStr == "true");
 
                 int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
+                response.setStatus(status);
 
                 if (status == 200) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
                 }
-
-                response.setStatus(status);
             }
             else
             {
-                response.write("Invalid HTTP method");
                 response.setStatus(405,"Invalid HTTP method");
+                response.write("Invalid HTTP method");
             }
         }
         else if (path == WebAPIAdapterInterface::instanceLoggingURL)
@@ -133,42 +132,57 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             if (request.getMethod() == "GET")
             {
                 int status = m_adapter->instanceLoggingGet(normalResponse, errorResponse);
+                response.setStatus(status);
 
                 if (status == 200) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
                 }
-
-                response.setStatus(status);
             }
             else if (request.getMethod() == "PUT")
             {
                 try
                 {
                     QString jsonStr = request.getBody();
-                    qDebug("WebAPIRequestMapper::service: /sdrangel/logging (PUT): %s", qPrintable(jsonStr));
-                    normalResponse.fromJson(jsonStr);
-                    int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
+                    QByteArray jsonBytes(jsonStr.toStdString().c_str());
+                    QJsonParseError error;
+                    QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
 
-                    if (status == 200) {
-                        response.write(normalResponse.asJson().toUtf8());
-                    } else {
+                    if (error.error == QJsonParseError::NoError)
+                    {
+                        normalResponse.fromJson(jsonStr);
+                        int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
+                        response.setStatus(status);
+
+                        if (status == 200) {
+                            response.write(normalResponse.asJson().toUtf8());
+                        } else {
+                            response.write(errorResponse.asJson().toUtf8());
+                        }
+                    }
+                    else
+                    {
+                        QString errorMsg = QString("Input JSON error: ") + error.errorString();
+                        errorResponse.init();
+                        *errorResponse.getMessage() = errorMsg;
+                        response.setStatus(400, errorMsg.toUtf8());
                         response.write(errorResponse.asJson().toUtf8());
                     }
-
-                    response.setStatus(status);
                 }
                 catch (const std::exception& ex)
                 {
-                    response.write("Invalid input format");
-                    response.setStatus(400,"Invalid input format");
+                    QString errorMsg = QString("Error parsing request: ") + ex.what();
+                    errorResponse.init();
+                    *errorResponse.getMessage() = errorMsg;
+                    response.setStatus(500, errorMsg.toUtf8());
+                    response.write(errorResponse.asJson().toUtf8());
                 }
             }
             else
             {
-                response.write("Invalid HTTP method");
                 response.setStatus(405,"Invalid HTTP method");
+                response.write("Invalid HTTP method");
             }
         }
         else

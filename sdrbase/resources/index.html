@@ -779,8 +779,8 @@ margin-bottom: 20px;
       "description" : "Key to identify the channel plugin type as short object name"
     },
     "tx" : {
-      "type" : "boolean",
-      "description" : "True if this is a Tx channel"
+      "type" : "integer",
+      "description" : "Not zero (true) if this is a Tx channel"
     },
     "version" : {
       "type" : "string",
@@ -830,8 +830,8 @@ margin-bottom: 20px;
       "description" : "Sequence in the enumeration of same device types"
     },
     "tx" : {
-      "type" : "boolean",
-      "description" : "Set to true if this is a Tx device"
+      "type" : "integer",
+      "description" : "Set to not zero (true) if this is a Tx device"
     },
     "nbStreams" : {
       "type" : "integer",
@@ -964,7 +964,6 @@ margin-bottom: 20px;
   "description" : "Instance geolocation information"
 };
             defs.LoggingInfo = {
-  "required" : [ "consoleLevel", "fileLevel" ],
   "properties" : {
     "consoleLevel" : {
       "type" : "string",
@@ -975,8 +974,8 @@ margin-bottom: 20px;
       "description" : "Minimum level of messages written to file: debug, info, warning, error"
     },
     "dumpToFile" : {
-      "type" : "boolean",
-      "description" : "True if messages are written to file"
+      "type" : "integer",
+      "description" : "not zero (true) if messages are written to file"
     },
     "fileName" : {
       "type" : "string",
@@ -1088,8 +1087,8 @@ margin-bottom: 20px;
       "description" : "Key to identify the type of hardware device"
     },
     "tx" : {
-      "type" : "boolean",
-      "description" : "True if this is a Tx device"
+      "type" : "integer",
+      "description" : "Not zero (true) if this is a Tx device"
     },
     "nbStreams" : {
       "type" : "integer",
@@ -5099,9 +5098,44 @@ $(document).ready(function() {
                             <h3> Status: 400 - Invallid data </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLoggingPut-400-schema">Schema</a>
+                                </li>
+
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLoggingPut-400-schema">
+                                  <div id='responses-instanceLoggingPut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invallid data",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLoggingPut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLoggingPut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLoggingPut-400-schema-data' type='hidden' value=''></input>
+                                </div>
                             </div>
 
                             <h3> Status: 500 - Error </h3>
@@ -7322,7 +7356,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-23T00:55:26.644+01:00
+              Generated 2017-11-24T00:44:01.796+01:00
             </div>
           </div>
       </div>

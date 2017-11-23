@@ -54,8 +54,8 @@ public:
     qint32 getSequence();
     void setSequence(qint32 sequence);
 
-    bool getTx();
-    void setTx(bool tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
 
     qint32 getNbStreams();
     void setNbStreams(qint32 nb_streams);
@@ -75,7 +75,7 @@ private:
     QString* hw_type;
     QString* serial;
     qint32 sequence;
-    bool tx;
+    qint32 tx;
     qint32 nb_streams;
     qint32 stream_index;
     qint32 device_set_index;

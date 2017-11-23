@@ -51,8 +51,8 @@ public:
     QString* getId();
     void setId(QString* id);
 
-    bool getTx();
-    void setTx(bool tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
 
     QString* getVersion();
     void setVersion(QString* version);
@@ -65,7 +65,7 @@ private:
     QString* name;
     QString* id_uri;
     QString* id;
-    bool tx;
+    qint32 tx;
     QString* version;
     qint32 index;
 };

@@ -41,7 +41,7 @@ SWGDeviceListItem::init() {
     hw_type = new QString("");
     serial = new QString("");
     sequence = 0;
-    tx = false;
+    tx = 0;
     nb_streams = 0;
     stream_index = 0;
     device_set_index = 0;
@@ -85,7 +85,7 @@ SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&hw_type, pJson["hwType"], "QString", "QString");
     ::Swagger::setValue(&serial, pJson["serial"], "QString", "QString");
     ::Swagger::setValue(&sequence, pJson["sequence"], "qint32", "");
-    ::Swagger::setValue(&tx, pJson["tx"], "bool", "");
+    ::Swagger::setValue(&tx, pJson["tx"], "qint32", "");
     ::Swagger::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
     ::Swagger::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     ::Swagger::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
@@ -163,12 +163,12 @@ SWGDeviceListItem::setSequence(qint32 sequence) {
     this->sequence = sequence;
 }
 
-bool
+qint32
 SWGDeviceListItem::getTx() {
     return tx;
 }
 void
-SWGDeviceListItem::setTx(bool tx) {
+SWGDeviceListItem::setTx(qint32 tx) {
     this->tx = tx;
 }
 

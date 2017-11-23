@@ -48,8 +48,8 @@ public:
     QString* getHwType();
     void setHwType(QString* hw_type);
 
-    bool getTx();
-    void setTx(bool tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
 
     qint32 getNbStreams();
     void setNbStreams(qint32 nb_streams);
@@ -76,7 +76,7 @@ public:
 private:
     qint32 index;
     QString* hw_type;
-    bool tx;
+    qint32 tx;
     qint32 nb_streams;
     qint32 stream_index;
     qint32 sequence;

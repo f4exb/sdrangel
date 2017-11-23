@@ -39,7 +39,7 @@ void
 SWGSamplingDevice::init() {
     index = 0;
     hw_type = new QString("");
-    tx = false;
+    tx = 0;
     nb_streams = 0;
     stream_index = 0;
     sequence = 0;
@@ -85,7 +85,7 @@ void
 SWGSamplingDevice::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&index, pJson["index"], "qint32", "");
     ::Swagger::setValue(&hw_type, pJson["hwType"], "QString", "QString");
-    ::Swagger::setValue(&tx, pJson["tx"], "bool", "");
+    ::Swagger::setValue(&tx, pJson["tx"], "qint32", "");
     ::Swagger::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
     ::Swagger::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     ::Swagger::setValue(&sequence, pJson["sequence"], "qint32", "");
@@ -150,12 +150,12 @@ SWGSamplingDevice::setHwType(QString* hw_type) {
     this->hw_type = hw_type;
 }
 
-bool
+qint32
 SWGSamplingDevice::getTx() {
     return tx;
 }
 void
-SWGSamplingDevice::setTx(bool tx) {
+SWGSamplingDevice::setTx(qint32 tx) {
     this->tx = tx;
 }
 

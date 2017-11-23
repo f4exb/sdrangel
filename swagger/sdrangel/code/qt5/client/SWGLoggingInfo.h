@@ -48,8 +48,8 @@ public:
     QString* getFileLevel();
     void setFileLevel(QString* file_level);
 
-    bool getDumpToFile();
-    void setDumpToFile(bool dump_to_file);
+    qint32 getDumpToFile();
+    void setDumpToFile(qint32 dump_to_file);
 
     QString* getFileName();
     void setFileName(QString* file_name);
@@ -58,7 +58,7 @@ public:
 private:
     QString* console_level;
     QString* file_level;
-    bool dump_to_file;
+    qint32 dump_to_file;
     QString* file_name;
 };
 

@@ -40,7 +40,7 @@ SWGChannelListItem::init() {
     name = new QString("");
     id_uri = new QString("");
     id = new QString("");
-    tx = false;
+    tx = 0;
     version = new QString("");
     index = 0;
 }
@@ -81,7 +81,7 @@ SWGChannelListItem::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
     ::Swagger::setValue(&id_uri, pJson["idURI"], "QString", "QString");
     ::Swagger::setValue(&id, pJson["id"], "QString", "QString");
-    ::Swagger::setValue(&tx, pJson["tx"], "bool", "");
+    ::Swagger::setValue(&tx, pJson["tx"], "qint32", "");
     ::Swagger::setValue(&version, pJson["version"], "QString", "QString");
     ::Swagger::setValue(&index, pJson["index"], "qint32", "");
 }
@@ -142,12 +142,12 @@ SWGChannelListItem::setId(QString* id) {
     this->id = id;
 }
 
-bool
+qint32
 SWGChannelListItem::getTx() {
     return tx;
 }
 void
-SWGChannelListItem::setTx(bool tx) {
+SWGChannelListItem::setTx(qint32 tx) {
     this->tx = tx;
 }
 

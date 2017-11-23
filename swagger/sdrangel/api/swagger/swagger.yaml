@@ -121,6 +121,8 @@ paths:
             $ref: "#/definitions/LoggingInfo"
         "400":
           description: Invallid data
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: Error
           schema:
@@ -462,9 +464,6 @@ definitions:
         type: string
   LoggingInfo:
     description: "Logging parameters setting"
-    required:
-      - consoleLevel
-      - fileLevel
     properties:
       consoleLevel:
         description: "Minimum level of messages printed to console: debug, info, warning, error"
@@ -473,8 +472,8 @@ definitions:
         description: "Minimum level of messages written to file: debug, info, warning, error"
         type: string
       dumpToFile:
-        description: "True if messages are written to file"
-        type: boolean
+        description: "not zero (true) if messages are written to file"
+        type: integer
       fileName:
         description: "Name of the log file"
         type: string
@@ -496,8 +495,8 @@ definitions:
         description: "Sequence in the enumeration of same device types"
         type: integer
       tx:
-        description: "Set to true if this is a Tx device"
-        type: boolean
+        description: "Set to not zero (true) if this is a Tx device"
+        type: integer
       nbStreams: 
         description: "Number of channels or streams in the device"
         type: integer
@@ -526,8 +525,8 @@ definitions:
         description: "Key to identify the channel plugin type as short object name"
         type: string
       tx:
-        description: "True if this is a Tx channel"
-        type: boolean
+        description: "Not zero (true) if this is a Tx channel"
+        type: integer
       version:
         description: "Channel plugin version number"
         type: string
@@ -582,8 +581,8 @@ definitions:
         description: "Key to identify the type of hardware device"
         type: string
       tx:
-        description: "True if this is a Tx device"
-        type: boolean
+        description: "Not zero (true) if this is a Tx device"
+        type: integer
       nbStreams: 
         description: "Number of channels or streams in the device"
         type: integer
