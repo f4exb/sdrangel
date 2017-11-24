@@ -696,11 +696,15 @@ margin-bottom: 20px;
     // Script section to load models into a JS Var
     var defs = {}
             defs.AudioDevices = {
-  "required" : [ "nbInputDevices", "nbOutputDevices" ],
+  "required" : [ "inputDeviceSelectedIndex", "nbInputDevices", "nbOutputDevices", "outputDeviceSelectedIndex" ],
   "properties" : {
     "nbInputDevices" : {
       "type" : "integer",
       "description" : "Number of input audio devices"
+    },
+    "inputDeviceSelectedIndex" : {
+      "type" : "integer",
+      "description" : "Index of selected input audio devices (-1 if default)"
     },
     "inputDevices" : {
       "type" : "array",
@@ -712,6 +716,10 @@ margin-bottom: 20px;
     "nbOutputDevices" : {
       "type" : "integer",
       "description" : "Number of output audio devices"
+    },
+    "outputDeviceSelectedIndex" : {
+      "type" : "integer",
+      "description" : "Index of selected output audio devices (-1 if default)"
     },
     "outputDevices" : {
       "type" : "array",
@@ -726,12 +734,12 @@ margin-bottom: 20px;
             defs.AudioDevicesSelect = {
   "properties" : {
     "input" : {
-      "type" : "string",
-      "description" : "Name of the audio input device"
+      "type" : "integer",
+      "description" : "Index of the audio input device (-1 for default)"
     },
     "output" : {
-      "type" : "string",
-      "description" : "Name of the audio output device"
+      "type" : "integer",
+      "description" : "Index of the audio output device (-1 for default)"
     }
   },
   "description" : "Audio devices selected"
@@ -7356,7 +7364,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-24T00:55:01.257+01:00
+              Generated 2017-11-24T08:42:52.359+01:00
             </div>
           </div>
       </div>

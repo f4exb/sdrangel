@@ -37,20 +37,14 @@ SWGAudioDevicesSelect::~SWGAudioDevicesSelect() {
 
 void
 SWGAudioDevicesSelect::init() {
-    input = new QString("");
-    output = new QString("");
+    input = 0;
+    output = 0;
 }
 
 void
 SWGAudioDevicesSelect::cleanup() {
     
-    if(input != nullptr) {
-        delete input;
-    }
 
-    if(output != nullptr) {
-        delete output;
-    }
 }
 
 SWGAudioDevicesSelect*
@@ -64,8 +58,8 @@ SWGAudioDevicesSelect::fromJson(QString &json) {
 
 void
 SWGAudioDevicesSelect::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&input, pJson["input"], "QString", "QString");
-    ::Swagger::setValue(&output, pJson["output"], "QString", "QString");
+    ::Swagger::setValue(&input, pJson["input"], "qint32", "");
+    ::Swagger::setValue(&output, pJson["output"], "qint32", "");
 }
 
 QString
@@ -82,28 +76,28 @@ QJsonObject*
 SWGAudioDevicesSelect::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
-    toJsonValue(QString("input"), input, obj, QString("QString"));
+    obj->insert("input", QJsonValue(input));
 
-    toJsonValue(QString("output"), output, obj, QString("QString"));
+    obj->insert("output", QJsonValue(output));
 
     return obj;
 }
 
-QString*
+qint32
 SWGAudioDevicesSelect::getInput() {
     return input;
 }
 void
-SWGAudioDevicesSelect::setInput(QString* input) {
+SWGAudioDevicesSelect::setInput(qint32 input) {
     this->input = input;
 }
 
-QString*
+qint32
 SWGAudioDevicesSelect::getOutput() {
     return output;
 }
 void
-SWGAudioDevicesSelect::setOutput(QString* output) {
+SWGAudioDevicesSelect::setOutput(qint32 output) {
     this->output = output;
 }
 

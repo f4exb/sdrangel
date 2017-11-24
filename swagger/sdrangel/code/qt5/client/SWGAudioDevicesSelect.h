@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include <QString>
 
 #include "SWGObject.h"
 
@@ -42,16 +41,16 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGAudioDevicesSelect* fromJson(QString &jsonString);
 
-    QString* getInput();
-    void setInput(QString* input);
+    qint32 getInput();
+    void setInput(qint32 input);
 
-    QString* getOutput();
-    void setOutput(QString* output);
+    qint32 getOutput();
+    void setOutput(qint32 output);
 
 
 private:
-    QString* input;
-    QString* output;
+    qint32 input;
+    qint32 output;
 };
 
 }

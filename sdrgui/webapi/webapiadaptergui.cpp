@@ -36,6 +36,7 @@
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
+#include "SWGAudioDevices.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -245,6 +246,38 @@ int WebAPIAdapterGUI::instanceLoggingPut(
     response.setDumpToFile(m_mainWindow.m_settings.getUseLogFile() ? 1 : 0);
     getMsgTypeString(m_mainWindow.m_settings.getFileMinLogLevel(), *response.getFileLevel());
     *response.getFileName() = m_mainWindow.m_settings.getLogFileName();
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioGet(
+            Swagger::SWGAudioDevices& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_audioDeviceInfo.getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_audioDeviceInfo.getOutputDevices();
+    int nbInputDevices = audioInputDevices.size();
+    int nbOutputDevices = audioOutputDevices.size();
+
+    response.init();
+    response.setNbInputDevices(nbInputDevices);
+    response.setInputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
+    response.setNbOutputDevices(nbOutputDevices);
+    response.setOutputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
+    QList<QString*> *inputDeviceNames = response.getInputDevices();
+    QList<QString*> *outputDeviceNames = response.getOutputDevices();
+
+    for (int i = 0; i < nbInputDevices; i++)
+    {
+        inputDeviceNames->append(new QString());
+        *inputDeviceNames->back() = audioInputDevices[i].deviceName();
+    }
+
+    for (int i = 0; i < nbOutputDevices; i++)
+    {
+        outputDeviceNames->append(new QString());
+        *outputDeviceNames->back() = audioOutputDevices[i].deviceName();
+    }
 
     return 200;
 }

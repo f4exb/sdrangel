@@ -634,10 +634,15 @@ definitions:
     description: "List of audio devices available in the system"
     required:
       - nbInputDevices
+      - inputDeviceSelectedIndex
       - nbOutputDevices
+      - outputDeviceSelectedIndex
     properties:
       nbInputDevices:
         description: "Number of input audio devices"
+        type: integer
+      inputDeviceSelectedIndex:
+        description: "Index of selected input audio devices (-1 if default)"
         type: integer
       inputDevices:
         description: "Names of input devices"
@@ -646,6 +651,9 @@ definitions:
           type: string
       nbOutputDevices:
         description: "Number of output audio devices"
+        type: integer
+      outputDeviceSelectedIndex:
+        description: "Index of selected output audio devices (-1 if default)"
         type: integer
       outputDevices:
         description: "Names of output devices"
@@ -656,11 +664,11 @@ definitions:
     description: "Audio devices selected"
     properties:
       input:
-        description: "Name of the audio input device"
-        type: string
+        description: "Index of the audio input device (-1 for default)"
+        type: integer
       output:
-        description: "Name of the audio output device"
-        type: string
+        description: "Index of the audio output device (-1 for default)"
+        type: integer
   LocationInformation:
     description: "Instance geolocation information"
     required:

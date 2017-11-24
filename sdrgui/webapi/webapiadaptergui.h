@@ -53,6 +53,10 @@ public:
             Swagger::SWGLoggingInfo& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceAudioGet(
+            Swagger::SWGAudioDevices& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

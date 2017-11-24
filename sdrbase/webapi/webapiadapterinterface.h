@@ -27,6 +27,7 @@ namespace Swagger
     class SWGInstanceDevicesResponse;
     class SWGInstanceChannelsResponse;
     class SWGLoggingInfo;
+    class SWGAudioDevices;
     class SWGErrorResponse;
 }
 
@@ -82,10 +83,20 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/audio (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioGet(
+            Swagger::SWGAudioDevices& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
     static QString instanceLoggingURL;
+    static QString instanceAudioURL;
 };
 
 

@@ -46,11 +46,17 @@ public:
     qint32 getNbInputDevices();
     void setNbInputDevices(qint32 nb_input_devices);
 
+    qint32 getInputDeviceSelectedIndex();
+    void setInputDeviceSelectedIndex(qint32 input_device_selected_index);
+
     QList<QString*>* getInputDevices();
     void setInputDevices(QList<QString*>* input_devices);
 
     qint32 getNbOutputDevices();
     void setNbOutputDevices(qint32 nb_output_devices);
+
+    qint32 getOutputDeviceSelectedIndex();
+    void setOutputDeviceSelectedIndex(qint32 output_device_selected_index);
 
     QList<QString*>* getOutputDevices();
     void setOutputDevices(QList<QString*>* output_devices);
@@ -58,8 +64,10 @@ public:
 
 private:
     qint32 nb_input_devices;
+    qint32 input_device_selected_index;
     QList<QString*>* input_devices;
     qint32 nb_output_devices;
+    qint32 output_device_selected_index;
     QList<QString*>* output_devices;
 };
 

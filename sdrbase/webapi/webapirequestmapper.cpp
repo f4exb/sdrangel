@@ -25,6 +25,8 @@
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
+#include "SWGAudioDevices.h"
+#include "SWGAudioDevicesSelect.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -178,6 +180,33 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                     response.setStatus(500, errorMsg.toUtf8());
                     response.write(errorResponse.asJson().toUtf8());
                 }
+            }
+            else
+            {
+                response.setStatus(405,"Invalid HTTP method");
+                response.write("Invalid HTTP method");
+            }
+        }
+        else if (path == WebAPIAdapterInterface::instanceAudioURL)
+        {
+            Swagger::SWGErrorResponse errorResponse;
+
+            if (request.getMethod() == "GET")
+            {
+                Swagger::SWGAudioDevices normalResponse;
+
+                int status = m_adapter->instanceAudioGet(normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else if (request.getMethod() == "PATCH")
+            {
+                Swagger::SWGAudioDevicesSelect normalResponse;
             }
             else
             {
