@@ -11,52 +11,45 @@
  */
 
 /*
- * SWGAudioDevicesSelect.h
+ * SWGAudioDevice.h
  * 
- * Audio devices selected
+ * Audio device
  */
 
-#ifndef SWGAudioDevicesSelect_H_
-#define SWGAudioDevicesSelect_H_
+#ifndef SWGAudioDevice_H_
+#define SWGAudioDevice_H_
 
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 
 
 namespace Swagger {
 
-class SWGAudioDevicesSelect: public SWGObject {
+class SWGAudioDevice: public SWGObject {
 public:
-    SWGAudioDevicesSelect();
-    SWGAudioDevicesSelect(QString* json);
-    virtual ~SWGAudioDevicesSelect();
+    SWGAudioDevice();
+    SWGAudioDevice(QString* json);
+    virtual ~SWGAudioDevice();
     void init();
     void cleanup();
 
     QString asJson ();
     QJsonObject* asJsonObject();
     void fromJsonObject(QJsonObject &json);
-    SWGAudioDevicesSelect* fromJson(QString &jsonString);
+    SWGAudioDevice* fromJson(QString &jsonString);
 
-    float getInputVolume();
-    void setInputVolume(float input_volume);
-
-    qint32 getInputIndex();
-    void setInputIndex(qint32 input_index);
-
-    qint32 getOutputIndex();
-    void setOutputIndex(qint32 output_index);
+    QString* getName();
+    void setName(QString* name);
 
 
 private:
-    float input_volume;
-    qint32 input_index;
-    qint32 output_index;
+    QString* name;
 };
 
 }
 
-#endif /* SWGAudioDevicesSelect_H_ */
+#endif /* SWGAudioDevice_H_ */

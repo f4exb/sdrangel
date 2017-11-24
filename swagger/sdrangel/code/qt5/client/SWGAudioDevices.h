@@ -22,8 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGAudioDevice.h"
 #include <QList>
-#include <QString>
 
 #include "SWGObject.h"
 
@@ -43,14 +43,17 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGAudioDevices* fromJson(QString &jsonString);
 
+    float getInputVolume();
+    void setInputVolume(float input_volume);
+
     qint32 getNbInputDevices();
     void setNbInputDevices(qint32 nb_input_devices);
 
     qint32 getInputDeviceSelectedIndex();
     void setInputDeviceSelectedIndex(qint32 input_device_selected_index);
 
-    QList<QString*>* getInputDevices();
-    void setInputDevices(QList<QString*>* input_devices);
+    QList<SWGAudioDevice*>* getInputDevices();
+    void setInputDevices(QList<SWGAudioDevice*>* input_devices);
 
     qint32 getNbOutputDevices();
     void setNbOutputDevices(qint32 nb_output_devices);
@@ -58,17 +61,18 @@ public:
     qint32 getOutputDeviceSelectedIndex();
     void setOutputDeviceSelectedIndex(qint32 output_device_selected_index);
 
-    QList<QString*>* getOutputDevices();
-    void setOutputDevices(QList<QString*>* output_devices);
+    QList<SWGAudioDevice*>* getOutputDevices();
+    void setOutputDevices(QList<SWGAudioDevice*>* output_devices);
 
 
 private:
+    float input_volume;
     qint32 nb_input_devices;
     qint32 input_device_selected_index;
-    QList<QString*>* input_devices;
+    QList<SWGAudioDevice*>* input_devices;
     qint32 nb_output_devices;
     qint32 output_device_selected_index;
-    QList<QString*>* output_devices;
+    QList<SWGAudioDevice*>* output_devices;
 };
 
 }

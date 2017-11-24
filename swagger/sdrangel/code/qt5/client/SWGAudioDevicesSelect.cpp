@@ -37,13 +37,15 @@ SWGAudioDevicesSelect::~SWGAudioDevicesSelect() {
 
 void
 SWGAudioDevicesSelect::init() {
-    input = 0;
-    output = 0;
+    input_volume = 0.0f;
+    input_index = 0;
+    output_index = 0;
 }
 
 void
 SWGAudioDevicesSelect::cleanup() {
     
+
 
 }
 
@@ -58,8 +60,9 @@ SWGAudioDevicesSelect::fromJson(QString &json) {
 
 void
 SWGAudioDevicesSelect::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&input, pJson["input"], "qint32", "");
-    ::Swagger::setValue(&output, pJson["output"], "qint32", "");
+    ::Swagger::setValue(&input_volume, pJson["inputVolume"], "float", "");
+    ::Swagger::setValue(&input_index, pJson["inputIndex"], "qint32", "");
+    ::Swagger::setValue(&output_index, pJson["outputIndex"], "qint32", "");
 }
 
 QString
@@ -76,29 +79,40 @@ QJsonObject*
 SWGAudioDevicesSelect::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
-    obj->insert("input", QJsonValue(input));
+    obj->insert("inputVolume", QJsonValue(input_volume));
 
-    obj->insert("output", QJsonValue(output));
+    obj->insert("inputIndex", QJsonValue(input_index));
+
+    obj->insert("outputIndex", QJsonValue(output_index));
 
     return obj;
 }
 
-qint32
-SWGAudioDevicesSelect::getInput() {
-    return input;
+float
+SWGAudioDevicesSelect::getInputVolume() {
+    return input_volume;
 }
 void
-SWGAudioDevicesSelect::setInput(qint32 input) {
-    this->input = input;
+SWGAudioDevicesSelect::setInputVolume(float input_volume) {
+    this->input_volume = input_volume;
 }
 
 qint32
-SWGAudioDevicesSelect::getOutput() {
-    return output;
+SWGAudioDevicesSelect::getInputIndex() {
+    return input_index;
 }
 void
-SWGAudioDevicesSelect::setOutput(qint32 output) {
-    this->output = output;
+SWGAudioDevicesSelect::setInputIndex(qint32 input_index) {
+    this->input_index = input_index;
+}
+
+qint32
+SWGAudioDevicesSelect::getOutputIndex() {
+    return output_index;
+}
+void
+SWGAudioDevicesSelect::setOutputIndex(qint32 output_index) {
+    this->output_index = output_index;
 }
 
 

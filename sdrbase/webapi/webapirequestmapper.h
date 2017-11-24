@@ -19,6 +19,8 @@
 #ifndef SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_
 #define SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_
 
+#include <QJsonParseError>
+
 #include "httprequesthandler.h"
 #include "httprequest.h"
 #include "httpresponse.h"
@@ -36,6 +38,14 @@ public:
 private:
     WebAPIAdapterInterface *m_adapter;
     qtwebapp::StaticFileController *m_staticFileController;
+
+    void instanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+
+    bool parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response);
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

@@ -37,12 +37,13 @@ SWGAudioDevices::~SWGAudioDevices() {
 
 void
 SWGAudioDevices::init() {
+    input_volume = 0.0f;
     nb_input_devices = 0;
     input_device_selected_index = 0;
-    input_devices = new QList<QString*>();
+    input_devices = new QList<SWGAudioDevice*>();
     nb_output_devices = 0;
     output_device_selected_index = 0;
-    output_devices = new QList<QString*>();
+    output_devices = new QList<SWGAudioDevice*>();
 }
 
 void
@@ -50,9 +51,10 @@ SWGAudioDevices::cleanup() {
     
 
 
+
     if(input_devices != nullptr) {
-        QList<QString*>* arr = input_devices;
-        foreach(QString* o, *arr) {
+        QList<SWGAudioDevice*>* arr = input_devices;
+        foreach(SWGAudioDevice* o, *arr) {
             delete o;
         }
         delete input_devices;
@@ -61,8 +63,8 @@ SWGAudioDevices::cleanup() {
 
 
     if(output_devices != nullptr) {
-        QList<QString*>* arr = output_devices;
-        foreach(QString* o, *arr) {
+        QList<SWGAudioDevice*>* arr = output_devices;
+        foreach(SWGAudioDevice* o, *arr) {
             delete o;
         }
         delete output_devices;
@@ -80,15 +82,16 @@ SWGAudioDevices::fromJson(QString &json) {
 
 void
 SWGAudioDevices::fromJsonObject(QJsonObject &pJson) {
+    ::Swagger::setValue(&input_volume, pJson["inputVolume"], "float", "");
     ::Swagger::setValue(&nb_input_devices, pJson["nbInputDevices"], "qint32", "");
     ::Swagger::setValue(&input_device_selected_index, pJson["inputDeviceSelectedIndex"], "qint32", "");
     
-    ::Swagger::setValue(&input_devices, pJson["inputDevices"], "QList", "QString");
+    ::Swagger::setValue(&input_devices, pJson["inputDevices"], "QList", "SWGAudioDevice");
     
     ::Swagger::setValue(&nb_output_devices, pJson["nbOutputDevices"], "qint32", "");
     ::Swagger::setValue(&output_device_selected_index, pJson["outputDeviceSelectedIndex"], "qint32", "");
     
-    ::Swagger::setValue(&output_devices, pJson["outputDevices"], "QList", "QString");
+    ::Swagger::setValue(&output_devices, pJson["outputDevices"], "QList", "SWGAudioDevice");
     
 }
 
@@ -106,12 +109,14 @@ QJsonObject*
 SWGAudioDevices::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
+    obj->insert("inputVolume", QJsonValue(input_volume));
+
     obj->insert("nbInputDevices", QJsonValue(nb_input_devices));
 
     obj->insert("inputDeviceSelectedIndex", QJsonValue(input_device_selected_index));
 
     QJsonArray input_devicesJsonArray;
-    toJsonArray((QList<void*>*)input_devices, &input_devicesJsonArray, "input_devices", "QString");
+    toJsonArray((QList<void*>*)input_devices, &input_devicesJsonArray, "input_devices", "SWGAudioDevice");
     obj->insert("inputDevices", input_devicesJsonArray);
 
     obj->insert("nbOutputDevices", QJsonValue(nb_output_devices));
@@ -119,10 +124,19 @@ SWGAudioDevices::asJsonObject() {
     obj->insert("outputDeviceSelectedIndex", QJsonValue(output_device_selected_index));
 
     QJsonArray output_devicesJsonArray;
-    toJsonArray((QList<void*>*)output_devices, &output_devicesJsonArray, "output_devices", "QString");
+    toJsonArray((QList<void*>*)output_devices, &output_devicesJsonArray, "output_devices", "SWGAudioDevice");
     obj->insert("outputDevices", output_devicesJsonArray);
 
     return obj;
+}
+
+float
+SWGAudioDevices::getInputVolume() {
+    return input_volume;
+}
+void
+SWGAudioDevices::setInputVolume(float input_volume) {
+    this->input_volume = input_volume;
 }
 
 qint32
@@ -143,12 +157,12 @@ SWGAudioDevices::setInputDeviceSelectedIndex(qint32 input_device_selected_index)
     this->input_device_selected_index = input_device_selected_index;
 }
 
-QList<QString*>*
+QList<SWGAudioDevice*>*
 SWGAudioDevices::getInputDevices() {
     return input_devices;
 }
 void
-SWGAudioDevices::setInputDevices(QList<QString*>* input_devices) {
+SWGAudioDevices::setInputDevices(QList<SWGAudioDevice*>* input_devices) {
     this->input_devices = input_devices;
 }
 
@@ -170,12 +184,12 @@ SWGAudioDevices::setOutputDeviceSelectedIndex(qint32 output_device_selected_inde
     this->output_device_selected_index = output_device_selected_index;
 }
 
-QList<QString*>*
+QList<SWGAudioDevice*>*
 SWGAudioDevices::getOutputDevices() {
     return output_devices;
 }
 void
-SWGAudioDevices::setOutputDevices(QList<QString*>* output_devices) {
+SWGAudioDevices::setOutputDevices(QList<SWGAudioDevice*>* output_devices) {
     this->output_devices = output_devices;
 }
 

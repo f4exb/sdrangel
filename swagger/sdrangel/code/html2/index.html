@@ -695,9 +695,23 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
-            defs.AudioDevices = {
-  "required" : [ "inputDeviceSelectedIndex", "nbInputDevices", "nbOutputDevices", "outputDeviceSelectedIndex" ],
+            defs.AudioDevice = {
   "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "Displayable name of the device"
+    }
+  },
+  "description" : "Audio device"
+};
+            defs.AudioDevices = {
+  "required" : [ "inputDeviceSelectedIndex", "inputVolume", "nbInputDevices", "nbOutputDevices", "outputDeviceSelectedIndex" ],
+  "properties" : {
+    "inputVolume" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Audio input volume [0.0..1.0]"
+    },
     "nbInputDevices" : {
       "type" : "integer",
       "description" : "Number of input audio devices"
@@ -708,9 +722,9 @@ margin-bottom: 20px;
     },
     "inputDevices" : {
       "type" : "array",
-      "description" : "Names of input devices",
+      "description" : "List of input devices",
       "items" : {
-        "type" : "string"
+        "$ref" : "#/definitions/AudioDevice"
       }
     },
     "nbOutputDevices" : {
@@ -723,21 +737,27 @@ margin-bottom: 20px;
     },
     "outputDevices" : {
       "type" : "array",
-      "description" : "Names of output devices",
+      "description" : "List of output devices",
       "items" : {
-        "type" : "string"
+        "$ref" : "#/definitions/AudioDevice"
       }
     }
   },
   "description" : "List of audio devices available in the system"
 };
             defs.AudioDevicesSelect = {
+  "required" : [ "inputIndex", "inputVolume", "outputIndex" ],
   "properties" : {
-    "input" : {
+    "inputVolume" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Audio input volume [0.0..1.0]"
+    },
+    "inputIndex" : {
       "type" : "integer",
       "description" : "Index of the audio input device (-1 for default)"
     },
-    "output" : {
+    "outputIndex" : {
       "type" : "integer",
       "description" : "Index of the audio output device (-1 for default)"
     }
@@ -7364,7 +7384,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-24T08:42:52.359+01:00
+              Generated 2017-11-24T17:11:18.943+01:00
             </div>
           </div>
       </div>

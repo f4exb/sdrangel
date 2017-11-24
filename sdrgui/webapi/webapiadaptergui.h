@@ -57,6 +57,10 @@ public:
             Swagger::SWGAudioDevices& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceAudioPatch(
+            Swagger::SWGAudioDevicesSelect& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

@@ -54,165 +54,16 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
     {
         QByteArray path=request.getPath();
 
-        if (path == WebAPIAdapterInterface::instanceSummaryURL)
-        {
-            if (request.getMethod() == "GET")
-            {
-                Swagger::SWGInstanceSummaryResponse normalResponse;
-                Swagger::SWGErrorResponse errorResponse;
-
-                int status = m_adapter->instanceSummary(normalResponse, errorResponse);
-                response.setStatus(status);
-
-                if (status == 200) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(405,"Invalid HTTP method");
-                response.write("Invalid HTTP method");
-            }
-        }
-        else if (path == WebAPIAdapterInterface::instanceDevicesURL)
-        {
-            Swagger::SWGInstanceDevicesResponse normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
-
-            if (request.getMethod() == "GET")
-            {
-                QByteArray txStr = request.getParameter("tx");
-                bool tx = (txStr == "1");
-
-                int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
-                response.setStatus(status);
-
-                if (status == 200) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(405,"Invalid HTTP method");
-                response.write("Invalid HTTP method");
-            }
-        }
-        else if (path == WebAPIAdapterInterface::instanceChannelsURL)
-        {
-            Swagger::SWGInstanceChannelsResponse normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
-
-            if (request.getMethod() == "GET")
-            {
-                QByteArray txStr = request.getParameter("tx");
-                bool tx = (txStr == "1");
-
-                int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
-                response.setStatus(status);
-
-                if (status == 200) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(405,"Invalid HTTP method");
-                response.write("Invalid HTTP method");
-            }
-        }
-        else if (path == WebAPIAdapterInterface::instanceLoggingURL)
-        {
-            Swagger::SWGLoggingInfo normalResponse;
-            Swagger::SWGErrorResponse errorResponse;
-
-            if (request.getMethod() == "GET")
-            {
-                int status = m_adapter->instanceLoggingGet(normalResponse, errorResponse);
-                response.setStatus(status);
-
-                if (status == 200) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else if (request.getMethod() == "PUT")
-            {
-                try
-                {
-                    QString jsonStr = request.getBody();
-                    QByteArray jsonBytes(jsonStr.toStdString().c_str());
-                    QJsonParseError error;
-                    QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
-
-                    if (error.error == QJsonParseError::NoError)
-                    {
-                        normalResponse.fromJson(jsonStr);
-                        int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
-                        response.setStatus(status);
-
-                        if (status == 200) {
-                            response.write(normalResponse.asJson().toUtf8());
-                        } else {
-                            response.write(errorResponse.asJson().toUtf8());
-                        }
-                    }
-                    else
-                    {
-                        QString errorMsg = QString("Input JSON error: ") + error.errorString();
-                        errorResponse.init();
-                        *errorResponse.getMessage() = errorMsg;
-                        response.setStatus(400, errorMsg.toUtf8());
-                        response.write(errorResponse.asJson().toUtf8());
-                    }
-                }
-                catch (const std::exception& ex)
-                {
-                    QString errorMsg = QString("Error parsing request: ") + ex.what();
-                    errorResponse.init();
-                    *errorResponse.getMessage() = errorMsg;
-                    response.setStatus(500, errorMsg.toUtf8());
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(405,"Invalid HTTP method");
-                response.write("Invalid HTTP method");
-            }
-        }
-        else if (path == WebAPIAdapterInterface::instanceAudioURL)
-        {
-            Swagger::SWGErrorResponse errorResponse;
-
-            if (request.getMethod() == "GET")
-            {
-                Swagger::SWGAudioDevices normalResponse;
-
-                int status = m_adapter->instanceAudioGet(normalResponse, errorResponse);
-                response.setStatus(status);
-
-                if (status == 200) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else if (request.getMethod() == "PATCH")
-            {
-                Swagger::SWGAudioDevicesSelect normalResponse;
-            }
-            else
-            {
-                response.setStatus(405,"Invalid HTTP method");
-                response.write("Invalid HTTP method");
-            }
+        if (path == WebAPIAdapterInterface::instanceSummaryURL) {
+            instanceSummaryService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceDevicesURL) {
+            instanceDevicesService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceChannelsURL) {
+            instanceChannelsService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceLoggingURL) {
+            instanceLoggingService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
+            instanceAudioService(request, response);
         }
         else
         {
@@ -223,7 +74,197 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 
             QByteArray path = "/index.html";
             m_staticFileController->service(path, response);
-            //response.setStatus(404,"Not found");
         }
+    }
+}
+
+void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    if (request.getMethod() == "GET")
+    {
+        Swagger::SWGInstanceSummaryResponse normalResponse;
+        Swagger::SWGErrorResponse errorResponse;
+
+        int status = m_adapter->instanceSummary(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGInstanceDevicesResponse normalResponse;
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        QByteArray txStr = request.getParameter("tx");
+        bool tx = (txStr == "1");
+
+        int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGInstanceChannelsResponse normalResponse;
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        QByteArray txStr = request.getParameter("tx");
+        bool tx = (txStr == "1");
+
+        int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGLoggingInfo normalResponse;
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        int status = m_adapter->instanceLoggingGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PUT")
+    {
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            normalResponse.fromJson(jsonStr);
+            int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        Swagger::SWGAudioDevices normalResponse;
+
+        int status = m_adapter->instanceAudioGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PATCH")
+    {
+        Swagger::SWGAudioDevicesSelect normalResponse;
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            normalResponse.fromJson(jsonStr);
+            int status = m_adapter->instanceAudioPatch(normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+
+bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    try
+    {
+        QByteArray jsonBytes(jsonStr.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error != QJsonParseError::NoError)
+        {
+            QString errorMsg = QString("Input JSON error: ") + error.errorString();
+            errorResponse.init();
+            *errorResponse.getMessage() = errorMsg;
+            response.setStatus(400, errorMsg.toUtf8());
+            response.write(errorResponse.asJson().toUtf8());
+        }
+
+        return (error.error == QJsonParseError::NoError);
+    }
+    catch (const std::exception& ex)
+    {
+        QString errorMsg = QString("Error parsing request: ") + ex.what();
+        errorResponse.init();
+        *errorResponse.getMessage() = errorMsg;
+        response.setStatus(500, errorMsg.toUtf8());
+        response.write(errorResponse.asJson().toUtf8());
+
+        return false;
     }
 }

@@ -14,6 +14,7 @@
 #define ModelFactory_H_
 
 
+#include "SWGAudioDevice.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
 #include "SWGChannel.h"
@@ -39,6 +40,9 @@
 namespace Swagger {
 
   inline void* create(QString type) {
+    if(QString("SWGAudioDevice").compare(type) == 0) {
+      return new SWGAudioDevice();
+    }
     if(QString("SWGAudioDevices").compare(type) == 0) {
       return new SWGAudioDevices();
     }

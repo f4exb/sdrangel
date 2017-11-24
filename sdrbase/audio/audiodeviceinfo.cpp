@@ -65,3 +65,20 @@ bool AudioDeviceInfo::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void AudioDeviceInfo::setInputDeviceIndex(int inputDeviceIndex)
+{
+    int nbDevices = m_inputDevicesInfo.size();
+    m_inputDeviceIndex = inputDeviceIndex < -1 ? -1 : inputDeviceIndex >= nbDevices ? nbDevices-1 : inputDeviceIndex;
+}
+
+void AudioDeviceInfo::setOutputDeviceIndex(int outputDeviceIndex)
+{
+    int nbDevices = m_outputDevicesInfo.size();
+    m_outputDeviceIndex = outputDeviceIndex < -1 ? -1 : outputDeviceIndex >= nbDevices ? nbDevices-1 : outputDeviceIndex;
+}
+
+void AudioDeviceInfo::setInputVolume(float inputVolume)
+{
+    m_inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
+}

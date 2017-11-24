@@ -27,6 +27,7 @@
 #include "device/deviceenumerator.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
+#include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 #include "channel/channelsinkapi.h"
@@ -37,6 +38,7 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
+#include "SWGAudioDevicesSelect.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -264,20 +266,54 @@ int WebAPIAdapterGUI::instanceAudioGet(
     response.setInputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
     response.setNbOutputDevices(nbOutputDevices);
     response.setOutputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
-    QList<QString*> *inputDeviceNames = response.getInputDevices();
-    QList<QString*> *outputDeviceNames = response.getOutputDevices();
+    response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
+    QList<Swagger::SWGAudioDevice*> *inputDevices = response.getInputDevices();
+    QList<Swagger::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
 
     for (int i = 0; i < nbInputDevices; i++)
     {
-        inputDeviceNames->append(new QString());
-        *inputDeviceNames->back() = audioInputDevices[i].deviceName();
+        inputDevices->append(new Swagger::SWGAudioDevice);
+        *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
     }
 
     for (int i = 0; i < nbOutputDevices; i++)
     {
-        outputDeviceNames->append(new QString());
-        *outputDeviceNames->back() = audioOutputDevices[i].deviceName();
+        outputDevices->append(new Swagger::SWGAudioDevice);
+        *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
     }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioPatch(
+            Swagger::SWGAudioDevicesSelect& response,
+            Swagger::SWGErrorResponse& error)
+{
+    // response input is the query actually
+    float inputVolume = response.getInputVolume();
+    int inputIndex = response.getInputIndex();
+    int outputIndex = response.getOutputIndex();
+
+    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_audioDeviceInfo.getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_audioDeviceInfo.getOutputDevices();
+    int nbInputDevices = audioInputDevices.size();
+    int nbOutputDevices = audioOutputDevices.size();
+
+    inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
+    inputIndex = inputIndex < -1 ? -1 : inputIndex > nbInputDevices ? nbInputDevices-1 : inputIndex;
+    outputIndex = outputIndex < -1 ? -1 : outputIndex > nbOutputDevices ? nbOutputDevices-1 : outputIndex;
+
+    m_mainWindow.m_audioDeviceInfo.setInputVolume(inputVolume);
+    m_mainWindow.m_audioDeviceInfo.setInputDeviceIndex(inputIndex);
+    m_mainWindow.m_audioDeviceInfo.setOutputDeviceIndex(outputIndex);
+
+    m_mainWindow.m_dspEngine->setAudioInputVolume(inputVolume);
+    m_mainWindow.m_dspEngine->setAudioInputDeviceIndex(inputIndex);
+    m_mainWindow.m_dspEngine->setAudioOutputDeviceIndex(outputIndex);
+
+    response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
+    response.setInputIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
+    response.setOutputIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
 
     return 200;
 }

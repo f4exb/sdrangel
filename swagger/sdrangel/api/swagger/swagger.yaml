@@ -633,11 +633,16 @@ definitions:
   AudioDevices:
     description: "List of audio devices available in the system"
     required:
+      - inputVolume
       - nbInputDevices
       - inputDeviceSelectedIndex
       - nbOutputDevices
       - outputDeviceSelectedIndex
     properties:
+      inputVolume:
+        description: "Audio input volume [0.0..1.0]"
+        type: number
+        format: float
       nbInputDevices:
         description: "Number of input audio devices"
         type: integer
@@ -645,10 +650,10 @@ definitions:
         description: "Index of selected input audio devices (-1 if default)"
         type: integer
       inputDevices:
-        description: "Names of input devices"
+        description: "List of input devices"
         type: array
         items:
-          type: string
+          $ref: "#/definitions/AudioDevice"        
       nbOutputDevices:
         description: "Number of output audio devices"
         type: integer
@@ -656,17 +661,31 @@ definitions:
         description: "Index of selected output audio devices (-1 if default)"
         type: integer
       outputDevices:
-        description: "Names of output devices"
+        description: "List of output devices"
         type: array
         items:
-          type: string
+          $ref: "#/definitions/AudioDevice"        
+  AudioDevice:
+    description: "Audio device"
+    properties:
+      name: 
+        description: "Displayable name of the device"
+        type: string
   AudioDevicesSelect:
     description: "Audio devices selected"
+    required:
+      - inputVolume
+      - inputIndex
+      - outputIndex
     properties:
-      input:
+      inputVolume:
+        description: "Audio input volume [0.0..1.0]"
+        type: number
+        format: float
+      inputIndex:
         description: "Index of the audio input device (-1 for default)"
         type: integer
-      output:
+      outputIndex:
         description: "Index of the audio output device (-1 for default)"
         type: integer
   LocationInformation:

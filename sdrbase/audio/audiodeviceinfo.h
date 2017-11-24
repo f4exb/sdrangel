@@ -33,6 +33,9 @@ public:
     int getInputDeviceIndex() const { return m_inputDeviceIndex; }
     int getOutputDeviceIndex() const { return m_outputDeviceIndex; }
     float getInputVolume() const { return m_inputVolume; }
+    void setInputDeviceIndex(int inputDeviceIndex);
+    void setOutputDeviceIndex(int inputDeviceIndex);
+    void setInputVolume(float inputVolume);
 
 private:
 	QList<QAudioDeviceInfo> m_inputDevicesInfo;

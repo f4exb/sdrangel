@@ -6,6 +6,8 @@
 
 TEMPLATE = subdirs
 
+CONFIG += ordered
+
 SUBDIRS = serialdv
 SUBDIRS += httpserver
 SUBDIRS += logging
@@ -59,5 +61,4 @@ SUBDIRS += plugins/channeltx/modwfm
 SUBDIRS += plugins/channeltx/udpsink
 
 # Main app must be last
-CONFIG += ordered
 SUBDIRS += app
