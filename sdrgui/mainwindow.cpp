@@ -506,10 +506,16 @@ void MainWindow::loadSettings()
 
     m_settings.load();
     m_settings.sortPresets();
+    int middleIndex = m_settings.getPresetCount() / 2;
+    QTreeWidgetItem *treeItem;
 
-    for(int i = 0; i < m_settings.getPresetCount(); ++i)
+    for (int i = 0; i < m_settings.getPresetCount(); ++i)
     {
-        ui->presetTree->setCurrentItem(addPresetToTree(m_settings.getPreset(i)));
+        treeItem = addPresetToTree(m_settings.getPreset(i));
+
+        if (i == middleIndex) {
+            ui->presetTree->setCurrentItem(treeItem);
+        }
     }
 
     setLoggingOpions();
@@ -696,6 +702,8 @@ void MainWindow::on_presetSave_clicked()
 
 		ui->presetTree->setCurrentItem(addPresetToTree(preset));
 	}
+
+	m_settings.sortPresets();
 }
 
 void MainWindow::on_presetUpdate_clicked()
@@ -711,6 +719,8 @@ void MainWindow::on_presetUpdate_clicked()
 			}
 		}
 	}
+
+	m_settings.sortPresets();
 }
 
 void MainWindow::on_presetExport_clicked()

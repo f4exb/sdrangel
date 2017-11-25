@@ -42,6 +42,9 @@
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
+#include "SWGPresets.h"
+#include "SWGPresetGroup.h"
+#include "SWGPresetItem.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -379,6 +382,50 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
     {
         response.setNbDevices(0);
     }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instancePresetGet(
+            Swagger::SWGPresets& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    int nbPresets = m_mainWindow.m_settings.getPresetCount();
+    int nbGroups = 0;
+    int nbPresetsThisGroup = 0;
+    QString groupName;
+    response.init();
+    QList<Swagger::SWGPresetGroup*> *groups = response.getGroups();
+    QList<Swagger::SWGPresetItem*> *swgPresets = 0;
+    int i = 0;
+
+    // Presets are sorted by group first
+
+    for (; i < nbPresets; i++)
+    {
+        const Preset *preset = m_mainWindow.m_settings.getPreset(i);
+
+        if ((i == 0) || (groupName != preset->getGroup())) // new group
+        {
+            if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+            groups->append(new Swagger::SWGPresetGroup);
+            groups->back()->init();
+            groupName = preset->getGroup();
+            *groups->back()->getGroupName() = groupName;
+            swgPresets = groups->back()->getPresets();
+            nbGroups++;
+            nbPresetsThisGroup = 0;
+        }
+
+        swgPresets->append(new Swagger::SWGPresetItem);
+        swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
+        *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
+        *swgPresets->back()->getName() = preset->getDescription();
+        nbPresetsThisGroup++;
+    }
+
+    if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+    response.setNbGroups(nbGroups);
 
     return 200;
 }

@@ -82,10 +82,17 @@ public:
 
 	static bool presetCompare(const Preset *p1, Preset *p2)
 	{
-	    if (p1->m_centerFrequency != p2->m_centerFrequency) {
-	        return p1->m_centerFrequency < p2->m_centerFrequency;
-	    } else {
-	        return p1->m_description < p2->m_description;
+	    if (p1->m_group != p2->m_group)
+	    {
+	        return p1->m_group < p2->m_group;
+	    }
+	    else
+	    {
+            if (p1->m_centerFrequency != p2->m_centerFrequency) {
+                return p1->m_centerFrequency < p2->m_centerFrequency;
+            } else {
+                return p1->m_description < p2->m_description;
+            }
 	    }
 	}
 

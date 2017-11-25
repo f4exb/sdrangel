@@ -32,6 +32,7 @@ namespace Swagger
     class SWGLocationInformation;
     class SWGDVSeralDevices;
     class SWGErrorResponse;
+    class SWGPresets;
 }
 
 class WebAPIAdapterInterface
@@ -132,6 +133,15 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/location (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetGet(
+            Swagger::SWGPresets& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
@@ -139,6 +149,7 @@ public:
     static QString instanceAudioURL;
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
+    static QString instancePresetURL;
 };
 
 

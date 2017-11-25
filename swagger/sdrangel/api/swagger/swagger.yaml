@@ -778,9 +778,9 @@ definitions:
       - name
     properties:
       centerFrequency:
-        description: "Center freqeuency in MHz"
-        type: number
-        format: float
+        description: "Center freqeuency in Hz"
+        type: integer
+        format: int64
       type:
         description: "Type of device set (R: Rx, T: Tx)"
         type: string

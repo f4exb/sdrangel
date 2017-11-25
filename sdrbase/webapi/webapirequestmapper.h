@@ -46,6 +46,7 @@ private:
     void instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response);
 };

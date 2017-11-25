@@ -29,6 +29,7 @@
 #include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
+#include "SWGPresets.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -70,6 +71,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLocationService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
             instanceDVSerialService(request, response);
+        } else if (path == WebAPIAdapterInterface::instancePresetURL) {
+            instancePresetService(request, response);
         }
         else
         {
@@ -307,6 +310,29 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
         Swagger::SWGDVSeralDevices normalResponse;
 
         int status = m_adapter->instanceDVSerialPatch(dvserial, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGPresets normalResponse;
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        int status = m_adapter->instancePresetGet(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status == 200) {

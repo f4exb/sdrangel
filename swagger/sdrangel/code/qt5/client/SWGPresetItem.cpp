@@ -37,7 +37,7 @@ SWGPresetItem::~SWGPresetItem() {
 
 void
 SWGPresetItem::init() {
-    center_frequency = 0.0f;
+    center_frequency = 0L;
     type = new QString("");
     name = new QString("");
 }
@@ -66,7 +66,7 @@ SWGPresetItem::fromJson(QString &json) {
 
 void
 SWGPresetItem::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "float", "");
+    ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     ::Swagger::setValue(&type, pJson["type"], "QString", "QString");
     ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
 }
@@ -94,12 +94,12 @@ SWGPresetItem::asJsonObject() {
     return obj;
 }
 
-float
+qint64
 SWGPresetItem::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGPresetItem::setCenterFrequency(float center_frequency) {
+SWGPresetItem::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
 }
 

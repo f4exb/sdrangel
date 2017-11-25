@@ -42,8 +42,8 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGPresetItem* fromJson(QString &jsonString);
 
-    float getCenterFrequency();
-    void setCenterFrequency(float center_frequency);
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
 
     QString* getType();
     void setType(QString* type);
@@ -53,7 +53,7 @@ public:
 
 
 private:
-    float center_frequency;
+    qint64 center_frequency;
     QString* type;
     QString* name;
 };

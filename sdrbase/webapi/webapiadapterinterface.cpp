@@ -25,3 +25,4 @@ QString WebAPIAdapterInterface::instanceLoggingURL = "/sdrangel/logging";
 QString WebAPIAdapterInterface::instanceAudioURL = "/sdrangel/audio";
 QString WebAPIAdapterInterface::instanceLocationURL = "/sdrangel/location";
 QString WebAPIAdapterInterface::instanceDVSerialURL = "/sdrangel/dvserial";
+QString WebAPIAdapterInterface::instancePresetURL = "/sdrangel/preset";

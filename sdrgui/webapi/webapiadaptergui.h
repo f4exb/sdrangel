@@ -74,6 +74,10 @@ public:
             Swagger::SWGDVSeralDevices& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instancePresetGet(
+            Swagger::SWGPresets& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 
