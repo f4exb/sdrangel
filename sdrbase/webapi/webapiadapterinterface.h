@@ -20,6 +20,7 @@
 #define SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 
 #include <QString>
+#include <regex>
 
 namespace Swagger
 {
@@ -223,6 +224,8 @@ public:
     static QString instanceDVSerialURL;
     static QString instancePresetURL;
     static QString instanceDeviceSetsURL;
+    static std::regex devicesetURLRe;
+    static std::regex devicesetDeviceURLRe;
 };
 
 

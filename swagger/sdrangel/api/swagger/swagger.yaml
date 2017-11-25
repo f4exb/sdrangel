@@ -429,6 +429,59 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get device set information
+      operationId: devicesetGet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return details on the device set
+          schema:
+            $ref: "#/definitions/DeviceSet"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/device:
+    x-swagger-router-controller: deviceset
+    put:
+      description: Set the device used in the device set
+      operationId: devicesetDevicePut
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return details on the device set
+          schema:
+            $ref: "#/definitions/DeviceSet"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+        
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions

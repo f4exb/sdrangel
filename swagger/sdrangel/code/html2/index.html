@@ -1187,6 +1187,12 @@ margin-bottom: 20px;
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
                   <li class="nav-header" data-group="Default"><a href="#api-Default">API Methods - Default</a></li>
+                    <li data-group="Default" data-name="devicesetDevicePut" class="">
+                      <a href="#api-Default-devicesetDevicePut">devicesetDevicePut</a>
+                    </li>
+                    <li data-group="Default" data-name="devicesetGet" class="">
+                      <a href="#api-Default-devicesetGet">devicesetGet</a>
+                    </li>
                     <li data-group="Default" data-name="instanceAudioGet" class="">
                       <a href="#api-Default-instanceAudioGet">instanceAudioGet</a>
                     </li>
@@ -1262,6 +1268,772 @@ margin-bottom: 20px;
         <div id="sections">
                 <section id="api-Default">
                   <h1>Default</h1>
+                    <div id="api-Default-devicesetDevicePut">
+                      <article id="api-Default-devicesetDevicePut-0" data-group="User" data-name="devicesetDevicePut" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDevicePut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Set the device used in the device set</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Default-devicesetDevicePut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Default-devicesetDevicePut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Default-devicesetDevicePut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Default-devicesetDevicePut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Default-devicesetDevicePut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:10010/sdrangel/deviceset/{deviceSetIndex}/device"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.DefaultApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DefaultApiExample {
+
+    public static void main(String[] args) {
+        
+        DefaultApi apiInstance = new DefaultApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            DeviceSet result = apiInstance.devicesetDevicePut(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#devicesetDevicePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.DefaultApi;
+
+public class DefaultApiExample {
+
+    public static void main(String[] args) {
+        DefaultApi apiInstance = new DefaultApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            DeviceSet result = apiInstance.devicesetDevicePut(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#devicesetDevicePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+
+DefaultApi *apiInstance = [[DefaultApi alloc] init];
+
+[apiInstance devicesetDevicePutWith:deviceSetIndex
+              completionHandler: ^(DeviceSet output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DefaultApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDevicePut(deviceSetIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Default-devicesetDevicePut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class devicesetDevicePutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DefaultApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+
+            try
+            {
+                DeviceSet result = apiInstance.devicesetDevicePut(deviceSetIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DefaultApi.devicesetDevicePut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DefaultApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+
+try {
+    $result = $api_instance->devicesetDevicePut($deviceSetIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DefaultApi->devicesetDevicePut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::DefaultApi;
+
+my $api_instance = WWW::SwaggerClient::DefaultApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+
+eval { 
+    my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DefaultApi->devicesetDevicePut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetDevicePut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_client.DefaultApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+
+try: 
+    api_response = api_instance.deviceset_device_put(deviceSetIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->devicesetDevicePut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDevicePut_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return details on the device set </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDevicePut-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDevicePut-200-schema">
+                                  <div id='responses-devicesetDevicePut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return details on the device set",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSet"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDevicePut-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDevicePut-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDevicePut-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid device set index or device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDevicePut-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDevicePut-404-schema">
+                                  <div id='responses-devicesetDevicePut-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index or device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDevicePut-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDevicePut-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDevicePut-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDevicePut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDevicePut-500-schema">
+                                  <div id='responses-devicesetDevicePut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDevicePut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDevicePut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDevicePut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Default-devicesetGet">
+                      <article id="api-Default-devicesetGet-0" data-group="User" data-name="devicesetGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get device set information</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Default-devicesetGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Default-devicesetGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Default-devicesetGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Default-devicesetGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Default-devicesetGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Default-devicesetGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Default-devicesetGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:10010/sdrangel/deviceset/{deviceSetIndex}"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Default-devicesetGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.DefaultApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DefaultApiExample {
+
+    public static void main(String[] args) {
+        
+        DefaultApi apiInstance = new DefaultApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            DeviceSet result = apiInstance.devicesetGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#devicesetGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Default-devicesetGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.DefaultApi;
+
+public class DefaultApiExample {
+
+    public static void main(String[] args) {
+        DefaultApi apiInstance = new DefaultApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            DeviceSet result = apiInstance.devicesetGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#devicesetGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Default-devicesetGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+
+DefaultApi *apiInstance = [[DefaultApi alloc] init];
+
+[apiInstance devicesetGetWith:deviceSetIndex
+              completionHandler: ^(DeviceSet output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DefaultApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetGet(deviceSetIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Default-devicesetGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class devicesetGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DefaultApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+
+            try
+            {
+                DeviceSet result = apiInstance.devicesetGet(deviceSetIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DefaultApi.devicesetGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DefaultApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+
+try {
+    $result = $api_instance->devicesetGet($deviceSetIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DefaultApi->devicesetGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::DefaultApi;
+
+my $api_instance = WWW::SwaggerClient::DefaultApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+
+eval { 
+    my $result = $api_instance->devicesetGet(deviceSetIndex => $deviceSetIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DefaultApi->devicesetGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-devicesetGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_client.DefaultApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+
+try: 
+    api_response = api_instance.deviceset_get(deviceSetIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->devicesetGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return details on the device set </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetGet-200-schema">
+                                  <div id='responses-devicesetGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return details on the device set",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSet"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetGet-404-schema">
+                                  <div id='responses-devicesetGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetGet-500-schema">
+                                  <div id='responses-devicesetGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Default-instanceAudioGet">
                       <article id="api-Default-instanceAudioGet-0" data-group="User" data-name="instanceAudioGet" data-version="0">
                         <div class="pull-left">
@@ -2839,9 +3611,44 @@ except ApiException as e:
                             <h3> Status: 404 - No more device sets to be deleted </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsDelete-404-schema">Schema</a>
+                                </li>
+
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDeviceSetsDelete-404-schema">
+                                  <div id='responses-instanceDeviceSetsDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "No more device sets to be deleted",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDeviceSetsDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetsDelete-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDeviceSetsDelete-404-schema-data' type='hidden' value=''></input>
+                                </div>
                             </div>
 
                             <h3> Status: 500 - Error </h3>
@@ -7638,7 +8445,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-25T22:31:12.548+01:00
+              Generated 2017-11-26T00:25:44.253+01:00
             </div>
           </div>
       </div>

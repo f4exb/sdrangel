@@ -29,6 +29,106 @@ SWGDefaultApi::SWGDefaultApi(QString host, QString basePath) {
 }
 
 void
+SWGDefaultApi::devicesetDevicePut(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    HttpRequestWorker *worker = new HttpRequestWorker();
+    HttpRequestInput input(fullPath, "PUT");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &HttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDefaultApi::devicesetDevicePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDefaultApi::devicesetDevicePutCallback(HttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGDeviceSet* output = static_cast<SWGDeviceSet*>(create(json, QString("SWGDeviceSet")));
+    worker->deleteLater();
+
+    emit devicesetDevicePutSignal(output);
+    emit devicesetDevicePutSignalE(output, error_type, error_str);
+}
+
+void
+SWGDefaultApi::devicesetGet(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    HttpRequestWorker *worker = new HttpRequestWorker();
+    HttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &HttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDefaultApi::devicesetGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDefaultApi::devicesetGetCallback(HttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGDeviceSet* output = static_cast<SWGDeviceSet*>(create(json, QString("SWGDeviceSet")));
+    worker->deleteLater();
+
+    emit devicesetGetSignal(output);
+    emit devicesetGetSignalE(output, error_type, error_str);
+}
+
+void
 SWGDefaultApi::instanceAudioGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio");
