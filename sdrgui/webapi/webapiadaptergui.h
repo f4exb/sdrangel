@@ -61,6 +61,14 @@ public:
             Swagger::SWGAudioDevicesSelect& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceLocationGet(
+            Swagger::SWGLocationInformation& response,
+            Swagger::SWGErrorResponse& error);
+
+    virtual int instanceLocationPut(
+            Swagger::SWGLocationInformation& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

@@ -39,6 +39,7 @@
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
+#include "SWGLocationInformation.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -287,7 +288,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
 
 int WebAPIAdapterGUI::instanceAudioPatch(
             Swagger::SWGAudioDevicesSelect& response,
-            Swagger::SWGErrorResponse& error)
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
 {
     // response input is the query actually
     float inputVolume = response.getInputVolume();
@@ -314,6 +315,35 @@ int WebAPIAdapterGUI::instanceAudioPatch(
     response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
     response.setInputIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
     response.setOutputIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLocationGet(
+            Swagger::SWGLocationInformation& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    response.setLatitude(m_mainWindow.m_settings.getLatitude());
+    response.setLongitude(m_mainWindow.m_settings.getLongitude());
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLocationPut(
+            Swagger::SWGLocationInformation& response,
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    float latitude = response.getLatitude();
+    float longitude = response.getLongitude();
+
+    latitude = latitude < -90.0 ? -90.0 : latitude > 90.0 ? 90.0 : latitude;
+    longitude = longitude < -180.0 ? -180.0 : longitude > 180.0 ? 180.0 : longitude;
+
+    m_mainWindow.m_settings.setLatitude(latitude);
+    m_mainWindow.m_settings.setLongitude(longitude);
+
+    response.setLatitude(m_mainWindow.m_settings.getLatitude());
+    response.setLongitude(m_mainWindow.m_settings.getLongitude());
 
     return 200;
 }

@@ -29,6 +29,7 @@ namespace Swagger
     class SWGLoggingInfo;
     class SWGAudioDevices;
     class SWGAudioDevicesSelect;
+    class SWGLocationInformation;
     class SWGErrorResponse;
 }
 
@@ -102,11 +103,30 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/location (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLocationGet(
+            Swagger::SWGLocationInformation& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/location (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLocationPut(
+            Swagger::SWGLocationInformation& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
     static QString instanceLoggingURL;
     static QString instanceAudioURL;
+    static QString instanceLocationURL;
 };
 
 

@@ -27,6 +27,7 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
+#include "SWGLocationInformation.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -64,6 +65,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLoggingService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
             instanceAudioService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
+            instanceLocationService(request, response);
         }
         else
         {
@@ -235,6 +238,47 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
     }
 }
 
+void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        Swagger::SWGLocationInformation normalResponse;
+
+        int status = m_adapter->instanceLocationGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PUT")
+    {
+        Swagger::SWGLocationInformation normalResponse;
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            normalResponse.fromJson(jsonStr);
+            int status = m_adapter->instanceLocationPut(normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
 
 bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response)
 {
@@ -248,7 +292,7 @@ bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse
 
         if (error.error != QJsonParseError::NoError)
         {
-            QString errorMsg = QString("Input JSON error: ") + error.errorString();
+            QString errorMsg = QString("Input JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
             errorResponse.init();
             *errorResponse.getMessage() = errorMsg;
             response.setStatus(400, errorMsg.toUtf8());
