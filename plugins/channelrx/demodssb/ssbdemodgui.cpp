@@ -368,6 +368,8 @@ void SSBDemodGUI::applyBandwidths(bool force)
         ui->scaleMinus->setText("0");
         ui->scaleCenter->setText("");
         ui->scalePlus->setText(tr("%1").arg(QChar(0xB1, 0x00)));
+        ui->lsbLabel->setText("");
+        ui->usbLabel->setText("");
         ui->glSpectrum->setCenterFrequency(0);
         ui->glSpectrum->setSampleRate(2*m_spectrumRate);
         ui->glSpectrum->setSsbSpectrum(false);
@@ -380,6 +382,8 @@ void SSBDemodGUI::applyBandwidths(bool force)
         ui->scaleMinus->setText("-");
         ui->scaleCenter->setText("0");
         ui->scalePlus->setText("+");
+        ui->lsbLabel->setText("LSB");
+        ui->usbLabel->setText("USB");
         ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
         ui->glSpectrum->setSampleRate(m_spectrumRate);
         ui->glSpectrum->setSsbSpectrum(true);
