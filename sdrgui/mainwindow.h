@@ -107,6 +107,32 @@ private:
         { }
     };
 
+    class MsgSavePreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        Preset *getPreset() const { return m_preset; }
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        bool isNewPreset() const { return m_newPreset; }
+
+        static MsgSavePreset* create(Preset *preset, int deviceSetIndex, bool newPreset)
+        {
+            return new MsgSavePreset(preset, deviceSetIndex, newPreset);
+        }
+
+    private:
+        Preset *m_preset;
+        int m_deviceSetIndex;
+        bool m_newPreset;
+
+        MsgSavePreset(Preset *preset, int deviceSetIndex, bool newPreset) :
+            Message(),
+            m_preset(preset),
+            m_deviceSetIndex(deviceSetIndex),
+            m_newPreset(newPreset)
+        { }
+    };
+
 	enum {
 		PGroup,
 		PItem

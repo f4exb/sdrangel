@@ -279,7 +279,7 @@ paths:
         "501":
           description: Function not implemented
     put:
-      description: Save device set settings on a preset
+      description: Save device set settings on a preset. Preset is updated if it already exists else it is created with the given name and group. If created given frequency and type is ignored and is determined with the device set values.
       operationId: instancePresetPut
       consumes: 
         - application/json

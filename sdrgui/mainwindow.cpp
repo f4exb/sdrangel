@@ -63,6 +63,7 @@
 #include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -662,6 +663,15 @@ bool MainWindow::handleMessage(const Message& cmd)
     {
         MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
         loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        return true;
+    }
+    else if (MsgSavePreset::match(cmd))
+    {
+        MsgSavePreset& notif = (MsgSavePreset&) cmd;
+        savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
+        m_settings.sortPresets();
+        m_settings.save();
         return true;
     }
 
