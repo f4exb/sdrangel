@@ -421,6 +421,8 @@ paths:
             $ref: "#/definitions/DeviceSetList"
         "404":
           description: "No more device sets to be deleted"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: Error
           schema:

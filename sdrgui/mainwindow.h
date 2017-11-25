@@ -153,6 +153,41 @@ private:
         { }
     };
 
+    class MsgAddDeviceSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool isTx() const { return m_tx; }
+
+        static MsgAddDeviceSet* create(bool tx)
+        {
+            return new MsgAddDeviceSet(tx);
+        }
+
+    private:
+        bool m_tx;
+
+        MsgAddDeviceSet(bool tx) :
+            Message(),
+            m_tx(tx)
+        { }
+    };
+
+    class MsgRemoveLastDeviceSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgRemoveLastDeviceSet* create()
+        {
+            return new MsgRemoveLastDeviceSet();
+        }
+
+    private:
+        MsgRemoveLastDeviceSet() :
+            Message()
+        { }
+    };
+
     enum {
 		PGroup,
 		PItem

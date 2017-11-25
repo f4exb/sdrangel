@@ -487,6 +487,37 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
             response.write(errorResponse.asJson().toUtf8());
         }
     }
+    else if (request.getMethod() == "POST")
+    {
+        Swagger::SWGDeviceSet normalResponse;
+        QByteArray txStr = request.getParameter("tx");
+        bool tx = false;
+
+        if (txStr.length() != 0) {
+            tx = !(txStr == "0");
+        }
+
+        int status = m_adapter->instanceDeviceSetsPost(tx, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "DELETE")
+    {
+        Swagger::SWGDeviceSetList normalResponse;
+        int status = m_adapter->instanceDeviceSetsDelete(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
     else
     {
         response.setStatus(405,"Invalid HTTP method");

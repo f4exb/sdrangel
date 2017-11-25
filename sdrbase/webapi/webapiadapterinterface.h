@@ -35,6 +35,7 @@ namespace Swagger
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
     class SWGDeviceSetList;
+    class SWGDeviceSet;
     class SWGErrorResponse;
 }
 
@@ -185,10 +186,30 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/preset (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/devicesets (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsGet(
+            Swagger::SWGDeviceSetList& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/devicesets (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDeviceSetsPost(
+            bool tx __attribute__((unused)),
+            Swagger::SWGDeviceSet& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+
+    /**
+     * Handler of /sdrangel/devicesets (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDeviceSetsDelete(
             Swagger::SWGDeviceSetList& response __attribute__((unused)),
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }

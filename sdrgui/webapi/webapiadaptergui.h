@@ -101,10 +101,20 @@ public:
             Swagger::SWGDeviceSetList& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceDeviceSetsPost(
+            bool tx,
+            Swagger::SWGDeviceSet& response,
+            Swagger::SWGErrorResponse& error);
+
+    virtual int instanceDeviceSetsDelete(
+            Swagger::SWGDeviceSetList& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 
     void getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList);
+    void getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

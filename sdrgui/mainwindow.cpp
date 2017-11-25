@@ -65,6 +65,8 @@
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddDeviceSet, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -704,6 +706,26 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         // remove preset from settings
         m_settings.deletePreset(presetToDelete);
+        return true;
+    }
+    else if (MsgAddDeviceSet::match(cmd))
+    {
+        MsgAddDeviceSet& notif = (MsgAddDeviceSet&) cmd;
+
+        if (notif.isTx()) {
+            addSinkDevice();
+        } else {
+            addSourceDevice();
+        }
+
+        return true;
+    }
+    else if (MsgRemoveLastDeviceSet::match(cmd))
+    {
+        if (m_deviceUIs.size() > 1) {
+            removeLastDevice();
+        }
+
         return true;
     }
 

@@ -19,6 +19,8 @@
 #include <QApplication>
 #include <QList>
 
+#include <unistd.h>
+
 #include "mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/devicesourceapi.h"
@@ -551,6 +553,46 @@ int WebAPIAdapterGUI::instanceDeviceSetsGet(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceDeviceSetsPost(
+        bool tx,
+        Swagger::SWGDeviceSet& response,
+        Swagger::SWGErrorResponse& error __attribute__((unused)))
+{
+    MainWindow::MsgAddDeviceSet *msg = MainWindow::MsgAddDeviceSet::create(tx);
+    m_mainWindow.m_inputMessageQueue.push(msg);
+
+    usleep(100000);
+
+    const DeviceUISet *lastDeviceSet = m_mainWindow.m_deviceUIs.back();
+    getDeviceSet(&response,lastDeviceSet, (int) m_mainWindow.m_deviceUIs.size() - 1);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceDeviceSetsDelete(
+            Swagger::SWGDeviceSetList& response,
+            Swagger::SWGErrorResponse& error)
+{
+    if (m_mainWindow.m_deviceUIs.size() > 1)
+    {
+        MainWindow::MsgRemoveLastDeviceSet *msg = MainWindow::MsgRemoveLastDeviceSet::create();
+        m_mainWindow.m_inputMessageQueue.push(msg);
+
+        usleep(100000);
+
+        getDeviceSetList(&response);
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = "No more device sets to be removed";
+
+        return 404;
+    }
+}
+
 void WebAPIAdapterGUI::getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
@@ -560,71 +602,77 @@ void WebAPIAdapterGUI::getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList
 
     for (int i = 0; it != m_mainWindow.m_deviceUIs.end(); ++it, i++)
     {
-        QList<Swagger::SWGDeviceSet*> *deviceSet = deviceSetList->getDeviceSets();
-        deviceSet->append(new Swagger::SWGDeviceSet());
-        Swagger::SWGSamplingDevice *samplingDevice = deviceSet->back()->getSamplingDevice();
-        samplingDevice->init();
-        samplingDevice->setIndex(i);
-        samplingDevice->setTx((*it)->m_deviceSinkEngine != 0);
+        QList<Swagger::SWGDeviceSet*> *deviceSets = deviceSetList->getDeviceSets();
+        deviceSets->append(new Swagger::SWGDeviceSet());
 
-        if ((*it)->m_deviceSinkEngine) // Tx data
-        {
-            *samplingDevice->getHwType() = (*it)->m_deviceSinkAPI->getHardwareId();
-            *samplingDevice->getSerial() = (*it)->m_deviceSinkAPI->getSampleSinkSerial();
-            samplingDevice->setSequence((*it)->m_deviceSinkAPI->getSampleSinkSequence());
-            samplingDevice->setNbStreams((*it)->m_deviceSinkAPI->getNbItems());
-            samplingDevice->setStreamIndex((*it)->m_deviceSinkAPI->getItemIndex());
-            (*it)->m_deviceSinkAPI->getDeviceEngineStateStr(*samplingDevice->getState());
-            DeviceSampleSink *sampleSink = (*it)->m_deviceSinkEngine->getSink();
+        getDeviceSet(deviceSets->back(), *it, i);
+    }
+}
 
-            if (sampleSink) {
-                samplingDevice->setCenterFrequency(sampleSink->getCenterFrequency());
-                samplingDevice->setBandwidth(sampleSink->getSampleRate());
-            }
+void WebAPIAdapterGUI::getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex)
+{
+    Swagger::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
+    samplingDevice->init();
+    samplingDevice->setIndex(deviceUISetIndex);
+    samplingDevice->setTx(deviceUISet->m_deviceSinkEngine != 0);
 
-            deviceSet->back()->setChannelcount((*it)->m_deviceSinkAPI->getNbChannels());
-            QList<Swagger::SWGChannel*> *channels = deviceSet->back()->getChannels();
+    if (deviceUISet->m_deviceSinkEngine) // Tx data
+    {
+        *samplingDevice->getHwType() = deviceUISet->m_deviceSinkAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceUISet->m_deviceSinkAPI->getSampleSinkSerial();
+        samplingDevice->setSequence(deviceUISet->m_deviceSinkAPI->getSampleSinkSequence());
+        samplingDevice->setNbStreams(deviceUISet->m_deviceSinkAPI->getNbItems());
+        samplingDevice->setStreamIndex(deviceUISet->m_deviceSinkAPI->getItemIndex());
+        deviceUISet->m_deviceSinkAPI->getDeviceEngineStateStr(*samplingDevice->getState());
+        DeviceSampleSink *sampleSink = deviceUISet->m_deviceSinkEngine->getSink();
 
-            for (int i = 0; i <  deviceSet->back()->getChannelcount(); i++)
-            {
-                channels->append(new Swagger::SWGChannel);
-                ChannelSourceAPI *channel = (*it)->m_deviceSinkAPI->getChanelAPIAt(i);
-                channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
-                channels->back()->setIndex(channel->getIndexInDeviceSet());
-                channels->back()->setUid(channel->getUID());
-                channel->getIdentifier(*channels->back()->getId());
-                channel->getTitle(*channels->back()->getTitle());
-            }
+        if (sampleSink) {
+            samplingDevice->setCenterFrequency(sampleSink->getCenterFrequency());
+            samplingDevice->setBandwidth(sampleSink->getSampleRate());
         }
 
-        if ((*it)->m_deviceSourceEngine) // Rx data
+        deviceSet->setChannelcount(deviceUISet->m_deviceSinkAPI->getNbChannels());
+        QList<Swagger::SWGChannel*> *channels = deviceSet->getChannels();
+
+        for (int i = 0; i <  deviceSet->getChannelcount(); i++)
         {
-            *samplingDevice->getHwType() = (*it)->m_deviceSourceAPI->getHardwareId();
-            *samplingDevice->getSerial() = (*it)->m_deviceSourceAPI->getSampleSourceSerial();
-            samplingDevice->setSequence((*it)->m_deviceSourceAPI->getSampleSourceSequence());
-            samplingDevice->setNbStreams((*it)->m_deviceSourceAPI->getNbItems());
-            samplingDevice->setStreamIndex((*it)->m_deviceSourceAPI->getItemIndex());
-            (*it)->m_deviceSourceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
-            DeviceSampleSource *sampleSource = (*it)->m_deviceSourceEngine->getSource();
+            channels->append(new Swagger::SWGChannel);
+            ChannelSourceAPI *channel = deviceUISet->m_deviceSinkAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+        }
+    }
 
-            if (sampleSource) {
-                samplingDevice->setCenterFrequency(sampleSource->getCenterFrequency());
-                samplingDevice->setBandwidth(sampleSource->getSampleRate());
-            }
+    if (deviceUISet->m_deviceSourceEngine) // Rx data
+    {
+        *samplingDevice->getHwType() = deviceUISet->m_deviceSourceAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceUISet->m_deviceSourceAPI->getSampleSourceSerial();
+        samplingDevice->setSequence(deviceUISet->m_deviceSourceAPI->getSampleSourceSequence());
+        samplingDevice->setNbStreams(deviceUISet->m_deviceSourceAPI->getNbItems());
+        samplingDevice->setStreamIndex(deviceUISet->m_deviceSourceAPI->getItemIndex());
+        deviceUISet->m_deviceSourceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
+        DeviceSampleSource *sampleSource = deviceUISet->m_deviceSourceEngine->getSource();
 
-            deviceSet->back()->setChannelcount((*it)->m_deviceSourceAPI->getNbChannels());
-            QList<Swagger::SWGChannel*> *channels = deviceSet->back()->getChannels();
+        if (sampleSource) {
+            samplingDevice->setCenterFrequency(sampleSource->getCenterFrequency());
+            samplingDevice->setBandwidth(sampleSource->getSampleRate());
+        }
 
-            for (int i = 0; i <  deviceSet->back()->getChannelcount(); i++)
-            {
-                channels->append(new Swagger::SWGChannel);
-                ChannelSinkAPI *channel = (*it)->m_deviceSourceAPI->getChanelAPIAt(i);
-                channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
-                channels->back()->setIndex(channel->getIndexInDeviceSet());
-                channels->back()->setUid(channel->getUID());
-                channel->getIdentifier(*channels->back()->getId());
-                channel->getTitle(*channels->back()->getTitle());
-            }
+        deviceSet->setChannelcount(deviceUISet->m_deviceSourceAPI->getNbChannels());
+        QList<Swagger::SWGChannel*> *channels = deviceSet->getChannels();
+
+        for (int i = 0; i <  deviceSet->getChannelcount(); i++)
+        {
+            channels->append(new Swagger::SWGChannel);
+            ChannelSinkAPI *channel = deviceUISet->m_deviceSourceAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
         }
     }
 }
