@@ -38,7 +38,7 @@ SWGDVSeralDevices::~SWGDVSeralDevices() {
 void
 SWGDVSeralDevices::init() {
     nb_devices = 0;
-    dv_serial_devices = new QList<QString*>();
+    dv_serial_devices = new QList<SWGDVSerialDevice*>();
 }
 
 void
@@ -46,8 +46,8 @@ SWGDVSeralDevices::cleanup() {
     
 
     if(dv_serial_devices != nullptr) {
-        QList<QString*>* arr = dv_serial_devices;
-        foreach(QString* o, *arr) {
+        QList<SWGDVSerialDevice*>* arr = dv_serial_devices;
+        foreach(SWGDVSerialDevice* o, *arr) {
             delete o;
         }
         delete dv_serial_devices;
@@ -67,7 +67,7 @@ void
 SWGDVSeralDevices::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&nb_devices, pJson["nbDevices"], "qint32", "");
     
-    ::Swagger::setValue(&dv_serial_devices, pJson["dvSerialDevices"], "QList", "QString");
+    ::Swagger::setValue(&dv_serial_devices, pJson["dvSerialDevices"], "QList", "SWGDVSerialDevice");
     
 }
 
@@ -88,7 +88,7 @@ SWGDVSeralDevices::asJsonObject() {
     obj->insert("nbDevices", QJsonValue(nb_devices));
 
     QJsonArray dv_serial_devicesJsonArray;
-    toJsonArray((QList<void*>*)dv_serial_devices, &dv_serial_devicesJsonArray, "dv_serial_devices", "QString");
+    toJsonArray((QList<void*>*)dv_serial_devices, &dv_serial_devicesJsonArray, "dv_serial_devices", "SWGDVSerialDevice");
     obj->insert("dvSerialDevices", dv_serial_devicesJsonArray);
 
     return obj;
@@ -103,12 +103,12 @@ SWGDVSeralDevices::setNbDevices(qint32 nb_devices) {
     this->nb_devices = nb_devices;
 }
 
-QList<QString*>*
+QList<SWGDVSerialDevice*>*
 SWGDVSeralDevices::getDvSerialDevices() {
     return dv_serial_devices;
 }
 void
-SWGDVSeralDevices::setDvSerialDevices(QList<QString*>* dv_serial_devices) {
+SWGDVSeralDevices::setDvSerialDevices(QList<SWGDVSerialDevice*>* dv_serial_devices) {
     this->dv_serial_devices = dv_serial_devices;
 }
 

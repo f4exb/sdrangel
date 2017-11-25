@@ -832,11 +832,20 @@ margin-bottom: 20px;
       "type" : "array",
       "description" : "Device names of DV serial devices",
       "items" : {
-        "type" : "string"
+        "$ref" : "#/definitions/DVSerialDevice"
       }
     }
   },
   "description" : "List of DV serial devices available in the system"
+};
+            defs.DVSerialDevice = {
+  "properties" : {
+    "deviceName" : {
+      "type" : "string",
+      "description" : "Name of the serial device in the system"
+    }
+  },
+  "description" : "DV serial device details"
 };
             defs.DeviceListItem = {
   "required" : [ "hwType" ],
@@ -7384,7 +7393,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-24T17:11:18.943+01:00
+              Generated 2017-11-25T04:38:54.817+01:00
             </div>
           </div>
       </div>

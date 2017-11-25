@@ -28,6 +28,7 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
+#include "SWGDVSeralDevices.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -67,6 +68,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceAudioService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
+            instanceDVSerialService(request, response);
         }
         else
         {
@@ -112,7 +115,11 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
     if (request.getMethod() == "GET")
     {
         QByteArray txStr = request.getParameter("tx");
-        bool tx = (txStr == "1");
+        bool tx = false;
+
+        if (txStr.length() != 0) {
+            tx = !(txStr == "0");
+        }
 
         int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
         response.setStatus(status);
@@ -138,7 +145,11 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
     if (request.getMethod() == "GET")
     {
         QByteArray txStr = request.getParameter("tx");
-        bool tx = (txStr == "1");
+        bool tx = false;
+
+        if (txStr.length() != 0) {
+            tx = !(txStr == "0");
+        }
 
         int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
         response.setStatus(status);
@@ -271,6 +282,37 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
             } else {
                 response.write(errorResponse.asJson().toUtf8());
             }
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "PATCH")
+    {
+        QByteArray dvserialStr = request.getParameter("dvserial");
+        bool dvserial = false;
+
+        if (dvserialStr.length() != 0) {
+            dvserial = !(dvserialStr == "0");
+        }
+
+        Swagger::SWGDVSeralDevices normalResponse;
+
+        int status = m_adapter->instanceDVSerialPatch(dvserial, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     else

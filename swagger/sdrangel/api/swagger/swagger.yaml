@@ -714,7 +714,13 @@ definitions:
         description: "Device names of DV serial devices"
         type: array
         items:
-          type: string
+          $ref: "#/definitions/DVSerialDevice"
+  DVSerialDevice:
+    description: "DV serial device details"
+    properties:
+      deviceName:
+        description: "Name of the serial device in the system"
+        type: string
   Presets:
     description: "Settings presets"
     required:

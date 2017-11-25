@@ -22,8 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGDVSerialDevice.h"
 #include <QList>
-#include <QString>
 
 #include "SWGObject.h"
 
@@ -46,13 +46,13 @@ public:
     qint32 getNbDevices();
     void setNbDevices(qint32 nb_devices);
 
-    QList<QString*>* getDvSerialDevices();
-    void setDvSerialDevices(QList<QString*>* dv_serial_devices);
+    QList<SWGDVSerialDevice*>* getDvSerialDevices();
+    void setDvSerialDevices(QList<SWGDVSerialDevice*>* dv_serial_devices);
 
 
 private:
     qint32 nb_devices;
-    QList<QString*>* dv_serial_devices;
+    QList<SWGDVSerialDevice*>* dv_serial_devices;
 };
 
 }

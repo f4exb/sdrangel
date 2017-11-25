@@ -20,6 +20,7 @@
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
 #include "SWGDVSeralDevices.h"
+#include "SWGDVSerialDevice.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
@@ -57,6 +58,9 @@ namespace Swagger {
     }
     if(QString("SWGDVSeralDevices").compare(type) == 0) {
       return new SWGDVSeralDevices();
+    }
+    if(QString("SWGDVSerialDevice").compare(type) == 0) {
+      return new SWGDVSerialDevice();
     }
     if(QString("SWGDeviceListItem").compare(type) == 0) {
       return new SWGDeviceListItem();

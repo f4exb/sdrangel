@@ -69,6 +69,11 @@ public:
             Swagger::SWGLocationInformation& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instanceDVSerialPatch(
+            bool dvserial,
+            Swagger::SWGDVSeralDevices& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 
