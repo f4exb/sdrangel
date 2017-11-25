@@ -381,6 +381,25 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
             }
         }
     }
+    else if (request.getMethod() == "POST")
+    {
+        Swagger::SWGPresetTransfer query;
+        Swagger::SWGPresetIdentifier normalResponse;
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            query.fromJson(jsonStr);
+            int status = m_adapter->instancePresetPost(query, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
     else
     {
         response.setStatus(405,"Invalid HTTP method");

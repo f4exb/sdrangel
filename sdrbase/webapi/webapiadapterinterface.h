@@ -164,6 +164,16 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/preset (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetPost(
+            Swagger::SWGPresetTransfer& query __attribute__((unused)),
+            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;

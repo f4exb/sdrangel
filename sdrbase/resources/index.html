@@ -1049,9 +1049,9 @@ margin-bottom: 20px;
       "description" : "Name of the preset group"
     },
     "centerFrequency" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "Center freqeuency in MHz"
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Center freqeuency in Hz"
     },
     "type" : {
       "type" : "string",
@@ -1068,9 +1068,9 @@ margin-bottom: 20px;
   "required" : [ "centerFrequency", "name", "type" ],
   "properties" : {
     "centerFrequency" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "Center freqeuency in MHz"
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Center freqeuency in Hz"
     },
     "type" : {
       "type" : "string",
@@ -6195,12 +6195,47 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid frequency </h3>
+                            <h3> Status: 400 - Preset type and device set type mismatch </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instancePresetPatch-400-schema">Schema</a>
+                                </li>
+
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instancePresetPatch-400-schema">
+                                  <div id='responses-instancePresetPatch-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Preset type and device set type mismatch",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instancePresetPatch-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instancePresetPatch-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instancePresetPatch-400-schema-data' type='hidden' value=''></input>
+                                </div>
                             </div>
 
                             <h3> Status: 404 - No preset or device set found </h3>
@@ -6309,7 +6344,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Create a new preset from a device set settings</p>
+                        <p class="marked">Create a new preset from a device set settings. Frequency and type is ignored and taken from the the device set values.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/preset</span></code></pre>
@@ -6598,42 +6633,61 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid frequency </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                            </div>
-
                             <h3> Status: 404 - Device set not found </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                            </div>
-
-                            <h3> Status: 409 - Preset already exists </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                            </div>
-
-                            <h3> Status: 500 - Error </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instancePresetPost-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instancePresetPost-404-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instancePresetPost-500-schema">
-                                  <div id='responses-instancePresetPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instancePresetPost-404-schema">
+                                  <div id='responses-instancePresetPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device set not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instancePresetPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instancePresetPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instancePresetPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 409 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instancePresetPost-409-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instancePresetPost-409-schema">
+                                  <div id='responses-instancePresetPost-409-schema-409' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -6654,14 +6708,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instancePresetPost-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instancePresetPost-500-schema-500');
+                                        $('#responses-instancePresetPost-409-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instancePresetPost-409-schema-409');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instancePresetPost-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instancePresetPost-409-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -6685,7 +6739,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Save device set settings on a preset</p>
+                        <p class="marked">Update device set settings on an existing preset.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/preset</span></code></pre>
@@ -6972,14 +7026,6 @@ $(document).ready(function() {
                                   </div>
                                   <input id='responses-instancePresetPut-200-schema-data' type='hidden' value=''></input>
                                 </div>
-                            </div>
-
-                            <h3> Status: 400 - Invalid frequency </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
                             </div>
 
                             <h3> Status: 404 - No preset or device set found </h3>
@@ -7393,7 +7439,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-25T04:38:54.817+01:00
+              Generated 2017-11-25T18:28:10.878+01:00
             </div>
           </div>
       </div>

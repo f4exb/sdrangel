@@ -279,7 +279,7 @@ paths:
         "501":
           description: Function not implemented
     put:
-      description: Save device set settings on a preset. Preset is updated if it already exists else it is created with the given name and group. If created given frequency and type is ignored and is determined with the device set values.
+      description: Update device set settings on an existing preset.
       operationId: instancePresetPut
       consumes: 
         - application/json
@@ -306,7 +306,7 @@ paths:
         "501":
           description: Function not implemented
     post:
-      description: Create a new preset from a device set settings
+      description: Create a new preset from a device set settings. Frequency and type is ignored and taken from the the device set values.
       operationId: instancePresetPost
       consumes: 
         - application/json
@@ -322,13 +322,15 @@ paths:
           description: On success return preset identification
           schema:
             $ref: "#/definitions/PresetIdentifier"
-        "400":
-          description: Invalid frequency
         "404":
           description: Device set not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "409":
           description: Preset already exists
-        "500":
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"

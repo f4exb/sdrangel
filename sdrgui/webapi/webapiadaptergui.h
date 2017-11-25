@@ -88,6 +88,11 @@ public:
             Swagger::SWGPresetIdentifier& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instancePresetPost(
+            Swagger::SWGPresetTransfer& query,
+            Swagger::SWGPresetIdentifier& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

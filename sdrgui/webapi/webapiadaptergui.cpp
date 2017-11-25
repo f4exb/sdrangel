@@ -494,7 +494,6 @@ int WebAPIAdapterGUI::instancePresetPut(
     int deviceSetIndex = query.getDeviceSetIndex();
     Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
-    bool newPreset;
 
     if (deviceSetIndex > nbDeviceSets)
     {
@@ -506,15 +505,17 @@ int WebAPIAdapterGUI::instancePresetPut(
             presetIdentifier->getCenterFrequency(),
             *presetIdentifier->getName());
 
-    if (selectedPreset == 0) // save on a new preset
+    if (selectedPreset == 0)
     {
-        selectedPreset = m_mainWindow.m_settings.newPreset(*presetIdentifier->getGroupName(), *presetIdentifier->getName());
-        newPreset = true;
+        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(presetIdentifier->getCenterFrequency())
+                .arg(*presetIdentifier->getName());
+        return 404;
     }
     else // update existing preset
     {
         DeviceUISet *deviceUI = m_mainWindow.m_deviceUIs[deviceSetIndex];
-        newPreset = false;
 
         if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
         {
@@ -529,7 +530,51 @@ int WebAPIAdapterGUI::instancePresetPut(
         }
     }
 
-    MainWindow::MsgSavePreset *msg = MainWindow::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, newPreset);
+    MainWindow::MsgSavePreset *msg = MainWindow::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    m_mainWindow.m_inputMessageQueue.push(msg);
+
+    response.init();
+    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getName() = selectedPreset->getDescription();
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instancePresetPost(
+        Swagger::SWGPresetTransfer& query,
+        Swagger::SWGPresetIdentifier& response,
+        Swagger::SWGErrorResponse& error)
+{
+    int deviceSetIndex = query.getDeviceSetIndex();
+    Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
+
+    if (deviceSetIndex > nbDeviceSets)
+    {
+        *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
+        return 404;
+    }
+
+    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
+            presetIdentifier->getCenterFrequency(),
+            *presetIdentifier->getName());
+
+    if (selectedPreset == 0) // save on a new preset
+    {
+        selectedPreset = m_mainWindow.m_settings.newPreset(*presetIdentifier->getGroupName(), *presetIdentifier->getName());
+    }
+    else
+    {
+        *error.getMessage() = QString("Preset already exists [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(presetIdentifier->getCenterFrequency())
+                .arg(*presetIdentifier->getName());
+        return 409;
+    }
+
+    MainWindow::MsgSavePreset *msg = MainWindow::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
     m_mainWindow.m_inputMessageQueue.push(msg);
 
     response.init();
