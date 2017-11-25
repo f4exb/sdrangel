@@ -23,6 +23,7 @@
 #include <QList>
 
 #include "settings/mainsettings.h"
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/export.h"
 #include "mainparser.h"
@@ -83,6 +84,29 @@ public:
 	friend class WebAPIAdapterGUI;
 
 private:
+    class MsgLoadPreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Preset *getPreset() const { return m_preset; }
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+
+        static MsgLoadPreset* create(const Preset *preset, int deviceSetIndex)
+        {
+            return new MsgLoadPreset(preset, deviceSetIndex);
+        }
+
+    private:
+        const Preset *m_preset;
+        int m_deviceSetIndex;
+
+        MsgLoadPreset(const Preset *preset, int deviceSetIndex) :
+            Message(),
+            m_preset(preset),
+            m_deviceSetIndex(deviceSetIndex)
+        { }
+    };
+
 	enum {
 		PGroup,
 		PItem
@@ -141,6 +165,8 @@ private:
     void removeLastDevice();
 
     void setLoggingOpions();
+
+    bool handleMessage(const Message& cmd);
 
 private slots:
 	void handleMessages();

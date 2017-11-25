@@ -107,3 +107,20 @@ void MainSettings::sortPresets()
 {
     qSort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
 }
+
+const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const
+{
+    int nbPresets = getPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if ((getPreset(i)->getGroup() == groupName) &&
+            (getPreset(i)->getCenterFrequency() == centerFrequency) &&
+            (getPreset(i)->getDescription() == description))
+        {
+            return getPreset(i);
+        }
+    }
+
+    return 0;
+}

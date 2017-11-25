@@ -45,6 +45,8 @@
 #include "SWGPresets.h"
 #include "SWGPresetGroup.h"
 #include "SWGPresetItem.h"
+#include "SWGPresetTransfer.h"
+#include "SWGPresetIdentifier.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -426,6 +428,60 @@ int WebAPIAdapterGUI::instancePresetGet(
 
     if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
     response.setNbGroups(nbGroups);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instancePresetPatch(
+        Swagger::SWGPresetTransfer& query,
+        Swagger::SWGPresetIdentifier& response,
+        Swagger::SWGErrorResponse& error)
+{
+    int deviceSetIndex = query.getDeviceSetIndex();
+    Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
+
+    if (deviceSetIndex > nbDeviceSets)
+    {
+        *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
+        return 404;
+    }
+
+    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
+            presetIdentifier->getCenterFrequency(),
+            *presetIdentifier->getName());
+
+    if (selectedPreset == 0)
+    {
+        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(presetIdentifier->getCenterFrequency())
+                .arg(*presetIdentifier->getName());
+        return 404;
+    }
+
+    DeviceUISet *deviceUI = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+    if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
+    {
+        *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
+        return 404;
+    }
+
+    if (deviceUI->m_deviceSinkEngine && selectedPreset->isSourcePreset())
+    {
+        *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
+        return 404;
+    }
+
+    MainWindow::MsgLoadPreset *msg = MainWindow::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
+    m_mainWindow.m_inputMessageQueue.push(msg);
+
+    response.init();
+    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getName() = selectedPreset->getDescription();
 
     return 200;
 }

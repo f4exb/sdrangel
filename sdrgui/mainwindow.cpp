@@ -62,6 +62,8 @@
 #include <string>
 #include <QDebug>
 
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
+
 MainWindow *MainWindow::m_instance = 0;
 
 MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent) :
@@ -654,6 +656,18 @@ void MainWindow::applySettings()
 {
 }
 
+bool MainWindow::handleMessage(const Message& cmd)
+{
+    if (MsgLoadPreset::match(cmd))
+    {
+        MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
+        loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        return true;
+    }
+
+    return false;
+}
+
 void MainWindow::handleMessages()
 {
 	Message* message;
@@ -661,6 +675,7 @@ void MainWindow::handleMessages()
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
 		qDebug("MainWindow::handleMessages: message: %s", message->getIdentifier());
+		handleMessage(*message);
 		delete message;
 	}
 }

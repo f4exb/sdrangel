@@ -20,6 +20,7 @@ public:
 	void deletePreset(const Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
 	const Preset* getPreset(int index) const { return m_presets[index]; }
+	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const;
 	void sortPresets();
 
 	Preset* getWorkingPreset() { return &m_workingPreset; }

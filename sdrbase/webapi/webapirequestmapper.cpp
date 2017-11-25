@@ -30,6 +30,8 @@
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGPresets.h"
+#include "SWGPresetTransfer.h"
+#include "SWGPresetIdentifier.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -327,11 +329,11 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
 
 void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGPresets normalResponse;
     Swagger::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
+        Swagger::SWGPresets normalResponse;
         int status = m_adapter->instancePresetGet(normalResponse, errorResponse);
         response.setStatus(status);
 
@@ -339,6 +341,25 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PATCH")
+    {
+        Swagger::SWGPresetTransfer query;
+        Swagger::SWGPresetIdentifier normalResponse;
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            query.fromJson(jsonStr);
+            int status = m_adapter->instancePresetPatch(query, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
         }
     }
     else

@@ -265,7 +265,9 @@ paths:
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
-          description: Invalid frequency
+          description: Preset type and device set type mismatch
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: No preset or device set found
           schema:
@@ -293,8 +295,6 @@ paths:
           description: On success return preset identification
           schema:
             $ref: "#/definitions/PresetIdentifier"
-        "400":
-          description: Invalid frequency
         "404":
           description: No preset or device set found
           schema:
@@ -761,9 +761,9 @@ definitions:
         description: "Name of the preset group"
         type: string
       centerFrequency:
-        description: "Center freqeuency in MHz"
-        type: number
-        format: float
+        description: "Center freqeuency in Hz"
+        type: integer
+        format: int64
       type:
         description: "Type of device set (R: Rx, T: Tx)"
         type: string

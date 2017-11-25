@@ -38,7 +38,7 @@ SWGPresetIdentifier::~SWGPresetIdentifier() {
 void
 SWGPresetIdentifier::init() {
     group_name = new QString("");
-    center_frequency = 0.0f;
+    center_frequency = 0L;
     type = new QString("");
     name = new QString("");
 }
@@ -72,7 +72,7 @@ SWGPresetIdentifier::fromJson(QString &json) {
 void
 SWGPresetIdentifier::fromJsonObject(QJsonObject &pJson) {
     ::Swagger::setValue(&group_name, pJson["groupName"], "QString", "QString");
-    ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "float", "");
+    ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     ::Swagger::setValue(&type, pJson["type"], "QString", "QString");
     ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
 }
@@ -111,12 +111,12 @@ SWGPresetIdentifier::setGroupName(QString* group_name) {
     this->group_name = group_name;
 }
 
-float
+qint64
 SWGPresetIdentifier::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGPresetIdentifier::setCenterFrequency(float center_frequency) {
+SWGPresetIdentifier::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
 }
 

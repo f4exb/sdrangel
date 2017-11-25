@@ -31,8 +31,10 @@ namespace Swagger
     class SWGAudioDevicesSelect;
     class SWGLocationInformation;
     class SWGDVSeralDevices;
-    class SWGErrorResponse;
     class SWGPresets;
+    class SWGPresetTransfer;
+    class SWGPresetIdentifier;
+    class SWGErrorResponse;
 }
 
 class WebAPIAdapterInterface
@@ -134,11 +136,21 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/location (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/preset (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetGet(
             Swagger::SWGPresets& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/preset (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetPatch(
+            Swagger::SWGPresetTransfer& query __attribute__((unused)),
+            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
