@@ -64,6 +64,7 @@
 
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -672,6 +673,37 @@ bool MainWindow::handleMessage(const Message& cmd)
         if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
         m_settings.sortPresets();
         m_settings.save();
+        return true;
+    }
+    else if (MsgDeletePreset::match(cmd))
+    {
+        MsgDeletePreset& notif = (MsgDeletePreset&) cmd;
+        const Preset *presetToDelete = notif.getPreset();
+
+        // remove preset from tree
+        for (int ig = 0; ig < ui->presetTree->topLevelItemCount(); ig++)
+        {
+            QTreeWidgetItem *groupItem = ui->presetTree->topLevelItem(ig);
+            if (groupItem->text(0) == presetToDelete->getGroup())
+            {
+                for (int ip = 0; ip < groupItem->childCount(); ip++)
+                {
+                    QTreeWidgetItem *presetItem = groupItem->child(ip);
+                    const Preset* preset = qvariant_cast<const Preset*>(presetItem->data(0, Qt::UserRole));
+
+                    if ((preset->getGroup() == presetToDelete->getGroup()) &&
+                        (preset->getCenterFrequency() == presetToDelete->getCenterFrequency()) &&
+                        (preset->getDescription() == presetToDelete->getDescription()) &&
+                        (preset->isSourcePreset() == presetToDelete->isSourcePreset()))
+                    {
+                        groupItem->takeChild(ip);
+                    }
+                }
+            }
+        }
+
+        // remove preset from settings
+        m_settings.deletePreset(presetToDelete);
         return true;
     }
 

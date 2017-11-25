@@ -265,7 +265,7 @@ paths:
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
-          description: Preset type and device set type mismatch
+          description: Invalid JSON request or preset type and device set type mismatch
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -295,6 +295,10 @@ paths:
           description: On success return preset identification
           schema:
             $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: No preset or device set found
           schema:
@@ -322,6 +326,10 @@ paths:
           description: On success return preset identification
           schema:
             $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Device set not found
           schema:
@@ -330,7 +338,7 @@ paths:
           description: Preset already exists
           schema:
             $ref: "#/definitions/ErrorResponse"
-          "500":
+        "500":
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
@@ -354,9 +362,13 @@ paths:
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
-          description: Invalid frequency
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Preset not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: Error
           schema:

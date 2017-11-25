@@ -27,6 +27,12 @@
 #include "staticfilecontroller.h"
 #include "webapiadapterinterface.h"
 
+namespace Swagger
+{
+    class SWGPresetTransfer;
+    class SWGPresetIdentifier;
+}
+
 class WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
     Q_OBJECT
 public:
@@ -47,6 +53,9 @@ private:
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+
+    bool validatePresetTransfer(Swagger::SWGPresetTransfer& presetTransfer);
+    bool validatePresetIdentifer(Swagger::SWGPresetIdentifier& presetIdentifier);
 
     bool parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response);
 };

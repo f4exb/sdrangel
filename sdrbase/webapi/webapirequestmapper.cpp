@@ -352,12 +352,23 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         if (parseJsonBody(jsonStr, response))
         {
             query.fromJson(jsonStr);
-            int status = m_adapter->instancePresetPatch(query, normalResponse, errorResponse);
-            response.setStatus(status);
 
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
+            if (validatePresetTransfer(query))
+            {
+                int status = m_adapter->instancePresetPatch(query, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
@@ -371,12 +382,23 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         if (parseJsonBody(jsonStr, response))
         {
             query.fromJson(jsonStr);
-            int status = m_adapter->instancePresetPut(query, normalResponse, errorResponse);
-            response.setStatus(status);
 
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
+            if (validatePresetTransfer(query))
+            {
+                int status = m_adapter->instancePresetPut(query, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
@@ -390,12 +412,52 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         if (parseJsonBody(jsonStr, response))
         {
             query.fromJson(jsonStr);
-            int status = m_adapter->instancePresetPost(query, normalResponse, errorResponse);
-            response.setStatus(status);
 
-            if (status == 200) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
+            if (validatePresetTransfer(query))
+            {
+                int status = m_adapter->instancePresetPost(query, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    else if (request.getMethod() == "DELETE")
+    {
+        Swagger::SWGPresetIdentifier normalResponse;
+        QString jsonStr = request.getBody();
+
+        if (parseJsonBody(jsonStr, response))
+        {
+            normalResponse.fromJson(jsonStr);
+
+            if (validatePresetIdentifer(normalResponse))
+            {
+                int status = m_adapter->instancePresetDelete(normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
@@ -439,3 +501,21 @@ bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse
         return false;
     }
 }
+
+bool WebAPIRequestMapper::validatePresetTransfer(Swagger::SWGPresetTransfer& presetTransfer)
+{
+    Swagger::SWGPresetIdentifier *presetIdentifier = presetTransfer.getPreset();
+
+    if (presetIdentifier == 0) {
+        return false;
+    }
+
+    return validatePresetIdentifer(*presetIdentifier);
+}
+
+bool WebAPIRequestMapper::validatePresetIdentifer(Swagger::SWGPresetIdentifier& presetIdentifier)
+{
+    return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
+}
+
+

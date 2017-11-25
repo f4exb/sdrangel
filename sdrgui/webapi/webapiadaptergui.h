@@ -93,6 +93,10 @@ public:
             Swagger::SWGPresetIdentifier& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int instancePresetDelete(
+            Swagger::SWGPresetIdentifier& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 
