@@ -75,6 +75,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceDVSerialService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
             instancePresetService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceDeviceSetsURL) {
+            instanceDeviceSetsService(request, response);
         }
         else
         {
@@ -460,6 +462,29 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        Swagger::SWGDeviceSetList normalResponse;
+        int status = m_adapter->instanceDeviceSetsGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     else

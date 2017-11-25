@@ -392,7 +392,7 @@ paths:
         "501":
           description: Function not implemented
     post:
-      description: Add (append) a new device set
+      description: Add (append) a new device set with default values
       operationId: instanceDeviceSetsPost
       parameters:
         - name: tx
@@ -412,7 +412,7 @@ paths:
         "501":
           description: Function not implemented
     delete:
-      description: "Remove last device set"
+      description: Remove last device set except the first device
       operationId: instanceDeviceSetsDelete
       responses:
         "200":
@@ -420,7 +420,7 @@ paths:
           schema:
             $ref: "#/definitions/DeviceSetList"
         "404":
-          description: "No more device sets opened in this instance"
+          description: "No more device sets to be deleted"
         "500":
           description: Error
           schema:

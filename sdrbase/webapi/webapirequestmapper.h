@@ -53,6 +53,7 @@ private:
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(Swagger::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(Swagger::SWGPresetIdentifier& presetIdentifier);

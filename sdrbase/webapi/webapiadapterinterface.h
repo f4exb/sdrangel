@@ -34,6 +34,7 @@ namespace Swagger
     class SWGPresets;
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
+    class SWGDeviceSetList;
     class SWGErrorResponse;
 }
 
@@ -183,6 +184,15 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/preset (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDeviceSetsGet(
+            Swagger::SWGDeviceSetList& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
@@ -191,6 +201,7 @@ public:
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
     static QString instancePresetURL;
+    static QString instanceDeviceSetsURL;
 };
 
 
