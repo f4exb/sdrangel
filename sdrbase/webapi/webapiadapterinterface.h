@@ -205,13 +205,22 @@ public:
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
-
     /**
      * Handler of /sdrangel/devicesets (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsDelete(
             Swagger::SWGDeviceSetList& response __attribute__((unused)),
+            Swagger::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/devicesets (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetGet(
+            int deviceSetIndex __attribute__((unused)),
+            Swagger::SWGDeviceSet& response __attribute__((unused)),
             Swagger::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 

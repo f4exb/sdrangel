@@ -28,5 +28,5 @@ QString WebAPIAdapterInterface::instanceDVSerialURL = "/sdrangel/dvserial";
 QString WebAPIAdapterInterface::instancePresetURL = "/sdrangel/preset";
 QString WebAPIAdapterInterface::instanceDeviceSetsURL = "/sdrangel/devicesets";
 
-std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]+)$");
-std::regex WebAPIAdapterInterface::devicesetDeviceURLRe("^/sdrangel/deviceset/([0-9]+)/device$");
+std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]{1,2})$");
+std::regex WebAPIAdapterInterface::devicesetDeviceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device$");

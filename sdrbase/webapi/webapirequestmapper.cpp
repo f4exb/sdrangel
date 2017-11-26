@@ -20,6 +20,8 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
+#include <boost/lexical_cast.hpp>
+
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
 #include "SWGInstanceSummaryResponse.h"
@@ -80,13 +82,23 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
         }
         else
         {
+            std::smatch desc_match;
+            std::string pathStr(path.constData(), path.length());
+
+            if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetURLRe)) {
+                deviceset(std::string(desc_match[1]), request, response);
+            }
+            else
+            {
+                QByteArray path = "/index.html";
+                m_staticFileController->service(path, response);
+            }
+
 //            QDirIterator it(":", QDirIterator::Subdirectories);
 //            while (it.hasNext()) {
 //                qDebug() << "WebAPIRequestMapper::service: " << it.next();
 //            }
 
-            QByteArray path = "/index.html";
-            m_staticFileController->service(path, response);
         }
     }
 }
@@ -515,6 +527,40 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
         if (status == 200) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    if (request.getMethod() == "GET")
+    {
+        try
+        {
+            Swagger::SWGDeviceSet normalResponse;
+            int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+            int status = m_adapter->devicesetGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            errorResponse.init();
+            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+            response.setStatus(400,"Invalid data");
             response.write(errorResponse.asJson().toUtf8());
         }
     }

@@ -110,6 +110,11 @@ public:
             Swagger::SWGDeviceSetList& response,
             Swagger::SWGErrorResponse& error);
 
+    virtual int devicesetGet(
+            int deviceSetIndex,
+            Swagger::SWGDeviceSet& response,
+            Swagger::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

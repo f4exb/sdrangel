@@ -792,7 +792,7 @@ margin-bottom: 20px;
   "description" : "Channel summarized information"
 };
             defs.ChannelListItem = {
-  "required" : [ "id", "name" ],
+  "required" : [ "id" ],
   "properties" : {
     "name" : {
       "type" : "string",
@@ -848,7 +848,7 @@ margin-bottom: 20px;
   "description" : "DV serial device details"
 };
             defs.DeviceListItem = {
-  "required" : [ "hwType" ],
+  "required" : [ "hwType", "tx" ],
   "properties" : {
     "displayedName" : {
       "type" : "string",
@@ -8445,7 +8445,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-11-26T00:25:44.253+01:00
+              Generated 2017-11-26T10:35:17.573+01:00
             </div>
           </div>
       </div>

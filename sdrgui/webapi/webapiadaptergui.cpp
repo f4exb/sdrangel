@@ -593,6 +593,27 @@ int WebAPIAdapterGUI::instanceDeviceSetsDelete(
     }
 }
 
+int WebAPIAdapterGUI::devicesetGet(
+        int deviceSetIndex,
+        Swagger::SWGDeviceSet& response,
+        Swagger::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        getDeviceSet(&response, deviceSet, deviceSetIndex);
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 void WebAPIAdapterGUI::getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();

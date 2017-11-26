@@ -550,6 +550,7 @@ definitions:
     description: "Summarized information about attached hardware device"
     required:
       - hwType
+      - tx
     properties:
       displayedName:
         description: "Displayable name that uniquely identifies this device instance"
@@ -581,7 +582,6 @@ definitions:
   ChannelListItem:
     description: "Summarized information about channel plugin"
     required:
-      - name
       - id
     properties:
       name:
