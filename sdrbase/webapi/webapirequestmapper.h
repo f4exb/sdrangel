@@ -56,6 +56,7 @@ private:
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     void deviceset(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetDevice(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(Swagger::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(Swagger::SWGPresetIdentifier& presetIdentifier);

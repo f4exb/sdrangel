@@ -466,11 +466,21 @@ paths:
           type: integer
           required: true
           description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+          required: true
+          schema:
+            $ref: "#/definitions/DeviceListItem"
       responses:
         "200":
-          description: On success return details on the device set
+          description: On success return details on the device
           schema:
-            $ref: "#/definitions/DeviceSet"
+            $ref: "#/definitions/DeviceListItem"
+        "400":
+          description: Device set and device type mismatch (Rx vs Tx)
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -549,7 +559,6 @@ definitions:
   DeviceListItem:
     description: "Summarized information about attached hardware device"
     required:
-      - hwType
       - tx
     properties:
       displayedName:

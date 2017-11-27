@@ -87,6 +87,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 
             if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetURLRe)) {
                 deviceset(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceURLRe)) {
+                devicesetDevice(std::string(desc_match[1]), request, response);
             }
             else
             {
@@ -568,6 +570,48 @@ void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpR
     {
         response.setStatus(405,"Invalid HTTP method");
         response.write("Invalid HTTP method");
+    }
+}
+
+void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    Swagger::SWGErrorResponse errorResponse;
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "PUT")
+        {
+            Swagger::SWGDeviceListItem normalResponse;
+            QString jsonStr = request.getBody();
+
+            if (parseJsonBody(jsonStr, response))
+            {
+                normalResponse.fromJson(jsonStr);
+
+                int status = m_adapter->devicesetDevicePut(deviceSetIndex, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            response.write("Invalid HTTP method");
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
