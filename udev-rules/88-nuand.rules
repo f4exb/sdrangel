@@ -1,0 +1,8 @@
+# Nuand bladeRF
+ATTR{idVendor}=="2cf0", ATTR{idProduct}=="5246", MODE="666", GROUP="plugdev"
+
+# Nuand bladeRF, legacy VID/PID
+ATTR{idVendor}=="1d50", ATTR{idProduct}=="6066", MODE="666", GROUP="plugdev"
+
+# Cypress Bootloader
+ATTR{idVendor}=="04b4", ATTR{idProduct}=="00f3", MODE="666", GROUP="plugdev"

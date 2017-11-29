@@ -1,0 +1,8 @@
+# allow "plugdev" group read/write access to ADI PlutoSDR devices
+# DFU Device
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="b674", MODE="0666", GROUP="plugdev"
+# SDR Device
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="b673", MODE="0666", GROUP="plugdev"
+# tell the ModemManager (part of the NetworkManager suite) that the device is not a modem, 
+# and don't send AT commands to it
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="b673", ENV{ID_MM_DEVICE_IGNORE}="1"

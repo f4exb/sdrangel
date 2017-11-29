@@ -261,6 +261,10 @@ endif(LIBUSB_FOUND AND UNIX)
 install(TARGETS sdrangel DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
+#install files and directories
+install(DIRECTORY udev-rules DESTINATION share/sdrangel)
+install(FILES udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS WORLD_EXECUTE)
+
 ##############################################################################
 
 # uninstall target

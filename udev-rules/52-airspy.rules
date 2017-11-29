@@ -1,0 +1,1 @@
+ATTR{idVendor}=="1d50", ATTR{idProduct}=="60a1", SYMLINK+="airspy-%k", MODE="666", GROUP="plugdev"
