@@ -2,8 +2,10 @@ sdrangel (3.8.5-1) unstable; urgency=medium
 
   * SSB mod/demod: improve LSB/USB experience
   * Web API: online static documentation page
+  * Web API: implemented all main window methods
+  * LimeSDR: fixed analog LP filter setting
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 26 Nov 2017 12:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 02 Dec 2017 12:14:18 +0100
 
 sdrangel (3.8.4-1) unstable; urgency=medium
 

@@ -57,7 +57,7 @@ set(limesuite_HEADERS
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/IConnection.h
     ${LIBLIMESUITESRC}/src/ConnectionSTREAM/ConnectionSTREAM.h
     ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/Connection_uLimeSDR.h
-    ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/DRV_DriverInterface.h
+#    ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/DRV_DriverInterface.h
     ${LIBLIMESUITESRC}/src/Connection_uLimeSDR/FTD3XXLibrary/FTD3XX.h
     ${LIBLIMESUITESRC}/src/ConnectionXillybus/ConnectionXillybus.h
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_common.h
