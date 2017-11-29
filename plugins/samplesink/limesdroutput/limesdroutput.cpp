@@ -885,7 +885,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                 qDebug("LimeSDROutput::applySettings: calibration successful on Tx channel %d", m_deviceShared.m_channel);
             }
         }
-        else if (doLPCalibration)
+
+        if (doLPCalibration)
         {
             if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
@@ -1013,7 +1014,11 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
             << " m_antennaPath: " << m_settings.m_antennaPath
             << " m_extClock: " << m_settings.m_extClock
-            << " m_extClockFreq: " << m_settings.m_extClockFreq;
+            << " m_extClockFreq: " << m_settings.m_extClockFreq
+            << " force: " << force
+            << " forceNCOFrequency: " << forceNCOFrequency
+            << " doCalibration: " << doCalibration
+            << " doLPCalibration: " << doLPCalibration;
 
     return true;
 }

@@ -711,7 +711,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                 else
                 {
                     doCalibration = true;
-                    qDebug() << "LimeSDRInput::applySettings: Gain set to " << settings.m_gain;
+                    qDebug() << "LimeSDRInput::applySettings: Gain (auto) set to " << settings.m_gain;
                 }
             }
         }
@@ -724,7 +724,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                         settings.m_lnaGain))
                 {
                     doCalibration = true;
-                    qDebug() << "LimeSDRInput::applySettings: LNA gain set to " << settings.m_lnaGain;
+                    qDebug() << "LimeSDRInput::applySettings: LNA gain (manual) set to " << settings.m_lnaGain;
                 }
                 else
                 {
@@ -736,7 +736,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                         settings.m_tiaGain))
                 {
                     doCalibration = true;
-                    qDebug() << "LimeSDRInput::applySettings: TIA gain set to " << settings.m_tiaGain;
+                    qDebug() << "LimeSDRInput::applySettings: TIA gain (manual) set to " << settings.m_tiaGain;
                 }
                 else
                 {
@@ -748,7 +748,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                         settings.m_pgaGain))
                 {
                     doCalibration = true;
-                    qDebug() << "LimeSDRInput::applySettings: PGA gain set to " << settings.m_pgaGain;
+                    qDebug() << "LimeSDRInput::applySettings: PGA gain (manual) set to " << settings.m_pgaGain;
                 }
                 else
                 {
@@ -772,7 +772,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             else
             {
                 doCalibration = true;
-                qDebug() << "LimeSDRInput::applySettings: Gain set to " << settings.m_gain;
+                qDebug() << "LimeSDRInput::applySettings: Gain (auto) set to " << settings.m_gain;
             }
         }
     }
@@ -786,7 +786,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     settings.m_lnaGain))
             {
                 doCalibration = true;
-                qDebug() << "LimeSDRInput::applySettings: LNA gain set to " << settings.m_lnaGain;
+                qDebug() << "LimeSDRInput::applySettings: LNA gain (manual) set to " << settings.m_lnaGain;
             }
             else
             {
@@ -804,7 +804,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     settings.m_tiaGain))
             {
                 doCalibration = true;
-                qDebug() << "LimeSDRInput::applySettings: TIA gain set to " << settings.m_tiaGain;
+                qDebug() << "LimeSDRInput::applySettings: TIA gain (manual) set to " << settings.m_tiaGain;
             }
             else
             {
@@ -822,7 +822,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     settings.m_pgaGain))
             {
                 doCalibration = true;
-                qDebug() << "LimeSDRInput::applySettings: PGA gain set to " << settings.m_pgaGain;
+                qDebug() << "LimeSDRInput::applySettings: PGA gain (manual) set to " << settings.m_pgaGain;
             }
             else
             {
@@ -1037,7 +1037,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                 qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %d", m_deviceShared.m_channel);
             }
         }
-        else if (doLPCalibration)
+
+        if (doLPCalibration)
         {
             if (LMS_SetLPFBW(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
@@ -1048,7 +1049,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             }
             else
             {
-                doCalibration = true;
                 qDebug("LimeSDRInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
             }
         }
@@ -1166,7 +1166,11 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
             << " m_antennaPath: " << m_settings.m_antennaPath
             << " m_extClock: " << m_settings.m_extClock
-            << " m_extClockFreq: " << m_settings.m_extClockFreq;
+            << " m_extClockFreq: " << m_settings.m_extClockFreq
+            << " force: " << force
+            << " forceNCOFrequency: " << forceNCOFrequency
+            << " doCalibration: " << doCalibration
+            << " doLPCalibration: " << doLPCalibration;
 
     return true;
 }
