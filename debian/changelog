@@ -5,6 +5,7 @@ sdrangel (3.8.5-1) unstable; urgency=medium
   * Web API: implemented all main window methods
   * LimeSDR: fixed analog LP filter setting
   * LimeSDR: builds done with LimeSuite commit 0167e64 to suport LimeSDR mini
+  * Debian: added installation of udev rules in postinst script
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 02 Dec 2017 12:14:18 +0100
 
