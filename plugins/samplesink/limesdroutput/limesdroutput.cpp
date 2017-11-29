@@ -897,7 +897,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             }
             else
             {
-                //doCalibration = true;
                 qDebug("LimeSDROutput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
             }
         }
