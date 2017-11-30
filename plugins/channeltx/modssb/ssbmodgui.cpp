@@ -458,6 +458,8 @@ void SSBModGUI::applyBandwidths(bool force)
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = 480/(1<<spanLog2);
+    int tickInterval = m_spectrumRate / 1200;
+    tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
     qDebug() << "SSBModGUI::applyBandwidths:"
             << " dsb: " << dsb
@@ -465,7 +467,11 @@ void SSBModGUI::applyBandwidths(bool force)
             << " m_spectrumRate: " << m_spectrumRate
             << " bw: " << bw
             << " lw: " << lw
-            << " bwMax: " << bwMax;
+            << " bwMax: " << bwMax
+            << " tickInterval: " << tickInterval;
+
+    ui->BW->setTickInterval(tickInterval);
+    ui->lowCut->setTickInterval(tickInterval);
 
     bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
 
