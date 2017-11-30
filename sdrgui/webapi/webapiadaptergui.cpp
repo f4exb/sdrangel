@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
@@ -292,6 +293,7 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
             Swagger::SWGErrorResponse& error __attribute__((unused)))
 {
     m_mainWindow.m_dspEngine->setDVSerialSupport(dvserial);
+    m_mainWindow.ui->action_DV_Serial->setChecked(dvserial);
     response.init();
 
     if (dvserial)
