@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGInstanceChannelsResponse::SWGInstanceChannelsResponse(QString* json) {
     init();
@@ -65,9 +65,9 @@ SWGInstanceChannelsResponse::fromJson(QString &json) {
 
 void
 SWGInstanceChannelsResponse::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&channelcount, pJson["channelcount"], "qint32", "");
+    ::SWGSDRangel::setValue(&channelcount, pJson["channelcount"], "qint32", "");
     
-    ::Swagger::setValue(&channels, pJson["channels"], "QList", "SWGChannelListItem");
+    ::SWGSDRangel::setValue(&channels, pJson["channels"], "QList", "SWGChannelListItem");
     
 }
 

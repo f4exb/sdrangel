@@ -87,7 +87,7 @@ Do not forget to start the http server for includes as described before for the 
 Eventually to generate the code for Qt5 in the code/qt5 directory do:
 
 ```shell
-/opt/install/swagger/swagger-codegen generate -i api/swagger/swagger.yaml -l qt5cpp -o code/qt5
+/opt/install/swagger/swagger-codegen generate -i api/swagger/swagger.yaml -l qt5cpp -c qt5cpp-config.json -o code/qt5
 ```
 
 The language option `-l` allows to generate code or documentation in a lot of languages (invoke the command without any parameter to get a list). The most commonly used are:
@@ -95,6 +95,18 @@ The language option `-l` allows to generate code or documentation in a lot of la
   - html2: documentation as a single HTML file pretty printed. Used to document the API in code/html2
   - python: Python client
   - angular2: Typescript for Angular2 client
+  
+The configuration option `-c` lets you specify a configuration file which is in JSON format and for which the key, value pairs are documented in the config-help of the specified codegen language. For example the following command will return the possible key values for Qt5 C++ generator:
+
+```shell
+/opt/install/swagger/swagger-codegen config-help -l qt5cpp
+```
+
+The following configuration files have been defined for generation in the SDRangel context:
+
+  - `qt5cpp-config.json` for Qt5/C++
+  - `html2-config.json` for HTML2
+  - `python-config.json` for Python
 
 <h3>Links</h3>
 

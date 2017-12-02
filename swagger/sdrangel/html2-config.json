@@ -1,0 +1,7 @@
+{
+    "perlModuleName": "SWGSDRangel",
+    "pythonPackageName": "swagger_sdrangel",
+    "packageName": "SWGSDRangel",
+    "invokerPackage": "SWGSDRangel",
+    "phpInvokerPackage": "SWGSDRangel"
+}

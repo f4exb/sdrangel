@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGAudioDevicesSelect::SWGAudioDevicesSelect(QString* json) {
     init();
@@ -60,9 +60,9 @@ SWGAudioDevicesSelect::fromJson(QString &json) {
 
 void
 SWGAudioDevicesSelect::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&input_volume, pJson["inputVolume"], "float", "");
-    ::Swagger::setValue(&input_index, pJson["inputIndex"], "qint32", "");
-    ::Swagger::setValue(&output_index, pJson["outputIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&input_volume, pJson["inputVolume"], "float", "");
+    ::SWGSDRangel::setValue(&input_index, pJson["inputIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&output_index, pJson["outputIndex"], "qint32", "");
 }
 
 QString

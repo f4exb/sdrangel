@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGChannelListItem::SWGChannelListItem(QString* json) {
     init();
@@ -78,12 +78,12 @@ SWGChannelListItem::fromJson(QString &json) {
 
 void
 SWGChannelListItem::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
-    ::Swagger::setValue(&id_uri, pJson["idURI"], "QString", "QString");
-    ::Swagger::setValue(&id, pJson["id"], "QString", "QString");
-    ::Swagger::setValue(&tx, pJson["tx"], "qint32", "");
-    ::Swagger::setValue(&version, pJson["version"], "QString", "QString");
-    ::Swagger::setValue(&index, pJson["index"], "qint32", "");
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
+    ::SWGSDRangel::setValue(&id_uri, pJson["idURI"], "QString", "QString");
+    ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
+    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
+    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
 }
 
 QString

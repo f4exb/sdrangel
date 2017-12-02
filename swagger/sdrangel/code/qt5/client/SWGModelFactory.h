@@ -38,7 +38,7 @@
 #include "SWGSamplingDevice.h"
 #include "SWGUser.h"
 
-namespace Swagger {
+namespace SWGSDRangel {
 
   inline void* create(QString type) {
     if(QString("SWGAudioDevice").compare(type) == 0) {

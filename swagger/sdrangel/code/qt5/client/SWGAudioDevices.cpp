@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGAudioDevices::SWGAudioDevices(QString* json) {
     init();
@@ -82,16 +82,16 @@ SWGAudioDevices::fromJson(QString &json) {
 
 void
 SWGAudioDevices::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&input_volume, pJson["inputVolume"], "float", "");
-    ::Swagger::setValue(&nb_input_devices, pJson["nbInputDevices"], "qint32", "");
-    ::Swagger::setValue(&input_device_selected_index, pJson["inputDeviceSelectedIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&input_volume, pJson["inputVolume"], "float", "");
+    ::SWGSDRangel::setValue(&nb_input_devices, pJson["nbInputDevices"], "qint32", "");
+    ::SWGSDRangel::setValue(&input_device_selected_index, pJson["inputDeviceSelectedIndex"], "qint32", "");
     
-    ::Swagger::setValue(&input_devices, pJson["inputDevices"], "QList", "SWGAudioDevice");
+    ::SWGSDRangel::setValue(&input_devices, pJson["inputDevices"], "QList", "SWGAudioDevice");
     
-    ::Swagger::setValue(&nb_output_devices, pJson["nbOutputDevices"], "qint32", "");
-    ::Swagger::setValue(&output_device_selected_index, pJson["outputDeviceSelectedIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&nb_output_devices, pJson["nbOutputDevices"], "qint32", "");
+    ::SWGSDRangel::setValue(&output_device_selected_index, pJson["outputDeviceSelectedIndex"], "qint32", "");
     
-    ::Swagger::setValue(&output_devices, pJson["outputDevices"], "QList", "SWGAudioDevice");
+    ::SWGSDRangel::setValue(&output_devices, pJson["outputDevices"], "QList", "SWGAudioDevice");
     
 }
 

@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGErrorResponse::SWGErrorResponse(QString* json) {
     init();
@@ -59,7 +59,7 @@ SWGErrorResponse::fromJson(QString &json) {
 
 void
 SWGErrorResponse::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&message, pJson["message"], "QString", "QString");
+    ::SWGSDRangel::setValue(&message, pJson["message"], "QString", "QString");
 }
 
 QString

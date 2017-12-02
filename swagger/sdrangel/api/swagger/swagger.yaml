@@ -5,16 +5,15 @@ info:
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
-    email: "f4exb06@gmail.com"  
+    email: "f4exb06@gmail.com"
 # during dev, should point to your local machine
-host: localhost:10010
+host: localhost:8091
 # basePath prefixes all resource paths 
 basePath: /
 # 
 schemes:
   # tip: remove http to make production-grade
   - http
-  - https
 # format of bodies a client can send (Content-Type)
 consumes:
   - application/json
@@ -29,6 +28,8 @@ paths:
       description: SDRangel instance summary
       # used as the method name of the controller
       operationId: instanceSummary
+      tags:
+        - Instance
       responses:
         "200":
           description: Success
@@ -47,6 +48,8 @@ paths:
     get:
       description: Get a list of sampling devices that can be used to take part in a device set
       operationId: instanceDevices
+      tags:
+        - Instance
       parameters:
         - name: tx
           in: query
@@ -69,6 +72,8 @@ paths:
     get:
       description: Get a list of channel plugins available in this instance
       operationId: instanceChannels
+      tags:
+        - Instance
       parameters:
         - name: tx
           in: query
@@ -91,6 +96,8 @@ paths:
     get:
       description: Get logging information for this instance
       operationId: instanceLoggingGet
+      tags:
+        - Instance
       responses:
         "200":
           description: Success
@@ -105,6 +112,8 @@ paths:
     put:
       description: Change logging parmeters for this instance
       operationId: instanceLoggingPut
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -120,7 +129,7 @@ paths:
           schema:
             $ref: "#/definitions/LoggingInfo"
         "400":
-          description: Invallid data
+          description: Invalid data
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -134,6 +143,8 @@ paths:
     get:
       description: Get audio devices list available to this instance
       operationId: instanceAudioGet
+      tags:
+        - Instance
       responses:
         "200":
           description: Success
@@ -148,6 +159,8 @@ paths:
     patch:
       description: Set audio devices
       operationId: instanceAudioPatch
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -173,6 +186,8 @@ paths:
     get:
       description: Get instance geolocation information
       operationId: instanceLocationGet
+      tags:
+        - Instance
       responses:
         "200":
           description: On success return location
@@ -187,6 +202,8 @@ paths:
     put:
       description: Set instance geolocation information
       operationId: instanceLocationPut
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -214,6 +231,8 @@ paths:
     patch:
       description: Set or reset DV serial processing for AMBE frames decoding in digital voice modes
       operationId: instanceDVSerialPatch
+      tags:
+        - Instance
       parameters:
         - name: dvserial
           in: query
@@ -236,6 +255,8 @@ paths:
     get:
       description: List all presets in the instance
       operationId: instancePresetGet
+      tags:
+        - Instance
       responses:
         "200":
           description: On success return preset list
@@ -250,6 +271,8 @@ paths:
     patch:
       description: Load a preset in a device set
       operationId: instancePresetPatch
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -281,6 +304,8 @@ paths:
     put:
       description: Update device set settings on an existing preset.
       operationId: instancePresetPut
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -312,6 +337,8 @@ paths:
     post:
       description: Create a new preset from a device set settings. Frequency and type is ignored and taken from the the device set values.
       operationId: instancePresetPost
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -347,6 +374,8 @@ paths:
     delete:
       description: Deletes a preset
       operationId: instancePresetDelete
+      tags:
+        - Instance
       consumes: 
         - application/json
       parameters:
@@ -380,6 +409,8 @@ paths:
     get:
       description: Get summary information about device sets opened in the instance
       operationId: instanceDeviceSetsGet
+      tags:
+        - Instance
       responses:
         "200":
           description: On success return device set list
@@ -394,6 +425,8 @@ paths:
     post:
       description: Add (append) a new device set with default values
       operationId: instanceDeviceSetsPost
+      tags:
+        - Instance
       parameters:
         - name: tx
           in: query
@@ -414,6 +447,8 @@ paths:
     delete:
       description: Remove last device set except the first device
       operationId: instanceDeviceSetsDelete
+      tags:
+        - Instance
       responses:
         "200":
           description: On success return new list of device sets
@@ -434,6 +469,8 @@ paths:
     get:
       description: Get device set information
       operationId: devicesetGet
+      tags:
+        - DeviceSet
       parameters:
         - in: path
           name: deviceSetIndex
@@ -460,6 +497,8 @@ paths:
     put:
       description: Set the device used in the device set
       operationId: devicesetDevicePut
+      tags:
+        - DeviceSet
       parameters:
         - in: path
           name: deviceSetIndex
@@ -474,7 +513,7 @@ paths:
             $ref: "#/definitions/DeviceListItem"
       responses:
         "200":
-          description: On success return details on the device
+          description: On success return details on the selected device
           schema:
             $ref: "#/definitions/DeviceListItem"
         "400":

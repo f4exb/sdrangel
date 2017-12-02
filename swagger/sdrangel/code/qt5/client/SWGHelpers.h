@@ -15,7 +15,7 @@
 
 #include <QJsonValue>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
     void setValue(void* value, QJsonValue obj, QString type, QString complexType);
     void toJsonArray(QList<void*>* value, QJsonArray* output, QString innerName, QString innerType);

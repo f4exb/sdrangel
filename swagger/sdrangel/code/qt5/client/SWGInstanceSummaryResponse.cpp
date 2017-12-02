@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGInstanceSummaryResponse::SWGInstanceSummaryResponse(QString* json) {
     init();
@@ -74,10 +74,10 @@ SWGInstanceSummaryResponse::fromJson(QString &json) {
 
 void
 SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&version, pJson["version"], "QString", "QString");
-    ::Swagger::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
-    ::Swagger::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
-    ::Swagger::setValue(&user, pJson["user"], "SWGUser", "SWGUser");
+    ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
+    ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
+    ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
+    ::SWGSDRangel::setValue(&user, pJson["user"], "SWGUser", "SWGUser");
 }
 
 QString

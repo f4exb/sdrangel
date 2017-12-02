@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGPresetIdentifier::SWGPresetIdentifier(QString* json) {
     init();
@@ -71,10 +71,10 @@ SWGPresetIdentifier::fromJson(QString &json) {
 
 void
 SWGPresetIdentifier::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&group_name, pJson["groupName"], "QString", "QString");
-    ::Swagger::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
-    ::Swagger::setValue(&type, pJson["type"], "QString", "QString");
-    ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
+    ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    ::SWGSDRangel::setValue(&type, pJson["type"], "QString", "QString");
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
 }
 
 QString

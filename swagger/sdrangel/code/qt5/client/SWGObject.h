@@ -15,7 +15,7 @@
 
 #include <QJsonValue>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGObject {
   public:

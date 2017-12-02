@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGDeviceListItem::SWGDeviceListItem(QString* json) {
     init();
@@ -81,15 +81,15 @@ SWGDeviceListItem::fromJson(QString &json) {
 
 void
 SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&displayed_name, pJson["displayedName"], "QString", "QString");
-    ::Swagger::setValue(&hw_type, pJson["hwType"], "QString", "QString");
-    ::Swagger::setValue(&serial, pJson["serial"], "QString", "QString");
-    ::Swagger::setValue(&sequence, pJson["sequence"], "qint32", "");
-    ::Swagger::setValue(&tx, pJson["tx"], "qint32", "");
-    ::Swagger::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
-    ::Swagger::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
-    ::Swagger::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
-    ::Swagger::setValue(&index, pJson["index"], "qint32", "");
+    ::SWGSDRangel::setValue(&displayed_name, pJson["displayedName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&hw_type, pJson["hwType"], "QString", "QString");
+    ::SWGSDRangel::setValue(&serial, pJson["serial"], "QString", "QString");
+    ::SWGSDRangel::setValue(&sequence, pJson["sequence"], "qint32", "");
+    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    ::SWGSDRangel::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
 }
 
 QString

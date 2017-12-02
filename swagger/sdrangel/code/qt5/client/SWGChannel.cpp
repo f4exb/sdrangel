@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGChannel::SWGChannel(QString* json) {
     init();
@@ -70,11 +70,11 @@ SWGChannel::fromJson(QString &json) {
 
 void
 SWGChannel::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&index, pJson["index"], "qint32", "");
-    ::Swagger::setValue(&id, pJson["id"], "QString", "QString");
-    ::Swagger::setValue(&uid, pJson["uid"], "qint64", "");
-    ::Swagger::setValue(&title, pJson["title"], "QString", "QString");
-    ::Swagger::setValue(&delta_frequency, pJson["deltaFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
+    ::SWGSDRangel::setValue(&uid, pJson["uid"], "qint64", "");
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    ::SWGSDRangel::setValue(&delta_frequency, pJson["deltaFrequency"], "qint32", "");
 }
 
 QString

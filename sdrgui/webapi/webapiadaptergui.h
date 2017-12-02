@@ -32,99 +32,99 @@ public:
     virtual ~WebAPIAdapterGUI();
 
     virtual int instanceSummary(
-            Swagger::SWGInstanceSummaryResponse& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGInstanceSummaryResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDevices(
             bool tx,
-            Swagger::SWGInstanceDevicesResponse& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGInstanceDevicesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceChannels(
             bool tx,
-            Swagger::SWGInstanceChannelsResponse& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGInstanceChannelsResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLoggingGet(
-            Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLoggingPut(
-            Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceAudioGet(
-            Swagger::SWGAudioDevices& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGAudioDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceAudioPatch(
-            Swagger::SWGAudioDevicesSelect& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGAudioDevicesSelect& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLocationGet(
-            Swagger::SWGLocationInformation& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGLocationInformation& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLocationPut(
-            Swagger::SWGLocationInformation& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGLocationInformation& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDVSerialPatch(
             bool dvserial,
-            Swagger::SWGDVSeralDevices& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instancePresetGet(
-            Swagger::SWGPresets& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGPresets& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instancePresetPatch(
-            Swagger::SWGPresetTransfer& query,
-            Swagger::SWGPresetIdentifier& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instancePresetPut(
-            Swagger::SWGPresetTransfer& query,
-            Swagger::SWGPresetIdentifier& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instancePresetPost(
-            Swagger::SWGPresetTransfer& query,
-            Swagger::SWGPresetIdentifier& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instancePresetDelete(
-            Swagger::SWGPresetIdentifier& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetsGet(
-            Swagger::SWGDeviceSetList& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDeviceSetList& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetsPost(
             bool tx,
-            Swagger::SWGDeviceSet& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetsDelete(
-            Swagger::SWGDeviceSetList& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDeviceSetList& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetGet(
             int deviceSetIndex,
-            Swagger::SWGDeviceSet& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetDevicePut(
             int deviceSetIndex,
-            Swagger::SWGDeviceListItem& response,
-            Swagger::SWGErrorResponse& error);
+            SWGSDRangel::SWGDeviceListItem& response,
+            SWGSDRangel::SWGErrorResponse& error);
 
 private:
     MainWindow& m_mainWindow;
 
-    void getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList);
-    void getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex);
+    void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
+    void getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-#ifndef _SWG_SWGDefaultApi_H_
-#define _SWG_SWGDefaultApi_H_
+#ifndef _SWG_SWGInstanceApi_H_
+#define _SWG_SWGInstanceApi_H_
 
 #include "SWGHttpRequest.h"
 
@@ -32,22 +32,20 @@
 
 #include <QObject>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
-class SWGDefaultApi: public QObject {
+class SWGInstanceApi: public QObject {
     Q_OBJECT
 
 public:
-    SWGDefaultApi();
-    SWGDefaultApi(QString host, QString basePath);
-    ~SWGDefaultApi();
+    SWGInstanceApi();
+    SWGInstanceApi(QString host, QString basePath);
+    ~SWGInstanceApi();
 
     QString host;
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
-    void devicesetDevicePut(qint32 device_set_index);
-    void devicesetGet(qint32 device_set_index);
     void instanceAudioGet();
     void instanceAudioPatch(SWGAudioDevicesSelect body);
     void instanceChannels(qint32 tx);
@@ -68,8 +66,6 @@ public:
     void instanceSummary();
     
 private:
-    void devicesetDevicePutCallback (HttpRequestWorker * worker);
-    void devicesetGetCallback (HttpRequestWorker * worker);
     void instanceAudioGetCallback (HttpRequestWorker * worker);
     void instanceAudioPatchCallback (HttpRequestWorker * worker);
     void instanceChannelsCallback (HttpRequestWorker * worker);
@@ -90,8 +86,6 @@ private:
     void instanceSummaryCallback (HttpRequestWorker * worker);
     
 signals:
-    void devicesetDevicePutSignal(SWGDeviceSet* summary);
-    void devicesetGetSignal(SWGDeviceSet* summary);
     void instanceAudioGetSignal(SWGAudioDevices* summary);
     void instanceAudioPatchSignal(SWGAudioDevicesSelect* summary);
     void instanceChannelsSignal(SWGInstanceChannelsResponse* summary);
@@ -111,8 +105,6 @@ signals:
     void instancePresetPutSignal(SWGPresetIdentifier* summary);
     void instanceSummarySignal(SWGInstanceSummaryResponse* summary);
     
-    void devicesetDevicePutSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceAudioGetSignalE(SWGAudioDevices* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceAudioPatchSignalE(SWGAudioDevicesSelect* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceChannelsSignalE(SWGInstanceChannelsResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);

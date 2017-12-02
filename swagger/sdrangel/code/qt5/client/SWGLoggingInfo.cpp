@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGLoggingInfo::SWGLoggingInfo(QString* json) {
     init();
@@ -71,10 +71,10 @@ SWGLoggingInfo::fromJson(QString &json) {
 
 void
 SWGLoggingInfo::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&console_level, pJson["consoleLevel"], "QString", "QString");
-    ::Swagger::setValue(&file_level, pJson["fileLevel"], "QString", "QString");
-    ::Swagger::setValue(&dump_to_file, pJson["dumpToFile"], "qint32", "");
-    ::Swagger::setValue(&file_name, pJson["fileName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&console_level, pJson["consoleLevel"], "QString", "QString");
+    ::SWGSDRangel::setValue(&file_level, pJson["fileLevel"], "QString", "QString");
+    ::SWGSDRangel::setValue(&dump_to_file, pJson["dumpToFile"], "qint32", "");
+    ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
 }
 
 QString

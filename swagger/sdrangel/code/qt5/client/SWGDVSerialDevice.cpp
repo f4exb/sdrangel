@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGDVSerialDevice::SWGDVSerialDevice(QString* json) {
     init();
@@ -59,7 +59,7 @@ SWGDVSerialDevice::fromJson(QString &json) {
 
 void
 SWGDVSerialDevice::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&device_name, pJson["deviceName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&device_name, pJson["deviceName"], "QString", "QString");
 }
 
 QString

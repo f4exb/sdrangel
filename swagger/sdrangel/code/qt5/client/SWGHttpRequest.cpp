@@ -18,7 +18,7 @@
 #include <QtGlobal>
 
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 HttpRequestInput::HttpRequestInput() {
     initialize();

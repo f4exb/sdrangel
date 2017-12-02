@@ -26,7 +26,7 @@
 #include "SWGObject.h"
 
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGAudioDevicesSelect: public SWGObject {
 public:

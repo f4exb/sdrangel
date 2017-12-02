@@ -27,7 +27,7 @@
 
 enum HttpRequestVarLayout {NOT_SET, ADDRESS, URL_ENCODED, MULTIPART};
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGHttpRequestInputFileElement {
 

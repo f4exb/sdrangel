@@ -10,126 +10,26 @@
  * Do not edit the class manually.
  */
 
-#include "SWGDefaultApi.h"
+#include "SWGInstanceApi.h"
 #include "SWGHelpers.h"
 #include "SWGModelFactory.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
-SWGDefaultApi::SWGDefaultApi() {}
+SWGInstanceApi::SWGInstanceApi() {}
 
-SWGDefaultApi::~SWGDefaultApi() {}
+SWGInstanceApi::~SWGInstanceApi() {}
 
-SWGDefaultApi::SWGDefaultApi(QString host, QString basePath) {
+SWGInstanceApi::SWGInstanceApi(QString host, QString basePath) {
     this->host = host;
     this->basePath = basePath;
 }
 
 void
-SWGDefaultApi::devicesetDevicePut(qint32 device_set_index) {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device");
-
-    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
-    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
-
-
-    HttpRequestWorker *worker = new HttpRequestWorker();
-    HttpRequestInput input(fullPath, "PUT");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &HttpRequestWorker::on_execution_finished,
-            this,
-            &SWGDefaultApi::devicesetDevicePutCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGDefaultApi::devicesetDevicePutCallback(HttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGDeviceSet* output = static_cast<SWGDeviceSet*>(create(json, QString("SWGDeviceSet")));
-    worker->deleteLater();
-
-    emit devicesetDevicePutSignal(output);
-    emit devicesetDevicePutSignalE(output, error_type, error_str);
-}
-
-void
-SWGDefaultApi::devicesetGet(qint32 device_set_index) {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}");
-
-    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
-    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
-
-
-    HttpRequestWorker *worker = new HttpRequestWorker();
-    HttpRequestInput input(fullPath, "GET");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &HttpRequestWorker::on_execution_finished,
-            this,
-            &SWGDefaultApi::devicesetGetCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGDefaultApi::devicesetGetCallback(HttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGDeviceSet* output = static_cast<SWGDeviceSet*>(create(json, QString("SWGDeviceSet")));
-    worker->deleteLater();
-
-    emit devicesetGetSignal(output);
-    emit devicesetGetSignalE(output, error_type, error_str);
-}
-
-void
-SWGDefaultApi::instanceAudioGet() {
+SWGInstanceApi::instanceAudioGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio");
 
@@ -149,13 +49,13 @@ SWGDefaultApi::instanceAudioGet() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceAudioGetCallback);
+            &SWGInstanceApi::instanceAudioGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceAudioGetCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceAudioGetCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -177,7 +77,7 @@ SWGDefaultApi::instanceAudioGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceAudioPatch(SWGAudioDevicesSelect body) {
+SWGInstanceApi::instanceAudioPatch(SWGAudioDevicesSelect body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio");
 
@@ -199,13 +99,13 @@ SWGDefaultApi::instanceAudioPatch(SWGAudioDevicesSelect body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceAudioPatchCallback);
+            &SWGInstanceApi::instanceAudioPatchCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceAudioPatchCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceAudioPatchCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -227,7 +127,7 @@ SWGDefaultApi::instanceAudioPatchCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceChannels(qint32 tx) {
+SWGInstanceApi::instanceChannels(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/channels");
 
@@ -255,13 +155,13 @@ SWGDefaultApi::instanceChannels(qint32 tx) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceChannelsCallback);
+            &SWGInstanceApi::instanceChannelsCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceChannelsCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceChannelsCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -283,7 +183,7 @@ SWGDefaultApi::instanceChannelsCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDVSerialPatch(qint32 dvserial) {
+SWGInstanceApi::instanceDVSerialPatch(qint32 dvserial) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/dvserial");
 
@@ -311,13 +211,13 @@ SWGDefaultApi::instanceDVSerialPatch(qint32 dvserial) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceDVSerialPatchCallback);
+            &SWGInstanceApi::instanceDVSerialPatchCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceDVSerialPatchCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceDVSerialPatchCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -339,7 +239,7 @@ SWGDefaultApi::instanceDVSerialPatchCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsDelete() {
+SWGInstanceApi::instanceDeviceSetsDelete() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devicesets");
 
@@ -359,13 +259,13 @@ SWGDefaultApi::instanceDeviceSetsDelete() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceDeviceSetsDeleteCallback);
+            &SWGInstanceApi::instanceDeviceSetsDeleteCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsDeleteCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceDeviceSetsDeleteCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -387,7 +287,7 @@ SWGDefaultApi::instanceDeviceSetsDeleteCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsGet() {
+SWGInstanceApi::instanceDeviceSetsGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devicesets");
 
@@ -407,13 +307,13 @@ SWGDefaultApi::instanceDeviceSetsGet() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceDeviceSetsGetCallback);
+            &SWGInstanceApi::instanceDeviceSetsGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsGetCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceDeviceSetsGetCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -435,7 +335,7 @@ SWGDefaultApi::instanceDeviceSetsGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsPost(qint32 tx) {
+SWGInstanceApi::instanceDeviceSetsPost(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devicesets");
 
@@ -463,13 +363,13 @@ SWGDefaultApi::instanceDeviceSetsPost(qint32 tx) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceDeviceSetsPostCallback);
+            &SWGInstanceApi::instanceDeviceSetsPostCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceDeviceSetsPostCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceDeviceSetsPostCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -491,7 +391,7 @@ SWGDefaultApi::instanceDeviceSetsPostCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceDevices(qint32 tx) {
+SWGInstanceApi::instanceDevices(qint32 tx) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/devices");
 
@@ -519,13 +419,13 @@ SWGDefaultApi::instanceDevices(qint32 tx) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceDevicesCallback);
+            &SWGInstanceApi::instanceDevicesCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceDevicesCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceDevicesCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -547,7 +447,7 @@ SWGDefaultApi::instanceDevicesCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceLocationGet() {
+SWGInstanceApi::instanceLocationGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/location");
 
@@ -567,13 +467,13 @@ SWGDefaultApi::instanceLocationGet() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceLocationGetCallback);
+            &SWGInstanceApi::instanceLocationGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceLocationGetCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceLocationGetCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -595,7 +495,7 @@ SWGDefaultApi::instanceLocationGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceLocationPut(SWGLocationInformation body) {
+SWGInstanceApi::instanceLocationPut(SWGLocationInformation body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/location");
 
@@ -617,13 +517,13 @@ SWGDefaultApi::instanceLocationPut(SWGLocationInformation body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceLocationPutCallback);
+            &SWGInstanceApi::instanceLocationPutCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceLocationPutCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceLocationPutCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -645,7 +545,7 @@ SWGDefaultApi::instanceLocationPutCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceLoggingGet() {
+SWGInstanceApi::instanceLoggingGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/logging");
 
@@ -665,13 +565,13 @@ SWGDefaultApi::instanceLoggingGet() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceLoggingGetCallback);
+            &SWGInstanceApi::instanceLoggingGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceLoggingGetCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceLoggingGetCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -693,7 +593,7 @@ SWGDefaultApi::instanceLoggingGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceLoggingPut(SWGLoggingInfo body) {
+SWGInstanceApi::instanceLoggingPut(SWGLoggingInfo body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/logging");
 
@@ -715,13 +615,13 @@ SWGDefaultApi::instanceLoggingPut(SWGLoggingInfo body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceLoggingPutCallback);
+            &SWGInstanceApi::instanceLoggingPutCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceLoggingPutCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceLoggingPutCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -743,7 +643,7 @@ SWGDefaultApi::instanceLoggingPutCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instancePresetDelete(SWGPresetIdentifier body) {
+SWGInstanceApi::instancePresetDelete(SWGPresetIdentifier body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
 
@@ -765,13 +665,13 @@ SWGDefaultApi::instancePresetDelete(SWGPresetIdentifier body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instancePresetDeleteCallback);
+            &SWGInstanceApi::instancePresetDeleteCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instancePresetDeleteCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instancePresetDeleteCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -793,7 +693,7 @@ SWGDefaultApi::instancePresetDeleteCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instancePresetGet() {
+SWGInstanceApi::instancePresetGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
 
@@ -813,13 +713,13 @@ SWGDefaultApi::instancePresetGet() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instancePresetGetCallback);
+            &SWGInstanceApi::instancePresetGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instancePresetGetCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instancePresetGetCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -841,7 +741,7 @@ SWGDefaultApi::instancePresetGetCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instancePresetPatch(SWGPresetTransfer body) {
+SWGInstanceApi::instancePresetPatch(SWGPresetTransfer body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
 
@@ -863,13 +763,13 @@ SWGDefaultApi::instancePresetPatch(SWGPresetTransfer body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instancePresetPatchCallback);
+            &SWGInstanceApi::instancePresetPatchCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instancePresetPatchCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instancePresetPatchCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -891,7 +791,7 @@ SWGDefaultApi::instancePresetPatchCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instancePresetPost(SWGPresetTransfer body) {
+SWGInstanceApi::instancePresetPost(SWGPresetTransfer body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
 
@@ -913,13 +813,13 @@ SWGDefaultApi::instancePresetPost(SWGPresetTransfer body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instancePresetPostCallback);
+            &SWGInstanceApi::instancePresetPostCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instancePresetPostCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instancePresetPostCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -941,7 +841,7 @@ SWGDefaultApi::instancePresetPostCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instancePresetPut(SWGPresetTransfer body) {
+SWGInstanceApi::instancePresetPut(SWGPresetTransfer body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
 
@@ -963,13 +863,13 @@ SWGDefaultApi::instancePresetPut(SWGPresetTransfer body) {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instancePresetPutCallback);
+            &SWGInstanceApi::instancePresetPutCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instancePresetPutCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instancePresetPutCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -991,7 +891,7 @@ SWGDefaultApi::instancePresetPutCallback(HttpRequestWorker * worker) {
 }
 
 void
-SWGDefaultApi::instanceSummary() {
+SWGInstanceApi::instanceSummary() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel");
 
@@ -1011,13 +911,13 @@ SWGDefaultApi::instanceSummary() {
     connect(worker,
             &HttpRequestWorker::on_execution_finished,
             this,
-            &SWGDefaultApi::instanceSummaryCallback);
+            &SWGInstanceApi::instanceSummaryCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDefaultApi::instanceSummaryCallback(HttpRequestWorker * worker) {
+SWGInstanceApi::instanceSummaryCallback(HttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;

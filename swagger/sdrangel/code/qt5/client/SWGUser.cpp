@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGUser::SWGUser(QString* json) {
     init();
@@ -61,8 +61,8 @@ SWGUser::fromJson(QString &json) {
 
 void
 SWGUser::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&index, pJson["index"], "qint32", "");
-    ::Swagger::setValue(&name, pJson["name"], "QString", "QString");
+    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
 }
 
 QString

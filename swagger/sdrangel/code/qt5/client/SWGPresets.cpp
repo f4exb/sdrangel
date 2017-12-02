@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGPresets::SWGPresets(QString* json) {
     init();
@@ -65,9 +65,9 @@ SWGPresets::fromJson(QString &json) {
 
 void
 SWGPresets::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&nb_groups, pJson["nbGroups"], "qint32", "");
+    ::SWGSDRangel::setValue(&nb_groups, pJson["nbGroups"], "qint32", "");
     
-    ::Swagger::setValue(&groups, pJson["groups"], "QList", "SWGPresetGroup");
+    ::SWGSDRangel::setValue(&groups, pJson["groups"], "QList", "SWGPresetGroup");
     
 }
 

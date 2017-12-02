@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGLocationInformation::SWGLocationInformation(QString* json) {
     init();
@@ -58,8 +58,8 @@ SWGLocationInformation::fromJson(QString &json) {
 
 void
 SWGLocationInformation::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&latitude, pJson["latitude"], "float", "");
-    ::Swagger::setValue(&longitude, pJson["longitude"], "float", "");
+    ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
+    ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
 }
 
 QString

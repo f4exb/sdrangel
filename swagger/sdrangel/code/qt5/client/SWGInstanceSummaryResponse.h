@@ -30,7 +30,7 @@
 #include "SWGObject.h"
 
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGInstanceSummaryResponse: public SWGObject {
 public:

@@ -109,8 +109,8 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 {
     if (request.getMethod() == "GET")
     {
-        Swagger::SWGInstanceSummaryResponse normalResponse;
-        Swagger::SWGErrorResponse errorResponse;
+        SWGSDRangel::SWGInstanceSummaryResponse normalResponse;
+        SWGSDRangel::SWGErrorResponse errorResponse;
 
         int status = m_adapter->instanceSummary(normalResponse, errorResponse);
         response.setStatus(status);
@@ -130,8 +130,8 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 
 void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGInstanceDevicesResponse normalResponse;
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGInstanceDevicesResponse normalResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
@@ -160,8 +160,8 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
 
 void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGInstanceChannelsResponse normalResponse;
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGInstanceChannelsResponse normalResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
@@ -190,8 +190,8 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
 
 void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGLoggingInfo normalResponse;
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGLoggingInfo normalResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
@@ -230,11 +230,11 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
 
 void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
-        Swagger::SWGAudioDevices normalResponse;
+        SWGSDRangel::SWGAudioDevices normalResponse;
 
         int status = m_adapter->instanceAudioGet(normalResponse, errorResponse);
         response.setStatus(status);
@@ -247,7 +247,7 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
     }
     else if (request.getMethod() == "PATCH")
     {
-        Swagger::SWGAudioDevicesSelect normalResponse;
+        SWGSDRangel::SWGAudioDevicesSelect normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -272,11 +272,11 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
 
 void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
-        Swagger::SWGLocationInformation normalResponse;
+        SWGSDRangel::SWGLocationInformation normalResponse;
 
         int status = m_adapter->instanceLocationGet(normalResponse, errorResponse);
         response.setStatus(status);
@@ -289,7 +289,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
     }
     else if (request.getMethod() == "PUT")
     {
-        Swagger::SWGLocationInformation normalResponse;
+        SWGSDRangel::SWGLocationInformation normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -314,7 +314,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
 
 void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "PATCH")
     {
@@ -325,7 +325,7 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
             dvserial = !(dvserialStr == "0");
         }
 
-        Swagger::SWGDVSeralDevices normalResponse;
+        SWGSDRangel::SWGDVSeralDevices normalResponse;
 
         int status = m_adapter->instanceDVSerialPatch(dvserial, normalResponse, errorResponse);
         response.setStatus(status);
@@ -345,11 +345,11 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
 
 void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
-        Swagger::SWGPresets normalResponse;
+        SWGSDRangel::SWGPresets normalResponse;
         int status = m_adapter->instancePresetGet(normalResponse, errorResponse);
         response.setStatus(status);
 
@@ -361,8 +361,8 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     }
     else if (request.getMethod() == "PATCH")
     {
-        Swagger::SWGPresetTransfer query;
-        Swagger::SWGPresetIdentifier normalResponse;
+        SWGSDRangel::SWGPresetTransfer query;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -391,8 +391,8 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     }
     else if (request.getMethod() == "PUT")
     {
-        Swagger::SWGPresetTransfer query;
-        Swagger::SWGPresetIdentifier normalResponse;
+        SWGSDRangel::SWGPresetTransfer query;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -421,8 +421,8 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     }
     else if (request.getMethod() == "POST")
     {
-        Swagger::SWGPresetTransfer query;
-        Swagger::SWGPresetIdentifier normalResponse;
+        SWGSDRangel::SWGPresetTransfer query;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -451,7 +451,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     }
     else if (request.getMethod() == "DELETE")
     {
-        Swagger::SWGPresetIdentifier normalResponse;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
 
         if (parseJsonBody(jsonStr, response))
@@ -487,11 +487,11 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
 
 void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
-        Swagger::SWGDeviceSetList normalResponse;
+        SWGSDRangel::SWGDeviceSetList normalResponse;
         int status = m_adapter->instanceDeviceSetsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
@@ -503,7 +503,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
     else if (request.getMethod() == "POST")
     {
-        Swagger::SWGDeviceSet normalResponse;
+        SWGSDRangel::SWGDeviceSet normalResponse;
         QByteArray txStr = request.getParameter("tx");
         bool tx = false;
 
@@ -522,7 +522,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
     else if (request.getMethod() == "DELETE")
     {
-        Swagger::SWGDeviceSetList normalResponse;
+        SWGSDRangel::SWGDeviceSetList normalResponse;
         int status = m_adapter->instanceDeviceSetsDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
@@ -541,13 +541,13 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
 
 void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     if (request.getMethod() == "GET")
     {
         try
         {
-            Swagger::SWGDeviceSet normalResponse;
+            SWGSDRangel::SWGDeviceSet normalResponse;
             int deviceSetIndex = boost::lexical_cast<int>(indexStr);
             int status = m_adapter->devicesetGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
@@ -575,7 +575,7 @@ void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpR
 
 void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     try
     {
@@ -583,7 +583,7 @@ void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp:
 
         if (request.getMethod() == "PUT")
         {
-            Swagger::SWGDeviceListItem normalResponse;
+            SWGSDRangel::SWGDeviceListItem normalResponse;
             QString jsonStr = request.getBody();
 
             if (parseJsonBody(jsonStr, response))
@@ -617,7 +617,7 @@ void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp:
 
 bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response)
 {
-    Swagger::SWGErrorResponse errorResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
 
     try
     {
@@ -648,9 +648,9 @@ bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse
     }
 }
 
-bool WebAPIRequestMapper::validatePresetTransfer(Swagger::SWGPresetTransfer& presetTransfer)
+bool WebAPIRequestMapper::validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer)
 {
-    Swagger::SWGPresetIdentifier *presetIdentifier = presetTransfer.getPreset();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = presetTransfer.getPreset();
 
     if (presetIdentifier == 0) {
         return false;
@@ -659,7 +659,7 @@ bool WebAPIRequestMapper::validatePresetTransfer(Swagger::SWGPresetTransfer& pre
     return validatePresetIdentifer(*presetIdentifier);
 }
 
-bool WebAPIRequestMapper::validatePresetIdentifer(Swagger::SWGPresetIdentifier& presetIdentifier)
+bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier)
 {
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
 }

@@ -22,7 +22,7 @@
 #include <QString>
 #include <regex>
 
-namespace Swagger
+namespace SWGSDRangel
 {
     class SWGInstanceSummaryResponse;
     class SWGInstanceDevicesResponse;
@@ -51,8 +51,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceSummary(
-            Swagger::SWGInstanceSummaryResponse& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -61,8 +61,8 @@ public:
      */
     virtual int instanceDevices(
             bool tx __attribute__((unused)),
-            Swagger::SWGInstanceDevicesResponse& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGInstanceDevicesResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -71,8 +71,8 @@ public:
      */
     virtual int instanceChannels(
             bool tx __attribute__((unused)),
-            Swagger::SWGInstanceChannelsResponse& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGInstanceChannelsResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -80,8 +80,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLoggingGet(
-            Swagger::SWGLoggingInfo& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -89,8 +89,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLoggingPut(
-            Swagger::SWGLoggingInfo& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -98,8 +98,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioGet(
-            Swagger::SWGAudioDevices& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGAudioDevices& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -107,8 +107,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioPatch(
-            Swagger::SWGAudioDevicesSelect& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGAudioDevicesSelect& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -116,8 +116,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLocationGet(
-            Swagger::SWGLocationInformation& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -125,8 +125,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLocationPut(
-            Swagger::SWGLocationInformation& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -135,8 +135,8 @@ public:
      */
     virtual int instanceDVSerialPatch(
             bool dvserial __attribute__((unused)),
-            Swagger::SWGDVSeralDevices& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -144,8 +144,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetGet(
-            Swagger::SWGPresets& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGPresets& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -153,9 +153,9 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPatch(
-            Swagger::SWGPresetTransfer& query __attribute__((unused)),
-            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -163,9 +163,9 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPut(
-            Swagger::SWGPresetTransfer& query __attribute__((unused)),
-            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -173,9 +173,9 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPost(
-            Swagger::SWGPresetTransfer& query __attribute__((unused)),
-            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -183,8 +183,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetDelete(
-            Swagger::SWGPresetIdentifier& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -192,8 +192,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsGet(
-            Swagger::SWGDeviceSetList& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDeviceSetList& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -202,8 +202,8 @@ public:
      */
     virtual int instanceDeviceSetsPost(
             bool tx __attribute__((unused)),
-            Swagger::SWGDeviceSet& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDeviceSet& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -211,8 +211,8 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsDelete(
-            Swagger::SWGDeviceSetList& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDeviceSetList& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -221,8 +221,8 @@ public:
      */
     virtual int devicesetGet(
             int deviceSetIndex __attribute__((unused)),
-            Swagger::SWGDeviceSet& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDeviceSet& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     /**
@@ -231,8 +231,8 @@ public:
      */
     virtual int devicesetDevicePut(
             int deviceSetIndex __attribute__((unused)),
-            Swagger::SWGDeviceListItem& response __attribute__((unused)),
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDeviceListItem& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
     static QString instanceSummaryURL;

@@ -27,7 +27,7 @@
 #include "SWGObject.h"
 
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGPresetItem: public SWGObject {
 public:

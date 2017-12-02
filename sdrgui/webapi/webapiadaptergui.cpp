@@ -64,13 +64,13 @@ WebAPIAdapterGUI::~WebAPIAdapterGUI()
 }
 
 int WebAPIAdapterGUI::instanceSummary(
-            Swagger::SWGInstanceSummaryResponse& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGInstanceSummaryResponse& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
 
     *response.getVersion() = qApp->applicationVersion();
 
-    Swagger::SWGLoggingInfo *logging = response.getLogging();
+    SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
     logging->init();
     logging->setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
 
@@ -81,7 +81,7 @@ int WebAPIAdapterGUI::instanceSummary(
 
     m_mainWindow.m_logger->getConsoleMinMessageLevelStr(*logging->getConsoleLevel());
 
-    Swagger::SWGDeviceSetList *deviceSetList = response.getDevicesetlist();
+    SWGSDRangel::SWGDeviceSetList *deviceSetList = response.getDevicesetlist();
     getDeviceSetList(deviceSetList);
 
     return 200;
@@ -89,17 +89,17 @@ int WebAPIAdapterGUI::instanceSummary(
 
 int WebAPIAdapterGUI::instanceDevices(
             bool tx,
-            Swagger::SWGInstanceDevicesResponse& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGInstanceDevicesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
     response.setDevicecount(nbSamplingDevices);
-    QList<Swagger::SWGDeviceListItem*> *devices = response.getDevices();
+    QList<SWGSDRangel::SWGDeviceListItem*> *devices = response.getDevices();
 
     for (int i = 0; i < nbSamplingDevices; i++)
     {
         PluginInterface::SamplingDevice samplingDevice = tx ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
-        devices->append(new Swagger::SWGDeviceListItem);
+        devices->append(new SWGSDRangel::SWGDeviceListItem);
         *devices->back()->getDisplayedName() = samplingDevice.displayedName;
         *devices->back()->getHwType() = samplingDevice.hardwareId;
         *devices->back()->getSerial() = samplingDevice.serial;
@@ -115,17 +115,17 @@ int WebAPIAdapterGUI::instanceDevices(
 
 int WebAPIAdapterGUI::instanceChannels(
             bool tx,
-            Swagger::SWGInstanceChannelsResponse& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGInstanceChannelsResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainWindow.m_pluginManager->getTxChannelRegistrations() : m_mainWindow.m_pluginManager->getRxChannelRegistrations();
     int nbChannelDevices = channelRegistrations->size();
     response.setChannelcount(nbChannelDevices);
-    QList<Swagger::SWGChannelListItem*> *channels = response.getChannels();
+    QList<SWGSDRangel::SWGChannelListItem*> *channels = response.getChannels();
 
     for (int i = 0; i < nbChannelDevices; i++)
     {
-        channels->append(new Swagger::SWGChannelListItem);
+        channels->append(new SWGSDRangel::SWGChannelListItem);
         PluginInterface *channelInterface = channelRegistrations->at(i).m_plugin;
         const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
         *channels->back()->getVersion() = pluginDescriptor.version;
@@ -140,8 +140,8 @@ int WebAPIAdapterGUI::instanceChannels(
 }
 
 int WebAPIAdapterGUI::instanceLoggingGet(
-            Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
 
@@ -156,8 +156,8 @@ int WebAPIAdapterGUI::instanceLoggingGet(
 }
 
 int WebAPIAdapterGUI::instanceLoggingPut(
-            Swagger::SWGLoggingInfo& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     // response input is the query actually
     bool dumpToFile = (response.getDumpToFile() != 0);
@@ -193,8 +193,8 @@ int WebAPIAdapterGUI::instanceLoggingPut(
 }
 
 int WebAPIAdapterGUI::instanceAudioGet(
-            Swagger::SWGAudioDevices& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGAudioDevices& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_audioDeviceInfo.getInputDevices();
     const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_audioDeviceInfo.getOutputDevices();
@@ -207,18 +207,18 @@ int WebAPIAdapterGUI::instanceAudioGet(
     response.setNbOutputDevices(nbOutputDevices);
     response.setOutputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
     response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
-    QList<Swagger::SWGAudioDevice*> *inputDevices = response.getInputDevices();
-    QList<Swagger::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
+    QList<SWGSDRangel::SWGAudioDevice*> *inputDevices = response.getInputDevices();
+    QList<SWGSDRangel::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
 
     for (int i = 0; i < nbInputDevices; i++)
     {
-        inputDevices->append(new Swagger::SWGAudioDevice);
+        inputDevices->append(new SWGSDRangel::SWGAudioDevice);
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
     }
 
     for (int i = 0; i < nbOutputDevices; i++)
     {
-        outputDevices->append(new Swagger::SWGAudioDevice);
+        outputDevices->append(new SWGSDRangel::SWGAudioDevice);
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
     }
 
@@ -226,8 +226,8 @@ int WebAPIAdapterGUI::instanceAudioGet(
 }
 
 int WebAPIAdapterGUI::instanceAudioPatch(
-            Swagger::SWGAudioDevicesSelect& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGAudioDevicesSelect& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     // response input is the query actually
     float inputVolume = response.getInputVolume();
@@ -259,8 +259,8 @@ int WebAPIAdapterGUI::instanceAudioPatch(
 }
 
 int WebAPIAdapterGUI::instanceLocationGet(
-            Swagger::SWGLocationInformation& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGLocationInformation& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     response.setLatitude(m_mainWindow.m_settings.getLatitude());
     response.setLongitude(m_mainWindow.m_settings.getLongitude());
@@ -269,8 +269,8 @@ int WebAPIAdapterGUI::instanceLocationGet(
 }
 
 int WebAPIAdapterGUI::instanceLocationPut(
-            Swagger::SWGLocationInformation& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGLocationInformation& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     float latitude = response.getLatitude();
     float longitude = response.getLongitude();
@@ -289,8 +289,8 @@ int WebAPIAdapterGUI::instanceLocationPut(
 
 int WebAPIAdapterGUI::instanceDVSerialPatch(
             bool dvserial,
-            Swagger::SWGDVSeralDevices& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     m_mainWindow.m_dspEngine->setDVSerialSupport(dvserial);
     m_mainWindow.ui->action_DV_Serial->setChecked(dvserial);
@@ -301,14 +301,14 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
         std::vector<std::string> deviceNames;
         m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
         response.setNbDevices((int) deviceNames.size());
-        QList<Swagger::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
+        QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
         std::vector<std::string>::iterator it = deviceNames.begin();
         std::string deviceNamesStr = "DV Serial devices found: ";
 
         while (it != deviceNames.end())
         {
-            deviceNamesList->append(new Swagger::SWGDVSerialDevice);
+            deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
             *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
             ++it;
         }
@@ -322,16 +322,16 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
 }
 
 int WebAPIAdapterGUI::instancePresetGet(
-            Swagger::SWGPresets& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGPresets& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     int nbPresets = m_mainWindow.m_settings.getPresetCount();
     int nbGroups = 0;
     int nbPresetsThisGroup = 0;
     QString groupName;
     response.init();
-    QList<Swagger::SWGPresetGroup*> *groups = response.getGroups();
-    QList<Swagger::SWGPresetItem*> *swgPresets = 0;
+    QList<SWGSDRangel::SWGPresetGroup*> *groups = response.getGroups();
+    QList<SWGSDRangel::SWGPresetItem*> *swgPresets = 0;
     int i = 0;
 
     // Presets are sorted by group first
@@ -343,7 +343,7 @@ int WebAPIAdapterGUI::instancePresetGet(
         if ((i == 0) || (groupName != preset->getGroup())) // new group
         {
             if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
-            groups->append(new Swagger::SWGPresetGroup);
+            groups->append(new SWGSDRangel::SWGPresetGroup);
             groups->back()->init();
             groupName = preset->getGroup();
             *groups->back()->getGroupName() = groupName;
@@ -352,7 +352,7 @@ int WebAPIAdapterGUI::instancePresetGet(
             nbPresetsThisGroup = 0;
         }
 
-        swgPresets->append(new Swagger::SWGPresetItem);
+        swgPresets->append(new SWGSDRangel::SWGPresetItem);
         swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
         *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
         *swgPresets->back()->getName() = preset->getDescription();
@@ -366,12 +366,12 @@ int WebAPIAdapterGUI::instancePresetGet(
 }
 
 int WebAPIAdapterGUI::instancePresetPatch(
-        Swagger::SWGPresetTransfer& query,
-        Swagger::SWGPresetIdentifier& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGPresetTransfer& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     int deviceSetIndex = query.getDeviceSetIndex();
-    Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
 
     if (deviceSetIndex > nbDeviceSets)
@@ -420,12 +420,12 @@ int WebAPIAdapterGUI::instancePresetPatch(
 }
 
 int WebAPIAdapterGUI::instancePresetPut(
-        Swagger::SWGPresetTransfer& query,
-        Swagger::SWGPresetIdentifier& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGPresetTransfer& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     int deviceSetIndex = query.getDeviceSetIndex();
-    Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
 
     if (deviceSetIndex > nbDeviceSets)
@@ -476,12 +476,12 @@ int WebAPIAdapterGUI::instancePresetPut(
 }
 
 int WebAPIAdapterGUI::instancePresetPost(
-        Swagger::SWGPresetTransfer& query,
-        Swagger::SWGPresetIdentifier& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGPresetTransfer& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     int deviceSetIndex = query.getDeviceSetIndex();
-    Swagger::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
 
     if (deviceSetIndex > nbDeviceSets)
@@ -520,8 +520,8 @@ int WebAPIAdapterGUI::instancePresetPost(
 }
 
 int WebAPIAdapterGUI::instancePresetDelete(
-        Swagger::SWGPresetIdentifier& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*response.getGroupName(),
             response.getCenterFrequency(),
@@ -548,8 +548,8 @@ int WebAPIAdapterGUI::instancePresetDelete(
 }
 
 int WebAPIAdapterGUI::instanceDeviceSetsGet(
-            Swagger::SWGDeviceSetList& response,
-            Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGDeviceSetList& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     getDeviceSetList(&response);
     return 200;
@@ -557,8 +557,8 @@ int WebAPIAdapterGUI::instanceDeviceSetsGet(
 
 int WebAPIAdapterGUI::instanceDeviceSetsPost(
         bool tx,
-        Swagger::SWGDeviceSet& response,
-        Swagger::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGDeviceSet& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     MainWindow::MsgAddDeviceSet *msg = MainWindow::MsgAddDeviceSet::create(tx);
     m_mainWindow.m_inputMessageQueue.push(msg);
@@ -572,8 +572,8 @@ int WebAPIAdapterGUI::instanceDeviceSetsPost(
 }
 
 int WebAPIAdapterGUI::instanceDeviceSetsDelete(
-            Swagger::SWGDeviceSetList& response,
-            Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGDeviceSetList& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     if (m_mainWindow.m_deviceUIs.size() > 1)
     {
@@ -597,8 +597,8 @@ int WebAPIAdapterGUI::instanceDeviceSetsDelete(
 
 int WebAPIAdapterGUI::devicesetGet(
         int deviceSetIndex,
-        Swagger::SWGDeviceSet& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGDeviceSet& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
@@ -618,8 +618,8 @@ int WebAPIAdapterGUI::devicesetGet(
 
 int WebAPIAdapterGUI::devicesetDevicePut(
         int deviceSetIndex,
-        Swagger::SWGDeviceListItem& response,
-        Swagger::SWGErrorResponse& error)
+        SWGSDRangel::SWGDeviceListItem& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
@@ -693,7 +693,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     }
 }
 
-void WebAPIAdapterGUI::getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList)
+void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
     deviceSetList->setDevicesetcount((int) m_mainWindow.m_deviceUIs.size());
@@ -702,16 +702,16 @@ void WebAPIAdapterGUI::getDeviceSetList(Swagger::SWGDeviceSetList* deviceSetList
 
     for (int i = 0; it != m_mainWindow.m_deviceUIs.end(); ++it, i++)
     {
-        QList<Swagger::SWGDeviceSet*> *deviceSets = deviceSetList->getDeviceSets();
-        deviceSets->append(new Swagger::SWGDeviceSet());
+        QList<SWGSDRangel::SWGDeviceSet*> *deviceSets = deviceSetList->getDeviceSets();
+        deviceSets->append(new SWGSDRangel::SWGDeviceSet());
 
         getDeviceSet(deviceSets->back(), *it, i);
     }
 }
 
-void WebAPIAdapterGUI::getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex)
+void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex)
 {
-    Swagger::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
+    SWGSDRangel::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
     samplingDevice->init();
     samplingDevice->setIndex(deviceUISetIndex);
     samplingDevice->setTx(deviceUISet->m_deviceSinkEngine != 0);
@@ -732,11 +732,11 @@ void WebAPIAdapterGUI::getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const Devi
         }
 
         deviceSet->setChannelcount(deviceUISet->m_deviceSinkAPI->getNbChannels());
-        QList<Swagger::SWGChannel*> *channels = deviceSet->getChannels();
+        QList<SWGSDRangel::SWGChannel*> *channels = deviceSet->getChannels();
 
         for (int i = 0; i <  deviceSet->getChannelcount(); i++)
         {
-            channels->append(new Swagger::SWGChannel);
+            channels->append(new SWGSDRangel::SWGChannel);
             ChannelSourceAPI *channel = deviceUISet->m_deviceSinkAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -762,11 +762,11 @@ void WebAPIAdapterGUI::getDeviceSet(Swagger::SWGDeviceSet *deviceSet, const Devi
         }
 
         deviceSet->setChannelcount(deviceUISet->m_deviceSourceAPI->getNbChannels());
-        QList<Swagger::SWGChannel*> *channels = deviceSet->getChannels();
+        QList<SWGSDRangel::SWGChannel*> *channels = deviceSet->getChannels();
 
         for (int i = 0; i <  deviceSet->getChannelcount(); i++)
         {
-            channels->append(new Swagger::SWGChannel);
+            channels->append(new SWGSDRangel::SWGChannel);
             ChannelSinkAPI *channel = deviceUISet->m_deviceSourceAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());

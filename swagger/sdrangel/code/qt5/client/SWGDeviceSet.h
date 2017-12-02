@@ -29,7 +29,7 @@
 #include "SWGObject.h"
 
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 class SWGDeviceSet: public SWGObject {
 public:

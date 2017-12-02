@@ -20,7 +20,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Swagger {
+namespace SWGSDRangel {
 
 SWGDeviceSetList::SWGDeviceSetList(QString* json) {
     init();
@@ -65,9 +65,9 @@ SWGDeviceSetList::fromJson(QString &json) {
 
 void
 SWGDeviceSetList::fromJsonObject(QJsonObject &pJson) {
-    ::Swagger::setValue(&devicesetcount, pJson["devicesetcount"], "qint32", "");
+    ::SWGSDRangel::setValue(&devicesetcount, pJson["devicesetcount"], "qint32", "");
     
-    ::Swagger::setValue(&device_sets, pJson["deviceSets"], "QList", "SWGDeviceSet");
+    ::SWGSDRangel::setValue(&device_sets, pJson["deviceSets"], "QList", "SWGDeviceSet");
     
 }
 
