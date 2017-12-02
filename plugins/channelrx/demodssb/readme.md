@@ -16,22 +16,26 @@ This plugin can be used to listen to a single sideband or double sidebands modul
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-<h3>3: Channel power</h3>
+<h3>2: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>4: Monaural/binaural toggle</h3>
+<h3>3: Monaural/binaural toggle</h3>
 
   - Monaural: the scalar signal is routed to both left and right audio channels
   - Binaural: the complex signal is fed with the real part on the left audio channel and the imaginary part to the right audio channel
   
-<h3>5: Invert left and right channels</h3>
+<h3>4: Invert left and right channels</h3>
 
 Inverts left and right audio channels. Useful in binaural mode only.
 
+<h3>5: Sideband flip</h3>
+
+Flip LSB/USB. Mirror filter bandwidth around zero frequency and change from LSB to USB or vice versa. Works in SSB mode only.
+
 <h3>6: SSB/DSB demodulation</h3>
 
-Toggles between SSB (icon with one sideband signal) and DSB (icon with double sidebands signal)
+Toggles between SSB (icon with one sideband signal) and DSB (icon with double sidebands signal). In SSB mode the shape of the icon represents LSB or USB operation.
 
 <h3>7: Level meter in dB</h3>
 
@@ -61,7 +65,7 @@ This is how the Span (8) and bandpass (9, 10) fitler controls look like in the 3
 ![SSB Demodulator band controls DSB](../../../doc/img/SSBDemod_plugin_dsb.png)
 
   - Decimation factor is 4 hence span is 6 kHz from -3 to +3 kHz and &#177;3.0k is displayed
-  - In channel filter bandwidth is 4.8 kHz from -2.4 to +2.4 kHz and &#177;2.4k is displayed
+  - In channel filter bandwidth is 5.2 kHz from -2.6 to +2.6 kHz and &#177;2.6k is displayed
   - In channel filter "low cut" is disabled and set to 0
 
 **USB**:
@@ -69,18 +73,18 @@ This is how the Span (8) and bandpass (9, 10) fitler controls look like in the 3
 ![SSB Demodulator band controls USB](../../../doc/img/SSBDemod_plugin_usb.png)
 
   - Decimation factor is 4 hence span is 3 kHz from 0 to 3 kHz and 3.0k is displayed
-  - In channel filter upper cutoff is 2.4 kHz and 2.4k is displayed
+  - In channel filter upper cutoff is 2.6 kHz and 2.6k is displayed
   - In channel filter lower cutoff is 0.3 kHz and 0.3k is displayed
-  - Hence in channel filter bandwidth is 2.1 kHz
+  - Hence in channel filter bandwidth is 2.3 kHz
 
 **LSB**:
 
 ![SSB Demodulator band controls LSB](../../../doc/img/SSBDemod_plugin_lsb.png)
 
   - Decimation factor is 4 hence span is 3 kHz from 0 to -3 kHz and 3.0k is displayed
-  - In channel filter lower cutoff is -2.4 kHz and -2.4k is displayed
+  - In channel filter lower cutoff is -2.6 kHz and -2.6k is displayed
   - In channel filter upper cutoff is -0.3 kHz and -0.3k is displayed
-  - Hence in channel filter bandwidth is 2.1 kHz
+  - Hence in channel filter bandwidth is 2.3 kHz
 
 <h3>9: "BW": In channel bandpass filter cutoff frequency farthest from zero</h3>
 
@@ -140,10 +144,14 @@ To avoid unwanted squelch opening on short transient bursts only signals wilth p
 
 When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
 
-<h3>12: Audio mute</h3>
+<h3>12: Copy audio to UDP</h3>
+
+Copies audio output to UDP. Output is mono S16LE samples regardless of binaural/monaural operation.
+
+<h3>13: Audio mute</h3>
 
 Use this button to toggle audio mute for this channel.
 
-<h3>13: Spectrum display</h3>
+<h3>14: Spectrum display</h3>
 
 This is the spectrum display of the demodulated signal (SSB) or translated signal (DSB). Controls on the bottom of the panel are identical to the ones of the main spectrum display.
