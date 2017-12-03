@@ -24,10 +24,14 @@
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceSettingsImpl.h"
 #include "SWGErrorResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGLimeSdrInputSettings.h"
+#include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
 #include "SWGPresetGroup.h"
@@ -35,6 +39,7 @@
 #include "SWGPresetItem.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
+#include "SWGRtlSdrSettings.h"
 #include "SWGSamplingDevice.h"
 #include "SWGUser.h"
 
@@ -71,6 +76,12 @@ namespace SWGSDRangel {
     if(QString("SWGDeviceSetList").compare(type) == 0) {
       return new SWGDeviceSetList();
     }
+    if(QString("SWGDeviceSettings").compare(type) == 0) {
+      return new SWGDeviceSettings();
+    }
+    if(QString("SWGDeviceSettingsImpl").compare(type) == 0) {
+      return new SWGDeviceSettingsImpl();
+    }
     if(QString("SWGErrorResponse").compare(type) == 0) {
       return new SWGErrorResponse();
     }
@@ -82,6 +93,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGInstanceSummaryResponse").compare(type) == 0) {
       return new SWGInstanceSummaryResponse();
+    }
+    if(QString("SWGLimeSdrInputSettings").compare(type) == 0) {
+      return new SWGLimeSdrInputSettings();
+    }
+    if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
+      return new SWGLimeSdrOutputSettings();
     }
     if(QString("SWGLocationInformation").compare(type) == 0) {
       return new SWGLocationInformation();
@@ -103,6 +120,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPresets").compare(type) == 0) {
       return new SWGPresets();
+    }
+    if(QString("SWGRtlSdrSettings").compare(type) == 0) {
+      return new SWGRtlSdrSettings();
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();

@@ -530,7 +530,28 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
-        
+    get:
+      description: Get device settings
+      operationId: devicesetDeviceGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success returns current settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
@@ -914,4 +935,24 @@ definitions:
         description: "Index of the device set" 
         type: integer
       preset:
-        $ref: "#/definitions/PresetIdentifier"    
+        $ref: "#/definitions/PresetIdentifier"
+  DeviceSettings:
+    description: Base device settings
+    discriminator: deviceType
+    required:
+      - deviceType
+    properties:
+      deviceType:
+        type: string
+      data:
+        type: object
+  DeviceSettingsImpl:
+    description: dummy structure to handle all devices settings
+    properties:
+      rtlsdr:
+        $ref: "http://localhost:8081/RtlSdr.yaml#/RtlSdrSettings"
+      limesdrInput:
+        $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrInputSettings"
+      limesdrOutput:
+        $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrOutputSettings"
+      

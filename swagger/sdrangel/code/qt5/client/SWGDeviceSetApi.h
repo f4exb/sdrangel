@@ -17,6 +17,7 @@
 
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceSet.h"
+#include "SWGDeviceSettings.h"
 #include "SWGErrorResponse.h"
 
 #include <QObject>
@@ -35,17 +36,21 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
+    void devicesetDeviceGet(qint32 device_set_index);
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body);
     void devicesetGet(qint32 device_set_index);
     
 private:
+    void devicesetDeviceGetCallback (HttpRequestWorker * worker);
     void devicesetDevicePutCallback (HttpRequestWorker * worker);
     void devicesetGetCallback (HttpRequestWorker * worker);
     
 signals:
+    void devicesetDeviceGetSignal(SWGDeviceSettings* summary);
     void devicesetDevicePutSignal(SWGDeviceListItem* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     
+    void devicesetDeviceGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDevicePutSignalE(SWGDeviceListItem* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     

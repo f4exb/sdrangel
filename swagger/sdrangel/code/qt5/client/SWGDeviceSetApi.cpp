@@ -29,6 +29,56 @@ SWGDeviceSetApi::SWGDeviceSetApi(QString host, QString basePath) {
 }
 
 void
+SWGDeviceSetApi::devicesetDeviceGet(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    HttpRequestWorker *worker = new HttpRequestWorker();
+    HttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &HttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetDeviceGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceGetCallback(HttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGDeviceSettings* output = static_cast<SWGDeviceSettings*>(create(json, QString("SWGDeviceSettings")));
+    worker->deleteLater();
+
+    emit devicesetDeviceGetSignal(output);
+    emit devicesetDeviceGetSignalE(output, error_type, error_str);
+}
+
+void
 SWGDeviceSetApi::devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device");
