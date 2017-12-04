@@ -25,6 +25,11 @@
 #include "util/messagequeue.h"
 #include "util/export.h"
 
+namespace SWGSDRangel
+{
+    class SWGObject;
+}
+
 class SDRANGEL_API DeviceSampleSource : public QObject {
 	Q_OBJECT
 public:

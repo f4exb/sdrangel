@@ -38,6 +38,7 @@ namespace SWGSDRangel
     class SWGDeviceSetList;
     class SWGDeviceSet;
     class SWGDeviceListItem;
+    class SWGDeviceSettings;
     class SWGErrorResponse;
 }
 

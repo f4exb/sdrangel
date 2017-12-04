@@ -34,6 +34,7 @@
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
+#include "SWGDeviceSettings.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :

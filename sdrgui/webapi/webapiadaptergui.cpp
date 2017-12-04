@@ -50,6 +50,7 @@
 #include "SWGPresetItem.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
+#include "SWGDeviceSettings.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadaptergui.h"
@@ -698,32 +699,24 @@ int WebAPIAdapterGUI::devicesetDeviceGet(
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (m_mainWindow.m_deviceUIs < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
         DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
-        int tx = response.getTx();
 
-        if ((tx == 0) && (deviceSet->m_deviceSinkEngine))
-        {
-            *error.getMessage() = QString("Device type (Rx) and device set type (Tx) mismatch");
-            return 404;
-        }
-
-        if ((tx != 0) && (deviceSet->m_deviceSourceEngine))
-        {
-            *error.getMessage() = QString("Device type (Tx) and device set type (Rx) mismatch");
-            return 404;
-        }
-
-        if (tx == 0) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Rx
         {
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
             return source->webapiSettingsGet(response.getData(), *error.getMessage());
         }
-        else // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Tx
         {
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
             return sink->webapiSettingsGet(response.getData(), *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
         }
     }
     else
