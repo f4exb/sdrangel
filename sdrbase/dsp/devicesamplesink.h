@@ -41,6 +41,11 @@ public:
 
 	virtual bool handleMessage(const Message& message) = 0;
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGObject *response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }

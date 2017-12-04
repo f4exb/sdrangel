@@ -86,9 +86,9 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             std::string pathStr(path.constData(), path.length());
 
             if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetURLRe)) {
-                deviceset(std::string(desc_match[1]), request, response);
+                devicesetService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceURLRe)) {
-                devicesetDevice(std::string(desc_match[1]), request, response);
+                devicesetDeviceService(std::string(desc_match[1]), request, response);
             }
             else
             {
@@ -539,7 +539,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
 }
 
-void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
 
@@ -573,7 +573,7 @@ void WebAPIRequestMapper::deviceset(const std::string& indexStr, qtwebapp::HttpR
     }
 }
 
-void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
 
@@ -598,6 +598,18 @@ void WebAPIRequestMapper::devicesetDevice(const std::string& indexStr, qtwebapp:
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
                 }
+            }
+        }
+        else if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGDeviceSettings normalResponse;
+            int status = m_adapter->devicesetDeviceGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
             }
         }
         else

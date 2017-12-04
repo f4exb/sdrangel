@@ -120,6 +120,11 @@ public:
             SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

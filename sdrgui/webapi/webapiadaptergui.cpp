@@ -693,6 +693,48 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     }
 }
 
+int WebAPIAdapterGUI::devicesetDeviceGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (m_mainWindow.m_deviceUIs < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        int tx = response.getTx();
+
+        if ((tx == 0) && (deviceSet->m_deviceSinkEngine))
+        {
+            *error.getMessage() = QString("Device type (Rx) and device set type (Tx) mismatch");
+            return 404;
+        }
+
+        if ((tx != 0) && (deviceSet->m_deviceSourceEngine))
+        {
+            *error.getMessage() = QString("Device type (Tx) and device set type (Rx) mismatch");
+            return 404;
+        }
+
+        if (tx == 0) // Rx
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiSettingsGet(response.getData(), *error.getMessage());
+        }
+        else // Tx
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiSettingsGet(response.getData(), *error.getMessage());
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();

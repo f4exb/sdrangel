@@ -226,12 +226,22 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/devicesets (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDevicePut(
             int deviceSetIndex __attribute__((unused)),
             SWGSDRangel::SWGDeviceListItem& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceGet(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
