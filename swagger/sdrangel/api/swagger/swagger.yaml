@@ -949,6 +949,8 @@ definitions:
   DeviceSettingsImpl:
     description: dummy structure to handle all devices settings
     properties:
+      fileSource:
+        $ref: "http://localhost:8081/FileSource.yaml#/FileSourceSettings"
       rtlsdr:
         $ref: "http://localhost:8081/RtlSdr.yaml#/RtlSdrSettings"
       limesdrInput:
