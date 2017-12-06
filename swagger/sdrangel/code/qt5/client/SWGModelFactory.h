@@ -27,6 +27,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceSettingsImpl.h"
 #include "SWGErrorResponse.h"
+#include "SWGFileSourceSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
@@ -84,6 +85,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGErrorResponse").compare(type) == 0) {
       return new SWGErrorResponse();
+    }
+    if(QString("SWGFileSourceSettings").compare(type) == 0) {
+      return new SWGFileSourceSettings();
     }
     if(QString("SWGInstanceChannelsResponse").compare(type) == 0) {
       return new SWGInstanceChannelsResponse();

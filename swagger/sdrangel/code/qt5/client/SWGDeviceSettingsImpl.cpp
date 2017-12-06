@@ -37,6 +37,7 @@ SWGDeviceSettingsImpl::~SWGDeviceSettingsImpl() {
 
 void
 SWGDeviceSettingsImpl::init() {
+    file_source = new SWGFileSourceSettings();
     rtlsdr = new SWGRtlSdrSettings();
     limesdr_input = new SWGLimeSdrInputSettings();
     limesdr_output = new SWGLimeSdrOutputSettings();
@@ -45,6 +46,10 @@ SWGDeviceSettingsImpl::init() {
 void
 SWGDeviceSettingsImpl::cleanup() {
     
+    if(file_source != nullptr) {
+        delete file_source;
+    }
+
     if(rtlsdr != nullptr) {
         delete rtlsdr;
     }
@@ -69,6 +74,7 @@ SWGDeviceSettingsImpl::fromJson(QString &json) {
 
 void
 SWGDeviceSettingsImpl::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&file_source, pJson["fileSource"], "SWGFileSourceSettings", "SWGFileSourceSettings");
     ::SWGSDRangel::setValue(&rtlsdr, pJson["rtlsdr"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
     ::SWGSDRangel::setValue(&limesdr_input, pJson["limesdrInput"], "SWGLimeSdrInputSettings", "SWGLimeSdrInputSettings");
     ::SWGSDRangel::setValue(&limesdr_output, pJson["limesdrOutput"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
@@ -88,6 +94,8 @@ QJsonObject*
 SWGDeviceSettingsImpl::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
+    toJsonValue(QString("fileSource"), file_source, obj, QString("SWGFileSourceSettings"));
+
     toJsonValue(QString("rtlsdr"), rtlsdr, obj, QString("SWGRtlSdrSettings"));
 
     toJsonValue(QString("limesdrInput"), limesdr_input, obj, QString("SWGLimeSdrInputSettings"));
@@ -95,6 +103,15 @@ SWGDeviceSettingsImpl::asJsonObject() {
     toJsonValue(QString("limesdrOutput"), limesdr_output, obj, QString("SWGLimeSdrOutputSettings"));
 
     return obj;
+}
+
+SWGFileSourceSettings*
+SWGDeviceSettingsImpl::getFileSource() {
+    return file_source;
+}
+void
+SWGDeviceSettingsImpl::setFileSource(SWGFileSourceSettings* file_source) {
+    this->file_source = file_source;
 }
 
 SWGRtlSdrSettings*

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGFileSourceSettings.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
@@ -44,6 +45,9 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGDeviceSettingsImpl* fromJson(QString &jsonString);
 
+    SWGFileSourceSettings* getFileSource();
+    void setFileSource(SWGFileSourceSettings* file_source);
+
     SWGRtlSdrSettings* getRtlsdr();
     void setRtlsdr(SWGRtlSdrSettings* rtlsdr);
 
@@ -55,6 +59,7 @@ public:
 
 
 private:
+    SWGFileSourceSettings* file_source;
     SWGRtlSdrSettings* rtlsdr;
     SWGLimeSdrInputSettings* limesdr_input;
     SWGLimeSdrOutputSettings* limesdr_output;
