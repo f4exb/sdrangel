@@ -90,6 +90,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceURLRe)) {
                 devicesetDeviceService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceSettingsURLRe)) {
+                devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             }
             else
             {
@@ -601,15 +603,40 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
                 }
             }
         }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            response.write("Invalid HTTP method");
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "PUT")
+        {
+        }
+        else if (request.getMethod() == "PATCH")
+        {
+        }
         else if (request.getMethod() == "GET")
         {
             SWGSDRangel::SWGDeviceSettings normalResponse;
-            normalResponse.cleanup();
-            normalResponse.setFileSourceSettings(0);
-            normalResponse.setRtlSdrSettings(0);
-            normalResponse.setLimeSdrInputSettings(0);
-            normalResponse.setLimeSdrOutputSettings(0);
-            int status = m_adapter->devicesetDeviceGet(deviceSetIndex, normalResponse, errorResponse);
+            resetDeviceSettings(normalResponse);
+            int status = m_adapter->devicesetDeviceSettingsGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
 
             if (status == 200) {
@@ -682,4 +709,12 @@ bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifi
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
 }
 
+void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
+{
+    deviceSettings.cleanup();
+    deviceSettings.setFileSourceSettings(0);
+    deviceSettings.setRtlSdrSettings(0);
+    deviceSettings.setLimeSdrInputSettings(0);
+    deviceSettings.setLimeSdrOutputSettings(0);
+}
 

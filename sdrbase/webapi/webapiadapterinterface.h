@@ -217,7 +217,7 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/devicesets (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{devicesetIndex} (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetGet(
@@ -237,10 +237,10 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/deviceset/{devicesetIndex}/device (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
-    virtual int devicesetDeviceGet(
+    virtual int devicesetDeviceSettingsGet(
             int deviceSetIndex __attribute__((unused)),
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
@@ -257,6 +257,7 @@ public:
     static QString instanceDeviceSetsURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetDeviceURLRe;
+    static std::regex devicesetDeviceSettingsURLRe;
 };
 
 

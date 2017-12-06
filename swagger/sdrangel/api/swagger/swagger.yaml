@@ -530,9 +530,11 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/device/settings:
+    x-swagger-router-controller: deviceset
     get:
       description: Get device settings
-      operationId: devicesetDeviceGet
+      operationId: devicesetDeviceSettingsGet
       tags:
         - DeviceSet
       parameters:
@@ -569,8 +571,6 @@ definitions:
         $ref: "#/definitions/LoggingInfo"
       devicesetlist:
         $ref: "#/definitions/DeviceSetList"
-      user:
-        $ref: "http://localhost:8081/User.yaml#/User"
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
     required:

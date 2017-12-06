@@ -120,7 +120,7 @@ public:
             SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int devicesetDeviceGet(
+    virtual int devicesetDeviceSettingsGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);

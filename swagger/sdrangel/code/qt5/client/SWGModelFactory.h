@@ -41,7 +41,6 @@
 #include "SWGPresets.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSamplingDevice.h"
-#include "SWGUser.h"
 
 namespace SWGSDRangel {
 
@@ -126,9 +125,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();
-    }
-    if(QString("SWGUser").compare(type) == 0) {
-      return new SWGUser();
     }
     
     return nullptr;

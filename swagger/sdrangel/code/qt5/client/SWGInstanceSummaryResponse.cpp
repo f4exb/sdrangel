@@ -40,7 +40,6 @@ SWGInstanceSummaryResponse::init() {
     version = new QString("");
     logging = new SWGLoggingInfo();
     devicesetlist = new SWGDeviceSetList();
-    user = new SWGUser();
 }
 
 void
@@ -56,10 +55,6 @@ SWGInstanceSummaryResponse::cleanup() {
 
     if(devicesetlist != nullptr) {
         delete devicesetlist;
-    }
-
-    if(user != nullptr) {
-        delete user;
     }
 }
 
@@ -77,7 +72,6 @@ SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
     ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
     ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
-    ::SWGSDRangel::setValue(&user, pJson["user"], "SWGUser", "SWGUser");
 }
 
 QString
@@ -99,8 +93,6 @@ SWGInstanceSummaryResponse::asJsonObject() {
     toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
 
     toJsonValue(QString("devicesetlist"), devicesetlist, obj, QString("SWGDeviceSetList"));
-
-    toJsonValue(QString("user"), user, obj, QString("SWGUser"));
 
     return obj;
 }
@@ -130,15 +122,6 @@ SWGInstanceSummaryResponse::getDevicesetlist() {
 void
 SWGInstanceSummaryResponse::setDevicesetlist(SWGDeviceSetList* devicesetlist) {
     this->devicesetlist = devicesetlist;
-}
-
-SWGUser*
-SWGInstanceSummaryResponse::getUser() {
-    return user;
-}
-void
-SWGInstanceSummaryResponse::setUser(SWGUser* user) {
-    this->user = user;
 }
 
 

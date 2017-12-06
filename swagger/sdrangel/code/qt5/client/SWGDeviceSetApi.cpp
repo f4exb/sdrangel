@@ -31,7 +31,7 @@ SWGDeviceSetApi::SWGDeviceSetApi(QString host, QString basePath) {
 void
 SWGDeviceSetApi::devicesetDeviceGet(qint32 device_set_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/settings");
 
     QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
     fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));

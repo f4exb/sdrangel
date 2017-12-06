@@ -694,7 +694,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceGet(
+int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)

@@ -24,7 +24,6 @@
 
 #include "SWGDeviceSetList.h"
 #include "SWGLoggingInfo.h"
-#include "SWGUser.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -54,15 +53,11 @@ public:
     SWGDeviceSetList* getDevicesetlist();
     void setDevicesetlist(SWGDeviceSetList* devicesetlist);
 
-    SWGUser* getUser();
-    void setUser(SWGUser* user);
-
 
 private:
     QString* version;
     SWGLoggingInfo* logging;
     SWGDeviceSetList* devicesetlist;
-    SWGUser* user;
 };
 
 }

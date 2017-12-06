@@ -1011,9 +1011,6 @@ margin-bottom: 20px;
     },
     "devicesetlist" : {
       "$ref" : "#/definitions/DeviceSetList"
-    },
-    "user" : {
-      "$ref" : "#/definitions/User"
     }
   },
   "description" : "Summarized information about this SDRangel instance"
@@ -1344,17 +1341,6 @@ margin-bottom: 20px;
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
 };
-            defs.User = {
-  "required" : [ "index", "name" ],
-  "properties" : {
-    "index" : {
-      "type" : "integer"
-    },
-    "name" : {
-      "type" : "string"
-    }
-  }
-};
   </script>
 
   <div class="container-fluid">
@@ -1469,7 +1455,7 @@ margin-bottom: 20px;
                         <p class="marked">Get device settings</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1489,7 +1475,7 @@ margin-bottom: 20px;
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -9072,7 +9058,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-06T19:21:13.596+01:00
+              Generated 2017-12-06T21:52:02.995+01:00
             </div>
           </div>
       </div>
