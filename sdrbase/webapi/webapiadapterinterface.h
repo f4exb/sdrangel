@@ -39,6 +39,7 @@ namespace SWGSDRangel
     class SWGDeviceSet;
     class SWGDeviceListItem;
     class SWGDeviceSettings;
+    class SWGDeviceState;
     class SWGErrorResponse;
 }
 
@@ -246,6 +247,46 @@ public:
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceSettingsPut(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceSettingsPatch(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/run (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceRunPost(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/run (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceRunDelete(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
@@ -258,6 +299,7 @@ public:
     static std::regex devicesetURLRe;
     static std::regex devicesetDeviceURLRe;
     static std::regex devicesetDeviceSettingsURLRe;
+    static std::regex devicesetDeviceRunURLRe;
 };
 
 

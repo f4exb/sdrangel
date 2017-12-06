@@ -1,5 +1,7 @@
 project(rtlsdr)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(rtlsdr_SOURCES
     rtlsdrgui.cpp
     rtlsdrinput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDRSRC}/include
     ${LIBRTLSDRSRC}/src
 )
@@ -31,6 +34,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDR_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -55,6 +59,7 @@ target_link_libraries(inputrtlsdr
     rtlsdr
     sdrbase
     sdrgui
+    swagger
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputrtlsdr
@@ -62,6 +67,7 @@ target_link_libraries(inputrtlsdr
     ${LIBRTLSDR_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
 )
 endif (BUILD_DEBIAN)
 

@@ -18,10 +18,12 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
+
+#include "SWGDeviceSettings.h"
+#include "SWGRtlSdrSettings.h"
+
 #include "rtlsdrinput.h"
-
 #include "device/devicesourceapi.h"
-
 #include "rtlsdrthread.h"
 #include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
@@ -463,5 +465,26 @@ void RTLSDRInput::setMessageQueueToGUI(MessageQueue *queue)
 void RTLSDRInput::set_ds_mode(int on)
 {
 	rtlsdr_set_direct_sampling(m_dev, on);
+}
+
+int RTLSDRInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+    response.getRtlSdrSettings()->setAgc(m_settings.m_agc ? 1 : 0);
+    response.getRtlSdrSettings()->setCenterFrequency(m_settings.m_centerFrequency);
+    response.getRtlSdrSettings()->setDcBlock(m_settings.m_dcBlock ? 1 : 0);
+    response.getRtlSdrSettings()->setDevSampleRate(m_settings.m_devSampleRate);
+    response.getRtlSdrSettings()->setFcPos((int) m_settings.m_fcPos);
+    response.getRtlSdrSettings()->setGain(m_settings.m_gain);
+    response.getRtlSdrSettings()->setIqImbalance(m_settings.m_iqImbalance ? 1 : 0);
+    response.getRtlSdrSettings()->setLoPpmCorrection(m_settings.m_loPpmCorrection);
+    response.getRtlSdrSettings()->setLog2Decim(m_settings.m_log2Decim);
+    response.getRtlSdrSettings()->setLowSampleRate(m_settings.m_lowSampleRate ? 1 : 0);
+    response.getRtlSdrSettings()->setNoModMode(m_settings.m_noModMode ? 1 : 0);
+    response.getRtlSdrSettings()->setTransverterDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    response.getRtlSdrSettings()->setTransverterMode(m_settings.m_transverterMode ? 1 : 0);
+    return 200;
 }
 

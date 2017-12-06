@@ -548,6 +548,128 @@ paths:
           description: On success returns current settings values
           schema:
             $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    put:
+      description: Apply all settings unconditionally (force)
+      operationId: devicesetDeviceSettingsPut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Device settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    patch:
+      description: Apply settings differentially (no force)
+      operationId: devicesetDeviceSettingsPatch
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Device settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/device/run:
+    x-swagger-router-controller: deviceset
+    post:
+      description: start device
+      operationId: devicesetDeviceRunPost
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return current state
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    delete:
+      description: stop device
+      operationId: devicesetDeviceRunDelete
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return current state
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           description: Error
           schema:
@@ -699,7 +821,14 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/DeviceSet"
-  
+  DeviceState:
+    description: "Device running state"
+    required:
+      - state
+    properties:
+      state:
+        description: "State: notStarted, idle, ready, running, error"
+        type: string
   SamplingDevice:
     description: "Information about a logical device available from an attached hardware device that can be used as a sampling device"
     required:

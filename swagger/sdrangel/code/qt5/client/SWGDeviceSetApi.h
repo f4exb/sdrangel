@@ -18,6 +18,7 @@
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
 
 #include <QObject>
@@ -36,22 +37,38 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
-    void devicesetDeviceGet(qint32 device_set_index);
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body);
+    void devicesetDeviceRunDelete(qint32 device_set_index);
+    void devicesetDeviceRunPost(qint32 device_set_index);
+    void devicesetDeviceSettingsGet(qint32 device_set_index);
+    void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings body);
+    void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings body);
     void devicesetGet(qint32 device_set_index);
     
 private:
-    void devicesetDeviceGetCallback (HttpRequestWorker * worker);
     void devicesetDevicePutCallback (HttpRequestWorker * worker);
+    void devicesetDeviceRunDeleteCallback (HttpRequestWorker * worker);
+    void devicesetDeviceRunPostCallback (HttpRequestWorker * worker);
+    void devicesetDeviceSettingsGetCallback (HttpRequestWorker * worker);
+    void devicesetDeviceSettingsPatchCallback (HttpRequestWorker * worker);
+    void devicesetDeviceSettingsPutCallback (HttpRequestWorker * worker);
     void devicesetGetCallback (HttpRequestWorker * worker);
     
 signals:
-    void devicesetDeviceGetSignal(SWGDeviceSettings* summary);
     void devicesetDevicePutSignal(SWGDeviceListItem* summary);
+    void devicesetDeviceRunDeleteSignal(SWGDeviceState* summary);
+    void devicesetDeviceRunPostSignal(SWGDeviceState* summary);
+    void devicesetDeviceSettingsGetSignal(SWGDeviceSettings* summary);
+    void devicesetDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
+    void devicesetDeviceSettingsPutSignal(SWGDeviceSettings* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     
-    void devicesetDeviceGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDevicePutSignalE(SWGDeviceListItem* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunDeleteSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsPutSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };

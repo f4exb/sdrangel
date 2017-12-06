@@ -106,6 +106,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
 	const std::vector<int>& getGains() const { return m_gains; }
 	void set_ds_mode(int on);
 

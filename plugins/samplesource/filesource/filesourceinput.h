@@ -225,7 +225,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 	virtual int webapiSettingsGet(
-	            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+	            SWGSDRangel::SWGDeviceSettings& response,
 	            QString& errorMessage);
 
 private:
