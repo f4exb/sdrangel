@@ -705,13 +705,17 @@ int WebAPIAdapterGUI::devicesetDeviceGet(
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
+            response.setTx(0);
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
-            return source->webapiSettingsGet(response.getData(), *error.getMessage());
+            return source->webapiSettingsGet(response, *error.getMessage());
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
+            response.setTx(1);
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
-            return sink->webapiSettingsGet(response.getData(), *error.getMessage());
+            return sink->webapiSettingsGet(response, *error.getMessage());
         }
         else
         {

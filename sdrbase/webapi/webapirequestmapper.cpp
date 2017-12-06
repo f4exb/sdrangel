@@ -604,6 +604,11 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
         else if (request.getMethod() == "GET")
         {
             SWGSDRangel::SWGDeviceSettings normalResponse;
+            normalResponse.cleanup();
+            normalResponse.setFileSourceSettings(0);
+            normalResponse.setRtlSdrSettings(0);
+            normalResponse.setLimeSdrInputSettings(0);
+            normalResponse.setLimeSdrOutputSettings(0);
             int status = m_adapter->devicesetDeviceGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
 

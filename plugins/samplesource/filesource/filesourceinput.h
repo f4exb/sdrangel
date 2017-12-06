@@ -224,6 +224,10 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+	virtual int webapiSettingsGet(
+	            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+	            QString& errorMessage);
+
 private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

@@ -21,6 +21,7 @@ set(filesource_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 #include(${QT_USE_FILE})
@@ -41,6 +42,7 @@ target_link_libraries(inputfilesource
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(inputfilesource Core Widgets)

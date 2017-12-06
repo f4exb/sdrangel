@@ -938,23 +938,22 @@ definitions:
         $ref: "#/definitions/PresetIdentifier"
   DeviceSettings:
     description: Base device settings
-    discriminator: deviceType
+    discriminator: deviceHwType
     required:
-      - deviceType
+      - deviceHwType
+      - tx
     properties:
-      deviceType:
+      deviceHwType:
+        description: Device hardware type code
         type: string
-      data:
-        type: object
-  DeviceSettingsImpl:
-    description: dummy structure to handle all devices settings
-    properties:
-      fileSource:
+      tx:
+        description: Not zero if it is a tx device else it is a rx device
+        type: integer
+      fileSourceSettings:
         $ref: "http://localhost:8081/FileSource.yaml#/FileSourceSettings"
-      rtlsdr:
+      rtlSdrSettings:
         $ref: "http://localhost:8081/RtlSdr.yaml#/RtlSdrSettings"
-      limesdrInput:
+      limeSdrInputSettings:
         $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrInputSettings"
-      limesdrOutput:
+      limeSdrOutputSettings:
         $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrOutputSettings"
-      

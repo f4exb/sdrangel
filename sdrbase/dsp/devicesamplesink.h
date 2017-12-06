@@ -27,7 +27,7 @@
 
 namespace SWGSDRangel
 {
-    class SWGObject;
+    class SWGDeviceSettings;
 }
 
 class SDRANGEL_API DeviceSampleSink : public QObject {
@@ -47,7 +47,7 @@ public:
 	virtual bool handleMessage(const Message& message) = 0;
 
     virtual int webapiSettingsGet(
-            SWGSDRangel::SWGObject *response __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 

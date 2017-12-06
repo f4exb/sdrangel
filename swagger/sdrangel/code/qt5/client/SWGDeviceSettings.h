@@ -22,7 +22,10 @@
 #include <QJsonObject>
 
 
-#include "SWGObject.h"
+#include "SWGFileSourceSettings.h"
+#include "SWGLimeSdrInputSettings.h"
+#include "SWGLimeSdrOutputSettings.h"
+#include "SWGRtlSdrSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -43,16 +46,32 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGDeviceSettings* fromJson(QString &jsonString);
 
-    QString* getDeviceType();
-    void setDeviceType(QString* device_type);
+    QString* getDeviceHwType();
+    void setDeviceHwType(QString* device_hw_type);
 
-    SWGObject* getData();
-    void setData(SWGObject* data);
+    qint32 getTx();
+    void setTx(qint32 tx);
+
+    SWGFileSourceSettings* getFileSourceSettings();
+    void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
+
+    SWGRtlSdrSettings* getRtlSdrSettings();
+    void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
+
+    SWGLimeSdrInputSettings* getLimeSdrInputSettings();
+    void setLimeSdrInputSettings(SWGLimeSdrInputSettings* lime_sdr_input_settings);
+
+    SWGLimeSdrOutputSettings* getLimeSdrOutputSettings();
+    void setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_output_settings);
 
 
 private:
-    QString* device_type;
-    SWGObject* data;
+    QString* device_hw_type;
+    qint32 tx;
+    SWGFileSourceSettings* file_source_settings;
+    SWGRtlSdrSettings* rtl_sdr_settings;
+    SWGLimeSdrInputSettings* lime_sdr_input_settings;
+    SWGLimeSdrOutputSettings* lime_sdr_output_settings;
 };
 
 }

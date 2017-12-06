@@ -18,6 +18,9 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGFileSourceSettings.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -289,4 +292,13 @@ bool FileSourceInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+int FileSourceInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+    *response.getFileSourceSettings()->getFileName() = m_settings.m_fileName;
+    return 200;
 }

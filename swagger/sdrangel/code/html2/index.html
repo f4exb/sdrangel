@@ -926,35 +926,31 @@ margin-bottom: 20px;
   "description" : "List of device sets opened in this instance"
 };
             defs.DeviceSettings = {
-  "required" : [ "deviceType" ],
-  "discriminator" : "deviceType",
+  "required" : [ "deviceHwType", "tx" ],
+  "discriminator" : "deviceHwType",
   "properties" : {
-    "deviceType" : {
-      "type" : "string"
+    "deviceHwType" : {
+      "type" : "string",
+      "description" : "Device hardware type code"
     },
-    "data" : {
-      "type" : "object",
-      "properties" : { }
-    }
-  },
-  "description" : "Base device settings"
-};
-            defs.DeviceSettingsImpl = {
-  "properties" : {
-    "fileSource" : {
+    "tx" : {
+      "type" : "integer",
+      "description" : "Not zero if it is a tx device else it is a rx device"
+    },
+    "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
     },
-    "rtlsdr" : {
+    "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
     },
-    "limesdrInput" : {
+    "limeSdrInputSettings" : {
       "$ref" : "#/definitions/LimeSdrInputSettings"
     },
-    "limesdrOutput" : {
+    "limeSdrOutputSettings" : {
       "$ref" : "#/definitions/LimeSdrOutputSettings"
     }
   },
-  "description" : "dummy structure to handle all devices settings"
+  "description" : "Base device settings"
 };
             defs.ErrorResponse = {
   "required" : [ "message" ],
@@ -9076,7 +9072,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-06T08:23:29.921+01:00
+              Generated 2017-12-06T19:21:13.596+01:00
             </div>
           </div>
       </div>
