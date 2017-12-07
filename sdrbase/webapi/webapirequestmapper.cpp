@@ -758,7 +758,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
         deviceSettings.setTx(0); // assume Rx
     }
 
-    if (jsonObject.contains("deviceHwType")) {
+    if (jsonObject.contains("deviceHwType") && jsonObject["deviceHwType"].isString()) {
         deviceSettings.setDeviceHwType(new QString(jsonObject["deviceHwType"].toString()));
     } else {
         return false;
@@ -766,21 +766,65 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
 
     QString *deviceHwType = deviceSettings.getDeviceHwType();
 
-    if (*deviceHwType == "FileSource") {
-        if (jsonObject.contains("fileSourceSettings")) {
+    if (*deviceHwType == "FileSource")
+    {
+        if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
+        {
+            QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
             deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+            deviceSettings.getFileSourceSettings()->fromJsonObject(fileSourceSettingsJsonObject);
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
-    } else if (*deviceHwType == "RTLSDR") {
-        return deviceSettings.getRtlSdrSettings() != 0;
-    } else if (*deviceHwType == "LimeSDR") {
-        if (deviceSettings.getTx() == 0) {
-            return deviceSettings.getLimeSdrInputSettings() != 0;
-        } else {
-            return deviceSettings.getLimeSdrOutputSettings() != 0;
+    }
+    else if (*deviceHwType == "RTLSDR")
+    {
+        if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
+        {
+            QJsonObject rtlSdrSettingsJsonObject = jsonObject["rtlSdrSettings"].toObject();
+            deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+            deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
+            return true;
         }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("limeSdrInputSettings") && jsonObject["limeSdrInputSettings"].isObject())
+        {
+            QJsonObject limeSdrInputSettingsJsonObject = jsonObject["limeSdrInputSettings"].toObject();
+            deviceSettings.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
+            deviceSettings.getLimeSdrInputSettings()->fromJsonObject(limeSdrInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("limeSdrOutputSettings") && jsonObject["limeSdrOutputSettings"].isObject())
+        {
+            QJsonObject limeSdrOutputSettingsJsonObject = jsonObject["limeSdrOutputSettings"].toObject();
+            deviceSettings.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
+            deviceSettings.getLimeSdrOutputSettings()->fromJsonObject(limeSdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
     }
 }
 

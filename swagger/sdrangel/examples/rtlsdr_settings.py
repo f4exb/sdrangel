@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import requests, json
 
-base_url = "http://10.0.2.2:8091/sdrangel"
+base_url = "http://127.0.0.1:8888/sdrangel"
 
 requests_methods = {
     "GET": requests.get,

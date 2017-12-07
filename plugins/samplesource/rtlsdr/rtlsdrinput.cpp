@@ -287,10 +287,11 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
         if (rtlsdr_set_agc_mode(m_dev, settings.m_agc ? 1 : 0) < 0)
         {
-            qCritical("could not set AGC mode %s", settings.m_agc ? "on" : "off");
+            qCritical("RTLSDRInput::applySettings: could not set AGC mode %s", settings.m_agc ? "on" : "off");
         }
         else
         {
+            qDebug("RTLSDRInput::applySettings: AGC mode %s", settings.m_agc ? "on" : "off");
             m_settings.m_agc = settings.m_agc;
         }
     }
@@ -301,9 +302,13 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 
         if(m_dev != 0)
         {
-            if(rtlsdr_set_tuner_gain(m_dev, m_settings.m_gain) != 0)
+            if (rtlsdr_set_tuner_gain(m_dev, m_settings.m_gain) != 0)
             {
-                qDebug("rtlsdr_set_tuner_gain() failed");
+                qCritical("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() failed");
+            }
+            else
+            {
+                qDebug("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() to %d", m_settings.m_gain);
             }
         }
     }
@@ -491,7 +496,7 @@ int RTLSDRInput::webapiSettingsGet(
 int RTLSDRInput::webapiSettingsPutPatch(
                 bool force,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage)
+                QString& errorMessage __attribute__((unused)))
 {
     RTLSDRSettings settings;
     settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
@@ -508,19 +513,14 @@ int RTLSDRInput::webapiSettingsPutPatch(
     settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
     settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
 
-    if (applySettings(settings, force))
-    {
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
-            m_guiMessageQueue->push(msg);
-        }
+    MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
 
-        return 200;
-    }
-    else
+    if (m_guiMessageQueue) // forward to GUI if any
     {
-        errorMessage = "RTLSDRInput::webapiSettingsPutPatch: error applying settings";
-        return 500;
+        MsgConfigureRTLSDR *msgToGUI = MsgConfigureRTLSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
     }
+
+    return 200;
 }
