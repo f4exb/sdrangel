@@ -643,10 +643,9 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
             if (parseJsonBody(jsonStr, jsonObject, response))
             {
                 SWGSDRangel::SWGDeviceSettings normalResponse;
-                //resetDeviceSettings(normalResponse);
-                normalResponse.fromJson(jsonStr);
+                resetDeviceSettings(normalResponse);
 
-                if (validateDeviceSettings(normalResponse))
+                if (validateDeviceSettings(normalResponse, jsonObject))
                 {
                     int status = m_adapter->devicesetDeviceSettingsPutPatch(
                             deviceSetIndex,
@@ -753,24 +752,34 @@ bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifi
 
 bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject)
 {
-    QString *deviceHwType = deviceSettings.getDeviceHwType();
+    if (jsonObject.contains("tx")) {
+        deviceSettings.setTx(jsonObject["tx"].toInt());
+    } else {
+        deviceSettings.setTx(0); // assume Rx
+    }
 
-    if (deviceHwType == 0)
-    {
+    if (jsonObject.contains("deviceHwType")) {
+        deviceSettings.setDeviceHwType(new QString(jsonObject["deviceHwType"].toString()));
+    } else {
         return false;
     }
-    else
-    {
-        if (*deviceHwType == "FileSource") {
-            return deviceSettings.getFileSourceSettings() != 0;
-        } else if (*deviceHwType == "RTLSDR") {
-            return deviceSettings.getRtlSdrSettings() != 0;
-        } else if (*deviceHwType == "LimeSDR") {
-            if (deviceSettings.getTx() == 0) {
-                return deviceSettings.getLimeSdrInputSettings() != 0;
-            } else {
-                return deviceSettings.getLimeSdrOutputSettings() != 0;
-            }
+
+    QString *deviceHwType = deviceSettings.getDeviceHwType();
+
+    if (*deviceHwType == "FileSource") {
+        if (jsonObject.contains("fileSourceSettings")) {
+            deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+            return true;
+        } else {
+            return false;
+        }
+    } else if (*deviceHwType == "RTLSDR") {
+        return deviceSettings.getRtlSdrSettings() != 0;
+    } else if (*deviceHwType == "LimeSDR") {
+        if (deviceSettings.getTx() == 0) {
+            return deviceSettings.getLimeSdrInputSettings() != 0;
+        } else {
+            return deviceSettings.getLimeSdrOutputSettings() != 0;
         }
     }
 }
