@@ -210,8 +210,9 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
     else if (request.getMethod() == "PUT")
     {
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             normalResponse.fromJson(jsonStr);
             int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
@@ -252,8 +253,9 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
     {
         SWGSDRangel::SWGAudioDevicesSelect normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             normalResponse.fromJson(jsonStr);
             int status = m_adapter->instanceAudioPatch(normalResponse, errorResponse);
@@ -294,8 +296,9 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
     {
         SWGSDRangel::SWGLocationInformation normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             normalResponse.fromJson(jsonStr);
             int status = m_adapter->instanceLocationPut(normalResponse, errorResponse);
@@ -367,8 +370,9 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         SWGSDRangel::SWGPresetTransfer query;
         SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             query.fromJson(jsonStr);
 
@@ -397,8 +401,9 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         SWGSDRangel::SWGPresetTransfer query;
         SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             query.fromJson(jsonStr);
 
@@ -427,8 +432,9 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
         SWGSDRangel::SWGPresetTransfer query;
         SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             query.fromJson(jsonStr);
 
@@ -456,8 +462,9 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     {
         SWGSDRangel::SWGPresetIdentifier normalResponse;
         QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
 
-        if (parseJsonBody(jsonStr, response))
+        if (parseJsonBody(jsonStr, jsonObject, response))
         {
             normalResponse.fromJson(jsonStr);
 
@@ -588,8 +595,9 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
         {
             SWGSDRangel::SWGDeviceListItem normalResponse;
             QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
 
-            if (parseJsonBody(jsonStr, response))
+            if (parseJsonBody(jsonStr, jsonObject, response))
             {
                 normalResponse.fromJson(jsonStr);
 
@@ -629,11 +637,13 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
         if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
         {
             QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+            qDebug("WebAPIRequestMapper::devicesetDeviceSettingsService: %s", qPrintable(jsonStr));
 
-            if (parseJsonBody(jsonStr, response))
+            if (parseJsonBody(jsonStr, jsonObject, response))
             {
                 SWGSDRangel::SWGDeviceSettings normalResponse;
-                resetDeviceSettings(normalResponse);
+                //resetDeviceSettings(normalResponse);
                 normalResponse.fromJson(jsonStr);
 
                 if (validateDeviceSettings(normalResponse))
@@ -688,7 +698,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
     }
 }
 
-bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse& response)
+bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
 
@@ -698,7 +708,11 @@ bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, qtwebapp::HttpResponse
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
 
-        if (error.error != QJsonParseError::NoError)
+        if (error.error == QJsonParseError::NoError)
+        {
+            jsonObject = doc.object();
+        }
+        else
         {
             QString errorMsg = QString("Input JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
             errorResponse.init();
@@ -737,7 +751,7 @@ bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifi
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
 }
 
-bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
+bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject)
 {
     QString *deviceHwType = deviceSettings.getDeviceHwType();
 

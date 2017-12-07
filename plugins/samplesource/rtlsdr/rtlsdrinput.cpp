@@ -488,3 +488,39 @@ int RTLSDRInput::webapiSettingsGet(
     return 200;
 }
 
+int RTLSDRInput::webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage)
+{
+    RTLSDRSettings settings;
+    settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
+    settings.m_centerFrequency = response.getRtlSdrSettings()->getCenterFrequency();
+    settings.m_dcBlock = response.getRtlSdrSettings()->getDcBlock() != 0;
+    settings.m_devSampleRate = response.getRtlSdrSettings()->getDevSampleRate();
+    settings.m_fcPos = (RTLSDRSettings::fcPos_t) response.getRtlSdrSettings()->getFcPos();
+    settings.m_gain = response.getRtlSdrSettings()->getGain();
+    settings.m_iqImbalance = response.getRtlSdrSettings()->getIqImbalance() != 0;
+    settings.m_loPpmCorrection = response.getRtlSdrSettings()->getLoPpmCorrection();
+    settings.m_log2Decim = response.getRtlSdrSettings()->getLog2Decim();
+    settings.m_lowSampleRate = response.getRtlSdrSettings()->getLowSampleRate() != 0;
+    settings.m_noModMode = response.getRtlSdrSettings()->getNoModMode() != 0;
+    settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
+    settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
+
+    if (applySettings(settings, force))
+    {
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
+            m_guiMessageQueue->push(msg);
+        }
+
+        return 200;
+    }
+    else
+    {
+        errorMessage = "RTLSDRInput::webapiSettingsPutPatch: error applying settings";
+        return 500;
+    }
+}

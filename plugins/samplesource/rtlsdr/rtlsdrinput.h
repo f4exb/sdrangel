@@ -110,6 +110,11 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage);
 
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
 	const std::vector<int>& getGains() const { return m_gains; }
 	void set_ds_mode(int on);
 
