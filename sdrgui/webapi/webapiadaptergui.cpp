@@ -732,6 +732,57 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
     }
 }
 
+int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
+        int deviceSetIndex,
+        bool force,
+        SWGSDRangel::SWGDeviceSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            if ((response.getTx() != 0) || (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType()))
+            {
+                *error.getMessage() = QString("Device mismatch. Found %1 input").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
+                return 400;
+            }
+            else
+            {
+                DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+                return source->webapiSettingsPutPatch(force, response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            if ((response.getTx() == 0) || (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType()))
+            {
+                *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
+                return 400;
+            }
+            else
+            {
+                DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+                return sink->webapiSettingsPutPatch(force, response, *error.getMessage());
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();

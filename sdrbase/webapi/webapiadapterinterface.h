@@ -248,21 +248,12 @@ public:
     { return 501; }
 
     /**
-     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (PUT, PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
-    virtual int devicesetDeviceSettingsPut(
+    virtual int devicesetDeviceSettingsPutPatch(
             int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
-    { return 501; }
-
-    /**
-     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/settings (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int devicesetDeviceSettingsPatch(
-            int deviceSetIndex __attribute__((unused)),
+            bool force __attribute__((unused)), //!< true to force settings = put else patch
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }

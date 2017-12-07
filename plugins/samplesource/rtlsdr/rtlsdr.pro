@@ -22,6 +22,7 @@ CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
+INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 !macx:INCLUDEPATH += $$LIBRTLSDRSRC/include
 macx:INCLUDEPATH += /opt/local/include
 
@@ -44,6 +45,7 @@ FORMS += rtlsdrgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
+LIBS += -L../../../swagger/$${build_subdir} -lswagger
 !macx:LIBS += -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
 macx:LIBS += -L/opt/local/lib -lrtlsdr
 

@@ -125,6 +125,12 @@ public:
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceSettingsPutPatch(
+            int deviceSetIndex,
+            bool force,
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

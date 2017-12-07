@@ -626,11 +626,39 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
     {
         int deviceSetIndex = boost::lexical_cast<int>(indexStr);
 
-        if (request.getMethod() == "PUT")
+        if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
         {
-        }
-        else if (request.getMethod() == "PATCH")
-        {
+            QString jsonStr = request.getBody();
+
+            if (parseJsonBody(jsonStr, response))
+            {
+                SWGSDRangel::SWGDeviceSettings normalResponse;
+                resetDeviceSettings(normalResponse);
+                normalResponse.fromJson(jsonStr);
+
+                if (validateDeviceSettings(normalResponse))
+                {
+                    int status = m_adapter->devicesetDeviceSettingsPutPatch(
+                            deviceSetIndex,
+                            (request.getMethod() == "PUT"), // force settings on PUT
+                            normalResponse,
+                            errorResponse);
+                    response.setStatus(status);
+
+                    if (status == 200) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
         }
         else if (request.getMethod() == "GET")
         {
@@ -707,6 +735,30 @@ bool WebAPIRequestMapper::validatePresetTransfer(SWGSDRangel::SWGPresetTransfer&
 bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier)
 {
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
+}
+
+bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
+{
+    QString *deviceHwType = deviceSettings.getDeviceHwType();
+
+    if (deviceHwType == 0)
+    {
+        return false;
+    }
+    else
+    {
+        if (*deviceHwType == "FileSource") {
+            return deviceSettings.getFileSourceSettings() != 0;
+        } else if (*deviceHwType == "RTLSDR") {
+            return deviceSettings.getRtlSdrSettings() != 0;
+        } else if (*deviceHwType == "LimeSDR") {
+            if (deviceSettings.getTx() == 0) {
+                return deviceSettings.getLimeSdrInputSettings() != 0;
+            } else {
+                return deviceSettings.getLimeSdrOutputSettings() != 0;
+            }
+        }
+    }
 }
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)

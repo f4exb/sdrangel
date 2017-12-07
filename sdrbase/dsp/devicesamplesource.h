@@ -51,6 +51,12 @@ public:
 	        QString& errorMessage)
 	{ errorMessage = "Not implemented"; return 501; }
 
+    virtual int webapiSettingsPutPatch(
+            bool force __attribute__((unused)), //!< true to force settings = put
+            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
