@@ -52,18 +52,35 @@ def patchRtlSdrSettings(settings):
     else:
         print "Error HTTP:", r.status_code
     
+def deviceRun(run):
+    if run:
+        r = requests.post(url=base_url+"/deviceset/0/device/run")
+    else:
+        r = requests.delete(url=base_url+"/deviceset/0/device/run")
+    if r.status_code == 200:
+        print json.dumps(r.json(), indent=4, sort_keys=True)
+    else:
+        print "Error HTTP:", r.status_code
+    
         
 def main():
     hwType = getHwType()
-    if hwType and hwType != "RTLSDR":
-        if not selectRtlSdr():
-            return
+    if hwType is not None:
+        if hwType != "RTLSDR":
+            if not selectRtlSdr():
+                return
+    else:
+        return
     settings = getRtlSdrSettings()
     if settings is not None:
         settings["agc"] = 1
+        settings["dcBlock"] = 1
+        settings["gain"] = 445
+        settings["centerFrequency"] = 467350000
         patchRtlSdrSettings(settings)
+        deviceRun(True)
         
-
 
 if __name__ == "__main__":
     main()
+        
