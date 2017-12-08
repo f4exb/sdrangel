@@ -20,6 +20,9 @@
 #include <string.h>
 #include "lime/LimeSuite.h"
 
+#include "SWGDeviceSettings.h"
+#include "SWGLimeSdrInputSettings.h"
+
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/dspcommands.h"
@@ -1173,5 +1176,70 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             << " doLPCalibration: " << doLPCalibration;
 
     return true;
+}
+
+int LimeSDRInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
+    response.getLimeSdrInputSettings()->setAntennaPath((int) m_settings.m_antennaPath);
+    response.getLimeSdrInputSettings()->setCenterFrequency(m_settings.m_centerFrequency);
+    response.getLimeSdrInputSettings()->setDcBlock(m_settings.m_dcBlock ? 1 : 0);
+    response.getLimeSdrInputSettings()->setDevSampleRate(m_settings.m_devSampleRate);
+    response.getLimeSdrInputSettings()->setExtClock(m_settings.m_extClock ? 1 : 0);
+    response.getLimeSdrInputSettings()->setExtClockFreq(m_settings.m_extClockFreq);
+    response.getLimeSdrInputSettings()->setGain(m_settings.m_gain);
+    response.getLimeSdrInputSettings()->setGainMode((int) m_settings.m_gainMode);
+    response.getLimeSdrInputSettings()->setIqCorrection(m_settings.m_iqCorrection ? 1 : 0);
+    response.getLimeSdrInputSettings()->setLnaGain(m_settings.m_lnaGain);
+    response.getLimeSdrInputSettings()->setLog2HardDecim(m_settings.m_log2HardDecim);
+    response.getLimeSdrInputSettings()->setLog2SoftDecim(m_settings.m_log2SoftDecim);
+    response.getLimeSdrInputSettings()->setLpfBw(m_settings.m_lpfBW);
+    response.getLimeSdrInputSettings()->setLpfFirEnable(m_settings.m_lpfFIREnable ? 1 : 0);
+    response.getLimeSdrInputSettings()->setLpfFirbw(m_settings.m_lpfFIRBW);
+    response.getLimeSdrInputSettings()->setNcoEnable(m_settings.m_ncoEnable ? 1 : 0);
+    response.getLimeSdrInputSettings()->setNcoFrequency(m_settings.m_ncoFrequency);
+    response.getLimeSdrInputSettings()->setPgaGain(m_settings.m_pgaGain);
+    response.getLimeSdrInputSettings()->setTiaGain(m_settings.m_tiaGain);
+    return 200;
+}
+
+int LimeSDRInput::webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    LimeSDRInputSettings settings;
+    settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) response.getLimeSdrInputSettings()->getAntennaPath();
+    settings.m_centerFrequency = response.getLimeSdrInputSettings()->getCenterFrequency();
+    settings.m_dcBlock = response.getLimeSdrInputSettings()->getDcBlock() != 0;
+    settings.m_devSampleRate = response.getLimeSdrInputSettings()->getDevSampleRate();
+    settings.m_extClock = response.getLimeSdrInputSettings()->getExtClock() != 0;
+    settings.m_extClockFreq = response.getLimeSdrInputSettings()->getExtClockFreq();
+    settings.m_gain = response.getLimeSdrInputSettings()->getGain();
+    settings.m_gainMode = (LimeSDRInputSettings::GainMode) response.getLimeSdrInputSettings()->getGainMode();
+    settings.m_iqCorrection = response.getLimeSdrInputSettings()->getIqCorrection() != 0;
+    settings.m_lnaGain = response.getLimeSdrInputSettings()->getLnaGain();
+    settings.m_log2HardDecim = response.getLimeSdrInputSettings()->getLog2HardDecim();
+    settings.m_log2SoftDecim = response.getLimeSdrInputSettings()->getLog2SoftDecim();
+    settings.m_lpfBW = response.getLimeSdrInputSettings()->getLpfBw();
+    settings.m_lpfFIREnable = response.getLimeSdrInputSettings()->getLpfFirEnable() != 0;
+    settings.m_lpfFIRBW = response.getLimeSdrInputSettings()->getLpfFirbw();
+    settings.m_ncoEnable = response.getLimeSdrInputSettings()->getNcoEnable() != 0;
+    settings.m_ncoFrequency = response.getLimeSdrInputSettings()->getNcoFrequency();
+    settings.m_pgaGain = response.getLimeSdrInputSettings()->getPgaGain();
+    settings.m_tiaGain = response.getLimeSdrInputSettings()->getTiaGain();
+
+    MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureLimeSDR *msgToGUI = MsgConfigureLimeSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
 }
 

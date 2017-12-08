@@ -239,6 +239,14 @@ void LimeSDRInputGUI::handleInputMessages()
 
             delete message;
         }
+        else if (LimeSDRInput::MsgConfigureLimeSDR::match(*message))
+        {
+            const LimeSDRInput::MsgConfigureLimeSDR& cfg = (LimeSDRInput::MsgConfigureLimeSDR&) *message;
+            m_settings = cfg.getSettings();
+            displaySettings();
+
+            delete message;
+        }
         else
         {
             if (handleMessage(*message)) {

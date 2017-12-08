@@ -25,6 +25,7 @@ CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
+INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
 INCLUDEPATH += ../../../liblimesuite/srcmw
 INCLUDEPATH += $$LIBLIMESUITESRC/src
@@ -57,6 +58,7 @@ FORMS += limesdrinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
+LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../liblimesuite/$${build_subdir} -lliblimesuite
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 

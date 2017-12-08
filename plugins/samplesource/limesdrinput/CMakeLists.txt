@@ -26,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBLIMESUITESRC}/src
     ${LIBLIMESUITESRC}/src/ADF4002
@@ -41,6 +42,7 @@ else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 	${CMAKE_SOURCE_DIR}/devices
 	${LIMESUITE_INCLUDE_DIR}
 )
@@ -66,6 +68,7 @@ target_link_libraries(inputlimesdr
     limesuite
     sdrbase
     sdrgui
+    swagger
     limesdrdevice
 )
 else (BUILD_DEBIAN)
@@ -74,6 +77,7 @@ target_link_libraries(inputlimesdr
 	${LIMESUITE_LIBRARY}
 	sdrbase
 	sdrgui
+	swagger
 	limesdrdevice
 )
 endif (BUILD_DEBIAN)
