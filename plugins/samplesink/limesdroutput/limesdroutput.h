@@ -178,6 +178,15 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     std::size_t getChannelIndex();
     void getLORange(float& minF, float& maxF, float& stepF) const;
     void getSRRange(float& minF, float& maxF, float& stepF) const;
