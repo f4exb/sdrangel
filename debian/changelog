@@ -1,3 +1,9 @@
+sdrangel (3.8.6-1) unstable; urgency=medium
+
+  * Web API: implemented some device plugins methods: RTLSDR, Lime
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 10 Dec 2017 12:14:18 +0100
+
 sdrangel (3.8.5-1) unstable; urgency=medium
 
   * SSB mod/demod: improve LSB/USB experience

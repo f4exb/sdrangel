@@ -25,7 +25,7 @@
 
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("File source input"),
-	QString("3.8.0"),
+	QString("3.8.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
