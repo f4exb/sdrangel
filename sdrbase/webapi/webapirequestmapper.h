@@ -58,6 +58,7 @@ private:
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetDeviceRunService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);

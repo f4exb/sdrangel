@@ -21,6 +21,7 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGRtlSdrSettings.h"
+#include "SWGDeviceState.h"
 
 #include "rtlsdrinput.h"
 #include "device/devicesourceapi.h"
@@ -522,5 +523,28 @@ int RTLSDRInput::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    return 200;
+}
+
+int RTLSDRInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudioOutput();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+        DSPEngine::instance()->stopAudioOutput();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }

@@ -35,6 +35,7 @@
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
 #include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -92,6 +93,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceSettingsURLRe)) {
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
+                devicesetDeviceRunService(std::string(desc_match[1]), request, response);
             }
             else
             {
@@ -674,6 +677,55 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
             SWGSDRangel::SWGDeviceSettings normalResponse;
             resetDeviceSettings(normalResponse);
             int status = m_adapter->devicesetDeviceSettingsGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            response.write("Invalid HTTP method");
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "POST")
+        {
+            SWGSDRangel::SWGDeviceState normalResponse;
+            int status = m_adapter->devicesetDeviceRunPost(deviceSetIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "DELETE")
+        {
+            SWGSDRangel::SWGDeviceState normalResponse;
+            int status = m_adapter->devicesetDeviceRunDelete(deviceSetIndex, normalResponse, errorResponse);
+
             response.setStatus(status);
 
             if (status == 200) {

@@ -131,6 +131,16 @@ public:
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceRunPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceRunDelete(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 
