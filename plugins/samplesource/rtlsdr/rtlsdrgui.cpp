@@ -138,6 +138,13 @@ bool RTLSDRGui::handleMessage(const Message& message)
 		displayGains();
 		return true;
 	}
+	else if (RTLSDRInput::MsgConfigureRTLSDR::match(message))
+	{
+	    const RTLSDRInput::MsgConfigureRTLSDR& cfg = (RTLSDRInput::MsgConfigureRTLSDR&) message;
+	    m_settings = cfg.getSettings();
+	    displaySettings();
+	    return true;
+	}
 	else
 	{
 		return false;
