@@ -115,6 +115,10 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
     virtual int webapiRun(
             bool run,
             SWGSDRangel::SWGDeviceState& response,

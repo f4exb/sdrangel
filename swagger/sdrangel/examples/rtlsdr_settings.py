@@ -73,12 +73,12 @@ def main():
         return
     settings = getRtlSdrSettings()
     if settings is not None:
+        deviceRun(True)
         settings["agc"] = 1
         settings["dcBlock"] = 1
         settings["gain"] = 445
-        settings["centerFrequency"] = 467350000
+        settings["centerFrequency"] = 433900000
         patchRtlSdrSettings(settings)
-        deviceRun(True)
         
 
 if __name__ == "__main__":

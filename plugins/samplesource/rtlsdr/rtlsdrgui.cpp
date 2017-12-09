@@ -34,6 +34,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::RTLSDRGui),
 	m_deviceUISet(deviceUISet),
+	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
@@ -142,7 +143,10 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	{
 	    const RTLSDRInput::MsgConfigureRTLSDR& cfg = (RTLSDRInput::MsgConfigureRTLSDR&) message;
 	    m_settings = cfg.getSettings();
+	    blockApplySettings(true);
+	    displayGains();
 	    displaySettings();
+	    blockApplySettings(false);
 	    return true;
 	}
 	else
@@ -355,10 +359,13 @@ void RTLSDRGui::on_transverter_clicked()
 
 void RTLSDRGui::updateHardware()
 {
-	RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings, m_forceSettings);
-	m_sampleSource->getInputMessageQueue()->push(message);
-	m_forceSettings = false;
-	m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        RTLSDRInput::MsgConfigureRTLSDR* message = RTLSDRInput::MsgConfigureRTLSDR::create(m_settings, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
 }
 
 void RTLSDRGui::updateStatus()
@@ -388,6 +395,11 @@ void RTLSDRGui::updateStatus()
 
         m_lastEngineState = state;
     }
+}
+
+void RTLSDRGui::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
 }
 
 void RTLSDRGui::on_checkBox_stateChanged(int state)

@@ -58,6 +58,11 @@ public:
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
     virtual int webapiRun(bool run __attribute__((unused)),
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
             QString& errorMessage)

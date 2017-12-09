@@ -708,7 +708,20 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
     {
         int deviceSetIndex = boost::lexical_cast<int>(indexStr);
 
-        if (request.getMethod() == "POST")
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGDeviceState normalResponse;
+            int status = m_adapter->devicesetDeviceRunGet(deviceSetIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "POST")
         {
             SWGSDRangel::SWGDeviceState normalResponse;
             int status = m_adapter->devicesetDeviceRunPost(deviceSetIndex, normalResponse, errorResponse);

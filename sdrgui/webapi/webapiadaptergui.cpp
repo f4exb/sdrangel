@@ -784,6 +784,40 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
     }
 }
 
+int WebAPIAdapterGUI::devicesetDeviceRunGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiRunGet(response, *error.getMessage());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiRunGet(response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetDeviceRunPost(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceState& response,

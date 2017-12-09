@@ -55,6 +55,7 @@ private:
 	Ui::RTLSDRGui* ui;
 
 	DeviceUISet* m_deviceUISet;
+    bool m_doApplySettings;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;
 	QTimer m_updateTimer;
@@ -71,6 +72,7 @@ private:
 	void sendSettings();
 	void updateSampleRateAndFrequency();
 	void updateFrequencyLimits();
+    void blockApplySettings(bool block);
 
 private slots:
     void handleInputMessages();

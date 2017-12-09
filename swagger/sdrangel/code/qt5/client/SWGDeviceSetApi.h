@@ -39,6 +39,7 @@ public:
 
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body);
     void devicesetDeviceRunDelete(qint32 device_set_index);
+    void devicesetDeviceRunGet(qint32 device_set_index);
     void devicesetDeviceRunPost(qint32 device_set_index);
     void devicesetDeviceSettingsGet(qint32 device_set_index);
     void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings body);
@@ -48,6 +49,7 @@ public:
 private:
     void devicesetDevicePutCallback (HttpRequestWorker * worker);
     void devicesetDeviceRunDeleteCallback (HttpRequestWorker * worker);
+    void devicesetDeviceRunGetCallback (HttpRequestWorker * worker);
     void devicesetDeviceRunPostCallback (HttpRequestWorker * worker);
     void devicesetDeviceSettingsGetCallback (HttpRequestWorker * worker);
     void devicesetDeviceSettingsPatchCallback (HttpRequestWorker * worker);
@@ -57,6 +59,7 @@ private:
 signals:
     void devicesetDevicePutSignal(SWGDeviceListItem* summary);
     void devicesetDeviceRunDeleteSignal(SWGDeviceState* summary);
+    void devicesetDeviceRunGetSignal(SWGDeviceState* summary);
     void devicesetDeviceRunPostSignal(SWGDeviceState* summary);
     void devicesetDeviceSettingsGetSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
@@ -65,6 +68,7 @@ signals:
     
     void devicesetDevicePutSignalE(SWGDeviceListItem* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunDeleteSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunGetSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);

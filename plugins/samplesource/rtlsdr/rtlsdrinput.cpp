@@ -314,16 +314,14 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
     {
         m_settings.m_dcBlock = settings.m_dcBlock;
-        m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
-    }
-
-    if ((m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
-    {
         m_settings.m_iqImbalance = settings.m_iqImbalance;
         m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+        qDebug("RTLSDRInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
+                m_settings.m_dcBlock ? "true" : "false",
+                m_settings.m_iqImbalance ? "true" : "false");
     }
 
     if ((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force)
@@ -370,6 +368,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         {
             m_rtlSDRThread->setLog2Decimation(settings.m_log2Decim);
         }
+
+        qDebug("RTLSDRInput::applySettings: log2decim set to %d", m_settings.m_log2Decim);
     }
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
@@ -430,13 +430,15 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         if (m_rtlSDRThread != 0)
         {
             m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
-            qDebug() << "RTLSDRInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
         }
+
+        qDebug() << "RTLSDRInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
     }
 
     if ((m_settings.m_noModMode != settings.m_noModMode) || force)
     {
         m_settings.m_noModMode = settings.m_noModMode;
+        qDebug() << "RTLSDRInput: set noModMode to " << m_settings.m_noModMode;
 
         // Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
         if (m_settings.m_noModMode) {
@@ -523,6 +525,14 @@ int RTLSDRInput::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    return 200;
+}
+
+int RTLSDRInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
 
