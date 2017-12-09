@@ -114,6 +114,15 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
 private:
     bool openDevice();
     void closeDevice();

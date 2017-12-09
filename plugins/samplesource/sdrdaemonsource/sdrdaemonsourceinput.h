@@ -320,6 +320,15 @@ public:
 
 	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
 private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

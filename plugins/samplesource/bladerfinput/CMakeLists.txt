@@ -1,5 +1,7 @@
 project(bladerfinput)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(bladerfinput_SOURCES
 	bladerfinputgui.cpp
 	bladerfinput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices
     ${LIBBLADERFLIBSRC}/include
     ${LIBBLADERFLIBSRC}/src
@@ -32,6 +35,7 @@ else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 	${CMAKE_SOURCE_DIR}/devices
 	${LIBBLADERF_INCLUDE_DIR}
 )
@@ -57,6 +61,7 @@ target_link_libraries(inputbladerf
     bladerf
     sdrbase
     sdrgui
+    swagger
     bladerfdevice
 )
 else (BUILD_DEBIAN)
@@ -65,6 +70,7 @@ target_link_libraries(inputbladerf
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 	bladerfdevice
 )
 endif (BUILD_DEBIAN)

@@ -18,6 +18,10 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGRtlSdrSettings.h"
+#include "SWGDeviceState.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -566,4 +570,34 @@ bool SDRPlayInput::setCenterFrequency(quint64 freq_hz)
     }
 }
 
+int SDRPlayInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int SDRPlayInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudioOutput();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+        DSPEngine::instance()->stopAudioOutput();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
 

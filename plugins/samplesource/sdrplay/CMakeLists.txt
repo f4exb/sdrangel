@@ -1,5 +1,7 @@
 project(sdrplay)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(sdrplay_SOURCES
     sdrplaygui.cpp
     sdrplayinput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBMIRISDRSRC}/include
     ${LIBMIRISDRSRC}/src
 )
@@ -31,6 +34,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBMIRISDR_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -52,6 +56,7 @@ target_link_libraries(inputsdrplay
     mirisdr
     sdrbase
     sdrgui
+    swagger
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputsdrplay
@@ -59,6 +64,7 @@ target_link_libraries(inputsdrplay
     ${LIBMIRISDR_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
 )
 endif (BUILD_DEBIAN)
 

@@ -27,7 +27,7 @@
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladerRF Input"),
-	QString("3.8.2"),
+	QString("3.8.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

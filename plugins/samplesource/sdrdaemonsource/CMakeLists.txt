@@ -1,5 +1,7 @@
 project(sdrdaemonsource)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 if (HAS_SSSE3)
     message(STATUS "SDRdaemonSource: use SSSE3 SIMD" )
 elseif (HAS_NEON)
@@ -49,6 +51,7 @@ if (BUILD_DEBIAN)
 target_include_directories(inputsdrdaemonsource PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBCM256CCSRC}
     ${LIBNANOMSG_INCLUDE_DIR}
 )
@@ -56,6 +59,7 @@ else (BUILD_DEBIAN)
 target_include_directories(inputsdrdaemonsource PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CM256CC_INCLUDE_DIR}
     ${LIBNANOMSG_INCLUDE_DIR}
 )
@@ -68,6 +72,7 @@ target_link_libraries(inputsdrdaemonsource
     ${LIBNANOMSG_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputsdrdaemonsource
@@ -76,6 +81,7 @@ target_link_libraries(inputsdrdaemonsource
     ${LIBNANOMSG_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
 )
 endif (BUILD_DEBIAN)
 
