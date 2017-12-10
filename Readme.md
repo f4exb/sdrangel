@@ -1,6 +1,6 @@
 ![SDR Angel banner](doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
+**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) 4.3+ (Windows) SDR and signal analyzer frontend to various hardware.
 
 <h1>Source code</h1>
 
@@ -103,9 +103,11 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-<b>&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b>
+<p><b>&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b></b>
 
-You will need a minimal installation of LimeSuite:
+<p>&#9888; In particular it appears that due to the oddities of LimeSuite you cannot start the second stream alone or first. Starting just stream 0 will work and starting stream 0 then stream 1 will work also but neither starting stream 1 alone nor starting stream 1 before stream 0 will work. It actually produces a segfault in LimeSuite software and SDRangel will crash (issue #101 reported).</p>
+
+You will need a minimal installation of LimeSuite. Presently version 17.12.1 should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
 
   - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`
@@ -122,7 +124,7 @@ Then add the following defines on `cmake` command line:
 
 <h2>PlutoSDR</h2>
 
-PlutoSDR (Rx only) is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
+PlutoSDR is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
 If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
 
