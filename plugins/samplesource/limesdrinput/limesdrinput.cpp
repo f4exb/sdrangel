@@ -22,11 +22,13 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGLimeSdrInputSettings.h"
+#include "SWGDeviceState.h"
 
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/filerecord.h"
+#include "dsp/dspengine.h"
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
 #include "limesdr/devicelimesdrparam.h"
@@ -1240,6 +1242,36 @@ int LimeSDRInput::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    return 200;
+}
+
+int LimeSDRInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int LimeSDRInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudioOutputImmediate();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
 

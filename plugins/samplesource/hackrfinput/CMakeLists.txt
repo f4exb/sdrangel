@@ -1,5 +1,7 @@
 project(hackrfinput)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(hackrfinput_SOURCES
     hackrfinputgui.cpp
     hackrfinput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBHACKRFSRC}
     ${LIBHACKRFSRC}/libhackrf/src
@@ -32,6 +35,7 @@ else (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBHACKRF_INCLUDE_DIR}
 )
@@ -58,6 +62,7 @@ target_link_libraries(inputhackrf
     hackrf
     sdrbase
     sdrgui
+    swagger
     hackrfdevice
 )
 else (BUILD_DEBIAN)
@@ -66,6 +71,7 @@ target_link_libraries(inputhackrf
     ${LIBHACKRF_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
     hackrfdevice
 )
 endif (BUILD_DEBIAN)

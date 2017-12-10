@@ -23,6 +23,7 @@ CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
+INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
 INCLUDEPATH += ../../../libiio/includemw
 INCLUDEPATH += $$LIBIIOSRC
@@ -46,6 +47,7 @@ FORMS += plutosdroutputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
+LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../libiio/$${build_subdir} -llibiio
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 

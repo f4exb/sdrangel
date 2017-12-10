@@ -20,6 +20,9 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -396,3 +399,34 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	return true;
 }
+
+int HackRFOutput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int HackRFOutput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initGeneration())
+        {
+            m_deviceAPI->startGeneration();
+            DSPEngine::instance()->startAudioInputImmediate();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopGeneration();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+

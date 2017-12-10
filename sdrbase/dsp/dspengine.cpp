@@ -104,13 +104,13 @@ void DSPEngine::stopAudioOutput()
 
 void DSPEngine::startAudioOutputImmediate()
 {
-    m_audioOutput.start(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
+    m_audioOutput.startImmediate(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
     m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
 void DSPEngine::stopAudioOutputImmediate()
 {
-    m_audioOutput.stop();
+    m_audioOutput.stopImmediate();
 }
 
 void DSPEngine::startAudioInput()
@@ -126,13 +126,13 @@ void DSPEngine::stopAudioInput()
 
 void DSPEngine::startAudioInputImmediate()
 {
-    m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);
+    m_audioInput.startImmediate(m_audioInputDeviceIndex, m_audioInputSampleRate);
     m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
 }
 
 void DSPEngine::stopAudioInputImmediate()
 {
-    m_audioInput.stop();
+    m_audioInput.stopImmediate();
 }
 
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)

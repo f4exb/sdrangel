@@ -20,6 +20,9 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -484,6 +487,36 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
             << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s";
 
 	return true;
+}
+
+int HackRFInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int HackRFInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initAcquisition())
+        {
+            m_deviceAPI->startAcquisition();
+            DSPEngine::instance()->startAudioOutputImmediate();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopAcquisition();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
 }
 
 //hackrf_device *HackRFInput::open_hackrf_from_sequence(int sequence)

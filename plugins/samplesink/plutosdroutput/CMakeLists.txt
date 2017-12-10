@@ -1,5 +1,7 @@
 project(plutosdroutput)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(plutosdroutput_SOURCES
     plutosdroutputgui.cpp
     plutosdroutput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBIIOSRC}
 )
@@ -31,6 +34,7 @@ else (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBIIO_INCLUDE_DIR}
 )
@@ -56,6 +60,7 @@ target_link_libraries(outputplutosdr
     iio
     sdrbase
     sdrgui
+    swagger
     plutosdrdevice
 )
 else (BUILD_DEBIAN)
@@ -64,6 +69,7 @@ target_link_libraries(outputplutosdr
     ${LIBIIO_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
     plutosdrdevice
 )
 endif (BUILD_DEBIAN)

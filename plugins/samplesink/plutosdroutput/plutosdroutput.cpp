@@ -16,7 +16,11 @@
 
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
+
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "plutosdr/deviceplutosdrparams.h"
@@ -473,3 +477,34 @@ float PlutoSDROutput::getTemperature()
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     return plutoBox->getTemp();
 }
+
+int PlutoSDROutput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int PlutoSDROutput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initGeneration())
+        {
+            m_deviceAPI->startGeneration();
+            DSPEngine::instance()->startAudioInputImmediate();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopGeneration();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+

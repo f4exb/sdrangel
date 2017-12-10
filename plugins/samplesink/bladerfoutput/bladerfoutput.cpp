@@ -18,9 +18,11 @@
 #include <errno.h>
 #include <QDebug>
 
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
 #include "bladerf/devicebladerfshared.h"
@@ -469,3 +471,33 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 
 	return true;
 }
+
+int BladerfOutput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int BladerfOutput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    if (run)
+    {
+        if (m_deviceAPI->initGeneration())
+        {
+            m_deviceAPI->startGeneration();
+        }
+    }
+    else
+    {
+        m_deviceAPI->stopGeneration();
+    }
+
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+

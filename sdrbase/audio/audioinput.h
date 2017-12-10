@@ -37,7 +37,10 @@ public:
 	bool start(int device, int rate);
 	void stop();
 
-	void addFifo(AudioFifo* audioFifo);
+    bool startImmediate(int device, int rate);
+    void stopImmediate();
+
+    void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
 
 	uint getRate() const { return m_audioFormat.sampleRate(); }

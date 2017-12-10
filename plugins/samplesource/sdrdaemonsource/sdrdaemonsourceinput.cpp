@@ -19,7 +19,6 @@
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
-#include "SWGRtlSdrSettings.h"
 #include "SWGDeviceState.h"
 
 #include "util/simpleserializer.h"
@@ -228,13 +227,12 @@ int SDRdaemonSourceInput::webapiRun(
         if (m_deviceAPI->initAcquisition())
         {
             m_deviceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
+            DSPEngine::instance()->startAudioOutputImmediate();
         }
     }
     else
     {
         m_deviceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
     }
 
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
