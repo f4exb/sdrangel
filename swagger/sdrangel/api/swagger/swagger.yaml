@@ -714,6 +714,187 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/channel:
+    x-swagger-router-controller: deviceset
+    post:
+      description: add a channel
+      operationId: devicesetChannelPost
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Channel identification (no settings data)
+          required: true
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+      responses:
+        "200":
+          description: On success return new channel settings
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}:
+    delete:
+      description: delete channel
+      operationId: devicesetChannelDelete
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of channel in the channels list
+      responses:
+        "200":
+          description: On success return deleted channel settings
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get a channel settings
+      operationId: devicesetChannelSettingsGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return channel settings
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    put:
+      description: apply all settings unconditionally (force)
+      operationId: devicesetChannelSettingsPut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return channel new settings
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    patch:
+      description: apply settings differentially (no force)
+      operationId: devicesetChannelSettingsPatch
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return channel new settings
+          schema:
+            $ref: "#/definitions/ChannelSettings"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
@@ -1124,3 +1305,20 @@ definitions:
         $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
         $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrOutputSettings"
+  ChannelSettings:
+    description: Base channel settings
+    discriminator: channelType
+    required:
+      - channelType
+      - tx
+    properties:
+      channelType:
+        description: Channel type code
+        type: string
+      tx:
+        description: Not zero if it is a tx channel else it is a rx channel
+        type: integer
+      NFMDemodSettings:
+        $ref: "http://localhost:8081/NFMDemod.yaml#/NFMDemodSettings"
+      NFMModSettings:
+        $ref: "http://localhost:8081/NFMMod.yaml#/NFMModSettings"

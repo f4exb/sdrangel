@@ -159,7 +159,6 @@ const signed char CWKeyer::m_asciiToMorse[128][7] = {
 
 CWKeyer::CWKeyer() :
     m_mutex(QMutex::Recursive),
-    m_sampleRate(48000),
     m_textPointer(0),
 	m_elementPointer(0),
     m_samplePointer(0),
@@ -169,9 +168,7 @@ CWKeyer::CWKeyer() :
     m_dot(false),
     m_dash(false),
     m_elementOn(false),
-    m_loop(false),
 	m_asciiChar('\0'),
-    m_mode(CWNone),
     m_keyIambicState(KeySilent),
 	m_textState(TextStart)
 {
@@ -185,9 +182,9 @@ CWKeyer::~CWKeyer()
 void CWKeyer::setSampleRate(int sampleRate)
 {
     m_mutex.lock();
-    m_sampleRate = sampleRate;
+    m_settings.m_sampleRate = sampleRate;
     m_mutex.unlock();
-    setWPM(m_wpm);
+    setWPM(m_settings.m_wpm);
 }
 
 void CWKeyer::setWPM(int wpm)
@@ -195,8 +192,8 @@ void CWKeyer::setWPM(int wpm)
     if ((wpm > 0) && (wpm < 27))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        m_dotLength = (int) (0.24f * m_sampleRate * (5.0f / wpm));
-        m_wpm = wpm;
+        m_dotLength = (int) (0.24f * m_settings.m_sampleRate * (5.0f / wpm));
+        m_settings.m_wpm = wpm;
         m_cwSmoother.setNbFadeSamples(m_dotLength/5); // 20% the dot time
     }
 }
@@ -204,34 +201,34 @@ void CWKeyer::setWPM(int wpm)
 void CWKeyer::setText(const QString& text)
 {
     QMutexLocker mutexLocker(&m_mutex);
-    m_text = text;
+    m_settings.m_text = text;
     m_textState = TextStart;
 }
 
-void CWKeyer::setMode(CWMode mode)
+void CWKeyer::setMode(CWKeyerSettings::CWMode mode)
 {
-    if (mode != m_mode)
+    if (mode != m_settings.m_mode)
     {
         QMutexLocker mutexLocker(&m_mutex);
 
-        if (mode == CWText)
+        if (mode == CWKeyerSettings::CWText)
         {
             m_textState = TextStart;
         }
-        else if (mode == CWDots)
+        else if (mode == CWKeyerSettings::CWDots)
         {
             m_dot = true;
             m_dash = false;
             m_keyIambicState = KeySilent;
         }
-        else if (mode == CWDashes)
+        else if (mode == CWKeyerSettings::CWDashes)
         {
             m_dot = false;
             m_dash = true;
             m_keyIambicState = KeySilent;
         }
 
-        m_mode = mode;
+        m_settings.m_mode = mode;
     }
 }
 
@@ -239,12 +236,12 @@ int CWKeyer::getSample()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_mode == CWText)
+    if (m_settings.m_mode == CWKeyerSettings::CWText)
     {
     	nextStateText();
         return m_key ? 1 : 0;
     }
-    else if ((m_mode == CWDots) || (m_mode == CWDashes))
+    else if ((m_settings.m_mode == CWKeyerSettings::CWDots) || (m_settings.m_mode == CWKeyerSettings::CWDashes))
     {
         nextStateIambic();
         return m_key ? 1 : 0;
@@ -336,7 +333,6 @@ void CWKeyer::nextStateIambic()
 
 void CWKeyer::nextStateText()
 {
-	// TODO...
 	switch (m_textState)
 	{
 	case TextStart:
@@ -351,9 +347,9 @@ void CWKeyer::nextStateText()
 	case TextStartChar:
 		m_samplePointer = 0;
 		m_elementPointer = 0;
-		if (m_textPointer < m_text.length())
+		if (m_textPointer < m_settings.m_text.length())
 		{
-            m_asciiChar = (m_text.at(m_textPointer)).toLatin1();
+            m_asciiChar = (m_settings.m_text.at(m_textPointer)).toLatin1();
 //            qDebug() << "CWKeyer::nextStateText: TextStartChar: " << m_asciiChar;
 
             if (m_asciiChar < 0) { // non ASCII
@@ -433,7 +429,7 @@ void CWKeyer::nextStateText()
 		}
 		break;
 	case TextEnd:
-	    if (m_loop)
+	    if (m_settings.m_loop)
 	    {
 	        m_textState = TextStart;
 	    }
@@ -452,7 +448,7 @@ void CWKeyer::nextStateText()
 
 bool CWKeyer::eom()
 {
-    return !(m_textPointer < m_text.length());
+    return !(m_textPointer < m_settings.m_text.length());
 }
 
 CWSmoother::CWSmoother() :

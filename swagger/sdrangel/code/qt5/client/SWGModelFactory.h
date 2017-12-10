@@ -17,8 +17,10 @@
 #include "SWGAudioDevice.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
+#include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
+#include "SWGChannelSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGDeviceListItem.h"
@@ -35,6 +37,8 @@
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGNFMDemodSettings.h"
+#include "SWGNFMModSettings.h"
 #include "SWGPresetGroup.h"
 #include "SWGPresetIdentifier.h"
 #include "SWGPresetItem.h"
@@ -55,11 +59,17 @@ namespace SWGSDRangel {
     if(QString("SWGAudioDevicesSelect").compare(type) == 0) {
       return new SWGAudioDevicesSelect();
     }
+    if(QString("SWGCWKeyerSettings").compare(type) == 0) {
+      return new SWGCWKeyerSettings();
+    }
     if(QString("SWGChannel").compare(type) == 0) {
       return new SWGChannel();
     }
     if(QString("SWGChannelListItem").compare(type) == 0) {
       return new SWGChannelListItem();
+    }
+    if(QString("SWGChannelSettings").compare(type) == 0) {
+      return new SWGChannelSettings();
     }
     if(QString("SWGDVSeralDevices").compare(type) == 0) {
       return new SWGDVSeralDevices();
@@ -108,6 +118,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLoggingInfo").compare(type) == 0) {
       return new SWGLoggingInfo();
+    }
+    if(QString("SWGNFMDemodSettings").compare(type) == 0) {
+      return new SWGNFMDemodSettings();
+    }
+    if(QString("SWGNFMModSettings").compare(type) == 0) {
+      return new SWGNFMModSettings();
     }
     if(QString("SWGPresetGroup").compare(type) == 0) {
       return new SWGPresetGroup();

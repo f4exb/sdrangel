@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
-//                                                                               //
-// API for Rx channels                                                           //
+// Copyright (C) 2016 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,42 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELSINKAPI_H_
-#define SDRBASE_CHANNEL_CHANNELSINKAPI_H_
+#ifndef SDRBASE_DSP_CWKEYERSETTINGS_H_
+#define SDRBASE_DSP_CWKEYERSETTINGS_H_
 
 #include <QString>
-#include <stdint.h>
+#include <QByteArray>
 
-#include "util/export.h"
-
-namespace SWGSDRangel
+struct CWKeyerSettings
 {
-    class SWGChannelSettings;
-}
+    typedef enum
+    {
+        CWNone,
+        CWText,
+        CWDots,
+        CWDashes
+    } CWMode;
 
-class SDRANGEL_API ChannelSinkAPI {
-public:
-    ChannelSinkAPI();
-    virtual ~ChannelSinkAPI() {}
+    bool m_loop;
+    CWMode m_mode;
+    int m_sampleRate;
+    QString m_text;
+    int m_wpm;
 
-    virtual int getDeltaFrequency() const = 0;
-    virtual void getIdentifier(QString& id) = 0;
-    virtual void getTitle(QString& title) = 0;
+    CWKeyerSettings();
+    void resetToDefaults();
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
-            QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
-
-    int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
-    void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
-    uint64_t getUID() const { return m_uid; }
-
-private:
-    int m_indexInDeviceSet;
-    uint64_t m_uid;
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
 
 
-#endif /* SDRBASE_CHANNEL_CHANNELSINKAPI_H_ */
+#endif /* SDRBASE_DSP_CWKEYERSETTINGS_H_ */

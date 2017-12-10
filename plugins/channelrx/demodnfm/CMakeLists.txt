@@ -1,5 +1,7 @@
 project(nfm)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(nfm_SOURCES
 	nfmdemod.cpp
 	nfmdemodgui.cpp
@@ -21,6 +23,7 @@ set(nfm_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 #include(${QT_USE_FILE})
@@ -41,6 +44,7 @@ target_link_libraries(demodnfm
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(demodnfm Core Widgets)

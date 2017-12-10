@@ -70,7 +70,7 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	// CW keyer
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
-	m_cwKeyer.setMode(CWKeyer::CWNone);
+	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);

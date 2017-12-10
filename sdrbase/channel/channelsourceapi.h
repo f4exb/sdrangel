@@ -24,6 +24,11 @@
 
 #include "util/export.h"
 
+namespace SWGSDRangel
+{
+    class SWGChannelSettings;
+}
+
 class SDRANGEL_API ChannelSourceAPI {
 public:
     ChannelSourceAPI();
@@ -32,6 +37,11 @@ public:
     virtual int getDeltaFrequency() const = 0;
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }

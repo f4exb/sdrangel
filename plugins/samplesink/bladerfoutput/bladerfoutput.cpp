@@ -23,6 +23,7 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
 #include "bladerf/devicebladerfshared.h"
@@ -490,6 +491,7 @@ int BladerfOutput::webapiRun(
         if (m_deviceAPI->initGeneration())
         {
             m_deviceAPI->startGeneration();
+            DSPEngine::instance()->startAudioInputImmediate();
         }
     }
     else

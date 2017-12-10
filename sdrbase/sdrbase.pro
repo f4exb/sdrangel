@@ -63,6 +63,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         dsp/channelmarker.cpp\
         dsp/ctcssdetector.cpp\
         dsp/cwkeyer.cpp\
+        dsp/cwkeyersettings.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
@@ -127,6 +128,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/upchannelizer.h\
         dsp/channelmarker.h\
         dsp/cwkeyer.h\
+        dsp/cwkeyersettings.h\
         dsp/complex.h\
         dsp/decimators.h\
         dsp/interpolators.h\

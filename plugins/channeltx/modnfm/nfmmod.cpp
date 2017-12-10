@@ -18,6 +18,9 @@
 #include <QDebug>
 #include <QMutexLocker>
 
+#include "SWGChannelSettings.h"
+#include "SWGCWKeyerSettings.h"
+
 #include <stdio.h>
 #include <complex.h>
 #include <algorithm>
@@ -75,7 +78,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
     // CW keyer
     m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
     m_cwKeyer.setWPM(13);
-    m_cwKeyer.setMode(CWKeyer::CWNone);
+    m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
@@ -467,3 +470,32 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
     m_settings = settings;
 }
 
+int NFMMod::webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+    response.getNfmModSettings()->setAfBandwidth(m_settings.m_afBandwidth);
+    response.getNfmModSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
+    response.getNfmModSettings()->setBasebandSampleRate(m_settings.m_basebandSampleRate);
+    response.getNfmModSettings()->setChannelMute(m_settings.m_channelMute ? 1 : 0);
+    response.getNfmModSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
+    response.getNfmModSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
+    response.getNfmModSettings()->setFmDeviation(m_settings.m_fmDeviation);
+    response.getNfmModSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
+    response.getNfmModSettings()->setOutputSampleRate(m_settings.m_outputSampleRate);
+    response.getNfmModSettings()->setPlayLoop(m_settings.m_playLoop ? 1 : 0);
+    response.getNfmModSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
+    response.getNfmModSettings()->setRgbColor(m_settings.m_rgbColor);
+    *response.getNfmModSettings()->getTitle() = m_settings.m_title;
+    response.getNfmModSettings()->setToneFrequency(m_settings.m_toneFrequency);
+    response.getNfmModSettings()->setVolumeFactor(m_settings.m_volumeFactor);
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    return 200;
+}

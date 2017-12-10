@@ -115,7 +115,7 @@ void CWKeyerGUI::on_playDots_toggled(bool checked)
     ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
 
-    m_cwKeyer->setMode(checked ? CWKeyer::CWDots : CWKeyer::CWNone);
+    m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDots : CWKeyerSettings::CWNone);
 }
 
 void CWKeyerGUI::on_playDashes_toggled(bool checked)
@@ -124,7 +124,7 @@ void CWKeyerGUI::on_playDashes_toggled(bool checked)
     //ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
 
-    m_cwKeyer->setMode(checked ? CWKeyer::CWDashes : CWKeyer::CWNone);
+    m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDashes : CWKeyerSettings::CWNone);
 }
 
 void CWKeyerGUI::on_playText_toggled(bool checked)
@@ -133,7 +133,7 @@ void CWKeyerGUI::on_playText_toggled(bool checked)
     ui->playDashes->setEnabled(!checked);
     //ui->playText->setEnabled(!checked);
 
-    m_cwKeyer->setMode(checked ? CWKeyer::CWText : CWKeyer::CWNone);
+    m_cwKeyer->setMode(checked ? CWKeyerSettings::CWText : CWKeyerSettings::CWNone);
 
     if (checked) {
         ui->playStop->setChecked(true);

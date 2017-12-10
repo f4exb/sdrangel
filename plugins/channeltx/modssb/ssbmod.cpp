@@ -90,7 +90,7 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	// CW keyer
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
-	m_cwKeyer.setMode(CWKeyer::CWNone);
+	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
 	m_inAGC.setGate(m_settings.m_agcThresholdGate);
 	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);

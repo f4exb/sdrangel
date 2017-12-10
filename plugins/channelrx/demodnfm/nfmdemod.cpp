@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGNFMDemodSettings.h"
+
 #include <dsp/downchannelizer.h>
 #include "util/stepfunctions.h"
 #include "audio/audiooutput.h"
@@ -450,4 +453,30 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     }
 
     m_settings = settings;
+}
+
+int NFMDemod::webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage __attribute__((unused)))
+{
+    response.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+    response.getNfmDemodSettings()->setAfBandwidth(m_settings.m_afBandwidth);
+    response.getNfmDemodSettings()->setAudioMute(m_settings.m_audioMute ? 1 : 0);
+    response.getNfmDemodSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
+    response.getNfmDemodSettings()->setCopyAudioToUdp(m_settings.m_copyAudioToUDP ? 1 : 0);
+    response.getNfmDemodSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
+    response.getNfmDemodSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
+    response.getNfmDemodSettings()->setDeltaSquelch(m_settings.m_deltaSquelch ? 1 : 0);
+    response.getNfmDemodSettings()->setFmDeviation(m_settings.m_fmDeviation);
+    response.getNfmDemodSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
+    response.getNfmDemodSettings()->setInputSampleRate(m_settings.m_inputSampleRate);
+    response.getNfmDemodSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
+    response.getNfmDemodSettings()->setRgbColor(m_settings.m_rgbColor);
+    response.getNfmDemodSettings()->setSquelch(m_settings.m_squelch);
+    response.getNfmDemodSettings()->setSquelchGate(m_settings.m_squelchGate);
+    *response.getNfmDemodSettings()->getTitle() = m_settings.m_title;
+    *response.getNfmDemodSettings()->getUdpAddress() = m_settings.m_udpAddress;
+    response.getNfmDemodSettings()->setUdpPort(m_settings.m_udpPort);
+    response.getNfmDemodSettings()->setVolume(m_settings.m_volume);
+    return 200;
 }

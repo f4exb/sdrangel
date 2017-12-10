@@ -16,6 +16,7 @@ set(sdrbase_SOURCES
     dsp/channelmarker.cpp
     dsp/ctcssdetector.cpp
     dsp/cwkeyer.cpp
+    dsp/cwkeyersettings.cpp
     dsp/dspcommands.cpp
     dsp/dspengine.cpp
     dsp/dspdevicesourceengine.cpp
@@ -91,6 +92,7 @@ set(sdrbase_HEADERS
     dsp/channelmarker.h
     dsp/complex.h
     dsp/cwkeyer.h
+    dsp/cwkeyersettings.h
     dsp/decimators.h
     dsp/interpolators.h
     dsp/dspcommands.h
