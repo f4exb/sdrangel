@@ -797,7 +797,7 @@ void WebAPIRequestMapper::devicesetChannelService(
 
                 if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
                 {
-                    normalResponse.setChannelType(new QString(jsonObject["deviceHwType"].toString()));
+                    normalResponse.setChannelType(new QString(jsonObject["channelType"].toString()));
 
                     int status = m_adapter->devicesetChannelPost(deviceSetIndex, normalResponse, errorResponse);
 
