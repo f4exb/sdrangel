@@ -146,6 +146,11 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetChannelSettingsGet(
             int deviceSetIndex,
             int channelIndex,

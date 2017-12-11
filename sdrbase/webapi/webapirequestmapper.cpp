@@ -96,6 +96,10 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
                 devicesetDeviceRunService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelURLRe)) {
+                devicesetChannelService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelIndexURLRe)) {
+                devicesetChannelIndexService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelSettingsURLRe)) {
                 devicesetChannelSettingsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             }
@@ -644,7 +648,6 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
         {
             QString jsonStr = request.getBody();
             QJsonObject jsonObject;
-            qDebug("WebAPIRequestMapper::devicesetDeviceSettingsService: %s", qPrintable(jsonStr));
 
             if (parseJsonBody(jsonStr, jsonObject, response))
             {
@@ -760,6 +763,103 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
     {
         errorResponse.init();
         *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelService(
+        const std::string& deviceSetIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+
+        if (request.getMethod() == "POST")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGChannelSettings normalResponse;
+                resetChannelSettings(normalResponse);
+
+                if (jsonObject.contains("tx")) {
+                    normalResponse.setTx(jsonObject["tx"].toInt());
+                } else {
+                    normalResponse.setTx(0); // assume Rx
+                }
+
+                if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
+                {
+                    normalResponse.setChannelType(new QString(jsonObject["deviceHwType"].toString()));
+
+                    int status = m_adapter->devicesetChannelPost(deviceSetIndex, normalResponse, errorResponse);
+
+                    response.setStatus(status);
+
+                    if (status == 200) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelIndexService(
+        const std::string& deviceSetIndexStr,
+        const std::string& channelIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+        int channelIndex = boost::lexical_cast<int>(channelIndexStr);
+
+        if (request.getMethod() == "DELETE")
+        {
+            SWGSDRangel::SWGChannelSettings normalResponse;
+            resetChannelSettings(normalResponse);
+            int status = m_adapter->devicesetChannelIndexDelete(deviceSetIndex, channelIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status == 200) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
         response.setStatus(400,"Invalid data");
         response.write(errorResponse.asJson().toUtf8());
     }

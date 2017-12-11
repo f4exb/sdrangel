@@ -68,6 +68,7 @@ MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -741,6 +742,16 @@ bool MainWindow::handleMessage(const Message& cmd)
         } else {
             on_sampleSource_changed();
         }
+
+        return true;
+    }
+    else if (MsgAddChannel::match(cmd))
+    {
+        MsgAddChannel& notif = (MsgAddChannel&) cmd;
+        ui->tabInputsSelect->setCurrentIndex(notif.getDeviceSetIndex());
+        DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
+        deviceUI->m_samplingDeviceControl->getChannelSelector()->setCurrentIndex(notif.getChannelRegistrationIndex());
+        on_channel_addClicked(true);
 
         return true;
     }

@@ -887,6 +887,136 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
     }
 }
 
+int WebAPIAdapterGUI::devicesetChannelPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (response.getTx() == 0) // Rx
+        {
+            if (deviceSet->m_deviceSourceEngine == 0)
+            {
+                error.init();
+                *error.getMessage() = QString("Device set at %1 is not a receive device set").arg(deviceSetIndex);
+                return 400;
+            }
+
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainWindow.m_pluginManager->getRxChannelRegistrations();
+            int nbRegistrations = channelRegistrations->size();
+            int index = 0;
+            for (; index < nbRegistrations; index++)
+            {
+                if (channelRegistrations->at(index).m_channelId == *response.getChannelType()) {
+                    break;
+                }
+            }
+
+            if (index < nbRegistrations)
+            {
+                MainWindow::MsgAddChannel *msg = MainWindow::MsgAddChannel::create(deviceSetIndex, index, false);
+                m_mainWindow.m_inputMessageQueue.push(msg);
+
+                usleep(100000);
+
+                int nbChannels = deviceSet->m_deviceSourceAPI->getNbChannels();
+
+                if (nbChannels > 0)
+                {
+                    ChannelSinkAPI *channelAPI = deviceSet->m_deviceSourceAPI->getChanelAPIAt(nbChannels-1);
+                    if (channelAPI == 0)
+                    {
+                        error.init();
+                        *error.getMessage() = QString("Expected channel not found");
+                        return 500;
+                    }
+                    else
+                    {
+                        return channelAPI->webapiSettingsGet(response, *error.getMessage());
+                    }
+                }
+                else
+                {
+                    error.init();
+                    *error.getMessage() = QString("No channels for device set");
+                    return 500;
+                }
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no receive channel with id %1").arg(*response.getChannelType());
+                return 404;
+            }
+        }
+        else // Tx
+        {
+            if (deviceSet->m_deviceSinkEngine == 0)
+            {
+                error.init();
+                *error.getMessage() = QString("Device set at %1 is not a transmit device set").arg(deviceSetIndex);
+                return 400;
+            }
+
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainWindow.m_pluginManager->getTxChannelRegistrations();
+            int nbRegistrations = channelRegistrations->size();
+            int index = 0;
+            for (; index < nbRegistrations; index++)
+            {
+                if (channelRegistrations->at(index).m_channelId == *response.getChannelType()) {
+                    break;
+                }
+            }
+
+            if (index < nbRegistrations)
+            {
+                MainWindow::MsgAddChannel *msg = MainWindow::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainWindow.m_inputMessageQueue.push(msg);
+
+                usleep(100000);
+
+                int nbChannels = deviceSet->m_deviceSinkAPI->getNbChannels();
+
+                if (nbChannels > 0)
+                {
+                    ChannelSourceAPI *channelAPI = deviceSet->m_deviceSinkAPI->getChanelAPIAt(nbChannels-1);
+                    if (channelAPI == 0)
+                    {
+                        error.init();
+                        *error.getMessage() = QString("Expected channel not found");
+                        return 500;
+                    }
+                    else
+                    {
+                        return channelAPI->webapiSettingsGet(response, *error.getMessage());
+                    }
+                }
+                else
+                {
+                    error.init();
+                    *error.getMessage() = QString("No channels for device set");
+                    return 500;
+                }
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no transmit channel with id %1").arg(*response.getChannelType());
+                return 404;
+            }
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetChannelSettingsGet(
             int deviceSetIndex,
             int channelIndex,

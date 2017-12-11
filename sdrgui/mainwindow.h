@@ -214,6 +214,32 @@ private:
         { }
     };
 
+    class MsgAddChannel : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getChannelRegistrationIndex() const { return m_channelRegistrationIndex; }
+        bool isTx() const { return m_tx; }
+
+        static MsgAddChannel* create(int deviceSetIndex, int channelRegistrationIndex, bool tx)
+        {
+            return new MsgAddChannel(deviceSetIndex, channelRegistrationIndex, tx);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_channelRegistrationIndex;
+        bool m_tx;
+
+        MsgAddChannel(int deviceSetIndex, int channelRegistrationIndex, bool tx) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_channelRegistrationIndex(channelRegistrationIndex),
+            m_tx(tx)
+        { }
+    };
+
     enum {
 		PGroup,
 		PItem

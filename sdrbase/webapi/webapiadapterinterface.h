@@ -293,6 +293,27 @@ public:
      * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
+    virtual int devicesetChannelPost(
+            int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetChannelIndexDelete(
+            int deviceSetIndex __attribute__((unused)),
+            int channelIndex __attribute__((unused)),
+            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
     virtual int devicesetChannelSettingsGet(
             int deviceSetIndex __attribute__((unused)),
             int channelIndex __attribute__((unused)),
@@ -313,6 +334,8 @@ public:
     static std::regex devicesetDeviceURLRe;
     static std::regex devicesetDeviceSettingsURLRe;
     static std::regex devicesetDeviceRunURLRe;
+    static std::regex devicesetChannelURLRe;
+    static std::regex devicesetChannelIndexURLRe;
     static std::regex devicesetChannelSettingsURLRe;
 };
 
