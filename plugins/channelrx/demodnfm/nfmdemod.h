@@ -125,6 +125,11 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
 		return m_ctcssDetector.getToneSet();

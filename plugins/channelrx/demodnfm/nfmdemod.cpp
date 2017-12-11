@@ -480,3 +480,40 @@ int NFMDemod::webapiSettingsGet(
     response.getNfmDemodSettings()->setVolume(m_settings.m_volume);
     return 200;
 }
+
+int NFMDemod::webapiSettingsPutPatch(
+            bool force,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage  __attribute__((unused)))
+{
+    NFMDemodSettings settings;
+    settings.m_afBandwidth = response.getNfmDemodSettings()->getAfBandwidth();
+    settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
+    settings.m_audioSampleRate = response.getNfmDemodSettings()->getAudioSampleRate();
+    settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
+    settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
+    settings.m_ctcssOn = response.getNfmDemodSettings()->getCtcssOn() != 0;
+    settings.m_deltaSquelch = response.getNfmDemodSettings()->getDeltaSquelch() != 0;
+    settings.m_fmDeviation = response.getNfmDemodSettings()->getFmDeviation();
+    settings.m_inputFrequencyOffset = response.getNfmDemodSettings()->getInputFrequencyOffset();
+    settings.m_inputSampleRate = response.getNfmDemodSettings()->getInputSampleRate();
+    settings.m_rfBandwidth = response.getNfmDemodSettings()->getRfBandwidth();
+    settings.m_rgbColor = response.getNfmDemodSettings()->getRgbColor();
+    settings.m_squelch = response.getNfmDemodSettings()->getSquelch();
+    settings.m_squelchGate = response.getNfmDemodSettings()->getSquelchGate();
+    settings.m_title = *response.getNfmDemodSettings()->getTitle();
+    settings.m_udpAddress = *response.getNfmDemodSettings()->getUdpAddress();
+    settings.m_udpPort = response.getNfmDemodSettings()->getUdpPort();
+    settings.m_volume = response.getNfmDemodSettings()->getVolume();
+
+    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
+}

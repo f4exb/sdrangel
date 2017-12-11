@@ -891,6 +891,41 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGChannelSettings normalResponse;
+                resetChannelSettings(normalResponse);
+
+                if (validateChannelSettings(normalResponse, jsonObject))
+                {
+                    int status = m_adapter->devicesetChannelSettingsPutPatch(
+                            deviceSetIndex,
+                            channelIndex,
+                            (request.getMethod() == "PUT"), // force settings on PUT
+                            normalResponse,
+                            errorResponse);
+                    response.setStatus(status);
+
+                    if (status == 200) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+        }
         else
         {
             response.setStatus(405,"Invalid HTTP method");
@@ -1034,6 +1069,50 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     else
     {
         return false;
+    }
+}
+
+bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject)
+{
+    if (jsonObject.contains("tx")) {
+        channelSettings.setTx(jsonObject["tx"].toInt());
+    } else {
+        channelSettings.setTx(0); // assume Rx
+    }
+
+    if (jsonObject.contains("channelType") && jsonObject["channelType"].isString()) {
+        channelSettings.setChannelType(new QString(jsonObject["channelType"].toString()));
+    } else {
+        return false;
+    }
+
+    QString *channelType = channelSettings.getChannelType();
+
+    if (*channelType == "NFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject nfmDemodSettingsJsonObject = jsonObject["nfmDemodSettings"].toObject();
+            channelSettings.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+            channelSettings.getNfmDemodSettings()->fromJsonObject(nfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject nfmModSettingsJsonObject = jsonObject["nfmModSettings"].toObject();
+            channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+            channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 

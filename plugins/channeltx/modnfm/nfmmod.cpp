@@ -499,3 +499,52 @@ int NFMMod::webapiSettingsGet(
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
     return 200;
 }
+
+int NFMMod::webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    NFMModSettings settings;
+    settings.m_afBandwidth = response.getNfmModSettings()->getAfBandwidth();
+    settings.m_audioSampleRate = response.getNfmModSettings()->getAudioSampleRate();
+    settings.m_basebandSampleRate = response.getNfmModSettings()->getBasebandSampleRate();
+    settings.m_channelMute = response.getNfmModSettings()->getChannelMute() != 0;
+    settings.m_ctcssIndex = response.getNfmModSettings()->getCtcssIndex();
+    settings.m_ctcssOn = response.getNfmModSettings()->getCtcssOn() != 0;
+    settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
+    settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
+    settings.m_outputSampleRate = response.getNfmModSettings()->getOutputSampleRate();
+    settings.m_playLoop = response.getNfmModSettings()->getPlayLoop() != 0;
+    settings.m_rfBandwidth = response.getNfmModSettings()->getRfBandwidth();
+    settings.m_rgbColor = response.getNfmModSettings()->getRgbColor();
+    settings.m_title = *response.getNfmModSettings()->getTitle();
+    settings.m_toneFrequency = response.getNfmModSettings()->getToneFrequency();
+    settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+    CWKeyerSettings cwKeyerSettings;
+    cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+    cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+    cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+    cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+    cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+    m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+    m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+    m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+    m_cwKeyer.setText(cwKeyerSettings.m_text);
+    m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_guiMessageQueue->push(msgCwKeyer);
+        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
+}
+

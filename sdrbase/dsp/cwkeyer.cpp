@@ -21,6 +21,8 @@
 #include "cwkeyer.h"
 #include "util/stepfunctions.h"
 
+MESSAGE_CLASS_DEFINITION(CWKeyer::MsgConfigureCWKeyer, Message)
+
 /**
  * 0:  dot
  * 1:  dash

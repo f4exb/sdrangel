@@ -157,6 +157,13 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelSettingsPutPatch(
+            int deviceSetIndex,
+            int channelIndex,
+            bool force,
+            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

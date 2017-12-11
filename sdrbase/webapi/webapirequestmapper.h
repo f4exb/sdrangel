@@ -66,6 +66,7 @@ private:
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject);
+    bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject);
 
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 

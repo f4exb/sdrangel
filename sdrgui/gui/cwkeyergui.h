@@ -29,6 +29,7 @@ namespace Ui {
 
 class MessageQueue;
 class CWKeyer;
+class CWKeyerSettings;
 
 class SDRANGEL_API CWKeyerGUI : public QWidget, public Serializable {
     Q_OBJECT
@@ -43,13 +44,17 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
+    void displaySettings(const CWKeyerSettings& settings);
+
 private:
     Ui::CWKeyerGUI* ui;
 
     MessageQueue* m_messageQueue;
     CWKeyer* m_cwKeyer;
+    bool m_doApplySettings;
 
     void applySettings();
+    void blockApplySettings(bool block);
 
 private slots:
     void on_cwTextClear_clicked(bool checked);

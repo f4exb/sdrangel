@@ -245,6 +245,11 @@ public:
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage);
 
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }

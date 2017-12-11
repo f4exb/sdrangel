@@ -22,6 +22,7 @@
 #include <QMutex>
 
 #include "util/export.h"
+#include "util/message.h"
 #include "cwkeyersettings.h"
 
 /**
@@ -49,13 +50,28 @@ class SDRANGEL_API CWKeyer : public QObject {
     Q_OBJECT
 
 public:
-//    typedef enum
-//    {
-//        CWNone,
-//        CWText,
-//        CWDots,
-//        CWDashes
-//    } CWMode;
+    class MsgConfigureCWKeyer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const CWKeyerSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureCWKeyer* create(const CWKeyerSettings& settings, bool force)
+        {
+            return new MsgConfigureCWKeyer(settings, force);
+        }
+
+    private:
+        CWKeyerSettings m_settings;
+        bool m_force;
+
+        MsgConfigureCWKeyer(const CWKeyerSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
 
     typedef enum
     {

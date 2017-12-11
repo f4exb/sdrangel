@@ -43,6 +43,12 @@ public:
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 
+    virtual int webapiSettingsPutPatch(
+            bool force __attribute__((unused)),
+            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
     uint64_t getUID() const { return m_uid; }

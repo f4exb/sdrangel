@@ -72,13 +72,22 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool NFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool NFMDemodGUI::handleMessage(const Message& message)
 {
     if (NFMDemod::MsgReportCTCSSFreq::match(message))
     {
         NFMDemod::MsgReportCTCSSFreq& report = (NFMDemod::MsgReportCTCSSFreq&) message;
         setCtcssFreq(report.getFrequency());
         //qDebug("NFMDemodGUI::handleMessage: MsgReportCTCSSFreq: %f", report.getFrequency());
+        return true;
+    }
+    else if (NFMDemod::MsgConfigureNFMDemod::match(message))
+    {
+        const NFMDemod::MsgConfigureNFMDemod& cfg = (NFMDemod::MsgConfigureNFMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
         return true;
     }
 

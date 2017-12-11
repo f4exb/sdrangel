@@ -103,6 +103,21 @@ bool NFMModGUI::handleMessage(const Message& message)
         updateWithStreamTime();
         return true;
     }
+    else if (NFMMod::MsgConfigureNFMMod::match(message))
+    {
+        const NFMMod::MsgConfigureNFMMod& cfg = (NFMMod::MsgConfigureNFMMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        return true;
+    }
     else
     {
         return false;
