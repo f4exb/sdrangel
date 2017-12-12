@@ -106,6 +106,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             else
             {
                 QByteArray path = "/index.html";
+                response.setStatus(404, "Page not found");
                 m_staticFileController->service(path, response);
             }
 
@@ -1092,7 +1093,7 @@ bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSetting
     {
         if (channelSettings.getTx() == 0)
         {
-            QJsonObject nfmDemodSettingsJsonObject = jsonObject["nfmDemodSettings"].toObject();
+            QJsonObject nfmDemodSettingsJsonObject = jsonObject["NFMDemodSettings"].toObject();
             channelSettings.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
             channelSettings.getNfmDemodSettings()->fromJsonObject(nfmDemodSettingsJsonObject);
             return true;
@@ -1105,7 +1106,7 @@ bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSetting
     {
         if (channelSettings.getTx() != 0)
         {
-            QJsonObject nfmModSettingsJsonObject = jsonObject["nfmModSettings"].toObject();
+            QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
             channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
             channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
             return true;

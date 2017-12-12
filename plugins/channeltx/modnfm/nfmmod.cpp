@@ -289,7 +289,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 
         applySettings(settings);
 
-        qDebug() << "NFMMod::handleMessage: MsgChannelizerNotification:"
+        qDebug() << "NFMMod::handleMessage: UpChannelizer::MsgChannelizerNotification:"
 				<< " m_basebandSampleRate: " << settings.m_basebandSampleRate
                 << " m_outputSampleRate: " << settings.m_outputSampleRate
 				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
@@ -341,6 +341,8 @@ bool NFMMod::handleMessage(const Message& cmd)
         MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
         openFileStream();
+	    qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceName:"
+	             << " m_fileName: " << m_fileName;
         return true;
     }
     else if (MsgConfigureFileSourceSeek::match(cmd))
@@ -348,6 +350,8 @@ bool NFMMod::handleMessage(const Message& cmd)
         MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
+        qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceSeek:"
+                 << " seekPercentage: " << seekPercentage;
 
         return true;
     }
@@ -355,6 +359,8 @@ bool NFMMod::handleMessage(const Message& cmd)
     {
         MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
         m_afInput = conf.getAFInput();
+        qDebug() << "NFMMod::handleMessage: MsgConfigureAFInput:"
+                 << " seekPercentage: " << m_afInput;
 
         return true;
     }

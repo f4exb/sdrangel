@@ -76,6 +76,7 @@ bool NFMDemodGUI::handleMessage(const Message& message)
 {
     if (NFMDemod::MsgReportCTCSSFreq::match(message))
     {
+        qDebug("NFMDemodGUI::handleMessage: NFMDemod::MsgReportCTCSSFreq");
         NFMDemod::MsgReportCTCSSFreq& report = (NFMDemod::MsgReportCTCSSFreq&) message;
         setCtcssFreq(report.getFrequency());
         //qDebug("NFMDemodGUI::handleMessage: MsgReportCTCSSFreq: %f", report.getFrequency());
@@ -83,6 +84,7 @@ bool NFMDemodGUI::handleMessage(const Message& message)
     }
     else if (NFMDemod::MsgConfigureNFMDemod::match(message))
     {
+        qDebug("NFMDemodGUI::handleMessage: NFMDemod::MsgConfigureNFMDemod");
         const NFMDemod::MsgConfigureNFMDemod& cfg = (NFMDemod::MsgConfigureNFMDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);

@@ -318,8 +318,6 @@ void NFMDemod::stop()
 
 bool NFMDemod::handleMessage(const Message& cmd)
 {
-	qDebug() << "NFMDemod::handleMessage";
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -331,7 +329,8 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 		applySettings(settings);
 
-		qDebug() << "NFMDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << settings.m_inputSampleRate
+		qDebug() << "NFMDemod::handleMessage: DownChannelizer::MsgChannelizerNotification:"
+		        << " m_inputSampleRate: " << settings.m_inputSampleRate
 				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
 
 		return true;
@@ -343,6 +342,10 @@ bool NFMDemod::handleMessage(const Message& cmd)
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
+
+        qDebug() << "NFMDemod::handleMessage: MsgConfigureChannelizer:"
+                 << " sampleRate: " << cfg.getSampleRate()
+                 << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
