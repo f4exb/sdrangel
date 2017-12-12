@@ -489,6 +489,7 @@ int NFMMod::webapiSettingsGet(
     response.getNfmModSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
     response.getNfmModSettings()->setFmDeviation(m_settings.m_fmDeviation);
     response.getNfmModSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
+    response.getNfmModSettings()->setModAfInput((int) m_settings.m_modAFInput);
     response.getNfmModSettings()->setOutputSampleRate(m_settings.m_outputSampleRate);
     response.getNfmModSettings()->setPlayLoop(m_settings.m_playLoop ? 1 : 0);
     response.getNfmModSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
@@ -520,6 +521,7 @@ int NFMMod::webapiSettingsPutPatch(
     settings.m_ctcssOn = response.getNfmModSettings()->getCtcssOn() != 0;
     settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
     settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
+    settings.m_modAFInput = (NFMModSettings::NFMModInputAF) response.getNfmModSettings()->getModAfInput();
     settings.m_outputSampleRate = response.getNfmModSettings()->getOutputSampleRate();
     settings.m_playLoop = response.getNfmModSettings()->getPlayLoop() != 0;
     settings.m_rfBandwidth = response.getNfmModSettings()->getRfBandwidth();

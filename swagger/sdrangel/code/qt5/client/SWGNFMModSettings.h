@@ -88,6 +88,9 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    qint32 getModAfInput();
+    void setModAfInput(qint32 mod_af_input);
+
     SWGCWKeyerSettings* getCwKeyer();
     void setCwKeyer(SWGCWKeyerSettings* cw_keyer);
 
@@ -108,6 +111,7 @@ private:
     qint32 ctcss_index;
     qint32 rgb_color;
     QString* title;
+    qint32 mod_af_input;
     SWGCWKeyerSettings* cw_keyer;
 };
 

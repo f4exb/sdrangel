@@ -36,6 +36,8 @@ NFMModSettings:
       type: integer
     title:
       type: string
+    modAFInput:
+      type: integer
     cwKeyer:
       $ref: "http://localhost:8081/CWKeyer.yaml#/CWKeyerSettings"
     

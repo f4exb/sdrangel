@@ -52,6 +52,7 @@ SWGNFMModSettings::init() {
     ctcss_index = 0;
     rgb_color = 0;
     title = new QString("");
+    mod_af_input = 0;
     cw_keyer = new SWGCWKeyerSettings();
 }
 
@@ -75,6 +76,7 @@ SWGNFMModSettings::cleanup() {
     if(title != nullptr) {
         delete title;
     }
+
 
     if(cw_keyer != nullptr) {
         delete cw_keyer;
@@ -107,6 +109,7 @@ SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ctcss_index, pJson["ctcssIndex"], "qint32", "");
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
     ::SWGSDRangel::setValue(&cw_keyer, pJson["cwKeyer"], "SWGCWKeyerSettings", "SWGCWKeyerSettings");
 }
 
@@ -153,6 +156,8 @@ SWGNFMModSettings::asJsonObject() {
     obj->insert("rgbColor", QJsonValue(rgb_color));
 
     toJsonValue(QString("title"), title, obj, QString("QString"));
+
+    obj->insert("modAFInput", QJsonValue(mod_af_input));
 
     toJsonValue(QString("cwKeyer"), cw_keyer, obj, QString("SWGCWKeyerSettings"));
 
@@ -292,6 +297,15 @@ SWGNFMModSettings::getTitle() {
 void
 SWGNFMModSettings::setTitle(QString* title) {
     this->title = title;
+}
+
+qint32
+SWGNFMModSettings::getModAfInput() {
+    return mod_af_input;
+}
+void
+SWGNFMModSettings::setModAfInput(qint32 mod_af_input) {
+    this->mod_af_input = mod_af_input;
 }
 
 SWGCWKeyerSettings*

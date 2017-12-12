@@ -1175,6 +1175,10 @@ bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSetting
             return false;
         }
     }
+    else
+    {
+        return false;
+    }
 }
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)

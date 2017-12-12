@@ -80,6 +80,7 @@ def main():
         settings["NFMModSettings"]["cwKeyer"]["text"] = "VVV DE F4EXB  "
         settings["NFMModSettings"]["cwKeyer"]["loop"] = 1
         settings["NFMModSettings"]["cwKeyer"]["mode"] = 1 # text
+        settings["NFMModSettings"]["modAFInput"] = 4
         
         r = callAPI("/deviceset/1/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
         if r is None:

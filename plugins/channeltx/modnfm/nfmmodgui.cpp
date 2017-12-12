@@ -461,7 +461,7 @@ void NFMModGUI::tick()
 	m_channelPowerDbAvg.feed(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
 
-    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == NFMMod::NFMModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == NFMModSettings::NFMModInputFile))
     {
         NFMMod::MsgConfigureFileSourceStreamTiming* message = NFMMod::MsgConfigureFileSourceStreamTiming::create();
         m_nfmMod->getInputMessageQueue()->push(message);
