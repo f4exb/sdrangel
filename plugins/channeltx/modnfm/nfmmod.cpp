@@ -57,7 +57,6 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(NFMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
@@ -179,7 +178,7 @@ void NFMMod::modulateSample()
 
 void NFMMod::pullAF(Real& sample)
 {
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
     case NFMModInputTone:
         sample = m_toneNco.next();
@@ -330,6 +329,7 @@ bool NFMMod::handleMessage(const Message& cmd)
                 << " m_ctcssOn: " << settings.m_ctcssOn
                 << " m_channelMute: " << settings.m_channelMute
                 << " m_playLoop: " << settings.m_playLoop
+                << " m_modAFInout " << settings.m_modAFInput
                 << " force: " << cfg.getForce();
 
         applySettings(settings, cfg.getForce());
@@ -360,7 +360,7 @@ bool NFMMod::handleMessage(const Message& cmd)
         MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
         m_afInput = conf.getAFInput();
         qDebug() << "NFMMod::handleMessage: MsgConfigureAFInput:"
-                 << " seekPercentage: " << m_afInput;
+                 << " m_afInput: " << m_afInput;
 
         return true;
     }

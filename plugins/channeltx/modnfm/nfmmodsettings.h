@@ -23,6 +23,15 @@ class Serializable;
 
 struct NFMModSettings
 {
+    typedef enum
+    {
+        NFMModInputNone,
+        NFMModInputTone,
+        NFMModInputFile,
+        NFMModInputAudio,
+        NFMModInputCWTone
+    } NFMModInputAF;
+
     static const int m_nbRfBW;
     static const int m_rfBW[];
     static const int m_nbCTCSSFreqs;
@@ -43,6 +52,7 @@ struct NFMModSettings
     int  m_ctcssIndex;
     quint32 m_rgbColor;
     QString m_title;
+    NFMModInputAF m_modAFInput;
 
     Serializable *m_channelMarker;
     Serializable *m_cwKeyerGUI;

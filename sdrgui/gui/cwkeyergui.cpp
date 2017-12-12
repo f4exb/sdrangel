@@ -179,30 +179,14 @@ void CWKeyerGUI::displaySettings(const CWKeyerSettings& settings)
 
     ui->playLoopCW->setChecked(settings.m_loop);
 
-    switch (settings.m_mode)
-    {
-    case CWKeyerSettings::CWDashes:
-        ui->playDots->setEnabled(false);
-        ui->playDashes->setEnabled(true);
-        ui->playText->setEnabled(false);
-        break;
-    case CWKeyerSettings::CWDots:
-        ui->playDots->setEnabled(true);
-        ui->playDashes->setEnabled(false);
-        ui->playText->setEnabled(false);
-        break;
-    case CWKeyerSettings::CWText:
-        ui->playDots->setEnabled(false);
-        ui->playDashes->setEnabled(false);
-        ui->playText->setEnabled(true);
-        break;
-    case CWKeyerSettings::CWNone:
-    default:
-        ui->playDots->setEnabled(false);
-        ui->playDashes->setEnabled(false);
-        ui->playText->setEnabled(false);
-        break;
-    }
+    ui->playDots->setEnabled((settings.m_mode == CWKeyerSettings::CWDots) || (settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playDots->setChecked(settings.m_mode == CWKeyerSettings::CWDots);
+
+    ui->playDashes->setEnabled((settings.m_mode == CWKeyerSettings::CWDashes) || (settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playDashes->setChecked(settings.m_mode == CWKeyerSettings::CWDashes);
+
+    ui->playText->setEnabled((settings.m_mode == CWKeyerSettings::CWText) || (settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playText->setChecked(settings.m_mode == CWKeyerSettings::CWText);
 
     ui->cwTextEdit->setText(settings.m_text);
     ui->cwSpeed->setValue(settings.m_wpm);

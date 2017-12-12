@@ -57,6 +57,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 {
     if (m_adapter == 0) // format service unavailable if adapter is null
     {
+        response.setHeader("Content-Type", "text/plain");
         response.setStatus(500,"Service not available");
         response.write("Service not available");
     }
@@ -106,7 +107,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             else
             {
                 QByteArray path = "/index.html";
-                response.setStatus(404, "Page not found");
+                response.setStatus(400, "API URL does not exist");
                 m_staticFileController->service(path, response);
             }
 
@@ -121,10 +122,12 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 
 void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
     if (request.getMethod() == "GET")
     {
         SWGSDRangel::SWGInstanceSummaryResponse normalResponse;
-        SWGSDRangel::SWGErrorResponse errorResponse;
 
         int status = m_adapter->instanceSummary(normalResponse, errorResponse);
         response.setStatus(status);
@@ -138,7 +141,9 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
@@ -146,6 +151,7 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGInstanceDevicesResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -168,7 +174,9 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
@@ -176,6 +184,7 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
 {
     SWGSDRangel::SWGInstanceChannelsResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -198,7 +207,9 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
@@ -206,6 +217,7 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGLoggingInfo normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -239,13 +251,16 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -282,13 +297,16 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -325,13 +343,16 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "PATCH")
     {
@@ -356,13 +377,16 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -502,13 +526,16 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -556,13 +583,16 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     if (request.getMethod() == "GET")
     {
@@ -590,13 +620,16 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
     else
     {
         response.setStatus(405,"Invalid HTTP method");
-        response.write("Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
 void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -625,7 +658,9 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
         else
         {
             response.setStatus(405,"Invalid HTTP method");
-            response.write("Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     catch (const boost::bad_lexical_cast &e)
@@ -640,6 +675,7 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
 void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -695,7 +731,9 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
         else
         {
             response.setStatus(405,"Invalid HTTP method");
-            response.write("Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     catch (const boost::bad_lexical_cast &e)
@@ -710,6 +748,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
 void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -757,7 +796,9 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
         else
         {
             response.setStatus(405,"Invalid HTTP method");
-            response.write("Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     catch (const boost::bad_lexical_cast &e)
@@ -775,6 +816,7 @@ void WebAPIRequestMapper::devicesetChannelService(
         qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -819,6 +861,13 @@ void WebAPIRequestMapper::devicesetChannelService(
                 }
             }
         }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     catch (const boost::bad_lexical_cast &e)
     {
@@ -836,6 +885,7 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
         qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -856,6 +906,13 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     catch (const boost::bad_lexical_cast &e)
     {
@@ -873,6 +930,7 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
         qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
 
     try
     {
@@ -930,7 +988,9 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
         else
         {
             response.setStatus(405,"Invalid HTTP method");
-            response.write("Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     catch (const boost::bad_lexical_cast &e)
