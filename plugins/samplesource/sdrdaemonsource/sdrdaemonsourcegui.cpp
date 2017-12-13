@@ -247,6 +247,15 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
 		updateWithStreamTime();
 		return true;
 	}
+	else if (SDRdaemonSourceInput::MsgStartStop::match(message))
+    {
+	    SDRdaemonSourceInput::MsgStartStop& notif = (SDRdaemonSourceInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -591,18 +600,10 @@ void SDRdaemonSourceGui::on_nbFECBlocks_valueChanged(int value)
 
 void SDRdaemonSourceGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        SDRdaemonSourceInput::MsgStartStop *message = SDRdaemonSourceInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

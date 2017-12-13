@@ -33,6 +33,7 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SDRPlayGui),
     m_deviceUISet(deviceUISet),
+    m_doApplySettings(true),
     m_forceSettings(true)
 {
     m_sampleSource = (SDRPlayInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
@@ -160,6 +161,15 @@ bool SDRPlayGui::handleMessage(const Message& message)
             gainText.sprintf("%03d", msg.getTunerGain());
             ui->gainTunerText->setText(gainText);
     	}
+
+        return true;
+    }
+    else if (SDRPlayInput::MsgStartStop::match(message))
+    {
+        SDRPlayInput::MsgStartStop& notif = (SDRPlayInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
 
         return true;
     }
@@ -433,18 +443,10 @@ void SDRPlayGui::on_gainBaseband_valueChanged(int value)
 
 void SDRPlayGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        SDRPlayInput::MsgStartStop *message = SDRPlayInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 
