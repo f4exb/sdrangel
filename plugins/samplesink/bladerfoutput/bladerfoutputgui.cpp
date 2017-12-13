@@ -33,6 +33,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::BladerfOutputGui),
 	m_deviceUISet(deviceUISet),
+	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(NULL),
@@ -306,18 +307,10 @@ void BladerfOutputGui::on_xb200_currentIndexChanged(int index)
 
 void BladerfOutputGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
-        {
-            m_deviceUISet->m_deviceSinkAPI->startGeneration();
-            DSPEngine::instance()->startAudioInput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioInput();
+        BladerfOutput::MsgStartStop *message = BladerfOutput::MsgStartStop::create(checked);
+        m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 

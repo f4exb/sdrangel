@@ -39,6 +39,7 @@ FileSinkGui::FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::FileSinkGui),
 	m_deviceUISet(deviceUISet),
+	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
 	m_fileName("./test.sdriq"),
@@ -141,6 +142,14 @@ bool FileSinkGui::handleMessage(const Message& message)
 		m_samplesCount = ((FileSinkOutput::MsgReportFileSinkStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
+	}
+	else if (FileSinkOutput::MsgStartStop::match(message))
+	{
+	    FileSinkOutput::MsgStartStop& notif = (FileSinkOutput::MsgStartStop&) message;
+	    blockApplySettings(true);
+	    ui->startStop->setChecked(notif.getStartStop());
+	    blockApplySettings(false);
+	    return true;
 	}
 	else
 	{
@@ -259,22 +268,10 @@ void FileSinkGui::on_interp_currentIndexChanged(int index)
 
 void FileSinkGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
-        {
-            if (!m_deviceUISet->m_deviceSinkAPI->startGeneration())
-            {
-                qDebug("FileSinkGui::on_startStop_toggled: device start failed");
-            }
-
-            DSPEngine::instance()->startAudioInput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioInput();
+        FileSinkOutput::MsgStartStop *message = FileSinkOutput::MsgStartStop::create(checked);
+        m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 

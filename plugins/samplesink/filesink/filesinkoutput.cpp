@@ -30,6 +30,7 @@
 #include "filesinkthread.h"
 
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSink, Message)
+MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkName, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Message)
@@ -158,6 +159,27 @@ bool FileSinkOutput::handleMessage(const Message& message)
 		m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
+	}
+	else if (MsgStartStop::match(message))
+	{
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "FileSinkOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initGeneration())
+            {
+                m_deviceAPI->startGeneration();
+                DSPEngine::instance()->startAudioInput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopGeneration();
+            DSPEngine::instance()->stopAudioInput();
+        }
+
+        return true;
 	}
 	else if (MsgConfigureFileSink::match(message))
     {

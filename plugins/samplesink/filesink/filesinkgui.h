@@ -57,6 +57,7 @@ private:
 	Ui::FileSinkGui* ui;
 
 	DeviceUISet* m_deviceUISet;
+	bool m_doApplySettings;
 	bool m_forceSettings;
 	FileSinkSettings m_settings;
     QString m_fileName;
@@ -72,6 +73,7 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
+	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void displayTime();
 	void sendSettings();
