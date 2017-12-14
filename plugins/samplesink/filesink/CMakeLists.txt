@@ -1,5 +1,7 @@
 project(filesink)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(filesink_SOURCES
 	filesinkgui.cpp
 	filesinkoutput.cpp
@@ -23,6 +25,7 @@ set(filesink_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -41,6 +44,7 @@ target_link_libraries(outputfilesink
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(outputfilesink Core Widgets)

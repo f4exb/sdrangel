@@ -314,7 +314,7 @@ void FCDProPlusGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        BladerfInput::MsgStartStop *message = BladerfInput::MsgStartStop::create(checked);
+        FCDProPlusInput::MsgStartStop *message = FCDProPlusInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }

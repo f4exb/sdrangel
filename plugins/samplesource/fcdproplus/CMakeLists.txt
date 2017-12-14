@@ -1,5 +1,7 @@
 project(fcdproplus)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(fcdproplus_SOURCES
 	fcdproplusgui.cpp
 	fcdproplusinput.cpp
@@ -23,6 +25,7 @@ set(fcdproplus_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
 	${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
@@ -48,6 +51,7 @@ target_link_libraries(inputfcdproplus
 	fcdlib
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(inputfcdproplus Core Widgets)

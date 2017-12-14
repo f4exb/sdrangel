@@ -210,9 +210,9 @@ bool FCDProGui::deserialize(const QByteArray& data)
 
 bool FCDProGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (BladerfInput::MsgStartStop::match(message))
+    if (FCDProInput::MsgStartStop::match(message))
     {
-        BladerfInput::MsgStartStop& notif = (BladerfInput::MsgStartStop&) message;
+        FCDProInput::MsgStartStop& notif = (FCDProInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -449,7 +449,7 @@ void FCDProGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        BladerfInput::MsgStartStop *message = BladerfInput::MsgStartStop::create(checked);
+        FCDProInput::MsgStartStop *message = FCDProInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
