@@ -177,6 +177,14 @@ bool SDRdaemonSinkGui::handleMessage(const Message& message)
 		updateWithStreamTime();
 		return true;
 	}
+    else if (SDRdaemonSinkOutput::MsgStartStop::match(message))
+    {
+        SDRdaemonSinkOutput::MsgStartStop& notif = (SDRdaemonSinkOutput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+        return true;
+    }
 	else
 	{
 		return false;
@@ -499,22 +507,10 @@ void SDRdaemonSinkGui::on_sendButton_clicked(bool checked __attribute__((unused)
 
 void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
-        {
-            if (!m_deviceUISet->m_deviceSinkAPI->startGeneration())
-            {
-                qDebug("SDRdaemonSinkGui::on_startStop_toggled: device start failed");
-            }
-
-            DSPEngine::instance()->startAudioInput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioInput();
+        SDRdaemonSinkOutput::MsgStartStop *message = SDRdaemonSinkOutput::MsgStartStop::create(checked);
+        m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 

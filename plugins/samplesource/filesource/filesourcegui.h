@@ -55,6 +55,7 @@ private:
 
 	DeviceUISet* m_deviceUISet;
 	FileSourceInput::Settings m_settings;
+	bool m_doApplySettings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	DeviceSampleSource* m_sampleSource;
@@ -72,6 +73,7 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
+	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void displayTime();
 	void sendSettings();

@@ -130,6 +130,15 @@ bool HackRFInputGui::handleMessage(const Message& message)
         displaySettings();
         return true;
     }
+    else if (HackRFInput::MsgStartStop::match(message))
+    {
+        HackRFInput::MsgStartStop& notif = (HackRFInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
     else
     {
         return false;
@@ -333,25 +342,10 @@ void HackRFInputGui::on_vga_valueChanged(int value)
 
 void HackRFInputGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        // forcibly stop the Tx if present before starting
-        if (m_deviceUISet->m_deviceSourceAPI->getSinkBuddies().size() > 0)
-        {
-            DeviceSinkAPI *buddy = m_deviceUISet->m_deviceSourceAPI->getSinkBuddies()[0];
-            buddy->stopGeneration();
-        }
-
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        HackRFInput::MsgStartStop *message = HackRFInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

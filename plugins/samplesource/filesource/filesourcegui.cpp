@@ -179,6 +179,15 @@ bool FileSourceGui::handleMessage(const Message& message)
 		updateWithStreamTime();
 		return true;
 	}
+	else if (FileSourceInput::MsgStartStop::match(message))
+    {
+	    FileSourceInput::MsgStartStop& notif = (FileSourceInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -207,18 +216,10 @@ void FileSourceGui::on_playLoop_toggled(bool checked __attribute__((unused)))
 
 void FileSourceGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        FileSourceInput::MsgStartStop *message = FileSourceInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

@@ -131,7 +131,16 @@ bool PlutoSDRInputGui::deserialize(const QByteArray& data)
 
 bool PlutoSDRInputGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
+    if (PlutoSDRInput::MsgStartStop::match(message))
+    {
+        PlutoSDRInput::MsgStartStop& notif = (PlutoSDRInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
     {
         DevicePlutoSDRShared::MsgCrossReportToBuddy& conf = (DevicePlutoSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = conf.getDevSampleRate();
@@ -153,18 +162,10 @@ bool PlutoSDRInputGui::handleMessage(const Message& message __attribute__((unuse
 
 void PlutoSDRInputGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        PlutoSDRInput::MsgStartStop *message = PlutoSDRInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

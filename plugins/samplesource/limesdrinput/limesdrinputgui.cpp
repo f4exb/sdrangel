@@ -219,8 +219,19 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
         ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
         return true;
     }
+    else if (LimeSDRInput::MsgStartStop::match(message))
+    {
+        LimeSDRInput::MsgStartStop& notif = (LimeSDRInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
 
-    return false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void LimeSDRInputGUI::handleInputMessages()
@@ -415,18 +426,10 @@ void LimeSDRInputGUI::blockApplySettings(bool block)
 
 void LimeSDRInputGUI::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        LimeSDRInput::MsgStartStop *message = LimeSDRInput::MsgStartStop::create(checked);
+        m_limeSDRInput->getInputMessageQueue()->push(message);
     }
 }
 

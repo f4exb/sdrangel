@@ -35,6 +35,7 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::AirspyGui),
 	m_deviceUISet(deviceUISet),
+	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
@@ -116,9 +117,21 @@ bool AirspyGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool AirspyGui::handleMessage(const Message& message __attribute__((unused)))
+bool AirspyGui::handleMessage(const Message& message)
 {
-    return false;
+    if (AirspyInput::MsgStartStop::match(message))
+    {
+        AirspyInput::MsgStartStop& notif = (AirspyInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void AirspyGui::handleInputMessages()
@@ -340,18 +353,10 @@ void AirspyGui::on_vga_valueChanged(int value)
 
 void AirspyGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        AirspyInput::MsgStartStop *message = AirspyInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

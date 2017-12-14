@@ -149,6 +149,15 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	    blockApplySettings(false);
 	    return true;
 	}
+    if (RTLSDRInput::MsgStartStop::match(message))
+    {
+        RTLSDRInput::MsgStartStop& notif = (RTLSDRInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -320,18 +329,10 @@ void RTLSDRGui::on_gain_valueChanged(int value)
 
 void RTLSDRGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        RTLSDRInput::MsgStartStop *message = RTLSDRInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

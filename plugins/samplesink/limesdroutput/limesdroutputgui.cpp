@@ -249,6 +249,14 @@ void LimeSDROutputGUI::handleInputMessages()
 
             delete message;
         }
+        else if (LimeSDROutput::MsgStartStop::match(*message))
+        {
+            LimeSDROutput::MsgStartStop& notif = (LimeSDROutput::MsgStartStop&) *message;
+            blockApplySettings(true);
+            ui->startStop->setChecked(notif.getStartStop());
+            blockApplySettings(false);
+            delete message;
+        }
         else
         {
             if (handleMessage(*message)) {
@@ -394,18 +402,10 @@ void LimeSDROutputGUI::blockApplySettings(bool block)
 
 void LimeSDROutputGUI::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
-        {
-            m_deviceUISet->m_deviceSinkAPI->startGeneration();
-            DSPEngine::instance()->startAudioInput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioInput();
+        LimeSDROutput::MsgStartStop *message = LimeSDROutput::MsgStartStop::create(checked);
+        m_limeSDROutput->getInputMessageQueue()->push(message);
     }
 }
 

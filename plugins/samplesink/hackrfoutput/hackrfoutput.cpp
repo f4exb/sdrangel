@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
@@ -34,6 +35,7 @@
 #include "hackrfoutputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgConfigureHackRF, Message)
+MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgReportHackRF, Message)
 
 HackRFOutput::HackRFOutput(DeviceSinkAPI *deviceAPI) :
@@ -202,6 +204,27 @@ bool HackRFOutput::handleMessage(const Message& message)
         newSettings.m_centerFrequency = m_settings.m_centerFrequency + conf.getFrequencyDelta();
         qDebug() << "HackRFOutput::handleMessage: DeviceHackRFShared::MsgConfigureFrequencyDelta: newFreq: " << newSettings.m_centerFrequency;
         applySettings(newSettings, false);
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "HackRFOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initGeneration())
+            {
+                m_deviceAPI->startGeneration();
+                DSPEngine::instance()->startAudioInput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopGeneration();
+            DSPEngine::instance()->stopAudioInput();
+        }
 
         return true;
     }
@@ -413,19 +436,16 @@ int HackRFOutput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
-    if (run)
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
     {
-        if (m_deviceAPI->initGeneration())
-        {
-            m_deviceAPI->startGeneration();
-            DSPEngine::instance()->startAudioInputImmediate();
-        }
-    }
-    else
-    {
-        m_deviceAPI->stopGeneration();
+        MsgStartStop *messagetoGui = MsgStartStop::create(run);
+        m_guiMessageQueue->push(messagetoGui);
     }
 
+    usleep(100000);
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }

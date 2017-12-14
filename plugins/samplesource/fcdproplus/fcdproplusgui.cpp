@@ -128,7 +128,19 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 
 bool FCDProPlusGui::handleMessage(const Message& message __attribute__((unused)))
 {
-	return false;
+    if (FCDProPlusInput::MsgStartStop::match(message))
+    {
+        FCDProPlusInput::MsgStartStop& notif = (FCDProPlusInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void FCDProPlusGui::handleInputMessages()
@@ -300,18 +312,10 @@ void FCDProPlusGui::on_ppm_valueChanged(int value)
 
 void FCDProPlusGui::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSourceAPI->initAcquisition())
-        {
-            m_deviceUISet->m_deviceSourceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSourceAPI->stopAcquisition();
-        DSPEngine::instance()->stopAudioOutput();
+        BladerfInput::MsgStartStop *message = BladerfInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 

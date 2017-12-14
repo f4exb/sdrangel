@@ -145,6 +145,14 @@ bool PlutoSDROutputGUI::handleMessage(const Message& message __attribute__((unus
 
         return true;
     }
+    else if (PlutoSDROutput::MsgStartStop::match(message))
+    {
+        PlutoSDROutput::MsgStartStop& notif = (PlutoSDROutput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+        return true;
+    }
     else
     {
         return false;
@@ -153,18 +161,10 @@ bool PlutoSDROutputGUI::handleMessage(const Message& message __attribute__((unus
 
 void PlutoSDROutputGUI::on_startStop_toggled(bool checked)
 {
-    if (checked)
+    if (m_doApplySettings)
     {
-        if (m_deviceUISet->m_deviceSinkAPI->initGeneration())
-        {
-            m_deviceUISet->m_deviceSinkAPI->startGeneration();
-            DSPEngine::instance()->startAudioOutput();
-        }
-    }
-    else
-    {
-        m_deviceUISet->m_deviceSinkAPI->stopGeneration();
-        DSPEngine::instance()->stopAudioOutput();
+        PlutoSDROutput::MsgStartStop *message = PlutoSDROutput::MsgStartStop::create(checked);
+        m_sampleSink->getInputMessageQueue()->push(message);
     }
 }
 

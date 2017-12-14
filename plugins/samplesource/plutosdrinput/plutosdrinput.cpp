@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <unistd.h>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -34,6 +35,7 @@
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgStartStop, Message)
 
 PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -150,6 +152,27 @@ bool PlutoSDRInput::handleMessage(const Message& message)
             m_fileSink->startRecording();
         } else {
             m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "PlutoSDRInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+                DSPEngine::instance()->startAudioOutput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -578,19 +601,16 @@ int PlutoSDRInput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
-    if (run)
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
     {
-        if (m_deviceAPI->initAcquisition())
-        {
-            m_deviceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutputImmediate();
-        }
-    }
-    else
-    {
-        m_deviceAPI->stopAcquisition();
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
     }
 
+    usleep(100000);
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }

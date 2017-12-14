@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "SWGDeviceSettings.h"
 #include "SWGRtlSdrSettings.h"
@@ -34,6 +35,7 @@
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
 const quint64 RTLSDRInput::frequencyLowRangeMin = 1000UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
@@ -270,6 +272,27 @@ bool RTLSDRInput::handleMessage(const Message& message)
             m_fileSink->startRecording();
         } else {
             m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "RTLSDRInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+                DSPEngine::instance()->startAudioOutput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -541,19 +564,16 @@ int RTLSDRInput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
-    if (run)
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
     {
-        if (m_deviceAPI->initAcquisition())
-        {
-            m_deviceAPI->startAcquisition();
-            DSPEngine::instance()->startAudioOutputImmediate();
-        }
-    }
-    else
-    {
-        m_deviceAPI->stopAcquisition();
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
     }
 
+    usleep(100000);
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }

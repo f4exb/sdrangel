@@ -29,6 +29,7 @@
 #include "airspythread.h"
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
+MESSAGE_CLASS_DEFINITION(AirspyInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgFileRecord, Message)
 
 const qint64 AirspyInput::loLowLimitFreq = 24000000L;
@@ -236,6 +237,27 @@ bool AirspyInput::handleMessage(const Message& message)
 
 		return true;
 	}
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "AirspyInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+                DSPEngine::instance()->startAudioOutput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+            DSPEngine::instance()->stopAudioOutput();
+        }
+
+        return true;
+    }
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;

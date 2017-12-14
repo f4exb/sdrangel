@@ -132,6 +132,14 @@ bool BladerfOutputGui::handleMessage(const Message& message)
 		displaySettings();
 		return true;
 	}
+    else if (BladerfOutput::MsgStartStop::match(message))
+    {
+        BladerfOutput::MsgStartStop& notif = (BladerfOutput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+        return true;
+    }
 	else
 	{
 		return false;

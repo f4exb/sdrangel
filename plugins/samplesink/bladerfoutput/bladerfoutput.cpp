@@ -211,7 +211,7 @@ bool BladerfOutput::handleMessage(const Message& message)
 	if (MsgConfigureBladerf::match(message))
 	{
 		MsgConfigureBladerf& conf = (MsgConfigureBladerf&) message;
-		qDebug() << "BladerfInput::handleMessage: MsgConfigureBladerf";
+		qDebug() << "BladerfOutput::handleMessage: MsgConfigureBladerf";
 
 		if (!applySettings(conf.getSettings(), conf.getForce()))
 		{
@@ -223,7 +223,7 @@ bool BladerfOutput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "SDRPlayInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "BladerfOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {

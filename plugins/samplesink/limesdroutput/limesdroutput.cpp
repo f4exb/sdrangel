@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <cstddef>
 #include <string.h>
+#include <unistd.h>
 #include "lime/LimeSuite.h"
 
 #include "SWGDeviceSettings.h"
@@ -34,6 +35,7 @@
 #include "limesdroutput.h"
 
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgConfigureLimeSDR, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportStreamInfo, Message)
@@ -463,6 +465,27 @@ bool LimeSDROutput::handleMessage(const Message& message)
         if (!applySettings(conf.getSettings(), conf.getForce()))
         {
             qDebug("LimeSDROutput::handleMessage config error");
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "LimeSDROutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initGeneration())
+            {
+                m_deviceAPI->startGeneration();
+                DSPEngine::instance()->startAudioInput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopGeneration();
+            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;
@@ -1093,19 +1116,16 @@ int LimeSDROutput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
-    if (run)
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
     {
-        if (m_deviceAPI->initGeneration())
-        {
-            m_deviceAPI->startGeneration();
-            DSPEngine::instance()->startAudioInputImmediate();
-        }
-    }
-    else
-    {
-        m_deviceAPI->stopGeneration();
+        MsgStartStop *messagetoGui = MsgStartStop::create(run);
+        m_guiMessageQueue->push(messagetoGui);
     }
 
+    usleep(100000);
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }

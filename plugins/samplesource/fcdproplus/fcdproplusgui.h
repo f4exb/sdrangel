@@ -54,6 +54,7 @@ private:
 	Ui::FCDProPlusGui* ui;
 
 	DeviceUISet* m_deviceUISet;
+	bool m_doApplySettings;
 	bool m_forceSettings;
 	FCDProPlusSettings m_settings;
 	QTimer m_updateTimer;
@@ -65,6 +66,7 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
+	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();

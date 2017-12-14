@@ -33,6 +33,7 @@
 #include "fcdproplusconst.h"
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
+MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 
 FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
@@ -172,6 +173,27 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 		applySettings(conf.getSettings(), conf.getForce());
 		return true;
 	}
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "BladerfInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+                DSPEngine::instance()->startAudioOutput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+            DSPEngine::instance()->stopAudioOutput();
+        }
+
+        return true;
+    }
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
