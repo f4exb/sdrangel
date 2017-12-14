@@ -746,7 +746,12 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
-            if ((response.getTx() != 0) || (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType()))
+            if (response.getTx() != 0)
+            {
+                *error.getMessage() = QString("Rx device found but Tx device requested");
+                return 400;
+            }
+            if (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
             {
                 *error.getMessage() = QString("Device mismatch. Found %1 input").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
                 return 400;
@@ -759,9 +764,14 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
-            if ((response.getTx() == 0) || (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType()))
+            if (response.getTx() == 0)
             {
-                *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
+                *error.getMessage() = QString("Tx device found but Rx device requested");
+                return 400;
+            }
+            else if (deviceSet->m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
+            {
+                *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSinkAPI->getHardwareId());
                 return 400;
             }
             else
