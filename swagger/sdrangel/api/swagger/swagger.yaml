@@ -667,7 +667,7 @@ paths:
           description: Index of device set in the device set list
       responses:
         "200":
-          description: On success return current state
+          description: On success return state before change
           schema:
             $ref: "#/definitions/DeviceState"
         "400":
@@ -697,7 +697,7 @@ paths:
           description: Index of device set in the device set list
       responses:
         "200":
-          description: On success return current state
+          description: On success return state before change
           schema:
             $ref: "#/definitions/DeviceState"
         "400":

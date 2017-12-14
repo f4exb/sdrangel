@@ -103,7 +103,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-<p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b></b>
+<p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b></p>
 
 You will need a minimal installation of LimeSuite. Presently version 17.12.1 should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
 

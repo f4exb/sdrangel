@@ -16,7 +16,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
@@ -340,6 +339,7 @@ int FileSourceInput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
 
@@ -349,8 +349,6 @@ int FileSourceInput::webapiRun(
         m_guiMessageQueue->push(msgToGUI);
     }
 
-    usleep(100000);
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
 

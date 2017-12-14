@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <cstddef>
 #include <string.h>
-#include <unistd.h>
 #include "lime/LimeSuite.h"
 
 #include "SWGDeviceSettings.h"
@@ -1281,6 +1280,7 @@ int LimeSDRInput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
 
@@ -1290,8 +1290,6 @@ int LimeSDRInput::webapiRun(
         m_guiMessageQueue->push(msgToGUI);
     }
 
-    usleep(100000);
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
 

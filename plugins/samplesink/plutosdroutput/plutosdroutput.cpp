@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
-#include <unistd.h>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -514,6 +513,7 @@ int PlutoSDROutput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
 
@@ -523,8 +523,6 @@ int PlutoSDROutput::webapiRun(
         m_guiMessageQueue->push(messagetoGui);
     }
 
-    usleep(100000);
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
 
