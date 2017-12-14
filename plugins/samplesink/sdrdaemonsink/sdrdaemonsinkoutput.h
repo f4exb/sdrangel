@@ -165,6 +165,15 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
 private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;

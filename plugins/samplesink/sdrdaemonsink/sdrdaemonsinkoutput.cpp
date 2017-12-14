@@ -16,7 +16,11 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <QDebug>
+
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -292,5 +296,33 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
-
 }
+
+int SDRdaemonSinkOutput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int SDRdaemonSinkOutput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgStartStop *messagetoGui = MsgStartStop::create(run);
+        m_guiMessageQueue->push(messagetoGui);
+    }
+
+    usleep(100000);
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+

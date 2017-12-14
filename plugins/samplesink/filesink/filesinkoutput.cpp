@@ -16,7 +16,11 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <QDebug>
+
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -271,3 +275,32 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     }
 
 }
+
+int FileSinkOutput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int FileSinkOutput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgStartStop *messagetoGui = MsgStartStop::create(run);
+        m_guiMessageQueue->push(messagetoGui);
+    }
+
+    usleep(100000);
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+
