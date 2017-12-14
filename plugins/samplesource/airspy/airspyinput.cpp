@@ -16,7 +16,11 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <QDebug>
+
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 
 #include "airspygui.h"
 #include "airspyinput.h"
@@ -565,3 +569,31 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 
 	return 0;
 }
+
+int AirspyInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int AirspyInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    usleep(100000);
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+

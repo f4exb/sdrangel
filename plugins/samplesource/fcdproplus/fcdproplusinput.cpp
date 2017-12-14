@@ -19,6 +19,10 @@
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -409,6 +413,32 @@ void FCDProPlusInput::set_lo_ppm()
 	set_center_freq((double) m_settings.m_centerFrequency);
 }
 
+int FCDProPlusInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int FCDProPlusInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    usleep(100000);
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
 
 
 

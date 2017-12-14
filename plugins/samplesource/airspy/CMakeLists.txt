@@ -1,5 +1,7 @@
 project(airspy)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(airspy_SOURCES
     airspygui.cpp
     airspyinput.cpp
@@ -24,6 +26,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
     ${LIBAIRSPYSRC}
     ${LIBAIRSPYSRC}/libairspy/src
 )
@@ -31,6 +34,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
     ${LIBAIRSPY_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -56,6 +60,7 @@ target_link_libraries(inputairspy
     airspy
     sdrbase
     sdrgui
+    swagger
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputairspy
@@ -63,6 +68,7 @@ target_link_libraries(inputairspy
     ${LIBAIRSPY_LIBRARIES}
     sdrbase
     sdrgui
+    swagger
 )
 endif (BUILD_DEBIAN)
 

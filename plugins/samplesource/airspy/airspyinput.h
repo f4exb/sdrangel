@@ -104,7 +104,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
-	static const qint64 loLowLimitFreq;
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    static const qint64 loLowLimitFreq;
 	static const qint64 loHighLimitFreq;
 
 private:

@@ -109,7 +109,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
-	void set_center_freq(double freq);
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    void set_center_freq(double freq);
 	void set_bias_t(bool on);
 	void set_lna_gain(bool on);
 	void set_mixer_gain(bool on);
