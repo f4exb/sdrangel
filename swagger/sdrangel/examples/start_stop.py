@@ -3,7 +3,7 @@
 import requests, json, traceback, sys
 from optparse import OptionParser
 
-base_url = "http://127.0.0.1:8888/sdrangel"
+base_url = "http://127.0.0.1:8091/sdrangel"
 
 # ======================================================================
 def getInputOptions():
