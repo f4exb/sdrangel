@@ -45,7 +45,7 @@ def callAPI(url, method, params, json, text):
             printResponse(r)
             return r.json() # all 200 yield application/json response
         else:
-            print(text + " faileded")
+            print(text + " failed")
             printResponse(r)
             return None
 
@@ -66,11 +66,11 @@ def main():
         
         r = callAPI("/deviceset/0/channel/0/settings", "PATCH", None, settings, "Change NFM demod")
         if r is None:
-            exut(-1)
+            exit(-1)
             
-        r = callAPI("/devicesets", "POST", {"tx": 1}, None, "Add Tx devuce set")
+        r = callAPI("/devicesets", "POST", {"tx": 1}, None, "Add Tx device set")
         if r is None:
-            exut(-1)
+            exit(-1)
             
         settings = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
         if settings is None:
@@ -80,29 +80,12 @@ def main():
         settings["NFMModSettings"]["cwKeyer"]["text"] = "VVV DE F4EXB  "
         settings["NFMModSettings"]["cwKeyer"]["loop"] = 1
         settings["NFMModSettings"]["cwKeyer"]["mode"] = 1 # text
-        settings["NFMModSettings"]["modAFInput"] = 4
+        settings["NFMModSettings"]["modAFInput"] = 4 # CW text
         
         r = callAPI("/deviceset/1/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
         if r is None:
             exit(-1)
         
-#         r = requests.post(url=base_url+"/deviceset/0/channel", json={"channelType": "NFMDemod", "tx": 0})
-#         if r.status_code == 200:
-#             print("Created NFM demod")
-#             printResponse(r)
-#             settings = r.json()
-#             settings["NFMDemodSettings"]["inputFrequencyOffset"] = 12500
-#             settings["NFMDemodSettings"]["afBandwidth"] = 5000
-#             r0 = requests.patch(url=base_url+"/deviceset/0/channel/0/settings", json=settings)
-#             if r0.status_code == 200:
-#                 print("Changed NFM demod")
-#                 printResponse(r0)
-#             else:
-#                 print("Error changing NFM demod. HTTP: %d" % r0.status_code)
-#                 printResponse(r0)
-#         else:
-#             print("Error creating NFM demod. (HTTP: %d)" % r.status_codes)
-#             printResponse(r)
     except Exception, msg:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
