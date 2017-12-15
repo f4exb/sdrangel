@@ -1641,7 +1641,21 @@ margin-bottom: 20px;
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
               <div class="app-desc">Version: 4.0.0</div>
             <hr>
-            <div>This is the web API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</div>
+            <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
+<hr />
+<p>Limitations:</p>
+<ul>
+<li>In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)</li>
+<li>The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source</li>
+<li>The content type returned is always application/json except in the following cases:
+<ul>
+<li>An incorrect URL was specified: this document is returned as text/html with a status 400</li>
+<li>There is no API adapter in the targeted instance: message &quot;Service not available&quot; as text/plain is returned with a status 500. This should not happen with released code.</li>
+</ul>
+</li>
+</ul>
+<hr />
+</div>
           </div>
         </div>
         <div id="sections">
@@ -13767,7 +13781,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-14T23:27:25.824+01:00
+              Generated 2017-12-15T18:29:32.547+01:00
             </div>
           </div>
       </div>
