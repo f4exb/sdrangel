@@ -1,5 +1,12 @@
+sdrangel (3.9.0-1) unstable; urgency=medium
+
+  * Server: proof of concept
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 24 Dec 2017 12:14:18 +0100
+
 sdrangel (3.8.6-1) unstable; urgency=medium
 
+  * LimeSDR: fixed second channel solo or first one streaming
   * Web API: implemented some device plugins methods: RTLSDR, Lime
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 10 Dec 2017 12:14:18 +0100
