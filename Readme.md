@@ -105,7 +105,9 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b></p>
 
-You will need a minimal installation of LimeSuite. Presently version 17.12.1 should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
+<p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 3 MS/s particularly in Tx mode.</p>
+
+You will need a minimal installation of LimeSuite. Presently commit 04b57e0 or later should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
 
   - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`

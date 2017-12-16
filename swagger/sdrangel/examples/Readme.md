@@ -35,6 +35,33 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
   
+<h2>limesdr_tx.py</h2>
+
+Create a Tx device set with a LimeSDR Tx device and a NFM modulator channel configured to send some beacon Morse code. Then starts the Tx.
+ 
+It uses the following APIs:
+
+  - To create a new device set:
+    - OperationID: `instanceDeviceSetsPost`
+    - URI: `/sdrangel/devicesets`
+    - HTTP method: `POST`
+  - To select a device in a device set:
+    - Operation ID: `devicesetDevicePut`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device`
+    - HTTP method: `PUT`
+  - To create a new channel:
+    - Operation ID: `devicesetChannelPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
+    - HTTP method: `POST`
+  - To change the settings of a channel:
+    - OperationID: `devicesetChannelSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `PATCH`
+  - Start a device streaming
+    - OperationID: `devicesetDeviceRunPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
+    - HTTP method: `POST`
+  
 <h2>nfm_test.py</h2>
 
 Example of creating NFM channels (demodulator and modulator) and changing the settings
