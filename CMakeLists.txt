@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.1.0)
 cmake_policy(SET CMP0043 OLD)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+    message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
+endif()
+
 # QT Framework
 set(CMAKE_PREFIX_PATH "/Applications/Qt/5.7/clang_64/lib/cmake")
 
