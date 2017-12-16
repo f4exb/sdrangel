@@ -1,5 +1,7 @@
 ## Examples of client scripts ##
 
+These are all Python scripts using python-requests so you have to install this package as a prerequiste either with your package manager or pip. They are designed for Python 2.7 but may work with Python 3 possibly with minimal changes.
+
 <h2>add_channel.py</h2>
 
 Adds a channel to a device set specifying device set index and channel type. 
