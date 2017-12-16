@@ -56,7 +56,7 @@ PluginManager::~PluginManager()
 void PluginManager::loadPlugins()
 {
 	QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
-	QString applicationLibPath = applicationDirPath + "/lib/plugins";
+	QString applicationLibPath = applicationDirPath + "/../lib/plugins";
 	QString applicationBuildPath = applicationDirPath + "/plugins";
     qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 
