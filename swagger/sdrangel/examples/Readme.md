@@ -144,6 +144,15 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `DELETE`
     
+<h2>stop_server.py</h2>
 
-  
+This works with a server instance only i.e. `sdrangelsrv`. It will shutdown the instance nicely as you would do with the exit menu or Ctl-Q in the GUI application.
+
+It uses this API:
+
+  - Stop a server instance
+    - OperationID: `instanceDelete`
+    - URI: `/sdrangel`
+    - HTTP method: `DELETE`
+
   
