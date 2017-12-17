@@ -358,3 +358,26 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 		}
 	}
 }
+
+QByteArray LoRaDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool LoRaDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureLoRaDemod *msg = MsgConfigureLoRaDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureLoRaDemod *msg = MsgConfigureLoRaDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+

@@ -592,3 +592,25 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray UDPSrc::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool UDPSrc::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

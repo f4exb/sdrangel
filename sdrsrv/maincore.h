@@ -38,10 +38,10 @@ class PluginAPI;
 class PluginInterface;
 class PluginManager;
 class ChannelMarker;
-class DeviceSet; // TODO: create this class
+class DeviceSet;
 class WebAPIRequestMapper;
 class WebAPIServer;
-class WebAPIAdapterSrv; // TODO: create this class
+class WebAPIAdapterSrv;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -69,21 +69,43 @@ signals:
     void finished();
 
 private:
+    class MsgDeleteInstance : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeleteInstance* create()
+        {
+            return new MsgDeleteInstance();
+        }
+
+    private:
+        MsgDeleteInstance() :
+            Message()
+        { }
+    };
+
     static MainCore *m_instance;
-    MessageQueue m_inputMessageQueue;
-    QTimer m_masterTimer;
     MainSettings m_settings;
     int m_masterTabIndex;
     DSPEngine* m_dspEngine;
-    PluginManager* m_pluginManager;
     int m_lastEngineState;
-    AudioDeviceInfo m_audioDeviceInfo;
-
     qtwebapp::LoggerWithFile *m_logger;
+    bool m_running;
+
+    MessageQueue m_inputMessageQueue;
+    QTimer m_masterTimer;
+    std::vector<DeviceSet*> m_deviceSets;
+    PluginManager* m_pluginManager;
+    AudioDeviceInfo m_audioDeviceInfo;
 
     WebAPIRequestMapper *m_requestMapper;
     WebAPIServer *m_apiServer;
     WebAPIAdapterSrv *m_apiAdapter;
+
+    bool handleMessage(const Message& cmd);
+
+private slots:
+    void handleMessages();
 };
 
 

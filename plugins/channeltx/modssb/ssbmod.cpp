@@ -799,3 +799,25 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray SSBMod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool SSBMod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

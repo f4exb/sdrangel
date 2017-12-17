@@ -71,3 +71,14 @@ BasebandSampleSource* WFMModPlugin::createTxChannel(const QString& channelName, 
         return 0;
     }
 }
+
+void WFMModPlugin::createTxChannel(ChannelSourceAPI **channelSourceAPI, const QString& channelName, DeviceSinkAPI *deviceAPI)
+{
+    if(channelName == WFMMod::m_channelIdURI) {
+        *channelSourceAPI = new WFMMod(deviceAPI);
+    } else {
+        *channelSourceAPI = 0;
+    }
+}
+
+

@@ -459,3 +459,26 @@ void TCPSrc::onTcpServerError(QAbstractSocket::SocketError socketError __attribu
 {
 	qDebug("TCPSrc::onTcpServerError: %s", qPrintable(m_tcpServer->errorString()));
 }
+
+QByteArray TCPSrc::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool TCPSrc::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureTCPSrc *msg = MsgConfigureTCPSrc::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureTCPSrc *msg = MsgConfigureTCPSrc::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+

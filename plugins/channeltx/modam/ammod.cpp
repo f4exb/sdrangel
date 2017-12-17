@@ -436,3 +436,25 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray AMMod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool AMMod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureAMMod *msg = MsgConfigureAMMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureAMMod *msg = MsgConfigureAMMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

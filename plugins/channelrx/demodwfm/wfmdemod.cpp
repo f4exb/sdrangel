@@ -320,3 +320,26 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray WFMDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool WFMDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+

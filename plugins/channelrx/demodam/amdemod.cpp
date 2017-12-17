@@ -239,3 +239,26 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray AMDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool AMDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+

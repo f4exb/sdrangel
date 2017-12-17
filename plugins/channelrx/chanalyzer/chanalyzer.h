@@ -109,6 +109,7 @@ public:
 
 	ChannelAnalyzer(DeviceSourceAPI *deviceAPI);
 	virtual ~ChannelAnalyzer();
+	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	void configure(MessageQueue* messageQueue,
@@ -128,6 +129,12 @@ public:
 	virtual int getDeltaFrequency() const { return m_frequency; }
 	virtual void getIdentifier(QString& id) { id = objectName(); }
 	virtual void getTitle(QString& title) { title = objectName(); }
+	virtual void setName(const QString& name) { setObjectName(name); }
+	virtual QString getName() const { return objectName(); }
+	virtual qint64 getCenterFrequency() const { return m_frequency; }
+
+    virtual QByteArray serialize() const { return QByteArray(); }
+    virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

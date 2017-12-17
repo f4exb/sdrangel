@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400     * There is no API adapter in the targeted instance: message \"Service not available\" as text/plain is returned with a status 500. This should not happen with released code.      --- 
  *
  * OpenAPI spec version: 4.0.0
  * Contact: f4exb06@gmail.com
@@ -236,6 +236,54 @@ SWGInstanceApi::instanceDVSerialPatchCallback(HttpRequestWorker * worker) {
 
     emit instanceDVSerialPatchSignal(output);
     emit instanceDVSerialPatchSignalE(output, error_type, error_str);
+}
+
+void
+SWGInstanceApi::instanceDelete() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel");
+
+
+
+    HttpRequestWorker *worker = new HttpRequestWorker();
+    HttpRequestInput input(fullPath, "DELETE");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &HttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceDeleteCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceDeleteCallback(HttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGInstanceSummaryResponse* output = static_cast<SWGInstanceSummaryResponse*>(create(json, QString("SWGInstanceSummaryResponse")));
+    worker->deleteLater();
+
+    emit instanceDeleteSignal(output);
+    emit instanceDeleteSignalE(output, error_type, error_str);
 }
 
 void

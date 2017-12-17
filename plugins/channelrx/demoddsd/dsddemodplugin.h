@@ -37,6 +37,7 @@ public:
 
 	PluginInstanceGUI* createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     BasebandSampleSink* createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI);
+    void createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

@@ -57,3 +57,13 @@ BasebandSampleSink* TCPSrcPlugin::createRxChannel(const QString& channelName, De
         return 0;
     }
 }
+
+void TCPSrcPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == TCPSrc::m_channelIdURI) {
+        *channelSinkAPI = new TCPSrc(deviceAPI);
+    } else {
+        *channelSinkAPI = 0;
+    }
+}
+

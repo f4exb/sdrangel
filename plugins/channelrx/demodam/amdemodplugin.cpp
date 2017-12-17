@@ -55,3 +55,13 @@ BasebandSampleSink* AMDemodPlugin::createRxChannel(const QString& channelName, D
         return 0;
     }
 }
+
+void AMDemodPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == AMDemod::m_channelIdURI) {
+        *channelSinkAPI = new AMDemod(deviceAPI);
+    } else {
+        *channelSinkAPI = 0;
+    }
+}
+

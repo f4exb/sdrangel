@@ -45,7 +45,6 @@ PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& chan
 	}
 }
 
-
 BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
 {
     if(channelName == ChannelAnalyzer::m_channelIdURI)
@@ -54,5 +53,14 @@ BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannel(const QString& channe
         return sink;
     } else {
         return 0;
+    }
+}
+
+void ChannelAnalyzerPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == ChannelAnalyzer::m_channelIdURI) {
+        *channelSinkAPI = new ChannelAnalyzer(deviceAPI);
+    } else {
+        *channelSinkAPI = 0;
     }
 }

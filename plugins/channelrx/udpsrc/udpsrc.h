@@ -94,6 +94,7 @@ public:
 
 	UDPSrc(DeviceSourceAPI *deviceAPI);
 	virtual ~UDPSrc();
+	virtual void destroy() { delete this; }
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
 	void setSpectrum(MessageQueue* messageQueue, bool enabled);
@@ -109,6 +110,12 @@ public:
     virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
+    virtual void setName(const QString& name) { setObjectName(name); }
+    virtual QString getName() const { return objectName(); }
+    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

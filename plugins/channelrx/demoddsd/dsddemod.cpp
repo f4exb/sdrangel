@@ -468,3 +468,25 @@ void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray DSDDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool DSDDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureDSDDemod *msg = MsgConfigureDSDDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureDSDDemod *msg = MsgConfigureDSDDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

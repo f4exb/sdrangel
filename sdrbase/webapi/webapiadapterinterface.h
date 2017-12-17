@@ -59,6 +59,15 @@ public:
     { return 501; }
 
     /**
+     * Handler of /sdrangel (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDelete(
+            SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
      * Handler of /sdrangel/devices (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceDevices
      * returns the Http status code (default 501: not implemented)
      */

@@ -55,3 +55,13 @@ BasebandSampleSink* SSBPlugin::createRxChannel(const QString& channelName, Devic
         return 0;
     }
 }
+
+void SSBPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == SSBDemod::m_channelIdURI) {
+        *channelSinkAPI = new SSBDemod(deviceAPI);
+    } else {
+        *channelSinkAPI = 0;
+    }
+}
+

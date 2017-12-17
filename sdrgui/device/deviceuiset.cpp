@@ -83,7 +83,7 @@ void DeviceUISet::registerRxChannelInstance(const QString& channelName, PluginIn
 void DeviceUISet::registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI)
 {
     m_txChannelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, pluginGUI));
-    renameRxChannelInstances();
+    renameTxChannelInstances();
 }
 
 void DeviceUISet::removeRxChannelInstance(PluginInstanceGUI* pluginGUI)
@@ -111,7 +111,7 @@ void DeviceUISet::removeTxChannelInstance(PluginInstanceGUI* pluginGUI)
         }
     }
 
-    renameRxChannelInstances();
+    renameTxChannelInstances();
 }
 
 void DeviceUISet::freeRxChannels()
@@ -223,7 +223,7 @@ void DeviceUISet::saveRxChannelSettings(Preset *preset)
     }
     else
     {
-        qDebug("DeviceSourceAPI::saveChannelSettings: not a source preset");
+        qDebug("DeviceUISet::saveChannelSettings: not a source preset");
     }
 }
 

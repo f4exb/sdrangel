@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <unistd.h>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
@@ -28,6 +29,8 @@
 
 #include "maincore.h"
 
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
+
 MainCore *MainCore::m_instance = 0;
 
 MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
@@ -36,7 +39,8 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_masterTabIndex(-1),
     m_dspEngine(DSPEngine::instance()),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
-    m_logger(logger)
+    m_logger(logger),
+    m_running(true)
 {
     qDebug() << "MainCore::MainCore: start";
 
@@ -74,7 +78,37 @@ MainCore::~MainCore()
 void MainCore::run()
 {
     qDebug() << "MainCore::run: start";
-    // TODO: the main loop is here
+
+    while (m_running) {
+        sleep(1);
+    }
+
     qDebug() << "MainCore::run: end";
     emit finished();
 }
+
+bool MainCore::handleMessage(const Message& cmd)
+{
+    if (MsgDeleteInstance::match(cmd))
+    {
+        m_running = false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void MainCore::handleMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        qDebug("MainCore::handleMessages: message: %s", message->getIdentifier());
+        handleMessage(*message);
+        delete message;
+    }
+}
+

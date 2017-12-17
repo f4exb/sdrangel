@@ -1,12 +1,14 @@
 project (sdrsrv)
 
 set(sdrsrv_SOURCES
-    maincore.cpp    
+    maincore.cpp   
+    device/deviceset.cpp 
     webapi/webapiadaptersrv.cpp
 )
 
 set(sdrsrv_HEADERS
     maincore.h
+    device/deviceset.h
     webapi/webapiadaptersrv.h
 )
 

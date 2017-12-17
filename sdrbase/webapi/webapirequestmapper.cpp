@@ -124,12 +124,26 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    qDebug("WebAPIRequestMapper::instanceSummaryService");
 
     if (request.getMethod() == "GET")
     {
         SWGSDRangel::SWGInstanceSummaryResponse normalResponse;
 
         int status = m_adapter->instanceSummary(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status == 200) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "DELETE")
+    {
+        SWGSDRangel::SWGInstanceSummaryResponse normalResponse;
+
+        int status = m_adapter->instanceDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status == 200) {

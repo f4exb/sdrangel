@@ -71,3 +71,12 @@ BasebandSampleSink* ChannelAnalyzerNGPlugin::createRxChannel(const QString& chan
     }
 }
 
+void ChannelAnalyzerNGPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+{
+    if(channelName == ChannelAnalyzerNG::m_channelIdURI) {
+        *channelSinkAPI = new ChannelAnalyzerNG(deviceAPI);
+    } else {
+        *channelSinkAPI = 0;
+    }
+}
+

@@ -458,6 +458,28 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
+QByteArray NFMDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool NFMDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+
 int NFMDemod::webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage __attribute__((unused)))

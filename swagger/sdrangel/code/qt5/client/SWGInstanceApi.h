@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400     * There is no API adapter in the targeted instance: message \"Service not available\" as text/plain is returned with a status 500. This should not happen with released code.      --- 
  *
  * OpenAPI spec version: 4.0.0
  * Contact: f4exb06@gmail.com
@@ -50,6 +50,7 @@ public:
     void instanceAudioPatch(SWGAudioDevicesSelect body);
     void instanceChannels(qint32 tx);
     void instanceDVSerialPatch(qint32 dvserial);
+    void instanceDelete();
     void instanceDeviceSetsDelete();
     void instanceDeviceSetsGet();
     void instanceDeviceSetsPost(qint32 tx);
@@ -70,6 +71,7 @@ private:
     void instanceAudioPatchCallback (HttpRequestWorker * worker);
     void instanceChannelsCallback (HttpRequestWorker * worker);
     void instanceDVSerialPatchCallback (HttpRequestWorker * worker);
+    void instanceDeleteCallback (HttpRequestWorker * worker);
     void instanceDeviceSetsDeleteCallback (HttpRequestWorker * worker);
     void instanceDeviceSetsGetCallback (HttpRequestWorker * worker);
     void instanceDeviceSetsPostCallback (HttpRequestWorker * worker);
@@ -90,6 +92,7 @@ signals:
     void instanceAudioPatchSignal(SWGAudioDevicesSelect* summary);
     void instanceChannelsSignal(SWGInstanceChannelsResponse* summary);
     void instanceDVSerialPatchSignal(SWGDVSeralDevices* summary);
+    void instanceDeleteSignal(SWGInstanceSummaryResponse* summary);
     void instanceDeviceSetsDeleteSignal(SWGDeviceSetList* summary);
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
     void instanceDeviceSetsPostSignal(SWGDeviceSet* summary);
@@ -109,6 +112,7 @@ signals:
     void instanceAudioPatchSignalE(SWGAudioDevicesSelect* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceChannelsSignalE(SWGInstanceChannelsResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDVSerialPatchSignalE(SWGDVSeralDevices* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeleteSignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsDeleteSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsPostSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);

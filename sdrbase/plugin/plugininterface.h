@@ -24,6 +24,8 @@ class DeviceSampleSource;
 class DeviceSampleSink;
 class BasebandSampleSink;
 class BasebandSampleSource;
+class ChannelSinkAPI;
+class ChannelSourceAPI;
 
 class PluginInterface {
 public:
@@ -87,6 +89,12 @@ public:
             DeviceSourceAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
+    virtual void createRxChannel(
+            ChannelSinkAPI **channelSinkAPI,
+            const QString& channelName __attribute__((unused)),
+            DeviceSourceAPI *deviceAPI __attribute__((unused)) )
+    { *channelSinkAPI = 0; }
+
     // channel Tx plugins
 
 	virtual PluginInstanceGUI* createTxChannelGUI(
@@ -100,7 +108,13 @@ public:
             DeviceSinkAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
-	// device source plugins only
+    virtual void createTxChannel(
+            ChannelSourceAPI **channelSourceAPI,
+            const QString& channelName __attribute__((unused)),
+            DeviceSourceAPI *deviceAPI __attribute__((unused)) )
+    { *channelSourceAPI = 0; }
+
+    // device source plugins only
 
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
 

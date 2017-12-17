@@ -90,6 +90,7 @@ public:
 
 	LoRaDemod(DeviceSourceAPI* deviceAPI);
 	virtual ~LoRaDemod();
+	virtual void destroy() { delete this; }
 	void setSpectrumSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO);
@@ -100,6 +101,12 @@ public:
     virtual int getDeltaFrequency() const { return 0; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
+    virtual void setName(const QString& name) { setObjectName(name); }
+    virtual QString getName() const { return objectName(); }
+    virtual qint64 getCenterFrequency() const { return 0; }
+
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

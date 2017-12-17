@@ -1121,3 +1121,25 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray ATVMod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool ATVMod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

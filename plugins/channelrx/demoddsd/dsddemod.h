@@ -92,6 +92,7 @@ public:
 
     DSDDemod(DeviceSourceAPI *deviceAPI);
 	~DSDDemod();
+	virtual void destroy() { delete this; }
 	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
@@ -104,6 +105,12 @@ public:
     virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
+    virtual void setName(const QString& name) { setObjectName(name); }
+    virtual QString getName() const { return objectName(); }
+    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
 	double getMagSq() { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }

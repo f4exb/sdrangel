@@ -479,3 +479,25 @@ void WFMMod::applySettings(const WFMModSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray WFMMod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool WFMMod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureWFMMod *msg = MsgConfigureWFMMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureWFMMod *msg = MsgConfigureWFMMod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

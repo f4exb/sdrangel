@@ -20,6 +20,7 @@
 #define SDRBASE_CHANNEL_CHANNELSINKAPI_H_
 
 #include <QString>
+#include <QByteArray>
 #include <stdint.h>
 
 #include "util/export.h"
@@ -33,10 +34,17 @@ class SDRANGEL_API ChannelSinkAPI {
 public:
     ChannelSinkAPI();
     virtual ~ChannelSinkAPI() {}
+    virtual void destroy() = 0;
 
     virtual int getDeltaFrequency() const = 0;
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
+    virtual void setName(const QString& name) = 0;
+    virtual QString getName() const = 0;
+    virtual qint64 getCenterFrequency() const = 0;
+
+    virtual QByteArray serialize() const = 0;
+    virtual bool deserialize(const QByteArray& data) = 0;
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),

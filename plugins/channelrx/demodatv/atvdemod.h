@@ -192,6 +192,7 @@ public:
 
     ATVDemod(DeviceSourceAPI *deviceAPI);
 	~ATVDemod();
+	virtual void destroy() { delete this; }
 	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
 
     void configure(MessageQueue* objMessageQueue,
@@ -226,6 +227,12 @@ public:
     virtual int getDeltaFrequency() const { return m_rfRunning.m_intFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
+    virtual void setName(const QString& name) { setObjectName(name); }
+    virtual QString getName() const { return objectName(); }
+    virtual qint64 getCenterFrequency() const { return m_rfRunning.m_intFrequencyOffset; }
+
+    virtual QByteArray serialize() const { return QByteArray(); }
+    virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
 
     void setATVScreen(ATVScreenInterface *objScreen);
     int getSampleRate();

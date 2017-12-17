@@ -479,3 +479,24 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
+QByteArray SSBDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool SSBDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

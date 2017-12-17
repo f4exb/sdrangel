@@ -553,3 +553,25 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray UDPSink::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool UDPSink::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}

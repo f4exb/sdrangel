@@ -1584,6 +1584,9 @@ margin-bottom: 20px;
                     <li data-group="Instance" data-name="instanceDVSerialPatch" class="">
                       <a href="#api-Instance-instanceDVSerialPatch">instanceDVSerialPatch</a>
                     </li>
+                    <li data-group="Instance" data-name="instanceDelete" class="">
+                      <a href="#api-Instance-instanceDelete">instanceDelete</a>
+                    </li>
                     <li data-group="Instance" data-name="instanceDeviceSetsDelete" class="">
                       <a href="#api-Instance-instanceDeviceSetsDelete">instanceDeviceSetsDelete</a>
                     </li>
@@ -1646,6 +1649,7 @@ margin-bottom: 20px;
 <p>Limitations:</p>
 <ul>
 <li>In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)</li>
+<li>Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.</li>
 <li>The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source</li>
 <li>The content type returned is always application/json except in the following cases:
 <ul>
@@ -8698,6 +8702,306 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceDelete">
+                      <article id="api-Instance-instanceDelete-0" data-group="User" data-name="instanceDelete" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceDelete</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Stop SDRangel instance (server only)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDelete-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceDelete-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            InstanceSummaryResponse result = apiInstance.instanceDelete();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceDelete-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            InstanceSummaryResponse result = apiInstance.instanceDelete();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceDelete-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceDeleteWithCompletionHandler: 
+              ^(InstanceSummaryResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceDelete(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceDelete-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceDeleteExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+
+            try
+            {
+                InstanceSummaryResponse result = apiInstance.instanceDelete();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceDelete: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+
+try {
+    $result = $api_instance->instanceDelete();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceDelete: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceDelete();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceDelete: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDelete-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+
+try: 
+    api_response = api_instance.instance_delete()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceDelete: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success returns instance summary before it was closed </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDelete-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDelete-200-schema">
+                                  <div id='responses-instanceDelete-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success returns instance summary before it was closed",
+  "schema" : {
+    "$ref" : "#/definitions/InstanceSummaryResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDelete-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDelete-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDelete-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDelete-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDelete-500-schema">
+                                  <div id='responses-instanceDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDelete-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDelete-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceDeviceSetsDelete">
                       <article id="api-Instance-instanceDeviceSetsDelete-0" data-group="User" data-name="instanceDeviceSetsDelete" data-version="0">
                         <div class="pull-left">
@@ -13781,7 +14085,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-15T18:29:32.547+01:00
+              Generated 2017-12-17T18:35:43.125+01:00
             </div>
           </div>
       </div>

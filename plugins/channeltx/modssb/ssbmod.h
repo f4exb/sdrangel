@@ -229,6 +229,7 @@ public:
 
     SSBMod(DeviceSinkAPI *deviceAPI);
     ~SSBMod();
+    virtual void destroy() { delete this; }
 
     void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
@@ -241,6 +242,12 @@ public:
     virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
+    virtual void setName(const QString& name) { setObjectName(name); }
+    virtual QString getName() const { return objectName(); }
+    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
     double getMagSq() const { return m_magsq; }
 

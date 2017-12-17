@@ -469,3 +469,26 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+QByteArray BFMDemod::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool BFMDemod::deserialize(const QByteArray& data)
+{
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+

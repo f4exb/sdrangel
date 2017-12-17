@@ -24,6 +24,7 @@
 #include "webapi/webapiadapterinterface.h"
 
 class MainCore;
+class DeviceSet;
 
 class WebAPIAdapterSrv: public WebAPIAdapterInterface
 {
@@ -31,8 +32,19 @@ public:
     WebAPIAdapterSrv(MainCore& mainCore);
     virtual ~WebAPIAdapterSrv();
 
+    virtual int instanceSummary(
+            SWGSDRangel::SWGInstanceSummaryResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceDelete(
+            SWGSDRangel::SWGInstanceSummaryResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
+
+    void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
+    void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex);
 };
 
 #endif /* SDRSRV_WEBAPI_WEBAPIADAPTERSRV_H_ */
