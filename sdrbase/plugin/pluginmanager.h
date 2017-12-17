@@ -42,7 +42,7 @@ public:
 	~PluginManager();
 
 	PluginAPI *getPluginAPI() { return &m_pluginAPI; }
-	void loadPlugins();
+	void loadPlugins(const QString& pluginsSubDir);
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins
@@ -112,7 +112,7 @@ private:
     static const QString m_fileSinkHardwareID;        //!< FileSource source hardware ID
     static const QString m_fileSinkDeviceTypeID;      //!< FileSink sink plugin ID
 
-	void loadPlugins(const QDir& dir);
+	void loadPluginsDir(const QDir& dir);
 };
 
 static inline bool operator<(const PluginManager::Plugin& a, const PluginManager::Plugin& b)

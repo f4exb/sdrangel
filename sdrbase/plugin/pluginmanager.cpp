@@ -53,18 +53,18 @@ PluginManager::~PluginManager()
 //	freeAll();
 }
 
-void PluginManager::loadPlugins()
+void PluginManager::loadPlugins(const QString& pluginsSubDir)
 {
 	QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
-	QString applicationLibPath = applicationDirPath + "/../lib/plugins";
-	QString applicationBuildPath = applicationDirPath + "/plugins";
+	QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
+	QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
     qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 
     QDir pluginsLibDir = QDir(applicationLibPath);
     QDir pluginsBuildDir = QDir(applicationBuildPath);
 
-    loadPlugins(pluginsLibDir);
-    loadPlugins(pluginsBuildDir);
+    loadPluginsDir(pluginsLibDir);
+    loadPluginsDir(pluginsBuildDir);
 
 	qSort(m_plugins);
 
@@ -113,7 +113,7 @@ void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface*
 	m_sampleSinkRegistrations.append(PluginAPI::SamplingDeviceRegistration(sinkName, plugin));
 }
 
-void PluginManager::loadPlugins(const QDir& dir)
+void PluginManager::loadPluginsDir(const QDir& dir)
 {
 	QDir pluginsDir(dir);
 
@@ -152,7 +152,7 @@ void PluginManager::loadPlugins(const QDir& dir)
 
 	foreach (QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
-		loadPlugins(pluginsDir.absoluteFilePath(dirName));
+		loadPluginsDir(pluginsDir.absoluteFilePath(dirName));
 	}
 }
 

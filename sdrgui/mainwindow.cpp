@@ -134,7 +134,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
             "QTabBar::tab:selected { background: rgb(100,100,100); }");
 
     m_pluginManager = new PluginManager(this);
-    m_pluginManager->loadPlugins();
+    m_pluginManager->loadPlugins(QString("plugins"));
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
