@@ -205,6 +205,9 @@ include_directories(
     ${OPENGL_INCLUDE_DIR}
 )
 
+##############################################################################
+# main GUI application
+
 set(sdrangel_SOURCES
     app/main.cpp
 )
@@ -237,6 +240,30 @@ endif(WIN32)
 qt5_use_modules(sdrangel Widgets Multimedia)
 
 ##############################################################################
+# main server application
+
+set(sdrangelsrv_SOURCES
+    appsrv/main.cpp
+)
+
+add_executable(sdrangelsrv
+    ${sdrangelsrv_SOURCES}
+)
+
+target_include_directories(sdrangelsrv
+    PUBLIC ${CMAKE_SOURCE_DIR}/sdrsrv
+)
+
+target_link_libraries(sdrangelsrv
+    sdrbase
+    sdrsrv
+    logging
+    ${QT_LIBRARIES}
+)
+
+qt5_use_modules(sdrangelsrv Multimedia)
+
+##############################################################################
 
 if (BUILD_DEBIAN)
     add_subdirectory(cm256cc)
@@ -265,6 +292,7 @@ endif(LIBUSB_FOUND AND UNIX)
 
 #install targets
 install(TARGETS sdrangel DESTINATION bin)
+install(TARGETS sdrangelsrv DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
 #install files and directories

@@ -30,7 +30,8 @@
 
 MainCore *MainCore::m_instance = 0;
 
-MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser) :
+MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
+    QObject(parent),
     m_settings(),
     m_masterTabIndex(-1),
     m_dspEngine(DSPEngine::instance()),
@@ -68,4 +69,12 @@ MainCore::~MainCore()
 
     qDebug() << "MainCore::~MainCore: end";
     delete m_logger;
+}
+
+void MainCore::run()
+{
+    qDebug() << "MainCore::run: start";
+    // TODO: the main loop is here
+    qDebug() << "MainCore::run: end";
+    emit finished();
 }

@@ -51,7 +51,7 @@ class SDRANGEL_API MainCore : public QObject {
     Q_OBJECT
 
 public:
-    explicit MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser);
+    explicit MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent = 0);
     ~MainCore();
     static MainCore *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
 
@@ -61,6 +61,12 @@ public:
     const MainSettings& getMainSettings() const { return m_settings; }
 
     friend class WebAPIAdapterSrv;
+
+public slots:
+    void run();
+
+signals:
+    void finished();
 
 private:
     static MainCore *m_instance;
