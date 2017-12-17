@@ -66,15 +66,6 @@ void PluginManager::loadPlugins()
     loadPlugins(pluginsLibDir);
     loadPlugins(pluginsBuildDir);
 
-//	QString applicationLibPath = applicationDirPath + "/../lib/plugins";
-//	qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationDirPath) << ", " << qPrintable(applicationLibPath);
-//
-//	QDir pluginsBinDir = QDir(applicationDirPath);
-//	QDir pluginsLibDir = QDir(applicationLibPath);
-//
-//	loadPlugins(pluginsBinDir);
-//	loadPlugins(pluginsLibDir);
-
 	qSort(m_plugins);
 
 	for (Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)

@@ -253,6 +253,7 @@ endif (BUILD_DEBIAN)
 
 add_subdirectory(devices)
 add_subdirectory(plugins)
+add_subdirectory(pluginssrv)
 
 if(LIBUSB_FOUND AND UNIX)
     add_subdirectory(fcdhid)
