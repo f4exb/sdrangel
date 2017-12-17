@@ -49,6 +49,15 @@ void NFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(NFMMod::m_channelIdURI, NFMMod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(
+        const QString& channelName __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
 	if(channelName == NFMMod::m_channelIdURI)
@@ -59,6 +68,7 @@ PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(const QString& channelName, 
 		return 0;
 	}
 }
+#endif
 
 BasebandSampleSource* NFMModPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
 {

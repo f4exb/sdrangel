@@ -31,7 +31,7 @@
 
 const PluginDescriptor LimeSDROutputPlugin::m_pluginDescriptor = {
     QString("LimeSDR Output"),
-    QString("3.8.6"),
+    QString("3.9.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -108,6 +108,15 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
     return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
@@ -124,6 +133,7 @@ PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         return 0;
     }
 }
+#endif
 
 bool LimeSDROutputPlugin::findSerial(const char *lmsInfoStr, std::string& serial)
 {
@@ -154,6 +164,5 @@ DeviceSampleSink* LimeSDROutputPlugin::createSampleSinkPluginInstanceOutput(cons
     {
         return 0;
     }
-
 }
 
