@@ -124,7 +124,6 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
-    qDebug("WebAPIRequestMapper::instanceSummaryService");
 
     if (request.getMethod() == "GET")
     {

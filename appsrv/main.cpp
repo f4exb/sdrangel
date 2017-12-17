@@ -37,9 +37,6 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     // This will cause the application to exit when the main core is finished
     QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
 
-    // This will run the main core from the application event loop.
-    QTimer::singleShot(0, &m, SLOT(run()));
-
     return a.exec();
 }
 

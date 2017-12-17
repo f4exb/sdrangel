@@ -39,8 +39,7 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_masterTabIndex(-1),
     m_dspEngine(DSPEngine::instance()),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1),
-    m_logger(logger),
-    m_running(true)
+    m_logger(logger)
 {
     qDebug() << "MainCore::MainCore: start";
 
@@ -54,7 +53,7 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_masterTimer.start(50);
 
     m_apiAdapter = new WebAPIAdapterSrv(*this);
-    m_requestMapper = new WebAPIRequestMapper(QCoreApplication::instance());
+    m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
@@ -75,23 +74,11 @@ MainCore::~MainCore()
     delete m_logger;
 }
 
-void MainCore::run()
-{
-    qDebug() << "MainCore::run: start";
-
-    while (m_running) {
-        sleep(1);
-    }
-
-    qDebug() << "MainCore::run: end";
-    emit finished();
-}
-
 bool MainCore::handleMessage(const Message& cmd)
 {
     if (MsgDeleteInstance::match(cmd))
     {
-        m_running = false;
+        emit finished();
         return true;
     }
     else

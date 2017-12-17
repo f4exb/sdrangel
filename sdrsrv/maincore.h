@@ -62,9 +62,6 @@ public:
 
     friend class WebAPIAdapterSrv;
 
-public slots:
-    void run();
-
 signals:
     void finished();
 
@@ -90,7 +87,6 @@ private:
     DSPEngine* m_dspEngine;
     int m_lastEngineState;
     qtwebapp::LoggerWithFile *m_logger;
-    bool m_running;
 
     MessageQueue m_inputMessageQueue;
     QTimer m_masterTimer;
