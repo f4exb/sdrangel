@@ -23,7 +23,7 @@
 
 const PluginDescriptor NFMModPlugin::m_pluginDescriptor = {
     QString("NFM Modulator"),
-    QString("3.8.5"),
+    QString("3.9.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
