@@ -787,7 +787,7 @@ paths:
           description: Function not implemented
   /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}:
     delete:
-      description: delete channel
+      description: delete channel (server only)
       operationId: devicesetChannelDelete
       tags:
         - DeviceSet
