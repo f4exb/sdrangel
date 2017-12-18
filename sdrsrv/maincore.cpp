@@ -52,6 +52,8 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_masterTimer.start(50);
 
+	loadSettings();
+
     m_apiAdapter = new WebAPIAdapterSrv(*this);
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
@@ -63,7 +65,8 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
 
 MainCore::~MainCore()
 {
-    m_apiServer->stop();
+	m_apiServer->stop();
+	m_settings.save();
     delete m_apiServer;
     delete m_requestMapper;
     delete m_apiAdapter;
@@ -97,5 +100,37 @@ void MainCore::handleMessages()
         handleMessage(*message);
         delete message;
     }
+}
+
+void MainCore::loadSettings()
+{
+	qDebug() << "MainCore::loadSettings";
+
+    m_settings.load();
+    m_settings.sortPresets();
+    setLoggingOptions();
+}
+
+void MainCore::setLoggingOptions()
+{
+    m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
+
+    if (m_settings.getUseLogFile())
+    {
+        qtwebapp::FileLoggerSettings fileLoggerSettings; // default values
+
+        if (m_logger->hasFileLogger()) {
+            fileLoggerSettings = m_logger->getFileLoggerSettings(); // values from file logger if it exists
+        }
+
+        fileLoggerSettings.fileName = m_settings.getLogFileName(); // put new values
+        m_logger->createOrSetFileLogger(fileLoggerSettings, 2000); // create file logger if it does not exist and apply settings in any case
+    }
+
+    if (m_logger->hasFileLogger()) {
+        m_logger->setFileMinMessageLevel(m_settings.getFileMinLogLevel());
+    }
+
+    m_logger->setUseFileLogger(m_settings.getUseLogFile());
 }
 

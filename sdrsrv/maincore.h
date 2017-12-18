@@ -98,6 +98,9 @@ private:
     WebAPIServer *m_apiServer;
     WebAPIAdapterSrv *m_apiAdapter;
 
+	void loadSettings();
+    void setLoggingOptions();
+
     bool handleMessage(const Message& cmd);
 
 private slots:

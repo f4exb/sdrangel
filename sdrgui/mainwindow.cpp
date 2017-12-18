@@ -526,7 +526,7 @@ void MainWindow::loadSettings()
         }
     }
 
-    setLoggingOpions();
+    setLoggingOptions();
 }
 
 void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
@@ -987,7 +987,7 @@ void MainWindow::on_action_Logging_triggered()
 {
     LoggingDialog loggingDialog(m_settings, this);
     loggingDialog.exec();
-    setLoggingOpions();
+    setLoggingOptions();
 }
 
 void MainWindow::on_action_My_Position_triggered()
@@ -1290,7 +1290,7 @@ void MainWindow::updateStatus()
     m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss t"));
 }
 
-void MainWindow::setLoggingOpions()
+void MainWindow::setLoggingOptions()
 {
     m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
 

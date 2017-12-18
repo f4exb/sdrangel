@@ -297,7 +297,7 @@ private:
 	void addSinkDevice();
     void removeLastDevice();
 
-    void setLoggingOpions();
+    void setLoggingOptions();
 
     bool handleMessage(const Message& cmd);
 

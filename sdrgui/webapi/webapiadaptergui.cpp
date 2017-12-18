@@ -184,7 +184,7 @@ int WebAPIAdapterGUI::instanceLoggingPut(
         m_mainWindow.m_settings.setLogFileName(*fileName);
     }
 
-    m_mainWindow.setLoggingOpions();
+    m_mainWindow.setLoggingOptions();
 
     // build response
     response.init();
