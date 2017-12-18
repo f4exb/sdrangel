@@ -23,6 +23,7 @@
 
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGInstanceChannelsResponse.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -35,6 +36,8 @@
 #include "dsp/devicesamplesource.h"
 #include "channel/channelsourceapi.h"
 #include "channel/channelsinkapi.h"
+#include "plugin/pluginapi.h"
+#include "plugin/pluginmanager.h"
 #include "webapiadaptersrv.h"
 
 WebAPIAdapterSrv::WebAPIAdapterSrv(MainCore& mainCore) :
@@ -104,6 +107,32 @@ int WebAPIAdapterSrv::instanceDevices(
         devices->back()->setNbStreams(samplingDevice.deviceNbItems);
         devices->back()->setDeviceSetIndex(samplingDevice.claimed);
         devices->back()->setIndex(i);
+    }
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceChannels(
+            bool tx,
+            SWGSDRangel::SWGInstanceChannelsResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainCore.m_pluginManager->getTxChannelRegistrations() : m_mainCore.m_pluginManager->getRxChannelRegistrations();
+    int nbChannelDevices = channelRegistrations->size();
+    response.setChannelcount(nbChannelDevices);
+    QList<SWGSDRangel::SWGChannelListItem*> *channels = response.getChannels();
+
+    for (int i = 0; i < nbChannelDevices; i++)
+    {
+        channels->append(new SWGSDRangel::SWGChannelListItem);
+        PluginInterface *channelInterface = channelRegistrations->at(i).m_plugin;
+        const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
+        *channels->back()->getVersion() = pluginDescriptor.version;
+        *channels->back()->getName() = pluginDescriptor.displayedName;
+        channels->back()->setTx(tx);
+        *channels->back()->getIdUri() = channelRegistrations->at(i).m_channelIdURI;
+        *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
+        channels->back()->setIndex(i);
     }
 
     return 200;

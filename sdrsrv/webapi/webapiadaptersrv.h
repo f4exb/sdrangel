@@ -45,6 +45,11 @@ public:
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceChannels(
+            bool tx,
+            SWGSDRangel::SWGInstanceChannelsResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
