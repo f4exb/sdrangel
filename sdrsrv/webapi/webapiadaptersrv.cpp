@@ -155,6 +155,43 @@ int WebAPIAdapterSrv::instanceLoggingGet(
     return 200;
 }
 
+int WebAPIAdapterSrv::instanceLoggingPut(
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    // response input is the query actually
+    bool dumpToFile = (response.getDumpToFile() != 0);
+    QString* consoleLevel = response.getConsoleLevel();
+    QString* fileLevel = response.getFileLevel();
+    QString* fileName = response.getFileName();
+
+    // perform actions
+    if (consoleLevel) {
+    	m_mainCore.m_settings.setConsoleMinLogLevel(getMsgTypeFromString(*consoleLevel));
+    }
+
+    if (fileLevel) {
+    	m_mainCore.m_settings.setFileMinLogLevel(getMsgTypeFromString(*fileLevel));
+    }
+
+    m_mainCore.m_settings.setUseLogFile(dumpToFile);
+
+    if (fileName) {
+    	m_mainCore.m_settings.setLogFileName(*fileName);
+    }
+
+    m_mainCore.setLoggingOptions();
+
+    // build response
+    response.init();
+    getMsgTypeString(m_mainCore.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
+    response.setDumpToFile(m_mainCore.m_settings.getUseLogFile() ? 1 : 0);
+    getMsgTypeString(m_mainCore.m_settings.getFileMinLogLevel(), *response.getFileLevel());
+    *response.getFileName() = m_mainCore.m_settings.getLogFileName();
+
+    return 200;
+}
+
 void WebAPIAdapterSrv::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
@@ -236,5 +273,43 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
             channel->getIdentifier(*channels->back()->getId());
             channel->getTitle(*channels->back()->getTitle());
         }
+    }
+}
+
+QtMsgType WebAPIAdapterSrv::getMsgTypeFromString(const QString& msgTypeString)
+{
+    if (msgTypeString == "debug") {
+        return QtDebugMsg;
+    } else if (msgTypeString == "info") {
+        return QtInfoMsg;
+    } else if (msgTypeString == "warning") {
+        return QtWarningMsg;
+    } else if (msgTypeString == "error") {
+        return QtCriticalMsg;
+    } else {
+        return QtDebugMsg;
+    }
+}
+
+void WebAPIAdapterSrv::getMsgTypeString(const QtMsgType& msgType, QString& levelStr)
+{
+    switch (msgType)
+    {
+    case QtDebugMsg:
+        levelStr = "debug";
+        break;
+    case QtInfoMsg:
+        levelStr = "info";
+        break;
+    case QtWarningMsg:
+        levelStr = "warning";
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        levelStr = "error";
+        break;
+    default:
+        levelStr = "debug";
+        break;
     }
 }

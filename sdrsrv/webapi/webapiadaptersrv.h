@@ -54,11 +54,17 @@ public:
             SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceLoggingPut(
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex);
+    static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
+    static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };
 
 #endif /* SDRSRV_WEBAPI_WEBAPIADAPTERSRV_H_ */
