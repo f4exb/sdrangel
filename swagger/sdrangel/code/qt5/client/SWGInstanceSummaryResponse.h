@@ -47,6 +47,9 @@ public:
     QString* getVersion();
     void setVersion(QString* version);
 
+    QString* getQtVersion();
+    void setQtVersion(QString* qt_version);
+
     SWGLoggingInfo* getLogging();
     void setLogging(SWGLoggingInfo* logging);
 
@@ -56,6 +59,7 @@ public:
 
 private:
     QString* version;
+    QString* qt_version;
     SWGLoggingInfo* logging;
     SWGDeviceSetList* devicesetlist;
 };

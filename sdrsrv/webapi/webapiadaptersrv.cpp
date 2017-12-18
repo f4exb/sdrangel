@@ -50,6 +50,7 @@ int WebAPIAdapterSrv::instanceSummary(
 {
 
     *response.getVersion() = QCoreApplication::instance()->applicationVersion();
+    *response.getQtVersion() = QString(QT_VERSION_STR);
 
     SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
     logging->init();

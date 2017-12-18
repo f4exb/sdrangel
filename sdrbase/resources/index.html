@@ -1050,11 +1050,15 @@ margin-bottom: 20px;
   "description" : "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
 };
             defs.InstanceSummaryResponse = {
-  "required" : [ "devicesetlist", "version" ],
+  "required" : [ "devicesetlist", "qtVersion", "version" ],
   "properties" : {
     "version" : {
       "type" : "string",
       "description" : "Current software version"
+    },
+    "qtVersion" : {
+      "type" : "string",
+      "description" : "Qt version with which the software was compiled"
     },
     "logging" : {
       "$ref" : "#/definitions/LoggingInfo"
@@ -14085,7 +14089,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-18T01:56:22.008+01:00
+              Generated 2017-12-18T13:11:28.683+01:00
             </div>
           </div>
       </div>

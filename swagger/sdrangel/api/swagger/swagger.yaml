@@ -936,10 +936,14 @@ definitions:
     description: "Summarized information about this SDRangel instance"
     required:
       - version
+      - qtVersion
       - devicesetlist
     properties:
       version:
         description: "Current software version"
+        type: string
+      qtVersion:
+        description: "Qt version with which the software was compiled"
         type: string
       logging:
         $ref: "#/definitions/LoggingInfo"

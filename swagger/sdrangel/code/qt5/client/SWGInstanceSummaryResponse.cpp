@@ -38,6 +38,7 @@ SWGInstanceSummaryResponse::~SWGInstanceSummaryResponse() {
 void
 SWGInstanceSummaryResponse::init() {
     version = new QString("");
+    qt_version = new QString("");
     logging = new SWGLoggingInfo();
     devicesetlist = new SWGDeviceSetList();
 }
@@ -47,6 +48,10 @@ SWGInstanceSummaryResponse::cleanup() {
     
     if(version != nullptr) {
         delete version;
+    }
+
+    if(qt_version != nullptr) {
+        delete qt_version;
     }
 
     if(logging != nullptr) {
@@ -70,6 +75,7 @@ SWGInstanceSummaryResponse::fromJson(QString &json) {
 void
 SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
+    ::SWGSDRangel::setValue(&qt_version, pJson["qtVersion"], "QString", "QString");
     ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
     ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
 }
@@ -90,6 +96,8 @@ SWGInstanceSummaryResponse::asJsonObject() {
     
     toJsonValue(QString("version"), version, obj, QString("QString"));
 
+    toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
+
     toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
 
     toJsonValue(QString("devicesetlist"), devicesetlist, obj, QString("SWGDeviceSetList"));
@@ -104,6 +112,15 @@ SWGInstanceSummaryResponse::getVersion() {
 void
 SWGInstanceSummaryResponse::setVersion(QString* version) {
     this->version = version;
+}
+
+QString*
+SWGInstanceSummaryResponse::getQtVersion() {
+    return qt_version;
+}
+void
+SWGInstanceSummaryResponse::setQtVersion(QString* qt_version) {
+    this->qt_version = qt_version;
 }
 
 SWGLoggingInfo*
