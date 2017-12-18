@@ -58,6 +58,14 @@ public:
             SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceAudioGet(
+            SWGSDRangel::SWGAudioDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioPatch(
+            SWGSDRangel::SWGAudioDevicesSelect& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
