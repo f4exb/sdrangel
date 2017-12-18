@@ -74,6 +74,11 @@ public:
             SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceDVSerialPatch(
+            bool dvserial,
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

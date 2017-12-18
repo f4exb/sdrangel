@@ -28,6 +28,7 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
+#include "SWGDVSeralDevices.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -287,6 +288,39 @@ int WebAPIAdapterSrv::instanceLocationPut(
 
     response.setLatitude(m_mainCore.m_settings.getLatitude());
     response.setLongitude(m_mainCore.m_settings.getLongitude());
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceDVSerialPatch(
+            bool dvserial,
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    m_mainCore.m_dspEngine->setDVSerialSupport(dvserial);
+    response.init();
+
+    if (dvserial)
+    {
+        std::vector<std::string> deviceNames;
+        m_mainCore.m_dspEngine->getDVSerialNames(deviceNames);
+        response.setNbDevices((int) deviceNames.size());
+        QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
+
+        std::vector<std::string>::iterator it = deviceNames.begin();
+        std::string deviceNamesStr = "DV Serial devices found: ";
+
+        while (it != deviceNames.end())
+        {
+            deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
+            *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
+            ++it;
+        }
+    }
+    else
+    {
+        response.setNbDevices(0);
+    }
 
     return 200;
 }
