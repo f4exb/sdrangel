@@ -40,6 +40,11 @@ public:
             SWGSDRangel::SWGInstanceSummaryResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceDevices(
+            bool tx,
+            SWGSDRangel::SWGInstanceDevicesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

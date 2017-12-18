@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInstanceDevicesResponse.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -29,6 +30,7 @@
 #include "device/deviceset.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
+#include "device/deviceenumerator.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/devicesamplesource.h"
 #include "channel/channelsourceapi.h"
@@ -77,6 +79,32 @@ int WebAPIAdapterSrv::instanceDelete(
 
     MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
     m_mainCore.getInputMessageQueue()->push(msg);
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceDevices(
+            bool tx,
+            SWGSDRangel::SWGInstanceDevicesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
+    response.setDevicecount(nbSamplingDevices);
+    QList<SWGSDRangel::SWGDeviceListItem*> *devices = response.getDevices();
+
+    for (int i = 0; i < nbSamplingDevices; i++)
+    {
+        PluginInterface::SamplingDevice samplingDevice = tx ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
+        devices->append(new SWGSDRangel::SWGDeviceListItem);
+        *devices->back()->getDisplayedName() = samplingDevice.displayedName;
+        *devices->back()->getHwType() = samplingDevice.hardwareId;
+        *devices->back()->getSerial() = samplingDevice.serial;
+        devices->back()->setSequence(samplingDevice.sequence);
+        devices->back()->setTx(!samplingDevice.rxElseTx);
+        devices->back()->setNbStreams(samplingDevice.deviceNbItems);
+        devices->back()->setDeviceSetIndex(samplingDevice.claimed);
+        devices->back()->setIndex(i);
+    }
 
     return 200;
 }
