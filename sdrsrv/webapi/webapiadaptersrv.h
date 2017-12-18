@@ -50,6 +50,10 @@ public:
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceLoggingGet(
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

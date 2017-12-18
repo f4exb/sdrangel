@@ -24,6 +24,7 @@
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
+#include "SWGLoggingInfo.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -134,6 +135,22 @@ int WebAPIAdapterSrv::instanceChannels(
         *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
         channels->back()->setIndex(i);
     }
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceLoggingGet(
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    response.setDumpToFile(m_mainCore.m_logger->getUseFileLogger() ? 1 : 0);
+
+    if (response.getDumpToFile()) {
+    	m_mainCore.m_logger->getLogFileName(*response.getFileName());
+    	m_mainCore.m_logger->getFileMinMessageLevelStr(*response.getFileLevel());
+    }
+
+    m_mainCore.m_logger->getConsoleMinMessageLevelStr(*response.getConsoleLevel());
 
     return 200;
 }
