@@ -66,6 +66,14 @@ public:
             SWGSDRangel::SWGAudioDevicesSelect& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceLocationGet(
+            SWGSDRangel::SWGLocationInformation& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceLocationPut(
+            SWGSDRangel::SWGLocationInformation& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

@@ -27,6 +27,7 @@
 #include "SWGLoggingInfo.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
+#include "SWGLocationInformation.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -257,6 +258,35 @@ int WebAPIAdapterSrv::instanceAudioPatch(
     response.setInputVolume(m_mainCore.m_audioDeviceInfo.getInputVolume());
     response.setInputIndex(m_mainCore.m_audioDeviceInfo.getInputDeviceIndex());
     response.setOutputIndex(m_mainCore.m_audioDeviceInfo.getOutputDeviceIndex());
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceLocationGet(
+        SWGSDRangel::SWGLocationInformation& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    response.setLatitude(m_mainCore.m_settings.getLatitude());
+    response.setLongitude(m_mainCore.m_settings.getLongitude());
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceLocationPut(
+        SWGSDRangel::SWGLocationInformation& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    float latitude = response.getLatitude();
+    float longitude = response.getLongitude();
+
+    latitude = latitude < -90.0 ? -90.0 : latitude > 90.0 ? 90.0 : latitude;
+    longitude = longitude < -180.0 ? -180.0 : longitude > 180.0 ? 180.0 : longitude;
+
+    m_mainCore.m_settings.setLatitude(latitude);
+    m_mainCore.m_settings.setLongitude(longitude);
+
+    response.setLatitude(m_mainCore.m_settings.getLatitude());
+    response.setLongitude(m_mainCore.m_settings.getLongitude());
 
     return 200;
 }
