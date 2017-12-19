@@ -43,6 +43,7 @@ namespace SWGSDRangel
     class SWGDeviceSettings;
     class SWGDeviceState;
     class SWGChannelSettings;
+    class SWGSuccessResponse;
     class SWGErrorResponse;
 }
 
@@ -236,7 +237,7 @@ public:
      */
     virtual int instanceDeviceSetsPost(
             bool tx __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSet& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
@@ -245,7 +246,7 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsDelete(
-            SWGSDRangel::SWGDeviceSetList& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 
@@ -326,7 +327,8 @@ public:
      */
     virtual int devicesetChannelPost(
             int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGChannelSettings& query __attribute__((unused)),
+			SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     { return 501; }
 

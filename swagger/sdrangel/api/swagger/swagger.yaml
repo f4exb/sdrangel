@@ -537,9 +537,9 @@ paths:
           type: integer
       responses:
         "200":
-          description: On success return new device set
+          description: On success return informative messsage
           schema:
-            $ref: "#/definitions/DeviceSet"
+            $ref: "#/definitions/SuccessResponse"
         "500":
           description: Error
           schema:
@@ -553,9 +553,9 @@ paths:
         - Instance
       responses:
         "200":
-          description: On success return new list of device sets
+          description: On success return informative message
           schema:
-            $ref: "#/definitions/DeviceSetList"
+            $ref: "#/definitions/SuccessResponse"
         "404":
           description: "No more device sets to be deleted"
           schema:
@@ -837,9 +837,9 @@ paths:
             $ref: "#/definitions/ChannelSettings"
       responses:
         "200":
-          description: On success return new channel settings
+          description: On success return informative message
           schema:
-            $ref: "#/definitions/ChannelSettings"
+            $ref: "#/definitions/SuccessResponse"
         "400":
           description: Invalid device set index
           schema:
@@ -1043,6 +1043,12 @@ definitions:
         items:
           $ref: "#/definitions/ChannelListItem"
   ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  SuccessResponse:
     required:
       - message
     properties:

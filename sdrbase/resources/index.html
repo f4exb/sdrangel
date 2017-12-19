@@ -1549,6 +1549,14 @@ margin-bottom: 20px;
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
 };
+            defs.SuccessResponse = {
+  "required" : [ "message" ],
+  "properties" : {
+    "message" : {
+      "type" : "string"
+    }
+  }
+};
   </script>
 
   <div class="container-fluid">
@@ -2216,7 +2224,7 @@ public class DeviceSetApiExample {
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         ChannelSettings body = ; // ChannelSettings | Channel identification (no settings data)
         try {
-            ChannelSettings result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
+            SuccessResponse result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelPost");
@@ -2236,7 +2244,7 @@ public class DeviceSetApiExample {
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         ChannelSettings body = ; // ChannelSettings | Channel identification (no settings data)
         try {
-            ChannelSettings result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
+            SuccessResponse result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelPost");
@@ -2257,7 +2265,7 @@ DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetChannelPostWith:deviceSetIndex
     body:body
-              completionHandler: ^(ChannelSettings output, NSError* error) {
+              completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -2312,7 +2320,7 @@ namespace Example
 
             try
             {
-                ChannelSettings result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
+                SuccessResponse result = apiInstance.devicesetChannelPost(deviceSetIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -2460,7 +2468,7 @@ $(document).ready(function() {
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success return new channel settings </h3>
+                            <h3> Status: 200 - On success return informative message </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -2475,9 +2483,9 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success return new channel settings",
+  "description" : "On success return informative message",
   "schema" : {
-    "$ref" : "#/definitions/ChannelSettings"
+    "$ref" : "#/definitions/SuccessResponse"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -9092,7 +9100,7 @@ public class InstanceApiExample {
         
         InstanceApi apiInstance = new InstanceApi();
         try {
-            DeviceSetList result = apiInstance.instanceDeviceSetsDelete();
+            SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDeviceSetsDelete");
@@ -9110,7 +9118,7 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
         try {
-            DeviceSetList result = apiInstance.instanceDeviceSetsDelete();
+            SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDeviceSetsDelete");
@@ -9128,7 +9136,7 @@ public class InstanceApiExample {
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 [apiInstance instanceDeviceSetsDeleteWithCompletionHandler: 
-              ^(DeviceSetList output, NSError* error) {
+              ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -9176,7 +9184,7 @@ namespace Example
 
             try
             {
-                DeviceSetList result = apiInstance.instanceDeviceSetsDelete();
+                SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -9246,7 +9254,7 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success return new list of device sets </h3>
+                            <h3> Status: 200 - On success return informative message </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -9261,9 +9269,9 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success return new list of device sets",
+  "description" : "On success return informative message",
   "schema" : {
-    "$ref" : "#/definitions/DeviceSetList"
+    "$ref" : "#/definitions/SuccessResponse"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -9736,7 +9744,7 @@ public class InstanceApiExample {
         InstanceApi apiInstance = new InstanceApi();
         Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
         try {
-            DeviceSet result = apiInstance.instanceDeviceSetsPost(tx);
+            SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDeviceSetsPost");
@@ -9755,7 +9763,7 @@ public class InstanceApiExample {
         InstanceApi apiInstance = new InstanceApi();
         Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
         try {
-            DeviceSet result = apiInstance.instanceDeviceSetsPost(tx);
+            SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDeviceSetsPost");
@@ -9774,7 +9782,7 @@ public class InstanceApiExample {
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 [apiInstance instanceDeviceSetsPostWith:tx
-              completionHandler: ^(DeviceSet output, NSError* error) {
+              completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -9827,7 +9835,7 @@ namespace Example
 
             try
             {
-                DeviceSet result = apiInstance.instanceDeviceSetsPost(tx);
+                SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -9927,7 +9935,7 @@ except ApiException as e:
                             </table>
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success return new device set </h3>
+                            <h3> Status: 200 - On success return informative messsage </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -9942,9 +9950,9 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success return new device set",
+  "description" : "On success return informative messsage",
   "schema" : {
-    "$ref" : "#/definitions/DeviceSet"
+    "$ref" : "#/definitions/SuccessResponse"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -15002,7 +15010,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-19T01:09:19.350+01:00
+              Generated 2017-12-19T15:17:58.471+01:00
             </div>
           </div>
       </div>

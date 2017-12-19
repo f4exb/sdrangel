@@ -21,6 +21,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
+#include "SWGSuccessResponse.h"
 
 #include <QObject>
 
@@ -69,7 +70,7 @@ private:
     
 signals:
     void devicesetChannelDeleteSignal(SWGChannelSettings* summary);
-    void devicesetChannelPostSignal(SWGChannelSettings* summary);
+    void devicesetChannelPostSignal(SWGSuccessResponse* summary);
     void devicesetChannelSettingsGetSignal(SWGChannelSettings* summary);
     void devicesetChannelSettingsPatchSignal(SWGChannelSettings* summary);
     void devicesetChannelSettingsPutSignal(SWGChannelSettings* summary);
@@ -83,7 +84,7 @@ signals:
     void devicesetGetSignal(SWGDeviceSet* summary);
     
     void devicesetChannelDeleteSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void devicesetChannelPostSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsGetSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPatchSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPutSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);

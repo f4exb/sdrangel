@@ -18,7 +18,6 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
 #include "SWGDVSeralDevices.h"
-#include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
 #include "SWGErrorResponse.h"
 #include "SWGInstanceChannelsResponse.h"
@@ -31,6 +30,7 @@
 #include "SWGPresetImport.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
+#include "SWGSuccessResponse.h"
 
 #include <QObject>
 
@@ -99,9 +99,9 @@ signals:
     void instanceChannelsSignal(SWGInstanceChannelsResponse* summary);
     void instanceDVSerialPatchSignal(SWGDVSeralDevices* summary);
     void instanceDeleteSignal(SWGInstanceSummaryResponse* summary);
-    void instanceDeviceSetsDeleteSignal(SWGDeviceSetList* summary);
+    void instanceDeviceSetsDeleteSignal(SWGSuccessResponse* summary);
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
-    void instanceDeviceSetsPostSignal(SWGDeviceSet* summary);
+    void instanceDeviceSetsPostSignal(SWGSuccessResponse* summary);
     void instanceDevicesSignal(SWGInstanceDevicesResponse* summary);
     void instanceLocationGetSignal(SWGLocationInformation* summary);
     void instanceLocationPutSignal(SWGLocationInformation* summary);
@@ -121,9 +121,9 @@ signals:
     void instanceChannelsSignalE(SWGInstanceChannelsResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDVSerialPatchSignalE(SWGDVSeralDevices* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceDeviceSetsDeleteSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetsDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceDeviceSetsPostSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalE(SWGInstanceDevicesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLocationGetSignalE(SWGLocationInformation* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLocationPutSignalE(SWGLocationInformation* summary, QNetworkReply::NetworkError error_type, QString& error_str);

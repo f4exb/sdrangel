@@ -39,6 +39,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelSettings.h"
+#include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -707,7 +708,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
     else if (request.getMethod() == "POST")
     {
-        SWGSDRangel::SWGDeviceSet normalResponse;
+        SWGSDRangel::SWGSuccessResponse normalResponse;
         QByteArray txStr = request.getParameter("tx");
         bool tx = false;
 
@@ -726,7 +727,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
     else if (request.getMethod() == "DELETE")
     {
-        SWGSDRangel::SWGDeviceSetList normalResponse;
+        SWGSDRangel::SWGSuccessResponse normalResponse;
         int status = m_adapter->instanceDeviceSetsDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
@@ -999,20 +1000,21 @@ void WebAPIRequestMapper::devicesetChannelService(
 
             if (parseJsonBody(jsonStr, jsonObject, response))
             {
-                SWGSDRangel::SWGChannelSettings normalResponse;
-                resetChannelSettings(normalResponse);
+                SWGSDRangel::SWGChannelSettings query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+                resetChannelSettings(query);
 
                 if (jsonObject.contains("tx")) {
-                    normalResponse.setTx(jsonObject["tx"].toInt());
+                    query.setTx(jsonObject["tx"].toInt());
                 } else {
-                    normalResponse.setTx(0); // assume Rx
+                    query.setTx(0); // assume Rx
                 }
 
                 if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
                 {
-                    normalResponse.setChannelType(new QString(jsonObject["channelType"].toString()));
+                    query.setChannelType(new QString(jsonObject["channelType"].toString()));
 
-                    int status = m_adapter->devicesetChannelPost(deviceSetIndex, normalResponse, errorResponse);
+                    int status = m_adapter->devicesetChannelPost(deviceSetIndex, query, normalResponse, errorResponse);
 
                     response.setStatus(status);
 

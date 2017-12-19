@@ -327,7 +327,7 @@ SWGInstanceApi::instanceDeviceSetsDeleteCallback(HttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGDeviceSetList* output = static_cast<SWGDeviceSetList*>(create(json, QString("SWGDeviceSetList")));
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
     worker->deleteLater();
 
     emit instanceDeviceSetsDeleteSignal(output);
@@ -431,7 +431,7 @@ SWGInstanceApi::instanceDeviceSetsPostCallback(HttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGDeviceSet* output = static_cast<SWGDeviceSet*>(create(json, QString("SWGDeviceSet")));
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
     worker->deleteLater();
 
     emit instanceDeviceSetsPostSignal(output);

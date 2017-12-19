@@ -103,11 +103,11 @@ public:
 
     virtual int instanceDeviceSetsPost(
             bool tx,
-            SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetsDelete(
-            SWGSDRangel::SWGDeviceSetList& response,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetGet(
@@ -148,7 +148,8 @@ public:
 
     virtual int devicesetChannelPost(
             int deviceSetIndex,
-            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGChannelSettings& query,
+			SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetChannelSettingsGet(

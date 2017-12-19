@@ -125,7 +125,7 @@ SWGDeviceSetApi::devicesetChannelPostCallback(HttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGChannelSettings* output = static_cast<SWGChannelSettings*>(create(json, QString("SWGChannelSettings")));
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
     worker->deleteLater();
 
     emit devicesetChannelPostSignal(output);
