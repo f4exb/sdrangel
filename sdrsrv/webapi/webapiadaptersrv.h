@@ -79,6 +79,20 @@ public:
             SWGSDRangel::SWGDVSeralDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instancePresetFilePut(
+            SWGSDRangel::SWGPresetImport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetFilePost(
+            SWGSDRangel::SWGPresetExport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetGet(
+            SWGSDRangel::SWGPresets& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

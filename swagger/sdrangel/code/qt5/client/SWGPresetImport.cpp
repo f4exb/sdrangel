@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGPresets.h"
+#include "SWGPresetImport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,40 +22,44 @@
 
 namespace SWGSDRangel {
 
-SWGPresets::SWGPresets(QString* json) {
+SWGPresetImport::SWGPresetImport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGPresets::SWGPresets() {
+SWGPresetImport::SWGPresetImport() {
     init();
 }
 
-SWGPresets::~SWGPresets() {
+SWGPresetImport::~SWGPresetImport() {
     this->cleanup();
 }
 
 void
-SWGPresets::init() {
-    nb_groups = 0;
-    groups = new QList<SWGPresetGroup*>();
+SWGPresetImport::init() {
+    group_name = new QString("");
+    description = new QString("");
+    file_path = new QString("");
 }
 
 void
-SWGPresets::cleanup() {
+SWGPresetImport::cleanup() {
     
+    if(group_name != nullptr) {
+        delete group_name;
+    }
 
-    if(groups != nullptr) {
-        QList<SWGPresetGroup*>* arr = groups;
-        foreach(SWGPresetGroup* o, *arr) {
-            delete o;
-        }
-        delete groups;
+    if(description != nullptr) {
+        delete description;
+    }
+
+    if(file_path != nullptr) {
+        delete file_path;
     }
 }
 
-SWGPresets*
-SWGPresets::fromJson(QString &json) {
+SWGPresetImport*
+SWGPresetImport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -64,15 +68,14 @@ SWGPresets::fromJson(QString &json) {
 }
 
 void
-SWGPresets::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&nb_groups, pJson["nbGroups"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&groups, pJson["groups"], "QList", "SWGPresetGroup");
-    
+SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&description, pJson["description"], "QString", "QString");
+    ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
 }
 
 QString
-SWGPresets::asJson ()
+SWGPresetImport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
     
@@ -82,34 +85,43 @@ SWGPresets::asJson ()
 }
 
 QJsonObject*
-SWGPresets::asJsonObject() {
+SWGPresetImport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
-    obj->insert("nbGroups", QJsonValue(nb_groups));
+    toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
 
-    QJsonArray groupsJsonArray;
-    toJsonArray((QList<void*>*)groups, &groupsJsonArray, "groups", "SWGPresetGroup");
-    obj->insert("groups", groupsJsonArray);
+    toJsonValue(QString("description"), description, obj, QString("QString"));
+
+    toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
 
     return obj;
 }
 
-qint32
-SWGPresets::getNbGroups() {
-    return nb_groups;
+QString*
+SWGPresetImport::getGroupName() {
+    return group_name;
 }
 void
-SWGPresets::setNbGroups(qint32 nb_groups) {
-    this->nb_groups = nb_groups;
+SWGPresetImport::setGroupName(QString* group_name) {
+    this->group_name = group_name;
 }
 
-QList<SWGPresetGroup*>*
-SWGPresets::getGroups() {
-    return groups;
+QString*
+SWGPresetImport::getDescription() {
+    return description;
 }
 void
-SWGPresets::setGroups(QList<SWGPresetGroup*>* groups) {
-    this->groups = groups;
+SWGPresetImport::setDescription(QString* description) {
+    this->description = description;
+}
+
+QString*
+SWGPresetImport::getFilePath() {
+    return file_path;
+}
+void
+SWGPresetImport::setFilePath(QString* file_path) {
+    this->file_path = file_path;
 }
 
 

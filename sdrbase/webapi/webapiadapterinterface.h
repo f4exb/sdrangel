@@ -35,6 +35,8 @@ namespace SWGSDRangel
     class SWGPresets;
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
+    class SWGPresetImport;
+    class SWGPresetExport;
     class SWGDeviceSetList;
     class SWGDeviceSet;
     class SWGDeviceListItem;
@@ -200,6 +202,26 @@ public:
     { return 501; }
 
     /**
+     * Handler of /sdrangel/preset/file (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetFilePut(
+            SWGSDRangel::SWGPresetImport& query __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
+     * Handler of /sdrangel/preset/file (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetFilePost(
+            SWGSDRangel::SWGPresetExport& query __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+    { return 501; }
+
+    /**
      * Handler of /sdrangel/devicesets (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -350,6 +372,7 @@ public:
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
     static QString instancePresetURL;
+    static QString instancePresetFileURL;
     static QString instanceDeviceSetsURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetDeviceURLRe;

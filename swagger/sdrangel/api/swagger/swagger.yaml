@@ -8,6 +8,7 @@ info:
       
       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)
       * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.
+      * Preset import and export from/to file is a server only feature.
       * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source
       * The content type returned is always application/json except in the following cases:
         * An incorrect URL was specified: this document is returned as text/html with a status 400
@@ -429,6 +430,74 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "404":
           description: Preset not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+  /sdrangel/preset/file:
+    x-swagger-router-controller: instance
+    put:
+      description: import a preset from file as a new preset (server only).
+      operationId: instancePresetFilePut
+      tags:
+        - Instance
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: import details
+          required: true
+          schema:
+            $ref: "#/definitions/PresetImport"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: File not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
+    post:
+      description: export a preset to file (server only).
+      operationId: instancePresetFilePost
+      tags:
+        - Instance
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: export details
+          required: true
+          schema:
+            $ref: "#/definitions/PresetExport"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Preset or file path not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1319,6 +1388,28 @@ definitions:
       deviceSetIndex:
         description: "Index of the device set" 
         type: integer
+      preset:
+        $ref: "#/definitions/PresetIdentifier"
+  PresetImport:
+    description: "Details to import preset from file in preset list"
+    required:
+      - filePath
+    properties:
+      groupName:
+        description: "If present overrides imported preset group name with this name"
+        type: string
+      description:
+        description: "If present overrides imported preset description with this description"
+        type: string
+      filePath:
+        description: "Path of the import file"
+        type: string
+  PresetExport:
+    description: "Details to export a preset to file"
+    properties:
+      filePath:
+        description: "Path of the import file"
+        type: string
       preset:
         $ref: "#/definitions/PresetIdentifier"
   DeviceSettings:

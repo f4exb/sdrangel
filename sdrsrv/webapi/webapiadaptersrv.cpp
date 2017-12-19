@@ -18,6 +18,7 @@
 
 #include <QCoreApplication>
 #include <QList>
+#include <QTextStream>
 
 #include <unistd.h>
 
@@ -29,6 +30,9 @@
 #include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
+#include "SWGPresetImport.h"
+#include "SWGPresetExport.h"
+#include "SWGPresets.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -321,6 +325,160 @@ int WebAPIAdapterSrv::instanceDVSerialPatch(
     {
         response.setNbDevices(0);
     }
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instancePresetFilePut(
+            SWGSDRangel::SWGPresetImport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    const QString& fileName = *query.getFilePath();
+
+    if (fileName != "")
+    {
+        QFile exportFile(fileName);
+
+        if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QByteArray base64Str;
+            QTextStream instream(&exportFile);
+            instream >> base64Str;
+            exportFile.close();
+
+            Preset* preset = m_mainCore.m_settings.newPreset("", "");
+            preset->deserialize(QByteArray::fromBase64(base64Str));
+
+            if (query.getGroupName() && (query.getGroupName()->size() > 0)) {
+                preset->setGroup(*query.getGroupName());
+            }
+
+            if (query.getDescription() && (query.getDescription()->size() > 0)) {
+                preset->setDescription(*query.getDescription());
+            }
+
+            response.init();
+            response.setCenterFrequency(preset->getCenterFrequency());
+            *response.getGroupName() = preset->getGroup();
+            *response.getType() = preset->isSourcePreset() ? "R" : "T";
+            *response.getName() = preset->getDescription();
+
+            return 200;
+        }
+        else
+        {
+            *error.getMessage() = QString("File %1 not found or not readable").arg(fileName);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("Empty file path");
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::instancePresetFilePost(
+            SWGSDRangel::SWGPresetExport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    QString filePath = *query.getFilePath();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+
+    const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
+            presetIdentifier->getCenterFrequency(),
+            *presetIdentifier->getName());
+
+    if (selectedPreset == 0)
+    {
+        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(presetIdentifier->getCenterFrequency())
+                .arg(*presetIdentifier->getName());
+        return 404;
+    }
+
+    QString base64Str = selectedPreset->serialize().toBase64();
+
+    if (filePath != "")
+    {
+        QFileInfo fileInfo(filePath);
+
+        if (fileInfo.suffix() != "prex") {
+            filePath += ".prex";
+        }
+
+        QFile exportFile(filePath);
+
+        if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream outstream(&exportFile);
+            outstream << base64Str;
+            exportFile.close();
+
+            response.init();
+            response.setCenterFrequency(selectedPreset->getCenterFrequency());
+            *response.getGroupName() = selectedPreset->getGroup();
+            *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+            *response.getName() = selectedPreset->getDescription();
+
+            return 200;
+        }
+        else
+        {
+            *error.getMessage() = QString("File %1 cannot be written").arg(filePath);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("Empty file path");
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::instancePresetGet(
+        SWGSDRangel::SWGPresets& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    int nbPresets = m_mainCore.m_settings.getPresetCount();
+    int nbGroups = 0;
+    int nbPresetsThisGroup = 0;
+    QString groupName;
+    response.init();
+    QList<SWGSDRangel::SWGPresetGroup*> *groups = response.getGroups();
+    QList<SWGSDRangel::SWGPresetItem*> *swgPresets = 0;
+    int i = 0;
+
+    // Presets are sorted by group first
+
+    for (; i < nbPresets; i++)
+    {
+        const Preset *preset = m_mainCore.m_settings.getPreset(i);
+
+        if ((i == 0) || (groupName != preset->getGroup())) // new group
+        {
+            if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+            groups->append(new SWGSDRangel::SWGPresetGroup);
+            groups->back()->init();
+            groupName = preset->getGroup();
+            *groups->back()->getGroupName() = groupName;
+            swgPresets = groups->back()->getPresets();
+            nbGroups++;
+            nbPresetsThisGroup = 0;
+        }
+
+        swgPresets->append(new SWGSDRangel::SWGPresetItem);
+        swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
+        *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
+        *swgPresets->back()->getName() = preset->getDescription();
+        nbPresetsThisGroup++;
+    }
+
+    if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+    response.setNbGroups(nbGroups);
 
     return 200;
 }

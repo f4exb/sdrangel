@@ -34,6 +34,8 @@
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
+#include "SWGPresetImport.h"
+#include "SWGPresetExport.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelSettings.h"
@@ -81,6 +83,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceDVSerialService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
             instancePresetService(request, response);
+        } else if (path == WebAPIAdapterInterface::instancePresetFileURL) {
+            instancePresetFileService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDeviceSetsURL) {
             instanceDeviceSetsService(request, response);
         }
@@ -260,6 +264,13 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     else
     {
@@ -306,6 +317,13 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     else
     {
@@ -351,6 +369,13 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
             } else {
                 response.write(errorResponse.asJson().toUtf8());
             }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     else
@@ -443,6 +468,13 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     else if (request.getMethod() == "PUT")
     {
@@ -473,6 +505,13 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     else if (request.getMethod() == "POST")
@@ -505,6 +544,13 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     else if (request.getMethod() == "DELETE")
     {
@@ -534,6 +580,103 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PUT")
+    {
+        SWGSDRangel::SWGPresetImport query;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
+        QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
+
+        if (parseJsonBody(jsonStr, jsonObject, response))
+        {
+            query.fromJson(jsonStr);
+
+            if (query.getFilePath())
+            {
+                int status = m_adapter->instancePresetFilePut(query, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON query");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON request";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "POST")
+    {
+        SWGSDRangel::SWGPresetExport query;
+        SWGSDRangel::SWGPresetIdentifier normalResponse;
+        QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
+
+        if (parseJsonBody(jsonStr, jsonObject, response))
+        {
+            query.fromJson(jsonStr);
+
+            if (validatePresetExport(query))
+            {
+                int status = m_adapter->instancePresetFilePost(query, normalResponse, errorResponse);
+                response.setStatus(status);
+
+                if (status == 200) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON query");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON request";
+            response.write(errorResponse.asJson().toUtf8());
         }
     }
     else
@@ -667,6 +810,13 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
         }
         else
         {
@@ -726,6 +876,13 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
                     *errorResponse.getMessage() = "Invalid JSON request";
                     response.write(errorResponse.asJson().toUtf8());
                 }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
             }
         }
         else if (request.getMethod() == "GET")
@@ -873,6 +1030,13 @@ void WebAPIRequestMapper::devicesetChannelService(
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
         }
         else
         {
@@ -997,6 +1161,13 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
         }
         else
         {
@@ -1066,6 +1237,21 @@ bool WebAPIRequestMapper::validatePresetTransfer(SWGSDRangel::SWGPresetTransfer&
 bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier)
 {
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
+}
+
+bool WebAPIRequestMapper::validatePresetExport(SWGSDRangel::SWGPresetExport& presetExport)
+{
+    if (presetExport.getFilePath() == 0) {
+        return false;
+    }
+
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier =  presetExport.getPreset();
+
+    if (presetIdentifier == 0) {
+        return false;
+    }
+
+    return validatePresetIdentifer(*presetIdentifier);
 }
 
 bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject)

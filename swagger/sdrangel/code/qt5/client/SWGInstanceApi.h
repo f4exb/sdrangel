@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400     * There is no API adapter in the targeted instance: message \"Service not available\" as text/plain is returned with a status 500. This should not happen with released code.      --- 
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * Preset import and export from/to file is a server only feature.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400     * There is no API adapter in the targeted instance: message \"Service not available\" as text/plain is returned with a status 500. This should not happen with released code.      --- 
  *
  * OpenAPI spec version: 4.0.0
  * Contact: f4exb06@gmail.com
@@ -26,7 +26,9 @@
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGPresetExport.h"
 #include "SWGPresetIdentifier.h"
+#include "SWGPresetImport.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
 
@@ -60,6 +62,8 @@ public:
     void instanceLoggingGet();
     void instanceLoggingPut(SWGLoggingInfo body);
     void instancePresetDelete(SWGPresetIdentifier body);
+    void instancePresetFilePost(SWGPresetExport body);
+    void instancePresetFilePut(SWGPresetImport body);
     void instancePresetGet();
     void instancePresetPatch(SWGPresetTransfer body);
     void instancePresetPost(SWGPresetTransfer body);
@@ -81,6 +85,8 @@ private:
     void instanceLoggingGetCallback (HttpRequestWorker * worker);
     void instanceLoggingPutCallback (HttpRequestWorker * worker);
     void instancePresetDeleteCallback (HttpRequestWorker * worker);
+    void instancePresetFilePostCallback (HttpRequestWorker * worker);
+    void instancePresetFilePutCallback (HttpRequestWorker * worker);
     void instancePresetGetCallback (HttpRequestWorker * worker);
     void instancePresetPatchCallback (HttpRequestWorker * worker);
     void instancePresetPostCallback (HttpRequestWorker * worker);
@@ -102,6 +108,8 @@ signals:
     void instanceLoggingGetSignal(SWGLoggingInfo* summary);
     void instanceLoggingPutSignal(SWGLoggingInfo* summary);
     void instancePresetDeleteSignal(SWGPresetIdentifier* summary);
+    void instancePresetFilePostSignal(SWGPresetIdentifier* summary);
+    void instancePresetFilePutSignal(SWGPresetIdentifier* summary);
     void instancePresetGetSignal(SWGPresets* summary);
     void instancePresetPatchSignal(SWGPresetIdentifier* summary);
     void instancePresetPostSignal(SWGPresetIdentifier* summary);
@@ -122,6 +130,8 @@ signals:
     void instanceLoggingGetSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLoggingPutSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetDeleteSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetFilePostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetFilePutSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetGetSignalE(SWGPresets* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetPatchSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);

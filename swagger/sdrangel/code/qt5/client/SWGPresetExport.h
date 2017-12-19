@@ -11,17 +11,18 @@
  */
 
 /*
- * SWGFileSourceSettings.h
+ * SWGPresetExport.h
  * 
- * 
+ * Details to export a preset to file
  */
 
-#ifndef SWGFileSourceSettings_H_
-#define SWGFileSourceSettings_H_
+#ifndef SWGPresetExport_H_
+#define SWGPresetExport_H_
 
 #include <QJsonObject>
 
 
+#include "SWGPresetIdentifier.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -29,27 +30,31 @@
 
 namespace SWGSDRangel {
 
-class SWGFileSourceSettings: public SWGObject {
+class SWGPresetExport: public SWGObject {
 public:
-    SWGFileSourceSettings();
-    SWGFileSourceSettings(QString* json);
-    virtual ~SWGFileSourceSettings();
+    SWGPresetExport();
+    SWGPresetExport(QString* json);
+    virtual ~SWGPresetExport();
     void init();
     void cleanup();
 
     QString asJson ();
     QJsonObject* asJsonObject();
     void fromJsonObject(QJsonObject &json);
-    SWGFileSourceSettings* fromJson(QString &jsonString);
+    SWGPresetExport* fromJson(QString &jsonString);
 
-    QString* getFileName();
-    void setFileName(QString* file_name);
+    QString* getFilePath();
+    void setFilePath(QString* file_path);
+
+    SWGPresetIdentifier* getPreset();
+    void setPreset(SWGPresetIdentifier* preset);
 
 
 private:
-    QString* file_name;
+    QString* file_path;
+    SWGPresetIdentifier* preset;
 };
 
 }
 
-#endif /* SWGFileSourceSettings_H_ */
+#endif /* SWGPresetExport_H_ */
