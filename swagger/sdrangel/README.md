@@ -33,14 +33,17 @@ sudo npm install -g http-server
 
 All commands are relative to this directory (where the README.md is)
 
-Firstly start a node server to serve files in `api/swagger/include`
+Firstly start a node server to serve files
 
 ```shell
-cd api/swagger/include
 http-server --cors .
 ```
 
-To start on a different port than 8080 use the `-p` option
+To start on a different port than 8080 that may be busy use the `-p` option:
+
+```shell
+http-server -p 8081 --cors .
+```
 
 Then in the directory where this README.md is start the swagger editor
 
@@ -113,3 +116,16 @@ The following configuration files have been defined for generation in the SDRang
   - [Github repository](https://github.com/swagger-api/swagger-codegen)
   - [Server side code generation](https://github.com/swagger-api/swagger-codegen/wiki/Server-stub-generator-HOWTO) although not useful in this case
 
+<h2>Show documentation with swagger-ui</h2>
+
+<h3>Installation</h3>
+
+Detailed instructions [here](https://swagger.io/docs/swagger-tools/#download-33)
+
+  - Go to the [GitHub repository](https://github.com/swagger-api/swagger-ui) of the Swagger UI project
+  - Clone the repository
+  - Go to the cloned repository folder
+  - Open the `dist/index.html` file with a browser
+  - Say you started the node server on 127.0.0.1 port 8081 as in the example above (see: "Edit files with Swagger" paragraph)
+  - In the "Explore" box at the top type: `http://127.0.0.1:8081/api/swagger/swagger.yaml`
+  - Hit enter or click on the "Explore" button

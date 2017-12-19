@@ -1426,13 +1426,13 @@ definitions:
         description: Not zero if it is a tx device else it is a rx device
         type: integer
       fileSourceSettings:
-        $ref: "http://localhost:8081/FileSource.yaml#/FileSourceSettings"
+        $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
       rtlSdrSettings:
-        $ref: "http://localhost:8081/RtlSdr.yaml#/RtlSdrSettings"
+        $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
       limeSdrInputSettings:
-        $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrInputSettings"
+        $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
-        $ref: "http://localhost:8081/LimeSdr.yaml#/LimeSdrOutputSettings"
+        $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
   ChannelSettings:
     description: Base channel settings
     discriminator: channelType
@@ -1447,6 +1447,6 @@ definitions:
         description: Not zero if it is a tx channel else it is a rx channel
         type: integer
       NFMDemodSettings:
-        $ref: "http://localhost:8081/NFMDemod.yaml#/NFMDemodSettings"
+        $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
-        $ref: "http://localhost:8081/NFMMod.yaml#/NFMModSettings"
+        $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
