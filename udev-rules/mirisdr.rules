@@ -20,3 +20,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="2500", MODE:="066
 
 # IO-DATA GV-TV100 stick
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="04bb", ATTRS{idProduct}=="0537", MODE:="0666"
+
+# SDRplay RSP1A
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3000", MODE:="0666"

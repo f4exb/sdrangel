@@ -39,6 +39,7 @@ MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgStartStop, Message)
 
 SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_variant(SDRPlayUndef),
     m_settings(),
 	m_dev(0),
     m_sdrPlayThread(0),
@@ -81,13 +82,13 @@ bool SDRPlayInput::openDevice()
 
     if (!m_sampleFifo.setSize(96000 * 4))
     {
-        qCritical("SDRPlayInput::start: could not allocate SampleFifo");
+        qCritical("SDRPlayInput::openDevice: could not allocate SampleFifo");
         return false;
     }
 
     if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, m_devNumber)) < 0)
     {
-        qCritical("SDRPlayInput::start: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
+        qCritical("SDRPlayInput::openDevice: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
         return false;
     }
 
@@ -101,13 +102,21 @@ bool SDRPlayInput::openDevice()
 
     if ((res = mirisdr_get_device_usb_strings(m_devNumber, vendor, product, serial)) < 0)
     {
-        qCritical("SDRPlayInput::start: error accessing USB device");
+        qCritical("SDRPlayInput::openDevice: error accessing USB device");
         stop();
         return false;
     }
 
-    qWarning("SDRPlayInput::start: open: %s %s, SN: %s", vendor, product, serial);
+    qWarning("SDRPlayInput::openDevice: %s %s, SN: %s", vendor, product, serial);
     m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
+
+    if (QString(product) == "RSP1A") {
+        m_variant = SDRPlayRSP1A;
+    } else {
+        m_variant = SDRPlayRSP1;
+    }
+
+    qDebug("SDRPlayInput::openDevice: m_variant: %d", (int) m_variant);
 
     return true;
 }

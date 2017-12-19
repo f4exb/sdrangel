@@ -30,6 +30,13 @@ class FileRecord;
 
 class SDRPlayInput : public DeviceSampleSource {
 public:
+    enum SDRPlayVariant
+    {
+        SDRPlayUndef,
+        SDRPlayRSP1,
+        SDRPlayRSP1A
+    };
+
     class MsgConfigureSDRPlay : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -142,6 +149,8 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    SDRPlayVariant getVariant() const { return m_variant; }
+
 private:
     bool openDevice();
     void closeDevice();
@@ -150,6 +159,7 @@ private:
 
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;
+    SDRPlayVariant m_variant;
     SDRPlaySettings m_settings;
     mirisdr_dev_t* m_dev;
     SDRPlayThread* m_sdrPlayThread;
