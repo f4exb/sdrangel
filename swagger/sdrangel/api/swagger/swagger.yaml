@@ -285,7 +285,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
-  /sdrangel/preset:
+  /sdrangel/presets:
     x-swagger-router-controller: instance
     get:
       description: List all presets in the instance
@@ -303,6 +303,8 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "501":
           description: Function not implemented
+  /sdrangel/preset:
+    x-swagger-router-controller: instance
     patch:
       description: Load a preset in a device set
       operationId: instancePresetPatch

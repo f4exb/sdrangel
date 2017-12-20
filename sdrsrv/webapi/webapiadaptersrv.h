@@ -89,7 +89,7 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instancePresetGet(
+    virtual int instancePresetsGet(
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);
 

@@ -326,7 +326,7 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instancePresetGet(
+int WebAPIAdapterGUI::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {

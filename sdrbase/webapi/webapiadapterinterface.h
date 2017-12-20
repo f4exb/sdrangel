@@ -200,10 +200,10 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/preset (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/presets (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
-    virtual int instancePresetGet(
+    virtual int instancePresetsGet(
             SWGSDRangel::SWGPresets& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
@@ -502,6 +502,7 @@ public:
     static QString instanceAudioURL;
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
+    static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
     static QString instanceDeviceSetsURL;

@@ -441,7 +441,7 @@ int WebAPIAdapterSrv::instancePresetFilePost(
     }
 }
 
-int WebAPIAdapterSrv::instancePresetGet(
+int WebAPIAdapterSrv::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {

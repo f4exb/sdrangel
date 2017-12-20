@@ -843,7 +843,7 @@ SWGInstanceApi::instancePresetFilePutCallback(HttpRequestWorker * worker) {
 void
 SWGInstanceApi::instancePresetGet() {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/presets");
 
 
 

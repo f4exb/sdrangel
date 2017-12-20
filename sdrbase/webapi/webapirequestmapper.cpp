@@ -82,6 +82,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLocationService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
             instanceDVSerialService(request, response);
+        } else if (path == WebAPIAdapterInterface::instancePresetsURL) {
+            instancePresetsService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
             instancePresetService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetFileURL) {
@@ -422,7 +424,7 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
     }
 }
 
-void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
@@ -430,7 +432,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
     if (request.getMethod() == "GET")
     {
         SWGSDRangel::SWGPresets normalResponse;
-        int status = m_adapter->instancePresetGet(normalResponse, errorResponse);
+        int status = m_adapter->instancePresetsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status == 200) {
@@ -439,7 +441,14 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else if (request.getMethod() == "PATCH")
+}
+
+void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PATCH")
     {
         SWGSDRangel::SWGPresetTransfer query;
         SWGSDRangel::SWGPresetIdentifier normalResponse;
