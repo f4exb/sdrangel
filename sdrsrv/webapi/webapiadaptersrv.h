@@ -108,13 +108,17 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instancePresetDelete(
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceDeviceSetsGet(
+            SWGSDRangel::SWGDeviceSetList& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDeviceSetsPost(
             bool tx,
             SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instancePresetDelete(
-            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetsDelete(

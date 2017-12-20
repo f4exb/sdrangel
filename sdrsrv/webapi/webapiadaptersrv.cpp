@@ -679,6 +679,14 @@ int WebAPIAdapterSrv::instancePresetDelete(
     return 200;
 }
 
+int WebAPIAdapterSrv::instanceDeviceSetsGet(
+        SWGSDRangel::SWGDeviceSetList& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    getDeviceSetList(&response);
+    return 200;
+}
+
 int WebAPIAdapterSrv::instanceDeviceSetsPost(
         bool tx,
         SWGSDRangel::SWGSuccessResponse& response,
