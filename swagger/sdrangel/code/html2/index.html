@@ -1694,9 +1694,10 @@ margin-bottom: 20px;
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
-<p>Limitations:</p>
+<p>Limitations and specifcities:</p>
 <ul>
 <li>In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)</li>
+<li>In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.</li>
 <li>Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.</li>
 <li>Preset import and export from/to file is a server only feature.</li>
 <li>The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source</li>
@@ -9060,7 +9061,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Remove last device set except the first device</p>
+                        <p class="marked">Remove last device set. The GUI version does not remove the  first device.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/devicesets</span></code></pre>
@@ -15010,7 +15011,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-19T15:17:58.471+01:00
+              Generated 2017-12-20T00:50:19.499+01:00
             </div>
           </div>
       </div>

@@ -33,6 +33,7 @@
 #include "SWGPresetImport.h"
 #include "SWGPresetExport.h"
 #include "SWGPresets.h"
+#include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
 #include "maincore.h"
@@ -481,6 +482,43 @@ int WebAPIAdapterSrv::instancePresetGet(
     response.setNbGroups(nbGroups);
 
     return 200;
+}
+
+int WebAPIAdapterSrv::instanceDeviceSetsPost(
+        bool tx,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(tx);
+    m_mainCore.m_inputMessageQueue.push(msg);
+
+    response.init();
+    *response.getMessage() = QString("MsgAddDeviceSet message submitted");
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceDeviceSetsDelete(
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if (m_mainCore.m_deviceSets.size() > 0)
+    {
+        MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
+        m_mainCore.m_inputMessageQueue.push(msg);
+
+        response.init();
+        *response.getMessage() = QString("MsgRemoveLastDeviceSet message submitted");
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = "No more device sets to be removed";
+
+        return 404;
+    }
 }
 
 void WebAPIAdapterSrv::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)

@@ -24,6 +24,8 @@ if(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 endif(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 
 if (BUILD_DEBIAN)
+    add_subdirectory(limesdrinput)
     add_subdirectory(rtlsdr)
 endif (BUILD_DEBIAN)
 
+add_subdirectory(filesource)

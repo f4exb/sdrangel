@@ -93,6 +93,15 @@ public:
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceDeviceSetsPost(
+            bool tx,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceDeviceSetsDelete(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

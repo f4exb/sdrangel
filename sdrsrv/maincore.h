@@ -60,6 +60,10 @@ public:
     const QTimer& getMasterTimer() const { return m_masterTimer; }
     const MainSettings& getMainSettings() const { return m_settings; }
 
+    void addSourceDevice();
+    void addSinkDevice();
+    void removeLastDevice();
+
     friend class WebAPIAdapterSrv;
 
 signals:
@@ -77,6 +81,41 @@ private:
 
     private:
         MsgDeleteInstance() :
+            Message()
+        { }
+    };
+
+    class MsgAddDeviceSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool isTx() const { return m_tx; }
+
+        static MsgAddDeviceSet* create(bool tx)
+        {
+            return new MsgAddDeviceSet(tx);
+        }
+
+    private:
+        bool m_tx;
+
+        MsgAddDeviceSet(bool tx) :
+            Message(),
+            m_tx(tx)
+        { }
+    };
+
+    class MsgRemoveLastDeviceSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgRemoveLastDeviceSet* create()
+        {
+            return new MsgRemoveLastDeviceSet();
+        }
+
+    private:
+        MsgRemoveLastDeviceSet() :
             Message()
         { }
     };
@@ -99,6 +138,7 @@ private:
     WebAPIAdapterSrv *m_apiAdapter;
 
 	void loadSettings();
+	void savePresetSettings(Preset* preset, int tabIndex);
     void setLoggingOptions();
 
     bool handleMessage(const Message& cmd);
