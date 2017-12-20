@@ -112,6 +112,8 @@ bool SDRPlayInput::openDevice()
 
     if (QString(product) == "RSP1A") {
         m_variant = SDRPlayRSP1A;
+    } else if (QString(product) == "RSP2") {
+        m_variant = SDRPlayRSP2;
     } else {
         m_variant = SDRPlayRSP1;
     }

@@ -34,7 +34,8 @@ public:
     {
         SDRPlayUndef,
         SDRPlayRSP1,
-        SDRPlayRSP1A
+        SDRPlayRSP1A,
+        SDRPlayRSP2
     };
 
     class MsgConfigureSDRPlay : public Message {
