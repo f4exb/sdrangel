@@ -40,23 +40,24 @@ const QString DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
-	m_deviceAPI(deviceAPI),
-	m_absoluteFrequencyOffset(0),
-    m_interpolatorDistance(0.0f),
-    m_interpolatorDistanceRemain(0.0f),
-    m_sampleCount(0),
-    m_squelchCount(0),
-    m_squelchGate(0),
-    m_squelchLevel(1e-4),
-    m_squelchOpen(false),
-    m_movingAverage(40, 0),
-    m_fmExcursion(24),
-    m_audioFifo1(48000),
-    m_audioFifo2(48000),
-    m_scope(0),
-    m_scopeEnabled(true),
-    m_dsdDecoder(),
-    m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_interpolatorDistance(0.0f),
+        m_interpolatorDistanceRemain(0.0f),
+        m_sampleCount(0),
+        m_squelchCount(0),
+        m_squelchGate(0),
+        m_squelchLevel(1e-4),
+        m_squelchOpen(false),
+        m_movingAverage(40, 0),
+        m_fmExcursion(24),
+        m_audioFifo1(48000),
+        m_audioFifo2(48000),
+        m_scope(0),
+        m_scopeEnabled(true),
+        m_dsdDecoder(),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

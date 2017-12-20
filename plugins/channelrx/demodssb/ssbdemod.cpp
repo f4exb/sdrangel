@@ -39,21 +39,22 @@ const QString SSBDemod::m_channelId = "SSBDemod";
 const int SSBDemod::m_udpBlockSize = 512;
 
 SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_audioBinaual(false),
-	m_audioFlipChannels(false),
-    m_dsb(false),
-    m_audioMute(false),
-    m_agc(12000, agcTarget, 1e-2),
-    m_agcActive(false),
-    m_agcClamping(false),
-    m_agcNbSamples(12000),
-    m_agcPowerThreshold(1e-2),
-    m_agcThresholdGate(0),
-    m_audioActive(false),
-    m_sampleSink(0),
-    m_audioFifo(24000),
-    m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_audioBinaual(false),
+        m_audioFlipChannels(false),
+        m_dsb(false),
+        m_audioMute(false),
+        m_agc(12000, agcTarget, 1e-2),
+        m_agcActive(false),
+        m_agcClamping(false),
+        m_agcNbSamples(12000),
+        m_agcPowerThreshold(1e-2),
+        m_agcThresholdGate(0),
+        m_audioActive(false),
+        m_sampleSink(0),
+        m_audioFifo(24000),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

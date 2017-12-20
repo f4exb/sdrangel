@@ -539,6 +539,62 @@ int WebAPIAdapterSrv::instancePresetPatch(
     return 200;
 }
 
+int WebAPIAdapterSrv::instancePresetPut(
+        SWGSDRangel::SWGPresetTransfer& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    int deviceSetIndex = query.getDeviceSetIndex();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    int nbDeviceSets = m_mainCore.m_deviceSets.size();
+
+    if (deviceSetIndex > nbDeviceSets)
+    {
+        *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
+        return 404;
+    }
+
+    const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
+            presetIdentifier->getCenterFrequency(),
+            *presetIdentifier->getName());
+
+    if (selectedPreset == 0)
+    {
+        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(presetIdentifier->getCenterFrequency())
+                .arg(*presetIdentifier->getName());
+        return 404;
+    }
+    else // update existing preset
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
+        {
+            *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
+            return 404;
+        }
+
+        if (deviceSet->m_deviceSinkEngine && selectedPreset->isSourcePreset())
+        {
+            *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
+            return 404;
+        }
+    }
+
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    m_mainCore.m_inputMessageQueue.push(msg);
+
+    response.init();
+    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getName() = selectedPreset->getDescription();
+
+    return 200;
+}
+
 int WebAPIAdapterSrv::instanceDeviceSetsPost(
         bool tx,
         SWGSDRangel::SWGSuccessResponse& response,

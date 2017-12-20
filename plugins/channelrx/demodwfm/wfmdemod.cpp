@@ -38,18 +38,18 @@ const QString WFMDemod::m_channelId = "WFMDemod";
 const int WFMDemod::m_udpBlockSize = 512;
 
 WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
-    m_squelchOpen(false),
-    m_magsq(0.0f),
-    m_magsqSum(0.0f),
-    m_magsqPeak(0.0f),
-    m_magsqCount(0),
-    m_movingAverage(40, 0),
-    m_sampleSink(0),
-    m_audioFifo(250000),
-    m_settingsMutex(QMutex::Recursive)
-
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_squelchOpen(false),
+        m_magsq(0.0f),
+        m_magsqSum(0.0f),
+        m_magsqPeak(0.0f),
+        m_magsqCount(0),
+        m_movingAverage(40, 0),
+        m_sampleSink(0),
+        m_audioFifo(250000),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

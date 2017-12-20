@@ -45,6 +45,7 @@ const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 
 WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
+    ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
 	m_modPhasor(0.0f),
     m_movingAverage(40, 0),

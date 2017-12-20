@@ -43,6 +43,7 @@ const int SSBMod::m_levelNbSamples = 480; // every 10ms
 const int SSBMod::m_ssbFftLen = 1024;
 
 SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
+    ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_absoluteFrequencyOffset(0),
     m_SSBFilter(0),

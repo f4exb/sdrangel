@@ -36,6 +36,7 @@
 
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
 
@@ -101,6 +102,14 @@ bool MainCore::handleMessage(const Message& cmd)
     {
         MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
         loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        return true;
+    }
+    else if (MsgSavePreset::match(cmd))
+    {
+        MsgSavePreset& notif = (MsgSavePreset&) cmd;
+        savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        m_settings.sortPresets();
+        m_settings.save();
         return true;
     }
     else if (MsgAddDeviceSet::match(cmd))

@@ -47,6 +47,7 @@ const QString NFMMod::m_channelId = "NFMMod";
 const int NFMMod::m_levelNbSamples = 480; // every 10ms
 
 NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
+    ChannelSourceAPI(m_channelIdURI),
 	m_deviceAPI(deviceAPI),
 	m_absoluteFrequencyOffset(0),
 	m_modPhasor(0.0f),

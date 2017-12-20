@@ -37,21 +37,22 @@ const QString UDPSrc::m_channelIdURI = "sdrangel.channel.udpsrc";
 const QString UDPSrc::m_channelId = "UDPSrc";
 
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
-    m_outMovingAverage(480, 1e-10),
-    m_inMovingAverage(480, 1e-10),
-    m_amMovingAverage(1200, 1e-10),
-    m_audioFifo(24000),
-    m_spectrum(0),
-    m_squelch(1e-6),
-    m_squelchOpen(false),
-    m_squelchOpenCount(0),
-    m_squelchCloseCount(0),
-    m_squelchGate(4800),
-    m_squelchRelease(4800),
-    m_agc(9600, m_agcTarget, 1e-6),
-    m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_outMovingAverage(480, 1e-10),
+        m_inMovingAverage(480, 1e-10),
+        m_amMovingAverage(1200, 1e-10),
+        m_audioFifo(24000),
+        m_spectrum(0),
+        m_squelch(1e-6),
+        m_squelchOpen(false),
+        m_squelchOpenCount(0),
+        m_squelchCloseCount(0),
+        m_squelchGate(4800),
+        m_squelchRelease(4800),
+        m_agc(9600, m_agcTarget, 1e-6),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

@@ -41,6 +41,7 @@ const QString AMMod::m_channelId ="AMMod";
 const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
+    ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_absoluteFrequencyOffset(0),
     m_movingAverage(40, 0),

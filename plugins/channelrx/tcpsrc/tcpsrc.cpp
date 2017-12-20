@@ -34,9 +34,10 @@ const QString TCPSrc::m_channelIdURI = "sdrangel.channel.tcpsrc";
 const QString TCPSrc::m_channelId = "TCPSrc";
 
 TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
-	m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

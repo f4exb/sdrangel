@@ -19,8 +19,9 @@
 #include "util/uid.h"
 #include "channelsinkapi.h"
 
-ChannelSinkAPI::ChannelSinkAPI() :
-    m_indexInDeviceSet(-1),
-    m_uid(UidCalculator::getNewObjectId())
+ChannelSinkAPI::ChannelSinkAPI(const QString& name) :
+        m_name(name),
+        m_indexInDeviceSet(-1),
+        m_uid(UidCalculator::getNewObjectId())
 {
 }

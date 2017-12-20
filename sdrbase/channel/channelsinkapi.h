@@ -32,15 +32,15 @@ namespace SWGSDRangel
 
 class SDRANGEL_API ChannelSinkAPI {
 public:
-    ChannelSinkAPI();
+    ChannelSinkAPI(const QString& name);
     virtual ~ChannelSinkAPI() {}
     virtual void destroy() = 0;
 
     virtual int getDeltaFrequency() const = 0;
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
-    virtual void setName(const QString& name) = 0;
-    virtual QString getName() const = 0;
+    virtual void setName(const QString& name) { m_name = name; }
+    virtual const QString& getName() const { return m_name; }
     virtual qint64 getCenterFrequency() const = 0;
 
     virtual QByteArray serialize() const = 0;
@@ -62,6 +62,11 @@ public:
     uint64_t getUID() const { return m_uid; }
 
 private:
+    /** Unique identifier in a device set used for sorting. Used when there is no GUI.
+     * In GUI version it is supported by GUI object name accessed through PluginInstanceGUI.
+     */
+    QString m_name;
+
     int m_indexInDeviceSet;
     uint64_t m_uid;
 };

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import requests
+import requests, traceback, sys
+from optparse import OptionParser
 
 base_url = "http://127.0.0.1:8091/sdrangel"
 
@@ -34,19 +35,50 @@ requests_methods = {
     "DELETE": requests.delete
 }
 
-for command in commands:
-    url = base_url + command[0]
-    method = requests_methods.get(command[1], None)
-    if method is not None:
-        r = method(url=url, params=command[2], json=command[3])
-        if r.status_code == 200:
-            print("Done: %s" % command[4])
-        else:
-            print("Error %d:%s" % (r.status_code, command[4]))
-            print(r.text)
-            exit(1)
-    else:
-        print("requests method error")
-        exit(1)
+# ======================================================================
+def getInputOptions():
 
-print("All done!")
+    parser = OptionParser(usage="usage: %%prog [-t]\n")
+    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
+
+    (options, args) = parser.parse_args()
+    
+    if (options.address == None):
+        options.address = "127.0.0.1:8091"
+    
+    return options
+
+# ======================================================================
+def main():
+    try:
+        options = getInputOptions()
+        
+        global base_url
+        base_url = "http://%s/sdrangel" % options.address
+
+        for command in commands:
+            url = base_url + command[0]
+            method = requests_methods.get(command[1], None)
+            if method is not None:
+                r = method(url=url, params=command[2], json=command[3])
+                if r.status_code == 200:
+                    print("Done: %s" % command[4])
+                else:
+                    print("Error %d:%s" % (r.status_code, command[4]))
+                    print(r.text)
+                    exit(1)
+            else:
+                print("requests method error")
+                exit(1)
+                
+        print("All done!")
+    
+    except Exception, msg:
+        tb = traceback.format_exc()
+        print >> sys.stderr, tb
+
+
+# ======================================================================
+if __name__ == "__main__":
+    main()
+

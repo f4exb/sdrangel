@@ -45,25 +45,26 @@ static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 const int NFMDemod::m_udpBlockSize = 512;
 
 NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
-    m_deviceAPI(devieAPI),
-    m_absoluteFrequencyOffset(0),
-	m_ctcssIndex(0),
-	m_sampleCount(0),
-	m_squelchCount(0),
-	m_squelchGate(2),
-	m_audioMute(false),
-	m_squelchLevel(-990),
-	m_squelchOpen(false),
-	m_afSquelchOpen(false),
-	m_magsq(0.0f),
-    m_magsqSum(0.0f),
-    m_magsqPeak(0.0f),
-    m_magsqCount(0),
-    m_movingAverage(40, 0),
-    m_afSquelch(2, afSqTones),
-    m_fmExcursion(2400),
-    m_audioFifo(48000),
-    m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(devieAPI),
+        m_absoluteFrequencyOffset(0),
+        m_ctcssIndex(0),
+        m_sampleCount(0),
+        m_squelchCount(0),
+        m_squelchGate(2),
+        m_audioMute(false),
+        m_squelchLevel(-990),
+        m_squelchOpen(false),
+        m_afSquelchOpen(false),
+        m_magsq(0.0f),
+        m_magsqSum(0.0f),
+        m_magsqPeak(0.0f),
+        m_magsqCount(0),
+        m_movingAverage(40, 0),
+        m_afSquelch(2, afSqTones),
+        m_fmExcursion(2400),
+        m_audioFifo(48000),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

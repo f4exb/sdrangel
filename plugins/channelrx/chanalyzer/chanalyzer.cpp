@@ -33,9 +33,10 @@ const QString ChannelAnalyzer::m_channelIdURI = "org.f4exb.sdrangelove.channel.c
 const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_sampleSink(0),
-	m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_sampleSink(0),
+        m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 

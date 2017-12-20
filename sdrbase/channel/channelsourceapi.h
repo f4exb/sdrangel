@@ -31,7 +31,7 @@ namespace SWGSDRangel
 
 class SDRANGEL_API ChannelSourceAPI {
 public:
-    ChannelSourceAPI();
+    ChannelSourceAPI(const QString& name);
     virtual ~ChannelSourceAPI() {}
     virtual void destroy() = 0;
 
@@ -61,6 +61,11 @@ public:
     uint64_t getUID() const { return m_uid; }
 
 private:
+    /** Unique identifier in a device set used for sorting. Used when there is no GUI.
+     * In GUI version it is supported by GUI object name accessed through PluginInstanceGUI.
+     */
+    QString m_name;
+
     int m_indexInDeviceSet;
     uint64_t m_uid;
 };

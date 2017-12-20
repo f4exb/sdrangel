@@ -19,8 +19,9 @@
 #include "util/uid.h"
 #include "channelsourceapi.h"
 
-ChannelSourceAPI::ChannelSourceAPI() :
-    m_indexInDeviceSet(-1),
-    m_uid(UidCalculator::getNewObjectId())
+ChannelSourceAPI::ChannelSourceAPI(const QString& name) :
+        m_name(name),
+        m_indexInDeviceSet(-1),
+        m_uid(UidCalculator::getNewObjectId())
 { }
 

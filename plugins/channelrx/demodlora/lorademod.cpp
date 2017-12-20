@@ -35,9 +35,10 @@ const QString LoRaDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.lora"
 const QString LoRaDemod::m_channelId = "LoRaDemod";
 
 LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_sampleSink(0),
-	m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_sampleSink(0),
+        m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
 

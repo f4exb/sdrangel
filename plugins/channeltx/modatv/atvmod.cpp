@@ -50,6 +50,7 @@ const int ATVMod::m_cameraFPSTestNbFrames = 100;
 const int ATVMod::m_ssbFftLen = 1024;
 
 ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
+    ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_absoluteFrequencyOffset(0),
 	m_modPhasor(0.0f),

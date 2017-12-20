@@ -40,13 +40,14 @@ const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
 BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
-	m_audioFifo(250000),
-	m_settingsMutex(QMutex::Recursive),
-	m_pilotPLL(19000/384000, 50/384000, 0.01),
-	m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
-	m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_audioFifo(250000),
+        m_settingsMutex(QMutex::Recursive),
+        m_pilotPLL(19000/384000, 50/384000, 0.01),
+        m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
+        m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
 	m_fmExcursion(default_excursion)
 {
 	setObjectName(m_channelId);

@@ -37,16 +37,17 @@ const QString AMDemod::m_channelId = "AMDemod";
 const int AMDemod::m_udpBlockSize = 512;
 
 AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
-    m_squelchOpen(false),
-	m_magsqSum(0.0f),
-	m_magsqPeak(0.0f),
-	m_magsqCount(0),
-	m_movingAverage(40, 0),
-    m_volumeAGC(1200, 1.0),
-    m_audioFifo(48000),
-    m_settingsMutex(QMutex::Recursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_deviceAPI(deviceAPI),
+        m_absoluteFrequencyOffset(0),
+        m_squelchOpen(false),
+        m_magsqSum(0.0f),
+        m_magsqPeak(0.0f),
+        m_magsqCount(0),
+        m_movingAverage(40, 0),
+        m_volumeAGC(1200, 1.0),
+        m_audioFifo(48000),
+        m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
