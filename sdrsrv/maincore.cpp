@@ -91,10 +91,6 @@ bool MainCore::handleMessage(const Message& cmd)
     {
         while (m_deviceSets.size() > 0)
         {
-            if (m_deviceSets.size() == 1) { // save the first device set settings as the working preset
-                savePresetSettings(m_settings.getWorkingPreset(), 0);
-            }
-
             removeLastDevice();
         }
 
