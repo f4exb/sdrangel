@@ -548,7 +548,7 @@ int WebAPIAdapterSrv::instancePresetPut(
     SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainCore.m_deviceSets.size();
 
-    if (deviceSetIndex > nbDeviceSets)
+    if (deviceSetIndex >= nbDeviceSets)
     {
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
@@ -584,6 +584,62 @@ int WebAPIAdapterSrv::instancePresetPut(
     }
 
     MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    m_mainCore.m_inputMessageQueue.push(msg);
+
+    response.init();
+    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getName() = selectedPreset->getDescription();
+
+    return 200;
+}
+
+int WebAPIAdapterSrv::instancePresetPost(
+        SWGSDRangel::SWGPresetTransfer& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    int deviceSetIndex = query.getDeviceSetIndex();
+    SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
+    int nbDeviceSets = m_mainCore.m_deviceSets.size();
+
+    if (deviceSetIndex >= nbDeviceSets)
+    {
+        *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
+        return 404;
+    }
+
+    DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+    int deviceCenterFrequency = 0;
+
+    if (deviceSet->m_deviceSourceEngine) { // Rx
+        deviceCenterFrequency = deviceSet->m_deviceSourceEngine->getSource()->getCenterFrequency();
+    } else if (deviceSet->m_deviceSinkEngine) { // Tx
+        deviceCenterFrequency = deviceSet->m_deviceSinkEngine->getSink()->getCenterFrequency();
+    } else {
+        *error.getMessage() = QString("Unknown device in device set (not Rx nor Tx)");
+        return 500;
+    }
+
+    const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
+            deviceCenterFrequency,
+            *presetIdentifier->getName());
+
+    if (selectedPreset == 0) // save on a new preset
+    {
+        selectedPreset = m_mainCore.m_settings.newPreset(*presetIdentifier->getGroupName(), *presetIdentifier->getName());
+    }
+    else
+    {
+        *error.getMessage() = QString("Preset already exists [%1, %2, %3]")
+                .arg(*presetIdentifier->getGroupName())
+                .arg(deviceCenterFrequency)
+                .arg(*presetIdentifier->getName());
+        return 409;
+    }
+
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
