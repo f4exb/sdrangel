@@ -651,6 +651,34 @@ int WebAPIAdapterSrv::instancePresetPost(
     return 200;
 }
 
+int WebAPIAdapterSrv::instancePresetDelete(
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*response.getGroupName(),
+            response.getCenterFrequency(),
+            *response.getName());
+
+    if (selectedPreset == 0)
+    {
+        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+                .arg(*response.getGroupName())
+                .arg(response.getCenterFrequency())
+                .arg(*response.getName());
+        return 404;
+    }
+
+    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getName() = selectedPreset->getDescription();
+
+    MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
+    m_mainCore.m_inputMessageQueue.push(msg);
+
+    return 200;
+}
+
 int WebAPIAdapterSrv::instanceDeviceSetsPost(
         bool tx,
         SWGSDRangel::SWGSuccessResponse& response,

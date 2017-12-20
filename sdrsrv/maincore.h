@@ -119,6 +119,26 @@ private:
         { }
     };
 
+    class MsgDeletePreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Preset *getPreset() const { return m_preset; }
+
+        static MsgDeletePreset* create(const Preset *preset)
+        {
+            return new MsgDeletePreset(preset);
+        }
+
+    private:
+        const Preset *m_preset;
+
+        MsgDeletePreset(const Preset *preset) :
+            Message(),
+            m_preset(preset)
+        { }
+    };
+
     class MsgDeleteInstance : public Message {
         MESSAGE_CLASS_DECLARATION
 
