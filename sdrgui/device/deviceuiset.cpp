@@ -182,7 +182,6 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                                 channelConfig.m_channelIdURI, this, rxChannel);
                         reg = ChannelInstanceRegistration(
                                 channelConfig.m_channelIdURI, rxChannelGUI);
-                        m_rxChannelInstanceRegistrations.append(reg);
                         break;
                     }
                 }
@@ -282,7 +281,6 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                                 channelConfig.m_channelIdURI, this, txChannel);
                         reg = ChannelInstanceRegistration(
                                 channelConfig.m_channelIdURI, txChannelGUI);
-                        m_txChannelInstanceRegistrations.append(reg);
                         break;
                     }
                 }
