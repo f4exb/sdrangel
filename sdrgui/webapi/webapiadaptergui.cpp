@@ -379,7 +379,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
     SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
     int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
 
-    if (deviceSetIndex > nbDeviceSets)
+    if (deviceSetIndex >= nbDeviceSets)
     {
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;

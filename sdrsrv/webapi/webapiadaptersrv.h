@@ -93,6 +93,11 @@ public:
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instancePresetPatch(
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDeviceSetsPost(
             bool tx,
             SWGSDRangel::SWGSuccessResponse& response,

@@ -70,6 +70,29 @@ signals:
     void finished();
 
 private:
+    class MsgLoadPreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Preset *getPreset() const { return m_preset; }
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+
+        static MsgLoadPreset* create(const Preset *preset, int deviceSetIndex)
+        {
+            return new MsgLoadPreset(preset, deviceSetIndex);
+        }
+
+    private:
+        const Preset *m_preset;
+        int m_deviceSetIndex;
+
+        MsgLoadPreset(const Preset *preset, int deviceSetIndex) :
+            Message(),
+            m_preset(preset),
+            m_deviceSetIndex(deviceSetIndex)
+        { }
+    };
+
     class MsgDeleteInstance : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -138,6 +161,7 @@ private:
     WebAPIAdapterSrv *m_apiAdapter;
 
 	void loadSettings();
+	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
     void setLoggingOptions();
 

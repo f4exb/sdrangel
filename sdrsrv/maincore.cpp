@@ -35,6 +35,7 @@
 #include "maincore.h"
 
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
 
@@ -98,6 +99,12 @@ bool MainCore::handleMessage(const Message& cmd)
         }
 
         emit finished();
+        return true;
+    }
+    else if (MsgLoadPreset::match(cmd))
+    {
+        MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
+        loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         return true;
     }
     else if (MsgAddDeviceSet::match(cmd))
@@ -288,6 +295,29 @@ void MainCore::removeLastDevice()
     }
 
     m_deviceSets.pop_back();
+}
+
+void MainCore::loadPresetSettings(const Preset* preset, int tabIndex)
+{
+	qDebug("MainCore::loadPresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
+
+	if (tabIndex >= 0)
+	{
+        DeviceSet *deviceSet = m_deviceSets[tabIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // source device
+        {
+        	deviceSet->m_deviceSourceAPI->loadSourceSettings(preset);
+        	deviceSet->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // sink device
+        {
+        	deviceSet->m_deviceSinkAPI->loadSinkSettings(preset);
+        	deviceSet->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        }
+	}
 }
 
 void MainCore::savePresetSettings(Preset* preset, int tabIndex)

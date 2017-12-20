@@ -337,7 +337,7 @@ paths:
         "501":
           description: Function not implemented
     put:
-      description: Update device set settings on an existing preset.
+      description: Update an existing preset with device set settings.
       operationId: instancePresetPut
       tags:
         - Instance
