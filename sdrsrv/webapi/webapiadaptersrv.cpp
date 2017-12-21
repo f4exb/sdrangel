@@ -94,7 +94,7 @@ int WebAPIAdapterSrv::instanceDelete(
     m_mainCore.getInputMessageQueue()->push(msg);
 
     response.init();
-    *response.getMessage() = QString("MsgDeleteInstance message submitted");
+    *response.getMessage() = QString("Message to stop the SDRangel instance (MsgDeleteInstance) was submitted successfully");
 
     return 202;
 }
@@ -697,7 +697,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsPost(
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
-    *response.getMessage() = QString("MsgAddDeviceSet message submitted");
+    *response.getMessage() = QString("Message to add a new device set (MsgAddDeviceSet) was submitted successfully");
 
     return 202;
 }
@@ -712,7 +712,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsDelete(
         m_mainCore.m_inputMessageQueue.push(msg);
 
         response.init();
-        *response.getMessage() = QString("MsgRemoveLastDeviceSet message submitted");
+        *response.getMessage() = QString("Message to remove last device set (MsgRemoveLastDeviceSet) was submitted successfully");
 
         return 202;
     }

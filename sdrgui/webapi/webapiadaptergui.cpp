@@ -569,7 +569,7 @@ int WebAPIAdapterGUI::instanceDeviceSetsPost(
     m_mainWindow.m_inputMessageQueue.push(msg);
 
     response.init();
-    *response.getMessage() = QString("MsgAddDeviceSet message submitted");
+    *response.getMessage() = QString("Message to add a new device set (MsgAddDeviceSet) was submitted successfully");
 
     return 202;
 }
@@ -584,7 +584,7 @@ int WebAPIAdapterGUI::instanceDeviceSetsDelete(
         m_mainWindow.m_inputMessageQueue.push(msg);
 
         response.init();
-        *response.getMessage() = QString("MsgRemoveLastDeviceSet message submitted");
+        *response.getMessage() = QString("Message to remove last device set (MsgRemoveLastDeviceSet) was submitted successfully");
 
         return 202;
     }
@@ -931,7 +931,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 m_mainWindow.m_inputMessageQueue.push(msg);
 
                 response.init();
-                *response.getMessage() = QString("MsgAddChannel message submitted");
+                *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
 
                 return 202;
             }
@@ -967,7 +967,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 m_mainWindow.m_inputMessageQueue.push(msg);
 
                 response.init();
-                *response.getMessage() = QString("MsgAddChannel message submitted");
+                *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
 
                 return 202;
             }
