@@ -63,6 +63,8 @@ public:
     void addSourceDevice();
     void addSinkDevice();
     void removeLastDevice();
+    void changeSampleSource(int deviceSetIndex, int selectedDeviceIndex);
+    void changeSampleSink(int deviceSetIndex, int selectedDeviceIndex);
 
     friend class WebAPIAdapterSrv;
 
@@ -186,6 +188,32 @@ private:
     private:
         MsgRemoveLastDeviceSet() :
             Message()
+        { }
+    };
+
+    class MsgSetDevice : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getDeviceIndex() const { return m_deviceIndex; }
+        bool isTx() const { return m_tx; }
+
+        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, bool tx)
+        {
+            return new MsgSetDevice(deviceSetIndex, deviceIndex, tx);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_deviceIndex;
+        bool m_tx;
+
+        MsgSetDevice(int deviceSetIndex, int deviceIndex, bool tx) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_deviceIndex(deviceIndex),
+            m_tx(tx)
         { }
     };
 

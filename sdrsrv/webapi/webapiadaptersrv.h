@@ -125,6 +125,16 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDevicePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceListItem& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

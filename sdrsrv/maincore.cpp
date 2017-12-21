@@ -40,6 +40,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeletePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
 
 MainCore *MainCore::m_instance = 0;
 
@@ -137,6 +138,18 @@ bool MainCore::handleMessage(const Message& cmd)
     {
         if (m_deviceSets.size() > 0) {
             removeLastDevice();
+        }
+
+        return true;
+    }
+    else if (MsgSetDevice::match(cmd))
+    {
+        MsgSetDevice& notif = (MsgSetDevice&) cmd;
+
+        if (notif.isTx()) {
+            changeSampleSink(notif.getDeviceSetIndex(), notif.getDeviceIndex());
+        } else {
+            changeSampleSource(notif.getDeviceSetIndex(), notif.getDeviceIndex());
         }
 
         return true;
@@ -309,6 +322,142 @@ void MainCore::removeLastDevice()
     }
 
     m_deviceSets.pop_back();
+}
+
+void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
+{
+    if (deviceSetIndex >= 0)
+    {
+        qDebug("MainCore::changeSampleSource: deviceSet at %d", deviceSetIndex);
+        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceSet->m_deviceSourceAPI->stopAcquisition();
+
+        // deletes old UI and input object
+        deviceSet->m_deviceSourceAPI->resetSampleSourceId();
+        deviceSet->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
+                deviceSet->m_deviceSourceAPI->getSampleSource());
+        deviceSet->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
+
+        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
+        deviceSet->m_deviceSourceAPI->setSampleSourceSequence(samplingDevice.sequence);
+        deviceSet->m_deviceSourceAPI->setNbItems(samplingDevice.deviceNbItems);
+        deviceSet->m_deviceSourceAPI->setItemIndex(samplingDevice.deviceItemIndex);
+        deviceSet->m_deviceSourceAPI->setHardwareId(samplingDevice.hardwareId);
+        deviceSet->m_deviceSourceAPI->setSampleSourceId(samplingDevice.id);
+        deviceSet->m_deviceSourceAPI->setSampleSourceSerial(samplingDevice.serial);
+        deviceSet->m_deviceSourceAPI->setSampleSourceDisplayName(samplingDevice.displayedName);
+        deviceSet->m_deviceSourceAPI->setSampleSourcePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(selectedDeviceIndex));
+
+        // add to buddies list
+        std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
+        int nbOfBuddies = 0;
+
+        for (; it != m_deviceSets.end(); ++it)
+        {
+            if (*it != deviceSet) // do not add to itself
+            {
+                if ((*it)->m_deviceSourceEngine) // it is a source device
+                {
+                    if ((deviceSet->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSourceAPI->getHardwareId()) &&
+                        (deviceSet->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
+                    {
+                        (*it)->m_deviceSourceAPI->addSourceBuddy(deviceSet->m_deviceSourceAPI);
+                        nbOfBuddies++;
+                    }
+                }
+
+                if ((*it)->m_deviceSinkEngine) // it is a sink device
+                {
+                    if ((deviceSet->m_deviceSourceAPI->getHardwareId() == (*it)->m_deviceSinkAPI->getHardwareId()) &&
+                        (deviceSet->m_deviceSourceAPI->getSampleSourceSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
+                    {
+                        (*it)->m_deviceSinkAPI->addSourceBuddy(deviceSet->m_deviceSourceAPI);
+                        nbOfBuddies++;
+                    }
+                }
+            }
+        }
+
+        if (nbOfBuddies == 0) {
+            deviceSet->m_deviceSourceAPI->setBuddyLeader(true);
+        }
+
+        // constructs new GUI and input object
+        DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+                deviceSet->m_deviceSourceAPI->getSampleSourceId(), deviceSet->m_deviceSourceAPI);
+        deviceSet->m_deviceSourceAPI->setSampleSource(source);
+
+        deviceSet->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
+    }
+}
+
+void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
+{
+    if (deviceSetIndex >= 0)
+    {
+        qDebug("MainCore::changeSampleSink: device set at %d", deviceSetIndex);
+        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceSet->m_deviceSinkAPI->stopGeneration();
+
+        // deletes old UI and output object
+        deviceSet->m_deviceSinkAPI->resetSampleSinkId();
+        deviceSet->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+                deviceSet->m_deviceSinkAPI->getSampleSink());
+        deviceSet->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
+
+        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(selectedDeviceIndex);
+        deviceSet->m_deviceSinkAPI->setSampleSinkSequence(samplingDevice.sequence);
+        deviceSet->m_deviceSinkAPI->setNbItems(samplingDevice.deviceNbItems);
+        deviceSet->m_deviceSinkAPI->setItemIndex(samplingDevice.deviceItemIndex);
+        deviceSet->m_deviceSinkAPI->setHardwareId(samplingDevice.hardwareId);
+        deviceSet->m_deviceSinkAPI->setSampleSinkId(samplingDevice.id);
+        deviceSet->m_deviceSinkAPI->setSampleSinkSerial(samplingDevice.serial);
+        deviceSet->m_deviceSinkAPI->setSampleSinkDisplayName(samplingDevice.displayedName);
+        deviceSet->m_deviceSinkAPI->setSampleSinkPluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(selectedDeviceIndex));
+
+        // add to buddies list
+        std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
+        int nbOfBuddies = 0;
+
+        for (; it != m_deviceSets.end(); ++it)
+        {
+            if (*it != deviceSet) // do not add to itself
+            {
+                if ((*it)->m_deviceSourceEngine) // it is a source device
+                {
+                    if ((deviceSet->m_deviceSinkAPI->getHardwareId() == (*it)->m_deviceSourceAPI->getHardwareId()) &&
+                        (deviceSet->m_deviceSinkAPI->getSampleSinkSerial() == (*it)->m_deviceSourceAPI->getSampleSourceSerial()))
+                    {
+                        (*it)->m_deviceSourceAPI->addSinkBuddy(deviceSet->m_deviceSinkAPI);
+                        nbOfBuddies++;
+                    }
+                }
+
+                if ((*it)->m_deviceSinkEngine) // it is a sink device
+                {
+                    if ((deviceSet->m_deviceSinkAPI->getHardwareId() == (*it)->m_deviceSinkAPI->getHardwareId()) &&
+                        (deviceSet->m_deviceSinkAPI->getSampleSinkSerial() == (*it)->m_deviceSinkAPI->getSampleSinkSerial()))
+                    {
+                        (*it)->m_deviceSinkAPI->addSinkBuddy(deviceSet->m_deviceSinkAPI);
+                        nbOfBuddies++;
+                    }
+                }
+            }
+        }
+
+        if (nbOfBuddies == 0) {
+            deviceSet->m_deviceSinkAPI->setBuddyLeader(true);
+        }
+
+        // constructs new GUI and output object
+        DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
+                deviceSet->m_deviceSinkAPI->getSampleSinkId(), deviceSet->m_deviceSinkAPI);
+        deviceSet->m_deviceSinkAPI->setSampleSink(sink);
+
+        deviceSet->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
+    }
 }
 
 void MainCore::loadPresetSettings(const Preset* preset, int tabIndex)
