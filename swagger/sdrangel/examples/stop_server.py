@@ -40,7 +40,7 @@ def callAPI(url, method, params, json, text):
     request_method = requests_methods.get(method, None)
     if request_method is not None:
         r = request_method(url=base_url+url, params=params, json=json)
-        if r.status_code == 200:
+        if r.status_code / 100  == 2:
             print(text + " succeeded")
             printResponse(r)
             return r.json() # all 200 yield application/json response

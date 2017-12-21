@@ -13,7 +13,7 @@ requests_methods = {
 
 def getHwType():
     r = requests.get(url=base_url+"/deviceset/0")
-    if r.status_code  == 200:
+    if r.status_code / 100  == 2:
         rj = r.json()
         devj = rj.get('samplingDevice', None)
         if devj is not None:
@@ -25,7 +25,7 @@ def getHwType():
         
 def selectRtlSdr():
     r = requests.put(url=base_url+"/deviceset/0/device", json={"hwType": "RTLSDR"})
-    if r.status_code  == 200:
+    if r.status_code / 100  == 2:
         print json.dumps(r.json(), indent=4, sort_keys=True)
         return True
     else:
@@ -33,7 +33,7 @@ def selectRtlSdr():
         
 def getRtlSdrSettings():
     r = requests.get(url=base_url+"/deviceset/0/device/settings")
-    if r.status_code == 200:
+    if r.status_code / 100  == 2:
         rj = r.json()
         hwType = rj.get('deviceHwType', None)
         if hwType is not None and hwType == "RTLSDR":
@@ -47,7 +47,7 @@ def getRtlSdrSettings():
 def patchRtlSdrSettings(settings):
     new_settings = {"deviceHwType": "RTLSDR", "tx": 0, "rtlSdrSettings": settings}
     r = requests.patch(url=base_url+"/deviceset/0/device/settings", json=new_settings)
-    if r.status_code == 200:
+    if r.status_code / 100  == 2:
         print json.dumps(r.json(), indent=4, sort_keys=True)
     else:
         print "Error HTTP:", r.status_code
@@ -57,7 +57,7 @@ def deviceRun(run):
         r = requests.post(url=base_url+"/deviceset/0/device/run")
     else:
         r = requests.delete(url=base_url+"/deviceset/0/device/run")
-    if r.status_code == 200:
+    if r.status_code / 100  == 2:
         print json.dumps(r.json(), indent=4, sort_keys=True)
     else:
         print "Error HTTP:", r.status_code

@@ -139,7 +139,7 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
         int status = m_adapter->instanceSummary(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -147,12 +147,12 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
     }
     else if (request.getMethod() == "DELETE")
     {
-        SWGSDRangel::SWGInstanceSummaryResponse normalResponse;
+        SWGSDRangel::SWGSuccessResponse normalResponse;
 
         int status = m_adapter->instanceDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -185,7 +185,7 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
         int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -218,7 +218,7 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
         int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -244,7 +244,7 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
         int status = m_adapter->instanceLoggingGet(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -261,7 +261,7 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
             int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -296,7 +296,7 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
         int status = m_adapter->instanceAudioGet(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -314,7 +314,7 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
             int status = m_adapter->instanceAudioPatch(normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -349,7 +349,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
         int status = m_adapter->instanceLocationGet(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -367,7 +367,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
             int status = m_adapter->instanceLocationPut(normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -409,7 +409,7 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
         int status = m_adapter->instanceDVSerialPatch(dvserial, normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -435,7 +435,7 @@ void WebAPIRequestMapper::instancePresetsService(qtwebapp::HttpRequest& request,
         int status = m_adapter->instancePresetsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -464,7 +464,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 int status = m_adapter->instancePresetPatch(query, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -502,7 +502,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 int status = m_adapter->instancePresetPut(query, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -540,7 +540,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 int status = m_adapter->instancePresetPost(query, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -577,7 +577,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
                 int status = m_adapter->instancePresetDelete(normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -629,7 +629,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
                 int status = m_adapter->instancePresetFilePut(query, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -667,7 +667,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
                 int status = m_adapter->instancePresetFilePost(query, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -709,7 +709,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
         int status = m_adapter->instanceDeviceSetsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -728,7 +728,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
         int status = m_adapter->instanceDeviceSetsPost(tx, normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -740,7 +740,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
         int status = m_adapter->instanceDeviceSetsDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
-        if (status == 200) {
+        if (status/100 == 2) {
             response.write(normalResponse.asJson().toUtf8());
         } else {
             response.write(errorResponse.asJson().toUtf8());
@@ -769,7 +769,7 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
             int status = m_adapter->devicesetGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -814,7 +814,7 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
                 int status = m_adapter->devicesetDevicePut(deviceSetIndex, normalResponse, errorResponse);
                 response.setStatus(status);
 
-                if (status == 200) {
+                if (status/100 == 2) {
                     response.write(normalResponse.asJson().toUtf8());
                 } else {
                     response.write(errorResponse.asJson().toUtf8());
@@ -873,7 +873,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
                             errorResponse);
                     response.setStatus(status);
 
-                    if (status == 200) {
+                    if (status/100 == 2) {
                         response.write(normalResponse.asJson().toUtf8());
                     } else {
                         response.write(errorResponse.asJson().toUtf8());
@@ -902,7 +902,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
             int status = m_adapter->devicesetDeviceSettingsGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -941,7 +941,7 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
 
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -954,7 +954,7 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
 
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -967,7 +967,7 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
 
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -1027,7 +1027,7 @@ void WebAPIRequestMapper::devicesetChannelService(
 
                     response.setStatus(status);
 
-                    if (status == 200) {
+                    if (status/100 == 2) {
                         response.write(normalResponse.asJson().toUtf8());
                     } else {
                         response.write(errorResponse.asJson().toUtf8());
@@ -1088,7 +1088,7 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
 
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -1132,7 +1132,7 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
             int status = m_adapter->devicesetChannelSettingsGet(deviceSetIndex, channelIndex, normalResponse, errorResponse);
             response.setStatus(status);
 
-            if (status == 200) {
+            if (status/100 == 2) {
                 response.write(normalResponse.asJson().toUtf8());
             } else {
                 response.write(errorResponse.asJson().toUtf8());
@@ -1158,7 +1158,7 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
                             errorResponse);
                     response.setStatus(status);
 
-                    if (status == 200) {
+                    if (status/100 == 2) {
                         response.write(normalResponse.asJson().toUtf8());
                     } else {
                         response.write(errorResponse.asJson().toUtf8());

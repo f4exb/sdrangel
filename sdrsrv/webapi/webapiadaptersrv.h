@@ -37,7 +37,7 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDelete(
-            SWGSDRangel::SWGInstanceSummaryResponse& response,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDevices(

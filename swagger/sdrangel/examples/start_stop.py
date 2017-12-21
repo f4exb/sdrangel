@@ -36,7 +36,7 @@ def getInputOptions():
 def startDevice(deviceIndex):
     dev_run_url = base_url+("/deviceset/%d/device/run" % deviceIndex)
     r = requests.get(url=dev_run_url)
-    if r.status_code == 200:
+    if r.status_code / 100  == 2:
         rj = r.json()
         state = rj.get("state", None)
         if state is not None:
@@ -57,7 +57,7 @@ def startDevice(deviceIndex):
 def stopDevice(deviceIndex):
     dev_run_url = base_url+("/deviceset/%d/device/run" % deviceIndex)
     r = requests.get(url=dev_run_url)
-    if r.status_code == 200:
+    if r.status_code / 100  == 2:
         rj = r.json()
         state = rj.get("state", None)
         if state is not None:
@@ -81,7 +81,7 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         r = requests.get(url=base_url+"/devicesets")
-        if r.status_code == 200:
+        if r.status_code / 100  == 2:
             rj = r.json()
             deviceSets = rj.get("deviceSets", None)
             if deviceSets is not None:

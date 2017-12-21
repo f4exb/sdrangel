@@ -61,7 +61,7 @@ def main():
             method = requests_methods.get(command[1], None)
             if method is not None:
                 r = method(url=url, params=command[2], json=command[3])
-                if r.status_code == 200:
+                if r.status_code / 100 == 2:
                     print("Done: %s" % command[4])
                 else:
                     print("Error %d:%s" % (r.status_code, command[4]))

@@ -66,8 +66,8 @@ paths:
       tags:
         - Instance
       responses:
-        "200":
-          description: On success returns instance summary before it was closed
+        "202":
+          description: Message to stop the SDRangel instance was sent successfully
           schema:
             # a pointer to a definition
             $ref: "#/definitions/InstanceSummaryResponse"
@@ -320,8 +320,8 @@ paths:
           schema:
             $ref: "#/definitions/PresetTransfer"
       responses:
-        "200":
-          description: On success return preset identification
+        "202":
+          description: On successful sending of the message the selected preset identification is returned
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
@@ -353,8 +353,8 @@ paths:
           schema:
             $ref: "#/definitions/PresetTransfer"
       responses:
-        "200":
-          description: On success return preset identification
+        "202":
+          description: On successful sending of the message the selected preset identification is returned
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
@@ -386,8 +386,8 @@ paths:
           schema:
             $ref: "#/definitions/PresetTransfer"
       responses:
-        "200":
-          description: On success return preset identification
+        "202":
+          description: On successful sending of the message the created preset identification is returned
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
@@ -423,8 +423,8 @@ paths:
           schema:
             $ref: "#/definitions/PresetIdentifier"
       responses:
-        "200":
-          description: On success return deleted preset identification
+        "202":
+          description: On successful sending of the message the selected preset identification is returned
           schema:
             $ref: "#/definitions/PresetIdentifier"
         "400":
@@ -539,8 +539,8 @@ paths:
           required: false
           type: integer
       responses:
-        "200":
-          description: On success return informative messsage
+        "202":
+          description: Message to add a new device set was sent successfully
           schema:
             $ref: "#/definitions/SuccessResponse"
         "500":
@@ -555,8 +555,8 @@ paths:
       tags:
         - Instance
       responses:
-        "200":
-          description: On success return informative message
+        "202":
+          description: Message to remove last device set was sent successfully
           schema:
             $ref: "#/definitions/SuccessResponse"
         "404":
@@ -617,8 +617,8 @@ paths:
           schema:
             $ref: "#/definitions/DeviceListItem"
       responses:
-        "200":
-          description: On success return details on the selected device
+        "202":
+          description: On successful semdomg of the message it returns the details of the device being set
           schema:
             $ref: "#/definitions/DeviceListItem"
         "400":
@@ -839,8 +839,8 @@ paths:
           schema:
             $ref: "#/definitions/ChannelSettings"
       responses:
-        "200":
-          description: On success return informative message
+        "202":
+          description: Message to add a channel was sent successfully
           schema:
             $ref: "#/definitions/SuccessResponse"
         "400":

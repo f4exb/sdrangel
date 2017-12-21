@@ -87,15 +87,16 @@ int WebAPIAdapterSrv::instanceSummary(
 }
 
 int WebAPIAdapterSrv::instanceDelete(
-        SWGSDRangel::SWGInstanceSummaryResponse& response,
-        SWGSDRangel::SWGErrorResponse& error)
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    instanceSummary(response, error);
-
     MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
     m_mainCore.getInputMessageQueue()->push(msg);
 
-    return 200;
+    response.init();
+    *response.getMessage() = QString("MsgDeleteInstance message submitted");
+
+    return 202;
 }
 
 int WebAPIAdapterSrv::instanceDevices(
@@ -536,7 +537,7 @@ int WebAPIAdapterSrv::instancePresetPatch(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterSrv::instancePresetPut(
@@ -592,7 +593,7 @@ int WebAPIAdapterSrv::instancePresetPut(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterSrv::instancePresetPost(
@@ -648,7 +649,7 @@ int WebAPIAdapterSrv::instancePresetPost(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterSrv::instancePresetDelete(
@@ -676,7 +677,7 @@ int WebAPIAdapterSrv::instancePresetDelete(
     MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
     m_mainCore.m_inputMessageQueue.push(msg);
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterSrv::instanceDeviceSetsGet(
@@ -698,7 +699,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsPost(
     response.init();
     *response.getMessage() = QString("MsgAddDeviceSet message submitted");
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterSrv::instanceDeviceSetsDelete(
@@ -713,7 +714,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsDelete(
         response.init();
         *response.getMessage() = QString("MsgRemoveLastDeviceSet message submitted");
 
-        return 200;
+        return 202;
     }
     else
     {

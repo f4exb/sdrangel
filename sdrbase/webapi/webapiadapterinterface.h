@@ -71,7 +71,7 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDelete(
-            SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
     	error.init();

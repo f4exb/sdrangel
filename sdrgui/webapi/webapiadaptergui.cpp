@@ -421,7 +421,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterGUI::instancePresetPut(
@@ -477,7 +477,7 @@ int WebAPIAdapterGUI::instancePresetPut(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterGUI::instancePresetPost(
@@ -521,7 +521,7 @@ int WebAPIAdapterGUI::instancePresetPost(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterGUI::instancePresetDelete(
@@ -549,7 +549,7 @@ int WebAPIAdapterGUI::instancePresetDelete(
     MainWindow::MsgDeletePreset *msg = MainWindow::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
     m_mainWindow.m_inputMessageQueue.push(msg);
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterGUI::instanceDeviceSetsGet(
@@ -571,7 +571,7 @@ int WebAPIAdapterGUI::instanceDeviceSetsPost(
     response.init();
     *response.getMessage() = QString("MsgAddDeviceSet message submitted");
 
-    return 200;
+    return 202;
 }
 
 int WebAPIAdapterGUI::instanceDeviceSetsDelete(
@@ -586,7 +586,7 @@ int WebAPIAdapterGUI::instanceDeviceSetsDelete(
         response.init();
         *response.getMessage() = QString("MsgRemoveLastDeviceSet message submitted");
 
-        return 200;
+        return 202;
     }
     else
     {
@@ -680,7 +680,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
             response.setDeviceSetIndex(deviceSetIndex);
             response.setIndex(i);
 
-            return 200;
+            return 202;
         }
 
         *error.getMessage() = QString("Device not found");
@@ -933,7 +933,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 response.init();
                 *response.getMessage() = QString("MsgAddChannel message submitted");
 
-                return 200;
+                return 202;
             }
             else
             {
@@ -969,7 +969,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 response.init();
                 *response.getMessage() = QString("MsgAddChannel message submitted");
 
-                return 200;
+                return 202;
             }
             else
             {
