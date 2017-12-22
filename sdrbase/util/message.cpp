@@ -20,7 +20,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-const char* Message::m_identifier = "Message";
+const char* Message::m_identifier = 0;
 
 Message::Message() :
 	m_destination(0)
