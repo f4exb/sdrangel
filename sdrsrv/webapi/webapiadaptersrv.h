@@ -135,6 +135,17 @@ public:
             SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceSettingsGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceSettingsPutPatch(
+            int deviceSetIndex,
+            bool force,
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

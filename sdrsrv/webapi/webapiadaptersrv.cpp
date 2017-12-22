@@ -34,6 +34,7 @@
 #include "SWGPresetExport.h"
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
+#include "SWGDeviceSettings.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
@@ -813,6 +814,105 @@ int WebAPIAdapterSrv::devicesetDevicePut(
 
         *error.getMessage() = QString("Device not found");
         return 404;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
+            response.setTx(0);
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiSettingsGet(response, *error.getMessage());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
+            response.setTx(1);
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiSettingsGet(response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
+        int deviceSetIndex,
+        bool force,
+        SWGSDRangel::SWGDeviceSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            if (response.getTx() != 0)
+            {
+                *error.getMessage() = QString("Rx device found but Tx device requested");
+                return 400;
+            }
+            if (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
+            {
+                *error.getMessage() = QString("Device mismatch. Found %1 input").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
+                return 400;
+            }
+            else
+            {
+                DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+                return source->webapiSettingsPutPatch(force, response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            if (response.getTx() == 0)
+            {
+                *error.getMessage() = QString("Tx device found but Rx device requested");
+                return 400;
+            }
+            else if (deviceSet->m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
+            {
+                *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSinkAPI->getHardwareId());
+                return 400;
+            }
+            else
+            {
+                DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+                return sink->webapiSettingsPutPatch(force, response, *error.getMessage());
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
     }
     else
     {
