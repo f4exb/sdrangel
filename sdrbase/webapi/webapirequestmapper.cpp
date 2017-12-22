@@ -60,9 +60,13 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 {
     if (m_adapter == 0) // format service unavailable if adapter is null
     {
-        response.setHeader("Content-Type", "text/plain");
+        SWGSDRangel::SWGErrorResponse errorResponse;
+        response.setHeader("Content-Type", "application/json");
         response.setStatus(500,"Service not available");
-        response.write("Service not available");
+
+        errorResponse.init();
+        *errorResponse.getMessage() = "Service not available";
+        response.write(errorResponse.asJson().toUtf8());
     }
     else // normal processing
     {

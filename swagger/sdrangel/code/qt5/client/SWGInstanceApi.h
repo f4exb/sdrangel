@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations and specifcities:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * Preset import and export from/to file is a server only feature.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400     * There is no API adapter in the targeted instance: message \"Service not available\" as text/plain is returned with a status 500. This should not happen with released code.      --- 
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations and specifcities:       * In SDRangel GUI version there is no support for channel deletion. As a consequence the call to the API /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} returns with a status code of 501 (not implemented)   * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * Preset import and export from/to file is a server only feature.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400    --- 
  *
  * OpenAPI spec version: 4.0.0
  * Contact: f4exb06@gmail.com
@@ -53,9 +53,9 @@ public:
     void instanceChannels(qint32 tx);
     void instanceDVSerialPatch(qint32 dvserial);
     void instanceDelete();
-    void instanceDeviceSetsDelete();
+    void instanceDeviceSetDelete();
+    void instanceDeviceSetPost(qint32 tx);
     void instanceDeviceSetsGet();
-    void instanceDeviceSetsPost(qint32 tx);
     void instanceDevices(qint32 tx);
     void instanceLocationGet();
     void instanceLocationPut(SWGLocationInformation body);
@@ -76,9 +76,9 @@ private:
     void instanceChannelsCallback (HttpRequestWorker * worker);
     void instanceDVSerialPatchCallback (HttpRequestWorker * worker);
     void instanceDeleteCallback (HttpRequestWorker * worker);
-    void instanceDeviceSetsDeleteCallback (HttpRequestWorker * worker);
+    void instanceDeviceSetDeleteCallback (HttpRequestWorker * worker);
+    void instanceDeviceSetPostCallback (HttpRequestWorker * worker);
     void instanceDeviceSetsGetCallback (HttpRequestWorker * worker);
-    void instanceDeviceSetsPostCallback (HttpRequestWorker * worker);
     void instanceDevicesCallback (HttpRequestWorker * worker);
     void instanceLocationGetCallback (HttpRequestWorker * worker);
     void instanceLocationPutCallback (HttpRequestWorker * worker);
@@ -99,9 +99,9 @@ signals:
     void instanceChannelsSignal(SWGInstanceChannelsResponse* summary);
     void instanceDVSerialPatchSignal(SWGDVSeralDevices* summary);
     void instanceDeleteSignal(SWGInstanceSummaryResponse* summary);
-    void instanceDeviceSetsDeleteSignal(SWGSuccessResponse* summary);
+    void instanceDeviceSetDeleteSignal(SWGSuccessResponse* summary);
+    void instanceDeviceSetPostSignal(SWGSuccessResponse* summary);
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
-    void instanceDeviceSetsPostSignal(SWGSuccessResponse* summary);
     void instanceDevicesSignal(SWGInstanceDevicesResponse* summary);
     void instanceLocationGetSignal(SWGLocationInformation* summary);
     void instanceLocationPutSignal(SWGLocationInformation* summary);
@@ -121,9 +121,9 @@ signals:
     void instanceChannelsSignalE(SWGInstanceChannelsResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDVSerialPatchSignalE(SWGDVSeralDevices* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceDeviceSetsDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceDeviceSetsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalE(SWGInstanceDevicesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLocationGetSignalE(SWGLocationInformation* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLocationPutSignalE(SWGLocationInformation* summary, QNetworkReply::NetworkError error_type, QString& error_str);

@@ -13,8 +13,7 @@ info:
       * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source
       * The content type returned is always application/json except in the following cases:
         * An incorrect URL was specified: this document is returned as text/html with a status 400
-        * There is no API adapter in the targeted instance: message "Service not available" as text/plain is returned with a status 500. This should not happen with released code.
-      
+
       ---
 
   version: "4.0.0"
