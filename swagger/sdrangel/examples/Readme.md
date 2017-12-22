@@ -25,8 +25,8 @@ It uses the following APIs:
     - URI: `/sdrangel/preset`
     - HTTP method: `PATCH`
   - To create a new device set:
-    - OperationID: `instanceDeviceSetsPost`
-    - URI: `/sdrangel/devicesets`
+    - OperationID: `instanceDeviceSetPost`
+    - URI: `/sdrangel/deviceset`
     - HTTP method: `POST`
   - Activate the DV serial dongle support for digital voice modes
     - OperationID: `instanceDVSerialPatch`
@@ -44,8 +44,8 @@ Create a Tx device set with a LimeSDR Tx device and a NFM modulator channel conf
 It uses the following APIs:
 
   - To create a new device set:
-    - OperationID: `instanceDeviceSetsPost`
-    - URI: `/sdrangel/devicesets`
+    - OperationID: `instanceDeviceSetPost`
+    - URI: `/sdrangel/deviceset`
     - HTTP method: `POST`
   - To select a device in a device set:
     - Operation ID: `devicesetDevicePut`

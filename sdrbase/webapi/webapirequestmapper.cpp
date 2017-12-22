@@ -90,6 +90,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instancePresetFileService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDeviceSetsURL) {
             instanceDeviceSetsService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceDeviceSetURL) {
+            instanceDeviceSetService(request, response);
         }
         else
         {
@@ -715,7 +717,21 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else if (request.getMethod() == "POST")
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "POST")
     {
         SWGSDRangel::SWGSuccessResponse normalResponse;
         QByteArray txStr = request.getParameter("tx");
@@ -725,7 +741,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
             tx = !(txStr == "0");
         }
 
-        int status = m_adapter->instanceDeviceSetsPost(tx, normalResponse, errorResponse);
+        int status = m_adapter->instanceDeviceSetPost(tx, normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -737,7 +753,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     else if (request.getMethod() == "DELETE")
     {
         SWGSDRangel::SWGSuccessResponse normalResponse;
-        int status = m_adapter->instanceDeviceSetsDelete(normalResponse, errorResponse);
+        int status = m_adapter->instanceDeviceSetDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {

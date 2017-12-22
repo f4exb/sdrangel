@@ -1630,14 +1630,14 @@ margin-bottom: 20px;
                     <li data-group="Instance" data-name="instanceDelete" class="">
                       <a href="#api-Instance-instanceDelete">instanceDelete</a>
                     </li>
-                    <li data-group="Instance" data-name="instanceDeviceSetsDelete" class="">
-                      <a href="#api-Instance-instanceDeviceSetsDelete">instanceDeviceSetsDelete</a>
+                    <li data-group="Instance" data-name="instanceDeviceSetDelete" class="">
+                      <a href="#api-Instance-instanceDeviceSetDelete">instanceDeviceSetDelete</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceDeviceSetPost" class="">
+                      <a href="#api-Instance-instanceDeviceSetPost">instanceDeviceSetPost</a>
                     </li>
                     <li data-group="Instance" data-name="instanceDeviceSetsGet" class="">
                       <a href="#api-Instance-instanceDeviceSetsGet">instanceDeviceSetsGet</a>
-                    </li>
-                    <li data-group="Instance" data-name="instanceDeviceSetsPost" class="">
-                      <a href="#api-Instance-instanceDeviceSetsPost">instanceDeviceSetsPost</a>
                     </li>
                     <li data-group="Instance" data-name="instanceDevices" class="">
                       <a href="#api-Instance-instanceDevices">instanceDevices</a>
@@ -9683,10 +9683,10 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
-                    <div id="api-Instance-instanceDeviceSetsDelete">
-                      <article id="api-Instance-instanceDeviceSetsDelete-0" data-group="User" data-name="instanceDeviceSetsDelete" data-version="0">
+                    <div id="api-Instance-instanceDeviceSetDelete">
+                      <article id="api-Instance-instanceDeviceSetDelete-0" data-group="User" data-name="instanceDeviceSetDelete" data-version="0">
                         <div class="pull-left">
-                          <h1>instanceDeviceSetsDelete</h1>
+                          <h1>instanceDeviceSetDelete</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
@@ -9695,29 +9695,29 @@ except ApiException as e:
                         <p class="marked">Remove last device set. The GUI version does not remove the  first device.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/devicesets</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/deviceset</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Instance-instanceDeviceSetsDelete-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsDelete-0-python">Python</a></li>
+                          <li class="active"><a href="#examples-Instance-instanceDeviceSetDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetDelete-0-python">Python</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Instance-instanceDeviceSetsDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/devicesets"</code></pre>
+                          <div class="tab-pane active" id="examples-Instance-instanceDeviceSetDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/deviceset"</code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-java">
+                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
 import SWGSDRangel.auth.*;
 import SWGSDRangel.model.*;
@@ -9732,17 +9732,17 @@ public class InstanceApiExample {
         
         InstanceApi apiInstance = new InstanceApi();
         try {
-            SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
+            SuccessResponse result = apiInstance.instanceDeviceSetDelete();
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDeviceSetsDelete");
+            System.err.println("Exception when calling InstanceApi#instanceDeviceSetDelete");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-android">
+                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-android">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
 
 public class InstanceApiExample {
@@ -9750,24 +9750,24 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
         try {
-            SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
+            SuccessResponse result = apiInstance.instanceDeviceSetDelete();
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDeviceSetsDelete");
+            System.err.println("Exception when calling InstanceApi#instanceDeviceSetDelete");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-groovy">
+  <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-objc">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDeviceSetsDeleteWithCompletionHandler: 
+[apiInstance instanceDeviceSetDeleteWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -9779,7 +9779,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-javascript">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
 
 var api = new SdRangel.InstanceApi()
@@ -9791,14 +9791,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.instanceDeviceSetsDelete(callback);
+api.instanceDeviceSetDelete(callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-angular">
+                            <!--<div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-csharp">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using SWGSDRangel.Api;
@@ -9807,7 +9807,7 @@ using SWGSDRangel.Model;
 
 namespace Example
 {
-    public class instanceDeviceSetsDeleteExample
+    public class instanceDeviceSetDeleteExample
     {
         public void main()
         {
@@ -9816,12 +9816,12 @@ namespace Example
 
             try
             {
-                SuccessResponse result = apiInstance.instanceDeviceSetsDelete();
+                SuccessResponse result = apiInstance.instanceDeviceSetDelete();
                 Debug.WriteLine(result);
             }
             catch (Exception e)
             {
-                Debug.Print("Exception when calling InstanceApi.instanceDeviceSetsDelete: " + e.Message );
+                Debug.Print("Exception when calling InstanceApi.instanceDeviceSetDelete: " + e.Message );
             }
         }
     }
@@ -9829,22 +9829,22 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-php">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\InstanceApi();
 
 try {
-    $result = $api_instance->instanceDeviceSetsDelete();
+    $result = $api_instance->instanceDeviceSetDelete();
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling InstanceApi->instanceDeviceSetsDelete: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling InstanceApi->instanceDeviceSetDelete: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-perl">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use SWGSDRangel::Configuration;
 use SWGSDRangel::InstanceApi;
@@ -9852,15 +9852,15 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
 eval { 
-    my $result = $api_instance->instanceDeviceSetsDelete();
+    my $result = $api_instance->instanceDeviceSetDelete();
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling InstanceApi->instanceDeviceSetsDelete: $@\n";
+    warn "Exception when calling InstanceApi->instanceDeviceSetDelete: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsDelete-0-python">
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetDelete-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import swagger_sdrangel
@@ -9871,10 +9871,10 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 
 try: 
-    api_response = api_instance.instance_device_sets_delete()
+    api_response = api_instance.instance_device_set_delete()
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling InstanceApi->instanceDeviceSetsDelete: %s\n" % e)</code></pre>
+    print("Exception when calling InstanceApi->instanceDeviceSetDelete: %s\n" % e)</code></pre>
                             </div>
                           </div>
 
@@ -9890,14 +9890,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsDelete-202-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetDelete-202-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsDelete-202-schema">
-                                  <div id='responses-instanceDeviceSetsDelete-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceDeviceSetDelete-202-schema">
+                                  <div id='responses-instanceDeviceSetDelete-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -9918,14 +9918,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsDelete-202-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsDelete-202-schema-202');
+                                        $('#responses-instanceDeviceSetDelete-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetDelete-202-schema-202');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceDeviceSetsDelete-202-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceDeviceSetDelete-202-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -9933,14 +9933,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsDelete-404-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetDelete-404-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsDelete-404-schema">
-                                  <div id='responses-instanceDeviceSetsDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceDeviceSetDelete-404-schema">
+                                  <div id='responses-instanceDeviceSetDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -9961,14 +9961,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsDelete-404-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsDelete-404-schema-404');
+                                        $('#responses-instanceDeviceSetDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetDelete-404-schema-404');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceDeviceSetsDelete-404-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceDeviceSetDelete-404-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -9976,14 +9976,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsDelete-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetDelete-500-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsDelete-500-schema">
-                                  <div id='responses-instanceDeviceSetsDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceDeviceSetDelete-500-schema">
+                                  <div id='responses-instanceDeviceSetDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -10004,14 +10004,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsDelete-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsDelete-500-schema-500');
+                                        $('#responses-instanceDeviceSetDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetDelete-500-schema-500');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceDeviceSetsDelete-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceDeviceSetDelete-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -10019,14 +10019,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsDelete-501-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetDelete-501-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsDelete-501-schema">
-                                  <div id='responses-instanceDeviceSetsDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceDeviceSetDelete-501-schema">
+                                  <div id='responses-instanceDeviceSetDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -10047,14 +10047,387 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsDelete-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsDelete-501-schema-501');
+                                        $('#responses-instanceDeviceSetDelete-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetDelete-501-schema-501');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceDeviceSetsDelete-501-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceDeviceSetDelete-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceDeviceSetPost">
+                      <article id="api-Instance-instanceDeviceSetPost-0" data-group="User" data-name="instanceDeviceSetPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceDeviceSetPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Add (append) a new device set with default values</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceDeviceSetPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceDeviceSetPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceDeviceSetPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/deviceset?tx="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+        try {
+            SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceDeviceSetPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+        try {
+            SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceDeviceSetPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for a Tx device set (default Rx) (optional)
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceDeviceSetPostWith:tx
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var opts = { 
+  'tx': 56 // {Integer} Set to non zero (true) for a Tx device set (default Rx)
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceDeviceSetPost(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceDeviceSetPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var tx = 56;  // Integer | Set to non zero (true) for a Tx device set (default Rx) (optional) 
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceDeviceSetPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+
+try {
+    $result = $api_instance->instanceDeviceSetPost($tx);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceDeviceSetPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $tx = 56; # Integer | Set to non zero (true) for a Tx device set (default Rx)
+
+eval { 
+    my $result = $api_instance->instanceDeviceSetPost(tx => $tx);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceDeviceSetPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+tx = 56 # Integer | Set to non zero (true) for a Tx device set (default Rx) (optional)
+
+try: 
+    api_response = api_instance.instance_device_set_post(tx=tx)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceDeviceSetPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">tx</td>
+<td>
+
+
+    <div id="d2e199_instanceDeviceSetPost_tx">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Set to non zero (true) for a Tx device set (default Rx)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to add a new device set was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetPost-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDeviceSetPost-202-schema">
+                                  <div id='responses-instanceDeviceSetPost-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to add a new device set was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDeviceSetPost-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetPost-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDeviceSetPost-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDeviceSetPost-500-schema">
+                                  <div id='responses-instanceDeviceSetPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDeviceSetPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDeviceSetPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceDeviceSetPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceDeviceSetPost-501-schema">
+                                  <div id='responses-instanceDeviceSetPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceDeviceSetPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceDeviceSetPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceDeviceSetPost-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -10390,379 +10763,6 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-instanceDeviceSetsGet-501-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                        </article>
-                      </div>
-                      <hr>
-                    <div id="api-Instance-instanceDeviceSetsPost">
-                      <article id="api-Instance-instanceDeviceSetsPost-0" data-group="User" data-name="instanceDeviceSetsPost" data-version="0">
-                        <div class="pull-left">
-                          <h1>instanceDeviceSetsPost</h1>
-                          <p></p>
-                        </div>
-                        <div class="pull-right"></div>
-                        <div class="clearfix"></div>
-                        <p></p>
-                        <p class="marked">Add (append) a new device set with default values</p>
-                        <p></p>
-                        <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/devicesets</span></code></pre>
-                        <p>
-                          <h3>Usage and SDK Samples</h3>
-                        </p>
-                        <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Instance-instanceDeviceSetsPost-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDeviceSetsPost-0-python">Python</a></li>
-                        </ul>
-
-                        <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Instance-instanceDeviceSetsPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/devicesets?tx="</code></pre>
-                          </div>
-                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-java">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
-import SWGSDRangel.auth.*;
-import SWGSDRangel.model.*;
-import SWGSDRangel.api.InstanceApi;
-
-import java.io.File;
-import java.util.*;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        
-        InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
-        try {
-            SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDeviceSetsPost");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-
-                          <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-android">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
-        try {
-            SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDeviceSetsPost");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-  <!--
-  <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-groovy">
-  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-  </div> -->
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for a Tx device set (default Rx) (optional)
-
-InstanceApi *apiInstance = [[InstanceApi alloc] init];
-
-[apiInstance instanceDeviceSetsPostWith:tx
-              completionHandler: ^(SuccessResponse output, NSError* error) {
-                            if (output) {
-                                NSLog(@"%@", output);
-                            }
-                            if (error) {
-                                NSLog(@"Error: %@", error);
-                            }
-                        }];
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-javascript">
-                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
-
-var api = new SdRangel.InstanceApi()
-
-var opts = { 
-  'tx': 56 // {Integer} Set to non zero (true) for a Tx device set (default Rx)
-};
-
-var callback = function(error, data, response) {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully. Returned data: ' + data);
-  }
-};
-api.instanceDeviceSetsPost(opts, callback);
-</code></pre>
-                            </div>
-
-                            <!--<div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-angular">
-              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-            </div>-->
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-csharp">
-                              <pre class="prettyprint"><code class="language-cs">using System;
-using System.Diagnostics;
-using SWGSDRangel.Api;
-using SWGSDRangel.Client;
-using SWGSDRangel.Model;
-
-namespace Example
-{
-    public class instanceDeviceSetsPostExample
-    {
-        public void main()
-        {
-            
-            var apiInstance = new InstanceApi();
-            var tx = 56;  // Integer | Set to non zero (true) for a Tx device set (default Rx) (optional) 
-
-            try
-            {
-                SuccessResponse result = apiInstance.instanceDeviceSetsPost(tx);
-                Debug.WriteLine(result);
-            }
-            catch (Exception e)
-            {
-                Debug.Print("Exception when calling InstanceApi.instanceDeviceSetsPost: " + e.Message );
-            }
-        }
-    }
-}
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-php">
-                              <pre class="prettyprint"><code class="language-php"><&#63;php
-require_once(__DIR__ . '/vendor/autoload.php');
-
-$api_instance = new Swagger\Client\Api\InstanceApi();
-$tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
-
-try {
-    $result = $api_instance->instanceDeviceSetsPost($tx);
-    print_r($result);
-} catch (Exception $e) {
-    echo 'Exception when calling InstanceApi->instanceDeviceSetsPost: ', $e->getMessage(), PHP_EOL;
-}
-?></code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-perl">
-                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
-use SWGSDRangel::Configuration;
-use SWGSDRangel::InstanceApi;
-
-my $api_instance = SWGSDRangel::InstanceApi->new();
-my $tx = 56; # Integer | Set to non zero (true) for a Tx device set (default Rx)
-
-eval { 
-    my $result = $api_instance->instanceDeviceSetsPost(tx => $tx);
-    print Dumper($result);
-};
-if ($@) {
-    warn "Exception when calling InstanceApi->instanceDeviceSetsPost: $@\n";
-}</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDeviceSetsPost-0-python">
-                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
-import time
-import swagger_sdrangel
-from swagger_sdrangel.rest import ApiException
-from pprint import pprint
-
-# create an instance of the API class
-api_instance = swagger_sdrangel.InstanceApi()
-tx = 56 # Integer | Set to non zero (true) for a Tx device set (default Rx) (optional)
-
-try: 
-    api_response = api_instance.instance_device_sets_post(tx=tx)
-    pprint(api_response)
-except ApiException as e:
-    print("Exception when calling InstanceApi->instanceDeviceSetsPost: %s\n" % e)</code></pre>
-                            </div>
-                          </div>
-
-                          <h2>Parameters</h2>
-
-
-
-
-
-                            <div class="methodsubtabletitle">Query parameters</div>
-                            <table id="methodsubtable">
-                              <tr>
-                                <th width="150px">Name</th>
-                                <th>Description</th>
-                              </tr>
-                                <tr><td style="width:150px;">tx</td>
-<td>
-
-
-    <div id="d2e199_instanceDeviceSetsPost_tx">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Set to non zero (true) for a Tx device set (default Rx)
-                    </div>
-            </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
-
-                          <h2>Responses</h2>
-                            <h3> Status: 202 - Message to add a new device set was sent successfully </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsPost-202-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsPost-202-schema">
-                                  <div id='responses-instanceDeviceSetsPost-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Message to add a new device set was sent successfully",
-  "schema" : {
-    "$ref" : "#/definitions/SuccessResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsPost-202-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsPost-202-schema-202');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDeviceSetsPost-202-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 500 - Error </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsPost-500-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsPost-500-schema">
-                                  <div id='responses-instanceDeviceSetsPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Error",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsPost-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsPost-500-schema-500');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDeviceSetsPost-500-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 501 - Function not implemented </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDeviceSetsPost-501-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDeviceSetsPost-501-schema">
-                                  <div id='responses-instanceDeviceSetsPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Function not implemented",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDeviceSetsPost-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDeviceSetsPost-501-schema-501');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDeviceSetsPost-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -16202,7 +16202,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-21T22:33:40.914+01:00
+              Generated 2017-12-22T01:05:47.414+01:00
             </div>
           </div>
       </div>

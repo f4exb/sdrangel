@@ -688,7 +688,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsGet(
     return 200;
 }
 
-int WebAPIAdapterSrv::instanceDeviceSetsPost(
+int WebAPIAdapterSrv::instanceDeviceSetPost(
         bool tx,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
@@ -702,7 +702,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsPost(
     return 202;
 }
 
-int WebAPIAdapterSrv::instanceDeviceSetsDelete(
+int WebAPIAdapterSrv::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {

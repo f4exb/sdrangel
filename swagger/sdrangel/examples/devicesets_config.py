@@ -14,10 +14,10 @@ base_url = "http://127.0.0.1:8091/sdrangel"
 commands = [
     ["/deviceset/0/device", "PUT", None, {"hwType": "BladeRF"}, "setup BladeRF on Rx 0"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145640000, "type": "R", "name": "Repeaters extended"}}, "load preset on Rx 0"],
-    ["/devicesets", "POST", None, None, "add Rx 1 device set"],
+    ["/deviceset", "POST", None, None, "add Rx 1 device set"],
     ["/deviceset/1/device", "PUT", None, {"hwType": "SDRdaemonSource"}, "setup SDRdaemonSource on Rx 1"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 1, "preset": {"groupName": "OM430", "centerFrequency": 439550000, "type": "R", "name": "F5ZKP Daemon RPi3 SUSE"}}, "load preset on Rx 1"],
-    ["/devicesets", "POST", None, None, "add Rx 2 device set"],
+    ["/deviceset", "POST", None, None, "add Rx 2 device set"],
     ["/deviceset/2/device", "PUT", None, {"hwType": "SDRplay1"}, "setup SDRplay on Rx 2"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 2, "preset": {"groupName": "40m", "centerFrequency": 7130000, "type": "R", "name": "SSB low"}}, "load preset on Rx 2"],
     ["/dvserial", "PATCH", {"dvserial": 1}, None, "set DV serial processing for AMBE frames decoding"],

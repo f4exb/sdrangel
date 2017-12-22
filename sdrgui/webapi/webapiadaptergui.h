@@ -101,12 +101,12 @@ public:
             SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceDeviceSetsPost(
+    virtual int instanceDeviceSetPost(
             bool tx,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceDeviceSetsDelete(
+    virtual int instanceDeviceSetDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 

@@ -57,7 +57,7 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         
-        r = callAPI("/devicesets", "POST", {"tx": 1}, None, "Add Tx device set")
+        r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
         if r is None:
             exit(-1)
             

@@ -499,9 +499,12 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset:
+    x-swagger-router-controller: instance
     post:
       description: Add (append) a new device set with default values
-      operationId: instanceDeviceSetsPost
+      operationId: instanceDeviceSetPost
       tags:
         - Instance
       parameters:
@@ -521,7 +524,7 @@ paths:
           $ref: "#/responses/Response_501"
     delete:
       description: Remove last device set. The GUI version does not remove the  first device.
-      operationId: instanceDeviceSetsDelete
+      operationId: instanceDeviceSetDelete
       tags:
         - Instance
       responses:
