@@ -65,6 +65,7 @@ public:
     void removeLastDevice();
     void changeSampleSource(int deviceSetIndex, int selectedDeviceIndex);
     void changeSampleSink(int deviceSetIndex, int selectedDeviceIndex);
+    void addChannel(int deviceSetIndex, int selectedChannelIndex);
 
     friend class WebAPIAdapterSrv;
 
@@ -213,6 +214,32 @@ private:
             Message(),
             m_deviceSetIndex(deviceSetIndex),
             m_deviceIndex(deviceIndex),
+            m_tx(tx)
+        { }
+    };
+
+    class MsgAddChannel : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getChannelRegistrationIndex() const { return m_channelRegistrationIndex; }
+        bool isTx() const { return m_tx; }
+
+        static MsgAddChannel* create(int deviceSetIndex, int channelRegistrationIndex, bool tx)
+        {
+            return new MsgAddChannel(deviceSetIndex, channelRegistrationIndex, tx);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_channelRegistrationIndex;
+        bool m_tx;
+
+        MsgAddChannel(int deviceSetIndex, int channelRegistrationIndex, bool tx) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_channelRegistrationIndex(channelRegistrationIndex),
             m_tx(tx)
         { }
     };

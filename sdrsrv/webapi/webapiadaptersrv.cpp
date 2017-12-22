@@ -35,6 +35,7 @@
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
 #include "SWGDeviceSettings.h"
+#include "SWGChannelSettings.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
@@ -919,6 +920,97 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetChannelPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelSettings& query,
+			SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (query.getTx() == 0) // Rx
+        {
+            if (deviceSet->m_deviceSourceEngine == 0)
+            {
+                error.init();
+                *error.getMessage() = QString("Device set at %1 is not a receive device set").arg(deviceSetIndex);
+                return 400;
+            }
+
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainCore.m_pluginManager->getRxChannelRegistrations();
+            int nbRegistrations = channelRegistrations->size();
+            int index = 0;
+            for (; index < nbRegistrations; index++)
+            {
+                if (channelRegistrations->at(index).m_channelId == *query.getChannelType()) {
+                    break;
+                }
+            }
+
+            if (index < nbRegistrations)
+            {
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
+                m_mainCore.m_inputMessageQueue.push(msg);
+
+                response.init();
+                *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
+
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no receive channel with id %1").arg(*query.getChannelType());
+                return 404;
+            }
+        }
+        else // Tx
+        {
+            if (deviceSet->m_deviceSinkEngine == 0)
+            {
+                error.init();
+                *error.getMessage() = QString("Device set at %1 is not a transmit device set").arg(deviceSetIndex);
+                return 400;
+            }
+
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainCore.m_pluginManager->getTxChannelRegistrations();
+            int nbRegistrations = channelRegistrations->size();
+            int index = 0;
+            for (; index < nbRegistrations; index++)
+            {
+                if (channelRegistrations->at(index).m_channelId == *query.getChannelType()) {
+                    break;
+                }
+            }
+
+            if (index < nbRegistrations)
+            {
+            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainCore.m_inputMessageQueue.push(msg);
+
+                response.init();
+                *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
+
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no transmit channel with id %1").arg(*query.getChannelType());
+                return 404;
+            }
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
 }

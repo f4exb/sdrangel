@@ -57,9 +57,11 @@ public:
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
 
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSourceAPI *deviceAPI);
+    void createRxChannelServerInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI);
     void listRxChannels(QList<QString>& list);
 
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSinkAPI *deviceAPI);
+	void createTxChannelServerInstance(int channelPluginIndex, DeviceSinkAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
 
 	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }

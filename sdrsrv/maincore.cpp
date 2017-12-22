@@ -41,6 +41,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgDeletePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgAddChannel, Message)
 
 MainCore *MainCore::m_instance = 0;
 
@@ -154,6 +155,13 @@ bool MainCore::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgAddChannel::match(cmd))
+    {
+        MsgAddChannel& notif = (MsgAddChannel&) cmd;
+        addChannel(notif.getDeviceSetIndex(), notif.getChannelRegistrationIndex());
+        return true;
+    }
+
     else
     {
         return false;
@@ -457,6 +465,23 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceSinkAPI->setSampleSink(sink);
 
         deviceSet->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
+    }
+}
+
+void MainCore::addChannel(int deviceSetIndex, int selectedChannelIndex)
+{
+    if (deviceSetIndex >= 0)
+    {
+        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
+        {
+            m_pluginManager->createRxChannelServerInstance(selectedChannelIndex, deviceSet->m_deviceSourceAPI);
+        }
+        else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
+        {
+            m_pluginManager->createTxChannelServerInstance(selectedChannelIndex, deviceSet->m_deviceSinkAPI);
+        }
     }
 }
 

@@ -146,6 +146,12 @@ public:
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelSettings& query,
+			SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
