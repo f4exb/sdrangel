@@ -888,7 +888,6 @@ margin-bottom: 20px;
   "description" : "DV serial device details"
 };
             defs.DeviceListItem = {
-  "required" : [ "tx" ],
   "properties" : {
     "displayedName" : {
       "type" : "string",
@@ -4253,7 +4252,7 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -4273,7 +4272,7 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -4290,7 +4289,7 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetDevicePut-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
-DeviceListItem *body = ; // Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+DeviceListItem *body = ; // Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
@@ -4314,7 +4313,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var body = ; // {DeviceListItem} Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+var body = ; // {DeviceListItem} Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
 
 var callback = function(error, data, response) {
@@ -4347,7 +4346,7 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
             try
             {
@@ -4370,7 +4369,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
-$body = ; // DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+$body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
 try {
     $result = $api_instance->devicesetDevicePut($deviceSetIndex, $body);
@@ -4388,7 +4387,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
-my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
 eval { 
     my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex, body => $body);
@@ -4409,7 +4408,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
-body =  # DeviceListItem | Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
 
 try: 
     api_response = api_instance.deviceset_device_put(deviceSetIndex, body)
@@ -4468,7 +4467,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.",
+  "description" : "Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/DeviceListItem"
@@ -16201,7 +16200,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-22T13:37:01.264+01:00
+              Generated 2017-12-23T07:26:19.634+01:00
             </div>
           </div>
       </div>

@@ -823,20 +823,29 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
 
         if (request.getMethod() == "PUT")
         {
-            SWGSDRangel::SWGDeviceListItem normalResponse;
             QString jsonStr = request.getBody();
             QJsonObject jsonObject;
 
             if (parseJsonBody(jsonStr, jsonObject, response))
             {
-                normalResponse.fromJson(jsonStr);
+                SWGSDRangel::SWGDeviceListItem normalResponse;
 
-                int status = m_adapter->devicesetDevicePut(deviceSetIndex, normalResponse, errorResponse);
-                response.setStatus(status);
+                if (validateDeviceListItem(normalResponse, jsonObject))
+                {
+                    int status = m_adapter->devicesetDevicePut(deviceSetIndex, normalResponse, errorResponse);
+                    response.setStatus(status);
 
-                if (status/100 == 2) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Missing device identification");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Missing device identification";
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
@@ -1283,6 +1292,62 @@ bool WebAPIRequestMapper::validatePresetExport(SWGSDRangel::SWGPresetExport& pre
     }
 
     return validatePresetIdentifer(*presetIdentifier);
+}
+
+bool WebAPIRequestMapper::validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject)
+{
+    if (jsonObject.contains("tx")) {
+        deviceListItem.setTx(jsonObject["tx"].toInt());
+    } else {
+        deviceListItem.setTx(0); // assume Rx
+    }
+
+    bool identified = false;
+
+    if (jsonObject.contains("displayedName") && jsonObject["displayedName"].isString())
+    {
+        deviceListItem.setDisplayedName(new QString(jsonObject["displayedName"].toString()));
+        identified = true;
+    } else {
+        deviceListItem.setDisplayedName(0);
+    }
+
+
+    if (jsonObject.contains("hwType") && jsonObject["hwType"].isString())
+    {
+        deviceListItem.setHwType(new QString(jsonObject["hwType"].toString()));
+        identified = true;
+    } else {
+        deviceListItem.setHwType(0);
+    }
+
+    if (jsonObject.contains("serial") && jsonObject["serial"].isString())
+    {
+        deviceListItem.setSerial(new QString(jsonObject["serial"].toString()));
+        identified = true;
+    } else {
+        deviceListItem.setSerial(0);
+    }
+
+    if (jsonObject.contains("index")) {
+        deviceListItem.setIndex(jsonObject["index"].toInt(-1));
+    } else {
+        deviceListItem.setIndex(-1);
+    }
+
+    if (jsonObject.contains("sequence")){
+        deviceListItem.setSequence(jsonObject["sequence"].toInt(-1));
+    } else {
+        deviceListItem.setSequence(-1);
+    }
+
+    if (jsonObject.contains("streamIndex")) {
+        deviceListItem.setStreamIndex(jsonObject["streamIndex"].toInt(-1));
+    } else {
+        deviceListItem.setStreamIndex(-1);
+    }
+
+    return identified;
 }
 
 bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject)

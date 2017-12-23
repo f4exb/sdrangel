@@ -582,7 +582,7 @@ paths:
           description: Index of device set in the device set list
         - name: body
           in: body
-          description: Device item to look for. Give values for only the fields you want to search for among displayedName, hwType, serial, sequence and deviceSetIndex. For integers except tx set to -1 to ignore the field. It will match the first device found.
+          description: Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
           required: true
           schema:
             $ref: "#/definitions/DeviceListItem"
@@ -1035,8 +1035,6 @@ definitions:
         
   DeviceListItem:
     description: "Summarized information about attached hardware device"
-    required:
-      - tx
     properties:
       displayedName:
         description: "Displayable name that uniquely identifies this device instance"
