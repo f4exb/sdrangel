@@ -45,18 +45,12 @@ PluginInstanceGUI* SSBPlugin::createRxChannelGUI(const QString& channelName, Dev
 	}
 }
 
-BasebandSampleSink* SSBPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == SSBDemod::m_channelIdURI)
-    {
-        SSBDemod* sink = new SSBDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new SSBDemod(deviceAPI);
 }
 
-ChannelSinkAPI* SSBPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* SSBPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new SSBDemod(deviceAPI);
 }

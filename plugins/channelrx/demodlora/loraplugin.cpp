@@ -44,18 +44,12 @@ PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(const QString& channelName, De
 	}
 }
 
-BasebandSampleSink* LoRaPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == LoRaDemod::m_channelIdURI)
-    {
-        LoRaDemod* sink = new LoRaDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new LoRaDemod(deviceAPI);
 }
 
-ChannelSinkAPI* LoRaPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* LoRaPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new LoRaDemod(deviceAPI);
 }

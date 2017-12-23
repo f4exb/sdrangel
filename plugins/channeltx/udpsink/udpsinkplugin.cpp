@@ -63,7 +63,7 @@ PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(const QString& channelName,
 	}
 }
 
-BasebandSampleSource* UDPSinkPlugin::createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* UDPSinkPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
 {
     if(channelName == UDPSink::m_channelIdURI)
     {
@@ -74,7 +74,7 @@ BasebandSampleSource* UDPSinkPlugin::createTxChannel(const QString& channelName,
     }
 }
 
-ChannelSourceAPI* UDPSinkPlugin::createTxChannel(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* UDPSinkPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
 {
     return new UDPSink(deviceAPI);
 }

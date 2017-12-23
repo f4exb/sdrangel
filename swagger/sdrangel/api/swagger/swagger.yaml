@@ -505,7 +505,7 @@ paths:
       description: Add (append) a new device set with default values
       operationId: instanceDeviceSetPost
       tags:
-        - Instance
+        - DeviceSet
       parameters:
         - name: tx
           in: query
@@ -525,7 +525,7 @@ paths:
       description: Remove last device set. The GUI version does not remove the  first device.
       operationId: instanceDeviceSetDelete
       tags:
-        - Instance
+        - DeviceSet
       responses:
         "202":
           description: Message to remove last device set was sent successfully

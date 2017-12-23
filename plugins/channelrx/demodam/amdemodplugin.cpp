@@ -45,18 +45,12 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName,
 	}
 }
 
-BasebandSampleSink* AMDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == AMDemod::m_channelIdURI)
-    {
-        AMDemod* sink = new AMDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new AMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* AMDemodPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* AMDemodPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new AMDemod(deviceAPI);
 }

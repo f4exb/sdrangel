@@ -183,8 +183,7 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSink *rxChannel = pluginInterface->createRxChannel(
-                m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
+        BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
         pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, rxChannel);
     }
 }
@@ -194,7 +193,7 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_txChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSource *txChannel = pluginInterface->createTxChannel(
+        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(
                 m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
         pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, txChannel);
     }

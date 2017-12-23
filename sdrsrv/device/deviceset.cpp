@@ -102,7 +102,7 @@ void DeviceSet::freeTxChannels()
 void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations(); // Available channel plugins
-    ChannelSinkAPI *rxChannel =(*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannel(m_deviceSourceAPI);
+    ChannelSinkAPI *rxChannel =(*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannelCS(m_deviceSourceAPI);
     ChannelInstanceRegistration reg = ChannelInstanceRegistration(rxChannel->getName(), rxChannel);
     m_rxChannelInstanceRegistrations.append(reg);
     qDebug("DeviceSet::addRxChannel: %s", qPrintable(rxChannel->getName()));
@@ -111,7 +111,7 @@ void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 void DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations(); // Available channel plugins
-    ChannelSourceAPI *txChannel = (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannel(m_deviceSinkAPI);
+    ChannelSourceAPI *txChannel = (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannelCS(m_deviceSinkAPI);
     ChannelInstanceRegistration reg = ChannelInstanceRegistration(txChannel->getName(), txChannel);
     m_txChannelInstanceRegistrations.append(reg);
     qDebug("DeviceSet::addTxChannel: %s", qPrintable(txChannel->getName()));
@@ -161,7 +161,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
                         qDebug("DeviceSet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                        ChannelSinkAPI *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceSourceAPI);
+                        ChannelSinkAPI *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannelCS(m_deviceSourceAPI);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannel);
                         m_rxChannelInstanceRegistrations.append(reg);
                         break;
@@ -257,7 +257,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
                         qDebug("DeviceSet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                        ChannelSourceAPI *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceSinkAPI);
+                        ChannelSourceAPI *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannelCS(m_deviceSinkAPI);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, txChannel);
                         m_txChannelInstanceRegistrations.append(reg);
                         break;

@@ -45,18 +45,12 @@ PluginInstanceGUI* WFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 	}
 }
 
-BasebandSampleSink* WFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == WFMDemod::m_channelIdURI)
-    {
-        WFMDemod* sink = new WFMDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new WFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* WFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* WFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new WFMDemod(deviceAPI);
 }

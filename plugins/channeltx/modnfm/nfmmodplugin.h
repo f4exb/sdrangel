@@ -35,8 +35,8 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	virtual PluginInstanceGUI* createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *rxChannel);
-    virtual BasebandSampleSource* createTxChannel(const QString& channelName, DeviceSinkAPI *deviceAPI);
-    virtual ChannelSourceAPI* createTxChannel(DeviceSinkAPI *deviceAPI);
+    virtual BasebandSampleSource* createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI);
+    virtual ChannelSourceAPI* createTxChannelCS(DeviceSinkAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

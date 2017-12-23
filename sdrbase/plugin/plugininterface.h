@@ -84,12 +84,11 @@ public:
             BasebandSampleSink *rxChannel __attribute__((unused)))
     { return 0; }
 
-    virtual BasebandSampleSink* createRxChannel(
-            const QString& channelName __attribute__((unused)),
+    virtual BasebandSampleSink* createRxChannelBS(
             DeviceSourceAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
-    virtual ChannelSinkAPI* createRxChannel(
+    virtual ChannelSinkAPI* createRxChannelCS(
             DeviceSourceAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
@@ -101,12 +100,12 @@ public:
 	        BasebandSampleSource *txChannel __attribute__((unused)))
 	{ return 0; }
 
-    virtual BasebandSampleSource* createTxChannel(
+    virtual BasebandSampleSource* createTxChannelBS(
             const QString& channelName __attribute__((unused)),
             DeviceSinkAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
-    virtual ChannelSourceAPI* createTxChannel(
+    virtual ChannelSourceAPI* createTxChannelCS(
             DeviceSinkAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 

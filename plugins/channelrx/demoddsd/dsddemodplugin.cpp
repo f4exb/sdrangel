@@ -62,18 +62,12 @@ PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName
 	}
 }
 
-BasebandSampleSink* DSDDemodPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == DSDDemod::m_channelIdURI)
-    {
-        DSDDemod* sink = new DSDDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new DSDDemod(deviceAPI);
 }
 
-ChannelSinkAPI* DSDDemodPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* DSDDemodPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new DSDDemod(deviceAPI);
 }

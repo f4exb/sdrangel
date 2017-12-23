@@ -63,18 +63,12 @@ PluginInstanceGUI* BFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 }
 
 
-BasebandSampleSink* BFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == BFMDemod::m_channelIdURI)
-    {
-        BFMDemod* sink = new BFMDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new BFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* BFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* BFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new BFMDemod(deviceAPI);
 }

@@ -53,18 +53,12 @@ PluginInstanceGUI* NFMPlugin::createRxChannelGUI(const QString& channelName, Dev
 }
 #endif
 
-BasebandSampleSink* NFMPlugin::createRxChannel(const QString& channelName, DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* NFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == NFMDemod::m_channelIdURI)
-    {
-        NFMDemod* sink = new NFMDemod(deviceAPI);
-        return sink;
-    } else {
-        return 0;
-    }
+    return new NFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* NFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* NFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
     return new NFMDemod(deviceAPI);
 }
