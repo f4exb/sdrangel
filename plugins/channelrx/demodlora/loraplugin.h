@@ -18,7 +18,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	virtual PluginInstanceGUI* createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+	virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual BasebandSampleSink* createRxChannelBS(DeviceSourceAPI *deviceAPI);
 	virtual ChannelSinkAPI* createRxChannelCS(DeviceSourceAPI *deviceAPI);
 

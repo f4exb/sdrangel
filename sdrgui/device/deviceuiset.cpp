@@ -176,11 +176,11 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
                         qDebug("DeviceUISet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                        BasebandSampleSink *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceSourceAPI);
-                        PluginInstanceGUI *rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(
-                                channelConfig.m_channelIdURI, this, rxChannel);
-                        reg = ChannelInstanceRegistration(
-                                channelConfig.m_channelIdURI, rxChannelGUI);
+                        BasebandSampleSink *rxChannel
+                            = (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceSourceAPI);
+                        PluginInstanceGUI *rxChannelGUI
+                            = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
+                        reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannelGUI);
                         break;
                     }
                 }

@@ -51,15 +51,9 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(DSDDemod::m_channelIdURI, DSDDemod::m_channelId, this);
 }
 
-PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == DSDDemod::m_channelIdURI)
-	{
-		DSDDemodGUI* gui = DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+	return DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)

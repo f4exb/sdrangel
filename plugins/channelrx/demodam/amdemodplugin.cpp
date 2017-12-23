@@ -34,15 +34,9 @@ void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(AMDemod::m_channelIdURI, AMDemod::m_channelId, this);
 }
 
-PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == AMDemod::m_channelIdURI)
-	{
-		AMDemodGUI* gui = AMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+	return AMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)

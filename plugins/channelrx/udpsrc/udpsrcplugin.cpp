@@ -51,17 +51,9 @@ void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(UDPSrc::m_channelIdURI, UDPSrc::m_channelId, this);
 }
 
-PluginInstanceGUI* UDPSrcPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* UDPSrcPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == UDPSrc::m_channelIdURI)
-	{
-		UDPSrcGUI* gui = UDPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-//		deviceAPI->registerChannelInstance("sdrangel.channel.udpsrc", gui);
-//		m_pluginAPI->addChannelRollup(gui);
-		return gui;
-	} else {
-		return 0;
-	}
+	return UDPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 BasebandSampleSink* UDPSrcPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)

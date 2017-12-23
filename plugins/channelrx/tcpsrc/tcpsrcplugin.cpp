@@ -34,17 +34,9 @@ void TCPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(TCPSrc::m_channelIdURI, TCPSrc::m_channelId, this);
 }
 
-PluginInstanceGUI* TCPSrcPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* TCPSrcPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == TCPSrc::m_channelIdURI)
-	{
-		TCPSrcGUI* gui = TCPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-//		deviceAPI->registerChannelInstance("sdrangel.channel.tcpsrc", gui);
-//		m_pluginAPI->addChannelRollup(gui);
-		return gui;
-	} else {
-		return 0;
-	}
+	return TCPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 BasebandSampleSink* TCPSrcPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)

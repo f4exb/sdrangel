@@ -35,21 +35,15 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* NFMPlugin::createRxChannelGUI(
-        const QString& channelName __attribute__((unused)),
         DeviceUISet *deviceUISet __attribute__((unused)),
         BasebandSampleSink *rxChannel __attribute__((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* NFMPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == NFMDemod::m_channelIdURI) {
-		NFMDemodGUI* gui = NFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+	return NFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 

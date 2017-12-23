@@ -34,15 +34,9 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChannelAnalyzer::m_channelIdURI, ChannelAnalyzer::m_channelId, this);
 }
 
-PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == ChannelAnalyzer::m_channelIdURI)
-	{
-		ChannelAnalyzerGUI* gui = ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-		return gui;
-	} else {
-		return NULL;
-	}
+    return ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)

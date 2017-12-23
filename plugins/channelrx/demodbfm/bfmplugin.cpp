@@ -51,15 +51,9 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(BFMDemod::m_channelIdURI, BFMDemod::m_channelId, this);
 }
 
-PluginInstanceGUI* BFMPlugin::createRxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	if(channelName == BFMDemod::m_channelIdURI)
-	{
-		BFMDemodGUI* gui = BFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+	return BFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
 

@@ -184,7 +184,7 @@ void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet 
     {
         PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
         BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
-        pluginInterface->createRxChannelGUI(m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, rxChannel);
+        pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
     }
 }
 
