@@ -61,15 +61,9 @@ PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, 
 	}
 }
 
-BasebandSampleSource* SSBModPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == SSBMod::m_channelIdURI)
-    {
-        SSBMod* source = new SSBMod(deviceAPI);
-        return source;
-    } else {
-        return 0;
-    }
+    return new SSBMod(deviceAPI);
 }
 
 ChannelSourceAPI* SSBModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)

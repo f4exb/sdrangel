@@ -63,15 +63,9 @@ PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(const QString& channelName,
 	}
 }
 
-BasebandSampleSource* UDPSinkPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* UDPSinkPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == UDPSink::m_channelIdURI)
-    {
-        UDPSink* source = new UDPSink(deviceAPI);
-        return source;
-    } else {
-        return 0;
-    }
+    return new UDPSink(deviceAPI);
 }
 
 ChannelSourceAPI* UDPSinkPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)

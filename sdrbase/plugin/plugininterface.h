@@ -101,7 +101,6 @@ public:
 	{ return 0; }
 
     virtual BasebandSampleSource* createTxChannelBS(
-            const QString& channelName __attribute__((unused)),
             DeviceSinkAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 

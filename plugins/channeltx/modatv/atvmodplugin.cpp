@@ -61,15 +61,9 @@ PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(const QString& channelName, 
     }
 }
 
-BasebandSampleSource* ATVModPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == ATVMod::m_channelIdURI)
-    {
-        ATVMod* source = new ATVMod(deviceAPI);
-        return source;
-    } else {
-        return 0;
-    }
+    return new ATVMod(deviceAPI);
 }
 
 ChannelSourceAPI* ATVModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)

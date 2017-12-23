@@ -193,8 +193,7 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     if (channelPluginIndex < m_txChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(
-                m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
+        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
         pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, txChannel);
     }
 }

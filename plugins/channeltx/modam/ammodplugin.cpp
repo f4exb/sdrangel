@@ -61,15 +61,9 @@ PluginInstanceGUI* AMModPlugin::createTxChannelGUI(const QString& channelName, D
 	}
 }
 
-BasebandSampleSource* AMModPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == AMMod::m_channelIdURI)
-    {
-        AMMod* source = new AMMod(deviceAPI);
-        return source;
-    } else {
-        return 0;
-    }
+    return new AMMod(deviceAPI);
 }
 
 ChannelSourceAPI* AMModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)

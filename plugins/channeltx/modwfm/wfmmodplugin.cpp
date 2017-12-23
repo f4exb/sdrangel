@@ -61,15 +61,9 @@ PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(const QString& channelName, 
 	}
 }
 
-BasebandSampleSource* WFMModPlugin::createTxChannelBS(const QString& channelName, DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == WFMMod::m_channelIdURI)
-    {
-        WFMMod* source = new WFMMod(deviceAPI);
-        return source;
-    } else {
-        return 0;
-    }
+    return new WFMMod(deviceAPI);
 }
 
 ChannelSourceAPI* WFMModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
