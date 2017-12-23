@@ -72,12 +72,8 @@ BasebandSampleSource* AMModPlugin::createTxChannel(const QString& channelName, D
     }
 }
 
-void AMModPlugin::createTxChannel(ChannelSourceAPI **channelSourceAPI, const QString& channelName, DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* AMModPlugin::createTxChannel(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == AMMod::m_channelIdURI) {
-        *channelSourceAPI = new AMMod(deviceAPI);
-    } else {
-        *channelSourceAPI = 0;
-    }
+    return new AMMod(deviceAPI);
 }
 

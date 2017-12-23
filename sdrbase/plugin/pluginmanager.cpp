@@ -199,21 +199,3 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
         pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, txChannel);
     }
 }
-
-void PluginManager::createRxChannelServerInstance(int channelPluginIndex, DeviceSourceAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_rxChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createRxChannel(m_rxChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
-    }
-}
-
-void PluginManager::createTxChannelServerInstance(int channelPluginIndex, DeviceSinkAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_txChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        pluginInterface->createTxChannel(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceAPI);
-    }
-}

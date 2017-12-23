@@ -55,12 +55,8 @@ BasebandSampleSink* LoRaPlugin::createRxChannel(const QString& channelName, Devi
     }
 }
 
-void LoRaPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* LoRaPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == LoRaDemod::m_channelIdURI) {
-        *channelSinkAPI = new LoRaDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new LoRaDemod(deviceAPI);
 }
 

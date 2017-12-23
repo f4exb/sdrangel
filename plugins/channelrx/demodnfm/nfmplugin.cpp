@@ -64,12 +64,8 @@ BasebandSampleSink* NFMPlugin::createRxChannel(const QString& channelName, Devic
     }
 }
 
-void NFMPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* NFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == NFMDemod::m_channelIdURI) {
-        *channelSinkAPI = new NFMDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new NFMDemod(deviceAPI);
 }
 

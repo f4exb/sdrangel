@@ -74,12 +74,8 @@ BasebandSampleSink* BFMPlugin::createRxChannel(const QString& channelName, Devic
     }
 }
 
-void BFMPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* BFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == BFMDemod::m_channelIdURI) {
-        *channelSinkAPI = new BFMDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new BFMDemod(deviceAPI);
 }
 

@@ -78,12 +78,8 @@ BasebandSampleSink* ATVDemodPlugin::createRxChannel(const QString& channelName, 
     }
 }
 
-void ATVDemodPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* ATVDemodPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == ATVDemod::m_channelIdURI) {
-        *channelSinkAPI = new ATVDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new ATVDemod(deviceAPI);
 }
 

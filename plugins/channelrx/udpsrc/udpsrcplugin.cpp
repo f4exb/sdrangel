@@ -75,12 +75,8 @@ BasebandSampleSink* UDPSrcPlugin::createRxChannel(const QString& channelName, De
     }
 }
 
-void UDPSrcPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* UDPSrcPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == UDPSrc::m_channelIdURI) {
-        *channelSinkAPI = new UDPSrc(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new UDPSrc(deviceAPI);
 }
 

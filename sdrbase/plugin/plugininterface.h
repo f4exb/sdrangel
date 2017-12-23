@@ -89,11 +89,9 @@ public:
             DeviceSourceAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
-    virtual void createRxChannel(
-            ChannelSinkAPI **channelSinkAPI,
-            const QString& channelName __attribute__((unused)),
+    virtual ChannelSinkAPI* createRxChannel(
             DeviceSourceAPI *deviceAPI __attribute__((unused)) )
-    { *channelSinkAPI = 0; }
+    { return 0; }
 
     // channel Tx plugins
 
@@ -108,11 +106,9 @@ public:
             DeviceSinkAPI *deviceAPI __attribute__((unused)) )
     { return 0; }
 
-    virtual void createTxChannel(
-            ChannelSourceAPI **channelSourceAPI,
-            const QString& channelName __attribute__((unused)),
-            DeviceSourceAPI *deviceAPI __attribute__((unused)) )
-    { *channelSourceAPI = 0; }
+    virtual ChannelSourceAPI* createTxChannel(
+            DeviceSinkAPI *deviceAPI __attribute__((unused)) )
+    { return 0; }
 
     // device source plugins only
 

@@ -38,6 +38,8 @@ struct DeviceSet
     DeviceSet(int tabIndex);
     ~DeviceSet();
 
+    void addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     void registerRxChannelInstance(const QString& channelName, ChannelSinkAPI* channelAPI);
     void registerTxChannelInstance(const QString& channelName, ChannelSourceAPI* channelAPI);
     void removeRxChannelInstance(ChannelSinkAPI* channelAPI);

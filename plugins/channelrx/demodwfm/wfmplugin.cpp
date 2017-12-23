@@ -56,12 +56,8 @@ BasebandSampleSink* WFMPlugin::createRxChannel(const QString& channelName, Devic
     }
 }
 
-void WFMPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* WFMPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == WFMDemod::m_channelIdURI) {
-        *channelSinkAPI = new WFMDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new WFMDemod(deviceAPI);
 }
 

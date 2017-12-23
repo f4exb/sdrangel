@@ -81,13 +81,9 @@ BasebandSampleSource* NFMModPlugin::createTxChannel(const QString& channelName, 
     }
 }
 
-void NFMModPlugin::createTxChannel(ChannelSourceAPI **channelSourceAPI, const QString& channelName, DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* NFMModPlugin::createTxChannel(DeviceSinkAPI *deviceAPI)
 {
-    if(channelName == NFMMod::m_channelIdURI) {
-        *channelSourceAPI = new NFMMod(deviceAPI);
-    } else {
-        *channelSourceAPI = 0;
-    }
+    return new NFMMod(deviceAPI);
 }
 
 

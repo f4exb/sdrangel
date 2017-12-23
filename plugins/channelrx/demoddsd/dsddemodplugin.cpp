@@ -73,12 +73,8 @@ BasebandSampleSink* DSDDemodPlugin::createRxChannel(const QString& channelName, 
     }
 }
 
-void DSDDemodPlugin::createRxChannel(ChannelSinkAPI **channelSinkAPI, const QString& channelName, DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* DSDDemodPlugin::createRxChannel(DeviceSourceAPI *deviceAPI)
 {
-    if(channelName == DSDDemod::m_channelIdURI) {
-        *channelSinkAPI = new DSDDemod(deviceAPI);
-    } else {
-        *channelSinkAPI = 0;
-    }
+    return new DSDDemod(deviceAPI);
 }
 

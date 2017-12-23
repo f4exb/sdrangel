@@ -476,11 +476,11 @@ void MainCore::addChannel(int deviceSetIndex, int selectedChannelIndex)
 
         if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
         {
-            m_pluginManager->createRxChannelServerInstance(selectedChannelIndex, deviceSet->m_deviceSourceAPI);
+            deviceSet->addRxChannel(selectedChannelIndex, m_pluginManager->getPluginAPI());
         }
         else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
         {
-            m_pluginManager->createTxChannelServerInstance(selectedChannelIndex, deviceSet->m_deviceSinkAPI);
+            deviceSet->addTxChannel(selectedChannelIndex, m_pluginManager->getPluginAPI());
         }
     }
 }
