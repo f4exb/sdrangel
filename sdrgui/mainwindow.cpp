@@ -69,6 +69,7 @@ MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteChannel, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -456,6 +457,23 @@ void MainWindow::removeLastDevice()
     m_deviceUIs.pop_back();
 }
 
+void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
+        {
+            deviceSet->deleteRxChannel(channelIndex);
+        }
+        else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
+        {
+            deviceSet->deleteTxChannel(channelIndex);
+        }
+    }
+}
+
 void MainWindow::addChannelRollup(int deviceTabIndex, QWidget* widget)
 {
     if (deviceTabIndex < ui->tabInputsView->count())
@@ -753,6 +771,12 @@ bool MainWindow::handleMessage(const Message& cmd)
         deviceUI->m_samplingDeviceControl->getChannelSelector()->setCurrentIndex(notif.getChannelRegistrationIndex());
         on_channel_addClicked(true);
 
+        return true;
+    }
+    else if (MsgDeleteChannel::match(cmd))
+    {
+        MsgDeleteChannel& notif = (MsgDeleteChannel&) cmd;
+        deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
 

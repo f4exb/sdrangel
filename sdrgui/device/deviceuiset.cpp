@@ -132,6 +132,32 @@ void DeviceUISet::freeTxChannels()
     }
 }
 
+void DeviceUISet::deleteRxChannel(int channelIndex)
+{
+    if ((channelIndex >= 0) && (channelIndex < m_rxChannelInstanceRegistrations.count()))
+    {
+        qDebug("DeviceUISet::deleteRxChennel: delete channel [%s] at %d",
+                qPrintable(m_rxChannelInstanceRegistrations[channelIndex].m_channelName),
+                channelIndex);
+        m_rxChannelInstanceRegistrations[channelIndex].m_gui->destroy();
+        m_rxChannelInstanceRegistrations.removeAt(channelIndex);
+        renameRxChannelInstances();
+    }
+}
+
+void DeviceUISet::deleteTxChannel(int channelIndex)
+{
+    if ((channelIndex >= 0) && (channelIndex < m_txChannelInstanceRegistrations.count()))
+    {
+        qDebug("DeviceUISet::deleteTxChennel: delete channel [%s] at %d",
+                qPrintable(m_txChannelInstanceRegistrations[channelIndex].m_channelName),
+                channelIndex);
+        m_txChannelInstanceRegistrations[channelIndex].m_gui->destroy();
+        m_txChannelInstanceRegistrations.removeAt(channelIndex);
+        renameTxChannelInstances();
+    }
+}
+
 void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
 {
     if (preset->isSourcePreset())

@@ -152,6 +152,12 @@ public:
 			SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelDelete(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetChannelSettingsGet(
             int deviceSetIndex,
             int channelIndex,

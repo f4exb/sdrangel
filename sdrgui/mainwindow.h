@@ -240,6 +240,32 @@ private:
         { }
     };
 
+    class MsgDeleteChannel : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getChannelIndex() const { return m_channelIndex; }
+        bool isTx() const { return m_tx; }
+
+        static MsgDeleteChannel* create(int deviceSetIndex, int channelIndex, bool tx)
+        {
+            return new MsgDeleteChannel(deviceSetIndex, channelIndex, tx);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_channelIndex;
+        bool m_tx;
+
+        MsgDeleteChannel(int deviceSetIndex, int channelIndex, bool tx) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_channelIndex(channelIndex),
+            m_tx(tx)
+        { }
+    };
+
     enum {
 		PGroup,
 		PItem
@@ -296,6 +322,7 @@ private:
 	void addSourceDevice();
 	void addSinkDevice();
     void removeLastDevice();
+    void deleteChannel(int deviceSetIndex, int channelIndex);
 
     void setLoggingOptions();
 

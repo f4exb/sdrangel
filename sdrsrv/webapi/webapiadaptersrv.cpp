@@ -1027,7 +1027,8 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
-            if (channelIndex < deviceSet->getNumberOfRxChannels()) {
+            if (channelIndex < deviceSet->getNumberOfRxChannels())
+            {
                 MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, false);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
@@ -1047,7 +1048,8 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
-            if (channelIndex < deviceSet->getNumberOfTxChannels()) {
+            if (channelIndex < deviceSet->getNumberOfTxChannels())
+            {
                 MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, true);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
