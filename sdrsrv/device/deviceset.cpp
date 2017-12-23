@@ -99,6 +99,26 @@ void DeviceSet::freeTxChannels()
     }
 }
 
+void DeviceSet::deleteRxChannel(int channelIndex)
+{
+    if (channelIndex < m_rxChannelInstanceRegistrations.count())
+    {
+        m_rxChannelInstanceRegistrations[channelIndex].m_channelSinkAPI->destroy();
+        m_rxChannelInstanceRegistrations.removeAt(channelIndex);
+        renameRxChannelInstances();
+    }
+}
+
+void DeviceSet::deleteTxChannel(int channelIndex)
+{
+    if (channelIndex < m_txChannelInstanceRegistrations.count())
+    {
+        m_txChannelInstanceRegistrations[channelIndex].m_channelSourceAPI->destroy();
+        m_txChannelInstanceRegistrations.removeAt(channelIndex);
+        renameTxChannelInstances();
+    }
+}
+
 void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations(); // Available channel plugins

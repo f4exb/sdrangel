@@ -621,7 +621,7 @@ int WebAPIAdapterSrv::instancePresetPost(
     } else if (deviceSet->m_deviceSinkEngine) { // Tx
         deviceCenterFrequency = deviceSet->m_deviceSinkEngine->getSink()->getCenterFrequency();
     } else {
-        *error.getMessage() = QString("Unknown device in device set (not Rx nor Tx)");
+        *error.getMessage() = QString("Device set error");
         return 500;
     }
 
@@ -850,6 +850,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -858,7 +859,6 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
     {
         error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }
@@ -911,6 +911,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -919,7 +920,6 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
     {
         error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }
@@ -1005,6 +1005,71 @@ int WebAPIAdapterSrv::devicesetChannelPost(
                 *error.getMessage() = QString("There is no transmit channel with id %1").arg(*query.getChannelType());
                 return 404;
             }
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetChannelDelete(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            if (channelIndex < deviceSet->getNumberOfRxChannels()) {
+                MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, false);
+                m_mainCore.m_inputMessageQueue.push(msg);
+
+                response.init();
+                *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
+
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no channel at index %1. There are %2 Rx channels")
+                        .arg(channelIndex)
+                        .arg(channelIndex < deviceSet->getNumberOfRxChannels());
+                return 400;
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            if (channelIndex < deviceSet->getNumberOfTxChannels()) {
+                MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, true);
+                m_mainCore.m_inputMessageQueue.push(msg);
+
+                response.init();
+                *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
+
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("There is no channel at index %1. There are %2 Tx channels")
+                        .arg(channelIndex)
+                        .arg(channelIndex < deviceSet->getNumberOfRxChannels());
+                return 400;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
         }
     }
     else

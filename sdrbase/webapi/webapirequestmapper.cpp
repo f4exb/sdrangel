@@ -1111,9 +1111,8 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
 
         if (request.getMethod() == "DELETE")
         {
-            SWGSDRangel::SWGChannelSettings normalResponse;
-            resetChannelSettings(normalResponse);
-            int status = m_adapter->devicesetChannelIndexDelete(deviceSetIndex, channelIndex, normalResponse, errorResponse);
+            SWGSDRangel::SWGSuccessResponse normalResponse;
+            int status = m_adapter->devicesetChannelDelete(deviceSetIndex, channelIndex, normalResponse, errorResponse);
 
             response.setStatus(status);
 

@@ -435,7 +435,7 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelPost(
@@ -450,18 +450,18 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex} (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
-    virtual int devicesetChannelIndexDelete(
+    virtual int devicesetChannelDelete(
             int deviceSetIndex __attribute__((unused)),
             int channelIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
-            SWGSDRangel::SWGErrorResponse& error)
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     {
-    	error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
     }
 
     /**
