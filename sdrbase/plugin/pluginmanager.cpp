@@ -194,6 +194,6 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
     {
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
         BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
-        pluginInterface->createTxChannelGUI(m_txChannelRegistrations[channelPluginIndex].m_channelIdURI, deviceUISet, txChannel);
+        pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
     }
 }

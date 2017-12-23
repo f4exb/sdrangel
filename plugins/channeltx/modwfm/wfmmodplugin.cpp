@@ -50,15 +50,9 @@ void WFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(WFMMod::m_channelIdURI, WFMMod::m_channelId, this);
 }
 
-PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-	if(channelName == WFMMod::m_channelIdURI)
-	{
-	    WFMModGUI* gui = WFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+    return WFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 
 BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)

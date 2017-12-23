@@ -50,15 +50,9 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(SSBMod::m_channelIdURI, SSBMod::m_channelId, this);
 }
 
-PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-    if(channelName == SSBMod::m_channelIdURI)
-	{
-	    SSBModGUI* gui = SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+    return SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 
 BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)

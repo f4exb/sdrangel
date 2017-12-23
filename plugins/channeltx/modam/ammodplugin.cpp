@@ -50,15 +50,9 @@ void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(AMMod::m_channelIdURI, AMMod::m_channelId, this);
 }
 
-PluginInstanceGUI* AMModPlugin::createTxChannelGUI(const QString& channelName, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-	if(channelName == AMMod::m_channelIdURI)
-	{
-		AMModGUI* gui = AMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
-		return gui;
-	} else {
-		return 0;
-	}
+	return AMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 
 BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
