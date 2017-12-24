@@ -21,6 +21,8 @@
 #include <QByteArray>
 
 struct FileSourceSettings {
+    quint64 m_centerFrequency;
+    qint32  m_sampleRate;
     QString m_fileName;
 
     FileSourceSettings();

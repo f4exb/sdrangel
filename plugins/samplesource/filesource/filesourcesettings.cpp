@@ -25,6 +25,8 @@ FileSourceSettings::FileSourceSettings()
 
 void FileSourceSettings::resetToDefaults()
 {
+    m_centerFrequency = 435000000;
+    m_sampleRate = 48000;
     m_fileName = "./test.sdriq";
 }
 
