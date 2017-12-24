@@ -53,26 +53,6 @@ public:
 		{ }
 	};
 
-    class MsgReportRTLSDR : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const std::vector<int>& getGains() const { return m_gains; }
-
-        static MsgReportRTLSDR* create(const std::vector<int>& gains)
-        {
-            return new MsgReportRTLSDR(gains);
-        }
-
-    protected:
-        std::vector<int> m_gains;
-
-        MsgReportRTLSDR(const std::vector<int>& gains) :
-            Message(),
-            m_gains(gains)
-        { }
-    };
-
     class MsgFileRecord : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -118,12 +98,12 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
 
 	virtual bool handleMessage(const Message& message);
-	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,

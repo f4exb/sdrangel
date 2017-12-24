@@ -32,7 +32,6 @@
 #include "dsp/filerecord.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
-MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgReportRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
@@ -479,17 +478,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     }
 
     return true;
-}
-
-void RTLSDRInput::setMessageQueueToGUI(MessageQueue *queue)
-{
-    qDebug("RTLSDRInput::setMessageQueueToGUI: %p", queue);
-    DeviceSampleSource::setMessageQueueToGUI(queue);
-
-    if (queue) {
-        MsgReportRTLSDR *message = MsgReportRTLSDR::create(m_gains);
-        queue->push(message);
-    }
 }
 
 void RTLSDRInput::set_ds_mode(int on)

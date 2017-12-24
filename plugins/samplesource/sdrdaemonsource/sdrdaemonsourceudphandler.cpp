@@ -26,7 +26,7 @@
 #include "sdrdaemonsourceinput.h"
 #include "sdrdaemonsourceudphandler.h"
 
-SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *devieAPI) :
+SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo, DeviceSourceAPI *devieAPI) :
     m_deviceAPI(devieAPI),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
@@ -41,7 +41,7 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
 	m_centerFrequency(0),
 	m_tv_sec(0),
 	m_tv_usec(0),
-	m_outputMessageQueueToGUI(outputMessageQueueToGUI),
+	m_outputMessageQueueToGUI(0),
 	m_tickCount(0),
 	m_samplesCount(0),
 	m_timer(0),
@@ -244,22 +244,25 @@ void SDRdaemonSourceUDPHandler::tick()
 			framesDecodingStatus = 2;
 		}
 
-		SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::create(
-			m_tv_sec,
-			m_tv_usec,
-			m_sdrDaemonBuffer.getBufferLengthInSecs(),
-            m_sdrDaemonBuffer.getBufferGauge(),
-            framesDecodingStatus,
-            minNbBlocks == nbOriginalBlocks + nbFECblocks,
-            minNbBlocks,
-            minNbOriginalBlocks,
-            m_sdrDaemonBuffer.getMaxNbRecovery(),
-            m_sdrDaemonBuffer.getAvgNbBlocks(),
-            m_sdrDaemonBuffer.getAvgOriginalBlocks(),
-            m_sdrDaemonBuffer.getAvgNbRecovery(),
-            nbOriginalBlocks,
-            nbFECblocks);
+		if (m_outputMessageQueueToGUI)
+		{
+	        SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::create(
+	            m_tv_sec,
+	            m_tv_usec,
+	            m_sdrDaemonBuffer.getBufferLengthInSecs(),
+	            m_sdrDaemonBuffer.getBufferGauge(),
+	            framesDecodingStatus,
+	            minNbBlocks == nbOriginalBlocks + nbFECblocks,
+	            minNbBlocks,
+	            minNbOriginalBlocks,
+	            m_sdrDaemonBuffer.getMaxNbRecovery(),
+	            m_sdrDaemonBuffer.getAvgNbBlocks(),
+	            m_sdrDaemonBuffer.getAvgOriginalBlocks(),
+	            m_sdrDaemonBuffer.getAvgNbRecovery(),
+	            nbOriginalBlocks,
+	            nbFECblocks);
 
-            m_outputMessageQueueToGUI->push(report);
+	            m_outputMessageQueueToGUI->push(report);
+		}
 	}
 }

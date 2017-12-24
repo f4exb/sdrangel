@@ -329,6 +329,7 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual void setMessageQueueToGUI(MessageQueue *queue);
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
@@ -336,8 +337,6 @@ public:
 	void getRemoteAddress(QString &s);
 
 	virtual bool handleMessage(const Message& message);
-
-	virtual void setMessageQueueToGUI(MessageQueue *queue);
 
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,

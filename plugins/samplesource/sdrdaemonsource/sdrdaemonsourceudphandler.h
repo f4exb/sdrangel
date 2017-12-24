@@ -36,7 +36,7 @@ class SDRdaemonSourceUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonSourceUDPHandler(SampleSinkFifo* sampleFifo, MessageQueue *outputMessageQueueToGUI, DeviceSourceAPI *deviceAPI);
+	SDRdaemonSourceUDPHandler(SampleSinkFifo* sampleFifo, DeviceSourceAPI *deviceAPI);
 	~SDRdaemonSourceUDPHandler();
 	void setMessageQueueToGUI(MessageQueue *queue) { m_outputMessageQueueToGUI = queue; }
 	void connectTimer(const QTimer* timer);

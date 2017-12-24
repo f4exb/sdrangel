@@ -55,6 +55,9 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
 
+	m_gains = m_sampleSource->getGains();
+	displayGains();
+
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -133,13 +136,7 @@ bool RTLSDRGui::deserialize(const QByteArray& data)
 
 bool RTLSDRGui::handleMessage(const Message& message)
 {
-	if (RTLSDRInput::MsgReportRTLSDR::match(message))
-	{
-		m_gains = ((RTLSDRInput::MsgReportRTLSDR&) message).getGains();
-		displayGains();
-		return true;
-	}
-	else if (RTLSDRInput::MsgConfigureRTLSDR::match(message))
+	if (RTLSDRInput::MsgConfigureRTLSDR::match(message))
 	{
 	    const RTLSDRInput::MsgConfigureRTLSDR& cfg = (RTLSDRInput::MsgConfigureRTLSDR&) message;
 	    m_settings = cfg.getSettings();

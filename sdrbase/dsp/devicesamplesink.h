@@ -69,7 +69,7 @@ public:
     { errorMessage = "Not implemented"; return 501; }
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 	SampleSourceFifo* getSampleFifo() { return &m_sampleSourceFifo; }
 

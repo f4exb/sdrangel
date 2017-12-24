@@ -54,7 +54,8 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
     m_autoCorrBuffer(false)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, &m_inputMessageQueue, m_deviceAPI);
+	//m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, &m_inputMessageQueue, m_deviceAPI);
+	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, m_deviceAPI);
 	m_SDRdaemonUDPHandler->connectTimer(&m_masterTimer);
 
     char recFileNameCStr[30];
@@ -89,6 +90,12 @@ void SDRdaemonSourceInput::stop()
 	qDebug() << "SDRdaemonInput::stop";
 	MsgConfigureSDRdaemonWork *command = MsgConfigureSDRdaemonWork::create(false);
 	getInputMessageQueue()->push(command);
+}
+
+void SDRdaemonSourceInput::setMessageQueueToGUI(MessageQueue *queue)
+{
+    m_guiMessageQueue = queue;
+    m_SDRdaemonUDPHandler->setMessageQueueToGUI(queue);
 }
 
 const QString& SDRdaemonSourceInput::getDeviceDescription() const
@@ -222,13 +229,6 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
-}
-
-void SDRdaemonSourceInput::setMessageQueueToGUI(MessageQueue *queue)
-{
-    qDebug("SDRdaemonSourceInput::setMessageQueueToGUI: %p", queue);
-    DeviceSampleSource::setMessageQueueToGUI(queue);
-    m_SDRdaemonUDPHandler->setMessageQueueToGUI(queue);
 }
 
 int SDRdaemonSourceInput::webapiRunGet(
