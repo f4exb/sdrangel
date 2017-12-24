@@ -1468,6 +1468,13 @@ bool WebAPIRequestMapper::validateChannelSettings(
         {
             QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
             channelSettingsKeys = nfmModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(nfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
             channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
             channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
             return true;
@@ -1479,6 +1486,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
     else
     {
         return false;
+    }
+}
+
+void WebAPIRequestMapper::appendSettingsSubKeys(
+        const QJsonObject& parentSettingsJsonObject,
+        QJsonObject& childSettingsJsonObject,
+        const QString& parentKey,
+        QStringList& keyList)
+{
+    childSettingsJsonObject = parentSettingsJsonObject[parentKey].toObject();
+    QStringList childSettingsKeys = childSettingsJsonObject.keys();
+
+    for (int i = 0; i < childSettingsKeys.size(); i++) {
+        keyList.append(parentKey + QString(".") + childSettingsKeys.at(i));
     }
 }
 

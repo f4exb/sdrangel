@@ -537,42 +537,99 @@ int NFMMod::webapiSettingsPutPatch(
                 QString& errorMessage __attribute__((unused)))
 {
     NFMModSettings settings;
-    settings.m_afBandwidth = response.getNfmModSettings()->getAfBandwidth();
-    settings.m_audioSampleRate = response.getNfmModSettings()->getAudioSampleRate();
-    settings.m_basebandSampleRate = response.getNfmModSettings()->getBasebandSampleRate();
-    settings.m_channelMute = response.getNfmModSettings()->getChannelMute() != 0;
-    settings.m_ctcssIndex = response.getNfmModSettings()->getCtcssIndex();
-    settings.m_ctcssOn = response.getNfmModSettings()->getCtcssOn() != 0;
-    settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
-    settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
-    settings.m_modAFInput = (NFMModSettings::NFMModInputAF) response.getNfmModSettings()->getModAfInput();
-    settings.m_outputSampleRate = response.getNfmModSettings()->getOutputSampleRate();
-    settings.m_playLoop = response.getNfmModSettings()->getPlayLoop() != 0;
-    settings.m_rfBandwidth = response.getNfmModSettings()->getRfBandwidth();
-    settings.m_rgbColor = response.getNfmModSettings()->getRgbColor();
-    settings.m_title = *response.getNfmModSettings()->getTitle();
-    settings.m_toneFrequency = response.getNfmModSettings()->getToneFrequency();
-    settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-    CWKeyerSettings cwKeyerSettings;
-    cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
-    cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
-    cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
-    cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
-    cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
-    m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
-    m_cwKeyer.setMode(cwKeyerSettings.m_mode);
-    m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
-    m_cwKeyer.setText(cwKeyerSettings.m_text);
-    m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+//    for (int i = 0; i < channelSettingsKeys.size(); i++) {
+//        qDebug("NFMMod::webapiSettingsPutPatch: settingKey: %s", qPrintable(channelSettingsKeys.at(i)));
+//    }
+
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getNfmModSettings()->getAfBandwidth();
+    }
+    if (channelSettingsKeys.contains("audioSampleRate")) {
+        settings.m_audioSampleRate = response.getNfmModSettings()->getAudioSampleRate();
+    }
+    if (channelSettingsKeys.contains("basebandSampleRate")) {
+        settings.m_basebandSampleRate = response.getNfmModSettings()->getBasebandSampleRate();
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getNfmModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("ctcssIndex")) {
+        settings.m_ctcssIndex = response.getNfmModSettings()->getCtcssIndex();
+    }
+    if (channelSettingsKeys.contains("ctcssOn")) {
+        settings.m_ctcssOn = response.getNfmModSettings()->getCtcssOn() != 0;
+    }
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("modAFInput")) {
+        settings.m_modAFInput = (NFMModSettings::NFMModInputAF) response.getNfmModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("outputSampleRate")) {
+        settings.m_outputSampleRate = response.getNfmModSettings()->getOutputSampleRate();
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getNfmModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getNfmModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getNfmModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getNfmModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getNfmModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
+    }
+
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+
+        if (channelSettingsKeys.contains("cwKeyer.loop")) {
+            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+        }
+        if (channelSettingsKeys.contains("cwKeyer.mode")) {
+            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.text")) {
+            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
+            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
+            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+        }
+
+        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        m_cwKeyer.setText(cwKeyerSettings.m_text);
+        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyer);
+        }
+    }
 
     MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_guiMessageQueue->push(msgCwKeyer);
         MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }

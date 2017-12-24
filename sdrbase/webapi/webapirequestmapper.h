@@ -73,6 +73,12 @@ private:
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
 
+    void appendSettingsSubKeys(
+            const QJsonObject& parentSettingsJsonObject,
+            QJsonObject& childSettingsJsonObject,
+            const QString& parentKey,
+            QStringList& keyList);
+
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
