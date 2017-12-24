@@ -81,7 +81,11 @@ def main():
         if r is None:
             exit(-1)
             
-        settings = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        r = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        if r is None:
+            exit(-1)
+        
+        settings = callAPI("/deviceset/1/channel/0/settings", "GET", None, None, "Get NFM mod settings")
         if settings is None:
             exit(-1)
         
