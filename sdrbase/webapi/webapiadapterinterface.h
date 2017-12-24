@@ -487,6 +487,7 @@ public:
             int deviceSetIndex __attribute__((unused)),
             int channelIndex __attribute__((unused)),
             bool force __attribute__((unused)),
+            const QStringList& channelSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {

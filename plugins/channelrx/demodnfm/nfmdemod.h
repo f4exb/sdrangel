@@ -132,6 +132,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
             bool force,
+            const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
@@ -221,6 +222,7 @@ private:
 
 //    void apply(bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
 };
 
 #endif // INCLUDE_NFMDEMOD_H

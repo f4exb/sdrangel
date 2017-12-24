@@ -158,6 +158,20 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelSettingsGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetChannelSettingsPutPatch(
+            int deviceSetIndex,
+            int channelIndex,
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 

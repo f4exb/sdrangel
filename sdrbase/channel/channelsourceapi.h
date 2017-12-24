@@ -52,6 +52,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
             bool force __attribute__((unused)),
+            const QStringList& channelSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }

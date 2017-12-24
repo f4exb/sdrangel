@@ -361,6 +361,8 @@ bool NFMDemod::handleMessage(const Message& cmd)
         settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
 
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod:"
+		        << " m_absoluteFrequencyOffset: " << m_absoluteFrequencyOffset
+		        << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
 		        << " m_rfBandwidth: " << settings.m_rfBandwidth
 				<< " m_afBandwidth: " << settings.m_afBandwidth
 				<< " m_fmDeviation: " << settings.m_fmDeviation
@@ -486,51 +488,84 @@ int NFMDemod::webapiSettingsGet(
             QString& errorMessage __attribute__((unused)))
 {
     response.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
-    response.getNfmDemodSettings()->setAfBandwidth(m_settings.m_afBandwidth);
-    response.getNfmDemodSettings()->setAudioMute(m_settings.m_audioMute ? 1 : 0);
-    response.getNfmDemodSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
-    response.getNfmDemodSettings()->setCopyAudioToUdp(m_settings.m_copyAudioToUDP ? 1 : 0);
-    response.getNfmDemodSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
-    response.getNfmDemodSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
-    response.getNfmDemodSettings()->setDeltaSquelch(m_settings.m_deltaSquelch ? 1 : 0);
-    response.getNfmDemodSettings()->setFmDeviation(m_settings.m_fmDeviation);
-    response.getNfmDemodSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
-    response.getNfmDemodSettings()->setInputSampleRate(m_settings.m_inputSampleRate);
-    response.getNfmDemodSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
-    response.getNfmDemodSettings()->setRgbColor(m_settings.m_rgbColor);
-    response.getNfmDemodSettings()->setSquelch(m_settings.m_squelch);
-    response.getNfmDemodSettings()->setSquelchGate(m_settings.m_squelchGate);
-    *response.getNfmDemodSettings()->getTitle() = m_settings.m_title;
-    *response.getNfmDemodSettings()->getUdpAddress() = m_settings.m_udpAddress;
-    response.getNfmDemodSettings()->setUdpPort(m_settings.m_udpPort);
-    response.getNfmDemodSettings()->setVolume(m_settings.m_volume);
+    NFMDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = m_absoluteFrequencyOffset;
+    webapiFormatChannelSettings(response, settings);
     return 200;
 }
 
 int NFMDemod::webapiSettingsPutPatch(
             bool force,
+            const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage  __attribute__((unused)))
 {
-    NFMDemodSettings settings;
-    settings.m_afBandwidth = response.getNfmDemodSettings()->getAfBandwidth();
-    settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
-    settings.m_audioSampleRate = response.getNfmDemodSettings()->getAudioSampleRate();
-    settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
-    settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
-    settings.m_ctcssOn = response.getNfmDemodSettings()->getCtcssOn() != 0;
-    settings.m_deltaSquelch = response.getNfmDemodSettings()->getDeltaSquelch() != 0;
-    settings.m_fmDeviation = response.getNfmDemodSettings()->getFmDeviation();
-    settings.m_inputFrequencyOffset = response.getNfmDemodSettings()->getInputFrequencyOffset();
-    settings.m_inputSampleRate = response.getNfmDemodSettings()->getInputSampleRate();
-    settings.m_rfBandwidth = response.getNfmDemodSettings()->getRfBandwidth();
-    settings.m_rgbColor = response.getNfmDemodSettings()->getRgbColor();
-    settings.m_squelch = response.getNfmDemodSettings()->getSquelch();
-    settings.m_squelchGate = response.getNfmDemodSettings()->getSquelchGate();
-    settings.m_title = *response.getNfmDemodSettings()->getTitle();
-    settings.m_udpAddress = *response.getNfmDemodSettings()->getUdpAddress();
-    settings.m_udpPort = response.getNfmDemodSettings()->getUdpPort();
-    settings.m_volume = response.getNfmDemodSettings()->getVolume();
+    NFMDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged;
+
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getNfmDemodSettings()->getAfBandwidth();
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("audioSampleRate")) {
+        settings.m_audioSampleRate = response.getNfmDemodSettings()->getAudioSampleRate();
+    }
+    if (channelSettingsKeys.contains("copyAudioToUDP")) {
+        settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
+    }
+    if (channelSettingsKeys.contains("ctcssIndex")) {
+        settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
+    }
+    if (channelSettingsKeys.contains("ctcssOn")) {
+        settings.m_ctcssOn = response.getNfmDemodSettings()->getCtcssOn() != 0;
+    }
+    if (channelSettingsKeys.contains("deltaSquelch")) {
+        settings.m_deltaSquelch = response.getNfmDemodSettings()->getDeltaSquelch() != 0;
+    }
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getNfmDemodSettings()->getFmDeviation();
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getNfmDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+//    if (channelSettingsKeys.contains("inputSampleRate")) {
+//        settings.m_inputSampleRate = response.getNfmDemodSettings()->getInputSampleRate();
+//    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getNfmDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getNfmDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("squelch")) {
+        settings.m_squelch = response.getNfmDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("squelchGate")) {
+        settings.m_squelchGate = response.getNfmDemodSettings()->getSquelchGate();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getNfmDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getNfmDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getNfmDemodSettings()->getUdpPort();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getNfmDemodSettings()->getVolume();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                48000, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
 
     MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -541,5 +576,40 @@ int NFMDemod::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    webapiFormatChannelSettings(response, settings);
+
     return 200;
 }
+
+void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings)
+{
+    response.getNfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getNfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getNfmDemodSettings()->setAudioSampleRate(settings.m_audioSampleRate);
+    response.getNfmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
+    response.getNfmDemodSettings()->setCtcssIndex(settings.m_ctcssIndex);
+    response.getNfmDemodSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
+    response.getNfmDemodSettings()->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);
+    response.getNfmDemodSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getNfmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getNfmDemodSettings()->setInputSampleRate(settings.m_inputSampleRate);
+    response.getNfmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getNfmDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getNfmDemodSettings()->setSquelch(settings.m_squelch);
+    response.getNfmDemodSettings()->setSquelchGate(settings.m_squelchGate);
+    response.getNfmDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getNfmDemodSettings()->setVolume(settings.m_volume);
+
+    if (response.getNfmDemodSettings()->getTitle()) {
+        *response.getNfmDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getNfmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getNfmDemodSettings()->getUdpAddress()) {
+        *response.getNfmDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getNfmDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+}
+

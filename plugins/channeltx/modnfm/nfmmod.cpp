@@ -532,6 +532,7 @@ int NFMMod::webapiSettingsGet(
 
 int NFMMod::webapiSettingsPutPatch(
                 bool force,
+                const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {

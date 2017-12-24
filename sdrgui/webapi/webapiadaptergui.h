@@ -168,6 +168,7 @@ public:
             int deviceSetIndex,
             int channelIndex,
             bool force,
+            const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 

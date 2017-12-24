@@ -254,6 +254,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
                 bool force,
+                const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage);
 

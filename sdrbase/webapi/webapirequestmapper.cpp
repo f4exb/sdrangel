@@ -1175,13 +1175,15 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
             {
                 SWGSDRangel::SWGChannelSettings normalResponse;
                 resetChannelSettings(normalResponse);
+                QStringList channelSettingsKeys;
 
-                if (validateChannelSettings(normalResponse, jsonObject))
+                if (validateChannelSettings(normalResponse, jsonObject, channelSettingsKeys))
                 {
                     int status = m_adapter->devicesetChannelSettingsPutPatch(
                             deviceSetIndex,
                             channelIndex,
                             (request.getMethod() == "PUT"), // force settings on PUT
+                            channelSettingsKeys,
                             normalResponse,
                             errorResponse);
                     response.setStatus(status);
@@ -1427,7 +1429,10 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     }
 }
 
-bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject)
+bool WebAPIRequestMapper::validateChannelSettings(
+        SWGSDRangel::SWGChannelSettings& channelSettings,
+        QJsonObject& jsonObject,
+        QStringList& channelSettingsKeys)
 {
     if (jsonObject.contains("tx")) {
         channelSettings.setTx(jsonObject["tx"].toInt());
@@ -1448,6 +1453,7 @@ bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSetting
         if (channelSettings.getTx() == 0)
         {
             QJsonObject nfmDemodSettingsJsonObject = jsonObject["NFMDemodSettings"].toObject();
+            channelSettingsKeys = nfmDemodSettingsJsonObject.keys();
             channelSettings.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
             channelSettings.getNfmDemodSettings()->fromJsonObject(nfmDemodSettingsJsonObject);
             return true;
@@ -1461,6 +1467,7 @@ bool WebAPIRequestMapper::validateChannelSettings(SWGSDRangel::SWGChannelSetting
         if (channelSettings.getTx() != 0)
         {
             QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
+            channelSettingsKeys = nfmModSettingsJsonObject.keys();
             channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
             channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
             return true;

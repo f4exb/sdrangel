@@ -720,6 +720,7 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -781,6 +782,7 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -815,6 +817,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -849,6 +852,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunPost(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -883,6 +887,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -1102,6 +1107,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
@@ -1115,11 +1121,12 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
 }
 
 int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
-            int deviceSetIndex,
-            int channelIndex,
-            bool force,
-            SWGSDRangel::SWGChannelSettings& response,
-            SWGSDRangel::SWGErrorResponse& error)
+        int deviceSetIndex,
+        int channelIndex,
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
@@ -1142,7 +1149,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
 
                 if (channelType == *response.getChannelType())
                 {
-                    return channelAPI->webapiSettingsPutPatch(force, response, *error.getMessage());
+                    return channelAPI->webapiSettingsPutPatch(force, channelSettingsKeys, response, *error.getMessage());
                 }
                 else
                 {
@@ -1172,7 +1179,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
 
                 if (channelType == *response.getChannelType())
                 {
-                    return channelAPI->webapiSettingsPutPatch(force, response, *error.getMessage());
+                    return channelAPI->webapiSettingsPutPatch(force, channelSettingsKeys, response, *error.getMessage());
                 }
                 else
                 {
@@ -1187,6 +1194,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
