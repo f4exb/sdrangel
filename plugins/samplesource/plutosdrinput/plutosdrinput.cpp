@@ -52,6 +52,8 @@ PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
     m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
+
+    applySettings(m_settings, true);
 }
 
 PlutoSDRInput::~PlutoSDRInput()
@@ -381,7 +383,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
                  << " -FIR-> " << m_deviceSampleRates.m_firRate;
 
         forwardChangeOtherDSP = true;
-        forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);
+        forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate) || force;
     }
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)

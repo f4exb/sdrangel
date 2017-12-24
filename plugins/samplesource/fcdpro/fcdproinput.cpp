@@ -54,6 +54,8 @@ FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
     m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
+
+    applySettings(m_settings, true);
 }
 
 FCDProInput::~FCDProInput()
@@ -224,7 +226,7 @@ bool FCDProInput::handleMessage(const Message& message)
 
 void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 {
-	bool signalChange = false;
+	bool forwardChange = false;
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
             || (m_settings.m_transverterMode != settings.m_transverterMode)
@@ -242,8 +244,9 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
         qDebug() << "FCDProInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
                 << " device center freq: " << deviceCenterFrequency << " Hz";
 
+		forwardChange = (m_settings.m_centerFrequency != settings.m_centerFrequency) || force;
+
 		m_settings.m_centerFrequency = settings.m_centerFrequency;
-		signalChange = true;
 	}
 
 	if ((m_settings.m_lnaGainIndex != settings.m_lnaGainIndex) || force)
@@ -428,7 +431,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
 
-    if (signalChange)
+    if (forwardChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate, m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink

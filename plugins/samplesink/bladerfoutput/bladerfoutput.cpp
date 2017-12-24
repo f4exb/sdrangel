@@ -47,6 +47,8 @@ BladerfOutput::BladerfOutput(DeviceSinkAPI *deviceAPI) :
     m_sampleSourceFifo.resize(16*BLADERFOUTPUT_BLOCKSIZE);
     openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
+
+    applySettings(m_settings, true);
 }
 
 BladerfOutput::~BladerfOutput()

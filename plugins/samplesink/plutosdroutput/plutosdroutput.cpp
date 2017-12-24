@@ -45,6 +45,8 @@ PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     suspendBuddies();
     openDevice();
     resumeBuddies();
+
+    applySettings(m_settings, true);
 }
 
 PlutoSDROutput::~PlutoSDROutput()
@@ -346,7 +348,7 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
                  << " <-FIR- " << m_deviceSampleRates.m_firRate;
 
         forwardChangeOtherDSP = true;
-        forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate);
+        forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate) || force;
     }
 
     if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
