@@ -61,6 +61,8 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
     m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
+
+    applySettings(m_settings, true, false);
 }
 
 LimeSDRInput::~LimeSDRInput()
@@ -923,6 +925,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
         (m_settings.m_ncoEnable != settings.m_ncoEnable) || force || forceNCOFrequency)
     {
+        forwardChangeOwnDSP = true;
+
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
@@ -932,7 +936,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
                     settings.m_ncoFrequency))
             {
                 //doCalibration = true;
-                forwardChangeOwnDSP = true;
                 m_deviceShared.m_ncoFrequency = settings.m_ncoEnable ? settings.m_ncoFrequency : 0; // for buddies
                 qDebug("LimeSDRInput::applySettings: %sd and set NCO to %d Hz",
                         settings.m_ncoEnable ? "enable" : "disable",

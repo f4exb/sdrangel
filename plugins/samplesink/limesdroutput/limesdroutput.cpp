@@ -55,6 +55,8 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     openDevice();
     resumeTxBuddies();
     resumeRxBuddies();
+
+    applySettings(m_settings, true, false);
 }
 
 LimeSDROutput::~LimeSDROutput()
@@ -773,6 +775,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) ||
         (m_settings.m_ncoEnable != settings.m_ncoEnable) || force || forceNCOFrequency)
     {
+        forwardChangeOwnDSP = true;
+
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
             if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
@@ -782,7 +786,6 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                     settings.m_ncoFrequency))
             {
                 //doCalibration = true;
-                forwardChangeOwnDSP = true;
                 m_deviceShared.m_ncoFrequency = settings.m_ncoEnable ? settings.m_ncoFrequency : 0; // for buddies
                 qDebug("LimeSDROutput::applySettings: %sd and set NCO to %d Hz",
                         settings.m_ncoEnable ? "enable" : "disable",
