@@ -23,6 +23,7 @@
 
 #include "util/messagequeue.h"
 
+#include "filesourcesettings.h"
 #include "filesourceinput.h"
 
 class DeviceUISet;
@@ -54,7 +55,7 @@ private:
 	Ui::FileSourceGui* ui;
 
 	DeviceUISet* m_deviceUISet;
-	FileSourceInput::Settings m_settings;
+	FileSourceSettings m_settings;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;

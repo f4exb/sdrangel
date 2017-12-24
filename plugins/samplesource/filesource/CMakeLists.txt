@@ -7,6 +7,7 @@ set(filesource_SOURCES
 	filesourceinput.cpp
 	filesourceplugin.cpp
 	filesourcethread.cpp
+	filesourcesettings.cpp
 )
 
 set(filesource_HEADERS
@@ -14,6 +15,7 @@ set(filesource_HEADERS
 	filesourceinput.h
 	filesourceplugin.h
 	filesourcethread.h
+	filesourcesettings.h
 )
 
 set(filesource_FORMS

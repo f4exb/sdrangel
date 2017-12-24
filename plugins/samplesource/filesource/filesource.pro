@@ -28,12 +28,14 @@ CONFIG(Debug):build_subdir = debug
 SOURCES += filesourcegui.cpp\
 	filesourceinput.cpp\
 	filesourceplugin.cpp\
-	filesourcethread.cpp
+	filesourcethread.cpp\
+	filesourcesettings.cpp
 
 HEADERS += filesourcegui.h\
 	filesourceinput.h\
 	filesourceplugin.h\
-	filesourcethread.h
+	filesourcethread.h\
+	filesourcesettings.h
 
 FORMS += filesourcegui.ui
 

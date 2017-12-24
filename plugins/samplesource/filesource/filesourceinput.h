@@ -24,35 +24,28 @@
 #include <iostream>
 #include <fstream>
 
+#include "filesourcesettings.h"
+
 class FileSourceThread;
 class DeviceSourceAPI;
 
 class FileSourceInput : public DeviceSampleSource {
 public:
-	struct Settings {
-		QString m_fileName;
-
-		Settings();
-		void resetToDefaults();
-		QByteArray serialize() const;
-		bool deserialize(const QByteArray& data);
-	};
-
 	class MsgConfigureFileSource : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const Settings& getSettings() const { return m_settings; }
+		const FileSourceSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFileSource* create(const Settings& settings)
+		static MsgConfigureFileSource* create(const FileSourceSettings& settings)
 		{
 			return new MsgConfigureFileSource(settings);
 		}
 
 	private:
-		Settings m_settings;
+		FileSourceSettings m_settings;
 
-		MsgConfigureFileSource(const Settings& settings) :
+		MsgConfigureFileSource(const FileSourceSettings& settings) :
 			Message(),
 			m_settings(settings)
 		{ }
@@ -259,7 +252,7 @@ public:
 	private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	Settings m_settings;
+	FileSourceSettings m_settings;
 	std::ifstream m_ifstream;
 	FileSourceThread* m_fileSourceThread;
 	QString m_deviceDescription;

@@ -42,41 +42,6 @@ MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Messag
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
 
-FileSourceInput::Settings::Settings() :
-	m_fileName("./test.sdriq")
-{
-}
-
-void FileSourceInput::Settings::resetToDefaults()
-{
-	m_fileName = "./test.sdriq";
-}
-
-QByteArray FileSourceInput::Settings::serialize() const
-{
-	SimpleSerializer s(1);
-	s.writeString(1, m_fileName);
-	return s.final();
-}
-
-bool FileSourceInput::Settings::deserialize(const QByteArray& data)
-{
-	SimpleDeserializer d(data);
-
-	if(!d.isValid()) {
-		resetToDefaults();
-		return false;
-	}
-
-	if(d.getVersion() == 1) {
-		d.readString(1, &m_fileName, "./test.sdriq");
-		return true;
-	} else {
-		resetToDefaults();
-		return false;
-	}
-}
-
 FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
