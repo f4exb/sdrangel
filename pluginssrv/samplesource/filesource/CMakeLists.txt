@@ -7,12 +7,14 @@ set(filesource_SOURCES
 	${PLUGIN_PREFIX}/filesourceinput.cpp
 	${PLUGIN_PREFIX}/filesourceplugin.cpp
 	${PLUGIN_PREFIX}/filesourcethread.cpp
+	${PLUGIN_PREFIX}/filesourcesettings.cpp
 )
 
 set(filesource_HEADERS
 	${PLUGIN_PREFIX}/filesourceinput.h
 	${PLUGIN_PREFIX}/filesourceplugin.h
 	${PLUGIN_PREFIX}/filesourcethread.h
+    ${PLUGIN_PREFIX}/filesourcesettings.h
 )
 
 include_directories(

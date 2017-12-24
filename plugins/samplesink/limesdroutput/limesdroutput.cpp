@@ -55,8 +55,6 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     openDevice();
     resumeTxBuddies();
     resumeRxBuddies();
-
-    applySettings(m_settings, true, false);
 }
 
 LimeSDROutput::~LimeSDROutput()

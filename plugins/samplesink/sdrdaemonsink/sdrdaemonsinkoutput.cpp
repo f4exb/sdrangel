@@ -47,7 +47,6 @@ SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
-    applySettings(m_settings, true);
 }
 
 SDRdaemonSinkOutput::~SDRdaemonSinkOutput()

@@ -47,8 +47,6 @@ HackRFOutput::HackRFOutput(DeviceSinkAPI *deviceAPI) :
 {
     openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
-
-    applySettings(m_settings, true);
 }
 
 HackRFOutput::~HackRFOutput()

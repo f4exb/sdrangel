@@ -56,8 +56,6 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addSink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
-
-    applySettings(m_settings, true);
 }
 
 HackRFInput::~HackRFInput()

@@ -45,8 +45,6 @@ PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     suspendBuddies();
     openDevice();
     resumeBuddies();
-
-    applySettings(m_settings, true);
 }
 
 PlutoSDROutput::~PlutoSDROutput()

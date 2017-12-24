@@ -95,8 +95,6 @@ void FileRecord::stopRecording()
 
 bool FileRecord::handleMessage(const Message& message)
 {
-	qDebug() << "FileRecord::handleMessage";
-
 	if (DSPSignalNotification::match(message))
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;

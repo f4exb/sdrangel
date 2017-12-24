@@ -61,8 +61,6 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
     m_fileSink = new FileRecord(std::string(recFileNameCStr));
     m_deviceAPI->addSink(m_fileSink);
-
-    applySettings(m_settings, true, false);
 }
 
 LimeSDRInput::~LimeSDRInput()
