@@ -25,7 +25,7 @@ HttpConnectionHandlerPool::HttpConnectionHandlerPool(QSettings* settings, HttpRe
 HttpConnectionHandlerPool::HttpConnectionHandlerPool(const HttpListenerSettings* settings, HttpRequestHandler* requestHandler)
     : QObject(), useQtSettings(false)
 {
-    Q_ASSERT(listenerSettings != 0);
+    Q_ASSERT(settings != 0);
     this->settings = 0;
     this->listenerSettings = settings;
     this->requestHandler = requestHandler;
