@@ -119,6 +119,11 @@ bool BladerfOutput::openDevice()
     return true;
 }
 
+void BladerfOutput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool BladerfOutput::start()
 {
 //	QMutexLocker mutexLocker(&m_mutex);

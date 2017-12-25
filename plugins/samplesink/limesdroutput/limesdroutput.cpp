@@ -346,6 +346,11 @@ void LimeSDROutput::releaseChannel()
     m_channelAcquired = false;
 }
 
+void LimeSDROutput::init()
+{
+    applySettings(m_settings, true, false);
+}
+
 bool LimeSDROutput::start()
 {
     if (!m_deviceShared.m_deviceParams->getDevice()) {

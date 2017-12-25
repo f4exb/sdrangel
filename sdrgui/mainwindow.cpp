@@ -334,6 +334,7 @@ void MainWindow::addSinkDevice()
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
+    m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->init();
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSinkAPI->getSampleSinkDisplayName(), false);
 }
 
@@ -1183,6 +1184,7 @@ void MainWindow::on_sampleSink_changed()
         deviceUI->m_deviceSinkAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSinkAPI->setSampleSinkPluginInstanceUI(pluginUI);
         setDeviceGUI(currentSinkTabIndex, gui, deviceUI->m_deviceSinkAPI->getSampleSinkDisplayName(), false);
+        m_deviceUIs.back()->m_deviceSinkAPI->getSampleSink()->init();
 
         deviceUI->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
     }

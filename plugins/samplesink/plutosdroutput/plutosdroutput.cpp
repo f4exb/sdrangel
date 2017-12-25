@@ -59,6 +59,11 @@ void PlutoSDROutput::destroy()
     delete this;
 }
 
+void PlutoSDROutput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool PlutoSDROutput::start()
 {
     if (!m_deviceShared.m_deviceParams->getBox()) {

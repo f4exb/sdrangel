@@ -87,6 +87,11 @@ bool SDRdaemonSinkOutput::start()
 	return true;
 }
 
+void SDRdaemonSinkOutput::init()
+{
+    applySettings(m_settings, true);
+}
+
 void SDRdaemonSinkOutput::stop()
 {
 	qDebug() << "SDRdaemonSinkOutput::stop";

@@ -104,6 +104,11 @@ bool HackRFOutput::openDevice()
     return true;
 }
 
+void HackRFOutput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool HackRFOutput::start()
 {
     if (!m_dev) {
