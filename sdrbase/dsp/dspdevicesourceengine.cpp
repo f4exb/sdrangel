@@ -365,8 +365,6 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 {
-	qDebug() << "DSPDeviceSourceEngine::gotoInit";
-
 	switch(m_state) {
 		case StNotStarted:
 			return StNotStarted;
@@ -398,7 +396,8 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 	m_centerFrequency = m_deviceSampleSource->getCenterFrequency();
 	m_sampleRate = m_deviceSampleSource->getSampleRate();
 
-	qDebug() << "DSPDeviceSourceEngine::gotoInit: " << m_deviceDescription.toStdString().c_str() << ": "
+	qDebug() << "DSPDeviceSourceEngine::gotoInit: "
+	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
 			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 
@@ -651,6 +650,7 @@ void DSPDeviceSourceEngine::handleInputMessages()
 			// forward changes to source GUI input queue
 
 			MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
+			qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
 			if (guiMessageQueue) {
 			    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI

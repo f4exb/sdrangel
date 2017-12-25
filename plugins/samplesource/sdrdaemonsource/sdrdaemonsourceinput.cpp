@@ -77,6 +77,12 @@ void SDRdaemonSourceInput::destroy()
     delete this;
 }
 
+void SDRdaemonSourceInput::init()
+{
+    DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), m_settings.m_centerFrequency);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+}
+
 bool SDRdaemonSourceInput::start()
 {
 	qDebug() << "SDRdaemonInput::start";

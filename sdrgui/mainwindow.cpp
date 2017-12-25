@@ -144,54 +144,14 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	m_masterTimer.start(50);
 
-    qDebug() << "MainWindow::MainWindow: add the first device...";
-
-    addSourceDevice(); // add the first device
-
     qDebug() << "MainWindow::MainWindow: load settings...";
 
 	loadSettings();
 
-	qDebug() << "MainWindow::MainWindow: select SampleSource from settings...";
+	qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source) ...";
 
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
-
-	if (deviceIndex >= 0)
-	{
-        // delete previous plugin GUI
-        m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourcePluginInstanceGUI());
-        m_deviceUIs.back()->m_deviceSourceAPI->resetSampleSourceId();
-        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
-        m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource());
-        m_deviceUIs.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-        m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(deviceIndex);
-
-	    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceSequence(samplingDevice.sequence);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setNbItems(samplingDevice.deviceItemIndex);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setHardwareId(samplingDevice.hardwareId);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceId(samplingDevice.id);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceSerial(samplingDevice.serial);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceDisplayName(samplingDevice.displayedName);
-	    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
-
-	    DeviceSampleSource *source = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
-                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(), m_deviceUIs.back()->m_deviceSourceAPI);
-        m_deviceUIs.back()->m_deviceSourceAPI->setSampleSource(source);
-        QWidget *gui;
-        PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
-                m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceId(),
-                &gui,
-                m_deviceUIs.back());
-        m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
-        m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
-        setDeviceGUI(0, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
-	}
-
+	addSourceDevice(deviceIndex);  // add the first device set with file source device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceSourceAPI->setBuddyLeader(true); // the first device is always the leader
 
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -234,7 +194,7 @@ MainWindow::~MainWindow()
 	delete m_logger;
 }
 
-void MainWindow::addSourceDevice()
+void MainWindow::addSourceDevice(int deviceIndex)
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
     dspDeviceSourceEngine->start();
@@ -271,9 +231,12 @@ void MainWindow::addSourceDevice()
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
-    // Create a file source instance by default
-    int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
-    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
+    // Create a file source instance by default if requested device was not enumerated (index = -1)
+    if (deviceIndex < 0) {
+        deviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
+    }
+
+    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceSequence(samplingDevice.sequence);
     m_deviceUIs.back()->m_deviceSourceAPI->setNbItems(samplingDevice.deviceNbItems);
     m_deviceUIs.back()->m_deviceSourceAPI->setItemIndex(samplingDevice.deviceItemIndex);
@@ -281,9 +244,9 @@ void MainWindow::addSourceDevice()
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceId(samplingDevice.id);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceSerial(samplingDevice.serial);
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourceDisplayName(samplingDevice.displayedName);
-    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(fileSourceDeviceIndex));
+    m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
-    m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(fileSourceDeviceIndex);
+    m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(deviceIndex);
 
     // delete previous plugin GUI
     m_deviceUIs.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
@@ -300,6 +263,7 @@ void MainWindow::addSourceDevice()
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceSourceAPI->getSampleSource()->init();
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceSourceAPI->getSampleSourceDisplayName());
 }
 
@@ -735,7 +699,7 @@ bool MainWindow::handleMessage(const Message& cmd)
         if (notif.isTx()) {
             addSinkDevice();
         } else {
-            addSourceDevice();
+            addSourceDevice(-1); // create with file source device by default
         }
 
         return true;
@@ -1130,6 +1094,7 @@ void MainWindow::on_sampleSource_changed()
         deviceUI->m_deviceSourceAPI->getSampleSource()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
         deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceGUI(pluginUI);
         setDeviceGUI(currentSourceTabIndex, gui, deviceUI->m_deviceSourceAPI->getSampleSourceDisplayName());
+        deviceUI->m_deviceSourceAPI->getSampleSource()->init();
 
         deviceUI->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
 
@@ -1257,7 +1222,7 @@ void MainWindow::on_action_About_triggered()
 
 void MainWindow::on_action_addSourceDevice_triggered()
 {
-    addSourceDevice();
+    addSourceDevice(-1); // create with file source device by default
 }
 
 void MainWindow::on_action_addSinkDevice_triggered()

@@ -365,8 +365,6 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 
 DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 {
-	qDebug() << "DSPDeviceSinkEngine::gotoInit";
-
 	switch(m_state) {
 		case StNotStarted:
 			return StNotStarted;
@@ -393,7 +391,8 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	m_centerFrequency = m_deviceSampleSink->getCenterFrequency();
 	m_sampleRate = m_deviceSampleSink->getSampleRate();
 
-	qDebug() << "DSPDeviceSinkEngine::gotoInit: " << m_deviceDescription.toStdString().c_str() << ": "
+	qDebug() << "DSPDeviceSinkEngine::gotoInit: "
+	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
 			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 

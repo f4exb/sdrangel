@@ -56,6 +56,7 @@ private:
 	QHostAddress m_remoteAddress;
 	quint16 m_dataPort;
 	bool m_dataConnected;
+	bool m_startInit;
 	char *m_udpBuf;
 	qint64 m_udpReadBytes;
 	SampleSinkFifo *m_sampleFifo;

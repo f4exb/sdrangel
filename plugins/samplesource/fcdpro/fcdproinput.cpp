@@ -91,6 +91,11 @@ bool FCDProInput::openDevice()
     return true;
 }
 
+void FCDProInput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool FCDProInput::start()
 {
 	qDebug() << "FCDProInput::start";

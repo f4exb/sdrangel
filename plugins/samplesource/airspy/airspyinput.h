@@ -94,6 +94,7 @@ public:
 	virtual ~AirspyInput();
 	virtual void destroy();
 
+	virtual void init();
 	virtual bool start();
 	virtual void stop();
 

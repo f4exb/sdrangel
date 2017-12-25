@@ -119,6 +119,11 @@ bool HackRFInput::openDevice()
     return true;
 }
 
+void HackRFInput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool HackRFInput::start()
 {
 //	QMutexLocker mutexLocker(&m_mutex);

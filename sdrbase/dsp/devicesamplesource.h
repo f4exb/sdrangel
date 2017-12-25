@@ -38,6 +38,7 @@ public:
 	virtual ~DeviceSampleSource();
 	virtual void destroy() = 0;
 
+	virtual void init() = 0;  //!< initializations to be done when all collaborating objects are created and possibly connected
 	virtual bool start() = 0;
 	virtual void stop() = 0;
 

@@ -121,6 +121,12 @@ void FileSourceInput::seekFileStream(int seekPercentage)
 	}
 }
 
+void FileSourceInput::init()
+{
+    DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+}
+
 bool FileSourceInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);

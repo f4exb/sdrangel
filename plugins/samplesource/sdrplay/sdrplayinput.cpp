@@ -198,6 +198,11 @@ void SDRPlayInput::closeDevice()
     m_deviceDescription.clear();
 }
 
+void SDRPlayInput::init()
+{
+    applySettings(m_settings, true, true);
+}
+
 void SDRPlayInput::stop()
 {
 //    QMutexLocker mutexLocker(&m_mutex);

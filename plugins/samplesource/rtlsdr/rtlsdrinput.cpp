@@ -173,6 +173,11 @@ bool RTLSDRInput::openDevice()
     return true;
 }
 
+void RTLSDRInput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool RTLSDRInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);

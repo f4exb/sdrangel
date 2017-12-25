@@ -319,7 +319,7 @@ private:
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
 
-	void addSourceDevice();
+	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
     void removeLastDevice();
     void deleteChannel(int deviceSetIndex, int channelIndex);

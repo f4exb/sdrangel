@@ -84,6 +84,11 @@ bool FCDProPlusInput::openDevice()
     return true;
 }
 
+void FCDProPlusInput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool FCDProPlusInput::start()
 {
 

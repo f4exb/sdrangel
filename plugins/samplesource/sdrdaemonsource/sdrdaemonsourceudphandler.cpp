@@ -34,6 +34,7 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
 	m_remoteAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
 	m_dataConnected(false),
+	m_startInit(true),
 	m_udpBuf(0),
 	m_udpReadBytes(0),
 	m_sampleFifo(sampleFifo),
@@ -92,8 +93,8 @@ void SDRdaemonSourceUDPHandler::start()
 		}
 	}
 
-	// Need to notify the DSP engine to actually start
-	DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
+	// Need to notify the DSP engine to actually start FIXME: may cause transient confusion because at this point sample rate and frequency are unknown
+	DSPSignalNotification *notif = new DSPSignalNotification(128000, 435000 * 1000); // Frequency in Hz for the DSP engine
 	m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     m_elapsedTimer.start();
 }
@@ -113,6 +114,8 @@ void SDRdaemonSourceUDPHandler::stop()
 		delete m_dataSocket;
 		m_dataSocket = 0;
 	}
+
+	m_startInit = true;
 }
 
 void SDRdaemonSourceUDPHandler::configureUDPLink(const QString& address, quint16 port)
@@ -170,17 +173,23 @@ void SDRdaemonSourceUDPHandler::processData()
         change = true;
     }
 
-    if (change)
+    if (change || m_startInit)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-        SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::create(
-            m_samplerate,
-            m_centerFrequency * 1000, // Frequency in Hz for the GUI
-            m_tv_sec,
-            m_tv_usec);
+        qDebug("SDRdaemonSourceUDPHandler::processData: m_samplerate: %u m_centerFrequency: %u kHz", m_samplerate, m_centerFrequency);
 
-        m_outputMessageQueueToGUI->push(report);
+        if (m_samplerate != 0)
+        {
+            DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
+            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+            SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData *report = SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::create(
+                m_samplerate,
+                m_centerFrequency * 1000, // Frequency in Hz for the GUI
+                m_tv_sec,
+                m_tv_usec);
+
+            m_outputMessageQueueToGUI->push(report);
+            m_startInit = false;
+        }
     }
 }
 

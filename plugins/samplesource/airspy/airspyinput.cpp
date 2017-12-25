@@ -147,6 +147,11 @@ bool AirspyInput::openDevice()
     return true;
 }
 
+void AirspyInput::init()
+{
+    applySettings(m_settings, true);
+}
+
 bool AirspyInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);

@@ -26,7 +26,7 @@ void SDRdaemonSourceSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_sampleRate = 256000;
-    m_log2Decim = 4;
+    m_log2Decim = 1;
     m_txDelay = 0.5;
     m_nbFECBlocks = 0;
     m_address = "127.0.0.1";
