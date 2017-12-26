@@ -39,24 +39,28 @@ public:
 	SDRdaemonSourceUDPHandler(SampleSinkFifo* sampleFifo, DeviceSourceAPI *deviceAPI);
 	~SDRdaemonSourceUDPHandler();
 	void setMessageQueueToGUI(MessageQueue *queue) { m_outputMessageQueueToGUI = queue; }
-	void connectTimer(const QTimer* timer);
 	void start();
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
     int getNbOriginalBlocks() const { return SDRdaemonSourceBuffer::m_nbOriginalBlocks; }
+    bool isStreaming() const { return m_masterTimerConnected; }
+    int getSampleRate() const { return m_samplerate; }
+    int getCenterFrequency() const { return m_centerFrequency * 1000; }
 public slots:
 	void dataReadyRead();
 
 private:
 	DeviceSourceAPI *m_deviceAPI;
+	const QTimer& m_masterTimer;
+	bool m_masterTimerConnected;
+	bool m_running;
 	SDRdaemonSourceBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
 	QHostAddress m_remoteAddress;
 	quint16 m_dataPort;
 	bool m_dataConnected;
-	bool m_startInit;
 	char *m_udpBuf;
 	qint64 m_udpReadBytes;
 	SampleSinkFifo *m_sampleFifo;
@@ -77,6 +81,8 @@ private:
     uint32_t m_rateDivider;
     bool m_autoCorrBuffer;
 
+	void connectTimer();
+    void disconnectTimer();
 	void processData();
 
 private slots:

@@ -55,71 +55,6 @@ public:
         { }
     };
 
-	class MsgConfigureSDRdaemonUDPLink : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const QString& getAddress() const { return m_address; }
-		quint16 getPort() const { return m_port; }
-
-		static MsgConfigureSDRdaemonUDPLink* create(const QString& address, quint16 port)
-		{
-			return new MsgConfigureSDRdaemonUDPLink(address, port);
-		}
-
-	private:
-		QString m_address;
-		quint16 m_port;
-
-		MsgConfigureSDRdaemonUDPLink(const QString& address, quint16 port) :
-			Message(),
-			m_address(address),
-			m_port(port)
-		{ }
-	};
-
-	class MsgConfigureSDRdaemonAutoCorr : public Message {
-		MESSAGE_CLASS_DECLARATION
-	public:
-		bool getDCBlock() const { return m_dcBlock; }
-		bool getIQImbalance() const { return m_iqCorrection; }
-
-		static MsgConfigureSDRdaemonAutoCorr* create(bool dcBlock, bool iqImbalance)
-		{
-			return new MsgConfigureSDRdaemonAutoCorr(dcBlock, iqImbalance);
-		}
-
-	private:
-		bool m_dcBlock;
-		bool m_iqCorrection;
-
-		MsgConfigureSDRdaemonAutoCorr(bool dcBlock, bool iqImbalance) :
-			Message(),
-			m_dcBlock(dcBlock),
-			m_iqCorrection(iqImbalance)
-		{ }
-	};
-
-	class MsgConfigureSDRdaemonWork : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool isWorking() const { return m_working; }
-
-		static MsgConfigureSDRdaemonWork* create(bool working)
-		{
-			return new MsgConfigureSDRdaemonWork(working);
-		}
-
-	private:
-		bool m_working;
-
-		MsgConfigureSDRdaemonWork(bool working) :
-			Message(),
-			m_working(working)
-		{ }
-	};
-
 	class MsgConfigureSDRdaemonStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -335,7 +270,7 @@ public:
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
 	std::time_t getStartingTimeStamp() const;
-	void getRemoteAddress(QString &s);
+	bool isStreaming() const;
 
 	virtual bool handleMessage(const Message& message);
 
@@ -352,15 +287,16 @@ private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	SDRdaemonSourceSettings m_settings;
-	QString m_address;
-	quint16 m_port;
 	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
+    QString m_remoteAddress;
+	int m_sender;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
-	const QTimer& m_masterTimer;
     bool m_autoFollowRate;
     bool m_autoCorrBuffer;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+
+    void applySettings(const SDRdaemonSourceSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEINPUT_H

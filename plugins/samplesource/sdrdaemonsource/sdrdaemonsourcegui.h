@@ -56,18 +56,17 @@ private:
 
 	DeviceUISet* m_deviceUISet;
     SDRdaemonSourceSettings m_settings;        //!< current settings
-    SDRdaemonSourceSettings m_controlSettings; //!< settings last sent to device via control port
+	SDRdaemonSourceInput* m_sampleSource;
+    bool m_acquisition;
+    int m_streamSampleRate;          //!< Sample rate of received stream
+    quint64 m_streamCenterFrequency; //!< Center frequency of received stream
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
-	DeviceSampleSource* m_sampleSource;
-    bool m_acquisition;
-    int m_deviceSampleRate;
-    quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
 
-	int m_sampleRate;
-	quint64 m_centerFrequency;
+    //	int m_sampleRate;
+    //	quint64 m_centerFrequency;
 	struct timeval m_startingTimeStamp;
 	int m_framesDecodingStatus;
 	bool m_allBlocksReceived;
@@ -85,14 +84,8 @@ private:
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
-	QString m_address;
-	QString m_remoteAddress;
-	quint16 m_dataPort;
-	quint16 m_controlPort;
 	bool m_addressEdited;
 	bool m_dataPortEdited;
-	bool m_initSendConfiguration;
-	int m_sender;
 
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
@@ -102,21 +95,14 @@ private:
     bool m_forceSettings;
     double m_txDelay;
 
-	bool m_dcBlock;
-	bool m_iqCorrection;
-
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
 
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();
-    void sendControl(bool force = false);
     void sendSettings();
-	void configureUDPLink();
-	void configureAutoCorrections();
 	void updateWithAcquisition();
-	void updateWithStreamData();
 	void updateWithStreamTime();
     void updateSampleRateAndFrequency();
     void updateTxDelay();

@@ -50,11 +50,12 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 	QWidget(parent),
 	ui(new Ui::SDRdaemonSourceGui),
 	m_deviceUISet(deviceUISet),
-	m_sampleSource(NULL),
+	m_settings(),
+	m_sampleSource(0),
 	m_acquisition(false),
+	m_streamSampleRate(0),
+	m_streamCenterFrequency(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
-	m_sampleRate(0),
-	m_centerFrequency(0),
 	m_framesDecodingStatus(0),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
@@ -62,26 +63,14 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
     m_nbFECBlocks(0),
     m_samplesCount(0),
     m_tickCount(0),
-    m_address("127.0.0.1"),
-    m_dataPort(9090),
-    m_controlPort(9091),
     m_addressEdited(false),
     m_dataPortEdited(false),
-    m_initSendConfiguration(false),
 	m_countUnrecoverable(0),
 	m_countRecovered(0),
     m_doApplySettings(true),
     m_forceSettings(true),
-    m_txDelay(0.0),
-    m_dcBlock(false),
-    m_iqCorrection(false)
+    m_txDelay(0.0)
 {
-	m_sender = nn_socket(AF_SP, NN_PAIR);
-	assert(m_sender != -1);
-	int millis = 500;
-    int rc __attribute__((unused)) = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
-    assert (rc == 0);
-
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
@@ -98,6 +87,8 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9999999U);
 
+	displaySettings();
+
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 	connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -105,16 +96,13 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 
     m_sampleSource = (SDRdaemonSourceInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
-	displaySettings();
-
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
     m_eventsTime.start();
     displayEventCounts();
     displayEventTimer();
 
-    displaySettings();
-    sendControl(true);
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -145,10 +133,9 @@ QString SDRdaemonSourceGui::getName() const
 
 void SDRdaemonSourceGui::resetToDefaults()
 {
-    blockApplySettings(true);
     m_settings.resetToDefaults();
     displaySettings();
-    blockApplySettings(false);
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -159,37 +146,31 @@ QByteArray SDRdaemonSourceGui::serialize() const
 
 bool SDRdaemonSourceGui::deserialize(const QByteArray& data)
 {
-    blockApplySettings(true);
+    qDebug("SDRdaemonSourceGui::deserialize");
 
-    if(m_settings.deserialize(data))
+    if (m_settings.deserialize(data))
     {
-        displaySettings();
-        configureUDPLink();
         updateTxDelay();
-        sendControl();
-        blockApplySettings(false);
-        sendControl(true);
+        displaySettings();
         m_forceSettings = true;
         sendSettings();
+
         return true;
     }
     else
     {
-        blockApplySettings(false);
         return false;
     }
 }
 
 qint64 SDRdaemonSourceGui::getCenterFrequency() const
 {
-    return m_centerFrequency;
+    return m_streamCenterFrequency;
 }
 
 void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
-    displaySettings();
-    sendControl();
     sendSettings();
 }
 
@@ -203,20 +184,14 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::match(message))
 	{
-        int sampleRate = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).getSampleRate();
-
-        if (m_sampleRate != sampleRate)
-        {
-            m_sampleRate = sampleRate;
-            updateTxDelay();
-            sendControl();
-        }
-
-        m_centerFrequency = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).getCenterFrequency();
         m_startingTimeStamp.tv_sec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_sec();
         m_startingTimeStamp.tv_usec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_usec();
 
-        updateWithStreamData();
+        qDebug() << "SDRdaemonSourceGui::handleMessage: SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData: "
+                << " : " << m_startingTimeStamp.tv_sec
+                << " : " << m_startingTimeStamp.tv_usec;
+
+        updateWithStreamTime();
         return true;
 	}
 	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::match(message))
@@ -241,7 +216,6 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
         {
             m_nbFECBlocks = nbFECBlocks;
             updateTxDelay();
-            sendControl();
         }
 
 		updateWithStreamTime();
@@ -273,9 +247,17 @@ void SDRdaemonSourceGui::handleInputMessages()
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            m_deviceSampleRate = notif->getSampleRate();
-            m_deviceCenterFrequency = notif->getCenterFrequency();
+
+            if (notif->getSampleRate() != m_streamSampleRate)
+            {
+                m_streamSampleRate = notif->getSampleRate();
+                updateTxDelay();
+            }
+
+            m_streamCenterFrequency = notif->getCenterFrequency();
+
             qDebug("SDRdaemonGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+
             updateSampleRateAndFrequency();
             DSPSignalNotification *fwd = new DSPSignalNotification(*notif);
             m_sampleSource->getInputMessageQueue()->push(fwd);
@@ -294,17 +276,21 @@ void SDRdaemonSourceGui::handleInputMessages()
 
 void SDRdaemonSourceGui::updateSampleRateAndFrequency()
 {
-    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
+    m_deviceUISet->getSpectrum()->setSampleRate(m_streamSampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_streamCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
+    blockApplySettings(true);
+    ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
+    ui->freq->setValue(m_streamCenterFrequency / 1000);
+    blockApplySettings(false);
 }
 
 void SDRdaemonSourceGui::updateTxDelay()
 {
-    if (m_sampleRate == 0) {
+    if (m_streamSampleRate == 0) {
         m_txDelay = 0.0; // 0 value will not set the Tx delay
     } else {
-        m_txDelay = ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_nbFECBlocks);
+        m_txDelay = ((127*127*m_settings.m_txDelay) / m_streamSampleRate)/(128 + m_nbFECBlocks);
     }
 
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(m_txDelay*1e6, 'f', 0)));
@@ -312,10 +298,12 @@ void SDRdaemonSourceGui::updateTxDelay()
 
 void SDRdaemonSourceGui::displaySettings()
 {
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-    ui->deviceRateText->setText(tr("%1k").arg(m_sampleRate / 1000.0));
+    blockApplySettings(true);
 
-    ui->freq->setValue(m_settings.m_centerFrequency / 1000);
+    ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
+    ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
+
+    ui->freq->setValue(m_streamCenterFrequency / 1000);
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex(m_settings.m_fcPos);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
@@ -336,124 +324,8 @@ void SDRdaemonSourceGui::displaySettings()
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
-}
 
-void SDRdaemonSourceGui::sendControl(bool force)
-{
-    QString remoteAddress;
-    ((SDRdaemonSourceInput *) m_sampleSource)->getRemoteAddress(remoteAddress);
-
-    if ((remoteAddress != m_remoteAddress) ||
-        (m_settings.m_controlPort != m_controlSettings.m_controlPort) || force)
-    {
-        m_remoteAddress = remoteAddress;
-
-        int rc = nn_shutdown(m_sender, 0);
-
-        if (rc < 0) {
-            qDebug() << "SDRdaemonSourceGui::sendControl: disconnection failed";
-        } else {
-            qDebug() << "SDRdaemonSourceGui::sendControl: disconnection successful";
-        }
-
-        std::ostringstream os;
-        os << "tcp://" << m_remoteAddress.toStdString() << ":" << m_settings.m_controlPort;
-        std::string addrstrng = os.str();
-        rc = nn_connect(m_sender, addrstrng.c_str());
-
-        if (rc < 0) {
-            qDebug() << "SDRdaemonSourceGui::sendConfiguration: connexion to " << addrstrng.c_str() << " failed";
-            QMessageBox::information(this, tr("Message"), tr("Cannot connect to remote control port"));
-        } else {
-            qDebug() << "SDRdaemonSourceGui::sendConfiguration: connexion to " << addrstrng.c_str() << " successful";
-        }
-    }
-
-    std::ostringstream os;
-    int nbArgs = 0;
-
-    if ((m_settings.m_centerFrequency != m_controlSettings.m_centerFrequency) || force)
-    {
-        os << "freq=" << m_settings.m_centerFrequency;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_sampleRate != m_controlSettings.m_sampleRate) || (m_settings.m_log2Decim != m_controlSettings.m_log2Decim) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "srate=" << m_settings.m_sampleRate;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_log2Decim != m_controlSettings.m_log2Decim) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "decim=" << m_settings.m_log2Decim;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_fcPos != m_controlSettings.m_fcPos) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "fcpos=" << m_settings.m_fcPos;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_nbFECBlocks != m_controlSettings.m_nbFECBlocks) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "fecblk=" << m_settings.m_nbFECBlocks;
-        nbArgs++;
-    }
-
-    if (m_txDelay != 0.0)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "txdelay=" << (int) (m_txDelay*1e6);
-        nbArgs++;
-        m_txDelay = 0.0;
-    }
-
-    if ((m_settings.m_specificParameters != m_controlSettings.m_specificParameters) || force)
-    {
-        if (m_settings.m_specificParameters.size() > 0)
-        {
-            if (nbArgs > 0) os << ",";
-            os << m_settings.m_specificParameters.toStdString();
-            nbArgs++;
-        }
-    }
-
-    if (nbArgs > 0)
-    {
-        int config_size = os.str().size();
-        int rc = nn_send(m_sender, (void *) os.str().c_str(), config_size, 0);
-
-        if (rc != config_size)
-        {
-            //QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
-            qDebug() << "SDRdaemonSourceGui::sendControl: Cannot send message to remote control port."
-                << " remoteAddress: " << m_remoteAddress
-                << " remotePort: " << m_settings.m_controlPort
-                << " message: " << os.str().c_str();
-        }
-        else
-        {
-            qDebug() << "SDRdaemonSourceGui::sendControl:"
-                << "remoteAddress:" << m_remoteAddress
-                << "remotePort:" << m_settings.m_controlPort
-                << "message:" << os.str().c_str();
-        }
-    }
-
-    m_controlSettings.m_address = m_settings.m_address;
-    m_controlSettings.m_controlPort = m_settings.m_controlPort;
-    m_controlSettings.m_centerFrequency = m_settings.m_centerFrequency;
-    m_controlSettings.m_sampleRate = m_settings.m_sampleRate;
-    m_controlSettings.m_log2Decim = m_settings.m_log2Decim;
-    m_controlSettings.m_fcPos = m_settings.m_fcPos;
-    m_controlSettings.m_nbFECBlocks = m_settings.m_nbFECBlocks;
-    m_controlSettings.m_specificParameters = m_settings.m_specificParameters;
+	blockApplySettings(false);
 }
 
 void SDRdaemonSourceGui::sendSettings()
@@ -466,12 +338,14 @@ void SDRdaemonSourceGui::on_applyButton_clicked(bool checked __attribute__((unus
 {
     m_settings.m_address = ui->address->text();
 
+    bool send = false;
     bool ctlOk;
     int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
 
     if((ctlOk) && (udpCtlPort >= 1024) && (udpCtlPort < 65535))
     {
         m_settings.m_controlPort = udpCtlPort;
+        send = true;
     }
 
     bool dataOk;
@@ -480,22 +354,26 @@ void SDRdaemonSourceGui::on_applyButton_clicked(bool checked __attribute__((unus
     if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
     {
         m_settings.m_dataPort = udpDataPort;
+        send = true;
     }
 
-    configureUDPLink();
+    if (send) {
+        sendSettings();
+    }
 }
 
 void SDRdaemonSourceGui::on_sendButton_clicked(bool checked __attribute__((unused)))
 {
     updateTxDelay();
-    sendControl(true);
+    m_forceSettings = true;
+    sendSettings();
 	ui->specificParms->setCursorPosition(0);
 }
 
 void SDRdaemonSourceGui::on_address_returnPressed()
 {
     m_settings.m_address = ui->address->text();
-    configureUDPLink();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_dataPort_returnPressed()
@@ -510,9 +388,8 @@ void SDRdaemonSourceGui::on_dataPort_returnPressed()
     else
     {
         m_settings.m_dataPort = udpDataPort;
+        sendSettings();
     }
-
-    configureUDPLink();
 }
 
 void SDRdaemonSourceGui::on_controlPort_returnPressed()
@@ -527,59 +404,52 @@ void SDRdaemonSourceGui::on_controlPort_returnPressed()
     else
     {
         m_settings.m_controlPort = udpCtlPort;
+        sendSettings();
     }
-
-    sendControl();
 }
 
 void SDRdaemonSourceGui::on_dcOffset_toggled(bool checked)
 {
-	if (m_dcBlock != checked)
-	{
-		m_dcBlock = checked;
-		configureAutoCorrections();
-	}
+    m_settings.m_dcBlock = checked;
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_iqImbalance_toggled(bool checked)
 {
-	if (m_iqCorrection != checked)
-	{
-		m_iqCorrection = checked;
-		configureAutoCorrections();
-	}
+    m_settings.m_iqCorrection = checked;
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_freq_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_specificParms_returnPressed()
 {
     if ((ui->specificParms->text()).size() > 0) {
         m_settings.m_specificParameters = ui->specificParms->text();
-        sendControl();
+        sendSettings();
     }
 }
 
 void SDRdaemonSourceGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
 {
     m_settings.m_log2Decim = ui->decim->currentIndex();
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
 {
     m_settings.m_fcPos = ui->fcPos->currentIndex();
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_txDelay_valueChanged(int value)
@@ -587,7 +457,7 @@ void SDRdaemonSourceGui::on_txDelay_valueChanged(int value)
     m_settings.m_txDelay = value / 100.0;
     ui->txDelayText->setText(tr("%1").arg(value));
     updateTxDelay();
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_nbFECBlocks_valueChanged(int value)
@@ -595,7 +465,7 @@ void SDRdaemonSourceGui::on_nbFECBlocks_valueChanged(int value)
     m_settings.m_nbFECBlocks = value;
     QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
     ui->nbFECBlocksText->setText(nstr);
-    sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSourceGui::on_startStop_toggled(bool checked)
@@ -645,29 +515,8 @@ void SDRdaemonSourceGui::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void SDRdaemonSourceGui::configureUDPLink()
-{
-	qDebug() << "SDRdaemonGui::configureUDPLink: " << m_settings.m_address.toStdString().c_str()
-			<< " : " << m_settings.m_dataPort;
-
-	SDRdaemonSourceInput::MsgConfigureSDRdaemonUDPLink* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonUDPLink::create(m_settings.m_address, m_settings.m_dataPort);
-	m_sampleSource->getInputMessageQueue()->push(message);
-}
-
-void SDRdaemonSourceGui::configureAutoCorrections()
-{
-	SDRdaemonSourceInput::MsgConfigureSDRdaemonAutoCorr* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonAutoCorr::create(m_dcBlock, m_iqCorrection);
-	m_sampleSource->getInputMessageQueue()->push(message);
-}
-
 void SDRdaemonSourceGui::updateWithAcquisition()
 {
-}
-
-void SDRdaemonSourceGui::updateWithStreamData()
-{
-	ui->centerFrequency->setValue(m_centerFrequency / 1000);
-	updateWithStreamTime();
 }
 
 void SDRdaemonSourceGui::updateWithStreamTime()
@@ -724,39 +573,54 @@ void SDRdaemonSourceGui::updateWithStreamTime()
 
 void SDRdaemonSourceGui::updateHardware()
 {
-    qDebug() << "SDRdaemonSinkGui::updateHardware";
-    SDRdaemonSourceInput::MsgConfigureSDRdaemonSource* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonSource::create(m_settings, m_forceSettings);
-    m_sampleSource->getInputMessageQueue()->push(message);
-    m_forceSettings = false;
-    m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "SDRdaemonSinkGui::updateHardware";
+        SDRdaemonSourceInput::MsgConfigureSDRdaemonSource* message =
+                SDRdaemonSourceInput::MsgConfigureSDRdaemonSource::create(m_settings, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
 }
 
 void SDRdaemonSourceGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSourceAPI->state();
-
-    if(m_lastEngineState != state)
+    if (m_sampleSource->isStreaming())
     {
-        switch(state)
+        int state = m_deviceUISet->m_deviceSourceAPI->state();
+
+        if (m_lastEngineState != state)
         {
-            case DSPDeviceSourceEngine::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case DSPDeviceSourceEngine::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case DSPDeviceSourceEngine::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case DSPDeviceSourceEngine::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
-                break;
-            default:
-                break;
+            switch(state)
+            {
+                case DSPDeviceSourceEngine::StNotStarted:
+                    ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                    break;
+                case DSPDeviceSourceEngine::StIdle:
+                    ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                    break;
+                case DSPDeviceSourceEngine::StRunning:
+                    ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                    break;
+                case DSPDeviceSourceEngine::StError:
+                    ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                    QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
+                    break;
+                default:
+                    break;
+            }
+
+            m_lastEngineState = state;
         }
 
-        m_lastEngineState = state;
+        ui->startStop->setEnabled(true);
+    }
+    else
+    {
+        ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->startStop->setChecked(false);
+        ui->startStop->setEnabled(false);
     }
 }
 
