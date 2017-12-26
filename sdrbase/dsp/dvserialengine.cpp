@@ -247,7 +247,13 @@ void DVSerialEngine::getDevicesNames(std::vector<std::string>& deviceNames)
     }
 }
 
-void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
+void DVSerialEngine::pushMbeFrame(
+        const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels,
+        bool useLP,
+        AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
     std::vector<DVSerialController>::iterator itAvail = m_controllers.end();
@@ -258,7 +264,7 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
     {
         if (it->worker->hasFifo(audioFifo))
         {
-            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, audioFifo);
             done = true;
         }
         else if (it->worker->isAvailable())
@@ -276,7 +282,7 @@ void DVSerialEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateInde
             int wNum = itAvail - m_controllers.begin();
 
             qDebug("DVSerialEngine::pushMbeFrame: push %p on empty queue %d", audioFifo, wNum);
-            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, audioFifo);
         }
         else
         {

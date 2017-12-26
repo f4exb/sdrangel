@@ -78,7 +78,13 @@ public:
 	bool hasDVSerialSupport();
 	void setDVSerialSupport(bool support);
 	void getDVSerialNames(std::vector<std::string>& deviceNames);
-	void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo);
+	void pushMbeFrame(
+	        const unsigned char *mbeFrame,
+	        int mbeRateIndex,
+	        int mbeVolumeIndex,
+	        unsigned char channels,
+	        bool useHP,
+	        AudioFifo *audioFifo);
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
 

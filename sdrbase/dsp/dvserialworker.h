@@ -54,11 +54,18 @@ public:
         SerialDV::DVRate getMbeRate() const { return m_mbeRate; }
         int getVolumeIndex() const { return m_volumeIndex; }
         unsigned char getChannels() const { return m_channels % 4; }
+        bool getUseHP() const { return m_useHP; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
 
-        static MsgMbeDecode* create(const unsigned char *mbeFrame, int mbeRateIndex, int volumeIndex, unsigned char channels, AudioFifo *audioFifo)
+        static MsgMbeDecode* create(
+                const unsigned char *mbeFrame,
+                int mbeRateIndex,
+                int volumeIndex,
+                unsigned char channels,
+                bool useHP,
+                AudioFifo *audioFifo)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, audioFifo);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, audioFifo);
         }
 
     private:
@@ -66,17 +73,20 @@ public:
         SerialDV::DVRate m_mbeRate;
         int m_volumeIndex;
         unsigned char m_channels;
+        bool m_useHP;
         AudioFifo *m_audioFifo;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
                 SerialDV::DVRate mbeRate,
                 int volumeIndex,
                 unsigned char channels,
+                bool useHP,
                 AudioFifo *audioFifo) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
             m_channels(channels),
+            m_useHP(useHP),
             m_audioFifo(audioFifo)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
@@ -90,6 +100,7 @@ public:
             int mbeRateIndex,
             int mbeVolumeIndex,
             unsigned char channels,
+            bool useHP,
             AudioFifo *audioFifo);
 
     bool open(const std::string& serialDevice);

@@ -17,40 +17,23 @@
 
 #include "filtermbe.h"
 
-const float MBEAudioInterpolatorFilter::m_a0 = 3.869430E-02;
-const float MBEAudioInterpolatorFilter::m_a1 = 7.738860E-02;
-const float MBEAudioInterpolatorFilter::m_a2 = 3.869430E-02;
-const float MBEAudioInterpolatorFilter::m_b1 = 1.392667E+00;
-const float MBEAudioInterpolatorFilter::m_b2 = -5.474446E-01;
+const float MBEAudioInterpolatorFilter::m_lpa[3] = {1.0,           1.392667E+00, -5.474446E-01};
+const float MBEAudioInterpolatorFilter::m_lpb[3] = {3.869430E-02,  7.738860E-02,  3.869430E-02};
 
-MBEAudioInterpolatorFilter::MBEAudioInterpolatorFilter()
+const float MBEAudioInterpolatorFilter::m_hpa[3] = {1.000000e+00,  1.911437E+00, -9.155749E-01};
+const float MBEAudioInterpolatorFilter::m_hpb[3] = {9.567529E-01, -1.913506E+00,  9.567529E-01};
+
+MBEAudioInterpolatorFilter::MBEAudioInterpolatorFilter() :
+        m_filterLP(m_lpa, m_lpb),
+        m_filterHP(m_hpa, m_hpb),
+        m_useHP(false)
 {
-    init();
 }
 
 MBEAudioInterpolatorFilter::~MBEAudioInterpolatorFilter()
 {}
 
-void MBEAudioInterpolatorFilter::init()
+float MBEAudioInterpolatorFilter::run(const float& sample)
 {
-    m_x[0] = 0.0f;
-    m_x[1] = 0.0f;
-    m_y[0] = 0.0f;
-    m_y[1] = 0.0f;
+    return m_useHP ? m_filterLP.run(m_filterHP.run(sample)) : m_filterLP.run(sample);
 }
-
-float MBEAudioInterpolatorFilter::run(float sample)
-{
-    float y = m_a0*sample + m_a1*m_x[0] + m_a2*m_x[1] + m_b1*m_y[0] + m_b2*m_y[1]; // this is y[n]
-
-    m_x[1] = m_x[0];
-    m_x[0] = sample;
-
-    m_y[1] = m_y[0];
-    m_y[0] = y;
-
-    return y;
-}
-
-
-

@@ -584,7 +584,7 @@
        <widget class="QLabel" name="volumeText">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
@@ -598,7 +598,7 @@
          <string>Sound volume</string>
         </property>
         <property name="text">
-         <string>2.0</string>
+         <string>10.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -828,7 +828,7 @@
       <item>
        <widget class="ButtonSwitch" name="highPassFilter">
         <property name="toolTip">
-         <string>Toggle audio high pass filter for mbelib (&gt;300 Hz)</string>
+         <string>Toggle audio high pass filter</string>
         </property>
         <property name="text">
          <string/>

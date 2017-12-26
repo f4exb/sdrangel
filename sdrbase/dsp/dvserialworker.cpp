@@ -81,6 +81,8 @@ void DVSerialWorker::handleInputMessages()
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
             int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 2;
 
+            m_upsampleFilter.useHP(decodeMsg->getUseHP());
+
             if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
             {
                 upsample6(m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels());
@@ -111,10 +113,12 @@ void DVSerialWorker::handleInputMessages()
 void DVSerialWorker::pushMbeFrame(const unsigned char *mbeFrame,
         int mbeRateIndex,
         int mbeVolumeIndex,
-        unsigned char channels, AudioFifo *audioFifo)
+        unsigned char channels,
+        bool useHP,
+        AudioFifo *audioFifo)
 {
     m_audioFifo = audioFifo;
-    m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo));
+    m_inputMessageQueue.push(MsgMbeDecode::create(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, audioFifo));
 }
 
 bool DVSerialWorker::isAvailable()

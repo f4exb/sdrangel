@@ -231,9 +231,15 @@ void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames __attribu
 #endif
 
 #ifdef DSD_USE_SERIALDV
-void DSPEngine::pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo)
+void DSPEngine::pushMbeFrame(
+        const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels,
+        bool useHP,
+        AudioFifo *audioFifo)
 {
-    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, audioFifo);
+    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, audioFifo);
 }
 #else
 void DSPEngine::pushMbeFrame(
@@ -241,6 +247,7 @@ void DSPEngine::pushMbeFrame(
         int mbeRateIndex __attribute((unused)),
         int mbeVolumeIndex __attribute((unused)),
         unsigned char channels __attribute((unused)),
+        bool useHP __attribute((unused)),
         AudioFifo *audioFifo __attribute((unused)))
 {}
 #endif

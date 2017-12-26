@@ -134,8 +134,6 @@ void FileSourceGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("FileSourceGui::handleInputMessages: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;

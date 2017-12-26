@@ -19,35 +19,61 @@
 #define SDRBASE_DSP_FILTERMBE_H_
 
 /**
- * This is a 2 pole lowpass Chebyshev (recursive) filter at fc=0.075 using coefficients found in table 20-1 of
- * http://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_Ch20.pdf
+ * Uses the generic IIR filter internally
+ *
+ * Low pass / High pass:
+ *
+ * This is a 2 pole Chebyshev (recursive) filter using coefficients found in table 20-1 (low pass)
+ * or table 20-2 (high pass) of http://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_Ch20.pdf
+ *
+ * For low pass fc = 0.075
+ * For high oass fc = 0.01
+ *
+ * Convention taken here exchanges A and B coefficients as shown in this image:
+ * https://cdn.mikroe.com/ebooks/img/8/2016/02/digital-filter-design-chapter-03-image-2-9.gif
+ * So A applies to Y and B to X
  *
  * At the interpolated sampling frequency of 48 kHz the -3 dB corner is at 48 * .075 = 3.6 kHz which is perfect for voice
+ * The high pass has a 3 dB corner of 48 * 0.01 = 0.48 kHz
  *
- * a0= 3.869430E-02
- * a1= 7.738860E-02 b1= 1.392667E+00
- * a2= 3.869430E-02 b2= -5.474446E-01
+ * Low pass:
+ *
+ * b0 = 3.869430E-02 (a0 = 1.0)
+ * b1 = 7.738860E-02 a1 =  1.392667E+00
+ * b2 = 3.869430E-02 a2 = -5.474446E-01
+ *
+ * High pass:
+ *
+ * b0 =  9.567529E-01 (a0 = 1.0)
+ * b1 = -1.913506E+00  a1 =  1.911437E+00
+ * b2 =  9.567529E-01  a2 = -9.155749E-01
  *
  * given x[n] is the new input sample and y[n] the returned output sample:
  *
- * y[n] = a0*x[n] + a1*x[n] + a2*x[n] + b1*y[n-1] + b2*y[n-2]
+ * y[n] = b0*x[n] + b1*x[n] + b2*x[n] + a1*y[n-1] + a2*y[n-2]
  *
  * This one works directly with floats
  *
+ *
  */
+
+#include "iirfilter.h"
+
 class MBEAudioInterpolatorFilter
 {
 public:
     MBEAudioInterpolatorFilter();
     ~MBEAudioInterpolatorFilter();
 
-    void init();
-    float run(float sample);
+    void useHP(bool useHP) { m_useHP = useHP; }
+    float run(const float& sample);
 
 private:
-    float m_x[2];
-    float m_y[2];
-    static const float m_a0, m_a1, m_a2, m_b1, m_b2;
+    IIRFilter<float, 2> m_filterLP;
+    IIRFilter<float, 2> m_filterHP;
+    bool m_useHP;
+    static const float m_lpa[3], m_lpb[3]; // low pass coefficients
+    static const float m_hpa[3], m_hpb[3]; // band pass coefficients
 };
 
 

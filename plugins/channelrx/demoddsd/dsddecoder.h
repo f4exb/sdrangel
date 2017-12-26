@@ -70,6 +70,7 @@ public:
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
     void setBaudRate(int baudRate);
     void setSymbolPLLLock(bool pllLock) { m_decoder.setSymbolPLLLock(pllLock); }
+    void useHPMbelib(bool useHP) { m_decoder.useHPMbelib(useHP); }
 
 private:
     DSDcc::DSDDecoder m_decoder;

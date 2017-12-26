@@ -196,6 +196,12 @@ void DSDDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_highPassFilter_toggled(bool checked)
+{
+    m_settings.m_highPassFilter = checked;
+    applySettings();
+}
+
 void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
 {
     if (checked) {

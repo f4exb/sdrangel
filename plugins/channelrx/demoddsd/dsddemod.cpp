@@ -215,6 +215,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                                 m_dsdDecoder.getMbeRateIndex(),
                                 m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
+                                m_settings.m_highPassFilter,
                                 &m_audioFifo1);
                     }
 
@@ -230,6 +231,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                                 m_dsdDecoder.getMbeRateIndex(),
                                 m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
+                                m_settings.m_highPassFilter,
                                 &m_audioFifo2);
                     }
 
@@ -375,6 +377,7 @@ bool DSDDemod::handleMessage(const Message& cmd)
                 << " m_udpCopyAudio: " << m_settings.m_udpCopyAudio
                 << " m_udpAddress: " << m_settings.m_udpAddress
                 << " m_udpPort: " << m_settings.m_udpPort
+                << " m_highPassFilter: "<< m_settings.m_highPassFilter
                 << " force: " << cfg.getForce();
 
         return true;
@@ -465,6 +468,11 @@ void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
     {
         m_audioFifo1.setCopyToUDP(settings.m_slot1On && settings.m_udpCopyAudio);
         m_audioFifo2.setCopyToUDP(settings.m_slot2On && !settings.m_slot1On && settings.m_udpCopyAudio);
+    }
+
+    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
+    {
+        m_dsdDecoder.useHPMbelib(settings.m_highPassFilter);
     }
 
     m_settings = settings;

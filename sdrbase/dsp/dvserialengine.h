@@ -41,7 +41,13 @@ public:
     int getNbDevices() const { return m_controllers.size(); }
     void getDevicesNames(std::vector<std::string>& devicesNames);
 
-    void pushMbeFrame(const unsigned char *mbeFrame, int mbeRateIndex, int mbeVolumeIndex, unsigned char channels, AudioFifo *audioFifo);
+    void pushMbeFrame(
+            const unsigned char *mbeFrame,
+            int mbeRateIndex,
+            int mbeVolumeIndex,
+            unsigned char channels,
+            bool useHP,
+            AudioFifo *audioFifo);
 
 private:
     struct DVSerialController
