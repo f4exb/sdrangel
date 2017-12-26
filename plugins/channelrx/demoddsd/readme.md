@@ -175,11 +175,15 @@ The level corresponds to the channel power above which the squelch gate opens.
 
 Number of milliseconds following squelch gate opening after which the signal is actually fed to the decoder. 0 means no delay i.e. immediate feed.
 
-<h3>18: Audio mute and squelch indicator</h3>
+<h3>18: High-pass filter for audio</h3>
+
+Use this switch to toggle high-pass filter on the audio
+
+<h3>19: Audio mute and squelch indicator</h3>
 
 Audio mute toggle button. This button lights in green when the squelch opens.
 
-<h3>19: UDP output</h3>
+<h3>20: UDP output</h3>
 
 Copies audio output to UDP. Output is stereo S16LE samples. Depending on which slots are active the output is the following:
 
@@ -191,57 +195,57 @@ It cannot mix both channels when slot1+2 are active.
 
 UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
-<h3>20: Format specific status display</h3>
+<h3>21: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 
-<h4>20.1: D-Star status display</h4>
+<h4>21.1: D-Star status display</h4>
 
 ![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
 
-<h5>20.1.1: Origin (my) and destination (your) callsign</h5>
+<h5>21.1.1: Origin (my) and destination (your) callsign</h5>
 
   - at the left of the `>` sign is the origin callsign ` MY` with the 4 character informative suffix nest to the slash `/`
   - at the right of the `>` sign is the destination callsign `YOUR`. As per Icom standard this is `CQCQCQ` when a call is made to all stations
   - this information is retrieved from the header or the slow data if it can be decoded
 
-<h5>20.1.2: Repeater callsign</h5>
+<h5>21.1.2: Repeater callsign</h5>
 
   - at the left of the `>` sign is the origin repeater or `RPT1`
   - at the right of the `>` sign is the destination repeater or `RPT2`
   - this information is retrieved from the header or the slow data if it can be decoded
 
-<h5>20.1.3: Informative text</h5>
+<h5>21.1.3: Informative text</h5>
 
 When slow data can be decoded this is the 20 character string that is sent in the text frames 
 
-<h5>20.1.4: Geopositional data</h5>
+<h5>21.1.4: Geopositional data</h5>
 
 When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:  
 
    - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
    - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`. 
 
-<h4>20.2: DMR status display</h4>
+<h4>21.2: DMR status display</h4>
 
 ![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
 
   - Note 1: statuses are polled at ~1s rate and therefore do not reflect values instantaneously. As a consequence some block types that occur during the conversation may not appear.
   - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared 
 
-<h5>20.2.1: Station role</h5>
+<h5>21.2.1: Station role</h5>
 
   - `BS`: base station
   - `MS`: mobile station
   - `NA`: not applicable or could not be determined (you should not see this normally)
 
-<h5>20.2.2: TDMA slot #0 status</h5>
+<h5>21.2.2: TDMA slot #0 status</h5>
 
 For mobile stations on an inbound channel there is no channel identification (no CACH) so information goes there by default.
 
-<h5>20.2.3: TDMA slot #1 status</h5>
+<h5>21.2.3: TDMA slot #1 status</h5>
 
-<h5>20.2.4: Channel status and color code</h5>
+<h5>21.2.4: Channel status and color code</h5>
 
 This applies to base stations and mobile stations in continuous mode that is transmissions including the CACH sequences.
 
@@ -256,7 +260,7 @@ This applies to base stations and mobile stations in continuous mode that is tra
     - The color code from 0 to 15 (4 bits)
     - `--`: The color code could not be decoded and information is missing
   
-<h5>20.2.5: Slot type</h5>
+<h5>21.2.5: Slot type</h5>
 
 This is either:
 
@@ -274,7 +278,7 @@ This is either:
    - `RES`: reserved data block 
    - `UNK`: unknown data type or could not be decoded
 
-<h5>20.2.6: Addressing information</h5>
+<h5>21.2.6: Addressing information</h5>
 
 String is in the form: `02223297>G00000222`
 
@@ -284,11 +288,11 @@ String is in the form: `02223297>G00000222`
     - `U`: unit (individual) address
   - Next on the right is the target address (24 bits) as defined in the DMR ETSI standard
 
-<h4>20.3: dPMR status display</h4>
+<h4>21.3: dPMR status display</h4>
 
 ![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
 
-<h5>20.3.1: dPMR frame tyoe</h5>
+<h5>21.3.1: dPMR frame tyoe</h5>
 
   - `--`: undetermined
   - `HD`: Header of FS1 type
@@ -300,23 +304,23 @@ String is in the form: `02223297>G00000222`
   - `XS`: Extended search: looking for a new payload frame when out of sequence
   - `EN`: End frame
   
-<h5>20.3.2: Colour code</h5>
+<h5>21.3.2: Colour code</h5>
 
 Colour code in decimal (12 bits)
 
-<h5>20.3.3: Own ID</h5>
+<h5>21.3.3: Own ID</h5>
 
 Sender's identification code in decimal (24 bits)
 
-<h5>20.3.4: Called ID</h5>
+<h5>21.3.4: Called ID</h5>
 
 Called party's identification code in decimal (24 bits)
 
-<h4>20.4: Yaesu System Fusion (YSF) status display</h4>
+<h4>21.4: Yaesu System Fusion (YSF) status display</h4>
 
 ![DSD YSF status](../../../doc/img/DSDdemod_plugin_ysf_status.png)
 
-<h5>20.4.1: FICH data</h5>
+<h5>21.4.1: FICH data</h5>
 
 This displays a summary of FICH (Frame Identification CHannel) block data. From left to right:
 
@@ -349,23 +353,23 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
       - `L`: local path (as inthe example)
     - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
     
-<h5>20.4.2: Origin and destination callsigns</h5>
+<h5>21.4.2: Origin and destination callsigns</h5>
 
   - at the left of the `>` sign is the origin callsign
   - at the right of the `>` sign is the destination callsign. It is filled with stars `*` when call is made to all stations (similar to the CQCQCQ in D-Star)
 
-<h5>20.4.3: Origin and destination repeaters callsigns</h5>
+<h5>21.4.3: Origin and destination repeaters callsigns</h5>
 
   - at the left of the `>` sign is the origin repeater callsign
   - at the right of the `>` sign is the destination repeater callsign. 
 
-<h5>20.4.4: Originator radio ID</h5>
+<h5>21.4.4: Originator radio ID</h5>
 
 This is the unique character string assigned to the device by the manufacturer.
 
-<h3>21: Discriminator output scope display</h3>
+<h3>22: Discriminator output scope display</h3>
 
-<h4>21.1 Transitions constellation display</h4>
+<h4>22.1 Transitions constellation display</h4>
 
 This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
@@ -381,18 +385,18 @@ This allows the visualization of symbol transitions which depend on the type of 
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope.png)
 
-<h5>21.1.1: Setting the display</h5>
+<h5>22.1.1: Setting the display</h5>
 
   - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
   - On the display buttons you should choose the side by side display
 
 On the same line you can choose any trace length. If it is too short the constellation points will not appear clearly and if it is too long the polar figure will be too dense. Usually 100ms give good results.
 
-<h5>21.1.2: IQ linear display</h5>
+<h5>22.1.2: IQ linear display</h5>
 
 The yellow trace (I) is the direct trace and the blue trace (Q) is the delayed trace. This can show how symbols differentiate between each other in a sort of eye diagram.
 
-<h5>21.1.3: IQ polar display</h5>
+<h5>22.1.3: IQ polar display</h5>
 
 This shows the constellation of transition points. You should adjust the frequency shift to center the figure and the maximum deviation and/or discriminator gain to contain the figure within the +/-0.4 square. +/- 0.1 to +/- 0.3 usually give the best results.
 
@@ -428,50 +432,47 @@ There are 16 possible points corresponding to the 16 possible transitions betwee
 
 Because not all transitions are possible similarly to the 2-FSK case pointer moves from the lower left side of the diagonal to the upper right side are not possible.
 
-<h5>21.1.4: I gain</h5>
+<h5>22.1.4: I gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>21.1.5: Q gain</h5>
+<h5>22.1.5: Q gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>21.1.6: Trigger settings</h5>
+<h5>22.1.6: Trigger settings</h5>
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
 
-<h4>21.2: Symbol synchronization display</h4>
+<h4>22.2: Symbol synchronization display</h4>
 
 This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
 
 ![DSD scope](../../../doc/img/DSDdemod_plugin_scope2.png)
 
-<h5>21.2.1: IQ linear display</h5>
+<h5>22.2.1: IQ linear display</h5>
 
 The I trace (yellow) is the discriminator signal and the Q trace (blue) is the symbol synchronization monitor trace that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
 
 The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Q trace (blue) should go down to mid position in the first fourth of the symbol period.
 
-<h5>21.2.2: Setting the display</h5>
+<h5>22.2.2: Setting the display</h5>
 
   - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
   - On the display buttons you should choose the first display (1)
 
-<h5>21.2.3: Timing settings</h5>
+<h5>22.2.3: Timing settings</h5>
 
 You can choose any trace length with the third slider from the left however 100 ms will give you the best view. You may stretch further the display by reducing the full length to 20 ms or less using the first slider. You can move this 20 ms window across the 100 ms trace with the middle slider.
 
-<h5>21.2.4: I gain</h5>
+<h5>22.2.4: I gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>21.2.5: Q gain</h5>
+<h5>22.2.5: Q gain</h5>
 
 You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
 
-<h5>21.2.6: Trigger settings</h5>
+<h5>22.2.6: Trigger settings</h5>
 
 You can leave the trigger free running or set it to I linear with a 0 threshold.
-
-
- 
