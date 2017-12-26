@@ -119,6 +119,7 @@ bool LimeSDROutput::openDevice()
             if (buddyShared->m_channel == requestedChannel)
             {
                 qCritical("LimeSDROutput::openDevice: cannot open busy channel %u", requestedChannel);
+                delete[] busyChannels;
                 return false;
             }
         }

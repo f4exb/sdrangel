@@ -501,7 +501,7 @@ int NFMDemod::webapiSettingsPutPatch(
             QString& errorMessage  __attribute__((unused)))
 {
     NFMDemodSettings settings = m_settings;
-    bool frequencyOffsetChanged;
+    bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("afBandwidth")) {
         settings.m_afBandwidth = response.getNfmDemodSettings()->getAfBandwidth();
