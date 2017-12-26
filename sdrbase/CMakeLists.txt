@@ -108,6 +108,7 @@ set(sdrbase_HEADERS
     dsp/filtermbe.h
     dsp/filerecord.h
     dsp/gfft.h
+    dsp/iirfilter.h
     dsp/interpolator.h
     dsp/hbfiltertraits.h
     dsp/inthalfbandfilter.h

@@ -45,6 +45,7 @@ struct DSDDemodSettings
     quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
+    bool m_highPassFilter;
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;

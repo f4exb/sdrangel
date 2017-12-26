@@ -826,6 +826,20 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="highPassFilter">
+        <property name="toolTip">
+         <string>Toggle audio high pass filter for mbelib (&gt;300 Hz)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/filter_highpass.png</normaloff>:/filter_highpass.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
          <string>Mute/Unmute audio (all slots)</string>

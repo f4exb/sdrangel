@@ -146,6 +146,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/filerecord.h\
         dsp/gfft.h\
         dsp/hbfiltertraits.h\
+        dsp/iirfilter.h\
         dsp/interpolator.h\
         dsp/inthalfbandfilter.h\
         dsp/inthalfbandfilterdb.h\
