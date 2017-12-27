@@ -159,27 +159,6 @@ public:
         { }
     };
 
-    class MsgConfigureAFInput : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        NFMModInputAF getAFInput() const { return m_afInput; }
-
-        static MsgConfigureAFInput* create(NFMModInputAF afInput)
-        {
-            return new MsgConfigureAFInput(afInput);
-        }
-
-    private:
-        NFMModInputAF m_afInput;
-
-        MsgConfigureAFInput(NFMModInputAF afInput) :
-            Message(),
-            m_afInput(afInput)
-        { }
-    };
-
     class MsgReportFileSourceStreamTiming : public Message
     {
         MESSAGE_CLASS_DECLARATION

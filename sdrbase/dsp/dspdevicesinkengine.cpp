@@ -353,9 +353,12 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 		(*it)->stop();
 	}
 
-	disconnect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+	if (m_spectrumSink)
+	{
+        disconnect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+        m_spectrumSink->stop();
+	}
 
-	m_spectrumSink->stop();
 	m_deviceSampleSink->stop();
 	m_deviceDescription.clear();
 	m_sampleRate = 0;
@@ -410,7 +413,9 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 		(*it)->handleSourceMessage(notif);
 	}
 
-	m_spectrumSink->handleMessage(notif);
+	if (m_spectrumSink) {
+        m_spectrumSink->handleMessage(notif);
+	}
 
 	// pass data to listeners
 	if (m_deviceSampleSink->getMessageQueueToGUI())
@@ -481,8 +486,11 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 		(*it)->start();
 	}
 
-	connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-	m_spectrumSink->start();
+	if (m_spectrumSink)
+	{
+        connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+        m_spectrumSink->start();
+	}
 
 	qDebug() << "DSPDeviceSinkEngine::gotoRunning: input message queue pending: " << m_inputMessageQueue.size();
 

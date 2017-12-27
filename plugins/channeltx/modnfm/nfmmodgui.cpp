@@ -205,8 +205,6 @@ void NFMModGUI::on_play_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputFile : NFMModSettings::NFMModInputNone;
     applySettings();
-//    NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
-//    m_nfmMod->getInputMessageQueue()->push(message);
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -218,8 +216,6 @@ void NFMModGUI::on_tone_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputTone : NFMModSettings::NFMModInputNone;
     applySettings();
-//    NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
-//    m_nfmMod->getInputMessageQueue()->push(message);
 }
 
 void NFMModGUI::on_morseKeyer_toggled(bool checked)
@@ -229,8 +225,6 @@ void NFMModGUI::on_morseKeyer_toggled(bool checked)
     ui->play->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputCWTone : NFMModSettings::NFMModInputNone;
     applySettings();
-//    NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
-//    m_nfmMod->getInputMessageQueue()->push(message);
 }
 
 void NFMModGUI::on_mic_toggled(bool checked)
@@ -240,8 +234,6 @@ void NFMModGUI::on_mic_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputAudio : NFMModSettings::NFMModInputNone;
     applySettings();
-//    NFMMod::MsgConfigureAFInput* message = NFMMod::MsgConfigureAFInput::create(m_modAFInput);
-//    m_nfmMod->getInputMessageQueue()->push(message);
 }
 
 void NFMModGUI::on_navTimeSlider_valueChanged(int value)

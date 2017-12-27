@@ -37,7 +37,6 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureNFMMod, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
@@ -356,15 +355,6 @@ bool NFMMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
-        qDebug() << "NFMMod::handleMessage: MsgConfigureAFInput:"
-                 << " m_afInput: " << m_afInput;
-
-        return true;
-    }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
     	std::size_t samplesCount;
@@ -537,6 +527,7 @@ int NFMMod::webapiSettingsPutPatch(
                 QString& errorMessage __attribute__((unused)))
 {
     NFMModSettings settings;
+    bool frequencyOffsetChanged = false;
 
 //    for (int i = 0; i < channelSettingsKeys.size(); i++) {
 //        qDebug("NFMMod::webapiSettingsPutPatch: settingKey: %s", qPrintable(channelSettingsKeys.at(i)));
@@ -563,8 +554,10 @@ int NFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
         settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("modAFInput")) {
         settings.m_modAFInput = (NFMModSettings::NFMModInputAF) response.getNfmModSettings()->getModAfInput();
@@ -623,6 +616,13 @@ int NFMMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyer);
         }
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
+                48000, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);

@@ -925,6 +925,76 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
     }
 }
 
+int WebAPIAdapterSrv::devicesetDeviceRunPost(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiRun(true, response, *error.getMessage());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiRun(true, response, *error.getMessage());
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceRunDelete(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiRun(false, response, *error.getMessage());
+       }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiRun(false, response, *error.getMessage());
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterSrv::devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
