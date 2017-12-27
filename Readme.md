@@ -2,6 +2,8 @@
 
 **SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) 4.3+ (Windows) SDR and signal analyzer frontend to various hardware.
 
+**Check the discussion group** [here](https://groups.io/g/sdrangel)
+
 <h1>Source code</h1>
 
 <h2>Repository branches</h2>
@@ -126,7 +128,7 @@ Then add the following defines on `cmake` command line:
 
 PlutoSDR is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
-If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
+If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSuse the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
 
 <h2>RTL-SDR</h2>
 
@@ -327,8 +329,10 @@ This has been tested with the bleeding edge "Thumbleweed" distribution:
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-  - Note1 for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
-  - Note2: A package has been created in OpenSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
+  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc5-c++` or `gcc6-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6` (for gcc 6) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
+  - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg)
+  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+  - Note4: A package has been created in OpenSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
 
