@@ -18,11 +18,15 @@ def getInputOptions():
 
     parser = OptionParser(usage="usage: %%prog [-t]\n")
     parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
+    parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int") 
 
     (options, args) = parser.parse_args()
     
-    if (options.address == None):
+    if options.address == None:
         options.address = "127.0.0.1:8091"
+    
+    if options.device_index == None:
+        options.device_index = 1
     
     return options
 
@@ -61,11 +65,13 @@ def main():
         if r is None:
             exit(-1)
             
-        r = callAPI("/deviceset/1/device", "PUT", None, {"hwType": "LimeSDR", "tx": 1}, "setup LimeSDR on Tx 1")
+        deviceset_url = "/deviceset/%d" % options.device_index
+        
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "LimeSDR", "tx": 1}, "setup LimeSDR on Tx device set")
         if r is None:
             exit(-1)
             
-        settings = callAPI("/deviceset/1/device/settings", "GET", None, None, "Get LimeSDR Tx settings")
+        settings = callAPI(deviceset_url + "/device/settings", "GET", None, None, "Get LimeSDR Tx settings")
         if settings is None:
             exit(-1)
 
@@ -77,15 +83,15 @@ def main():
         settings["limeSdrOutputSettings"]["lpfFIRBW"] = 100000
         settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1 
         
-        r = callAPI("/deviceset/1/device/settings", "PATCH", None, settings, "Patch LimeSDR Tx settings")
+        r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch LimeSDR Tx settings")
         if r is None:
             exit(-1)
             
-        r = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
         if r is None:
             exit(-1)
         
-        settings = callAPI("/deviceset/1/channel/0/settings", "GET", None, None, "Get NFM mod settings")
+        settings = callAPI(deviceset_url + "/channel/0/settings", "GET", None, None, "Get NFM mod settings")
         if settings is None:
             exit(-1)
         
@@ -95,11 +101,11 @@ def main():
         settings["NFMModSettings"]["modAFInput"] = 4 # CW text
         settings["NFMModSettings"]["toneFrequency"] = 600
         
-        r = callAPI("/deviceset/1/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
+        r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
         if r is None:
             exit(-1)
             
-        r = callAPI("/deviceset/1/device/run", "POST", None, None, "Start device on deviceset R1")
+        r = callAPI(deviceset_url + "/device/run", "POST", None, None, "Start device on deviceset R1")
         if r is None:
             exit(-1)
         
