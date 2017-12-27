@@ -384,6 +384,7 @@ public:
     virtual int devicesetDeviceSettingsPutPatch(
             int deviceSetIndex __attribute__((unused)),
             bool force __attribute__((unused)), //!< true to force settings = put else patch
+            const QStringList& channelSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {

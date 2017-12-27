@@ -128,6 +128,7 @@ public:
     virtual int devicesetDeviceSettingsPutPatch(
             int deviceSetIndex,
             bool force,
+            const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 

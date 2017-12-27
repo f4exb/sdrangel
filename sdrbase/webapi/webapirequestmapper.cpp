@@ -892,12 +892,14 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
             {
                 SWGSDRangel::SWGDeviceSettings normalResponse;
                 resetDeviceSettings(normalResponse);
+                QStringList deviceSettingsKeys;
 
-                if (validateDeviceSettings(normalResponse, jsonObject))
+                if (validateDeviceSettings(normalResponse, jsonObject, deviceSettingsKeys))
                 {
                     int status = m_adapter->devicesetDeviceSettingsPutPatch(
                             deviceSetIndex,
                             (request.getMethod() == "PUT"), // force settings on PUT
+                            deviceSettingsKeys,
                             normalResponse,
                             errorResponse);
                     response.setStatus(status);
@@ -1351,7 +1353,10 @@ bool WebAPIRequestMapper::validateDeviceListItem(SWGSDRangel::SWGDeviceListItem&
     return identified;
 }
 
-bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject)
+bool WebAPIRequestMapper::validateDeviceSettings(
+        SWGSDRangel::SWGDeviceSettings& deviceSettings,
+        QJsonObject& jsonObject,
+        QStringList& deviceSettingsKeys)
 {
     if (jsonObject.contains("tx")) {
         deviceSettings.setTx(jsonObject["tx"].toInt());
@@ -1372,6 +1377,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
         if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
         {
             QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
+            deviceSettingsKeys = fileSourceSettingsJsonObject.keys();
             deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
             deviceSettings.getFileSourceSettings()->fromJsonObject(fileSourceSettingsJsonObject);
             return true;
@@ -1386,6 +1392,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
         if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
         {
             QJsonObject rtlSdrSettingsJsonObject = jsonObject["rtlSdrSettings"].toObject();
+            deviceSettingsKeys = rtlSdrSettingsJsonObject.keys();
             deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
             deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
             return true;
@@ -1400,6 +1407,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
         if (jsonObject.contains("limeSdrInputSettings") && jsonObject["limeSdrInputSettings"].isObject())
         {
             QJsonObject limeSdrInputSettingsJsonObject = jsonObject["limeSdrInputSettings"].toObject();
+            deviceSettingsKeys = limeSdrInputSettingsJsonObject.keys();
             deviceSettings.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
             deviceSettings.getLimeSdrInputSettings()->fromJsonObject(limeSdrInputSettingsJsonObject);
             return true;
@@ -1414,6 +1422,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(SWGSDRangel::SWGDeviceSettings&
         if (jsonObject.contains("limeSdrOutputSettings") && jsonObject["limeSdrOutputSettings"].isObject())
         {
             QJsonObject limeSdrOutputSettingsJsonObject = jsonObject["limeSdrOutputSettings"].toObject();
+            deviceSettingsKeys = limeSdrOutputSettingsJsonObject.keys();
             deviceSettings.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
             deviceSettings.getLimeSdrOutputSettings()->fromJsonObject(limeSdrOutputSettingsJsonObject);
             return true;

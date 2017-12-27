@@ -55,6 +55,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
             bool force __attribute__((unused)), //!< true to force settings = put
+            const QStringList& deviceSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }

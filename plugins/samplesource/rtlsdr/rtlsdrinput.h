@@ -112,6 +112,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
                 bool force,
+                const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
@@ -150,6 +151,7 @@ private:
 	bool openDevice();
 	void closeDevice();
 	bool applySettings(const RTLSDRSettings& settings, bool force);
+	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings);
 };
 
 #endif // INCLUDE_RTLSDRINPUT_H

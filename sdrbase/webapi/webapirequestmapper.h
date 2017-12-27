@@ -70,7 +70,7 @@ private:
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
     bool validatePresetExport(SWGSDRangel::SWGPresetExport& presetExport);
     bool validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject);
-    bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject);
+    bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
 
     void appendSettingsSubKeys(

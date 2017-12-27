@@ -866,6 +866,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
 int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         int deviceSetIndex,
         bool force,
+        const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -888,7 +889,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
             else
             {
                 DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
-                return source->webapiSettingsPutPatch(force, response, *error.getMessage());
+                return source->webapiSettingsPutPatch(force, deviceSettingsKeys, response, *error.getMessage());
             }
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
@@ -906,7 +907,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
             else
             {
                 DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
-                return sink->webapiSettingsPutPatch(force, response, *error.getMessage());
+                return sink->webapiSettingsPutPatch(force, deviceSettingsKeys, response, *error.getMessage());
             }
         }
         else

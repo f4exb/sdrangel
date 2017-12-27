@@ -1214,53 +1214,75 @@ int LimeSDRInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
-    response.getLimeSdrInputSettings()->setAntennaPath((int) m_settings.m_antennaPath);
-    response.getLimeSdrInputSettings()->setCenterFrequency(m_settings.m_centerFrequency);
-    response.getLimeSdrInputSettings()->setDcBlock(m_settings.m_dcBlock ? 1 : 0);
-    response.getLimeSdrInputSettings()->setDevSampleRate(m_settings.m_devSampleRate);
-    response.getLimeSdrInputSettings()->setExtClock(m_settings.m_extClock ? 1 : 0);
-    response.getLimeSdrInputSettings()->setExtClockFreq(m_settings.m_extClockFreq);
-    response.getLimeSdrInputSettings()->setGain(m_settings.m_gain);
-    response.getLimeSdrInputSettings()->setGainMode((int) m_settings.m_gainMode);
-    response.getLimeSdrInputSettings()->setIqCorrection(m_settings.m_iqCorrection ? 1 : 0);
-    response.getLimeSdrInputSettings()->setLnaGain(m_settings.m_lnaGain);
-    response.getLimeSdrInputSettings()->setLog2HardDecim(m_settings.m_log2HardDecim);
-    response.getLimeSdrInputSettings()->setLog2SoftDecim(m_settings.m_log2SoftDecim);
-    response.getLimeSdrInputSettings()->setLpfBw(m_settings.m_lpfBW);
-    response.getLimeSdrInputSettings()->setLpfFirEnable(m_settings.m_lpfFIREnable ? 1 : 0);
-    response.getLimeSdrInputSettings()->setLpfFirbw(m_settings.m_lpfFIRBW);
-    response.getLimeSdrInputSettings()->setNcoEnable(m_settings.m_ncoEnable ? 1 : 0);
-    response.getLimeSdrInputSettings()->setNcoFrequency(m_settings.m_ncoFrequency);
-    response.getLimeSdrInputSettings()->setPgaGain(m_settings.m_pgaGain);
-    response.getLimeSdrInputSettings()->setTiaGain(m_settings.m_tiaGain);
+    webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
 
 int LimeSDRInput::webapiSettingsPutPatch(
                 bool force,
+                const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage __attribute__((unused)))
 {
-    LimeSDRInputSettings settings;
-    settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) response.getLimeSdrInputSettings()->getAntennaPath();
-    settings.m_centerFrequency = response.getLimeSdrInputSettings()->getCenterFrequency();
-    settings.m_dcBlock = response.getLimeSdrInputSettings()->getDcBlock() != 0;
-    settings.m_devSampleRate = response.getLimeSdrInputSettings()->getDevSampleRate();
-    settings.m_extClock = response.getLimeSdrInputSettings()->getExtClock() != 0;
-    settings.m_extClockFreq = response.getLimeSdrInputSettings()->getExtClockFreq();
-    settings.m_gain = response.getLimeSdrInputSettings()->getGain();
-    settings.m_gainMode = (LimeSDRInputSettings::GainMode) response.getLimeSdrInputSettings()->getGainMode();
-    settings.m_iqCorrection = response.getLimeSdrInputSettings()->getIqCorrection() != 0;
-    settings.m_lnaGain = response.getLimeSdrInputSettings()->getLnaGain();
-    settings.m_log2HardDecim = response.getLimeSdrInputSettings()->getLog2HardDecim();
-    settings.m_log2SoftDecim = response.getLimeSdrInputSettings()->getLog2SoftDecim();
-    settings.m_lpfBW = response.getLimeSdrInputSettings()->getLpfBw();
-    settings.m_lpfFIREnable = response.getLimeSdrInputSettings()->getLpfFirEnable() != 0;
-    settings.m_lpfFIRBW = response.getLimeSdrInputSettings()->getLpfFirbw();
-    settings.m_ncoEnable = response.getLimeSdrInputSettings()->getNcoEnable() != 0;
-    settings.m_ncoFrequency = response.getLimeSdrInputSettings()->getNcoFrequency();
-    settings.m_pgaGain = response.getLimeSdrInputSettings()->getPgaGain();
-    settings.m_tiaGain = response.getLimeSdrInputSettings()->getTiaGain();
+    LimeSDRInputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("antennaPath")) {
+        settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) response.getLimeSdrInputSettings()->getAntennaPath();
+    }
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getLimeSdrInputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getLimeSdrInputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getLimeSdrInputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("extClock")) {
+        settings.m_extClock = response.getLimeSdrInputSettings()->getExtClock() != 0;
+    }
+    if (deviceSettingsKeys.contains("extClockFreq")) {
+        settings.m_extClockFreq = response.getLimeSdrInputSettings()->getExtClockFreq();
+    }
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getLimeSdrInputSettings()->getGain();
+    }
+    if (deviceSettingsKeys.contains("gainMode")) {
+        settings.m_gainMode = (LimeSDRInputSettings::GainMode) response.getLimeSdrInputSettings()->getGainMode();
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getLimeSdrInputSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("lnaGain")) {
+        settings.m_lnaGain = response.getLimeSdrInputSettings()->getLnaGain();
+    }
+    if (deviceSettingsKeys.contains("log2HardDecim")) {
+        settings.m_log2HardDecim = response.getLimeSdrInputSettings()->getLog2HardDecim();
+    }
+    if (deviceSettingsKeys.contains("log2SoftDecim")) {
+        settings.m_log2SoftDecim = response.getLimeSdrInputSettings()->getLog2SoftDecim();
+    }
+    if (deviceSettingsKeys.contains("lpfBW")) {
+        settings.m_lpfBW = response.getLimeSdrInputSettings()->getLpfBw();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnable")) {
+        settings.m_lpfFIREnable = response.getLimeSdrInputSettings()->getLpfFirEnable() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBW")) {
+        settings.m_lpfFIRBW = response.getLimeSdrInputSettings()->getLpfFirbw();
+    }
+    if (deviceSettingsKeys.contains("ncoEnable")) {
+        settings.m_ncoEnable = response.getLimeSdrInputSettings()->getNcoEnable() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoFrequency")) {
+        settings.m_ncoFrequency = response.getLimeSdrInputSettings()->getNcoFrequency();
+    }
+    if (deviceSettingsKeys.contains("pgaGain")) {
+        settings.m_pgaGain = response.getLimeSdrInputSettings()->getPgaGain();
+    }
+    if (deviceSettingsKeys.contains("tiaGain")) {
+        settings.m_tiaGain = response.getLimeSdrInputSettings()->getTiaGain();
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1271,7 +1293,31 @@ int LimeSDRInput::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDRInputSettings& settings)
+{
+    response.getLimeSdrInputSettings()->setAntennaPath((int) settings.m_antennaPath);
+    response.getLimeSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getLimeSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getLimeSdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getLimeSdrInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
+    response.getLimeSdrInputSettings()->setExtClockFreq(settings.m_extClockFreq);
+    response.getLimeSdrInputSettings()->setGain(settings.m_gain);
+    response.getLimeSdrInputSettings()->setGainMode((int) settings.m_gainMode);
+    response.getLimeSdrInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getLimeSdrInputSettings()->setLnaGain(settings.m_lnaGain);
+    response.getLimeSdrInputSettings()->setLog2HardDecim(settings.m_log2HardDecim);
+    response.getLimeSdrInputSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getLimeSdrInputSettings()->setLpfBw(settings.m_lpfBW);
+    response.getLimeSdrInputSettings()->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
+    response.getLimeSdrInputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
+    response.getLimeSdrInputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
+    response.getLimeSdrInputSettings()->setNcoFrequency(settings.m_ncoFrequency);
+    response.getLimeSdrInputSettings()->setPgaGain(settings.m_pgaGain);
+    response.getLimeSdrInputSettings()->setTiaGain(settings.m_tiaGain);
 }
 
 int LimeSDRInput::webapiRunGet(

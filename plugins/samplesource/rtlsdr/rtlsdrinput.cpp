@@ -495,41 +495,57 @@ int RTLSDRInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
-    response.getRtlSdrSettings()->setAgc(m_settings.m_agc ? 1 : 0);
-    response.getRtlSdrSettings()->setCenterFrequency(m_settings.m_centerFrequency);
-    response.getRtlSdrSettings()->setDcBlock(m_settings.m_dcBlock ? 1 : 0);
-    response.getRtlSdrSettings()->setDevSampleRate(m_settings.m_devSampleRate);
-    response.getRtlSdrSettings()->setFcPos((int) m_settings.m_fcPos);
-    response.getRtlSdrSettings()->setGain(m_settings.m_gain);
-    response.getRtlSdrSettings()->setIqImbalance(m_settings.m_iqImbalance ? 1 : 0);
-    response.getRtlSdrSettings()->setLoPpmCorrection(m_settings.m_loPpmCorrection);
-    response.getRtlSdrSettings()->setLog2Decim(m_settings.m_log2Decim);
-    response.getRtlSdrSettings()->setLowSampleRate(m_settings.m_lowSampleRate ? 1 : 0);
-    response.getRtlSdrSettings()->setNoModMode(m_settings.m_noModMode ? 1 : 0);
-    response.getRtlSdrSettings()->setTransverterDeltaFrequency(m_settings.m_transverterDeltaFrequency);
-    response.getRtlSdrSettings()->setTransverterMode(m_settings.m_transverterMode ? 1 : 0);
+    webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
 
 int RTLSDRInput::webapiSettingsPutPatch(
                 bool force,
+                const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage __attribute__((unused)))
 {
-    RTLSDRSettings settings;
-    settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
-    settings.m_centerFrequency = response.getRtlSdrSettings()->getCenterFrequency();
-    settings.m_dcBlock = response.getRtlSdrSettings()->getDcBlock() != 0;
-    settings.m_devSampleRate = response.getRtlSdrSettings()->getDevSampleRate();
-    settings.m_fcPos = (RTLSDRSettings::fcPos_t) response.getRtlSdrSettings()->getFcPos();
-    settings.m_gain = response.getRtlSdrSettings()->getGain();
-    settings.m_iqImbalance = response.getRtlSdrSettings()->getIqImbalance() != 0;
-    settings.m_loPpmCorrection = response.getRtlSdrSettings()->getLoPpmCorrection();
-    settings.m_log2Decim = response.getRtlSdrSettings()->getLog2Decim();
-    settings.m_lowSampleRate = response.getRtlSdrSettings()->getLowSampleRate() != 0;
-    settings.m_noModMode = response.getRtlSdrSettings()->getNoModMode() != 0;
-    settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
-    settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
+    RTLSDRSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("agc")) {
+        settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
+    }
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getRtlSdrSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getRtlSdrSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getRtlSdrSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = (RTLSDRSettings::fcPos_t) response.getRtlSdrSettings()->getFcPos();
+    }
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getRtlSdrSettings()->getGain();
+    }
+    if (deviceSettingsKeys.contains("iqImbalance")) {
+        settings.m_iqImbalance = response.getRtlSdrSettings()->getIqImbalance() != 0;
+    }
+    if (deviceSettingsKeys.contains("loPpmCorrection")) {
+        settings.m_loPpmCorrection = response.getRtlSdrSettings()->getLoPpmCorrection();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getRtlSdrSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("lowSampleRate")) {
+        settings.m_lowSampleRate = response.getRtlSdrSettings()->getLowSampleRate() != 0;
+    }
+    if (deviceSettingsKeys.contains("noModMode")) {
+        settings.m_noModMode = response.getRtlSdrSettings()->getNoModMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
+    }
 
     MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -540,7 +556,25 @@ int RTLSDRInput::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings)
+{
+    response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getRtlSdrSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getRtlSdrSettings()->setFcPos((int) settings.m_fcPos);
+    response.getRtlSdrSettings()->setGain(settings.m_gain);
+    response.getRtlSdrSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
+    response.getRtlSdrSettings()->setLoPpmCorrection(settings.m_loPpmCorrection);
+    response.getRtlSdrSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getRtlSdrSettings()->setLowSampleRate(settings.m_lowSampleRate ? 1 : 0);
+    response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
+    response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 }
 
 int RTLSDRInput::webapiRunGet(

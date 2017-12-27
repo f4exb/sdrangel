@@ -205,6 +205,7 @@ public:
 
     virtual int webapiSettingsPutPatch(
                 bool force,
+                const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
@@ -244,6 +245,7 @@ private:
     void suspendTxBuddies();
     void resumeTxBuddies();
     bool applySettings(const LimeSDROutputSettings& settings, bool force = false, bool forceNCOFrequency = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDROutputSettings& settings);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUT_H_ */
