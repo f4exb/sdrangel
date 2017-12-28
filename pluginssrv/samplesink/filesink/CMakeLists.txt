@@ -35,7 +35,6 @@ add_library(outputfilesinksrv SHARED
 target_link_libraries(outputfilesinksrv
 	${QT_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 )
 

@@ -49,7 +49,6 @@ target_link_libraries(inputrtlsdrsrv
     ${QT_LIBRARIES}
     rtlsdr
     sdrbase
-    sdrgui
     swagger
 )
 else (BUILD_DEBIAN)
@@ -57,7 +56,6 @@ target_link_libraries(inputrtlsdrsrv
     ${QT_LIBRARIES}
     ${LIBRTLSDR_LIBRARIES}
     sdrbase
-    sdrgui
     swagger
 )
 endif (BUILD_DEBIAN)

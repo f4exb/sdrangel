@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 
 #include <regex>
 #include <string>
@@ -26,7 +25,11 @@
 #include "device/devicesinkapi.h"
 #include "limesdr/devicelimesdrparam.h"
 
+#ifdef SERVER_MODE
+#include "limesdroutput.h"
+#else
 #include "limesdroutputgui.h"
+#endif
 #include "limesdroutputplugin.h"
 
 const PluginDescriptor LimeSDROutputPlugin::m_pluginDescriptor = {

@@ -28,7 +28,6 @@
 #include "dsp/filerecord.h"
 #include "device/devicesourceapi.h"
 
-#include "filesourcegui.h"
 #include "filesourceinput.h"
 #include "filesourcethread.h"
 

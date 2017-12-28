@@ -28,7 +28,6 @@
 
 #include "device/devicesinkapi.h"
 
-#include "filesinkgui.h"
 #include "filesinkoutput.h"
 #include "filesinkthread.h"
 

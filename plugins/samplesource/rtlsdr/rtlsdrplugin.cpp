@@ -1,13 +1,16 @@
 #include <QtPlugin>
-#include <QAction>
 #include <rtl-sdr.h>
+
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "rtlsdrplugin.h"
-
 #include <device/devicesourceapi.h>
 
+#ifdef SERVER_MODE
+#include "rtlsdrinput.h"
+#else
 #include "rtlsdrgui.h"
+#endif
+#include "rtlsdrplugin.h"
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QString("RTL-SDR Input"),

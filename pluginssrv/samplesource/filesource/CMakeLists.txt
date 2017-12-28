@@ -36,7 +36,6 @@ add_library(inputfilesourcesrv SHARED
 target_link_libraries(inputfilesourcesrv
 	${QT_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 )
 

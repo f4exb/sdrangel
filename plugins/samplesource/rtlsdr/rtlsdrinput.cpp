@@ -26,7 +26,6 @@
 #include "rtlsdrinput.h"
 #include "device/devicesourceapi.h"
 #include "rtlsdrthread.h"
-#include "rtlsdrgui.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"

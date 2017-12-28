@@ -14,10 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "limesdrinputplugin.h"
-
 #include <QtPlugin>
-#include <QAction>
 
 #include <regex>
 #include <string>
@@ -27,7 +24,12 @@
 #include "util/simpleserializer.h"
 #include "device/devicesourceapi.h"
 
+#ifdef SERVER_MODE
+#include "limesdrinput.h"
+#else
 #include "limesdrinputgui.h"
+#endif
+#include "limesdrinputplugin.h"
 
 const PluginDescriptor LimeSDRInputPlugin::m_pluginDescriptor = {
     QString("LimeSDR Input"),

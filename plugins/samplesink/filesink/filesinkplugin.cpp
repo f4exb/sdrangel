@@ -15,12 +15,16 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
+
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-
 #include "device/devicesinkapi.h"
+
+#ifdef SERVER_MODE
+#include "filesinkoutput.h"
+#else
 #include "filesinkgui.h"
+#endif
 #include "filesinkplugin.h"
 
 const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
@@ -68,6 +72,15 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
@@ -84,6 +97,7 @@ PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSink* FileSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {

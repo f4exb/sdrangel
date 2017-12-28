@@ -51,7 +51,6 @@ add_definitions(-DQT_SHARED)
 add_library(inputlimesdrsrv SHARED
 	${limesdrinput_SOURCES}
 	${limesdrinput_HEADERS_MOC}
-	${limesdrinput_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)
@@ -59,7 +58,6 @@ target_link_libraries(inputlimesdrsrv
     ${QT_LIBRARIES}
     limesuite
     sdrbase
-    sdrgui
     swagger
     limesdrdevice
 )
@@ -68,7 +66,6 @@ target_link_libraries(inputlimesdrsrv
 	${QT_LIBRARIES}
 	${LIMESUITE_LIBRARY}
 	sdrbase
-	sdrgui
 	swagger
 	limesdrdevice
 )
