@@ -294,7 +294,7 @@ void DeviceSinkAPI::saveSinkSettings(Preset* preset)
     }
     else
     {
-        qDebug("DeviceSinkAPI::saveSourceSettings: %s", qPrintable(m_sampleSinkPluginInstanceUI->getName()));
+        qDebug("DeviceSinkAPI::saveSourceSettings: serializing sink %s[%d]: %s", qPrintable(m_sampleSinkId), m_sampleSinkSequence, qPrintable(m_sampleSinkSerial));
 
         if (m_sampleSinkPluginInstanceUI != 0) // GUI flavor
         {

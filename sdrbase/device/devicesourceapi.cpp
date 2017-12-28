@@ -281,7 +281,7 @@ void DeviceSourceAPI::saveSourceSettings(Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceSourceAPI::saveSourceSettings: %s", qPrintable(m_sampleSourcePluginInstanceUI->getName()));
+        qDebug("DeviceSourceAPI::saveSourceSettings: serializing source %s[%d]: %s", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
 
         if (m_sampleSourcePluginInstanceUI != 0)
         {

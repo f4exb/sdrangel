@@ -344,6 +344,7 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
     {
         qDebug("MainCore::changeSampleSource: deviceSet at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceSourceAPI->stopAcquisition();
 
         // deletes old UI and input object
@@ -400,6 +401,8 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
                 deviceSet->m_deviceSourceAPI->getSampleSourceId(), deviceSet->m_deviceSourceAPI);
         deviceSet->m_deviceSourceAPI->setSampleSource(source);
+
+        deviceSet->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
@@ -409,6 +412,7 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
     {
         qDebug("MainCore::changeSampleSink: device set at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceSinkAPI->saveSinkSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceSinkAPI->stopGeneration();
 
         // deletes old UI and output object
@@ -465,6 +469,8 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
                 deviceSet->m_deviceSinkAPI->getSampleSinkId(), deviceSet->m_deviceSinkAPI);
         deviceSet->m_deviceSinkAPI->setSampleSink(sink);
+
+        deviceSet->m_deviceSinkAPI->loadSinkSettings(m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
