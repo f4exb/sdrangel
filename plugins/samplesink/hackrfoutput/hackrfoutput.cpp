@@ -30,7 +30,6 @@
 #include "device/devicesinkapi.h"
 #include "hackrf/devicehackrfshared.h"
 
-#include "hackrfoutputgui.h"
 #include "hackrfoutputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgConfigureHackRF, Message)

@@ -32,7 +32,6 @@
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
-#include "hackrfinputgui.h"
 #include "hackrfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)

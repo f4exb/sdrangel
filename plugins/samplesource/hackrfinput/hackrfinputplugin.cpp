@@ -14,10 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../hackrfinput/hackrfinputplugin.h"
 
 #include <QtPlugin>
-#include <QAction>
 #include "libhackrf/hackrf.h"
 
 #include <device/devicesourceapi.h>
@@ -25,7 +23,12 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 
-#include "../hackrfinput/hackrfinputgui.h"
+#ifdef SERVER_MODE
+#include "hackrfinput.h"
+#else
+#include "hackrfinputgui.h"
+#endif
+#include "hackrfinputplugin.h"
 
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),
@@ -121,6 +124,15 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -137,6 +149,7 @@ PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *HackRFInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

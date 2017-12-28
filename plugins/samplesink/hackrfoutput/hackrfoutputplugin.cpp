@@ -14,18 +14,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "hackrfoutputplugin.h"
-
 #include <QtPlugin>
-#include <QAction>
 #include "libhackrf/hackrf.h"
 
 #include "device/devicesourceapi.h"
-
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 
+#ifdef SERVER_MODE
+#include "hackrfoutput.h"
+#else
 #include "hackrfoutputgui.h"
+#endif
+#include "hackrfoutputplugin.h"
 
 const PluginDescriptor HackRFOutputPlugin::m_pluginDescriptor = {
 	QString("HackRF Output"),
@@ -120,6 +121,15 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
@@ -136,6 +146,7 @@ PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSink* HackRFOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {
