@@ -1,4 +1,5 @@
 FileSourceSettings:
+  description: FileSource
   properties:
     fileName:
       type: string

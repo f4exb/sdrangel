@@ -1,4 +1,5 @@
 RtlSdrSettings:
+  description: RTLSDR
   properties:
     devSampleRate:
       type: integer

@@ -1,4 +1,5 @@
 NFMModSettings:
+  description: NFMMod
   properties:
     basebandSampleRate:
       type: integer

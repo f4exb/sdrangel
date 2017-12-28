@@ -164,12 +164,12 @@ void PlutoSDRInput::setCenterFrequency(qint64 centerFrequency)
     PlutoSDRInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigurePlutoSDR* message = MsgConfigurePlutoSDR::create(m_settings, false);
+    MsgConfigurePlutoSDR* message = MsgConfigurePlutoSDR::create(settings, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePlutoSDR* messageToGUI = MsgConfigurePlutoSDR::create(m_settings, false);
+        MsgConfigurePlutoSDR* messageToGUI = MsgConfigurePlutoSDR::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }

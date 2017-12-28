@@ -1,4 +1,5 @@
 LimeSdrInputSettings:
+  description: LimeSDR
   properties:  
     centerFrequency:
       type: integer
@@ -41,6 +42,7 @@ LimeSdrInputSettings:
       type: integer
       
 LimeSdrOutputSettings:
+  description: LimeSDR
   properties:  
     centerFrequency:
       type: integer

@@ -1,4 +1,5 @@
 NFMDemodSettings:
+  description: NFMDemod
   properties:
     inputSampleRate:
       type: integer
