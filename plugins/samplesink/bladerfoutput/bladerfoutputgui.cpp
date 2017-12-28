@@ -127,7 +127,16 @@ bool BladerfOutputGui::deserialize(const QByteArray& data)
 
 bool BladerfOutputGui::handleMessage(const Message& message)
 {
-	if (BladerfOutput::MsgReportBladerf::match(message))
+    if (BladerfOutput::MsgConfigureBladerf::match(message))
+    {
+        const BladerfOutput::MsgConfigureBladerf& cfg = (BladerfOutput::MsgConfigureBladerf&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (BladerfOutput::MsgReportBladerf::match(message))
 	{
 		displaySettings();
 		return true;

@@ -245,26 +245,30 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
 
         const QByteArray* sourceConfig = preset->findBestDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence);
         qint64 centerFrequency = preset->getCenterFrequency();
-        qDebug("DeviceSourceAPI::loadSettings: center frequency: %llu Hz", centerFrequency);
+        qDebug("DeviceSourceAPI::loadSourceSettings: center frequency: %llu Hz", centerFrequency);
 
         if (sourceConfig != 0)
         {
-            qDebug("DeviceSourceAPI::loadSettings: deserializing source %s[%d]: %s", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
+            qDebug("DeviceSourceAPI::loadSourceSettings: deserializing source %s[%d]: %s", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
 
-            if (m_sampleSourcePluginInstanceUI != 0)
+            if (m_sampleSourcePluginInstanceUI != 0) // GUI flavor
             {
                 m_sampleSourcePluginInstanceUI->deserialize(*sourceConfig);
                 m_sampleSourcePluginInstanceUI->setCenterFrequency(centerFrequency);
             }
-            else
+            else if (m_deviceSourceEngine->getSource() != 0) // Server flavor
             {
                 m_deviceSourceEngine->getSource()->deserialize(*sourceConfig);
                 m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
             }
+            else
+            {
+                qDebug("DeviceSourceAPI::loadSourceSettings: no source");
+            }
         }
         else
         {
-            qDebug("DeviceSourceAPI::loadSettings: source %s[%d]: %s not found", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
+            qDebug("DeviceSourceAPI::loadSourceSettings: source %s[%d]: %s not found", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
         }
     }
     else
@@ -277,17 +281,21 @@ void DeviceSourceAPI::saveSourceSettings(Preset* preset)
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceSourceAPI::saveSourceSettings: %s saved", qPrintable(m_sampleSourcePluginInstanceUI->getName()));
+        qDebug("DeviceSourceAPI::saveSourceSettings: %s", qPrintable(m_sampleSourcePluginInstanceUI->getName()));
 
         if (m_sampleSourcePluginInstanceUI != 0)
         {
             preset->addOrUpdateDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_sampleSourcePluginInstanceUI->serialize());
             preset->setCenterFrequency(m_sampleSourcePluginInstanceUI->getCenterFrequency());
         }
-        else
+        else if (m_deviceSourceEngine->getSource() != 0)
         {
             preset->addOrUpdateDeviceConfig(m_sampleSourceId, m_sampleSourceSerial, m_sampleSourceSequence, m_deviceSourceEngine->getSource()->serialize());
             preset->setCenterFrequency(m_deviceSourceEngine->getSource()->getCenterFrequency());
+        }
+        else
+        {
+            qDebug("DeviceSourceAPI::saveSourceSettings: no source");
         }
     }
     else

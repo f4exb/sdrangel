@@ -142,7 +142,16 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
 
 bool LimeSDROutputGUI::handleMessage(const Message& message)
 {
-    if (DeviceLimeSDRShared::MsgReportBuddyChange::match(message))
+    if (LimeSDROutput::MsgConfigureLimeSDR::match(message))
+    {
+        const LimeSDROutput::MsgConfigureLimeSDR& cfg = (LimeSDROutput::MsgConfigureLimeSDR&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (DeviceLimeSDRShared::MsgReportBuddyChange::match(message))
     {
         DeviceLimeSDRShared::MsgReportBuddyChange& report = (DeviceLimeSDRShared::MsgReportBuddyChange&) message;
         m_settings.m_devSampleRate = report.getDevSampleRate();

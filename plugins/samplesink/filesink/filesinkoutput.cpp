@@ -139,6 +139,33 @@ void FileSinkOutput::stop()
     }
 }
 
+QByteArray FileSinkOutput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool FileSinkOutput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureFileSink* message = MsgConfigureFileSink::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFileSink* messageToGUI = MsgConfigureFileSink::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& FileSinkOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -152,6 +179,21 @@ int FileSinkOutput::getSampleRate() const
 quint64 FileSinkOutput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void FileSinkOutput::setCenterFrequency(qint64 centerFrequency)
+{
+    FileSinkSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureFileSink* message = MsgConfigureFileSink::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFileSink* messageToGUI = MsgConfigureFileSink::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 std::time_t FileSinkOutput::getStartingTimeStamp() const

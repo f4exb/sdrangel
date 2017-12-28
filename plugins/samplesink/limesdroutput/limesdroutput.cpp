@@ -407,6 +407,33 @@ void LimeSDROutput::stop()
     releaseChannel();
 }
 
+QByteArray LimeSDROutput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool LimeSDROutput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureLimeSDR* message = MsgConfigureLimeSDR::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureLimeSDR* messageToGUI = MsgConfigureLimeSDR::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& LimeSDROutput::getDeviceDescription() const
 {
     return m_deviceDescription;
@@ -421,6 +448,21 @@ int LimeSDROutput::getSampleRate() const
 quint64 LimeSDROutput::getCenterFrequency() const
 {
     return m_settings.m_centerFrequency;
+}
+
+void LimeSDROutput::setCenterFrequency(qint64 centerFrequency)
+{
+    LimeSDROutputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureLimeSDR* message = MsgConfigureLimeSDR::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureLimeSDR* messageToGUI = MsgConfigureLimeSDR::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 std::size_t LimeSDROutput::getChannelIndex()

@@ -131,7 +131,16 @@ void HackRFOutputGui::blockApplySettings(bool block)
 
 bool HackRFOutputGui::handleMessage(const Message& message)
 {
-    if (HackRFOutput::MsgReportHackRF::match(message))
+    if (HackRFOutput::MsgConfigureHackRF::match(message))
+    {
+        const HackRFOutput::MsgConfigureHackRF& cfg = (HackRFOutput::MsgConfigureHackRF&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (HackRFOutput::MsgReportHackRF::match(message))
     {
         displaySettings();
         return true;

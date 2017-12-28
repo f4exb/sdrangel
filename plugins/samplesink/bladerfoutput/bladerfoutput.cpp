@@ -194,6 +194,33 @@ void BladerfOutput::stop()
     m_running = false;
 }
 
+QByteArray BladerfOutput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool BladerfOutput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureBladerf* message = MsgConfigureBladerf::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureBladerf* messageToGUI = MsgConfigureBladerf::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& BladerfOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -208,6 +235,21 @@ int BladerfOutput::getSampleRate() const
 quint64 BladerfOutput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void BladerfOutput::setCenterFrequency(qint64 centerFrequency)
+{
+    BladeRFOutputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureBladerf* message = MsgConfigureBladerf::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureBladerf* messageToGUI = MsgConfigureBladerf::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool BladerfOutput::handleMessage(const Message& message)

@@ -105,6 +105,33 @@ void SDRdaemonSinkOutput::stop()
 	}
 }
 
+QByteArray SDRdaemonSinkOutput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool SDRdaemonSinkOutput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureSDRdaemonSink* message = MsgConfigureSDRdaemonSink::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSDRdaemonSink* messageToGUI = MsgConfigureSDRdaemonSink::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& SDRdaemonSinkOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -118,6 +145,21 @@ int SDRdaemonSinkOutput::getSampleRate() const
 quint64 SDRdaemonSinkOutput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void SDRdaemonSinkOutput::setCenterFrequency(qint64 centerFrequency)
+{
+    SDRdaemonSinkSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureSDRdaemonSink* message = MsgConfigureSDRdaemonSink::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSDRdaemonSink* messageToGUI = MsgConfigureSDRdaemonSink::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const

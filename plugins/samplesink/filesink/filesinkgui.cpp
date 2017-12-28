@@ -131,7 +131,16 @@ bool FileSinkGui::deserialize(const QByteArray& data)
 
 bool FileSinkGui::handleMessage(const Message& message)
 {
-	if (FileSinkOutput::MsgReportFileSinkGeneration::match(message))
+    if (FileSinkOutput::MsgConfigureFileSink::match(message))
+    {
+        const FileSinkOutput::MsgConfigureFileSink& cfg = (FileSinkOutput::MsgConfigureFileSink&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (FileSinkOutput::MsgReportFileSinkGeneration::match(message))
 	{
 		m_generation = ((FileSinkOutput::MsgReportFileSinkGeneration&)message).getAcquisition();
 		updateWithGeneration();

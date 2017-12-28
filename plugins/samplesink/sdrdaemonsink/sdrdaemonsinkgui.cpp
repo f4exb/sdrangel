@@ -171,7 +171,16 @@ bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
 
 bool SDRdaemonSinkGui::handleMessage(const Message& message)
 {
-	if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
+    if (SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::match(message))
+    {
+        const SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink& cfg = (SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
 	{
 		m_samplesCount = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();

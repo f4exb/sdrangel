@@ -109,6 +109,33 @@ void PlutoSDROutput::stop()
     m_running = false;
 }
 
+QByteArray PlutoSDROutput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool PlutoSDROutput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigurePlutoSDR* message = MsgConfigurePlutoSDR::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigurePlutoSDR* messageToGUI = MsgConfigurePlutoSDR::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& PlutoSDROutput::getDeviceDescription() const
 {
     return m_deviceDescription;
@@ -123,6 +150,20 @@ quint64 PlutoSDROutput::getCenterFrequency() const
     return m_settings.m_centerFrequency;
 }
 
+void PlutoSDROutput::setCenterFrequency(qint64 centerFrequency)
+{
+    PlutoSDROutputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigurePlutoSDR* message = MsgConfigurePlutoSDR::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigurePlutoSDR* messageToGUI = MsgConfigurePlutoSDR::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+}
 
 bool PlutoSDROutput::handleMessage(const Message& message)
 {

@@ -131,7 +131,16 @@ bool PlutoSDROutputGUI::deserialize(const QByteArray& data)
 
 bool PlutoSDROutputGUI::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
+    if (PlutoSDROutput::MsgConfigurePlutoSDR::match(message))
+    {
+        const PlutoSDROutput::MsgConfigurePlutoSDR& cfg = (PlutoSDROutput::MsgConfigurePlutoSDR&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (DevicePlutoSDRShared::MsgCrossReportToBuddy::match(message)) // message from buddy
     {
         DevicePlutoSDRShared::MsgCrossReportToBuddy& conf = (DevicePlutoSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = conf.getDevSampleRate();
