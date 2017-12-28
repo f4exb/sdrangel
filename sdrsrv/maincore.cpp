@@ -344,7 +344,6 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
     {
         qDebug("MainCore::changeSampleSource: deviceSet at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
-        deviceSet->m_deviceSourceAPI->saveSourceSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceSourceAPI->stopAcquisition();
 
         // deletes old UI and input object
@@ -401,8 +400,6 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
                 deviceSet->m_deviceSourceAPI->getSampleSourceId(), deviceSet->m_deviceSourceAPI);
         deviceSet->m_deviceSourceAPI->setSampleSource(source);
-
-        deviceSet->m_deviceSourceAPI->loadSourceSettings(m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
