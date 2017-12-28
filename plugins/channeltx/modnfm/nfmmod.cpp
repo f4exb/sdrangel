@@ -474,19 +474,22 @@ QByteArray NFMMod::serialize() const
 
 bool NFMMod::deserialize(const QByteArray& data)
 {
-    if (m_settings.deserialize(data))
-    {
-        MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(m_settings, true);
-        m_inputMessageQueue.push(msg);
-        return true;
-    }
-    else
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
     {
         m_settings.resetToDefaults();
-        MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(m_settings, true);
-        m_inputMessageQueue.push(msg);
-        return false;
+        success = false;
     }
+
+    MsgConfigureChannelizer *msgChan = MsgConfigureChannelizer::create(
+            48000, m_settings.m_inputFrequencyOffset);
+    m_inputMessageQueue.push(msgChan);
+
+    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(m_settings, true);
+    m_inputMessageQueue.push(msg);
+
+    return success;
 }
 
 int NFMMod::webapiSettingsGet(
