@@ -119,7 +119,16 @@ bool AirspyGui::deserialize(const QByteArray& data)
 
 bool AirspyGui::handleMessage(const Message& message)
 {
-    if (AirspyInput::MsgStartStop::match(message))
+    if (AirspyInput::MsgConfigureAirspy::match(message))
+    {
+        const AirspyInput::MsgConfigureAirspy& cfg = (AirspyInput::MsgConfigureAirspy&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (AirspyInput::MsgStartStop::match(message))
     {
         AirspyInput::MsgStartStop& notif = (AirspyInput::MsgStartStop&) message;
         blockApplySettings(true);

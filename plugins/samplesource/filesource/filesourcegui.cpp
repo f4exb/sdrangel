@@ -156,7 +156,16 @@ void FileSourceGui::handleInputMessages()
 
 bool FileSourceGui::handleMessage(const Message& message)
 {
-	if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
+    if (FileSourceInput::MsgConfigureFileSource::match(message))
+    {
+        const FileSourceInput::MsgConfigureFileSource& cfg = (FileSourceInput::MsgConfigureFileSource&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
 	{
 		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition&)message).getAcquisition();
 		updateWithAcquisition();

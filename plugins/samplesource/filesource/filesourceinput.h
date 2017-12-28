@@ -17,13 +17,14 @@
 #ifndef INCLUDE_FILESOURCEINPUT_H
 #define INCLUDE_FILESOURCEINPUT_H
 
-#include <dsp/devicesamplesource.h>
 #include <QString>
+#include <QByteArray>
 #include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <fstream>
 
+#include <dsp/devicesamplesource.h>
 #include "filesourcesettings.h"
 
 class FileSourceThread;
@@ -230,10 +231,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 	std::time_t getStartingTimeStamp() const;
 
 	virtual bool handleMessage(const Message& message);

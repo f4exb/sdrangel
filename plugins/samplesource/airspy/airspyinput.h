@@ -17,11 +17,12 @@
 #ifndef INCLUDE_AIRSPYINPUT_H
 #define INCLUDE_AIRSPYINPUT_H
 
-#include <dsp/devicesamplesource.h>
-
-#include "airspysettings.h"
-#include <libairspy/airspy.h>
 #include <QString>
+#include <QByteArray>
+
+#include <libairspy/airspy.h>
+#include <dsp/devicesamplesource.h>
+#include "airspysettings.h"
 
 class DeviceSourceAPI;
 class AirspyThread;
@@ -98,10 +99,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
 	virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+	virtual void setCenterFrequency(qint64 centerFrequency);
 	const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
 	virtual bool handleMessage(const Message& message);
@@ -123,7 +128,7 @@ private:
 	void closeDevice();
 	bool applySettings(const AirspySettings& settings, bool force);
 	struct airspy_device *open_airspy_from_sequence(int sequence);
-	void setCenterFrequency(quint64 freq);
+	void setDeviceCenterFrequency(quint64 freq);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

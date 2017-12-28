@@ -188,6 +188,33 @@ void HackRFInput::stop()
 	m_running = false;
 }
 
+QByteArray HackRFInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool HackRFInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& HackRFInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -201,6 +228,21 @@ int HackRFInput::getSampleRate() const
 quint64 HackRFInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void HackRFInput::setCenterFrequency(qint64 centerFrequency)
+{
+    HackRFInputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool HackRFInput::handleMessage(const Message& message)

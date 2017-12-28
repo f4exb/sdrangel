@@ -210,7 +210,16 @@ bool FCDProGui::deserialize(const QByteArray& data)
 
 bool FCDProGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (FCDProInput::MsgStartStop::match(message))
+    if (FCDProInput::MsgConfigureFCD::match(message))
+    {
+        const FCDProInput::MsgConfigureFCD& cfg = (FCDProInput::MsgConfigureFCD&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (FCDProInput::MsgStartStop::match(message))
     {
         FCDProInput::MsgStartStop& notif = (FCDProInput::MsgStartStop&) message;
         blockApplySettings(true);

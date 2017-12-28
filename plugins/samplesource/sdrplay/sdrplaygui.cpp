@@ -137,7 +137,16 @@ bool SDRPlayGui::deserialize(const QByteArray& data)
 
 bool SDRPlayGui::handleMessage(const Message& message)
 {
-    if (SDRPlayInput::MsgReportSDRPlayGains::match(message))
+    if (SDRPlayInput::MsgConfigureSDRPlay::match(message))
+    {
+        const SDRPlayInput::MsgConfigureSDRPlay& cfg = (SDRPlayInput::MsgConfigureSDRPlay&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (SDRPlayInput::MsgReportSDRPlayGains::match(message))
     {
     	qDebug() << "SDRPlayGui::handleMessage: MsgReportSDRPlayGains";
 

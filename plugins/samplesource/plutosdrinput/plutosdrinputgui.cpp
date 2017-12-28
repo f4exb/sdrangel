@@ -131,7 +131,16 @@ bool PlutoSDRInputGui::deserialize(const QByteArray& data)
 
 bool PlutoSDRInputGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (PlutoSDRInput::MsgStartStop::match(message))
+    if (PlutoSDRInput::MsgConfigurePlutoSDR::match(message))
+    {
+        const PlutoSDRInput::MsgConfigurePlutoSDR& cfg = (PlutoSDRInput::MsgConfigurePlutoSDR&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (PlutoSDRInput::MsgStartStop::match(message))
     {
         PlutoSDRInput::MsgStartStop& notif = (PlutoSDRInput::MsgStartStop&) message;
         blockApplySettings(true);

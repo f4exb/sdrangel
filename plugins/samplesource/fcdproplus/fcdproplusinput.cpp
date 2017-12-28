@@ -157,6 +157,33 @@ void FCDProPlusInput::stop()
 	m_running = false;
 }
 
+QByteArray FCDProPlusInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool FCDProPlusInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureFCD* message = MsgConfigureFCD::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFCD* messageToGUI = MsgConfigureFCD::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& FCDProPlusInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -170,6 +197,21 @@ int FCDProPlusInput::getSampleRate() const
 quint64 FCDProPlusInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void FCDProPlusInput::setCenterFrequency(qint64 centerFrequency)
+{
+    FCDProPlusSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureFCD* message = MsgConfigureFCD::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFCD* messageToGUI = MsgConfigureFCD::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool FCDProPlusInput::handleMessage(const Message& message)

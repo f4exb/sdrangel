@@ -234,6 +234,33 @@ void RTLSDRInput::stop()
 	m_running = false;
 }
 
+QByteArray RTLSDRInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool RTLSDRInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& RTLSDRInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -248,6 +275,21 @@ int RTLSDRInput::getSampleRate() const
 quint64 RTLSDRInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void RTLSDRInput::setCenterFrequency(qint64 centerFrequency)
+{
+    RTLSDRSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool RTLSDRInput::handleMessage(const Message& message)

@@ -18,12 +18,13 @@
 #ifndef INCLUDE_FCDPROINPUT_H
 #define INCLUDE_FCDPROINPUT_H
 
-#include <dsp/devicesamplesource.h>
+#include <QString>
+#include <QByteArray>
+#include <inttypes.h>
 
+#include <dsp/devicesamplesource.h>
 #include "fcdprosettings.h"
 #include "fcdhid.h"
-#include <QString>
-#include <inttypes.h>
 
 struct fcd_buffer {
 	void *start;
@@ -105,10 +106,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
 

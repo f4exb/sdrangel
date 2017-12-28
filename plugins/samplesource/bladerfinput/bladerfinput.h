@@ -17,13 +17,13 @@
 #ifndef INCLUDE_BLADERFINPUT_H
 #define INCLUDE_BLADERFINPUT_H
 
+#include <QString>
+#include <QByteArray>
+
+#include <libbladeRF.h>
 #include <dsp/devicesamplesource.h>
 #include "bladerf/devicebladerf.h"
 #include "bladerf/devicebladerfparam.h"
-
-#include <libbladeRF.h>
-#include <QString>
-
 #include "bladerfinputsettings.h"
 
 class DeviceSourceAPI;
@@ -101,10 +101,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
 

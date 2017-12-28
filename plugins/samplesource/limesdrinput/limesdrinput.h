@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
 
 #include <QString>
+#include <QByteArray>
 #include <stdint.h>
 
 #include "dsp/devicesamplesource.h"
@@ -212,10 +213,14 @@ public:
     virtual bool start();
     virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     virtual const QString& getDeviceDescription() const;
     virtual int getSampleRate() const;
     virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
     virtual bool handleMessage(const Message& message);
 

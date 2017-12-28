@@ -128,7 +128,16 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 
 bool FCDProPlusGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (FCDProPlusInput::MsgStartStop::match(message))
+    if (FCDProPlusInput::MsgConfigureFCD::match(message))
+    {
+        const FCDProPlusInput::MsgConfigureFCD& cfg = (FCDProPlusInput::MsgConfigureFCD&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (FCDProPlusInput::MsgStartStop::match(message))
     {
         FCDProPlusInput::MsgStartStop& notif = (FCDProPlusInput::MsgStartStop&) message;
         blockApplySettings(true);

@@ -19,6 +19,7 @@
 #define INCLUDE_SAMPLESOURCE_H
 
 #include <QtGlobal>
+#include <QByteArray>
 
 #include "samplesinkfifo.h"
 #include "util/message.h"
@@ -42,9 +43,13 @@ public:
 	virtual bool start() = 0;
 	virtual void stop() = 0;
 
+    virtual QByteArray serialize() const = 0;
+    virtual bool deserialize(const QByteArray& data) = 0;
+
 	virtual const QString& getDeviceDescription() const = 0;
 	virtual int getSampleRate() const = 0; //!< Sample rate exposed by the source
 	virtual quint64 getCenterFrequency() const = 0; //!< Center frequency exposed by the source
+    virtual void setCenterFrequency(qint64 centerFrequency) = 0;
 
 	virtual bool handleMessage(const Message& message) = 0;
 

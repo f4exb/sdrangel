@@ -217,6 +217,33 @@ void SDRPlayInput::stop()
     m_running = false;
 }
 
+QByteArray SDRPlayInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool SDRPlayInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& SDRPlayInput::getDeviceDescription() const
 {
     return m_deviceDescription;
@@ -231,6 +258,21 @@ int SDRPlayInput::getSampleRate() const
 quint64 SDRPlayInput::getCenterFrequency() const
 {
     return m_settings.m_centerFrequency;
+}
+
+void SDRPlayInput::setCenterFrequency(qint64 centerFrequency)
+{
+    SDRPlaySettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool SDRPlayInput::handleMessage(const Message& message)
@@ -517,7 +559,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
 
         if(m_dev != 0)
         {
-            if (setCenterFrequency(deviceCenterFrequency))
+            if (setDeviceCenterFrequency(deviceCenterFrequency))
             {
                 qDebug() << "SDRPlayInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
                         << " device center freq: " << deviceCenterFrequency << " Hz"
@@ -588,7 +630,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     return true;
 }
 
-bool SDRPlayInput::setCenterFrequency(quint64 freq_hz)
+bool SDRPlayInput::setDeviceCenterFrequency(quint64 freq_hz)
 {
     qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
     freq_hz += df;
@@ -597,12 +639,12 @@ bool SDRPlayInput::setCenterFrequency(quint64 freq_hz)
 
     if (r != 0)
     {
-        qWarning("SDRPlayInput::setCenterFrequency: could not frequency to %llu Hz", freq_hz);
+        qWarning("SDRPlayInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
         return false;
     }
     else
     {
-        qWarning("SDRPlayInput::setCenterFrequency: frequency set to %llu Hz", freq_hz);
+        qWarning("SDRPlayInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
         return true;
     }
 }

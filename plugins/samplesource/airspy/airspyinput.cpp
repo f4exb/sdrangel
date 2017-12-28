@@ -213,6 +213,33 @@ void AirspyInput::stop()
 	m_running = false;
 }
 
+QByteArray AirspyInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool AirspyInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureAirspy* message = MsgConfigureAirspy::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& AirspyInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -227,6 +254,21 @@ int AirspyInput::getSampleRate() const
 quint64 AirspyInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
+}
+
+void AirspyInput::setCenterFrequency(qint64 centerFrequency)
+{
+    AirspySettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureAirspy* message = MsgConfigureAirspy::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool AirspyInput::handleMessage(const Message& message)
@@ -285,7 +327,7 @@ bool AirspyInput::handleMessage(const Message& message)
 	}
 }
 
-void AirspyInput::setCenterFrequency(quint64 freq_hz)
+void AirspyInput::setDeviceCenterFrequency(quint64 freq_hz)
 {
 	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
 	freq_hz += df;
@@ -294,11 +336,11 @@ void AirspyInput::setCenterFrequency(quint64 freq_hz)
 
 	if (rc != AIRSPY_SUCCESS)
 	{
-		qWarning("AirspyInput::setCenterFrequency: could not frequency to %llu Hz", freq_hz);
+		qWarning("AirspyInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
 	}
 	else
 	{
-		qWarning("AirspyInput::setCenterFrequency: frequency set to %llu Hz", freq_hz);
+		qWarning("AirspyInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	}
 }
 
@@ -401,7 +443,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			setCenterFrequency(deviceCenterFrequency);
+			setDeviceCenterFrequency(deviceCenterFrequency);
 
 			qDebug() << "AirspyInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
 					<< " device center freq: " << deviceCenterFrequency << " Hz"

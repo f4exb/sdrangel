@@ -102,6 +102,33 @@ void SDRdaemonSourceInput::stop()
     m_SDRdaemonUDPHandler->stop();
 }
 
+QByteArray SDRdaemonSourceInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool SDRdaemonSourceInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureSDRdaemonSource* message = MsgConfigureSDRdaemonSource::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSDRdaemonSource* messageToGUI = MsgConfigureSDRdaemonSource::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 void SDRdaemonSourceInput::setMessageQueueToGUI(MessageQueue *queue)
 {
     m_guiMessageQueue = queue;
@@ -129,6 +156,15 @@ quint64 SDRdaemonSourceInput::getCenterFrequency() const
     } else {
         return m_settings.m_centerFrequency;
     }
+}
+
+void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency)
+{
+    SDRdaemonSourceSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureSDRdaemonSource* message = MsgConfigureSDRdaemonSource::create(m_settings, false);
+    m_inputMessageQueue.push(message);
 }
 
 std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const

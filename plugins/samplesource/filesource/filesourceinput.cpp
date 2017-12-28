@@ -189,6 +189,33 @@ void FileSourceInput::stop()
 	}
 }
 
+QByteArray FileSourceInput::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool FileSourceInput::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
 const QString& FileSourceInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
@@ -202,6 +229,21 @@ int FileSourceInput::getSampleRate() const
 quint64 FileSourceInput::getCenterFrequency() const
 {
 	return m_centerFrequency;
+}
+
+void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
+{
+    FileSourceSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 std::time_t FileSourceInput::getStartingTimeStamp() const

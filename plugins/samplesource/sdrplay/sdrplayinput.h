@@ -17,12 +17,13 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_
 
-#include <dsp/devicesamplesource.h>
-
-#include "sdrplaysettings.h"
-#include <mirisdr.h>
 #include <QString>
+#include <QByteArray>
 #include <stdint.h>
+
+#include <mirisdr.h>
+#include <dsp/devicesamplesource.h>
+#include "sdrplaysettings.h"
 
 class DeviceSourceAPI;
 class SDRPlayThread;
@@ -136,10 +137,14 @@ public:
     virtual bool start();
     virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     virtual const QString& getDeviceDescription() const;
     virtual int getSampleRate() const;
     virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
     virtual bool handleMessage(const Message& message);
 
@@ -158,7 +163,7 @@ private:
     bool openDevice();
     void closeDevice();
     bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
-    bool setCenterFrequency(quint64 freq);
+    bool setDeviceCenterFrequency(quint64 freq);
 
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;

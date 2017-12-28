@@ -17,10 +17,11 @@
 #ifndef INCLUDE_HACKRFINPUT_H
 #define INCLUDE_HACKRFINPUT_H
 
-#include <dsp/devicesamplesource.h>
-#include "libhackrf/hackrf.h"
 #include <QString>
+#include <QByteArray>
 
+#include "libhackrf/hackrf.h"
+#include <dsp/devicesamplesource.h>
 #include "hackrf/devicehackrf.h"
 #include "hackrf/devicehackrfparam.h"
 #include "hackrfinputsettings.h"
@@ -118,10 +119,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
 

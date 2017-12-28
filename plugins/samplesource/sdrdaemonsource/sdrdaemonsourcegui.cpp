@@ -176,7 +176,16 @@ void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
 
 bool SDRdaemonSourceGui::handleMessage(const Message& message)
 {
-	if (SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition::match(message))
+    if (SDRdaemonSourceInput::MsgConfigureSDRdaemonSource::match(message))
+    {
+        const SDRdaemonSourceInput::MsgConfigureSDRdaemonSource& cfg = (SDRdaemonSourceInput::MsgConfigureSDRdaemonSource&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition::match(message))
 	{
 		m_acquisition = ((SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition&)message).getAcquisition();
 		updateWithAcquisition();

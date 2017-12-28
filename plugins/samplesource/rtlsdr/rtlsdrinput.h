@@ -18,11 +18,12 @@
 #ifndef INCLUDE_RTLSDRINPUT_H
 #define INCLUDE_RTLSDRINPUT_H
 
-#include <dsp/devicesamplesource.h>
+#include <QString>
+#include <QByteArray>
 
+#include <dsp/devicesamplesource.h>
 #include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
-#include <QString>
 
 class DeviceSourceAPI;
 class RTLSDRThread;
@@ -99,10 +100,14 @@ public:
 	virtual bool start();
 	virtual void stop();
 
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
 

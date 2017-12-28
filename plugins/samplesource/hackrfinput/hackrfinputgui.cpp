@@ -125,7 +125,16 @@ bool HackRFInputGui::deserialize(const QByteArray& data)
 
 bool HackRFInputGui::handleMessage(const Message& message)
 {
-    if (HackRFInput::MsgReportHackRF::match(message))
+    if (HackRFInput::MsgConfigureHackRF::match(message))
+    {
+        const HackRFInput::MsgConfigureHackRF& cfg = (HackRFInput::MsgConfigureHackRF&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (HackRFInput::MsgReportHackRF::match(message))
     {
         displaySettings();
         return true;

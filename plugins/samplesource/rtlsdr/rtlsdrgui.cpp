@@ -146,7 +146,7 @@ bool RTLSDRGui::handleMessage(const Message& message)
 	    blockApplySettings(false);
 	    return true;
 	}
-    if (RTLSDRInput::MsgStartStop::match(message))
+	else if (RTLSDRInput::MsgStartStop::match(message))
     {
         RTLSDRInput::MsgStartStop& notif = (RTLSDRInput::MsgStartStop&) message;
         blockApplySettings(true);

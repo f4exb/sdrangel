@@ -126,7 +126,16 @@ bool BladerfInputGui::deserialize(const QByteArray& data)
 
 bool BladerfInputGui::handleMessage(const Message& message)
 {
-    if (BladerfInput::MsgStartStop::match(message))
+    if (BladerfInput::MsgConfigureBladerf::match(message))
+    {
+        const BladerfInput::MsgConfigureBladerf& cfg = (BladerfInput::MsgConfigureBladerf&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (BladerfInput::MsgStartStop::match(message))
     {
         BladerfInput::MsgStartStop& notif = (BladerfInput::MsgStartStop&) message;
         blockApplySettings(true);
