@@ -13,7 +13,7 @@
 /*
  * SWGLimeSdrInputSettings.h
  * 
- * 
+ * LimeSDR
  */
 
 #ifndef SWGLimeSdrInputSettings_H_

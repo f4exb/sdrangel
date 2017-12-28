@@ -13,7 +13,7 @@
 /*
  * SWGRtlSdrSettings.h
  * 
- * 
+ * RTLSDR
  */
 
 #ifndef SWGRtlSdrSettings_H_

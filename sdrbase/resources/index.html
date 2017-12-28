@@ -1015,7 +1015,8 @@ margin-bottom: 20px;
     "fileName" : {
       "type" : "string"
     }
-  }
+  },
+  "description" : "FileSource"
 };
             defs.InstanceChannelsResponse = {
   "required" : [ "channelcount" ],
@@ -1129,7 +1130,8 @@ margin-bottom: 20px;
     "extClockFreq" : {
       "type" : "integer"
     }
-  }
+  },
+  "description" : "LimeSDR"
 };
             defs.LimeSdrOutputSettings = {
   "properties" : {
@@ -1173,7 +1175,8 @@ margin-bottom: 20px;
     "extClockFreq" : {
       "type" : "integer"
     }
-  }
+  },
+  "description" : "LimeSDR"
 };
             defs.LocationInformation = {
   "required" : [ "latitude", "longitude" ],
@@ -1273,7 +1276,8 @@ margin-bottom: 20px;
     "title" : {
       "type" : "string"
     }
-  }
+  },
+  "description" : "NFMDemod"
 };
             defs.NFMModSettings = {
   "properties" : {
@@ -1334,7 +1338,8 @@ margin-bottom: 20px;
     "cwKeyer" : {
       "$ref" : "#/definitions/CWKeyerSettings"
     }
-  }
+  },
+  "description" : "NFMMod"
 };
             defs.PresetExport = {
   "properties" : {
@@ -1500,7 +1505,8 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     }
-  }
+  },
+  "description" : "RTLSDR"
 };
             defs.SamplingDevice = {
   "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state", "streamIndex" ],
@@ -3264,8 +3270,9 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        ChannelSettings body = ; // ChannelSettings | Channel settings to apply
         try {
-            ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex);
+            ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelSettingsPatch");
@@ -3284,8 +3291,9 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        ChannelSettings body = ; // ChannelSettings | Channel settings to apply
         try {
-            ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex);
+            ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelSettingsPatch");
@@ -3301,11 +3309,13 @@ public class DeviceSetApiExample {
                             <div class="tab-pane" id="examples-DeviceSet-devicesetChannelSettingsPatch-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
 Integer *channelIndex = 56; // Index of the channel in the channels list for this device set
+ChannelSettings *body = ; // Channel settings to apply
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetChannelSettingsPatchWith:deviceSetIndex
     channelIndex:channelIndex
+    body:body
               completionHandler: ^(ChannelSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -3326,6 +3336,8 @@ var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var channelIndex = 56; // {Integer} Index of the channel in the channels list for this device set
 
+var body = ; // {ChannelSettings} Channel settings to apply
+
 
 var callback = function(error, data, response) {
   if (error) {
@@ -3334,7 +3346,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex, callback);
+api.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex, body, callback);
 </code></pre>
                             </div>
 
@@ -3358,10 +3370,11 @@ namespace Example
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
+            var body = new ChannelSettings(); // ChannelSettings | Channel settings to apply
 
             try
             {
-                ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex);
+                ChannelSettings result = apiInstance.devicesetChannelSettingsPatch(deviceSetIndex, channelIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -3381,9 +3394,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
 $channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+$body = ; // ChannelSettings | Channel settings to apply
 
 try {
-    $result = $api_instance->devicesetChannelSettingsPatch($deviceSetIndex, $channelIndex);
+    $result = $api_instance->devicesetChannelSettingsPatch($deviceSetIndex, $channelIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DeviceSetApi->devicesetChannelSettingsPatch: ', $e->getMessage(), PHP_EOL;
@@ -3399,9 +3413,10 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
+my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
 eval { 
-    my $result = $api_instance->devicesetChannelSettingsPatch(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
+    my $result = $api_instance->devicesetChannelSettingsPatch(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -3420,9 +3435,10 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
+body =  # ChannelSettings | Channel settings to apply
 
 try: 
-    api_response = api_instance.deviceset_channel_settings_patch(deviceSetIndex, channelIndex)
+    api_response = api_instance.deviceset_channel_settings_patch(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DeviceSetApi->devicesetChannelSettingsPatch: %s\n" % e)</code></pre>
@@ -3486,6 +3502,48 @@ except ApiException as e:
                             </table>
 
 
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Channel settings to apply",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/ChannelSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetChannelSettingsPatch_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetChannelSettingsPatch_body"></div>
+</td>
+</tr>
+
+                            </table>
 
 
 
@@ -3758,8 +3816,9 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        ChannelSettings body = ; // ChannelSettings | Channel settings to apply
         try {
-            ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex);
+            ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelSettingsPut");
@@ -3778,8 +3837,9 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        ChannelSettings body = ; // ChannelSettings | Channel settings to apply
         try {
-            ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex);
+            ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetChannelSettingsPut");
@@ -3795,11 +3855,13 @@ public class DeviceSetApiExample {
                             <div class="tab-pane" id="examples-DeviceSet-devicesetChannelSettingsPut-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
 Integer *channelIndex = 56; // Index of the channel in the channels list for this device set
+ChannelSettings *body = ; // Channel settings to apply
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetChannelSettingsPutWith:deviceSetIndex
     channelIndex:channelIndex
+    body:body
               completionHandler: ^(ChannelSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -3820,6 +3882,8 @@ var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var channelIndex = 56; // {Integer} Index of the channel in the channels list for this device set
 
+var body = ; // {ChannelSettings} Channel settings to apply
+
 
 var callback = function(error, data, response) {
   if (error) {
@@ -3828,7 +3892,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.devicesetChannelSettingsPut(deviceSetIndex, channelIndex, callback);
+api.devicesetChannelSettingsPut(deviceSetIndex, channelIndex, body, callback);
 </code></pre>
                             </div>
 
@@ -3852,10 +3916,11 @@ namespace Example
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
+            var body = new ChannelSettings(); // ChannelSettings | Channel settings to apply
 
             try
             {
-                ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex);
+                ChannelSettings result = apiInstance.devicesetChannelSettingsPut(deviceSetIndex, channelIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -3875,9 +3940,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
 $channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+$body = ; // ChannelSettings | Channel settings to apply
 
 try {
-    $result = $api_instance->devicesetChannelSettingsPut($deviceSetIndex, $channelIndex);
+    $result = $api_instance->devicesetChannelSettingsPut($deviceSetIndex, $channelIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DeviceSetApi->devicesetChannelSettingsPut: ', $e->getMessage(), PHP_EOL;
@@ -3893,9 +3959,10 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
+my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
 eval { 
-    my $result = $api_instance->devicesetChannelSettingsPut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
+    my $result = $api_instance->devicesetChannelSettingsPut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -3914,9 +3981,10 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
+body =  # ChannelSettings | Channel settings to apply
 
 try: 
-    api_response = api_instance.deviceset_channel_settings_put(deviceSetIndex, channelIndex)
+    api_response = api_instance.deviceset_channel_settings_put(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DeviceSetApi->devicesetChannelSettingsPut: %s\n" % e)</code></pre>
@@ -3980,6 +4048,48 @@ except ApiException as e:
                             </table>
 
 
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Channel settings to apply",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/ChannelSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetChannelSettingsPut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetChannelSettingsPut_body"></div>
+</td>
+</tr>
+
+                            </table>
 
 
 
@@ -16199,7 +16309,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-23T23:39:41.313+01:00
+              Generated 2017-12-28T22:34:28.719+01:00
             </div>
           </div>
       </div>

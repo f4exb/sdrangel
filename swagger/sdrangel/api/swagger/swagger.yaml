@@ -900,6 +900,12 @@ paths:
           type: integer
           required: true
           description: Index of the channel in the channels list for this device set
+        - name: body
+          in: body
+          description: Channel settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/ChannelSettings"
       responses:
         "200":
           description: On success return channel new settings
@@ -933,6 +939,12 @@ paths:
           type: integer
           required: true
           description: Index of the channel in the channels list for this device set
+        - name: body
+          in: body
+          description: Channel settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/ChannelSettings"
       responses:
         "200":
           description: On success return channel new settings

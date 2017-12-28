@@ -13,7 +13,7 @@
 /*
  * SWGNFMModSettings.h
  * 
- * 
+ * NFMMod
  */
 
 #ifndef SWGNFMModSettings_H_

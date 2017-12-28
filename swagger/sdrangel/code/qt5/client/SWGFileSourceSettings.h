@@ -13,7 +13,7 @@
 /*
  * SWGFileSourceSettings.h
  * 
- * 
+ * FileSource
  */
 
 #ifndef SWGFileSourceSettings_H_

@@ -185,7 +185,7 @@ SWGDeviceSetApi::devicesetChannelSettingsGetCallback(HttpRequestWorker * worker)
 }
 
 void
-SWGDeviceSetApi::devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index) {
+SWGDeviceSetApi::devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings");
 
@@ -199,7 +199,9 @@ SWGDeviceSetApi::devicesetChannelSettingsPatch(qint32 device_set_index, qint32 c
     HttpRequestInput input(fullPath, "PATCH");
 
 
-
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
 
 
     foreach(QString key, this->defaultHeaders.keys()) {
@@ -237,7 +239,7 @@ SWGDeviceSetApi::devicesetChannelSettingsPatchCallback(HttpRequestWorker * worke
 }
 
 void
-SWGDeviceSetApi::devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index) {
+SWGDeviceSetApi::devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings");
 
@@ -251,7 +253,9 @@ SWGDeviceSetApi::devicesetChannelSettingsPut(qint32 device_set_index, qint32 cha
     HttpRequestInput input(fullPath, "PUT");
 
 
-
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
 
 
     foreach(QString key, this->defaultHeaders.keys()) {

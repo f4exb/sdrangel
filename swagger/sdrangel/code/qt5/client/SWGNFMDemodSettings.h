@@ -13,7 +13,7 @@
 /*
  * SWGNFMDemodSettings.h
  * 
- * 
+ * NFMDemod
  */
 
 #ifndef SWGNFMDemodSettings_H_

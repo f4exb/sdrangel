@@ -42,8 +42,8 @@ public:
     void devicesetChannelDelete(qint32 device_set_index, qint32 channel_index);
     void devicesetChannelPost(qint32 device_set_index, SWGChannelSettings body);
     void devicesetChannelSettingsGet(qint32 device_set_index, qint32 channel_index);
-    void devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index);
-    void devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index);
+    void devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body);
+    void devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body);
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body);
     void devicesetDeviceRunDelete(qint32 device_set_index);
     void devicesetDeviceRunGet(qint32 device_set_index);
