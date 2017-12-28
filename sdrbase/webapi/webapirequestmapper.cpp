@@ -1515,6 +1515,7 @@ void WebAPIRequestMapper::appendSettingsSubKeys(
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
 {
     deviceSettings.cleanup();
+    deviceSettings.setDeviceHwType(0);
     deviceSettings.setFileSourceSettings(0);
     deviceSettings.setRtlSdrSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
@@ -1524,6 +1525,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
 {
     channelSettings.cleanup();
+    channelSettings.setChannelType(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
 }
