@@ -37,8 +37,6 @@ WFMModSettings::WFMModSettings() :
 
 void WFMModSettings::resetToDefaults()
 {
-    m_basebandSampleRate = 384000;
-    m_outputSampleRate = 384000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 125000.0f;
     m_afBandwidth = 15000.0f;

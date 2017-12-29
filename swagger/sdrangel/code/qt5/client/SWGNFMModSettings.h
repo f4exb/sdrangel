@@ -43,12 +43,6 @@ public:
     void fromJsonObject(QJsonObject &json);
     SWGNFMModSettings* fromJson(QString &jsonString);
 
-    qint32 getBasebandSampleRate();
-    void setBasebandSampleRate(qint32 baseband_sample_rate);
-
-    qint32 getOutputSampleRate();
-    void setOutputSampleRate(qint32 output_sample_rate);
-
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
@@ -96,8 +90,6 @@ public:
 
 
 private:
-    qint32 baseband_sample_rate;
-    qint32 output_sample_rate;
     qint64 input_frequency_offset;
     float rf_bandwidth;
     float af_bandwidth;

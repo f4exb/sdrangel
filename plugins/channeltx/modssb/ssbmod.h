@@ -275,8 +275,10 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 
+    int m_basebandSampleRate;
+    int m_outputSampleRate;
+    int m_inputFrequencyOffset;
     SSBModSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
     NCOF m_carrierNco;
     NCOF m_toneNco;
@@ -325,6 +327,7 @@ private:
 
     static const int m_levelNbSamples;
 
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
     void applySettings(const SSBModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
     void calculateLevel(Complex& sample);

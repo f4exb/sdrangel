@@ -45,8 +45,6 @@ SSBModSettings::SSBModSettings() :
 
 void SSBModSettings::resetToDefaults()
 {
-    m_basebandSampleRate = 48000;
-    m_outputSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_bandwidth = 3000.0;
     m_lowCutoff = 300.0;

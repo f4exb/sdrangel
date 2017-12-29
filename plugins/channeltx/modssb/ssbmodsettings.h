@@ -28,8 +28,6 @@ struct SSBModSettings
     static const int m_nbAGCTimeConstants;
     static const int m_agcTimeConstant[];
 
-    int m_basebandSampleRate;
-    int m_outputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real m_bandwidth;
     Real m_lowCutoff;

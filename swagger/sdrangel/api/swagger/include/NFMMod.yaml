@@ -1,10 +1,6 @@
 NFMModSettings:
   description: NFMMod
   properties:
-    basebandSampleRate:
-      type: integer
-    outputSampleRate:
-      type: integer
     inputFrequencyOffset:
       type: integer
       format: int64

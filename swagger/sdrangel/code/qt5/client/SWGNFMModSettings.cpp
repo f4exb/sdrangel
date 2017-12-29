@@ -37,8 +37,6 @@ SWGNFMModSettings::~SWGNFMModSettings() {
 
 void
 SWGNFMModSettings::init() {
-    baseband_sample_rate = 0;
-    output_sample_rate = 0;
     input_frequency_offset = 0L;
     rf_bandwidth = 0.0f;
     af_bandwidth = 0.0f;
@@ -59,8 +57,6 @@ SWGNFMModSettings::init() {
 void
 SWGNFMModSettings::cleanup() {
     
-
-
 
 
 
@@ -94,8 +90,6 @@ SWGNFMModSettings::fromJson(QString &json) {
 
 void
 SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&baseband_sample_rate, pJson["basebandSampleRate"], "qint32", "");
-    ::SWGSDRangel::setValue(&output_sample_rate, pJson["outputSampleRate"], "qint32", "");
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     ::SWGSDRangel::setValue(&af_bandwidth, pJson["afBandwidth"], "float", "");
@@ -127,10 +121,6 @@ QJsonObject*
 SWGNFMModSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
-    obj->insert("basebandSampleRate", QJsonValue(baseband_sample_rate));
-
-    obj->insert("outputSampleRate", QJsonValue(output_sample_rate));
-
     obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
 
     obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -162,24 +152,6 @@ SWGNFMModSettings::asJsonObject() {
     toJsonValue(QString("cwKeyer"), cw_keyer, obj, QString("SWGCWKeyerSettings"));
 
     return obj;
-}
-
-qint32
-SWGNFMModSettings::getBasebandSampleRate() {
-    return baseband_sample_rate;
-}
-void
-SWGNFMModSettings::setBasebandSampleRate(qint32 baseband_sample_rate) {
-    this->baseband_sample_rate = baseband_sample_rate;
-}
-
-qint32
-SWGNFMModSettings::getOutputSampleRate() {
-    return output_sample_rate;
-}
-void
-SWGNFMModSettings::setOutputSampleRate(qint32 output_sample_rate) {
-    this->output_sample_rate = output_sample_rate;
 }
 
 qint64

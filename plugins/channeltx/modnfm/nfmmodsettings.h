@@ -37,8 +37,6 @@ struct NFMModSettings
     static const int m_nbCTCSSFreqs;
     static const float m_ctcssFreqs[];
 
-    int m_basebandSampleRate;
-    int m_outputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;

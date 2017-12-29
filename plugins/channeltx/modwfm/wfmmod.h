@@ -273,8 +273,10 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 
+    int m_basebandSampleRate;
+    int m_outputSampleRate;
+    int m_inputFrequencyOffset;
     WFMModSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -315,6 +317,7 @@ private:
     CWKeyer m_cwKeyer;
     static const int m_levelNbSamples;
 
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
     void applySettings(const WFMModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
     void calculateLevel(const Real& sample);

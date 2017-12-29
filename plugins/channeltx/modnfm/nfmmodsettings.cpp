@@ -46,8 +46,6 @@ NFMModSettings::NFMModSettings() :
 void NFMModSettings::resetToDefaults()
 {
     m_afBandwidth = 3000;
-    m_basebandSampleRate = 48000;
-    m_outputSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500.0f;
     m_fmDeviation = 5000.0f;
