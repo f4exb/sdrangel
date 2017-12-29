@@ -35,6 +35,9 @@ const QString UDPSink::m_channelId = "UDPSink";
 UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
+    m_outputSampleRate(48000),
+    m_basebandSampleRate(48000),
+    m_inputFrequencyOffset(0),
     m_squelch(1e-6),
     m_spectrum(0),
     m_spectrumEnabled(false),
@@ -313,66 +316,31 @@ bool UDPSink::handleMessage(const Message& cmd)
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
+        qDebug() << "UDPSink::handleMessage: MsgChannelizerNotification";
 
-        UDPSinkSettings settings = m_settings;
-
-        settings.m_basebandSampleRate = notif.getBasebandSampleRate();
-        settings.m_outputSampleRate = notif.getSampleRate();
-        settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-        applySettings(settings);
-
-        qDebug() << "UDPSink::handleMessage: MsgChannelizerNotification:"
-                << " m_basebandSampleRate: " << settings.m_basebandSampleRate
-                << " m_outputSampleRate: " << settings.m_outputSampleRate
-                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+        applyChannelSettings(notif.getBasebandSampleRate(), notif.getSampleRate(), notif.getFrequencyOffset());
 
         return true;
     }
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "UDPSink::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
-
-        qDebug() << "UDPSink::handleMessage: MsgConfigureChannelizer:"
-                << " sampleRate: " << cfg.getSampleRate()
-                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
     else if (MsgConfigureUDPSink::match(cmd))
     {
         MsgConfigureUDPSink& cfg = (MsgConfigureUDPSink&) cmd;
+        qDebug() << "UDPSink::handleMessage: MsgConfigureUDPSink";
 
-        UDPSinkSettings settings = cfg.getSettings();
-
-        // These settings are set with DownChannelizer::MsgChannelizerNotification
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_basebandSampleRate = m_settings.m_basebandSampleRate;
-        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "UDPSink::handleMessage: MsgConfigureUDPSink:"
-                << " m_sampleFormat: " << settings.m_sampleFormat
-                << " m_inputSampleRate: " << settings.m_inputSampleRate
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_fmDeviation: " << settings.m_fmDeviation
-                << " m_udpAddressStr: " << settings.m_udpAddress
-                << " m_udpPort: " << settings.m_udpPort
-                << " m_channelMute: " << settings.m_channelMute
-                << " m_gainIn: " << settings.m_gainIn
-                << " m_gainOut: " << settings.m_gainOut
-                << " m_squelchGate: " << settings.m_squelchGate
-                << " m_squelch: " << settings.m_squelch << "dB"
-                << " m_squelchEnabled: " << settings.m_squelchEnabled
-                << " m_autoRWBalance: " << settings.m_autoRWBalance
-                << " m_stereoInput: " << settings.m_stereoInput
-                << " force: " << cfg.getForce();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -421,7 +389,7 @@ bool UDPSink::handleMessage(const Message& cmd)
             m_settingsMutex.lock();
             m_interpolatorDistanceRemain = 0;
             m_interpolatorConsumed = false;
-            m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_settings.m_outputSampleRate;
+            m_interpolatorDistance = (Real) m_actualInputSampleRate / (Real) m_outputSampleRate;
             //m_interpolator.create(48, m_actualInputSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0); // causes clicking: leaving at standard frequency
             m_settingsMutex.unlock();
         }
@@ -471,24 +439,65 @@ void UDPSink::resetReadIndex()
     getInputMessageQueue()->push(cmd);
 }
 
-void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
+void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    qDebug() << "UDPSink::applyChannelSettings:"
+            << " basebandSampleRate: " << basebandSampleRate
+            << " outputSampleRate: " << outputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (outputSampleRate != m_outputSampleRate))
     {
         m_settingsMutex.lock();
-        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
+        m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if((settings.m_outputSampleRate != m_settings.m_outputSampleRate) ||
-       (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+    if (outputSampleRate != m_outputSampleRate)
+    {
+        m_settingsMutex.lock();
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_settings.m_inputSampleRate / (Real) outputSampleRate;
+        m_interpolator.create(48, m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
+        m_settingsMutex.unlock();
+        m_squelchThreshold = outputSampleRate * m_settings.m_squelchGate;
+        initSquelch(m_squelchOpen);
+    }
+
+    m_basebandSampleRate = basebandSampleRate;
+    m_outputSampleRate = outputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
+{
+    qDebug() << "UDPSink::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_sampleFormat: " << settings.m_sampleFormat
+            << " m_inputSampleRate: " << settings.m_inputSampleRate
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_fmDeviation: " << settings.m_fmDeviation
+            << " m_udpAddressStr: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
+            << " m_channelMute: " << settings.m_channelMute
+            << " m_gainIn: " << settings.m_gainIn
+            << " m_gainOut: " << settings.m_gainOut
+            << " m_squelchGate: " << settings.m_squelchGate
+            << " m_squelch: " << settings.m_squelch << "dB"
+            << " m_squelchEnabled: " << settings.m_squelchEnabled
+            << " m_autoRWBalance: " << settings.m_autoRWBalance
+            << " m_stereoInput: " << settings.m_stereoInput
+            << " force: " << force;
+
+    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) settings.m_outputSampleRate;
+        m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) m_outputSampleRate;
         m_interpolator.create(48, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
         m_actualInputSampleRate = settings.m_inputSampleRate;
         m_udpHandler.resetReadIndex();
@@ -515,7 +524,7 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
     {
-        m_squelchThreshold = settings.m_outputSampleRate * settings.m_squelchGate;
+        m_squelchThreshold = m_outputSampleRate * settings.m_squelchGate;
         initSquelch(m_squelchOpen);
     }
 
@@ -543,7 +552,7 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
         {
             m_interpolatorDistanceRemain = 0;
             m_interpolatorConsumed = false;
-            m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) settings.m_outputSampleRate;
+            m_interpolatorDistance = (Real) settings.m_inputSampleRate / (Real) m_outputSampleRate;
             m_interpolator.create(48, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
             m_actualInputSampleRate = settings.m_inputSampleRate;
             m_udpHandler.resetReadIndex();

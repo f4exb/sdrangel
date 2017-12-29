@@ -168,8 +168,10 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 
+    int m_basebandSampleRate;
+    Real m_outputSampleRate;
+    int m_inputFrequencyOffset;
     UDPSinkSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
     Real m_squelch;
 
@@ -217,6 +219,7 @@ private:
     static const int m_sampleRateAverageItems = 17;
     static const int m_ssbFftLen = 1024;
 
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
     void applySettings(const UDPSinkSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);

@@ -34,8 +34,6 @@ struct UDPSinkSettings
         FormatNone
     };
 
-    int m_basebandSampleRate;
-    Real m_outputSampleRate;
     SampleFormat m_sampleFormat;
     Real m_inputSampleRate;
     qint64 m_inputFrequencyOffset;

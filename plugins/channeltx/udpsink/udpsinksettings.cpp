@@ -30,10 +30,8 @@ UDPSinkSettings::UDPSinkSettings() :
 
 void UDPSinkSettings::resetToDefaults()
 {
-    m_outputSampleRate = 48000;
     m_sampleFormat = FormatS16LE;
     m_inputSampleRate = 48000;
-    m_basebandSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;
     m_fmDeviation = 2500;
@@ -117,7 +115,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
             m_sampleFormat = (SampleFormat) ((int) FormatNone - 1);
         }
 
-        d.readReal(4, &m_outputSampleRate, 48000);
+        d.readReal(4, &m_inputSampleRate, 48000);
         d.readReal(5, &m_rfBandwidth, 32000);
 
         if (m_spectrumGUI)
