@@ -37,7 +37,6 @@ SWGNFMDemodSettings::~SWGNFMDemodSettings() {
 
 void
 SWGNFMDemodSettings::init() {
-    input_sample_rate = 0;
     input_frequency_offset = 0L;
     rf_bandwidth = 0.0f;
     af_bandwidth = 0.0f;
@@ -73,7 +72,6 @@ SWGNFMDemodSettings::cleanup() {
 
 
 
-
     if(udp_address != nullptr) {
         delete udp_address;
     }
@@ -96,7 +94,6 @@ SWGNFMDemodSettings::fromJson(QString &json) {
 
 void
 SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&input_sample_rate, pJson["inputSampleRate"], "qint32", "");
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     ::SWGSDRangel::setValue(&af_bandwidth, pJson["afBandwidth"], "float", "");
@@ -130,8 +127,6 @@ QJsonObject*
 SWGNFMDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     
-    obj->insert("inputSampleRate", QJsonValue(input_sample_rate));
-
     obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
 
     obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -167,15 +162,6 @@ SWGNFMDemodSettings::asJsonObject() {
     toJsonValue(QString("title"), title, obj, QString("QString"));
 
     return obj;
-}
-
-qint32
-SWGNFMDemodSettings::getInputSampleRate() {
-    return input_sample_rate;
-}
-void
-SWGNFMDemodSettings::setInputSampleRate(qint32 input_sample_rate) {
-    this->input_sample_rate = input_sample_rate;
 }
 
 qint64

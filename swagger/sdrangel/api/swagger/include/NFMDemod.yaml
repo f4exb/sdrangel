@@ -1,8 +1,6 @@
 NFMDemodSettings:
   description: NFMDemod
   properties:
-    inputSampleRate:
-      type: integer
     inputFrequencyOffset:
       type: integer
       format: int64
