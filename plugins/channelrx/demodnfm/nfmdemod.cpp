@@ -23,13 +23,13 @@
 #include "SWGChannelSettings.h"
 #include "SWGNFMDemodSettings.h"
 
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 #include "util/stepfunctions.h"
 #include "audio/audiooutput.h"
 #include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 
 #include "nfmdemodgui.h"
 #include "nfmdemod.h"
@@ -111,9 +111,11 @@ float arctan2(Real y, Real x)
 		Real r = (x + abs_y) / (abs_y - x);
 		angle = coeff_2 - coeff_1 * r;
 	}
-	if(y < 0)
+	if(y < 0) {
 		return(-angle);
-	else return(angle);
+	} else {
+	    return(angle);
+	}
 }
 
 Real angleDist(Real a, Real b)
@@ -410,7 +412,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) ||
         (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
-        m_phaseDiscri.setFMScaling((8.0f*settings.m_rfBandwidth) / (float) settings.m_fmDeviation); // integrate 4x factor
+        m_phaseDiscri.setFMScaling((8.0f*settings.m_rfBandwidth) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||

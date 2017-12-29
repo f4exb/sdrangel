@@ -31,7 +31,6 @@
 #include "dsp/afsquelch.h"
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
-#include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 

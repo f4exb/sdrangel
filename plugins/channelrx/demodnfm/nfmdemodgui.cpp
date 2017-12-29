@@ -261,7 +261,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_nfmDemod = (NFMDemod*) rxChannel; //new NFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_nfmDemod = reinterpret_cast<NFMDemod*>(rxChannel); //new NFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_nfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));

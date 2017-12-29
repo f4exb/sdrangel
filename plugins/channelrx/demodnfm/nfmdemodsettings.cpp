@@ -65,7 +65,7 @@ QByteArray NFMDemodSettings::serialize() const
     s.writeS32(2, getRFBWIndex(m_rfBandwidth));
     s.writeS32(3, m_afBandwidth/1000.0);
     s.writeS32(4, m_volume*10.0);
-    s.writeS32(5, (int) m_squelch);
+    s.writeS32(5, static_cast<int>(m_squelch));
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_ctcssIndex);
     s.writeBool(9, m_ctcssOn);
