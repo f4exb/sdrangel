@@ -30,8 +30,6 @@ AMModSettings::AMModSettings() :
 
 void AMModSettings::resetToDefaults()
 {
-    m_basebandSampleRate = 48000;
-    m_outputSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500.0;
     m_modFactor = 0.2f;

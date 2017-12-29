@@ -272,8 +272,10 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 
+    int m_basebandSampleRate;
+    int m_outputSampleRate;
+    int m_inputFrequencyOffset;
     AMModSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -308,6 +310,7 @@ private:
 
     static const int m_levelNbSamples;
 
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
     void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
     void calculateLevel(Real& sample);

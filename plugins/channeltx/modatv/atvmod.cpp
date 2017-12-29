@@ -52,7 +52,8 @@ const int ATVMod::m_ssbFftLen = 1024;
 ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
-    m_absoluteFrequencyOffset(0),
+    m_outputSampleRate(1000000),
+    m_inputFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
     m_evenImage(true),
@@ -78,11 +79,11 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     setObjectName(m_channelId);
     scanCameras();
 
-    m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_settings.m_outputSampleRate, m_ssbFftLen);
+    m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_outputSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
 
-    m_DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_settings.m_outputSampleRate, 2 * m_ssbFftLen);
+    m_DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_outputSampleRate, 2 * m_ssbFftLen);
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
@@ -126,7 +127,7 @@ void ATVMod::pull(Sample& sample)
 
     m_settingsMutex.lock();
 
-    if ((m_tvSampleRate == m_settings.m_outputSampleRate) && (!m_settings.m_forceDecimator)) // no interpolation nor decimation
+    if ((m_tvSampleRate == m_outputSampleRate) && (!m_settings.m_forceDecimator)) // no interpolation nor decimation
     {
         modulateSample();
         pullFinalize(m_modSample, sample);
@@ -486,7 +487,7 @@ void ATVMod::calculateLevel(Real& sample)
 
 void ATVMod::start()
 {
-    qDebug() << "ATVMod::start: m_outputSampleRate: " << m_settings.m_outputSampleRate
+    qDebug() << "ATVMod::start: m_outputSampleRate: " << m_outputSampleRate
             << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 }
 
@@ -499,63 +500,32 @@ bool ATVMod::handleMessage(const Message& cmd)
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-
-        ATVModSettings settings = m_settings;
-        settings.m_outputSampleRate = notif.getSampleRate();
-        settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-        applySettings(settings);
-
         qDebug() << "ATVMod::handleMessage: MsgChannelizerNotification:"
-                << " m_outputSampleRate: " << settings.m_outputSampleRate
-                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+                << " outputSampleRate: " << notif.getSampleRate()
+                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
+
+        applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
         return true;
     }
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "SSBMod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getOutputSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
                 m_channelizer->getOutputSampleRate(),
                 cfg.getCenterFrequency());
-
-        qDebug() << "SSBMod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getOutputSampleRate()
-                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
     else if (MsgConfigureATVMod::match(cmd))
     {
         MsgConfigureATVMod& cfg = (MsgConfigureATVMod&) cmd;
+        qDebug() << "ATVMod::handleMessage: MsgConfigureATVMod";
 
-        ATVModSettings settings = cfg.getSettings();
-
-        // These settings are set with UpChannelizer::MsgChannelizerNotification
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_outputSampleRate = m_settings.m_outputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "ATVMod::handleMessage: MsgConfigureATVMod:"
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_rfOppBandwidth: " << settings.m_rfOppBandwidth
-                << " m_atvStd: " << (int) settings.m_atvStd
-                << " m_nbLines: " << settings.m_nbLines
-                << " m_fps: " << settings.m_fps
-                << " m_atvModInput: " << (int) settings.m_atvModInput
-                << " m_uniformLevel: " << settings.m_uniformLevel
-                << " m_atvModulation: " << (int) settings.m_atvModulation
-                << " m_videoPlayLoop: " << settings.m_videoPlayLoop
-                << " m_videoPlay: " << settings.m_videoPlay
-                << " m_cameraPlay: " << settings.m_cameraPlay
-                << " m_channelMute: " << settings.m_channelMute
-                << " m_invertedVideo: " << settings.m_invertedVideo
-                << " m_rfScalingFactor: " << settings.m_rfScalingFactor
-                << " m_fmExcursion: " << settings.m_fmExcursion
-                << " m_forceDecimator: " << settings.m_forceDecimator
-                << " force: " << cfg.getForce();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -1054,31 +1024,99 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
 }
 
-void ATVMod::applySettings(const ATVModSettings& settings, bool force)
+void ATVMod::applyChannelSettings(int outputSampleRate, int inputFrequencyOffset)
 {
-    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate)
-        || (settings.m_atvStd != m_settings.m_atvStd)
-        || (settings.m_nbLines != m_settings.m_nbLines)
-        || (settings.m_fps != m_settings.m_fps)
-        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_atvModulation != m_settings.m_atvModulation) || force)
+    qDebug() << "AMMod::applyChannelSettings:"
+            << " outputSampleRate: " << outputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (outputSampleRate != m_outputSampleRate))
     {
-        getBaseValues(settings.m_outputSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_pointsPerLine);
+        m_settingsMutex.lock();
+        m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
+        m_settingsMutex.unlock();
+    }
+
+    if (outputSampleRate != m_outputSampleRate)
+    {
+        getBaseValues(outputSampleRate, m_settings.m_nbLines * m_settings.m_fps, m_tvSampleRate, m_pointsPerLine);
 
         m_settingsMutex.lock();
 
         if (m_tvSampleRate > 0)
         {
             m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) settings.m_outputSampleRate;
+            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) outputSampleRate;
             m_interpolator.create(32,
                     m_tvSampleRate,
-                    settings.m_rfBandwidth / getRFBandwidthDivisor(settings.m_atvModulation),
+                    m_settings.m_rfBandwidth / getRFBandwidthDivisor(m_settings.m_atvModulation),
                     3.0);
         }
         else
         {
-            m_tvSampleRate = settings.m_outputSampleRate;
+            m_tvSampleRate = outputSampleRate;
+        }
+
+        m_SSBFilter->create_filter(0, m_settings.m_rfBandwidth / m_tvSampleRate);
+        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilterBufferIndex = 0;
+
+        applyStandard(); // set all timings
+        m_settingsMutex.unlock();
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportEffectiveSampleRate *report;
+            report = MsgReportEffectiveSampleRate::create(m_tvSampleRate, m_pointsPerLine);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
+
+    m_outputSampleRate = outputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void ATVMod::applySettings(const ATVModSettings& settings, bool force)
+{
+    qDebug() << "ATVMod::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_rfOppBandwidth: " << settings.m_rfOppBandwidth
+            << " m_atvStd: " << (int) settings.m_atvStd
+            << " m_nbLines: " << settings.m_nbLines
+            << " m_fps: " << settings.m_fps
+            << " m_atvModInput: " << (int) settings.m_atvModInput
+            << " m_uniformLevel: " << settings.m_uniformLevel
+            << " m_atvModulation: " << (int) settings.m_atvModulation
+            << " m_videoPlayLoop: " << settings.m_videoPlayLoop
+            << " m_videoPlay: " << settings.m_videoPlay
+            << " m_cameraPlay: " << settings.m_cameraPlay
+            << " m_channelMute: " << settings.m_channelMute
+            << " m_invertedVideo: " << settings.m_invertedVideo
+            << " m_rfScalingFactor: " << settings.m_rfScalingFactor
+            << " m_fmExcursion: " << settings.m_fmExcursion
+            << " m_forceDecimator: " << settings.m_forceDecimator
+            << " force: " << force;
+
+    if ((settings.m_atvStd != m_settings.m_atvStd)
+        || (settings.m_nbLines != m_settings.m_nbLines)
+        || (settings.m_fps != m_settings.m_fps)
+        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+        || (settings.m_atvModulation != m_settings.m_atvModulation) || force)
+    {
+        getBaseValues(m_outputSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_pointsPerLine);
+
+        m_settingsMutex.lock();
+
+        if (m_tvSampleRate > 0)
+        {
+            m_interpolatorDistanceRemain = 0;
+            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_outputSampleRate;
+            m_interpolator.create(32,
+                    m_tvSampleRate,
+                    settings.m_rfBandwidth / getRFBandwidthDivisor(settings.m_atvModulation),
+                    3.0);
         }
 
         m_SSBFilter->create_filter(0, settings.m_rfBandwidth / m_tvSampleRate);
@@ -1096,8 +1134,7 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate)
-        || (settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth)
+    if ((settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth)
         || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
         || (settings.m_nbLines != m_settings.m_nbLines) // difference in line period may have changed TV sample rate
         || (settings.m_fps != m_settings.m_fps)         //
@@ -1109,14 +1146,6 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
         m_DSBFilterBufferIndex = 0;
 
-        m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_carrierNco.setFreq(settings.m_inputFrequencyOffset, settings.m_outputSampleRate);
         m_settingsMutex.unlock();
     }
 

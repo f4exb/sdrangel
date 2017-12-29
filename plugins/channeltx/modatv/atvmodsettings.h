@@ -58,7 +58,6 @@ struct ATVModSettings
         ATVModulationVestigialLSB
     } ATVModulation;
 
-    int           m_outputSampleRate;     //!< sample rate from channelizer
     qint64        m_inputFrequencyOffset; //!< offset from baseband center frequency
     Real          m_rfBandwidth;          //!< Bandwidth of modulated signal or direct sideband for SSB / vestigial SSB
     Real          m_rfOppBandwidth;       //!< Bandwidth of opposite sideband for vestigial SSB

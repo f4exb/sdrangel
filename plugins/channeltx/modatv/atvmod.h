@@ -469,8 +469,9 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 
+    int m_outputSampleRate;
+    int m_inputFrequencyOffset;
     ATVModSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
     NCO m_carrierNco;
     Complex m_modSample;
@@ -560,6 +561,7 @@ private:
     static const int m_nbBars; //!< number of bars in bar or chessboard patterns
     static const int m_cameraFPSTestNbFrames; //!< number of frames for camera FPS test
 
+    void applyChannelSettings(int outputSampleRate, int inputFrequencyOffset);
     void applySettings(const ATVModSettings& settings, bool force = false);
     void pullFinalize(Complex& ci, Sample& sample);
     void pullVideo(Real& sample);

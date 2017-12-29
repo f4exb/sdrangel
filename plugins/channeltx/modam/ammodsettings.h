@@ -23,8 +23,6 @@ class Serializable;
 
 struct AMModSettings
 {
-    int m_basebandSampleRate;
-    int m_outputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     float m_modFactor;

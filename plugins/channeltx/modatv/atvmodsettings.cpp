@@ -29,7 +29,6 @@ ATVModSettings::ATVModSettings() :
 
 void ATVModSettings::resetToDefaults()
 {
-    m_outputSampleRate = 1000000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 1000000;
     m_rfOppBandwidth = 0;
