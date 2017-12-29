@@ -39,7 +39,8 @@ const QString UDPSrc::m_channelId = "UDPSrc";
 UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_absoluteFrequencyOffset(0),
+        m_inputSampleRate(48000),
+        m_inputFrequencyOffset(0),
         m_outMovingAverage(480, 1e-10),
         m_inMovingAverage(480, 1e-10),
         m_amMovingAverage(1200, 1e-10),
@@ -64,9 +65,9 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 
-	m_nco.setFreq(0, m_settings.m_inputSampleRate);
-	m_interpolator.create(16, m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / 2.0);
-	m_sampleDistanceRemain = m_settings.m_inputSampleRate / m_settings.m_outputSampleRate;
+	m_nco.setFreq(0, m_inputSampleRate);
+	m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.0);
+	m_sampleDistanceRemain = m_inputSampleRate / m_settings.m_outputSampleRate;
 	m_spectrumEnabled = false;
 	m_nextSSBId = 0;
 	m_nextS16leId = 0;
@@ -162,7 +163,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			Sample ss(ci.real(), ci.imag());
 			m_sampleBuffer.push_back(ss);
 
-			m_sampleDistanceRemain += m_settings.m_inputSampleRate / m_settings.m_outputSampleRate;
+			m_sampleDistanceRemain += m_inputSampleRate / m_settings.m_outputSampleRate;
 
 			calculateSquelch(m_inMagsq);
 
@@ -323,66 +324,33 @@ bool UDPSrc::handleMessage(const Message& cmd)
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-
-		UDPSrcSettings settings;
-
-		settings.m_inputSampleRate = notif.getSampleRate();
-		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-		//apply(false);
-		applySettings(settings);
-
-		qDebug() << "UDPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << settings.m_inputSampleRate
+		qDebug() << "UDPSrc::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << notif.getSampleRate()
                  << " frequencyOffset: " << notif.getFrequencyOffset();
+
+		applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
+
 
         return true;
 	}
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "UDPSrc::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
-
-        qDebug() << "UDPSrc::handleMessage: MsgConfigureChannelizer:"
-                << " sampleRate: " << cfg.getSampleRate()
-                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
     else if (MsgConfigureUDPSrc::match(cmd))
     {
         MsgConfigureUDPSrc& cfg = (MsgConfigureUDPSrc&) cmd;
+        qDebug("UDPSrc::handleMessage: MsgConfigureUDPSrc");
 
-        UDPSrcSettings settings = cfg.getSettings();
-
-        // These settings are set with DownChannelizer::MsgChannelizerNotification
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "UDPSrc::handleMessage: MsgConfigureUDPSrc: "
-                << " m_inputSampleRate: " << settings.m_inputSampleRate
-                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-                << " m_audioActive: " << settings.m_audioActive
-                << " m_audioStereo: " << settings.m_audioStereo
-                << " m_gain: " << settings.m_gain
-                << " m_volume: " << settings.m_volume
-                << " m_squelchEnabled: " << settings.m_squelchEnabled
-                << " m_squelchdB: " << settings.m_squelchdB
-                << " m_squelchGate" << settings.m_squelchGate
-                << " m_agc" << settings.m_agc
-                << " m_sampleFormat: " << settings.m_sampleFormat
-                << " m_outputSampleRate: " << settings.m_outputSampleRate
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_fmDeviation: " << settings.m_fmDeviation
-                << " m_udpAddressStr: " << settings.m_udpAddress
-                << " m_udpPort: " << settings.m_udpPort
-                << " m_audioPort: " << settings.m_audioPort
-                << " force: " << cfg.getForce();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -477,18 +445,59 @@ void UDPSrc::audioReadyRead()
 	//qDebug("UDPSrc::audioReadyRead: done");
 }
 
+void UDPSrc::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+{
+    qDebug() << "UDPSrc::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (inputSampleRate != m_inputSampleRate))
+    {
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
+    }
+
+    if (inputSampleRate != m_inputSampleRate)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.0);
+        m_sampleDistanceRemain = inputSampleRate / m_settings.m_outputSampleRate;
+        m_settingsMutex.unlock();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
 void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
 {
+    qDebug() << "UDPSrc::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_audioActive: " << settings.m_audioActive
+            << " m_audioStereo: " << settings.m_audioStereo
+            << " m_gain: " << settings.m_gain
+            << " m_volume: " << settings.m_volume
+            << " m_squelchEnabled: " << settings.m_squelchEnabled
+            << " m_squelchdB: " << settings.m_squelchdB
+            << " m_squelchGate" << settings.m_squelchGate
+            << " m_agc" << settings.m_agc
+            << " m_sampleFormat: " << settings.m_sampleFormat
+            << " m_outputSampleRate: " << settings.m_outputSampleRate
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_fmDeviation: " << settings.m_fmDeviation
+            << " m_udpAddressStr: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
+            << " m_audioPort: " << settings.m_audioPort
+            << " force: " << force;
+
     m_settingsMutex.lock();
 
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
-        (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
         (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
         (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
     {
-        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
-        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.0);
-        m_sampleDistanceRemain = settings.m_inputSampleRate / settings.m_outputSampleRate;
+        m_interpolator.create(16, m_inputSampleRate, settings.m_rfBandwidth / 2.0);
+        m_sampleDistanceRemain = m_inputSampleRate / settings.m_outputSampleRate;
 
         if ((settings.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
             (settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||

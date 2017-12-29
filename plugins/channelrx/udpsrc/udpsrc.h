@@ -146,8 +146,9 @@ protected:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
     UDPSrcSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
 	QUdpSocket *m_audioSocket;
 
@@ -197,6 +198,7 @@ protected:
 
 	QMutex m_settingsMutex;
 
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
     void applySettings(const UDPSrcSettings& settings, bool force = false);
 
     inline void calculateSquelch(double value)

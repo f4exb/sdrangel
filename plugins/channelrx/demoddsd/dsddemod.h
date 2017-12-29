@@ -160,8 +160,9 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_inputSampleRate;
+	int m_inputFrequencyOffset;
 	DSDDemodSettings m_settings;
-	int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -201,7 +202,8 @@ private:
 
     static const int m_udpBlockSize;
 
-	void applySettings(DSDDemodSettings& settings, bool force = false);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
+	void applySettings(const DSDDemodSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

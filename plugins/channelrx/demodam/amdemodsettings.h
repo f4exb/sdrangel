@@ -23,7 +23,6 @@ class Serializable;
 
 struct AMDemodSettings
 {
-    int m_inputSampleRate;
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_squelch;

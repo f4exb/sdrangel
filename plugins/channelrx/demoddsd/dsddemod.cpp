@@ -42,7 +42,8 @@ const int DSDDemod::m_udpBlockSize = 512;
 DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_absoluteFrequencyOffset(0),
+        m_inputSampleRate(48000),
+        m_inputFrequencyOffset(0),
         m_interpolatorDistance(0.0f),
         m_interpolatorDistanceRemain(0.0f),
         m_sampleCount(0),
@@ -325,21 +326,17 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+		qDebug() << "DSDDemod::handleMessage: MsgChannelizerNotification: inputSampleRate: " << notif.getSampleRate()
+				<< " inputFrequencyOffset: " << notif.getFrequencyOffset();
 
-		DSDDemodSettings settings = m_settings;
-		settings.m_inputSampleRate = notif.getSampleRate();
-		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-		applySettings(settings);
-
-		qDebug() << "DSDDemod::handleMessage: MsgChannelizerNotification: m_inputSampleRate: " << settings.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+		applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
 		return true;
 	}
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug("DSDDemod::handleMessage: MsgConfigureChannelizer");
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
@@ -350,35 +347,9 @@ bool DSDDemod::handleMessage(const Message& cmd)
     else if (MsgConfigureDSDDemod::match(cmd))
     {
         MsgConfigureDSDDemod& cfg = (MsgConfigureDSDDemod&) cmd;
+        qDebug("DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth");
 
-        DSDDemodSettings settings = cfg.getSettings();
-
-        // These settings are set with DownChannelizer::MsgChannelizerNotification
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "DSDDemod::handleMessage: MsgConfigureDSDDemod: m_rfBandwidth: " << m_settings.m_rfBandwidth
-                << " m_fmDeviation: " << m_settings.m_fmDeviation
-                << " m_demodGain: " << m_settings.m_demodGain
-                << " m_volume: " << m_settings.m_volume
-                << " m_baudRate: " << m_settings.m_baudRate
-                << " m_squelchGate" << m_settings.m_squelchGate
-                << " m_squelch: " << m_settings.m_squelch
-                << " m_audioMute: " << m_settings.m_audioMute
-                << " m_enableCosineFiltering: " << m_settings.m_enableCosineFiltering
-                << " m_syncOrConstellation: " << m_settings.m_syncOrConstellation
-                << " m_slot1On: " << m_settings.m_slot1On
-                << " m_slot2On: " << m_settings.m_slot2On
-                << " m_tdmaStereo: " << m_settings.m_tdmaStereo
-                << " m_pllLock: " << m_settings.m_pllLock
-                << " m_udpCopyAudio: " << m_settings.m_udpCopyAudio
-                << " m_udpAddress: " << m_settings.m_udpAddress
-                << " m_udpPort: " << m_settings.m_udpPort
-                << " m_highPassFilter: "<< m_settings.m_highPassFilter
-                << " force: " << cfg.getForce();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -394,21 +365,61 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
+void DSDDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    qDebug() << "DSDDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (inputSampleRate != m_inputSampleRate))
     {
-        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if (inputSampleRate != m_inputSampleRate)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, settings.m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
+        m_interpolator.create(16, inputSampleRate, (m_settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_settingsMutex.unlock();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
+{
+    qDebug() << "DSDDemod::applySettings: "
+            << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << m_settings.m_rfBandwidth
+            << " m_fmDeviation: " << m_settings.m_fmDeviation
+            << " m_demodGain: " << m_settings.m_demodGain
+            << " m_volume: " << m_settings.m_volume
+            << " m_baudRate: " << m_settings.m_baudRate
+            << " m_squelchGate" << m_settings.m_squelchGate
+            << " m_squelch: " << m_settings.m_squelch
+            << " m_audioMute: " << m_settings.m_audioMute
+            << " m_enableCosineFiltering: " << m_settings.m_enableCosineFiltering
+            << " m_syncOrConstellation: " << m_settings.m_syncOrConstellation
+            << " m_slot1On: " << m_settings.m_slot1On
+            << " m_slot2On: " << m_settings.m_slot2On
+            << " m_tdmaStereo: " << m_settings.m_tdmaStereo
+            << " m_pllLock: " << m_settings.m_pllLock
+            << " m_udpCopyAudio: " << m_settings.m_udpCopyAudio
+            << " m_udpAddress: " << m_settings.m_udpAddress
+            << " m_udpPort: " << m_settings.m_udpPort
+            << " m_highPassFilter: "<< m_settings.m_highPassFilter
+            << " force: " << force;
+
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
         m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
         m_settingsMutex.unlock();
     }
@@ -458,7 +469,7 @@ void DSDDemod::applySettings(DSDDemodSettings& settings, bool force)
     if ((settings.m_udpAddress != m_settings.m_udpAddress)
         || (settings.m_udpPort != m_settings.m_udpPort) || force)
     {
-        m_udpBufferAudio->setAddress(settings.m_udpAddress);
+        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
         m_udpBufferAudio->setPort(settings.m_udpPort);
     }
 

@@ -36,7 +36,6 @@ BFMDemodSettings::BFMDemodSettings() :
 
 void BFMDemodSettings::resetToDefaults()
 {
-    m_inputSampleRate = 384000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = getRFBW(5);
     m_afBandwidth = 15000;

@@ -44,7 +44,6 @@ void SSBDemodSettings::resetToDefaults()
     m_lowCutoff = 300;
     m_volume = 3.0;
     m_spanLog2 = 3;
-    m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_udpAddress = "127.0.0.1";

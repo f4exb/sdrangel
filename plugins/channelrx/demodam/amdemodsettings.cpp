@@ -29,7 +29,6 @@ AMDemodSettings::AMDemodSettings() :
 
 void AMDemodSettings::resetToDefaults()
 {
-    m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 5000;
     m_squelch = -40.0;

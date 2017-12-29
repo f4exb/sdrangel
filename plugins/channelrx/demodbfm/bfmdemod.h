@@ -117,7 +117,7 @@ public:
 	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
-	int getSampleRate() const { return m_settings.m_inputSampleRate; }
+	int getSampleRate() const { return m_inputSampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
@@ -167,8 +167,9 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
     BFMDemodSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)
@@ -224,6 +225,7 @@ private:
 
     static const int m_udpBlockSize;
 
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
 };
 

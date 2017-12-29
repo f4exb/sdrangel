@@ -312,6 +312,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 void NFMDemod::start()
 {
     qDebug() << "NFMDemod::start";
+    m_squelchCount = 0;
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
 }
@@ -334,6 +335,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+
         qDebug() << "NFMDemod::handleMessage: MsgConfigureChannelizer:"
                  << " sampleRate: " << cfg.getSampleRate()
                  << " centerFrequency: " << cfg.getCenterFrequency();
@@ -347,10 +349,9 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	else if (MsgConfigureNFMDemod::match(cmd))
 	{
 	    MsgConfigureNFMDemod& cfg = (MsgConfigureNFMDemod&) cmd;
-	    NFMDemodSettings settings = cfg.getSettings();
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod";
 
-        applySettings(settings, cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
 	}

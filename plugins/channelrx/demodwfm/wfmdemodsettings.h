@@ -22,7 +22,6 @@ class Serializable;
 
 struct WFMDemodSettings
 {
-    int m_inputSampleRate;
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;

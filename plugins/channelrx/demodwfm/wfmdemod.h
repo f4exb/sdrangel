@@ -132,8 +132,9 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
     WFMDemodSettings m_settings;
-    int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
@@ -166,6 +167,7 @@ private:
 
     static const int m_udpBlockSize;
 
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
     void applySettings(const WFMDemodSettings& settings, bool force = false);
 };
 

@@ -126,7 +126,8 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
-    int m_absoluteFrequencyOffset;
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
     AMDemodSettings m_settings;
 
 	NCO m_nco;
@@ -155,7 +156,7 @@ private:
 
 	QMutex m_settingsMutex;
 
-//	void apply(bool force = false);
+	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
     void applySettings(const AMDemodSettings& settings, bool force = false);
 
 	void processOneSample(Complex &ci)

@@ -241,8 +241,8 @@ private:
 	int m_spanLog2;
 	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
-	int m_sampleRate;
-	int m_absoluteFrequencyOffset;
+	int m_inputSampleRate;
+	int m_inputFrequencyOffset;
 	bool m_audioBinaual;
 	bool m_audioFlipChannels;
 	bool m_usb;
@@ -278,6 +278,7 @@ private:
 
 	QMutex m_settingsMutex;
 
+	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
 };
 

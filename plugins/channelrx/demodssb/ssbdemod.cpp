@@ -62,13 +62,13 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_LowCutoff = 300;
 	m_volume = 2.0;
 	m_spanLog2 = 3;
-	m_sampleRate = 96000;
-	m_absoluteFrequencyOffset = 0;
-	m_nco.setFreq(m_absoluteFrequencyOffset, m_sampleRate);
+	m_inputSampleRate = 48000;
+	m_inputFrequencyOffset = 0;
 	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
-	m_interpolator.create(16, m_sampleRate, 5000);
-	m_sampleDistanceRemain = (Real) m_sampleRate / m_audioSampleRate;
+	m_nco.setFreq(m_inputFrequencyOffset, m_inputSampleRate);
+	m_interpolator.create(16, m_inputSampleRate, 5000);
+	m_sampleDistanceRemain = (Real) m_inputSampleRate / m_audioSampleRate;
 
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
@@ -172,7 +172,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
 			}
 
-			m_sampleDistanceRemain += (Real)m_sampleRate / m_audioSampleRate;
+			m_sampleDistanceRemain += (Real) m_inputSampleRate / m_audioSampleRate;
 		}
 		else
 		{
@@ -297,62 +297,30 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+		qDebug("SSBDemod::handleMessage: MsgChannelizerNotification: m_sampleRate");
 
-		m_settingsMutex.lock();
-
-		m_sampleRate = notif.getSampleRate();
-		m_nco.setFreq(-notif.getFrequencyOffset(), m_sampleRate);
-		m_interpolator.create(16, m_sampleRate, m_Bandwidth);
-		m_sampleDistanceRemain = m_sampleRate / m_audioSampleRate;
-
-		m_settingsMutex.unlock();
-
-		qDebug() << "SSBDemod::handleMessage: MsgChannelizerNotification: m_sampleRate: " << m_sampleRate
-				<< " frequencyOffset" << notif.getFrequencyOffset();
+		applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
 		return true;
 	}
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "SSBDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
-
-        qDebug() << "SSBDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
-                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
     else if (MsgConfigureSSBDemod::match(cmd))
     {
         MsgConfigureSSBDemod& cfg = (MsgConfigureSSBDemod&) cmd;
+        qDebug("SSBDemod::handleMessage: MsgConfigureSSBDemod");
 
-        SSBDemodSettings settings = cfg.getSettings();
-
-        // These settings are set with DownChannelizer::MsgChannelizerNotificatione
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset; // save as absolut frequency shift in baseband
-        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "SSBDemod::handleMessage: MsgConfigureSSBDemod:"
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_lowCutoff: " << settings.m_lowCutoff
-                << " m_volume: " << settings.m_volume
-                << " m_spanLog2: " << settings.m_spanLog2
-                << " m_audioBinaual: " << settings.m_audioBinaural
-                << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-                << " m_dsb: " << settings.m_dsb
-                << " m_audioMute: " << settings.m_audioMute
-                << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-                << " m_agcActive: " << settings.m_agc
-                << " m_agcClamping: " << settings.m_agcClamping
-                << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-                << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-                << " agcThresholdGate: " << settings.m_agcThresholdGate;
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -369,17 +337,49 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
+void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
 {
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) ||
-        (m_settings.m_inputSampleRate != settings.m_inputSampleRate) || force)
+    qDebug() << "SSBDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
+        (m_inputSampleRate != inputSampleRate))
     {
-        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
+    if (m_inputSampleRate != inputSampleRate)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth * 2.0f);
+        m_settingsMutex.unlock();
+    }
 
-    if((m_settings.m_inputSampleRate != settings.m_inputSampleRate) ||
-        (m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
+{
+    qDebug() << "SSBDemod::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_lowCutoff: " << settings.m_lowCutoff
+            << " m_volume: " << settings.m_volume
+            << " m_spanLog2: " << settings.m_spanLog2
+            << " m_audioBinaual: " << settings.m_audioBinaural
+            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
+            << " m_dsb: " << settings.m_dsb
+            << " m_audioMute: " << settings.m_audioMute
+            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+            << " m_agcActive: " << settings.m_agc
+            << " m_agcClamping: " << settings.m_agcClamping
+            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
+            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
+            << " agcThresholdGate: " << settings.m_agcThresholdGate;
+
+    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
         (m_settings.m_lowCutoff != settings.m_lowCutoff) ||
         (m_settings.m_audioSampleRate != settings.m_audioSampleRate) || force)
     {
@@ -393,8 +393,9 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             band = -band;
             lowCutoff = -lowCutoff;
             m_usb = false;
-        } else
+        } else {
             m_usb = true;
+        }
 
         if (band < 100.0f)
         {
@@ -406,7 +407,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_LowCutoff = lowCutoff;
 
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_sampleRate, band * 2.0f);
+        m_interpolator.create(16, m_inputSampleRate, band * 2.0f);
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
         DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();

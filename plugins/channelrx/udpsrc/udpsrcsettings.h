@@ -41,7 +41,6 @@ struct UDPSrcSettings
 
     float m_outputSampleRate;
     SampleFormat m_sampleFormat;
-    float m_inputSampleRate;
     int64_t m_inputFrequencyOffset;
     float m_rfBandwidth;
     int m_fmDeviation;

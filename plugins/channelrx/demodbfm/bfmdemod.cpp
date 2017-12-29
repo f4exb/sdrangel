@@ -42,7 +42,8 @@ const int BFMDemod::m_udpBlockSize = 512;
 BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_absoluteFrequencyOffset(0),
+        m_inputSampleRate(384000),
+        m_inputFrequencyOffset(0),
         m_audioFifo(250000),
         m_settingsMutex(QMutex::Recursive),
         m_pilotPLL(19000/384000, 50/384000, 0.01),
@@ -311,16 +312,11 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-        BFMDemodSettings settings = m_settings;
+		qDebug() << "BFMDemod::handleMessage: MsgChannelizerNotification:"
+                << " inputSampleRate: " << notif.getSampleRate()
+                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
 
-        settings.m_inputSampleRate = notif.getSampleRate();
-        settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-        applySettings(settings);
-
-        qDebug() << "BFMDemod::handleMessage: MsgChannelizerNotification:"
-                << " m_inputSampleRate: " << settings.m_inputSampleRate
-                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+        applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
         if (getMessageQueueToGUI())
         {
@@ -334,40 +330,21 @@ bool BFMDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
 
+        qDebug() << "BFMDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
-
-        qDebug() << "BFMDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << cfg.getSampleRate()
-                << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
     else if (MsgConfigureBFMDemod::match(cmd))
     {
         MsgConfigureBFMDemod& cfg = (MsgConfigureBFMDemod&) cmd;
+        qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod";
 
-        BFMDemodSettings settings = cfg.getSettings();
-
-        // These settings are set with DownChannelizer::MsgChannelizerNotification
-        m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-        applySettings(settings, cfg.getForce());
-
-        qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod:"
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_volume: " << settings.m_volume
-                << " m_squelch: " << settings.m_squelch
-                << " m_audioStereo: " << settings.m_audioStereo
-                << " m_lsbStereo: " << settings.m_lsbStereo
-                << " m_showPilot: " << settings.m_showPilot
-                << " m_rdsActive: " << settings.m_rdsActive
-                << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-                << " m_udpAddress: " << settings.m_udpAddress
-                << " m_udpPort: " << settings.m_udpPort
-                << " force: " << cfg.getForce();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -386,57 +363,97 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void BFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+{
+    qDebug() << "BFMDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (inputSampleRate != m_inputSampleRate))
+    {
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
+    }
+
+    if (inputSampleRate != m_inputSampleRate)
+    {
+        m_pilotPLL.configure(19000.0/inputSampleRate, 50.0/inputSampleRate, 0.01);
+
+        m_settingsMutex.lock();
+
+        m_interpolator.create(16, inputSampleRate, m_settings.m_afBandwidth);
+        m_interpolatorDistanceRemain = (Real) inputSampleRate / m_settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+
+        m_interpolatorStereo.create(16, inputSampleRate, m_settings.m_afBandwidth);
+        m_interpolatorStereoDistanceRemain = (Real) inputSampleRate / m_settings.m_audioSampleRate;
+        m_interpolatorStereoDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+
+        m_interpolatorRDS.create(4, inputSampleRate, 600.0);
+        m_interpolatorRDSDistanceRemain = (Real) inputSampleRate / 250000.0;
+        m_interpolatorRDSDistance =  (Real) inputSampleRate / 250000.0;
+
+        Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
+        Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
+        m_rfFilter->create_filter(lowCut, hiCut);
+        m_phaseDiscri.setFMScaling(inputSampleRate / m_fmExcursion);
+
+        m_settingsMutex.unlock();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
 void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate)
-        || (settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
+    qDebug() << "BFMDemod::applySettings: MsgConfigureBFMDemod:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_volume: " << settings.m_volume
+            << " m_squelch: " << settings.m_squelch
+            << " m_audioStereo: " << settings.m_audioStereo
+            << " m_lsbStereo: " << settings.m_lsbStereo
+            << " m_showPilot: " << settings.m_showPilot
+            << " m_rdsActive: " << settings.m_rdsActive
+            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
+            << " force: " << force;
+
+    if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
     {
-        m_pilotPLL.configure(19000.0/settings.m_inputSampleRate, 50.0/settings.m_inputSampleRate, 0.01);
+        m_pilotPLL.configure(19000.0/m_inputSampleRate, 50.0/m_inputSampleRate, 0.01);
     }
 
-    if((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
-    {
-        qDebug() << "BFMDemod::handleMessage: m_nco.setFreq";
-        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
-    }
-
-    if((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
-        (settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
         m_settingsMutex.lock();
-        qDebug() << "BFMDemod::handleMessage: m_interpolator.create";
 
-        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_afBandwidth);
-        m_interpolatorDistanceRemain = (Real) settings.m_inputSampleRate / settings.m_audioSampleRate;
-        m_interpolatorDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolator.create(16, m_inputSampleRate, settings.m_afBandwidth);
+        m_interpolatorDistanceRemain = (Real) m_inputSampleRate / settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
 
-        m_interpolatorStereo.create(16, settings.m_inputSampleRate, settings.m_afBandwidth);
-        m_interpolatorStereoDistanceRemain = (Real) settings.m_inputSampleRate / settings.m_audioSampleRate;
-        m_interpolatorStereoDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorStereo.create(16, m_inputSampleRate, settings.m_afBandwidth);
+        m_interpolatorStereoDistanceRemain = (Real) m_inputSampleRate / settings.m_audioSampleRate;
+        m_interpolatorStereoDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
 
-        m_interpolatorRDS.create(4, settings.m_inputSampleRate, 600.0);
-        m_interpolatorRDSDistanceRemain = (Real) settings.m_inputSampleRate / 250000.0;
-        m_interpolatorRDSDistance =  (Real) settings.m_inputSampleRate / 250000.0;
+        m_interpolatorRDS.create(4, m_inputSampleRate, 600.0);
+        m_interpolatorRDSDistanceRemain = (Real) m_inputSampleRate / 250000.0;
+        m_interpolatorRDSDistance =  (Real) m_inputSampleRate / 250000.0;
 
         m_settingsMutex.unlock();
     }
 
-    if((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-        (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+       (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_settingsMutex.lock();
-        Real lowCut = -(settings.m_rfBandwidth / 2.0) / settings.m_inputSampleRate;
-        Real hiCut  = (settings.m_rfBandwidth / 2.0) / settings.m_inputSampleRate;
+        Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
+        Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
-        m_phaseDiscri.setFMScaling(settings.m_inputSampleRate / m_fmExcursion);
+        m_phaseDiscri.setFMScaling(m_inputSampleRate / m_fmExcursion);
         m_settingsMutex.unlock();
-
-        qDebug() << "BFMDemod::handleMessage: m_rfFilter->create_filter: sampleRate: "
-                << settings.m_inputSampleRate
-                << " lowCut: " << lowCut * settings.m_inputSampleRate
-                << " hiCut: " << hiCut * settings.m_inputSampleRate;
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||

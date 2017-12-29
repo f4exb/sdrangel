@@ -23,7 +23,6 @@ class Serializable;
 
 struct SSBDemodSettings
 {
-    int m_inputSampleRate;
     qint32 m_inputFrequencyOffset;
     quint32 m_audioSampleRate;
     Real m_rfBandwidth;
