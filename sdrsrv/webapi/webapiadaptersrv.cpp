@@ -1383,7 +1383,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         {
             channels->append(new SWGSDRangel::SWGChannel);
             ChannelSourceAPI *channel = deviceSet->m_deviceSinkAPI->getChanelAPIAt(i);
-            channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
@@ -1413,7 +1413,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         {
             channels->append(new SWGSDRangel::SWGChannel);
             ChannelSinkAPI *channel = deviceSet->m_deviceSourceAPI->getChanelAPIAt(i);
-            channels->back()->setDeltaFrequency(channel->getDeltaFrequency());
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());

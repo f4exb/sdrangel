@@ -224,7 +224,6 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual int getDeltaFrequency() const { return m_rfRunning.m_intFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_rfRunning.m_intFrequencyOffset; }

@@ -35,7 +35,6 @@ public:
     virtual ~ChannelSourceAPI() {}
     virtual void destroy() = 0;
 
-    virtual int getDeltaFrequency() const = 0;
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
     virtual void setName(const QString& name) = 0;
