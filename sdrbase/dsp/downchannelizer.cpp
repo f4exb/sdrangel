@@ -185,8 +185,8 @@ void DownChannelizer::applyConfiguration()
 
 	if (m_sampleSink != 0)
 	{
-		MsgChannelizerNotification notif(m_currentOutputSampleRate, m_currentCenterFrequency);
-		m_sampleSink->handleMessage(notif);
+		MsgChannelizerNotification *notif = MsgChannelizerNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
+		m_sampleSink->getInputMessageQueue()->push(notif);
 	}
 }
 

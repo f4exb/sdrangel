@@ -51,6 +51,11 @@ public:
         int getSampleRate() const { return m_sampleRate; }
         qint64 getFrequencyOffset() const { return m_frequencyOffset; }
 
+        static MsgChannelizerNotification* create(int basebandSampleRate, int samplerate, qint64 frequencyOffset)
+        {
+            return new MsgChannelizerNotification(basebandSampleRate, samplerate, frequencyOffset);
+        }
+
     private:
         int m_basebandSampleRate;
         int m_sampleRate;
