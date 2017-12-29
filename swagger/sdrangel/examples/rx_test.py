@@ -145,7 +145,7 @@ def main():
                 settings["NFMDemodSettings"]["udpAddress"] = address_port[0]
             settings["NFMDemodSettings"]["copyAudioToUDP"] = 1
         
-        r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
+        r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change NFM demod")
         if r is None:
             exit(-1)
             

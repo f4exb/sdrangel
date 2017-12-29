@@ -38,7 +38,6 @@ NFMDemodSettings::NFMDemodSettings() :
 
 void NFMDemodSettings::resetToDefaults()
 {
-    m_inputSampleRate = 96000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;
     m_afBandwidth = 3000;

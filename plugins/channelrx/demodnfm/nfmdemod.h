@@ -117,7 +117,6 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual int getDeltaFrequency() const { return m_absoluteFrequencyOffset; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
@@ -171,8 +170,9 @@ private:
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
 	NFMDemodSettings m_settings;
-	int m_absoluteFrequencyOffset;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -220,6 +220,7 @@ private:
     static const int m_udpBlockSize;
 
 //    void apply(bool force = false);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
 };

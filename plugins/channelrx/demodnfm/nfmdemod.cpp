@@ -47,7 +47,8 @@ const int NFMDemod::m_udpBlockSize = 512;
 NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(devieAPI),
-        m_absoluteFrequencyOffset(0),
+        m_inputSampleRate(48000),
+        m_inputFrequencyOffset(0),
         m_ctcssIndex(0),
         m_sampleCount(0),
         m_squelchCount(0),
@@ -324,61 +325,30 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+		qDebug() << "NFMDemod::handleMessage: DownChannelizer::MsgChannelizerNotification";
 
-		NFMDemodSettings settings = m_settings;
-
-		settings.m_inputSampleRate = notif.getSampleRate();
-		settings.m_inputFrequencyOffset = notif.getFrequencyOffset();
-
-		applySettings(settings);
-
-		qDebug() << "NFMDemod::handleMessage: DownChannelizer::MsgChannelizerNotification:"
-		        << " m_inputSampleRate: " << settings.m_inputSampleRate
-				<< " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset;
+		applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
 		return true;
 	}
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "NFMDemod::handleMessage: MsgConfigureChannelizer:"
+                 << " sampleRate: " << cfg.getSampleRate()
+                 << " centerFrequency: " << cfg.getCenterFrequency();
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
             cfg.getSampleRate(),
             cfg.getCenterFrequency());
-
-        qDebug() << "NFMDemod::handleMessage: MsgConfigureChannelizer:"
-                 << " sampleRate: " << cfg.getSampleRate()
-                 << " centerFrequency: " << cfg.getCenterFrequency();
 
         return true;
     }
 	else if (MsgConfigureNFMDemod::match(cmd))
 	{
 	    MsgConfigureNFMDemod& cfg = (MsgConfigureNFMDemod&) cmd;
-
 	    NFMDemodSettings settings = cfg.getSettings();
-
-	    m_absoluteFrequencyOffset = settings.m_inputFrequencyOffset;
-        settings.m_inputSampleRate = m_settings.m_inputSampleRate;
-        settings.m_inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
-
-		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod:"
-		        << " m_absoluteFrequencyOffset: " << m_absoluteFrequencyOffset
-		        << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-		        << " m_rfBandwidth: " << settings.m_rfBandwidth
-				<< " m_afBandwidth: " << settings.m_afBandwidth
-				<< " m_fmDeviation: " << settings.m_fmDeviation
-				<< " m_volume: " << settings.m_volume
-				<< " m_squelchGate: " << settings.m_squelchGate
-				<< " m_deltaSquelch: " << settings.m_deltaSquelch
-				<< " m_squelch: " << settings.m_squelch
-                << " m_ctcssIndex: " << settings.m_ctcssIndex
-				<< " m_ctcssOn: " << settings.m_ctcssOn
-				<< " m_audioMute: " << settings.m_audioMute
-                << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-                << " m_udpAddress: " << settings.m_udpAddress
-                << " m_udpPort: " << settings.m_udpPort
-				<< " force: " << cfg.getForce();
+		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod";
 
         applySettings(settings, cfg.getForce());
 
@@ -390,22 +360,57 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
+void NFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    qDebug() << "NFMDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
+        (inputSampleRate != m_inputSampleRate))
     {
-        m_nco.setFreq(-settings.m_inputFrequencyOffset, settings.m_inputSampleRate);
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+    if (inputSampleRate != m_inputSampleRate)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.2);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_settingsMutex.unlock();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
+{
+    qDebug() << "NFMDemod::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_afBandwidth: " << settings.m_afBandwidth
+            << " m_fmDeviation: " << settings.m_fmDeviation
+            << " m_volume: " << settings.m_volume
+            << " m_squelchGate: " << settings.m_squelchGate
+            << " m_deltaSquelch: " << settings.m_deltaSquelch
+            << " m_squelch: " << settings.m_squelch
+            << " m_ctcssIndex: " << settings.m_ctcssIndex
+            << " m_ctcssOn: " << settings.m_ctcssOn
+            << " m_audioMute: " << settings.m_audioMute
+            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
+            << " force: " << force;
+
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
         (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, settings.m_inputSampleRate, settings.m_rfBandwidth / 2.2);
+        m_interpolator.create(16, m_inputSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) settings.m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
         m_settingsMutex.unlock();
     }
 
@@ -493,9 +498,7 @@ int NFMDemod::webapiSettingsGet(
             QString& errorMessage __attribute__((unused)))
 {
     response.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
-    NFMDemodSettings settings = m_settings;
-    settings.m_inputFrequencyOffset = m_absoluteFrequencyOffset;
-    webapiFormatChannelSettings(response, settings);
+    webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
@@ -537,9 +540,6 @@ int NFMDemod::webapiSettingsPutPatch(
         settings.m_inputFrequencyOffset = response.getNfmDemodSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
-//    if (channelSettingsKeys.contains("inputSampleRate")) {
-//        settings.m_inputSampleRate = response.getNfmDemodSettings()->getInputSampleRate();
-//    }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getNfmDemodSettings()->getRfBandwidth();
     }
@@ -597,7 +597,6 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getNfmDemodSettings()->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);
     response.getNfmDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getNfmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getNfmDemodSettings()->setInputSampleRate(settings.m_inputSampleRate);
     response.getNfmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getNfmDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getNfmDemodSettings()->setSquelch(settings.m_squelch);

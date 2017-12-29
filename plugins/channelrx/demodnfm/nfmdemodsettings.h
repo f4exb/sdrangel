@@ -27,7 +27,6 @@ struct NFMDemodSettings
     static const int m_rfBW[];
     static const int m_fmDev[];
 
-    int m_inputSampleRate;
     int64_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;
