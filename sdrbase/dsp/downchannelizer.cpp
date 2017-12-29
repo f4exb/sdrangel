@@ -123,7 +123,8 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 
 		if (m_sampleSink != 0)
 		{
-			m_sampleSink->handleMessage(notif);
+		    DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+			m_sampleSink->getInputMessageQueue()->push(rep);
 		}
 
 		emit inputSampleRateChanged();
@@ -145,14 +146,15 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 	}
 	else
 	{
-		if (m_sampleSink != 0)
-		{
-			return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+	    return false;
+//		if (m_sampleSink != 0)
+//		{
+//			return m_sampleSink->handleMessage(cmd);
+//		}
+//		else
+//		{
+//			return false;
+//		}
 	}
 }
 

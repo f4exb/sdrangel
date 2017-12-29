@@ -135,7 +135,8 @@ bool UpChannelizer::handleMessage(const Message& cmd)
 
         if (m_sampleSource != 0)
         {
-            m_sampleSource->handleMessage(notif);
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_sampleSource->getInputMessageQueue()->push(rep);
         }
 
         emit outputSampleRateChanged();
@@ -157,14 +158,15 @@ bool UpChannelizer::handleMessage(const Message& cmd)
     }
     else
     {
-        if (m_sampleSource != 0)
-        {
-            return m_sampleSource->handleMessage(cmd);
-        }
-        else
-        {
-            return false;
-        }
+        return false;
+//        if (m_sampleSource != 0)
+//        {
+//            return m_sampleSource->handleMessage(cmd);
+//        }
+//        else
+//        {
+//            return false;
+//        }
     }
 }
 
