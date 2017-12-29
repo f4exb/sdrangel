@@ -643,7 +643,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
             }
             else
             {
-                response.setStatus(400,"Invalid JSON query");
+                response.setStatus(400,"Invalid JSON request");
                 errorResponse.init();
                 *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
@@ -653,7 +653,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
         {
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON request";
+            *errorResponse.getMessage() = "Invalid JSON format";
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -681,7 +681,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
             }
             else
             {
-                response.setStatus(400,"Invalid JSON query");
+                response.setStatus(400,"Invalid JSON request");
                 errorResponse.init();
                 *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
@@ -691,7 +691,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
         {
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON request";
+            *errorResponse.getMessage() = "Invalid JSON format";
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -1389,9 +1389,9 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     }
     else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() == 0))
     {
-        if (jsonObject.contains("HackRFInputSettings") && jsonObject["HackRFInputSettings"].isObject())
+        if (jsonObject.contains("hackRFInputSettings") && jsonObject["hackRFInputSettings"].isObject())
         {
-            QJsonObject hackRFInputSettingsJsonObject = jsonObject["HackRFInputSettings"].toObject();
+            QJsonObject hackRFInputSettingsJsonObject = jsonObject["hackRFInputSettings"].toObject();
             deviceSettingsKeys = hackRFInputSettingsJsonObject.keys();
             deviceSettings.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
             deviceSettings.getHackRfInputSettings()->fromJsonObject(hackRFInputSettingsJsonObject);
@@ -1404,9 +1404,9 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     }
     else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() != 0))
     {
-        if (jsonObject.contains("HackRFOutputSettings") && jsonObject["HackRFOutputSettings"].isObject())
+        if (jsonObject.contains("hackRFOutputSettings") && jsonObject["hackRFOutputSettings"].isObject())
         {
-            QJsonObject hackRFOutputSettingsJsonObject = jsonObject["HackRFOutputSettings"].toObject();
+            QJsonObject hackRFOutputSettingsJsonObject = jsonObject["hackRFOutputSettings"].toObject();
             deviceSettingsKeys = hackRFOutputSettingsJsonObject.keys();
             deviceSettings.setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
             deviceSettings.getHackRfOutputSettings()->fromJsonObject(hackRFOutputSettingsJsonObject);
@@ -1547,9 +1547,11 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.cleanup();
     deviceSettings.setDeviceHwType(0);
     deviceSettings.setFileSourceSettings(0);
-    deviceSettings.setRtlSdrSettings(0);
+    deviceSettings.setHackRfInputSettings(0);
+    deviceSettings.setHackRfOutputSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
     deviceSettings.setLimeSdrOutputSettings(0);
+    deviceSettings.setRtlSdrSettings(0);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)

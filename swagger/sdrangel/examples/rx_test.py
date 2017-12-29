@@ -107,6 +107,15 @@ def main():
             settings['rtlSdrSettings']['log2Decim'] = 4
             settings['rtlSdrSettings']['dcBlock'] = 1
             settings['rtlSdrSettings']['agc'] = 1
+        elif options.device_hwid == "HackRF":
+            settings['hackRFInputSettings']['LOppmTenths'] = -51
+            settings['hackRFInputSettings']['centerFrequency'] = options.device_freq
+            settings['hackRFInputSettings']['dcBlock'] = 1
+            settings['hackRFInputSettings']['devSampleRate'] = 2600000
+            settings['hackRFInputSettings']['lnaExt'] = 1
+            settings['hackRFInputSettings']['lnaGain'] = 32
+            settings['hackRFInputSettings']['log2Decim'] = 4
+            settings['hackRFInputSettings']['vgaGain'] = 24
         
         r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch device settings")
         if r is None:

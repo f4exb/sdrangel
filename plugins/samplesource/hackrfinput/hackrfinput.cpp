@@ -329,30 +329,27 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
 	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
 	{
-		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_settings.m_iqCorrection = settings.m_iqCorrection;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
 	}
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
-        m_settings.m_devSampleRate = settings.m_devSampleRate;
         forwardChange = true;
 
         if (m_dev != 0)
 		{
-	        rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, m_settings.m_devSampleRate, 1);
+	        rc = (hackrf_error) hackrf_set_sample_rate_manual(m_dev, settings.m_devSampleRate, 1);
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qCritical("HackRFInput::applySettings: could not set sample rate TO %llu S/s: %s", m_settings.m_devSampleRate, hackrf_error_name(rc));
+				qCritical("HackRFInput::applySettings: could not set sample rate TO %llu S/s: %s", settings.m_devSampleRate, hackrf_error_name(rc));
 			}
 			else
 			{
 			    if (m_hackRFThread != 0)
 			    {
-	                qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", m_settings.m_devSampleRate);
-	                m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+	                qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", settings.m_devSampleRate);
+	                m_hackRFThread->setSamplerate(settings.m_devSampleRate);
 			    }
 			}
 		}
@@ -360,19 +357,18 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
-		m_settings.m_log2Decim = settings.m_log2Decim;
 		forwardChange = true;
 
 		if (m_hackRFThread != 0)
 		{
-			m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
-			qDebug() << "HackRFInput: set decimation to " << (1<<m_settings.m_log2Decim);
+			m_hackRFThread->setLog2Decimation(settings.m_log2Decim);
+			qDebug() << "HackRFInput: set decimation to " << (1<<settings.m_log2Decim);
 		}
 	}
 
-	qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+	qint64 deviceCenterFrequency = settings.m_centerFrequency;
 	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate =m_settings.m_devSampleRate;
+	quint32 devSampleRate = settings.m_devSampleRate;
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
 	{
@@ -396,24 +392,21 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
 			(m_settings.m_fcPos != settings.m_fcPos))
 	{
-		m_settings.m_centerFrequency = settings.m_centerFrequency;
-		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
-
 		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
 		{
-			deviceCenterFrequency = m_settings.m_centerFrequency;
+			deviceCenterFrequency = settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;
 		}
 		else
 		{
 			if (settings.m_fcPos == HackRFInputSettings::FC_POS_INFRA)
 			{
-				deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
+				deviceCenterFrequency = settings.m_centerFrequency + (devSampleRate / 4);
 				f_img = deviceCenterFrequency + devSampleRate/2;
 			}
 			else if (settings.m_fcPos == HackRFInputSettings::FC_POS_SUPRA)
 			{
-				deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
+				deviceCenterFrequency = settings.m_centerFrequency - (devSampleRate / 4);
 				f_img = deviceCenterFrequency - devSampleRate/2;
 			}
 		}
@@ -422,10 +415,10 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		{
 			setDeviceCenterFrequency(deviceCenterFrequency);
 
-			qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+			qDebug() << "HackRFInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
 					<< " device center freq: " << deviceCenterFrequency << " Hz"
 					<< " device sample rate: " << devSampleRate << "Hz"
-					<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
+					<< " Actual sample rate: " << devSampleRate/(1<<settings.m_log2Decim) << "Hz"
 					<< " img: " << f_img << "Hz";
 		}
 
@@ -434,22 +427,18 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		m_settings.m_fcPos = settings.m_fcPos;
-
 		if (m_hackRFThread != 0)
 		{
-			m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
-			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
+			m_hackRFThread->setFcPos((int) settings.m_fcPos);
+			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) settings.m_fcPos;
 		}
 	}
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
-		m_settings.m_lnaGain = settings.m_lnaGain;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_lna_gain(m_dev, m_settings.m_lnaGain);
+			rc = (hackrf_error) hackrf_set_lna_gain(m_dev, settings.m_lnaGain);
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -457,18 +446,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: LNA gain set to " << m_settings.m_lnaGain;
+				qDebug() << "HackRFInput:applySettings: LNA gain set to " << settings.m_lnaGain;
 			}
 		}
 	}
 
 	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
 	{
-		m_settings.m_vgaGain = settings.m_vgaGain;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_vga_gain(m_dev, m_settings.m_vgaGain);
+			rc = (hackrf_error) hackrf_set_vga_gain(m_dev, settings.m_vgaGain);
 
 			if (rc != HACKRF_SUCCESS)
 			{
@@ -476,18 +463,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: VGA gain set to " << m_settings.m_vgaGain;
+				qDebug() << "HackRFInput:applySettings: VGA gain set to " << settings.m_vgaGain;
 			}
 		}
 	}
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-        m_settings.m_bandwidth = settings.m_bandwidth;
-
         if (m_dev != 0)
 		{
-	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(m_settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
+	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
 			if (rc != HACKRF_SUCCESS)
@@ -496,18 +481,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << m_settings.m_bandwidth << " Hz";
+				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << settings.m_bandwidth << " Hz";
 			}
 		}
 	}
 
 	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
-		m_settings.m_biasT = settings.m_biasT;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (m_settings.m_biasT ? 1 : 0));
+			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -515,18 +498,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: bias tee set to " << m_settings.m_biasT;
+				qDebug() << "HackRFInput:applySettings: bias tee set to " << settings.m_biasT;
 			}
 		}
 	}
 
 	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
 	{
-		m_settings.m_lnaExt = settings.m_lnaExt;
-
 		if (m_dev != 0)
 		{
-			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (m_settings.m_lnaExt ? 1 : 0));
+			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
 
 			if(rc != HACKRF_SUCCESS)
 			{
@@ -534,25 +515,34 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-				qDebug() << "HackRFInput:applySettings: extra LNA set to " << m_settings.m_lnaExt;
+				qDebug() << "HackRFInput:applySettings: extra LNA set to " << settings.m_lnaExt;
 			}
 		}
 	}
 
 	if (forwardChange)
 	{
-		int sampleRate = devSampleRate/(1<<m_settings.m_log2Decim);
-		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+		int sampleRate = devSampleRate/(1<<settings.m_log2Decim);
+		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
-	m_settings.m_linkTxFrequency = settings.m_linkTxFrequency;
+	m_settings = settings;
 
-    qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-            << " device center freq: " << deviceCenterFrequency << " Hz"
-            << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
-            << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s";
+    qDebug() << "HackRFInput::applySettings: "
+            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_bandwidth: " << m_settings.m_bandwidth
+            << " m_lnaGain: " << m_settings.m_lnaGain
+            << " m_vgaGain: " << m_settings.m_vgaGain
+            << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_fcPos: " << m_settings.m_fcPos
+            << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_biasT: " << m_settings.m_biasT
+            << " m_lnaExt: " << m_settings.m_lnaExt
+            << " m_dcBlock: " << m_settings.m_dcBlock
+            << " m_linkTxFrequency: " << m_settings.m_linkTxFrequency;
 
 	return true;
 }
@@ -589,7 +579,7 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("vgaGain")) {
         settings.m_vgaGain = response.getHackRfInputSettings()->getVgaGain();
     }
-    if (deviceSettingsKeys.contains("log2Interp")) {
+    if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getHackRfInputSettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("devSampleRate")) {
