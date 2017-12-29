@@ -50,6 +50,8 @@ void ATVModSettings::resetToDefaults()
     m_overlayText = "ATV";
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Modulator";
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9999;
 }
 
 QByteArray ATVModSettings::serialize() const

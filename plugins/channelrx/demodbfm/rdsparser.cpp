@@ -15,7 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodbfm/rdsparser.h"
+#include "rdsparser.h"
+#include "rdstmc.h"
 
 #include <QDebug>
 #include <string.h>
@@ -25,7 +26,6 @@
 #include <cstring>
 #include "boost/format.hpp"
 
-#include "../../channelrx/demodbfm/rdstmc.h"
 
 const unsigned int RDSParser::offset_pos[5] = {0,1,2,3,2};
 const unsigned int RDSParser::offset_word[5] = {252,408,360,436,848};
@@ -743,7 +743,7 @@ void RDSParser::decode_type3(unsigned int *group, bool B)
 	qDebug() << "RDSParser::decode_type3: aid group: " << application_group
 		<< " " << (group_type ? 'B' : 'A');*/
 
-	if ((application_group == 8) && (group_type == false))
+	if ((application_group == 8) && (group_type == 0))
 	{ // 8A
 		int variant_code = (message >> 14) & 0x3;
 

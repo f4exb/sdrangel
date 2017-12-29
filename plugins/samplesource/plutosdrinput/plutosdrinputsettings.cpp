@@ -38,6 +38,7 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_lpfFIREnable = false;
 	m_lpfFIRBW = 500000U;
 	m_lpfFIRlog2Decim = 0;
+	m_lpfFIRGain = 0;
 	m_gain = 40;
 	m_antennaPath = RFPATH_A_BAL;
 	m_gainMode = GAIN_MANUAL;

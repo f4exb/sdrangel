@@ -30,6 +30,7 @@ void FCDProPlusSettings::resetToDefaults()
 	m_lnaGain = true;
 	m_biasT = false;
 	m_ifGain = 0;
+	m_mixGain = 0;
 	m_rfFilterIndex = 0;
 	m_ifFilterIndex = 0;
 	m_LOppmTenths = 0;

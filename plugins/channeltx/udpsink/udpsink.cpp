@@ -386,7 +386,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         {
             m_actualInputSampleRate = newSampleRate;
 
-            if ((cfg.getRawDeltaRatio() > -0.05) || (cfg.getRawDeltaRatio() < 0.05))
+            if ((cfg.getRawDeltaRatio() > -0.05) && (cfg.getRawDeltaRatio() < 0.05))
             {
                 if (m_sampleRateAvgCounter < m_sampleRateAverageItems)
                 {

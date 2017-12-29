@@ -34,6 +34,7 @@ void PlutoSDROutputSettings::resetToDefaults()
 	m_lpfFIREnable = false;
 	m_lpfFIRBW = 500000U;
 	m_lpfFIRlog2Interp = 0;
+	m_lpfFIRGain = 0;
 	m_att = -50;
 	m_antennaPath = RFPATH_A;
     m_transverterMode = false;

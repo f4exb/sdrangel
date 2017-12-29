@@ -33,6 +33,7 @@ void UDPSinkSettings::resetToDefaults()
     m_outputSampleRate = 48000;
     m_sampleFormat = FormatS16LE;
     m_inputSampleRate = 48000;
+    m_basebandSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;
     m_fmDeviation = 2500;

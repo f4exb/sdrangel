@@ -15,9 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demodbfm/rdsdecoder.h"
+#include "rdsdecoder.h"
 
 #include <QDebug>
+#include <string.h>
 
 const unsigned int RDSDecoder::offset_pos[5] = {0,1,2,3,2};
 const unsigned int RDSDecoder::offset_word[5] = {252,408,360,436,848};
@@ -41,6 +42,7 @@ RDSDecoder::RDSDecoder()
 	m_wrongBlocksCounter   = 0;
 	m_goodBlock            = false;
 	m_qua                  = 0.0f;
+	memset(m_group, 0, 4*sizeof(int));
 }
 
 RDSDecoder::~RDSDecoder()
