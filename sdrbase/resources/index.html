@@ -979,14 +979,20 @@ margin-bottom: 20px;
     "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
     },
-    "rtlSdrSettings" : {
-      "$ref" : "#/definitions/RtlSdrSettings"
+    "hackRFInputSettings" : {
+      "$ref" : "#/definitions/HackRFInputSettings"
+    },
+    "hackRFOutputSettings" : {
+      "$ref" : "#/definitions/HackRFOutputSettings"
     },
     "limeSdrInputSettings" : {
       "$ref" : "#/definitions/LimeSdrInputSettings"
     },
     "limeSdrOutputSettings" : {
       "$ref" : "#/definitions/LimeSdrOutputSettings"
+    },
+    "rtlSdrSettings" : {
+      "$ref" : "#/definitions/RtlSdrSettings"
     }
   },
   "description" : "Base device settings"
@@ -1017,6 +1023,82 @@ margin-bottom: 20px;
     }
   },
   "description" : "FileSource"
+};
+            defs.HackRFInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "lnaGain" : {
+      "type" : "integer"
+    },
+    "vgaGain" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer",
+      "description" : "0=Infra 1=Supra 2=Center"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "biasT" : {
+      "type" : "integer"
+    },
+    "lnaExt" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "linkTxFrequency" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "HackRF"
+};
+            defs.HackRFOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "vgaGain" : {
+      "type" : "integer"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "biasT" : {
+      "type" : "integer"
+    },
+    "lnaExt" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "HackRF"
 };
             defs.InstanceChannelsResponse = {
   "required" : [ "channelcount" ],
@@ -16309,7 +16391,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2017-12-28T22:34:28.719+01:00
+              Generated 2017-12-29T01:07:32.200+01:00
             </div>
           </div>
       </div>

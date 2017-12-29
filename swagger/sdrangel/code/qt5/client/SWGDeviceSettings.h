@@ -23,6 +23,8 @@
 
 
 #include "SWGFileSourceSettings.h"
+#include "SWGHackRFInputSettings.h"
+#include "SWGHackRFOutputSettings.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
@@ -55,8 +57,11 @@ public:
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
 
-    SWGRtlSdrSettings* getRtlSdrSettings();
-    void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
+    SWGHackRFInputSettings* getHackRfInputSettings();
+    void setHackRfInputSettings(SWGHackRFInputSettings* hack_rf_input_settings);
+
+    SWGHackRFOutputSettings* getHackRfOutputSettings();
+    void setHackRfOutputSettings(SWGHackRFOutputSettings* hack_rf_output_settings);
 
     SWGLimeSdrInputSettings* getLimeSdrInputSettings();
     void setLimeSdrInputSettings(SWGLimeSdrInputSettings* lime_sdr_input_settings);
@@ -64,14 +69,19 @@ public:
     SWGLimeSdrOutputSettings* getLimeSdrOutputSettings();
     void setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_output_settings);
 
+    SWGRtlSdrSettings* getRtlSdrSettings();
+    void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
+
 
 private:
     QString* device_hw_type;
     qint32 tx;
     SWGFileSourceSettings* file_source_settings;
-    SWGRtlSdrSettings* rtl_sdr_settings;
+    SWGHackRFInputSettings* hack_rf_input_settings;
+    SWGHackRFOutputSettings* hack_rf_output_settings;
     SWGLimeSdrInputSettings* lime_sdr_input_settings;
     SWGLimeSdrOutputSettings* lime_sdr_output_settings;
+    SWGRtlSdrSettings* rtl_sdr_settings;
 };
 
 }

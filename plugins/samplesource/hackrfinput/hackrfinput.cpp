@@ -300,7 +300,7 @@ bool HackRFInput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFInput::setCenterFrequency(quint64 freq_hz)
+void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz)
 {
 	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
 	freq_hz += df;
@@ -309,11 +309,11 @@ void HackRFInput::setCenterFrequency(quint64 freq_hz)
 
 	if (rc != HACKRF_SUCCESS)
 	{
-		qWarning("HackRFInput::setCenterFrequency: could not frequency to %llu Hz", freq_hz);
+		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
 	}
 	else
 	{
-		qWarning("HackRFInput::setCenterFrequency: frequency set to %llu Hz", freq_hz);
+		qWarning("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	}
 }
 
@@ -420,7 +420,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			setCenterFrequency(deviceCenterFrequency);
+			setDeviceCenterFrequency(deviceCenterFrequency);
 
 			qDebug() << "HackRFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
 					<< " device center freq: " << deviceCenterFrequency << " Hz"
@@ -555,6 +555,90 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
             << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s";
 
 	return true;
+}
+
+int HackRFInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int HackRFInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    HackRFInputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getHackRfInputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getHackRfInputSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("bandwidth")) {
+        settings.m_bandwidth = response.getHackRfInputSettings()->getBandwidth();
+    }
+    if (deviceSettingsKeys.contains("lnaGain")) {
+        settings.m_lnaGain = response.getHackRfInputSettings()->getLnaGain();
+    }
+    if (deviceSettingsKeys.contains("vgaGain")) {
+        settings.m_vgaGain = response.getHackRfInputSettings()->getVgaGain();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Decim = response.getHackRfInputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getHackRfInputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("biasT")) {
+        settings.m_biasT = response.getHackRfInputSettings()->getBiasT() != 0;
+    }
+    if (deviceSettingsKeys.contains("lnaExt")) {
+        settings.m_lnaExt = response.getHackRfInputSettings()->getLnaExt() != 0;
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getHackRfInputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getHackRfInputSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("linkTxFrequency")) {
+        settings.m_linkTxFrequency = response.getHackRfInputSettings()->getLinkTxFrequency() != 0;
+    }
+
+    MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureHackRF *msgToGUI = MsgConfigureHackRF::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const HackRFInputSettings& settings)
+{
+    response.getHackRfInputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getHackRfInputSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getHackRfInputSettings()->setBandwidth(settings.m_bandwidth);
+    response.getHackRfInputSettings()->setLnaGain(settings.m_lnaGain);
+    response.getHackRfInputSettings()->setVgaGain(settings.m_vgaGain);
+    response.getHackRfInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getHackRfInputSettings()->setFcPos(settings.m_fcPos);
+    response.getHackRfInputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getHackRfInputSettings()->setBiasT(settings.m_biasT ? 1 : 0);
+    response.getHackRfInputSettings()->setLnaExt(settings.m_lnaExt ? 1 : 0);
+    response.getHackRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getHackRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getHackRfInputSettings()->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
 }
 
 int HackRFInput::webapiRunGet(

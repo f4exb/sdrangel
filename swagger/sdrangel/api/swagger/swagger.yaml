@@ -1425,12 +1425,16 @@ definitions:
         type: integer
       fileSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
-      rtlSdrSettings:
-        $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+      hackRFInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
+      hackRFOutputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFOutputSettings"
       limeSdrInputSettings:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      rtlSdrSettings:
+        $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
         
   ChannelSettings:
     description: Base channel settings

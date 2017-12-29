@@ -109,6 +109,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -123,7 +133,8 @@ private:
     void closeDevice();
 	bool applySettings(const HackRFOutputSettings& settings, bool force);
 //	hackrf_device *open_hackrf_from_sequence(int sequence);
-	void setCenterFrequency(quint64 freq_hz, qint32 LOppmTenths);
+	void setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const HackRFOutputSettings& settings);
 
 	DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;

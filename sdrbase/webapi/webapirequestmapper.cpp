@@ -1387,14 +1387,29 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if (*deviceHwType == "RTLSDR")
+    else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() == 0))
     {
-        if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
+        if (jsonObject.contains("HackRFInputSettings") && jsonObject["HackRFInputSettings"].isObject())
         {
-            QJsonObject rtlSdrSettingsJsonObject = jsonObject["rtlSdrSettings"].toObject();
-            deviceSettingsKeys = rtlSdrSettingsJsonObject.keys();
-            deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
-            deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
+            QJsonObject hackRFInputSettingsJsonObject = jsonObject["HackRFInputSettings"].toObject();
+            deviceSettingsKeys = hackRFInputSettingsJsonObject.keys();
+            deviceSettings.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+            deviceSettings.getHackRfInputSettings()->fromJsonObject(hackRFInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("HackRFOutputSettings") && jsonObject["HackRFOutputSettings"].isObject())
+        {
+            QJsonObject hackRFOutputSettingsJsonObject = jsonObject["HackRFOutputSettings"].toObject();
+            deviceSettingsKeys = hackRFOutputSettingsJsonObject.keys();
+            deviceSettings.setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
+            deviceSettings.getHackRfOutputSettings()->fromJsonObject(hackRFOutputSettingsJsonObject);
             return true;
         }
         else
@@ -1425,6 +1440,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             deviceSettingsKeys = limeSdrOutputSettingsJsonObject.keys();
             deviceSettings.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
             deviceSettings.getLimeSdrOutputSettings()->fromJsonObject(limeSdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "RTLSDR")
+    {
+        if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
+        {
+            QJsonObject rtlSdrSettingsJsonObject = jsonObject["rtlSdrSettings"].toObject();
+            deviceSettingsKeys = rtlSdrSettingsJsonObject.keys();
+            deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+            deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
             return true;
         }
         else

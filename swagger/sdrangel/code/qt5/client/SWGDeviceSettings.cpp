@@ -40,9 +40,11 @@ SWGDeviceSettings::init() {
     device_hw_type = new QString("");
     tx = 0;
     file_source_settings = new SWGFileSourceSettings();
-    rtl_sdr_settings = new SWGRtlSdrSettings();
+    hack_rf_input_settings = new SWGHackRFInputSettings();
+    hack_rf_output_settings = new SWGHackRFOutputSettings();
     lime_sdr_input_settings = new SWGLimeSdrInputSettings();
     lime_sdr_output_settings = new SWGLimeSdrOutputSettings();
+    rtl_sdr_settings = new SWGRtlSdrSettings();
 }
 
 void
@@ -57,8 +59,12 @@ SWGDeviceSettings::cleanup() {
         delete file_source_settings;
     }
 
-    if(rtl_sdr_settings != nullptr) {
-        delete rtl_sdr_settings;
+    if(hack_rf_input_settings != nullptr) {
+        delete hack_rf_input_settings;
+    }
+
+    if(hack_rf_output_settings != nullptr) {
+        delete hack_rf_output_settings;
     }
 
     if(lime_sdr_input_settings != nullptr) {
@@ -67,6 +73,10 @@ SWGDeviceSettings::cleanup() {
 
     if(lime_sdr_output_settings != nullptr) {
         delete lime_sdr_output_settings;
+    }
+
+    if(rtl_sdr_settings != nullptr) {
+        delete rtl_sdr_settings;
     }
 }
 
@@ -84,9 +94,11 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&device_hw_type, pJson["deviceHwType"], "QString", "QString");
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
     ::SWGSDRangel::setValue(&file_source_settings, pJson["fileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
-    ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
+    ::SWGSDRangel::setValue(&hack_rf_input_settings, pJson["hackRFInputSettings"], "SWGHackRFInputSettings", "SWGHackRFInputSettings");
+    ::SWGSDRangel::setValue(&hack_rf_output_settings, pJson["hackRFOutputSettings"], "SWGHackRFOutputSettings", "SWGHackRFOutputSettings");
     ::SWGSDRangel::setValue(&lime_sdr_input_settings, pJson["limeSdrInputSettings"], "SWGLimeSdrInputSettings", "SWGLimeSdrInputSettings");
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
+    ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
 }
 
 QString
@@ -109,11 +121,15 @@ SWGDeviceSettings::asJsonObject() {
 
     toJsonValue(QString("fileSourceSettings"), file_source_settings, obj, QString("SWGFileSourceSettings"));
 
-    toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
+    toJsonValue(QString("hackRFInputSettings"), hack_rf_input_settings, obj, QString("SWGHackRFInputSettings"));
+
+    toJsonValue(QString("hackRFOutputSettings"), hack_rf_output_settings, obj, QString("SWGHackRFOutputSettings"));
 
     toJsonValue(QString("limeSdrInputSettings"), lime_sdr_input_settings, obj, QString("SWGLimeSdrInputSettings"));
 
     toJsonValue(QString("limeSdrOutputSettings"), lime_sdr_output_settings, obj, QString("SWGLimeSdrOutputSettings"));
+
+    toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
 
     return obj;
 }
@@ -145,13 +161,22 @@ SWGDeviceSettings::setFileSourceSettings(SWGFileSourceSettings* file_source_sett
     this->file_source_settings = file_source_settings;
 }
 
-SWGRtlSdrSettings*
-SWGDeviceSettings::getRtlSdrSettings() {
-    return rtl_sdr_settings;
+SWGHackRFInputSettings*
+SWGDeviceSettings::getHackRfInputSettings() {
+    return hack_rf_input_settings;
 }
 void
-SWGDeviceSettings::setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings) {
-    this->rtl_sdr_settings = rtl_sdr_settings;
+SWGDeviceSettings::setHackRfInputSettings(SWGHackRFInputSettings* hack_rf_input_settings) {
+    this->hack_rf_input_settings = hack_rf_input_settings;
+}
+
+SWGHackRFOutputSettings*
+SWGDeviceSettings::getHackRfOutputSettings() {
+    return hack_rf_output_settings;
+}
+void
+SWGDeviceSettings::setHackRfOutputSettings(SWGHackRFOutputSettings* hack_rf_output_settings) {
+    this->hack_rf_output_settings = hack_rf_output_settings;
 }
 
 SWGLimeSdrInputSettings*
@@ -170,6 +195,15 @@ SWGDeviceSettings::getLimeSdrOutputSettings() {
 void
 SWGDeviceSettings::setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_output_settings) {
     this->lime_sdr_output_settings = lime_sdr_output_settings;
+}
+
+SWGRtlSdrSettings*
+SWGDeviceSettings::getRtlSdrSettings() {
+    return rtl_sdr_settings;
+}
+void
+SWGDeviceSettings::setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings) {
+    this->rtl_sdr_settings = rtl_sdr_settings;
 }
 
 

@@ -30,6 +30,8 @@
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
 #include "SWGFileSourceSettings.h"
+#include "SWGHackRFInputSettings.h"
+#include "SWGHackRFOutputSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
@@ -100,6 +102,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileSourceSettings").compare(type) == 0) {
       return new SWGFileSourceSettings();
+    }
+    if(QString("SWGHackRFInputSettings").compare(type) == 0) {
+      return new SWGHackRFInputSettings();
+    }
+    if(QString("SWGHackRFOutputSettings").compare(type) == 0) {
+      return new SWGHackRFOutputSettings();
     }
     if(QString("SWGInstanceChannelsResponse").compare(type) == 0) {
       return new SWGInstanceChannelsResponse();
