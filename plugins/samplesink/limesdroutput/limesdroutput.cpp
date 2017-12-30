@@ -1078,10 +1078,14 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         }
     }
 
-    qDebug() << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-            << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
-            << " sample rate with soft interpolation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp) << "S/s"
-            << " DAC sample rate with hard interpolation: " << m_settings.m_devSampleRate*(1<<m_settings.m_log2HardInterp) << "S/s"
+    QLocale loc;
+    QDebug debug = qDebug();
+    debug.noquote();
+
+    debug << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " device stream sample rate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
+            << " sample rate with soft interpolation: " << loc.toString( m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp)) << "S/s"
+            << " DAC sample rate with hard interpolation: " << loc.toString(m_settings.m_devSampleRate*(1<<m_settings.m_log2HardInterp)) << "S/s"
             << " m_log2HardInterp: " << m_settings.m_log2HardInterp
             << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
             << " m_gain: " << m_settings.m_gain
