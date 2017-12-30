@@ -18,9 +18,35 @@
 
 #include <QCoreApplication>
 
+#include <signal.h>
+#include <unistd.h>
+#include <vector>
+
 #include "loggerwithfile.h"
 #include "maincore.h"
 
+void handler(int sig) {
+    fprintf(stderr, "quit the application by signal(%d).\n", sig);
+    QCoreApplication::quit();
+}
+
+void catchUnixSignals(const std::vector<int>& quitSignals) {
+    sigset_t blocking_mask;
+    sigemptyset(&blocking_mask);
+
+    for (std::vector<int>::const_iterator it = quitSignals.begin(); it != quitSignals.end(); ++it) {
+        sigaddset(&blocking_mask, *it);
+    }
+
+    struct sigaction sa;
+    sa.sa_handler = handler;
+    sa.sa_mask    = blocking_mask;
+    sa.sa_flags   = 0;
+
+    for (std::vector<int>::const_iterator it = quitSignals.begin(); it != quitSignals.end(); ++it) {
+        sigaction(*it, &sa, 0);
+    }
+}
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -29,6 +55,10 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     QCoreApplication::setOrganizationName("f4exb");
     QCoreApplication::setApplicationName("SDRangelSrv");
     QCoreApplication::setApplicationVersion("3.9.0");
+
+    int catchSignals[] = {SIGQUIT, SIGINT, SIGTERM, SIGHUP};
+    std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));
+    catchUnixSignals(vsig);
 
     MainParser parser;
     parser.parse(a);
