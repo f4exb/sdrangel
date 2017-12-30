@@ -10,7 +10,6 @@
 
 - master: the production branch
 - dev: the development branch
-- fix: production fixes that can't wait
 - legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
 
 <h2>Untested plugins</h2>
@@ -27,7 +26,6 @@ channelrx:
 These plugins are still present at least in the code but have been superceded:
 
   - chanalyzer: the Channel Analyzer channel plugin is superceded by the "new generation" Channel Analyzer NG (chanalyzerng)
-  - sdrdaemon: the SDRdaemon input plugin is superceded by the SDRdaemon source input plugin (sdrdaemonsource). The plugin is not part of the build anymore.
 
 <h1>Specific features</h1>
 
@@ -107,7 +105,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental.</b></p>
 
-<p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 3 MS/s particularly in Tx mode.</p>
+<p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 2.5 MS/s particularly in Tx mode.</p>
 
 You will need a minimal installation of LimeSuite. Presently commit 04b57e0 or later should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
 
@@ -244,13 +242,11 @@ In the [releases](https://github.com/f4exb/sdrangel/releases) section one can fi
   
 <h2>Windows distributions</h2>
 
-This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
+This is the archive of the complete binary distribution that expands to the `sdrangel64` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
 <h2>Debian distributions</h2>
 
-It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support or ARMv7l architectures with Neon support. 
-
-Please note that the ARM version is quite experimental and may or may not work depending on the hardware (it is very slow and unusable on a RPi3 for example). From release v3.5.1 there is no more ARMv7 distributions.
+It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support. 
 
 Install it as usual for .deb packages:
 
@@ -277,8 +273,7 @@ The software is installed in `/opt/sdrangel` you can start it from the command l
 
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
-  - Linux builds are made with 5.5.1
-  - Windows 32 build is made with 5.9.1
+  - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful) 
   - Windows 64 build is made with 5.9.1 
 
 <h2>Ubuntu</h2>
@@ -388,6 +383,7 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
 <h1>Limitations</h1>
 
   - Your hardware. Still SDRangel is relatively conservative on computer resources.
+  - OpenGL 3+ (Linux) and 4.3+ (Windows) is required
 
 <h1>Features</h1>
 
@@ -401,11 +397,7 @@ Since version 3.3.2 the "todos" are in the form of tickets opened in the Issues 
 
 Other ideas:
 
-  - Possibility to connect channels for example Rx to Tx or single Rx channel to dual Rx channel supporting MI(MO) features like 360 degree polarization detection. Introduce the notion of ports of the same physical device.
-  - Specialize plugins into channel and sample source plugins since both have almost complete different requirements and only little in common
-  - 32 bit samples for the Channel Analyzer
   - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).
-  - Headless mode based on a saved configuration in above human readable form
   - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
   - Implement polyphase channelizer
   - Level calibration

@@ -1,8 +1,12 @@
 sdrangel (3.9.0-1) unstable; urgency=medium
 
   * Server: proof of concept
+  * DSD demodulator: added optional high pass filter on audio (uese dsdcc v1.7.3)
+  * Down/Up channelizers: enqeue MsgChannelizerNotification to sample sink/source 
+  * Separate channel sample rate and offset frequency this data from settings
+  * Use specific method to apply channelizer sample rate and frequency offset changes
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 24 Dec 2017 12:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 30 Dec 2017 17:14:18 +0100
 
 sdrangel (3.8.6-1) unstable; urgency=medium
 
