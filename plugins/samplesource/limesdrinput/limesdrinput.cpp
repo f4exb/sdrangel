@@ -1234,7 +1234,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     qDebug() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
             << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
             << " sample rate with soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s"
-            << " ADC sample rate with hard decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2HardDecim) << "S/s"
+            << " ADC sample rate with hard decimation: " << m_settings.m_devSampleRate*(1<<m_settings.m_log2HardDecim) << "S/s"
             << " m_log2HardDecim: " << m_settings.m_log2HardDecim
             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
             << " m_gain: " << m_settings.m_gain
