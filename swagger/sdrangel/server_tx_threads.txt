@@ -1,0 +1,11 @@
+Tx:
+ 1.320 6.895   0:01.49                  `- sdrangelsrv                                                                                                                                         
+ 0.660 6.895   0:00.23                      `- threaded-ml                                                                                                                                     
+ 0.000 6.895   0:00.00                      `- sdrangelsrv                                                                                                                                     
+ 0.000 6.895   0:00.00                      `- sdrangelsrv                                                                                                                                     
+ 0.000 6.895   0:00.00                      `- sdrangelsrv                                                                                                                                     
+ 0.000 6.895   0:00.02                      `- qtwebapp::HttpC                                                                                                                                 
+ 49.50 6.895   0:18.56                      `- DSPDeviceSinkEn                                                                                                                                 
+ 0.000 6.895   0:00.01                      `- HackRFOutputThr                                                                                                                                 
+ 0.000 6.895   0:00.00                      `- QThread                                                                                                                                         
+ 32.67 6.895   0:12.59                      `- HackRFOutputThr                                                                                                                                 
