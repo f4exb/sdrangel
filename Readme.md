@@ -1,6 +1,6 @@
 ![SDR Angel banner](doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) 4.3+ (Windows) SDR and signal analyzer frontend to various hardware.
+**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) 4.3+ (Windows 64) SDR and signal analyzer frontend to various hardware.
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
@@ -242,7 +242,7 @@ In the [releases](https://github.com/f4exb/sdrangel/releases) section one can fi
   
 <h2>Windows distributions</h2>
 
-This is the archive of the complete binary distribution that expands to the `sdrangel64` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
+This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
 <h2>Debian distributions</h2>
 
@@ -273,8 +273,9 @@ The software is installed in `/opt/sdrangel` you can start it from the command l
 
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
-  - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful) 
-  - Windows 64 build is made with 5.9.1 
+  - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful)
+  - Windows 32 build is made with 5.9.1 and has Qt ANGLE support
+  - Windows 64 build is made with 5.9.1 and has no Qt ANGLE support
 
 <h2>Ubuntu</h2>
 
