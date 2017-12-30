@@ -35,8 +35,8 @@ const QString UDPSink::m_channelId = "UDPSink";
 UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
-    m_outputSampleRate(48000),
     m_basebandSampleRate(48000),
+    m_outputSampleRate(48000),
     m_inputFrequencyOffset(0),
     m_squelch(1e-6),
     m_spectrum(0),

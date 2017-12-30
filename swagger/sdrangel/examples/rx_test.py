@@ -80,7 +80,7 @@ def main():
             
         deviceset_url = "/deviceset/%d" % options.device_index
         
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "rx": 1}, "setup device on Rx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 0}, "setup device on Rx device set")
         if r is None:
             exit(-1)
             
