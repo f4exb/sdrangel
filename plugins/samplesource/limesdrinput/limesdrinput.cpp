@@ -1242,14 +1242,14 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             << " m_log2HardDecim: " << m_settings.m_log2HardDecim
             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
             << " m_gain: " << m_settings.m_gain
-            << " m_lpfBW: " << m_settings.m_lpfBW
-            << " m_lpfFIRBW: " << m_settings.m_lpfFIRBW
+            << " m_lpfBW: " << loc.toString(static_cast<int>(m_settings.m_lpfBW))
+            << " m_lpfFIRBW: " << loc.toString(static_cast<int>(m_settings.m_lpfFIRBW))
             << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
             << " m_ncoEnable: " << m_settings.m_ncoEnable
-            << " m_ncoFrequency: " << m_settings.m_ncoFrequency
+            << " m_ncoFrequency: " << loc.toString(m_settings.m_ncoFrequency)
             << " m_antennaPath: " << m_settings.m_antennaPath
             << " m_extClock: " << m_settings.m_extClock
-            << " m_extClockFreq: " << m_settings.m_extClockFreq
+            << " m_extClockFreq: " << loc.toString(m_settings.m_extClockFreq)
             << " force: " << force
             << " forceNCOFrequency: " << forceNCOFrequency
             << " doCalibration: " << doCalibration
