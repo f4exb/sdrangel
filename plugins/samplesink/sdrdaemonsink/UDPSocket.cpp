@@ -48,7 +48,7 @@ CSocket::~CSocket()
     m_sockDesc = -1;
 }
 
-CSocket::CSocket( SocketType type, NetworkLayerProtocol protocol ) throw(CSocketException):m_sockDesc(-1)
+CSocket::CSocket( SocketType type, NetworkLayerProtocol protocol ):m_sockDesc(-1)
 {
     m_sockDesc = socket(protocol, type, 0);
     if (m_sockDesc < 0)
@@ -72,7 +72,7 @@ void CSocket::operator=(const CSocket &sock)
     m_sockDesc = sock.m_sockDesc;
 }
 
-std::string CSocket::GetLocalAddress() throw(CSocketException)
+std::string CSocket::GetLocalAddress()
 {
     sockaddr_in addr;
     unsigned int addr_len = sizeof(addr);
@@ -83,7 +83,7 @@ std::string CSocket::GetLocalAddress() throw(CSocketException)
     return inet_ntoa(addr.sin_addr);
 }
 
-unsigned short CSocket::GetLocalPort() throw(CSocketException)
+unsigned short CSocket::GetLocalPort()
 {
     sockaddr_in addr;
     unsigned int addr_len = sizeof(addr);
@@ -94,7 +94,7 @@ unsigned short CSocket::GetLocalPort() throw(CSocketException)
     return ntohs(addr.sin_port);
 }
 
-void CSocket::BindLocalPort( unsigned short localPort ) throw(CSocketException)
+void CSocket::BindLocalPort( unsigned short localPort )
 {
     // Bind the socket to its port
     sockaddr_in localAddr;
@@ -109,7 +109,6 @@ void CSocket::BindLocalPort( unsigned short localPort ) throw(CSocketException)
 }
 
 void CSocket::BindLocalAddressAndPort( const string &localAddress, unsigned short localPort /*= 0*/ )
-    throw(CSocketException)
 {
     // Get the address of the requested host
     sockaddr_in localAddr;
@@ -147,7 +146,7 @@ unsigned long int CSocket::GetReadBufferSize()
     return nSize;
 }
 
-void CSocket::SetReadBufferSize( unsigned int nSize ) throw(CSocketException)
+void CSocket::SetReadBufferSize( unsigned int nSize )
 {
     if (setsockopt(m_sockDesc, SOL_SOCKET, SO_RCVBUF, &nSize, sizeof(nSize)) == -1)
     {
@@ -155,7 +154,7 @@ void CSocket::SetReadBufferSize( unsigned int nSize ) throw(CSocketException)
     }
 }
 
-void CSocket::SetNonBlocking( bool bBlocking ) throw(CSocketException)
+void CSocket::SetNonBlocking( bool bBlocking )
 {
     int opts;
 
@@ -174,7 +173,7 @@ void CSocket::SetNonBlocking( bool bBlocking ) throw(CSocketException)
     fcntl ( m_sockDesc, F_SETFL,opts );
 }
 
-void CSocket::ConnectToHost( const string &foreignAddress, unsigned short foreignPort ) throw(CSocketException)
+void CSocket::ConnectToHost( const string &foreignAddress, unsigned short foreignPort )
 {
     //cout<<"\nstart Connect to host";
     // Get the address of the requested host
@@ -191,14 +190,14 @@ void CSocket::ConnectToHost( const string &foreignAddress, unsigned short foreig
 
 }
 
-void CSocket::Send( const void *buffer, int bufferLen ) throw(CSocketException)
+void CSocket::Send( const void *buffer, int bufferLen )
 {
     if (::send(m_sockDesc, (void *) buffer, bufferLen, 0) < 0) {
         throw CSocketException("Send failed (send())", true);
     }
 }
 
-int CSocket::Recv( void *buffer, int bufferLen ) throw(CSocketException)
+int CSocket::Recv( void *buffer, int bufferLen )
 {
     int nBytes;
     if ((nBytes = ::recv(m_sockDesc, (void *) buffer, bufferLen, 0)) < 0) {
@@ -209,7 +208,7 @@ int CSocket::Recv( void *buffer, int bufferLen ) throw(CSocketException)
     return nBytes;
 }
 
-std::string CSocket::GetPeerAddress() throw(CSocketException)
+std::string CSocket::GetPeerAddress()
 {
     sockaddr_in addr;
     unsigned int addr_len = sizeof(addr);
@@ -220,7 +219,7 @@ std::string CSocket::GetPeerAddress() throw(CSocketException)
     return inet_ntoa(addr.sin_addr);
 }
 
-unsigned short CSocket::GetPeerPort() throw(CSocketException)
+unsigned short CSocket::GetPeerPort()
 {
     sockaddr_in addr;
     unsigned int addr_len = sizeof(addr);
@@ -296,7 +295,7 @@ int CSocket::OnDataRead(unsigned long timeToWait)
     return nRet;
 }
 
-void CSocket::SetBindToDevice( const string& sInterface ) throw(CSocketException)
+void CSocket::SetBindToDevice( const string& sInterface )
 {
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
@@ -310,26 +309,26 @@ void CSocket::SetBindToDevice( const string& sInterface ) throw(CSocketException
     }*/
 }
 
-UDPSocket::UDPSocket() throw(CSocketException):CSocket(UdpSocket,IPv4Protocol)
+UDPSocket::UDPSocket():CSocket(UdpSocket,IPv4Protocol)
 {
     SetBroadcast();
 }
 
-UDPSocket::UDPSocket( unsigned short localPort ) throw(CSocketException):
+UDPSocket::UDPSocket( unsigned short localPort ):
 CSocket(UdpSocket,IPv4Protocol)
 {
     BindLocalPort(localPort);
     SetBroadcast();
 }
 
-UDPSocket::UDPSocket( const string &localAddress, unsigned short localPort ) throw(CSocketException):
+UDPSocket::UDPSocket( const string &localAddress, unsigned short localPort ):
 CSocket(UdpSocket,IPv4Protocol)
 {
     BindLocalAddressAndPort(localAddress, localPort);
     SetBroadcast();
 }
 
-void UDPSocket::DisconnectFromHost() throw(CSocketException)
+void UDPSocket::DisconnectFromHost()
 {
     sockaddr_in nullAddr;
     memset(&nullAddr, 0, sizeof(nullAddr));
@@ -345,7 +344,7 @@ void UDPSocket::DisconnectFromHost() throw(CSocketException)
 }
 
 void UDPSocket::SendDataGram( const void *buffer, int bufferLen, const string &foreignAddress,
-    unsigned short foreignPort )  throw(CSocketException)
+    unsigned short foreignPort )
 {
     //cout<<"Befor Fill addr";
     sockaddr_in destAddr;
@@ -360,7 +359,6 @@ void UDPSocket::SendDataGram( const void *buffer, int bufferLen, const string &f
 }
 
 int UDPSocket::RecvDataGram( void *buffer, int bufferLen, string &sourceAddress, unsigned short &sourcePort )
-    throw(CSocketException)
 {
     sockaddr_in clntAddr;
     socklen_t addrLen = sizeof(clntAddr);
@@ -377,7 +375,7 @@ int UDPSocket::RecvDataGram( void *buffer, int bufferLen, string &sourceAddress,
     return nBytes;
 }
 
-void UDPSocket::SetMulticastTTL( unsigned char multicastTTL ) throw(CSocketException)
+void UDPSocket::SetMulticastTTL( unsigned char multicastTTL )
 {
     if (setsockopt(m_sockDesc, IPPROTO_IP, IP_MULTICAST_TTL, (void *) &multicastTTL, sizeof(multicastTTL)) < 0)
     {
@@ -385,7 +383,7 @@ void UDPSocket::SetMulticastTTL( unsigned char multicastTTL ) throw(CSocketExcep
     }
 }
 
-void UDPSocket::JoinGroup( const string &multicastGroup ) throw(CSocketException)
+void UDPSocket::JoinGroup( const string &multicastGroup )
 {
     struct ip_mreq multicastRequest;
 
@@ -400,7 +398,7 @@ void UDPSocket::JoinGroup( const string &multicastGroup ) throw(CSocketException
 
 }
 
-void UDPSocket::LeaveGroup( const string &multicastGroup ) throw(CSocketException)
+void UDPSocket::LeaveGroup( const string &multicastGroup )
 {
     struct ip_mreq multicastRequest;
 

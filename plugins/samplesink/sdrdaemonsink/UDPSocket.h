@@ -114,7 +114,7 @@ public:
    *   @exception CSocketException thrown if fetch fails
    */
 
-    string GetLocalAddress() throw(CSocketException);
+    string GetLocalAddress();
 
     /**
    *   Get the local port
@@ -122,7 +122,7 @@ public:
    *   @exception CSocketException thrown if fetch fails
    */
 
-    unsigned short GetLocalPort() throw(CSocketException);
+    unsigned short GetLocalPort();
 
 
     /**
@@ -132,7 +132,7 @@ public:
    *   @exception CSocketException thrown if setting local port fails
    */
 
-    void BindLocalPort(unsigned short localPort) throw(CSocketException);
+    void BindLocalPort(unsigned short localPort);
 
     /**
    *   Set the local port to the specified port and the local address
@@ -143,7 +143,7 @@ public:
    *   @exception CSocketException thrown if setting local port or address fails
    */
 
-    void BindLocalAddressAndPort(const string &localAddress, unsigned short localPort = 0) throw(CSocketException);
+    void BindLocalAddressAndPort(const string &localAddress, unsigned short localPort = 0);
 
     /**
     *   Returns the size of the internal read buffer. This limits the amount of data that the client
@@ -155,13 +155,13 @@ public:
     *   Sets the read buffer size of the socket.
     *   @param Size of the buffer.
     */
-    void SetReadBufferSize(unsigned int nSize) throw(CSocketException);
+    void SetReadBufferSize(unsigned int nSize);
 
     /**
     *   Sets the socket to Blocking/Non blocking state.
     *   @param Bool flag for Non blocking status.
     */
-    void SetNonBlocking(bool bBlocking) throw(CSocketException);
+    void SetNonBlocking(bool bBlocking);
 
     /**
    *   Establish a socket connection with the given foreign
@@ -170,7 +170,7 @@ public:
    *   @param foreignPort foreign port
    *   @exception SocketException thrown if unable to establish connection
    */
-    void ConnectToHost(const string &foreignAddress, unsigned short foreignPort) throw(CSocketException);
+    void ConnectToHost(const string &foreignAddress, unsigned short foreignPort);
 
     /**
      *   Write the given buffer to this socket.  Call connect() before
@@ -179,7 +179,7 @@ public:
      *   @param bufferLen number of bytes from buffer to be written
      *   @exception SocketException thrown if unable to send data
      */
-    void Send(const void *buffer, int bufferLen) throw(CSocketException);
+    void Send(const void *buffer, int bufferLen);
 
   /**
    *   Read into the given buffer up to bufferLen bytes data from this
@@ -189,21 +189,21 @@ public:
    *   @return number of bytes read, 0 for EOF, and -1 for error
    *   @exception SocketException thrown if unable to receive data
    */
-    int Recv(void *buffer, int bufferLen) throw(CSocketException);
+    int Recv(void *buffer, int bufferLen);
 
     /**
      *   Get the foreign address.  Call connect() before calling recv()
      *   @return foreign address
      *   @exception SocketException thrown if unable to fetch foreign address
      */
-    string GetPeerAddress() throw(CSocketException);
+    string GetPeerAddress();
 
     /**
      *   Get the foreign port.  Call connect() before calling recv()
      *   @return foreign port
      *   @exception SocketException thrown if unable to fetch foreign port
      */
-    unsigned short GetPeerPort() throw(CSocketException);
+    unsigned short GetPeerPort();
 
     /**
      *   Writing sStr to socket
@@ -225,7 +225,7 @@ public:
      *   To Bind socket to a symbolic device name like eth0
      *   @param sInterface NIC device name
      */
-    void SetBindToDevice(const string& sInterface) throw(CSocketException);
+    void SetBindToDevice(const string& sInterface);
 
 protected:
     /**
@@ -233,7 +233,7 @@ protected:
      **/
     int m_sockDesc;
 
-    CSocket(SocketType type, NetworkLayerProtocol protocol) throw(CSocketException);
+    CSocket(SocketType type, NetworkLayerProtocol protocol);
     CSocket(int sockDesc);
     static void FillAddr( const string & localAddress, unsigned short localPort, sockaddr_in& localAddr );
 
@@ -254,13 +254,13 @@ public:
    *   Construct a UDP socket
    *   @exception SocketException thrown if unable to create UDP socket
    */
-    UDPSocket() throw(CSocketException);
+    UDPSocket();
   /**
    *   Construct a UDP socket with the given local port
    *   @param localPort local port
    *   @exception SocketException thrown if unable to create UDP socket
    */
-    UDPSocket(unsigned short localPort) throw(CSocketException);
+    UDPSocket(unsigned short localPort);
 
   /**
    *   Construct a UDP socket with the given local port and address
@@ -268,7 +268,7 @@ public:
    *   @param localPort local port
    *   @exception SocketException thrown if unable to create UDP socket
    */
-    UDPSocket(const string &localAddress, unsigned short localPort) throw(CSocketException);
+    UDPSocket(const string &localAddress, unsigned short localPort);
 
   /**
    *   Unset foreign address and port
@@ -281,7 +281,7 @@ public:
    *   @return true if disassociation is successful
    *   @exception SocketException thrown if unable to disconnect UDP socket
    */
-    void DisconnectFromHost() throw(CSocketException);
+    void DisconnectFromHost();
 
   /**
    *   Send the given buffer as a UDP datagram to the
@@ -294,7 +294,7 @@ public:
    *   @exception SocketException thrown if unable to send datagram
    */
     void SendDataGram(const void *buffer, int bufferLen, const string &foreignAddress,
-        unsigned short foreignPort) throw(CSocketException);
+        unsigned short foreignPort);
 
     /**
      *   Read read up to bufferLen bytes data from this socket.  The given buffer
@@ -307,28 +307,28 @@ public:
      *   @exception SocketException thrown if unable to receive datagram
      */
     int RecvDataGram(void *buffer, int bufferLen, string &sourceAddress,
-               unsigned short &sourcePort) throw(CSocketException);
+               unsigned short &sourcePort);
 
     /**
     *   Set the multicast TTL
     *   @param multicastTTL multicast TTL
     *   @exception SocketException thrown if unable to set TTL
     */
-    void SetMulticastTTL(unsigned char multicastTTL) throw(CSocketException);
+    void SetMulticastTTL(unsigned char multicastTTL);
 
     /**
      *   Join the specified multicast group
      *   @param multicastGroup multicast group address to join
      *   @exception SocketException thrown if unable to join group
      */
-    void JoinGroup(const string &multicastGroup) throw(CSocketException);
+    void JoinGroup(const string &multicastGroup);
 
     /**
      *   Leave the specified multicast group
      *   @param multicastGroup multicast group address to leave
      *   @exception SocketException thrown if unable to leave group
      */
-    void LeaveGroup(const string &multicastGroup) throw(CSocketException);
+    void LeaveGroup(const string &multicastGroup);
 
 private:
     void SetBroadcast();
