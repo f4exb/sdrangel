@@ -22,6 +22,8 @@ set(bfm_HEADERS
 	rdstmc.h
 )
 
+set_source_files_properties(rdstmc.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+
 set(bfm_FORMS
 	bfmdemodgui.ui
 )
