@@ -527,17 +527,17 @@ void DSDDemodGUI::formatStatusText()
             strncpy(&m_formatStatusText[14], "---", 82-14);
     	}
 
-        char dest[12];
+        char dest[13];
 
         if ( m_dsdDemod->getDecoder().getYSFDecoder().radioIdMode())
         {
-            snprintf(dest, 11, "%-5s:%-5s",
+            snprintf(dest, 12, "%-5s:%-5s",
                     m_dsdDemod->getDecoder().getYSFDecoder().getDestId(),
                     m_dsdDemod->getDecoder().getYSFDecoder().getSrcId());
         }
         else
         {
-            snprintf(dest, 10, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
+            snprintf(dest, 11, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
         }
 
         snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
