@@ -27,7 +27,7 @@
  * 2nd column: text (CEN-English)
  * 3rd column: event code (to be transmitted/received)
  * 4th column: quantifier type */
-static const std::string tmc_events[TMC_EVENTS][4] = {
+static const char *tmc_events[TMC_EVENTS][4] = {
 	{"0"," "," "," "},
 	{"1"," "," "," "},
 	{"2"," "," "," "},
