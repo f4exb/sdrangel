@@ -178,15 +178,11 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 	if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) == 1)
 	{
 //        qDebug("DSPDeviceSinkEngine::work: single channel source handling");
-
-        for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-		{
-			(*it)->feed(sampleFifo, nbWriteSamples);
-		}
-		for (BasebandSampleSources::iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
-		{
-			(*it)->feed(sampleFifo, nbWriteSamples);
-		}
+	    if (m_threadedBasebandSampleSources.size() == 1) {
+	        m_threadedBasebandSampleSources.back()->feed(sampleFifo, nbWriteSamples);
+	    } else if (m_basebandSampleSources.size() == 1) {
+	        m_basebandSampleSources.back()->feed(sampleFifo, nbWriteSamples);
+	    }
 	}
 	// multiple channel sources handling
 	else if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 1)
