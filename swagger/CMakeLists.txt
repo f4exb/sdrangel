@@ -31,7 +31,6 @@ target_link_libraries(swagger
 )
 
 set_target_properties(swagger PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
-target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
 qt5_use_modules(swagger Core Network)
 
