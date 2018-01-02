@@ -50,11 +50,11 @@ void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned i
 {
 //    QMutexLocker mutexLocker(&m_mutex);
     assert(nbSamples <= m_size/2);
+    emit dataWrite(nbSamples);
 
     m_ir = (m_ir + nbSamples) % m_size;
     readUntil =  m_data.begin() + m_size + m_ir;
     emit dataRead(nbSamples);
-    emit dataWrite(nbSamples);
 }
 
 void SampleSourceFifo::write(const Sample& sample)
