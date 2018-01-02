@@ -174,7 +174,11 @@ void UpChannelizer::applyConfiguration()
 {
     if (m_outputSampleRate == 0)
     {
-        qDebug() << "UpChannelizer::applyConfiguration: m_outputSampleRate=0 aborting";
+        qDebug() << "UpChannelizer::applyConfiguration: aborting (out=0):"
+                << " out =" << m_outputSampleRate
+                << ", req =" << m_requestedInputSampleRate
+                << ", in =" << m_currentInputSampleRate
+                << ", fc =" << m_currentCenterFrequency;
         return;
     }
 

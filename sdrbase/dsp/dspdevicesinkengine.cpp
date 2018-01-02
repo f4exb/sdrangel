@@ -481,7 +481,10 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 		m_basebandSampleSources.push_back(source);
 		checkNumberOfBasebandSources();
 
-        if (m_state == StRunning) {
+        if (m_state == StRunning)
+        {
+            DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
+            source->handleMessage(notif);
             source->start();
         }
 	}
@@ -502,7 +505,10 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 		m_threadedBasebandSampleSources.push_back(threadedSource);
 		checkNumberOfBasebandSources();
 
-        if (m_state == StRunning) {
+        if (m_state == StRunning)
+        {
+            DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
+            threadedSource->handleSourceMessage(notif);
             threadedSource->start();
         }
 	}
