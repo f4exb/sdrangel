@@ -51,6 +51,7 @@ public:
 		int nbSamples);
 
 	SampleSourceFifo& getSampleSourceFifo() { return m_basebandSampleSource->getSampleSourceFifo(); }
+	void setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo) { m_basebandSampleSource->setDeviceSampleSourceFifo(deviceSampleFifo); }
 
 	QString getSampleSourceObjectName() const;
 

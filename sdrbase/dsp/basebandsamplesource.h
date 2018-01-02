@@ -58,15 +58,20 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+    void setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo);
 
 protected:
-	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
-	SampleSourceFifo m_sampleFifo;    //!< Internal FIFO for multi-channel processing
+	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
+    MessageQueue *m_guiMessageQueue;      //!< Input message queue to the GUI
+	SampleSourceFifo m_sampleFifo;        //!< Internal FIFO for multi-channel processing
+	SampleSourceFifo *m_deviceSampleFifo; //!< Reference to the device FIFO for single channel processing
+
+	void handleWriteToFifo(SampleSourceFifo *sampleFifo, int nbSamples);
 
 protected slots:
 	void handleInputMessages();
 	void handleWriteToFifo(int nbSamples);
+    void handleWriteToDeviceFifo(int nbSamples);
 };
 
 #endif /* SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_ */

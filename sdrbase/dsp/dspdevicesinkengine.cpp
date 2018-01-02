@@ -179,9 +179,9 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 	{
 //        qDebug("DSPDeviceSinkEngine::work: single channel source handling");
 	    if (m_threadedBasebandSampleSources.size() == 1) {
-	        m_threadedBasebandSampleSources.back()->feed(sampleFifo, nbWriteSamples);
+	        m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
 	    } else if (m_basebandSampleSources.size() == 1) {
-	        m_basebandSampleSources.back()->feed(sampleFifo, nbWriteSamples);
+	        m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
 	    }
 	}
 	// multiple channel sources handling
@@ -257,11 +257,13 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 
 	    for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
 	    {
+	        (*it)->setDeviceSampleSourceFifo(0);
 	        (*it)->pullAudio(nbWriteSamples);
 	    }
 
 	    for (BasebandSampleSources::iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
 	    {
+	        (*it)->setDeviceSampleSourceFifo(0);
 	        (*it)->pullAudio(nbWriteSamples);
 	    }
 

@@ -20,7 +20,8 @@
 
 BasebandSampleSource::BasebandSampleSource() :
     m_guiMessageQueue(0),
-	m_sampleFifo(48000) // arbitrary, will be adjusted to match device sink FIFO size
+	m_sampleFifo(48000), // arbitrary, will be adjusted to match device sink FIFO size
+	m_deviceSampleFifo(0)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 	connect(&m_sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToFifo(int)));
@@ -45,15 +46,40 @@ void BasebandSampleSource::handleInputMessages()
 
 void BasebandSampleSource::handleWriteToFifo(int nbSamples)
 {
+    handleWriteToFifo(&m_sampleFifo, nbSamples);
+}
+
+void BasebandSampleSource::handleWriteToDeviceFifo(int nbSamples)
+{
+    handleWriteToFifo(m_deviceSampleFifo, nbSamples);
+}
+
+void BasebandSampleSource::handleWriteToFifo(SampleSourceFifo *sampleFifo, int nbSamples)
+{
     SampleVector::iterator writeAt;
-    m_sampleFifo.getWriteIterator(writeAt);
+    sampleFifo->getWriteIterator(writeAt);
     pullAudio(nbSamples); // Pre-fetch input audio samples this is mandatory to keep things running smoothly
 
     for (int i = 0; i < nbSamples; i++)
     {
         pull((*writeAt));
-        m_sampleFifo.bumpIndex(writeAt);
+        sampleFifo->bumpIndex(writeAt);
     }
 }
 
 
+void BasebandSampleSource::setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo)
+{
+    if (m_deviceSampleFifo != deviceSampleFifo)
+    {
+        if (m_deviceSampleFifo) {
+            disconnect(m_deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
+        }
+
+        if (deviceSampleFifo) {
+            connect(deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
+        }
+
+        m_deviceSampleFifo = deviceSampleFifo;
+    }
+}
