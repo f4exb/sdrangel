@@ -396,7 +396,7 @@ void NFMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, 
         (outputSampleRate != m_outputSampleRate))
     {
         m_settingsMutex.lock();
-        m_carrierNco.setFreq(inputFrequencyOffset, m_outputSampleRate);
+        m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
