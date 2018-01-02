@@ -1208,7 +1208,7 @@ void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
             uint32_t nbSources = deviceUI->m_deviceSinkAPI->getNumberOfSources();
 
             if (nbSources > 0) {
-                QMessageBox::information(this, tr("Message"), tr("%1 channel(s) already in use. Multiple transmission channels is experimental. Some plugin types are not compatible with each other.").arg(nbSources));
+                QMessageBox::information(this, tr("Message"), tr("%1 channel(s) already in use. Multiple transmission channels is experimental. You may experience performance problems").arg(nbSources));
             }
 
             m_pluginManager->createTxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceSinkAPI);
