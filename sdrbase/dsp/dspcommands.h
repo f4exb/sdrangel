@@ -140,11 +140,11 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPAddSource : public Message {
+class SDRANGEL_API DSPAddBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+	DSPAddBasebandSampleSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
 
 	BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
 
@@ -176,11 +176,11 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPRemoveSource : public Message {
+class SDRANGEL_API DSPRemoveBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+	DSPRemoveBasebandSampleSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
 
 	BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
 
@@ -200,11 +200,11 @@ private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGEL_API DSPAddThreadedSampleSource : public Message {
+class SDRANGEL_API DSPAddThreadedBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddThreadedSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
+	DSPAddThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
 
 	ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
 
@@ -224,11 +224,11 @@ private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGEL_API DSPRemoveThreadedSampleSource : public Message {
+class SDRANGEL_API DSPRemoveThreadedBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveThreadedSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
+	DSPRemoveThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource) : Message(), m_threadedSampleSource(threadedSampleSource) { }
 
 	ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
 

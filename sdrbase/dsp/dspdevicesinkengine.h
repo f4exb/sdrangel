@@ -125,6 +125,7 @@ private:
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
 	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
+	void checkNumberOfBasebandSources();
 
 private slots:
 	void handleData(int nbSamples); //!< Handle data when samples have to be written to the sample FIFO
