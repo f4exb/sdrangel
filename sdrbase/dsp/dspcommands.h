@@ -116,11 +116,11 @@ private:
 	DeviceSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPAddSink : public Message {
+class SDRANGEL_API DSPAddBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+	DSPAddBasebandSampleSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
 
 	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
 
@@ -152,11 +152,11 @@ private:
 	BasebandSampleSource* m_sampleSource;
 };
 
-class SDRANGEL_API DSPRemoveSink : public Message {
+class SDRANGEL_API DSPRemoveBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+	DSPRemoveBasebandSampleSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
 
 	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
 
@@ -188,11 +188,11 @@ private:
 	BasebandSampleSource* m_sampleSource;
 };
 
-class SDRANGEL_API DSPAddThreadedSampleSink : public Message {
+class SDRANGEL_API DSPAddThreadedBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPAddThreadedSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
+	DSPAddThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
 
 	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
 
@@ -212,11 +212,11 @@ private:
 	ThreadedBasebandSampleSource* m_threadedSampleSource;
 };
 
-class SDRANGEL_API DSPRemoveThreadedSampleSink : public Message {
+class SDRANGEL_API DSPRemoveThreadedBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveThreadedSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
+	DSPRemoveThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
 
 	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
 
