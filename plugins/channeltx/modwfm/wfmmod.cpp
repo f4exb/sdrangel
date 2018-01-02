@@ -424,11 +424,11 @@ void WFMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, 
         m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_settings.m_audioSampleRate / (Real) outputSampleRate;
         m_interpolator.create(48, m_settings.m_audioSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-        Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / m_outputSampleRate;
-        Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / m_outputSampleRate;
+        Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / outputSampleRate;
+        Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / outputSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
-        m_toneNcoRF.setFreq(m_settings.m_toneFrequency, m_outputSampleRate);
-        m_cwKeyer.setSampleRate(m_outputSampleRate);
+        m_toneNcoRF.setFreq(m_settings.m_toneFrequency, outputSampleRate);
+        m_cwKeyer.setSampleRate(outputSampleRate);
         m_cwKeyer.reset();
         m_settingsMutex.unlock();
     }
@@ -468,14 +468,6 @@ void WFMMod::applySettings(const WFMModSettings& settings, bool force)
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_outputSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_outputSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
-        m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 
