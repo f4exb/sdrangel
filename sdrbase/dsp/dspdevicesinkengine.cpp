@@ -621,9 +621,7 @@ void DSPDeviceSinkEngine::checkNumberOfBasebandSources()
             m_multipleSourcesDivisionFactor = 1<<nbSources;
         }
 
-        if (nbSources == 0) {
-            disconnect(sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleData(int)));
-        } else if (nbSources > 1) {
+        if (nbSources > 1) {
             connect(sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleData(int)), Qt::QueuedConnection);
         }
 
