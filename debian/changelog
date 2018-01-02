@@ -3,8 +3,9 @@ sdrangel (3.9.1-1) unstable; urgency=medium
   * Transmission: make source channels working concurrently in multiple channel
   * Transmission: connect source channel directly to device FIFO in single channel
   * NFM, WFM modulators and UDP sink: fixes
+  * DSD demodulator: use lower cutoff for optional audio high pass filter
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 02 Jan 2018 21:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 02 Jan 2018 18:14:18 +0100
 
 sdrangel (3.9.0-1) unstable; urgency=medium
 

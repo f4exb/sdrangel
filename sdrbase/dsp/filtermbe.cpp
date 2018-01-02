@@ -20,8 +20,8 @@
 const float MBEAudioInterpolatorFilter::m_lpa[3] = {1.0,           1.392667E+00, -5.474446E-01};
 const float MBEAudioInterpolatorFilter::m_lpb[3] = {3.869430E-02,  7.738860E-02,  3.869430E-02};
 
-const float MBEAudioInterpolatorFilter::m_hpa[3] = {1.000000e+00,  1.911437E+00, -9.155749E-01};
-const float MBEAudioInterpolatorFilter::m_hpb[3] = {9.567529E-01, -1.913506E+00,  9.567529E-01};
+const float MBEAudioInterpolatorFilter::m_hpa[3] = {1.000000e+00,  1.955578e+00, -9.565437e-01};
+const float MBEAudioInterpolatorFilter::m_hpb[3] = {9.780305e-01, -1.956061e+00,  9.780305e-01};
 
 MBEAudioInterpolatorFilter::MBEAudioInterpolatorFilter() :
         m_filterLP(m_lpa, m_lpb),
