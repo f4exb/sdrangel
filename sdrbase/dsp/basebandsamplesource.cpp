@@ -73,10 +73,12 @@ void BasebandSampleSource::setDeviceSampleSourceFifo(SampleSourceFifo *deviceSam
     if (m_deviceSampleFifo != deviceSampleFifo)
     {
         if (m_deviceSampleFifo) {
+            qDebug("BasebandSampleSource::setDeviceSampleSourceFifo: disconnect device FIFO %p", m_deviceSampleFifo);
             disconnect(m_deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
         }
 
         if (deviceSampleFifo) {
+            qDebug("BasebandSampleSource::setDeviceSampleSourceFifo: connect device FIFO %p", deviceSampleFifo);
             connect(deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
         }
 
