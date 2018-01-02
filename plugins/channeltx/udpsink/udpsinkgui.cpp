@@ -251,7 +251,8 @@ void UDPSinkGUI::channelMarkerChangedByCursor()
 void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_settings.m_inputFrequencyOffset = value;
-    m_channelMarker.setCenterFrequency(value); // will trigger apply settings
+    m_channelMarker.setCenterFrequency(value);
+    applySettings();
 }
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
@@ -436,6 +437,7 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
 
     setWindowTitle(m_channelMarker.getTitle());
     setTitleColor(m_settings.m_rgbColor);
+    ui->addressText->setText(tr("%1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 
     applySettings();
 }

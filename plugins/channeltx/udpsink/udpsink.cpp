@@ -454,7 +454,7 @@ void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate,
         m_settingsMutex.unlock();
     }
 
-    if (outputSampleRate != m_outputSampleRate)
+    if ((outputSampleRate != m_outputSampleRate) && (!m_settings.m_autoRWBalance))
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
@@ -462,8 +462,6 @@ void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate,
         m_interpolatorDistance = (Real) m_settings.m_inputSampleRate / (Real) outputSampleRate;
         m_interpolator.create(48, m_settings.m_inputSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
         m_settingsMutex.unlock();
-        m_squelchThreshold = outputSampleRate * m_settings.m_squelchGate;
-        initSquelch(m_squelchOpen);
     }
 
     m_basebandSampleRate = basebandSampleRate;

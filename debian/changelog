@@ -2,9 +2,9 @@ sdrangel (3.9.1-1) unstable; urgency=medium
 
   * Transmission: make source channels working concurrently in multiple channel
   * Transmission: connect source channel directly to device FIFO in single channel
-  * NFM and WFM modulators: fixes
+  * NFM, WFM modulators and UDP sink: fixes
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 30 Dec 2017 17:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 02 Jan 2018 21:14:18 +0100
 
 sdrangel (3.9.0-1) unstable; urgency=medium
 
