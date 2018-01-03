@@ -82,5 +82,7 @@
         <file>clocksource.png</file>
         <file>flip_sidebands.png</file>
         <file>filter_highpass.png</file>
+        <file>edit.png</file>
+        <file>listing.png</file>
     </qresource>
 </RCC>

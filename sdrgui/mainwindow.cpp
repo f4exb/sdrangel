@@ -104,23 +104,28 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	removeDockWidget(ui->inputSelectDock);
 	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
+    removeDockWidget(ui->commandsDock);
 	removeDockWidget(ui->channelDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->inputSelectDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
+    addDockWidget(Qt::LeftDockWidgetArea, ui->commandsDock);
+    tabifyDockWidget(ui->presetDock, ui->commandsDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
 	ui->inputViewDock->show();
     ui->inputSelectDock->show();
 	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
+	ui->commandsDock->show();
 	ui->channelDock->show();
 
     ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->inputSelectDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
+    ui->menu_Window->addAction(ui->commandsDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
 
     ui->tabInputsView->setStyleSheet("QWidget { background: rgb(50,50,50); } "

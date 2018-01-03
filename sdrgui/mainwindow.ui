@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1012</width>
-    <height>767</height>
+    <height>721</height>
    </rect>
   </property>
   <property name="font">
@@ -391,40 +391,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1" rowspan="4" colspan="12">
-      <widget class="QTreeWidget" name="presetTree">
-       <property name="indentation">
-        <number>10</number>
-       </property>
-       <property name="allColumnsShowFocus">
-        <bool>true</bool>
-       </property>
-       <attribute name="headerMinimumSectionSize">
-        <number>5</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>Freq (MHz)</string>
-        </property>
-        <property name="toolTip">
-         <string>Center frequency in MHz</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>M</string>
-        </property>
-        <property name="toolTip">
-         <string>Mode: R: Rx or source, T: Tx or sink</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Description</string>
-        </property>
-       </column>
-      </widget>
-     </item>
      <item row="5" column="2">
       <widget class="QToolButton" name="presetUpdate">
        <property name="toolTip">
@@ -519,6 +485,40 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="1" rowspan="2" colspan="12">
+      <widget class="QTreeWidget" name="presetTree">
+       <property name="indentation">
+        <number>10</number>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerMinimumSectionSize">
+        <number>5</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Freq (MHz)</string>
+        </property>
+        <property name="toolTip">
+         <string>Center frequency in MHz</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>M</string>
+        </property>
+        <property name="toolTip">
+         <string>Mode: R: Rx or source, T: Tx or sink</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Description</string>
+        </property>
+       </column>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -555,6 +555,163 @@
         <number>-1</number>
        </property>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="commandsDock">
+   <property name="windowTitle">
+    <string>Commands</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="commandsDockWidget">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QTreeWidget" name="commadsTree">
+       <property name="indentation">
+        <number>5</number>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <property name="columnCount">
+        <number>3</number>
+       </property>
+       <attribute name="headerMinimumSectionSize">
+        <number>5</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Description</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Key press</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Key release</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="commandsControl">
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QToolButton" name="commandEdit">
+         <property name="toolTip">
+          <string>Edit command details</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="commandRun">
+         <property name="toolTip">
+          <string>Run command</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/play.png</normaloff>:/play.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="commandViewOutput">
+         <property name="toolTip">
+          <string>View last run output</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="commandsSave">
+         <property name="toolTip">
+          <string>Save commands in settings</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/preset-last.png</normaloff>:/preset-last.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButton">
+         <property name="toolTip">
+          <string>Delete selected command</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/preset-delete.png</normaloff>:/preset-delete.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -699,6 +856,7 @@
   </action>
   <zorder>presetDock</zorder>
   <zorder>channelDock</zorder>
+  <zorder>commandsDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>

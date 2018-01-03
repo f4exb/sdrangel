@@ -40,6 +40,8 @@ set(sdrgui_SOURCES
     gui/valuedial.cpp
     gui/valuedialz.cpp
     
+    commands/command.cpp
+    
     dsp/scopevis.cpp
     dsp/scopevisng.cpp
     dsp/scopevismulti.cpp
@@ -91,6 +93,8 @@ set(sdrgui_HEADERS
     gui/transverterdialog.h    
     gui/valuedial.h
     gui/valuedialz.h
+    
+    commands/command.h
     
     dsp/scopevis.h
     dsp/scopevisng.h
