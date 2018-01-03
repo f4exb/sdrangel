@@ -84,5 +84,6 @@
         <file>filter_highpass.png</file>
         <file>edit.png</file>
         <file>listing.png</file>
+        <file>create.png</file>
     </qresource>
 </RCC>
