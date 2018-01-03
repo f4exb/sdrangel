@@ -219,14 +219,14 @@ void MainWindow::addSourceDevice(int deviceIndex)
     QStringList channelNamesList(channelNames);
     m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
     dspDeviceSourceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(on_sampleSource_changed()));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(sampleSourceChanged()));
 
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
@@ -294,14 +294,14 @@ void MainWindow::addSinkDevice()
     QStringList channelNamesList(channelNames);
     m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(on_channel_addClicked(bool)));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
     dspDeviceSinkEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(on_sampleSink_changed()));
+    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(sampleSinkChanged()));
 
     ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
@@ -721,9 +721,9 @@ bool MainWindow::handleMessage(const Message& cmd)
         deviceUI->m_samplingDeviceControl->setSelectedDeviceIndex(notif.getDeviceIndex());
 
         if (notif.isTx()) {
-            on_sampleSink_changed();
+            sampleSinkChanged();
         } else {
-            on_sampleSource_changed();
+            sampleSourceChanged();
         }
 
         return true;
@@ -734,7 +734,7 @@ bool MainWindow::handleMessage(const Message& cmd)
         ui->tabInputsSelect->setCurrentIndex(notif.getDeviceSetIndex());
         DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
         deviceUI->m_samplingDeviceControl->getChannelSelector()->setCurrentIndex(notif.getChannelRegistrationIndex());
-        on_channel_addClicked(true);
+        channelAddClicked(true);
 
         return true;
     }
@@ -1018,7 +1018,7 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
     }
 }
 
-void MainWindow::on_sampleSource_changed()
+void MainWindow::sampleSourceChanged()
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
@@ -1107,7 +1107,7 @@ void MainWindow::on_sampleSource_changed()
     }
 }
 
-void MainWindow::on_sampleSink_changed()
+void MainWindow::sampleSinkChanged()
 {
     // Do it in the currently selected source tab
     int currentSinkTabIndex = ui->tabInputsSelect->currentIndex();
@@ -1190,7 +1190,7 @@ void MainWindow::on_sampleSink_changed()
     }
 }
 
-void MainWindow::on_channel_addClicked(bool checked __attribute__((unused)))
+void MainWindow::channelAddClicked(bool checked __attribute__((unused)))
 {
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
@@ -1238,12 +1238,6 @@ void MainWindow::on_action_removeLastDevice_triggered()
     {
         removeLastDevice();
     }
-}
-
-void MainWindow::on_action_reloadDevices_triggered()
-{
-    QMessageBox::information(this, tr("Message"), tr("Not implemented"));
-    return;
 }
 
 void MainWindow::on_action_Exit_triggered()

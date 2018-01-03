@@ -345,15 +345,14 @@ private slots:
     void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
-	void on_sampleSource_changed();
-	void on_sampleSink_changed();
-    void on_channel_addClicked(bool checked);
+	void sampleSourceChanged();
+	void sampleSinkChanged();
+    void channelAddClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
 	void on_action_addSinkDevice_triggered();
 	void on_action_removeLastDevice_triggered();
-	void on_action_reloadDevices_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
 };
