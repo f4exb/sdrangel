@@ -318,173 +318,6 @@
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="5" column="1">
-      <widget class="QToolButton" name="presetSave">
-       <property name="toolTip">
-        <string>Save current settings as new preset</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-save.png</normaloff>:/preset-save.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="12">
-      <widget class="QToolButton" name="presetLoad">
-       <property name="toolTip">
-        <string>Load selected preset</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-load.png</normaloff>:/preset-load.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="10" colspan="2">
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="5" column="8">
-      <widget class="QToolButton" name="presetDelete">
-       <property name="toolTip">
-        <string>Delete selected preset</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-delete.png</normaloff>:/preset-delete.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
-      <widget class="QToolButton" name="presetUpdate">
-       <property name="toolTip">
-        <string>Update selected preset with current settings</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-update.png</normaloff>:/preset-update.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="7">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="5" column="3">
-      <widget class="QToolButton" name="settingsSave">
-       <property name="toolTip">
-        <string>Save the current settings (inc. presets)</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/preset-last.png</normaloff>:/preset-last.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="5">
-      <widget class="QToolButton" name="presetExport">
-       <property name="toolTip">
-        <string>Export current preset to file</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/export.png</normaloff>:/export.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="4">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="5" column="6">
-      <widget class="QToolButton" name="presetImport">
-       <property name="toolTip">
-        <string>Import preset from file into current group</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources/res.qrc">
-         <normaloff>:/import.png</normaloff>:/import.png</iconset>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1" rowspan="2" colspan="12">
       <widget class="QTreeWidget" name="presetTree">
        <property name="indentation">
@@ -518,6 +351,160 @@
         </property>
        </column>
       </widget>
+     </item>
+     <item row="5" column="9">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="presetSave">
+       <property name="toolTip">
+        <string>Save current settings as new preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/create.png</normaloff>:/create.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="10">
+      <widget class="QToolButton" name="presetDelete">
+       <property name="toolTip">
+        <string>Delete selected preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QToolButton" name="presetUpdate">
+       <property name="toolTip">
+        <string>Update selected preset with current settings</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="6">
+      <widget class="QToolButton" name="presetImport">
+       <property name="toolTip">
+        <string>Import preset from file into current group</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/import.png</normaloff>:/import.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="5">
+      <widget class="QToolButton" name="presetExport">
+       <property name="toolTip">
+        <string>Export current preset to file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/export.png</normaloff>:/export.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="3">
+      <widget class="QToolButton" name="settingsSave">
+       <property name="toolTip">
+        <string>Save the current settings (inc. presets)</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/save.png</normaloff>:/save.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="8">
+      <widget class="QToolButton" name="presetLoad">
+       <property name="toolTip">
+        <string>Load selected preset</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/load.png</normaloff>:/load.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="7">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </widget>
@@ -584,7 +571,7 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QTreeWidget" name="commadsTree">
+      <widget class="QTreeWidget" name="commandTree">
        <property name="indentation">
         <number>5</number>
        </property>
@@ -604,12 +591,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Key press</string>
+         <string>Key</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Key release</string>
+         <string>P/R</string>
         </property>
        </column>
       </widget>
@@ -639,6 +626,20 @@
          <property name="icon">
           <iconset resource="resources/res.qrc">
            <normaloff>:/create.png</normaloff>:/create.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="commandDuplicate">
+         <property name="toolTip">
+          <string>Duplicate command</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/duplicate.png</normaloff>:/duplicate.png</iconset>
          </property>
         </widget>
        </item>
@@ -694,7 +695,34 @@
          </property>
          <property name="icon">
           <iconset resource="resources/res.qrc">
-           <normaloff>:/preset-last.png</normaloff>:/preset-last.png</iconset>
+           <normaloff>:/save.png</normaloff>:/save.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="ButtonSwitch" name="commandKeyboardConnect">
+         <property name="toolTip">
+          <string>Toggle keyboard to command connection</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/res.qrc">
+           <normaloff>:/keyboard.png</normaloff>:/keyboard.png</iconset>
          </property>
         </widget>
        </item>
@@ -721,7 +749,7 @@
          </property>
          <property name="icon">
           <iconset resource="resources/res.qrc">
-           <normaloff>:/preset-delete.png</normaloff>:/preset-delete.png</iconset>
+           <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
          </property>
         </widget>
        </item>
@@ -873,11 +901,17 @@
   <zorder>commandsDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>presetTree</tabstop>
   <tabstop>presetSave</tabstop>
   <tabstop>presetDelete</tabstop>
-  <tabstop>presetLoad</tabstop>
  </tabstops>
  <resources>
   <include location="resources/res.qrc"/>

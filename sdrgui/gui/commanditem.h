@@ -14,45 +14,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_COMMANDS_COMMAND_H_
-#define SDRBASE_COMMANDS_COMMAND_H_
+#include <QTreeWidgetItem>
 
-#include <Qt>
-#include <QByteArray>
-#include <QString>
-
-class Command
-{
+class CommandItem : public QTreeWidgetItem {
 public:
-    Command();
-    ~Command();
-    void resetToDefaults();
-
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-
-    void setCommand(const QString& command) { m_command = command; }
-    const QString& getCommand() const { return m_command; }
-    void setArgString(const QString& argString) { m_argString = argString; }
-    const QString& getArgString() const { return m_argString; }
-    void setGroup(const QString& group) { m_group = group; }
-    const QString& getGroup() const { return m_group; }
-    void setDescription(const QString& description) { m_description = description; }
-    const QString& getDescription() const { return m_description; }
-    void setPressKey(Qt::Key key) { m_pressKey = key; }
-    Qt::Key getPressKey() const { return m_pressKey; }
-    void setReleaseKey(Qt::Key key) { m_releaseKey = key; }
-    Qt::Key getReleaseKey() const { return m_releaseKey; }
+    CommandItem(QTreeWidgetItem* parent, const QStringList& strings, const QString& description, int type);
+	bool operator<(const QTreeWidgetItem& other) const;
 
 private:
-    QString m_command;
-    QString m_argString;
-    QString m_group;
-    QString m_description;
-    Qt::Key m_pressKey;
-    Qt::Key m_releaseKey;
+	QString m_description;
 };
-
-
-
-#endif /* SDRBASE_COMMANDS_COMMAND_H_ */

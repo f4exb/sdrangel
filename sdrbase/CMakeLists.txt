@@ -8,6 +8,7 @@ set(sdrbase_SOURCES
 
     channel/channelsinkapi.cpp
     channel/channelsourceapi.cpp
+    commands/command.cpp
 
     dsp/afsquelch.cpp
     dsp/agc.cpp
@@ -85,6 +86,7 @@ set(sdrbase_HEADERS
 
     channel/channelsinkapi.h
     channel/channelsourceapi.h
+    commands/command.h
 
     dsp/afsquelch.h
     dsp/downchannelizer.h

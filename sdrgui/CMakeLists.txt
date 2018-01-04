@@ -9,7 +9,9 @@ set(sdrgui_SOURCES
     gui/channelwindow.cpp
     gui/clickablelabel.cpp
     gui/colormapper.cpp
+    gui/commanditem.cpp
     gui/cwkeyergui.cpp
+    gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
     gui/glscope.cpp
@@ -40,8 +42,6 @@ set(sdrgui_SOURCES
     gui/valuedial.cpp
     gui/valuedialz.cpp
     
-    commands/command.cpp
-    
     dsp/scopevis.cpp
     dsp/scopevisng.cpp
     dsp/scopevismulti.cpp
@@ -62,7 +62,9 @@ set(sdrgui_HEADERS
     gui/buttonswitch.h
     gui/channelwindow.h
     gui/colormapper.h
+    gui/commanditem.h
     gui/cwkeyergui.h
+    gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
     gui/glscope.h
@@ -94,8 +96,6 @@ set(sdrgui_HEADERS
     gui/valuedial.h
     gui/valuedialz.h
     
-    commands/command.h
-    
     dsp/scopevis.h
     dsp/scopevisng.h
     dsp/scopevismulti.h
@@ -119,6 +119,7 @@ set(sdrgui_FORMS
     gui/addpresetdialog.ui
     gui/basicchannelsettingsdialog.ui
     gui/cwkeyergui.ui
+    gui/editcommanddialog.ui
     gui/externalclockdialog.ui
     gui/glscopegui.ui
     gui/glscopenggui.ui

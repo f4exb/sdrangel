@@ -53,6 +53,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         audio/audioinput.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
+        commands/command.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
         device/deviceenumerator.cpp\
@@ -119,7 +120,8 @@ HEADERS  += audio/audiodeviceinfo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         channel/channelsinkapi.h\
-        channel/channelsourceapi.h\        
+        channel/channelsourceapi.h\ 
+        commands/command.h\       
         device/devicesourceapi.h\
         device/devicesinkapi.h\
         device/deviceenumerator.h\

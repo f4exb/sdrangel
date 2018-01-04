@@ -34,7 +34,9 @@
 #include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
+#include "gui/commanditem.h"
 #include "gui/addpresetdialog.h"
+#include "gui/editcommanddialog.h"
 #include "gui/pluginsdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
@@ -55,6 +57,7 @@
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadaptergui.h"
+#include "commands/command.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -514,6 +517,13 @@ void MainWindow::loadSettings()
         }
     }
 
+    m_settings.sortCommands();
+
+    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+    {
+        treeItem = addCommandToTree(m_settings.getCommand(i));
+    }
+
     setLoggingOptions();
 }
 
@@ -646,6 +656,44 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 	return item;
 }
 
+QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
+{
+    QTreeWidgetItem* group = 0;
+
+    for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++)
+    {
+        if(ui->commandTree->topLevelItem(i)->text(0) == command->getGroup())
+        {
+            group = ui->commandTree->topLevelItem(i);
+            break;
+        }
+    }
+
+    if(group == 0)
+    {
+        QStringList sl;
+        sl.append(command->getGroup());
+        group = new QTreeWidgetItem(ui->commandTree, sl, PGroup);
+        group->setFirstColumnSpanned(true);
+        group->setExpanded(true);
+        ui->commandTree->sortByColumn(0, Qt::AscendingOrder);
+    }
+
+    QStringList sl;
+    sl.append(QString("%1").arg(command->getDescription())); // Descriptions column
+    sl.append(QString("%1").arg(command->getKeyLabel()));   // key column
+    sl.append(QString("%1").arg(command->getAssociateKey() ? command->getRelease() ? "R" : "P" : "")); // key press/release column
+    CommandItem* item = new CommandItem(group, sl, command->getDescription(), PItem);
+    item->setData(0, Qt::UserRole, qVariantFromValue(command));
+    item->setTextAlignment(0, Qt::AlignLeft);
+    ui->presetTree->resizeColumnToContents(0); // Resize description column to minimum
+    ui->presetTree->resizeColumnToContents(1); // Resize key column to minimum
+    ui->presetTree->resizeColumnToContents(2); // Resize key press/release column to minimum
+
+    //updatePresetControls();
+    return item;
+}
+
 void MainWindow::applySettings()
 {
 }
@@ -772,48 +820,170 @@ void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 	else showNormal();
 }
 
+void MainWindow::on_commandNew_clicked()
+{
+    QStringList groups;
+    QString group = "";
+    QString description = "";
+
+    for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
+        groups.append(ui->commandTree->topLevelItem(i)->text(0));
+    }
+
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+
+    if(item != 0)
+    {
+        if(item->type() == PGroup) {
+            group = item->text(0);
+        } else if(item->type() == PItem) {
+            group = item->parent()->text(0);
+            description = item->text(0);
+        }
+    }
+
+    Command *command = new Command();
+    command->setGroup(group);
+    command->setDescription(description);
+    EditCommandDialog editCommandDialog(groups, group, this);
+    editCommandDialog.fromCommand(*command);
+
+    if (editCommandDialog.exec() == QDialog::Accepted)
+    {
+        editCommandDialog.toCommand(*command);
+        m_settings.addCommand(command);
+        ui->commandTree->setCurrentItem(addCommandToTree(command));
+        m_settings.sortCommands();
+    }
+}
+
+void MainWindow::on_commandDuplicate_clicked()
+{
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+    const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+    Command *commandCopy = new Command(*command);
+    m_settings.addCommand(commandCopy);
+    ui->commandTree->setCurrentItem(addCommandToTree(commandCopy));
+    m_settings.sortCommands();
+}
+
+void MainWindow::on_commandEdit_clicked()
+{
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+
+    if(item != 0)
+    {
+        if(item->type() == PItem)
+        {
+            const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+
+            if (command != 0)
+            {
+                QStringList groups;
+
+                for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
+                    groups.append(ui->commandTree->topLevelItem(i)->text(0));
+                }
+
+                EditCommandDialog editCommandDialog(groups, command->getGroup(), this);
+                editCommandDialog.fromCommand(*command);
+
+                if (editCommandDialog.exec() == QDialog::Accepted)
+                {
+                    Command* command_mod = const_cast<Command*>(command);
+                    editCommandDialog.toCommand(*command_mod);
+                    m_settings.sortCommands();
+
+                    ui->commandTree->clear();
+
+                    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+                    {
+                        QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
+                        const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
+                        if (command_x == command_mod) {
+                            ui->commandTree->setCurrentItem(item_x);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::on_commandDelete_clicked()
+{
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+
+    if(item == 0) {
+        return;
+    }
+
+    const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+
+    if(command == 0) {
+        return;
+    }
+
+    if (QMessageBox::question(this,
+            tr("Delete command"),
+            tr("Do you want to delete command '%1'?")
+                .arg(command->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+    {
+        delete item;
+        m_settings.deleteCommand(command);
+    }
+}
+
 void MainWindow::on_presetSave_clicked()
 {
-	QStringList groups;
-	QString group;
-	QString description = "";
-	for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
-		groups.append(ui->presetTree->topLevelItem(i)->text(0));
+    QStringList groups;
+    QString group;
+    QString description = "";
 
-	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item != 0) {
-		if(item->type() == PGroup)
-			group = item->text(0);
-		else if(item->type() == PItem) {
-			group = item->parent()->text(0);
-			description = item->text(0);
-		}
-	}
+    for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
+        groups.append(ui->presetTree->topLevelItem(i)->text(0));
+    }
 
-	AddPresetDialog dlg(groups, group, this);
+    QTreeWidgetItem* item = ui->presetTree->currentItem();
 
-	if (description.length() > 0) {
-		dlg.setDescription(description);
-	}
+    if(item != 0)
+    {
+        if(item->type() == PGroup) {
+            group = item->text(0);
+        } else if(item->type() == PItem) {
+            group = item->parent()->text(0);
+            description = item->text(0);
+        }
+    }
 
-	if(dlg.exec() == QDialog::Accepted) {
-		Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
-		savePresetSettings(preset, ui->tabInputsView->currentIndex());
+    AddPresetDialog dlg(groups, group, this);
 
-		ui->presetTree->setCurrentItem(addPresetToTree(preset));
-	}
+    if (description.length() > 0) {
+        dlg.setDescription(description);
+    }
 
-	m_settings.sortPresets();
+    if(dlg.exec() == QDialog::Accepted) {
+        Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
+        savePresetSettings(preset, ui->tabInputsView->currentIndex());
+
+        ui->presetTree->setCurrentItem(addPresetToTree(preset));
+    }
+
+    m_settings.sortPresets();
 }
 
 void MainWindow::on_presetUpdate_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 
-	if(item != 0) {
-		if(item->type() == PItem) {
+	if(item != 0)
+	{
+		if(item->type() == PItem)
+		{
 			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-			if (preset != 0) {
+
+			if (preset != 0)
+			{
 				Preset* preset_mod = const_cast<Preset*>(preset);
 				savePresetSettings(preset_mod, ui->tabInputsView->currentIndex());
 			}

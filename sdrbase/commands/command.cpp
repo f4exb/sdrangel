@@ -17,6 +17,8 @@
 #include "command.h"
 #include "util/simpleserializer.h"
 
+#include <QKeySequence>
+
 Command::Command()
 {
     resetToDefaults();
@@ -31,8 +33,9 @@ void Command::resetToDefaults()
     m_description = "no name";
     m_command = "";
     m_argString = "";
-    m_pressKey = static_cast<Qt::Key>(0);
-    m_releaseKey = static_cast<Qt::Key>(0);
+    m_key = static_cast<Qt::Key>(0);
+    m_associateKey = false;
+    m_release = false;
 }
 
 QByteArray Command::serialize() const
@@ -43,8 +46,10 @@ QByteArray Command::serialize() const
     s.writeString(2, m_description);
     s.writeString(3, m_command);
     s.writeString(4, m_argString);
-    s.writeS32(5, (int) m_pressKey);
-    s.writeS32(6, (int) m_releaseKey);
+    s.writeS32(5, (int) m_key);
+    s.writeS32(6, (int) m_keyModifiers);
+    s.writeBool(7, m_associateKey);
+    s.writeBool(8, m_release);
 
     return s.final();
 }
@@ -69,9 +74,11 @@ bool Command::deserialize(const QByteArray& data)
         d.readString(3, &m_command, "");
         d.readString(4, &m_argString, "");
         d.readS32(5, &tmpInt, 0);
-        m_pressKey = static_cast<Qt::Key>(tmpInt);
+        m_key = static_cast<Qt::Key>(tmpInt);
         d.readS32(6, &tmpInt, 0);
-        m_releaseKey = static_cast<Qt::Key>(tmpInt);
+        m_keyModifiers = static_cast<Qt::KeyboardModifiers>(tmpInt);
+        d.readBool(7, &m_associateKey, false);
+        d.readBool(8, &m_release, false);
 
         return true;
     }
@@ -79,5 +86,23 @@ bool Command::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+QString Command::getKeyLabel() const
+{
+    if (m_key == 0)
+    {
+       return "";
+    }
+    else if (m_keyModifiers != Qt::NoModifier)
+    {
+        QString altGrStr = m_keyModifiers & Qt::GroupSwitchModifier ? "Gr " : "";
+        int maskedModifiers = (m_keyModifiers & 0x3FFFFFFF) + ((m_keyModifiers & 0x40000000)>>3);
+        return altGrStr + QKeySequence(maskedModifiers, m_key).toString();
+    }
+    else
+    {
+        return QKeySequence(m_key).toString();
     }
 }

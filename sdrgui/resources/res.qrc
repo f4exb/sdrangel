@@ -85,5 +85,10 @@
         <file>edit.png</file>
         <file>listing.png</file>
         <file>create.png</file>
+        <file>duplicate.png</file>
+        <file>bin.png</file>
+        <file>save.png</file>
+        <file>load.png</file>
+        <file>keyboard.png</file>
     </qresource>
 </RCC>

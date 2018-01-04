@@ -6,6 +6,8 @@
 #include "preset.h"
 #include "audio/audiodeviceinfo.h"
 
+class Command;
+
 class MainSettings {
 public:
 	MainSettings();
@@ -22,6 +24,13 @@ public:
 	const Preset* getPreset(int index) const { return m_presets[index]; }
 	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const;
 	void sortPresets();
+
+    void addCommand(Command *command);
+    void deleteCommand(const Command* command);
+    int getCommandCount() const { return m_commands.count(); }
+    const Command* getCommand(int index) const { return m_commands[index]; }
+    const Command* getCommand(const QString& groupName, const QString& description) const;
+    void sortCommands();
 
 	Preset* getWorkingPreset() { return &m_workingPreset; }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
@@ -52,6 +61,8 @@ protected:
 	Preset m_workingPreset;
 	typedef QList<Preset*> Presets;
 	Presets m_presets;
+    typedef QList<Command*> Commands;
+    Commands m_commands;
 };
 
 #endif // INCLUDE_SETTINGS_H

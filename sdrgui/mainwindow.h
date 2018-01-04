@@ -54,6 +54,8 @@ class QWidget;
 class WebAPIRequestMapper;
 class WebAPIServer;
 class WebAPIAdapterGUI;
+class Preset;
+class Command;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -317,6 +319,7 @@ private:
 	void closeEvent(QCloseEvent*);
 	void updatePresetControls();
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
+	QTreeWidgetItem* addCommandToTree(const Command* command);
 	void applySettings();
 
 	void addSourceDevice(int deviceIndex);
@@ -341,6 +344,10 @@ private slots:
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
+	void on_commandNew_clicked();
+    void on_commandDuplicate_clicked();
+    void on_commandEdit_clicked();
+    void on_commandDelete_clicked();
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
