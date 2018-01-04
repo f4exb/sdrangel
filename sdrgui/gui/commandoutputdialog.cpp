@@ -64,34 +64,35 @@ void CommandOutputDialog::refresh()
     ui->runningState->setChecked(m_command.getLastProcessState() == QProcess::Running);
     QProcess::ProcessError processError;
 
-    if (m_command.getLastProcessStartTimestamp().tv_sec == 0)
+    if (m_command.getLastProcessStartTimestamp().tv_sec == 0) // not started
     {
         ui->errorText->setText("...");
         ui->exitCode->setText("-");
         ui->exitText->setText("...");
         ui->runningState->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
-    else if (m_command.getLastProcessState() != QProcess::NotRunning)
+    else if (m_command.getLastProcessState() != QProcess::NotRunning) // running
     {
         ui->errorText->setText("...");
-        ui->runningState->setStyleSheet("QToolButton { background-color : blue; }");
+        ui->runningState->setStyleSheet("QToolButton { background-color : orange; }");
     }
-    else if (m_command.getLastProcessError(processError))
+    else // finished
     {
-        ui->runningState->setStyleSheet("QToolButton { background-color : red; }");
-        setErrorText(processError);
-        ui->exitCode->setText("-");
-        ui->exitText->setText("...");
-    }
-    else
-    {
-        ui->runningState->setStyleSheet("QToolButton { background-color : green; }");
-        ui->errorText->setText("No error");
+        if (m_command.getLastProcessError(processError)) // finished
+        {
+            ui->runningState->setStyleSheet("QToolButton { background-color : red; }");
+            setErrorText(processError);
+        }
+        else
+        {
+            ui->runningState->setStyleSheet("QToolButton { background-color : green; }");
+            ui->errorText->setText("No error");
+        }
 
         int processExitCode;
         QProcess::ExitStatus processExitStatus;
 
-        if (m_command.getLastProcessTermination(processExitCode, processExitStatus))
+        if (m_command.getLastProcessExit(processExitCode, processExitStatus))
         {
             ui->exitCode->setText(QString("%1").arg(processExitCode));
             setExitText(processExitStatus);
@@ -148,13 +149,21 @@ void CommandOutputDialog::setExitText(const QProcess::ExitStatus& processExit)
     }
 }
 
-void CommandOutputDialog::on_processRefresh_toggled(bool checked __attribute__((unused)))
+void CommandOutputDialog::on_processRefresh_toggled(bool checked)
 {
-    refresh();
+    if (checked)
+    {
+        refresh();
+        ui->processRefresh->setChecked(false);
+    }
 }
 
-void CommandOutputDialog::on_processKill_toggled(bool checked __attribute__((unused)))
+void CommandOutputDialog::on_processKill_toggled(bool checked)
 {
-    m_command.kill();
+    if (checked)
+    {
+        m_command.kill();
+        ui->processKill->setChecked(false);
+    }
 }
 

@@ -59,7 +59,7 @@ public:
     void kill();
     QProcess::ProcessState getLastProcessState() const;
     bool getLastProcessError(QProcess::ProcessError& error) const;
-    bool getLastProcessTermination(int& exitCode, QProcess::ExitStatus& exitStatus) const;
+    bool getLastProcessExit(int& exitCode, QProcess::ExitStatus& exitStatus) const;
     const QString& getLastProcessLog() const;
     struct timeval getLastProcessStartTimestamp() const { return m_currentProcessStartTimeStamp; }
     struct timeval getLastProcessFinishTimestamp() const { return m_currentProcessFinishTimeStamp; }
@@ -101,7 +101,7 @@ private:
     QProcess::ProcessState m_currentProcessState;
     bool m_isInError;
     QProcess::ProcessError m_currentProcessError;
-    bool m_isFinished;
+    bool m_hasExited;
     int m_currentProcessExitCode;
     QProcess::ExitStatus m_currentProcessExitStatus;
     QString m_log;

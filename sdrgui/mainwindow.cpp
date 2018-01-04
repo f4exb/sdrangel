@@ -682,14 +682,14 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 
     QStringList sl;
     sl.append(QString("%1").arg(command->getDescription())); // Descriptions column
-    sl.append(QString("%1").arg(command->getKeyLabel()));   // key column
     sl.append(QString("%1").arg(command->getAssociateKey() ? command->getRelease() ? "R" : "P" : "")); // key press/release column
+    sl.append(QString("%1").arg(command->getKeyLabel()));   // key column
     CommandItem* item = new CommandItem(group, sl, command->getDescription(), PItem);
     item->setData(0, Qt::UserRole, qVariantFromValue(command));
     item->setTextAlignment(0, Qt::AlignLeft);
-    ui->presetTree->resizeColumnToContents(0); // Resize description column to minimum
-    ui->presetTree->resizeColumnToContents(1); // Resize key column to minimum
-    ui->presetTree->resizeColumnToContents(2); // Resize key press/release column to minimum
+    ui->commandTree->resizeColumnToContents(0); // Resize description column to minimum
+    ui->commandTree->resizeColumnToContents(1); // Resize key column to minimum
+    ui->commandTree->resizeColumnToContents(2); // Resize key press/release column to minimum
 
     //updatePresetControls();
     return item;
@@ -816,9 +816,11 @@ void MainWindow::handleMessages()
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 {
-	if(checked)
+	if(checked) {
 		showFullScreen();
-	else showNormal();
+	} else {
+	    showNormal();
+	}
 }
 
 void MainWindow::on_commandNew_clicked()

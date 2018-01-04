@@ -591,12 +591,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Key</string>
+         <string>P/R</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>P/R</string>
+         <string>Key</string>
         </property>
        </column>
       </widget>

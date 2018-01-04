@@ -25,7 +25,7 @@ Command::Command() :
     m_currentProcessState(QProcess::NotRunning),
     m_isInError(false),
     m_currentProcessError(QProcess::UnknownError),
-    m_isFinished(true),
+    m_hasExited(false),
     m_currentProcessExitCode(0),
     m_currentProcessExitStatus(QProcess::NormalExit),
     m_currentProcessPid(0)
@@ -52,7 +52,7 @@ Command::Command(const Command& command) :
         m_currentProcessState(QProcess::NotRunning),
         m_isInError(false),
         m_currentProcessError(QProcess::UnknownError),
-        m_isFinished(true),
+        m_hasExited(false),
         m_currentProcessExitCode(0),
         m_currentProcessExitStatus(QProcess::NormalExit),
         m_currentProcessPid(0)
@@ -179,7 +179,7 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
 
     m_currentProcess = new QProcess(this);
     m_isInError = false;
-    m_isFinished = false;
+    m_hasExited = false;
 
 #if QT_VERSION < 0x051000
     connect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
@@ -200,17 +200,6 @@ void Command::kill()
     {
         qDebug("Command::kill: %lld", m_currentProcessPid);
         m_currentProcess->kill();
-
-#if QT_VERSION < 0x051000
-        disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
-#else
-        disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
-#endif
-        disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
-        disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
-
-        delete m_currentProcess;
-        m_currentProcess = 0;
     }
 }
 
@@ -228,15 +217,15 @@ bool Command::getLastProcessError(QProcess::ProcessError& error) const
     return m_isInError;
 }
 
-bool Command::getLastProcessTermination(int& exitCode, QProcess::ExitStatus& exitStatus) const
+bool Command::getLastProcessExit(int& exitCode, QProcess::ExitStatus& exitStatus) const
 {
-    if (m_isFinished)
+    if (m_hasExited)
     {
         exitCode = m_currentProcessExitCode;
         exitStatus = m_currentProcessExitStatus;
     }
 
-    return m_isFinished;
+    return m_hasExited;
 }
 
 const QString& Command::getLastProcessLog() const
@@ -255,37 +244,41 @@ void Command::processStateChanged(QProcess::ProcessState newState)
 
 void Command::processError(QProcess::ProcessError error)
 {
+    //qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessError = error;
     m_isInError = true;
-    m_isFinished = true;
-    m_log = m_currentProcess->readAllStandardOutput();
+
+    if (m_currentProcessState == QProcess::NotRunning)
+    {
+        m_log = m_currentProcess->readAllStandardOutput();
 
 #if QT_VERSION < 0x051000
         disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
         disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #endif
-    disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
-    disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
+        disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
+        disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
-    delete m_currentProcess;
-    m_currentProcess = 0;
+        delete m_currentProcess;
+        m_currentProcess = 0;
+    }
 }
 
 void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;
-    m_isInError = false;
-    m_isFinished = true;
+    m_hasExited = true;
     m_log = m_currentProcess->readAllStandardOutput();
 
 #if QT_VERSION < 0x051000
-        disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
+    disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
-        disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
+    disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #endif
     disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
     disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));

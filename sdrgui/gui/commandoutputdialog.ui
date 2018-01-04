@@ -55,6 +55,9 @@
         <iconset resource="../resources/res.qrc">
          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -157,6 +160,9 @@
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/kill.png</normaloff>:/kill.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
