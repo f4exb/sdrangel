@@ -90,5 +90,6 @@
         <file>save.png</file>
         <file>load.png</file>
         <file>keyboard.png</file>
+        <file>kill.png</file>
     </qresource>
 </RCC>

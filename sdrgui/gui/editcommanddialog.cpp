@@ -140,7 +140,7 @@ void EditCommandDialog::on_showFileDialog_clicked(bool checked __attribute__((un
             this,
             tr("Select command"),
             dirStr,
-            tr("Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe);;All (*.*)"));
+            tr("Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe);;All (*)"));
 
     if (fileName != "") {
         ui->command->setText(fileName);
@@ -249,4 +249,3 @@ void EditCommandDialog::setKeyAssociate()
         ui->keyAssociate->setEnabled(true);
     }
 }
-

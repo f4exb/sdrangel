@@ -21,11 +21,16 @@
 #include <QByteArray>
 #include <QString>
 #include <QMetaType>
+#include <QObject>
+#include <QProcess>
+#include <sys/time.h>
 
-class Command
+class Command : public QObject
 {
+    Q_OBJECT
 public:
     Command();
+    Command(const Command& command);
     ~Command();
     void resetToDefaults();
 
@@ -48,8 +53,18 @@ public:
     bool getAssociateKey() const { return m_associateKey; }
     void setRelease(bool release) { m_release = release; }
     bool getRelease() const { return m_release; }
-
     QString getKeyLabel() const;
+
+    void run(const QString& apiAddress, int apiPort, int deviceSetIndex);
+    void kill();
+    QProcess::ProcessState getLastProcessState() const;
+    bool getLastProcessError(QProcess::ProcessError& error) const;
+    bool getLastProcessTermination(int& exitCode, QProcess::ExitStatus& exitStatus) const;
+    const QString& getLastProcessLog() const;
+    struct timeval getLastProcessStartTimestamp() const { return m_currentProcessStartTimeStamp; }
+    struct timeval getLastProcessFinishTimestamp() const { return m_currentProcessFinishTimeStamp; }
+    const QString& getLastProcessCommandLine() const { return m_currentProcessCommandLine; }
+    qint64 getLastProcessPid() const { return m_currentProcessPid; }
 
     static bool commandCompare(const Command *c1, Command *c2)
     {
@@ -74,14 +89,31 @@ public:
     }
 
 private:
-    QString m_command;
-    QString m_argString;
     QString m_group;
     QString m_description;
+    QString m_command;
+    QString m_argString;
     Qt::Key m_key;
     Qt::KeyboardModifiers m_keyModifiers;
     bool m_associateKey;
     bool m_release;
+    QProcess *m_currentProcess;
+    QProcess::ProcessState m_currentProcessState;
+    bool m_isInError;
+    QProcess::ProcessError m_currentProcessError;
+    bool m_isFinished;
+    int m_currentProcessExitCode;
+    QProcess::ExitStatus m_currentProcessExitStatus;
+    QString m_log;
+    struct timeval m_currentProcessStartTimeStamp;
+    struct timeval m_currentProcessFinishTimeStamp;
+    QString m_currentProcessCommandLine;
+    qint64 m_currentProcessPid;
+
+private slots:
+    void processStateChanged(QProcess::ProcessState newState);
+    void processError(QProcess::ProcessError error);
+    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 Q_DECLARE_METATYPE(const Command*);

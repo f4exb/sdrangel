@@ -37,6 +37,7 @@
 #include "gui/commanditem.h"
 #include "gui/addpresetdialog.h"
 #include "gui/editcommanddialog.h"
+#include "gui/commandoutputdialog.h"
 #include "gui/pluginsdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
@@ -931,6 +932,32 @@ void MainWindow::on_commandDelete_clicked()
     {
         delete item;
         m_settings.deleteCommand(command);
+    }
+}
+
+void MainWindow::on_commandRun_clicked()
+{
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+
+    if ((item != 0) && (item->type() == PItem))
+    {
+        const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+        Command* command_mod = const_cast<Command*>(command);
+        int currentDeviceSetIndex = ui->tabInputsSelect->currentIndex();
+        command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+    }
+}
+
+void MainWindow::on_commandOutput_clicked()
+{
+    QTreeWidgetItem* item = ui->commandTree->currentItem();
+
+    if ((item != 0) && (item->type() == PItem))
+    {
+        const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+        Command* command_mod = const_cast<Command*>(command);
+        CommandOutputDialog commandOutputDialog(*command_mod);
+        commandOutputDialog.exec();
     }
 }
 

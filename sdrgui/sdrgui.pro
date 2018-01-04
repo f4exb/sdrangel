@@ -51,6 +51,7 @@ SOURCES += mainwindow.cpp\
         gui/clickablelabel.cpp\
         gui/colormapper.cpp\
         gui/commanditem.cpp\
+        gui/commandoutputdialog.cpp\
         gui/cwkeyergui.cpp\
         gui/editcommanddialog.cpp\
         gui/externalclockbutton.cpp\
@@ -100,6 +101,7 @@ HEADERS  += mainwindow.h\
         gui/clickablelabel.h\
         gui/colormapper.h\
         gui/commanditem.h\
+        gui/commandoutputdialog.h\
         gui/cwkeyergui.h\
         gui/editcommanddialog.h\
         gui/externalclockbutton.h\
@@ -135,6 +137,7 @@ FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\
         gui/basicchannelsettingsdialog.ui\
+        gui/commandoutputdialog.ui\
         gui/cwkeyergui.ui\
         gui/editcommanddialog.ui\
         gui/externalclockdialog.ui\

@@ -348,6 +348,8 @@ private slots:
     void on_commandDuplicate_clicked();
     void on_commandEdit_clicked();
     void on_commandDelete_clicked();
+    void on_commandRun_clicked();
+    void on_commandOutput_clicked();
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);

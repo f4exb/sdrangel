@@ -672,9 +672,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="commandViewOutput">
+        <widget class="QToolButton" name="commandOutput">
          <property name="toolTip">
-          <string>View last run output</string>
+          <string>View last run status and output</string>
          </property>
          <property name="text">
           <string/>
