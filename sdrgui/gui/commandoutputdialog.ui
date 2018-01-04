@@ -276,10 +276,13 @@
    <item>
     <widget class="QPlainTextEdit" name="logEdit">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="toolTip">
       <string>Output log (stdout + stderr)</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
