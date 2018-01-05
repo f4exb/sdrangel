@@ -56,6 +56,7 @@ class WebAPIServer;
 class WebAPIAdapterGUI;
 class Preset;
 class Command;
+class CommandKeyReceiver;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -311,6 +312,8 @@ private:
 	WebAPIServer *m_apiServer;
 	WebAPIAdapterGUI *m_apiAdapter;
 
+	CommandKeyReceiver *m_commandKeyReceiver;
+
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
@@ -350,6 +353,7 @@ private slots:
     void on_commandDelete_clicked();
     void on_commandRun_clicked();
     void on_commandOutput_clicked();
+    void on_commandKeyboardConnect_toggled(bool checked);
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
@@ -364,6 +368,8 @@ private slots:
 	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
+	void focusHasChanged(QWidget *oldWidget, QWidget *newWidget);
+	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

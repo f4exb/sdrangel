@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <gui/commandkeyreceiver.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -24,6 +25,7 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QSysInfo>
+#include <QKeyEvent>
 
 #include <plugin/plugininstancegui.h>
 #include <plugin/plugininstancegui.h>
@@ -183,11 +185,18 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
 	m_apiServer->start();
 
+	connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), this, SLOT(focusHasChanged(QWidget *, QWidget *)));
+	m_commandKeyReceiver = new CommandKeyReceiver();
+	m_commandKeyReceiver->setRelease(true);
+	this->installEventFilter(m_commandKeyReceiver);
+
     qDebug() << "MainWindow::MainWindow: end";
 }
 
 MainWindow::~MainWindow()
 {
+    m_commandKeyReceiver->deleteLater();
+
     m_apiServer->stop();
     delete m_apiServer;
     delete m_requestMapper;
@@ -963,6 +972,23 @@ void MainWindow::on_commandOutput_clicked()
     }
 }
 
+void MainWindow::on_commandKeyboardConnect_toggled(bool checked)
+{
+    qDebug("on_commandKeyboardConnect_toggled: %s", checked ? "true" : "false");
+
+    if (checked)
+    {
+        setFocus();
+        connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+                this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
+    }
+    else
+    {
+        disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+                this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
+    }
+}
+
 void MainWindow::on_presetSave_clicked()
 {
     QStringList groups;
@@ -1500,4 +1526,21 @@ void MainWindow::setLoggingOptions()
     }
 
     m_logger->setUseFileLogger(m_settings.getUseLogFile());
+}
+
+void MainWindow::focusHasChanged(QWidget *oldWidget __attribute__((unused)), QWidget *newWidget)
+{
+    // this is the hard way:
+//    if (ui->commandKeyboardConnect->isChecked() && (newWidget != this)) {
+//        setFocus();
+//    }
+    // this is the soft way:
+    if (newWidget != this) {
+        ui->commandKeyboardConnect->setChecked(false);
+    }
+}
+
+void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
+{
+    qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
 }

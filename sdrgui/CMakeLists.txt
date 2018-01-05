@@ -10,6 +10,7 @@ set(sdrgui_SOURCES
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
+    gui/commandkeyreceiver.cpp
     gui/commandoutputdialog.cpp
     gui/cwkeyergui.cpp
     gui/editcommanddialog.cpp
@@ -64,6 +65,7 @@ set(sdrgui_HEADERS
     gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
+    gui/commandkeyreceiver.h
     gui/commandoutputdialog.h
     gui/cwkeyergui.h
     gui/editcommanddialog.h
