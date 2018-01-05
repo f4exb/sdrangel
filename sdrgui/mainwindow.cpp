@@ -913,19 +913,6 @@ void MainWindow::on_commandEdit_clicked()
                     editCommandDialog.toCommand(*command_mod);
                     change = true;
                     changedCommand = command;
-//
-//                    m_settings.sortCommands();
-//
-//                    ui->commandTree->clear();
-//
-//                    for (int i = 0; i < m_settings.getCommandCount(); ++i)
-//                    {
-//                        QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
-//                        const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
-//                        if (command_x == command_mod) {
-//                            ui->commandTree->setCurrentItem(item_x);
-//                        }
-//                    }
                 }
             }
         }
