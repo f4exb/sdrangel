@@ -230,6 +230,7 @@ void EditCommandDialog::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers key
 //    qDebug("EditCommandDialog::commandKeyPressed: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(keyModifiers));
     m_key = key;
     m_keyModifiers = keyModifiers;
+    setKeyAssociate();
     setKeyLabel();
     ui->keyCapture->setChecked(false);
 }
