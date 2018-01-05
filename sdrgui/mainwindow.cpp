@@ -1074,6 +1074,7 @@ void MainWindow::on_presetSave_clicked()
 void MainWindow::on_presetUpdate_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
+	const Preset* changedPreset;
 
 	if(item != 0)
 	{
@@ -1085,11 +1086,22 @@ void MainWindow::on_presetUpdate_clicked()
 			{
 				Preset* preset_mod = const_cast<Preset*>(preset);
 				savePresetSettings(preset_mod, ui->tabInputsView->currentIndex());
+				changedPreset = preset;
 			}
 		}
 	}
 
 	m_settings.sortPresets();
+    ui->presetTree->clear();
+
+    for (int i = 0; i < m_settings.getPresetCount(); ++i)
+    {
+        QTreeWidgetItem *item_x = addPresetToTree(m_settings.getPreset(i));
+        const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
+        if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
+            ui->presetTree->setCurrentItem(item_x);
+        }
+    }
 }
 
 void MainWindow::on_presetEdit_clicked()
