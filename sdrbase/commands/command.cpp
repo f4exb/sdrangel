@@ -247,7 +247,7 @@ const QString& Command::getLastProcessLog() const
 
 void Command::processStateChanged(QProcess::ProcessState newState)
 {
-    qDebug("Command::processStateChanged: %d", newState);
+    //qDebug("Command::processStateChanged: %d", newState);
     if (newState == QProcess::Running) {
         m_currentProcessPid = m_currentProcess->processId();
     }
@@ -257,7 +257,7 @@ void Command::processStateChanged(QProcess::ProcessState newState)
 
 void Command::processError(QProcess::ProcessError error)
 {
-    qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
+    //qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessError = error;
     m_isInError = true;
@@ -281,7 +281,7 @@ void Command::processError(QProcess::ProcessError error)
 
 void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
+    //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;

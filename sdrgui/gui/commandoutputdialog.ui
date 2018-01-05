@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Command output</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/res.qrc">
+    <normaloff>:/sdrangel_icon.png</normaloff>:/sdrangel_icon.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="processLayout">
