@@ -317,6 +317,7 @@ private:
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
+	void saveCommandSettings();
 
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
@@ -354,6 +355,7 @@ private slots:
     void on_commandDelete_clicked();
     void on_commandRun_clicked();
     void on_commandOutput_clicked();
+    void on_commandsSave_clicked();
     void on_commandKeyboardConnect_toggled(bool checked);
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();

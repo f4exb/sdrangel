@@ -594,6 +594,10 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     preset->setLayout(saveState());
 }
 
+void MainWindow::saveCommandSettings()
+{
+}
+
 void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
@@ -1017,6 +1021,12 @@ void MainWindow::on_commandOutput_clicked()
         CommandOutputDialog commandOutputDialog(*command_mod);
         commandOutputDialog.exec();
     }
+}
+
+void MainWindow::on_commandsSave_clicked()
+{
+    saveCommandSettings();
+    m_settings.save();
 }
 
 void MainWindow::on_commandKeyboardConnect_toggled(bool checked)
