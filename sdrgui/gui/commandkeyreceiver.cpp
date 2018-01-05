@@ -39,10 +39,10 @@ bool CommandKeyReceiver::eventFilter(QObject* obj, QEvent* event)
             Qt::KeyboardModifiers keyModifiers;
             keyEventHandler(keyEvent, key, keyModifiers);
             emit capturedKey(key, keyModifiers, false);
-        }
 
-        if (!m_pass) {
-            return true;
+            if (!m_pass) { // do not pass the event
+                return true;
+            }
         }
     }
     else if (m_release && (event->type()==QEvent::KeyRelease))
@@ -56,14 +56,14 @@ bool CommandKeyReceiver::eventFilter(QObject* obj, QEvent* event)
             Qt::KeyboardModifiers keyModifiers;
             keyEventHandler(keyEvent, key, keyModifiers);
             emit capturedKey(key, keyModifiers, true);
-        }
 
-        if (!m_pass) {
-            return true;
+            if (!m_pass) { // do not pass the event
+                return true;
+            }
         }
     }
 
-    return QObject::eventFilter(obj, event);
+    return QObject::eventFilter(obj, event); // pass the event on
 }
 
 void CommandKeyReceiver::keyEventHandler(QKeyEvent *e, Qt::Key& key, Qt::KeyboardModifiers& keyModifiers)

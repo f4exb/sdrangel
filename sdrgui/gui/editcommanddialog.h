@@ -25,6 +25,7 @@ namespace Ui {
 }
 
 class Command;
+class CommandKeyReceiver;
 
 class EditCommandDialog : public QDialog {
     Q_OBJECT
@@ -56,18 +57,15 @@ private:
     Ui::EditCommandDialog* ui;
     Qt::Key m_key;
     Qt::KeyboardModifiers m_keyModifiers;
+    CommandKeyReceiver *m_commandKeyReceiver;
 
-    virtual void keyPressEvent(QKeyEvent *e);
-    bool isComposeKey(Qt::Key key);
     void setKeyLabel();
     void setKeyAssociate();
-
-    static const std::vector<Qt::Key> m_composeKeys;
 
 private slots:
     void on_showFileDialog_clicked(bool checked);
     void on_keyCapture_toggled(bool checked);
-
+    void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 
 

@@ -17,13 +17,11 @@
 #include "editcommanddialog.h"
 #include "ui_editcommanddialog.h"
 #include "commands/command.h"
+#include "commandkeyreceiver.h"
 
 #include <QFileInfo>
 #include <QFileDialog>
-#include <QKeyEvent>
 #include <algorithm>
-
-const std::vector<Qt::Key> EditCommandDialog::m_composeKeys = {Qt::Key_Shift, Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_AltGr};
 
 EditCommandDialog::EditCommandDialog(const QStringList& groups, const QString& group, QWidget* parent) :
     QDialog(parent),
@@ -35,10 +33,14 @@ EditCommandDialog::EditCommandDialog(const QStringList& groups, const QString& g
     ui->group->lineEdit()->setText(group);
     setKeyAssociate();
     setKeyLabel();
+
+    m_commandKeyReceiver = new CommandKeyReceiver();
+    this->installEventFilter(m_commandKeyReceiver);
 }
 
 EditCommandDialog::~EditCommandDialog()
 {
+    m_commandKeyReceiver->deleteLater();
     delete ui;
 }
 
@@ -153,35 +155,13 @@ void EditCommandDialog::on_keyCapture_toggled(bool checked)
     {
         ui->keyCapture->setFocus();
         ui->keyCapture->setFocusPolicy(Qt::StrongFocus);
+        connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+                        this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
     }
     else
     {
-        ui->keyCapture->setFocusPolicy(Qt::NoFocus);
-        ui->keyCapture->clearFocus();
-    }
-}
-
-void EditCommandDialog::keyPressEvent(QKeyEvent *e)
-{
-    if (ui->keyCapture->isChecked() && (!isComposeKey(static_cast<Qt::Key>(e->key()))))
-    {
-        m_key = static_cast<Qt::Key>(e->key());
-
-        if (e->modifiers())
-        {
-            //qDebug("EditCommandDialog::keyPressEvent: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(e->modifiers()));
-            m_keyModifiers = e->modifiers();
-        }
-        else
-        {
-            m_keyModifiers = Qt::NoModifier;
-        }
-
-        setKeyAssociate();
-        setKeyLabel();
-        //qDebug("EditCommandDialog::keyPressEvent: key: %x", m_key);
-
-        ui->keyCapture->setChecked(false);
+        disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+                        this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
         ui->keyCapture->setFocusPolicy(Qt::NoFocus);
         ui->keyCapture->clearFocus();
     }
@@ -213,12 +193,6 @@ void EditCommandDialog::fromCommand(const Command& command)
     ui->keyRelease->setChecked(command.getRelease());
 }
 
-bool EditCommandDialog::isComposeKey(Qt::Key key)
-{
-    auto it = std::find(m_composeKeys.begin(), m_composeKeys.end(), key);
-    return it != m_composeKeys.end();
-}
-
 void EditCommandDialog::setKeyLabel()
 {
     if (m_key == 0)
@@ -248,4 +222,14 @@ void EditCommandDialog::setKeyAssociate()
     {
         ui->keyAssociate->setEnabled(true);
     }
+}
+
+void EditCommandDialog::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release __attribute__((unused)))
+{
+//    qDebug("EditCommandDialog::commandKeyPressed: key: %x", m_key);
+//    qDebug("EditCommandDialog::commandKeyPressed: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(keyModifiers));
+    m_key = key;
+    m_keyModifiers = keyModifiers;
+    setKeyLabel();
+    ui->keyCapture->setChecked(false);
 }
