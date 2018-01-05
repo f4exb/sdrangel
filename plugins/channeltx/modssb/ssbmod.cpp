@@ -665,7 +665,7 @@ void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, 
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_settings.m_audioSampleRate / (Real) m_outputSampleRate;
+        m_interpolatorDistance = (Real) m_settings.m_audioSampleRate / (Real) outputSampleRate;
         m_interpolator.create(48, m_settings.m_audioSampleRate, m_settings.m_bandwidth, 3.0);
         m_settingsMutex.unlock();
     }

@@ -196,7 +196,7 @@ void AMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset
     if (m_inputSampleRate != inputSampleRate)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
+        m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
         m_settingsMutex.unlock();

@@ -348,7 +348,7 @@ void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     if (m_inputSampleRate != inputSampleRate)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth / 2.2f);
+        m_interpolator.create(16, inputSampleRate, m_Bandwidth / 2.2f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
         m_settingsMutex.unlock();
