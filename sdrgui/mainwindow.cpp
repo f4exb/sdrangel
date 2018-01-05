@@ -534,6 +534,8 @@ void MainWindow::loadSettings()
         treeItem = addCommandToTree(m_settings.getCommand(i));
     }
 
+    tabifyDockWidget(ui->presetDock, ui->commandsDock);
+
     setLoggingOptions();
 }
 
