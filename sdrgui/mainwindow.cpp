@@ -1542,5 +1542,20 @@ void MainWindow::focusHasChanged(QWidget *oldWidget __attribute__((unused)), QWi
 
 void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
-    qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
+    //qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
+    int currentDeviceSetIndex = ui->tabInputsSelect->currentIndex();
+
+    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+    {
+        const Command* command = m_settings.getCommand(i);
+
+        if (command->getAssociateKey()
+                && (command->getRelease() == release)
+                && (command->getKey() == key)
+                && (command->getKeyModifiers() == keyModifiers))
+        {
+            Command* command_mod = const_cast<Command*>(command);
+            command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+        }
+    }
 }
