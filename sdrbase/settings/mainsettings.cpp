@@ -138,6 +138,20 @@ void MainSettings::sortPresets()
     qSort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
 }
 
+void MainSettings::renamePresetGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    int nbPresets = getPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if (getPreset(i)->getGroup() == oldGroupName)
+        {
+            Preset *preset_mod = const_cast<Preset*>(getPreset(i));
+            preset_mod->setGroup(newGroupName);
+        }
+    }
+}
+
 const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const
 {
     int nbPresets = getPresetCount();
@@ -169,6 +183,20 @@ void MainSettings::deleteCommand(const Command* command)
 void MainSettings::sortCommands()
 {
     qSort(m_commands.begin(), m_commands.end(), Command::commandCompare);
+}
+
+void MainSettings::renameCommandGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    int nbCommands = getCommandCount();
+
+    for (int i = 0; i < nbCommands; i++)
+    {
+        if (getCommand(i)->getGroup() == oldGroupName)
+        {
+            Command *command_mod = const_cast<Command*>(getCommand(i));
+            command_mod->setGroup(newGroupName);
+        }
+    }
 }
 
 const Command* MainSettings::getCommand(const QString& groupName, const QString& description) const

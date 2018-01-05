@@ -16,8 +16,11 @@ public:
 
 	QString group() const;
 	QString description() const;
-	void setGroup(QString& group);
-	void setDescription(QString& description);
+	void setGroup(const QString& group);
+	void setDescription(const QString& description);
+	void showGroupOnly();
+	void setDialogTitle(const QString& title);
+	void setDescriptionBoxTitle(const QString& title);
 
 private:
 	enum Audio {

@@ -25,12 +25,28 @@ QString AddPresetDialog::description() const
 	return ui->description->text();
 }
 
-void AddPresetDialog::setGroup(QString& group)
+void AddPresetDialog::setGroup(const QString& group)
 {
     ui->group->lineEdit()->setText(group);
 }
 
-void AddPresetDialog::setDescription(QString& description)
+void AddPresetDialog::setDescription(const QString& description)
 {
     ui->description->setText(description);
+}
+
+void AddPresetDialog::showGroupOnly()
+{
+    ui->description->hide();
+    ui->descriptionLabel->hide();
+}
+
+void AddPresetDialog::setDialogTitle(const QString& title)
+{
+    setWindowTitle(title);
+}
+
+void AddPresetDialog::setDescriptionBoxTitle(const QString& title)
+{
+    ui->descriptionBox->setTitle(title);
 }

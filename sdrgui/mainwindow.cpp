@@ -882,21 +882,24 @@ void MainWindow::on_commandDuplicate_clicked()
 void MainWindow::on_commandEdit_clicked()
 {
     QTreeWidgetItem* item = ui->commandTree->currentItem();
+    bool change = false;
+    const Command *changedCommand = 0;
+    QString newGroupName;
+
+    QStringList groups;
+
+    for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
+        groups.append(ui->commandTree->topLevelItem(i)->text(0));
+    }
 
     if(item != 0)
     {
-        if(item->type() == PItem)
+        if (item->type() == PItem)
         {
             const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
 
             if (command != 0)
             {
-                QStringList groups;
-
-                for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
-                    groups.append(ui->commandTree->topLevelItem(i)->text(0));
-                }
-
                 EditCommandDialog editCommandDialog(groups, command->getGroup(), this);
                 editCommandDialog.fromCommand(*command);
 
@@ -904,18 +907,62 @@ void MainWindow::on_commandEdit_clicked()
                 {
                     Command* command_mod = const_cast<Command*>(command);
                     editCommandDialog.toCommand(*command_mod);
-                    m_settings.sortCommands();
+                    change = true;
+                    changedCommand = command;
+//
+//                    m_settings.sortCommands();
+//
+//                    ui->commandTree->clear();
+//
+//                    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+//                    {
+//                        QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
+//                        const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
+//                        if (command_x == command_mod) {
+//                            ui->commandTree->setCurrentItem(item_x);
+//                        }
+//                    }
+                }
+            }
+        }
+        else if (item->type() == PGroup)
+        {
+            AddPresetDialog dlg(groups, item->text(0), this);
+            dlg.showGroupOnly();
+            dlg.setDialogTitle("Edit command group");
+            dlg.setDescriptionBoxTitle("Command details");
 
-                    ui->commandTree->clear();
+            if (dlg.exec() == QDialog::Accepted)
+            {
+                m_settings.renameCommandGroup(item->text(0), dlg.group());
+                newGroupName = dlg.group();
+                change = true;
+            }
+        }
+    }
 
-                    for (int i = 0; i < m_settings.getCommandCount(); ++i)
-                    {
-                        QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
-                        const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
-                        if (command_x == command_mod) {
-                            ui->commandTree->setCurrentItem(item_x);
-                        }
-                    }
+    if (change)
+    {
+        m_settings.sortCommands();
+        ui->commandTree->clear();
+
+        for (int i = 0; i < m_settings.getCommandCount(); ++i)
+        {
+            QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
+            const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
+            if (changedCommand &&  (command_x == changedCommand)) { // set cursor on changed command
+                ui->commandTree->setCurrentItem(item_x);
+            }
+        }
+
+        if (!changedCommand) // on group name change set cursor on the group that has been changed
+        {
+            for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++)
+            {
+                QTreeWidgetItem* item = ui->commandTree->topLevelItem(i);
+
+                if (item->text(0) == newGroupName) {
+                    ui->commandTree->setCurrentItem(item);
                 }
             }
         }
@@ -1046,6 +1093,78 @@ void MainWindow::on_presetUpdate_clicked()
 	}
 
 	m_settings.sortPresets();
+}
+
+void MainWindow::on_presetEdit_clicked()
+{
+    QTreeWidgetItem* item = ui->presetTree->currentItem();
+    QStringList groups;
+    bool change = false;
+    const Preset *changedPreset = 0;
+    QString newGroupName;
+
+    for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
+        groups.append(ui->presetTree->topLevelItem(i)->text(0));
+    }
+
+    if(item != 0)
+    {
+        if (item->type() == PItem)
+        {
+            const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
+            AddPresetDialog dlg(groups, preset->getGroup(), this);
+            dlg.setDescription(preset->getDescription());
+
+            if (dlg.exec() == QDialog::Accepted)
+            {
+                Preset* preset_mod = const_cast<Preset*>(preset);
+                preset_mod->setGroup(dlg.group());
+                preset_mod->setDescription(dlg.description());
+                change = true;
+                changedPreset = preset;
+            }
+        }
+        else if (item->type() == PGroup)
+        {
+            AddPresetDialog dlg(groups, item->text(0), this);
+            dlg.showGroupOnly();
+            dlg.setDialogTitle("Edit preset group");
+
+            if (dlg.exec() == QDialog::Accepted)
+            {
+                m_settings.renamePresetGroup(item->text(0), dlg.group());
+                newGroupName = dlg.group();
+                change = true;
+            }
+        }
+    }
+
+    if (change)
+    {
+        m_settings.sortPresets();
+        ui->presetTree->clear();
+
+        for (int i = 0; i < m_settings.getPresetCount(); ++i)
+        {
+            QTreeWidgetItem *item_x = addPresetToTree(m_settings.getPreset(i));
+            const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
+            if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
+                ui->presetTree->setCurrentItem(item_x);
+            }
+        }
+
+        if (!changedPreset) // on group name change set cursor on the group that has been changed
+        {
+            for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
+            {
+                QTreeWidgetItem* item = ui->presetTree->topLevelItem(i);
+
+                if (item->text(0) == newGroupName) {
+                    ui->presetTree->setCurrentItem(item);
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::on_presetExport_clicked()

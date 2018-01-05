@@ -415,7 +415,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources/res.qrc">
-         <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -505,6 +505,20 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="5" column="4">
+      <widget class="QToolButton" name="presetEdit">
+       <property name="toolTip">
+        <string>Edit preset details</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources/res.qrc">
+         <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
