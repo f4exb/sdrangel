@@ -66,10 +66,6 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_inputFrequencyOffset = 0;
 	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
-	m_nco.setFreq(m_inputFrequencyOffset, m_inputSampleRate);
-	m_interpolator.create(16, m_inputSampleRate, 5000);
-	m_sampleDistanceRemain = (Real) m_inputSampleRate / m_audioSampleRate;
-
 	m_audioBuffer.resize(1<<9);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
@@ -161,7 +157,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
+		if(m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
 		{
 			if (m_dsb)
 			{
@@ -172,7 +168,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
 			}
 
-			m_sampleDistanceRemain += (Real) m_inputSampleRate / m_audioSampleRate;
+			m_interpolatorDistanceRemain += m_interpolatorDistance;
 		}
 		else
 		{
@@ -352,7 +348,9 @@ void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     if (m_inputSampleRate != inputSampleRate)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth * 2.0f);
+        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth / 2.2f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
         m_settingsMutex.unlock();
     }
 
@@ -407,7 +405,9 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_LowCutoff = lowCutoff;
 
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, band * 2.0f);
+        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth / 2.2f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_settings.m_audioSampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
         DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();

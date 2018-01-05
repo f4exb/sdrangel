@@ -261,8 +261,9 @@ private:
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
 	NCOF m_nco;
-	Interpolator m_interpolator;
-	Real m_sampleDistanceRemain;
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
