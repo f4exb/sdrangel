@@ -64,7 +64,19 @@ Command::Command(const Command& command) :
 }
 
 Command::~Command()
-{}
+{
+    if (m_currentProcess)
+    {
+#if QT_VERSION < 0x051000
+        disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
+#else
+        disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
+#endif
+        disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
+        disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
+        m_currentProcess->deleteLater();
+    }
+}
 
 void Command::resetToDefaults()
 {
@@ -235,6 +247,7 @@ const QString& Command::getLastProcessLog() const
 
 void Command::processStateChanged(QProcess::ProcessState newState)
 {
+    qDebug("Command::processStateChanged: %d", newState);
     if (newState == QProcess::Running) {
         m_currentProcessPid = m_currentProcess->processId();
     }
@@ -244,7 +257,7 @@ void Command::processStateChanged(QProcess::ProcessState newState)
 
 void Command::processError(QProcess::ProcessError error)
 {
-    //qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
+    qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessError = error;
     m_isInError = true;
@@ -261,14 +274,14 @@ void Command::processError(QProcess::ProcessError error)
         disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
         disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
-        delete m_currentProcess;
-        m_currentProcess = 0;
+        m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
+        m_currentProcess = 0; // for this thread it can assume it was deleted
     }
 }
 
 void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
+    qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
     gettimeofday(&m_currentProcessFinishTimeStamp, 0);
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;
@@ -283,6 +296,6 @@ void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     disconnect(m_currentProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
     disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
-    delete m_currentProcess;
-    m_currentProcess = 0;
+    m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
+    m_currentProcess = 0; // for this thread it can assume it was deleted
 }

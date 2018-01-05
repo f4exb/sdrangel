@@ -278,6 +278,11 @@
      <property name="enabled">
       <bool>true</bool>
      </property>
+     <property name="font">
+      <font>
+       <family>Monospace</family>
+      </font>
+     </property>
      <property name="toolTip">
       <string>Output log (stdout + stderr)</string>
      </property>
