@@ -98,7 +98,7 @@
      </font>
     </property>
     <property name="title">
-     <string>&amp;Devices</string>
+     <string>&amp;DeviceSets</string>
     </property>
     <addaction name="action_addSourceDevice"/>
     <addaction name="action_addSinkDevice"/>
@@ -842,7 +842,7 @@
   </action>
   <action name="action_addSourceDevice">
    <property name="text">
-    <string>Add source device</string>
+    <string>Add source device set</string>
    </property>
    <property name="font">
     <font/>
@@ -850,7 +850,7 @@
   </action>
   <action name="action_removeLastDevice">
    <property name="text">
-    <string>Remove last device</string>
+    <string>Remove last device set</string>
    </property>
    <property name="font">
     <font/>
@@ -885,7 +885,7 @@
   </action>
   <action name="action_addSinkDevice">
    <property name="text">
-    <string>Add sink device</string>
+    <string>Add sink device set</string>
    </property>
   </action>
   <action name="action_Logging">
