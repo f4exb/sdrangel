@@ -171,7 +171,6 @@ bool AMDemod::handleMessage(const Message& cmd)
 	{
         MsgConfigureAMDemod& cfg = (MsgConfigureAMDemod&) cmd;
         qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod";
-
         applySettings(cfg.getSettings(), cfg.getForce());
 
 		return true;
@@ -209,8 +208,8 @@ void AMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset
 
 void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 {
-    qDebug() << "AMDemod::applySettings: MsgConfigureAMDemod:"
-            << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset
+    qDebug() << "AMDemod::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
