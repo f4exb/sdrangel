@@ -534,8 +534,6 @@ void MainWindow::loadSettings()
         treeItem = addCommandToTree(m_settings.getCommand(i));
     }
 
-    tabifyDockWidget(ui->presetDock, ui->commandsDock);
-
     setLoggingOptions();
 }
 
@@ -565,6 +563,8 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 
 	// has to be last step
 	restoreState(preset->getLayout());
+    tabifyDockWidget(ui->presetDock, ui->commandsDock); // override this setting
+    ui->presetDock->raise();
 }
 
 void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
@@ -1076,7 +1076,7 @@ void MainWindow::on_presetSave_clicked()
 void MainWindow::on_presetUpdate_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	const Preset* changedPreset;
+	const Preset* changedPreset = 0;
 
 	if(item != 0)
 	{
