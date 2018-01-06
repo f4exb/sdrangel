@@ -22,7 +22,7 @@
 #include "audio/audiofifo.h"
 
 AudioInput::AudioInput() :
-	m_mutex(),
+	m_mutex(QMutex::Recursive),
 	m_audioInput(0),
 	m_audioUsageCount(0),
 	m_onExit(false),
@@ -47,10 +47,9 @@ AudioInput::~AudioInput()
 
 bool AudioInput::start(int device, int rate)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
 	if (m_audioUsageCount == 0)
 	{
+        QMutexLocker mutexLocker(&m_mutex);
         QAudioDeviceInfo devInfo;
 
         if (device < 0)
@@ -194,8 +193,6 @@ void AudioInput::stop()
 {
     qDebug("AudioInput::stop");
 
-	QMutexLocker mutexLocker(&m_mutex);
-
     if (m_audioUsageCount > 0)
     {
         m_audioUsageCount--;
@@ -203,6 +200,7 @@ void AudioInput::stop()
         if (m_audioUsageCount == 0)
         {
             qDebug("AudioInput::stop: effectively close QIODevice");
+            QMutexLocker mutexLocker(&m_mutex);
             QIODevice::close();
 
             if (!m_onExit) {
