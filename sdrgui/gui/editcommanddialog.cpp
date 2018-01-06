@@ -153,8 +153,8 @@ void EditCommandDialog::on_keyCapture_toggled(bool checked)
 {
     if (checked)
     {
-        ui->keyCapture->setFocus();
-        ui->keyCapture->setFocusPolicy(Qt::StrongFocus);
+        setFocus();
+        setFocusPolicy(Qt::StrongFocus);
         connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
                         this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
     }
@@ -162,8 +162,8 @@ void EditCommandDialog::on_keyCapture_toggled(bool checked)
     {
         disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
                         this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
-        ui->keyCapture->setFocusPolicy(Qt::NoFocus);
-        ui->keyCapture->clearFocus();
+        setFocusPolicy(Qt::NoFocus);
+        clearFocus();
     }
 }
 
