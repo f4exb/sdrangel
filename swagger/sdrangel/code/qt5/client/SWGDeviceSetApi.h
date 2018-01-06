@@ -87,7 +87,7 @@ signals:
     void devicesetDeviceSettingsGetSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPutSignal(SWGDeviceSettings* summary);
-    void devicesetFocusPatchSignal(SWGDeviceSet* summary);
+    void devicesetFocusPatchSignal(SWGSuccessResponse* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     void instanceDeviceSetDeleteSignal(SWGSuccessResponse* summary);
     void instanceDeviceSetPostSignal(SWGSuccessResponse* summary);
@@ -104,7 +104,7 @@ signals:
     void devicesetDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPutSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void devicesetFocusPatchSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetFocusPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);

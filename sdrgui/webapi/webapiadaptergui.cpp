@@ -1247,6 +1247,10 @@ void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
     deviceSetList->init();
     deviceSetList->setDevicesetcount((int) m_mainWindow.m_deviceUIs.size());
 
+    if (m_mainWindow.m_deviceUIs.size() > 0) {
+        deviceSetList->setDevicesetfocus(m_mainWindow.ui->tabInputsView->currentIndex());
+    }
+
     std::vector<DeviceUISet*>::const_iterator it = m_mainWindow.m_deviceUIs.begin();
 
     for (int i = 0; it != m_mainWindow.m_deviceUIs.end(); ++it, i++)

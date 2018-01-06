@@ -1159,6 +1159,9 @@ definitions:
       devicesetcount:
         description: "Number of device sets opened in this instance"
         type: integer
+      devicesetfocus:
+        description: "Index of the deviceset that has focus (relevant for GUI only)"
+        type: integer
       deviceSets:
         type: array
         items:

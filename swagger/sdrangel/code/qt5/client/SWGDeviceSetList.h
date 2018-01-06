@@ -46,12 +46,16 @@ public:
     qint32 getDevicesetcount();
     void setDevicesetcount(qint32 devicesetcount);
 
+    qint32 getDevicesetfocus();
+    void setDevicesetfocus(qint32 devicesetfocus);
+
     QList<SWGDeviceSet*>* getDeviceSets();
     void setDeviceSets(QList<SWGDeviceSet*>* device_sets);
 
 
 private:
     qint32 devicesetcount;
+    qint32 devicesetfocus;
     QList<SWGDeviceSet*>* device_sets;
 };
 

@@ -38,12 +38,14 @@ SWGDeviceSetList::~SWGDeviceSetList() {
 void
 SWGDeviceSetList::init() {
     devicesetcount = 0;
+    devicesetfocus = 0;
     device_sets = new QList<SWGDeviceSet*>();
 }
 
 void
 SWGDeviceSetList::cleanup() {
     
+
 
     if(device_sets != nullptr) {
         QList<SWGDeviceSet*>* arr = device_sets;
@@ -66,6 +68,7 @@ SWGDeviceSetList::fromJson(QString &json) {
 void
 SWGDeviceSetList::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&devicesetcount, pJson["devicesetcount"], "qint32", "");
+    ::SWGSDRangel::setValue(&devicesetfocus, pJson["devicesetfocus"], "qint32", "");
     
     ::SWGSDRangel::setValue(&device_sets, pJson["deviceSets"], "QList", "SWGDeviceSet");
     
@@ -87,6 +90,8 @@ SWGDeviceSetList::asJsonObject() {
     
     obj->insert("devicesetcount", QJsonValue(devicesetcount));
 
+    obj->insert("devicesetfocus", QJsonValue(devicesetfocus));
+
     QJsonArray device_setsJsonArray;
     toJsonArray((QList<void*>*)device_sets, &device_setsJsonArray, "device_sets", "SWGDeviceSet");
     obj->insert("deviceSets", device_setsJsonArray);
@@ -101,6 +106,15 @@ SWGDeviceSetList::getDevicesetcount() {
 void
 SWGDeviceSetList::setDevicesetcount(qint32 devicesetcount) {
     this->devicesetcount = devicesetcount;
+}
+
+qint32
+SWGDeviceSetList::getDevicesetfocus() {
+    return devicesetfocus;
+}
+void
+SWGDeviceSetList::setDevicesetfocus(qint32 devicesetfocus) {
+    this->devicesetfocus = devicesetfocus;
 }
 
 QList<SWGDeviceSet*>*

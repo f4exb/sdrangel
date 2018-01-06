@@ -955,6 +955,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Number of device sets opened in this instance"
     },
+    "devicesetfocus" : {
+      "type" : "integer",
+      "description" : "Index of the deviceset that has focus (relevant for GUI only)"
+    },
     "deviceSets" : {
       "type" : "array",
       "items" : {
@@ -7693,7 +7697,7 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
-            DeviceSet result = apiInstance.devicesetFocusPatch(deviceSetIndex);
+            SuccessResponse result = apiInstance.devicesetFocusPatch(deviceSetIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetFocusPatch");
@@ -7712,7 +7716,7 @@ public class DeviceSetApiExample {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
-            DeviceSet result = apiInstance.devicesetFocusPatch(deviceSetIndex);
+            SuccessResponse result = apiInstance.devicesetFocusPatch(deviceSetIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetFocusPatch");
@@ -7731,7 +7735,7 @@ public class DeviceSetApiExample {
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetFocusPatchWith:deviceSetIndex
-              completionHandler: ^(DeviceSet output, NSError* error) {
+              completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -7783,7 +7787,7 @@ namespace Example
 
             try
             {
-                DeviceSet result = apiInstance.devicesetFocusPatch(deviceSetIndex);
+                SuccessResponse result = apiInstance.devicesetFocusPatch(deviceSetIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -7886,24 +7890,24 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success return details on the device set </h3>
+                            <h3> Status: 202 - Message to focus on device set was sent successfully </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-devicesetFocusPatch-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-devicesetFocusPatch-202-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-devicesetFocusPatch-200-schema">
-                                  <div id='responses-devicesetFocusPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-devicesetFocusPatch-202-schema">
+                                  <div id='responses-devicesetFocusPatch-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success return details on the device set",
+  "description" : "Message to focus on device set was sent successfully",
   "schema" : {
-    "$ref" : "#/definitions/DeviceSet"
+    "$ref" : "#/definitions/SuccessResponse"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -7918,14 +7922,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-devicesetFocusPatch-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-devicesetFocusPatch-200-schema-200');
+                                        $('#responses-devicesetFocusPatch-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetFocusPatch-202-schema-202');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-devicesetFocusPatch-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-devicesetFocusPatch-202-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -16890,7 +16894,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-01-06T03:02:37.398+01:00
+              Generated 2018-01-06T09:41:18.709+01:00
             </div>
           </div>
       </div>
