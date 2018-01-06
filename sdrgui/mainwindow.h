@@ -281,6 +281,26 @@ private:
 	    QString tabName;
 	};
 
+	class MsgDeviceSetFocus : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+
+        static MsgDeviceSetFocus* create(int deviceSetIndex)
+        {
+            return new MsgDeviceSetFocus(deviceSetIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+
+        MsgDeviceSetFocus(int deviceSetIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex)
+        { }
+    };
+
 	static MainWindow *m_instance;
 	Ui::MainWindow* ui;
 	AudioDeviceInfo m_audioDeviceInfo;

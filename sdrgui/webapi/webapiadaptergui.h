@@ -35,6 +35,10 @@ public:
             SWGSDRangel::SWGInstanceSummaryResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceDelete(
+            SWGSDRangel::SWGInstanceSummaryResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDevices(
             bool tx,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
@@ -113,6 +117,11 @@ public:
     virtual int devicesetGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetFocusPatch(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetDevicePut(

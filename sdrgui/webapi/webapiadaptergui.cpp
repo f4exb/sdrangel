@@ -92,6 +92,14 @@ int WebAPIAdapterGUI::instanceSummary(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceDelete(
+        SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    *error.getMessage() = QString("Not supported in GUI instance");
+    return 400;
+}
+
 int WebAPIAdapterGUI::instanceDevices(
             bool tx,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
@@ -608,6 +616,30 @@ int WebAPIAdapterGUI::devicesetGet(
         getDeviceSet(&response, deviceSet, deviceSetIndex);
 
         return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+ }
+
+int WebAPIAdapterGUI::devicesetFocusPatch(
+        int deviceSetIndex,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(deviceSetIndex);
+        m_mainWindow.m_inputMessageQueue.push(msg);
+
+        response.init();
+        *response.getMessage() = QString("Message to focus on device set (MsgDeviceSetFocus) was submitted successfully");
+
+        return 202;
     }
     else
     {

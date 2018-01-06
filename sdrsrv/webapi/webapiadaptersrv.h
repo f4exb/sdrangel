@@ -130,6 +130,11 @@ public:
             SWGSDRangel::SWGDeviceSet& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetFocusPatch(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDevicePut(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceListItem& response,

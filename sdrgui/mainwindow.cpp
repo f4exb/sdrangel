@@ -76,6 +76,7 @@ MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteChannel, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeviceSetFocus, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -812,6 +813,14 @@ bool MainWindow::handleMessage(const Message& cmd)
         MsgDeleteChannel& notif = (MsgDeleteChannel&) cmd;
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
+    }
+    else if (MsgDeviceSetFocus::match(cmd))
+    {
+        MsgDeviceSetFocus& notif = (MsgDeviceSetFocus&) cmd;
+        int index = notif.getDeviceSetIndex();
+        if ((index >= 0) && (index < (int) m_deviceUIs.size())) {
+            ui->tabInputsView->setCurrentIndex(index);
+        }
     }
 
     return false;

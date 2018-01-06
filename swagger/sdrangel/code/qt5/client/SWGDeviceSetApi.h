@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations and specifcities:       * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * Preset import and export from/to file is a server only feature.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400    --- 
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube     ---   Limitations and specifcities:       * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source   * The content type returned is always application/json except in the following cases:     * An incorrect URL was specified: this document is returned as text/html with a status 400    --- 
  *
  * OpenAPI spec version: 4.0.0
  * Contact: f4exb06@gmail.com
@@ -51,6 +51,7 @@ public:
     void devicesetDeviceSettingsGet(qint32 device_set_index);
     void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings body);
     void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings body);
+    void devicesetFocusPatch(qint32 device_set_index);
     void devicesetGet(qint32 device_set_index);
     void instanceDeviceSetDelete();
     void instanceDeviceSetPost(qint32 tx);
@@ -68,6 +69,7 @@ private:
     void devicesetDeviceSettingsGetCallback (HttpRequestWorker * worker);
     void devicesetDeviceSettingsPatchCallback (HttpRequestWorker * worker);
     void devicesetDeviceSettingsPutCallback (HttpRequestWorker * worker);
+    void devicesetFocusPatchCallback (HttpRequestWorker * worker);
     void devicesetGetCallback (HttpRequestWorker * worker);
     void instanceDeviceSetDeleteCallback (HttpRequestWorker * worker);
     void instanceDeviceSetPostCallback (HttpRequestWorker * worker);
@@ -85,6 +87,7 @@ signals:
     void devicesetDeviceSettingsGetSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPutSignal(SWGDeviceSettings* summary);
+    void devicesetFocusPatchSignal(SWGDeviceSet* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     void instanceDeviceSetDeleteSignal(SWGSuccessResponse* summary);
     void instanceDeviceSetPostSignal(SWGSuccessResponse* summary);
@@ -101,6 +104,7 @@ signals:
     void devicesetDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPutSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetFocusPatchSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);

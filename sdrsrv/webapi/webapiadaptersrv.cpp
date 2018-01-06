@@ -748,6 +748,15 @@ int WebAPIAdapterSrv::devicesetGet(
     }
 }
 
+int WebAPIAdapterSrv::devicesetFocusPatch(
+        int deviceSetIndex __attribute__((unused)),
+        SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    *error.getMessage() = QString("Not supported in server instance");
+    return 400;
+}
+
 int WebAPIAdapterSrv::devicesetDevicePut(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceListItem& response,

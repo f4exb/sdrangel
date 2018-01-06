@@ -9,6 +9,7 @@ info:
       * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.
       * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.
       * Preset import and export from/to file is a server only feature.
+      * Device set focus is a GUI only feature.
       * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source
       * The content type returned is always application/json except in the following cases:
         * An incorrect URL was specified: this document is returned as text/html with a status 400
@@ -68,6 +69,10 @@ paths:
           schema:
             # a pointer to a definition
             $ref: "#/definitions/InstanceSummaryResponse"
+        "400":
+          description: Unsupported (GUI instance)
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -557,6 +562,37 @@ paths:
           description: On success return details on the device set
           schema:
             $ref: "#/definitions/DeviceSet"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
+  /sdrangel/deviceset/{deviceSetIndex}/focus:
+    x-swagger-router-controller: deviceset
+    patch:
+      description: Set focus on device set (GUI only)
+      operationId: devicesetFocusPatch
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "202":
+          description: Message to focus on device set was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Unsupported (srver instance)
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Invalid index
           schema:
