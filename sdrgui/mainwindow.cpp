@@ -698,7 +698,7 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 
     QStringList sl;
     sl.append(QString("%1").arg(command->getDescription())); // Descriptions column
-    sl.append(QString("%1").arg(command->getAssociateKey() ? command->getRelease() ? "R" : "P" : "")); // key press/release column
+    sl.append(QString("%1").arg(command->getAssociateKey() ? command->getRelease() ? "R" : "P" : "-")); // key press/release column
     sl.append(QString("%1").arg(command->getKeyLabel()));   // key column
     CommandItem* item = new CommandItem(group, sl, command->getDescription(), PItem);
     item->setData(0, Qt::UserRole, qVariantFromValue(command));
