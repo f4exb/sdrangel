@@ -142,7 +142,7 @@ void EditCommandDialog::on_showFileDialog_clicked(bool checked __attribute__((un
             this,
             tr("Select command"),
             dirStr,
-            tr("Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe);;All (*)"));
+            tr("All (*);;Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe)"));
 
     if (fileName != "") {
         ui->command->setText(fileName);

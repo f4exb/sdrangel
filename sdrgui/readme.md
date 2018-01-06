@@ -2,9 +2,9 @@
 
 <h2>Multi device support</h2>
 
-Starting with version 2 SDRangel supports several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2... 
+Starting with version 2 SDRangel supports running several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2... 
 
-The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device menu a new slot is allocated in the last position and when a devcie is removed with the Acquisition -> Remove device menu the slot in the last position is deleted. Slot 0 (R0) receiver slot is created at initialization and cannot be deleted with the menu. The letter "R" in the tab names indicates that the slot is for a receiver (source) device while "T" designates a tramsmitter (sink) device.
+The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device set menu a new slot is allocated in the last position and when a devcie is removed with the Acquisition -> Remove last device set menu the slot in the last position is deleted. Slot 0 (R0) receiver slot is created at initialization and cannot be deleted with the menu. The letter "R" in the tab names indicates that the slot is for a receiver (source) device while "T" designates a tramsmitter (sink) device.
 
 The tabbed windows are:
 
@@ -13,6 +13,8 @@ The tabbed windows are:
   - Spectrum display control (3)
   - Channels (4)
   - Spectrum from device (5)
+
+The combination of a sampling device and its associated channels is called a "device set".
 
 ![Main Window nulti device support](../doc/img/MainWindow_tabs.png)
 
@@ -32,15 +34,16 @@ The following items are presented hierarchically from left to right:
     - _Exit_ (shortcut Ctl-Q): Exit the program
   - View:
     - _Fullscreen_ (Shortcut F11): Toggle full screen mode
-  - Devices:
-    - _Add source device_: adds a new source (receiver) device slot to the device stack (last position)
-    - _Add sink device_: adds a new sink (transmitter) device slot to the device stack (last position)
-    - _Remove last device_: removes the last device slot from thte device stack
+  - Device sets:
+    - _Add source device set_: adds a new source (receiver) type device set to the device set stack (last position)
+    - _Add sink device set_: adds a new sink (transmitter) type device set to the device set stack (last position)
+    - _Remove last device set_: removes the last device set from the device set stack
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
     - _Sampling devices control_: control of which sampling devices is used and add channels
     - _Sampling devices_: the sampling devices UIs
     - _Spectrum display_: the main spectrum displays (output from the sampling devices)
     - _Presets_: the saved presets
+    - _Commands_: the defined commands
     - _Channels_: the channels active for each device
   - Preferences:
     - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
@@ -158,10 +161,10 @@ This is where the plugin GUI specific to the device is displayed. Control of one
 
 <h4>2.1. Start or stop acquisition</h4>
 
-  - When a play icon is displayed with a grey background the device is not operational
-  - When a play icon is displayed with a blue background the device is ready to start
-  - When a square icon is displayed with a green background the device is currently running
-  - When a play icon is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
+  - When a play icon (&#9654;) is displayed with a grey background the device is not operational
+  - When a play icon (&#9654;) is displayed with a blue background the device is ready to start
+  - When a stop icon (&#9632;) is displayed with a green background the device is currently running
+  - When a play icon (&#9654;) is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
   
 <h4>2.2. Record I/Q</h4>
 
@@ -239,61 +242,279 @@ Use this push button to add a new channel with the selected plugin
 
 These are the controls of the main spectrum display in (7). Please refer to the spectrum display documentation (TBD) for details.
 
-<h3>5. Presets</h3>
+<h3>5. Presets and commands</h3>
+
+The presets and commands tree view are by default stacked in tabbs. The following sections describe the presets section 5A) and commands (section 5B) views successively 
+
+<h3>5A. Presets</h3>
 
 This is a tree view of the saved presets. Presets record the channels setup and a copy of the settings of each sample source that has been used when saving this preset. Thus you can use the same channel arrangement with various devices having their particular setup.
 
 ![Main Window presets view](../doc/img/MainWindow_presets_view.png)
 
-<h4>5.1. Preset selection</h4>
+<h4>5A.1. Preset selection</h4>
 
-You select a preset by clicking on its line in the tree view. All actions (5) will be done relative to this preset.
+You select a preset or a preset group by clicking on its line in the tree view. All actions (6) will be done relative to this preset or preset group.
 
-<h4>5.2. Group</h4>
+<h4>5A.2. Group</h4>
 
 You can organize your presets into groups. Groups can be collapsed or expanded by using the caret icon on the left.
 
-<h4>5.3. Center frequency</h4>
+<h4>5A.3. Center frequency</h4>
 
 The center frequency used in this preset is displayed here.
 
-<h4>5.4. Preset name</h4>
+<h4>5A.4. Rx/Tx indicator</h4>
+
+"R" is displayed for a Rx device set and "T" for a Tx device set
+
+<h4>5A.5. Preset name</h4>
 
 You can give a name to your preset. Names need not to be unique.
 
-<h4>5.5. Preset control or actions</h4>
+<h4>5A.6. Preset control or actions</h4>
 
 The controls are located as icons at the bottom of the window: 
 
 ![Main Window presets](../doc/img/MainWindow_presets.png)
 
-<h5>5.5.1. New preset</h5>
+<h5>5A.6.1. New preset</h5>
 
 Click on this icon to create a new preset with the current values in the selected sample device tab (Main window: 2).
 
-<h5>5.5.2. Update preset</h5>
+<h5>5A.6.2. Update preset</h5>
 
-Click on this icon to create a update the selected preset with the current values in the selected sample device tab (Main window: 2). Please note that this does not save the preset immediately on disk to save presets immediately you need to use the next icon.
+Click on this icon to create a update the selected preset with the current values in the selected sample device tab (Main window: 2). Please note that this does not save the preset immediately on disk to save presets immediately you need to use the save button (4).
 
-<h5>5.5.3. Save presets</h5>
+<h5>5A.6.3. Edit preset</h5>
+
+Opens a new window where you can change the group name and description. 
+
+  - for group items you can rename the group or merge all group presets into an existing group by selecting this existing group
+  - for preset items you can:
+    - move the preset to another existing group by selecting this existing group
+    - assign this preset to a new group by typing in this new group
+    - change the description
+
+<h5>5A.6.4. Save presets</h5>
 
 Presets are saved to disk automatically at exit time you can however request to save them immediately using this icon.
 
-<h5>5.5.4. Export preset</h5>
+<h5>5A.6.5. Export preset</h5>
 
 Using the previous icon presets are saved globally in a system dependent place. Using this icon you can export a specific preset in a single file that can be imported on another machine possibly with a different O/S. The preset binary data (BLOB) is saved in Base-64 format.
 
-<h5>5.5.5. Import preset</h5>
+<h5>5A.6.6. Import preset</h5>
 
 This is the opposite of the previous operation. This will create a new preset in the selected group or the same group as the preset being selected.
 
-<h5>5.5.6. Delete preset</h5>
+<h5>5A.6.7. Delete preset</h5>
 
-This deletes the selected preset. It takes no action if a group is selected.
+  - on a preset item: deletes the selected preset. 
+  - on a preset group: deletes the group and all its presets.
 
-<h5>5.5.7. Load preset</h5>
+<h5>5A.6.8. Load preset</h5>
 
 Applies the selected preset to the current device set (source and channel plugins).  
+
+<h3>5B. Commands</h3>
+
+This is a tree view of the saved commands. Commands describe the path to an executable file, its arguments a possible link to a keystroke event that triggers the execution. Similarly to presets commands can be arranged into groups and have a description short text.
+
+Typically an "executable file" is a script (Python, shell, whatever...) or can be a compiled program (c, c++, java, whatever...) that interacts with SDRangel using its web REST API. When called from within SDRangel they can act as "macros" allowing to perform actions automatically.
+
+Of course any binary that resides in your system can be used that way like `/bin/ls` or `/bin/date` although these two are of anedoctical interest...
+
+![Main Window presets view](../doc/img/MainWindow_commands_view.png)
+
+<h4>5B.1. Command selection</h4>
+
+You select a command or a command group by clicking on its line in the tree view. All actions (6) will be done relative to this command or command group.
+
+<h4>5B.2. Group</h4>
+
+You can organize your commands into groups. Groups can be collapsed or expanded by using the caret icon on the left.
+
+<h4>5B.3. Description</h4>
+
+Short description of a command.
+
+<h4>5B.4. Key binding indicator</h4>
+
+  - `-`: no key binding
+  - `P`: key press binding
+  - `R`: key release binding
+
+<h4>5B.5. Key binding sequence</h4>
+
+This is a descriptive text of the key sequence that is used for the key binding.
+
+<h4>5B.6. Command control or actions</h4>
+
+The controls are located as icons at the bottom of the window: 
+
+![Main Window commands](../doc/img/MainWindow_commands.png)
+
+<h5>5B.6.1. Create new command</h5>
+
+Click on this icon to create a new command. This opens an edit dialog see the edit section (5B.6.3) for the details of the edit dialog.
+
+<h5>5B.6.2. Duplicate command</h5>
+
+Click on this icon to duplicate the currently selected command (inactive on groups). Later you can edit the details of the copy with the edit dialog (see 5B.6.3 next)
+
+<h5>5B.6.3. Edit command or command group</h5>
+
+<b>Command groups</b>
+
+With this dialog you can rename a group using the text box or if you select an existing group with the combo this will merge the contents of the group with the existing group
+
+![Main Window command group edit](../doc/img/MainWindow_command_edit_group.png)
+
+<b>Commands</b>
+
+You can edit the details of the command with this dialog.
+
+![Main Window command group edit](../doc/img/MainWindow_command_edit.png)
+
+<h6>5B.6.3.1. Edit group </h6>
+
+You can select an existing group with the combo or create a new one for this command using the text edit box
+
+<h6>5B.6.3.2. Edit description </h6>
+
+You can edit the description using this text box. The description will appear in the tree view.
+
+<h6>5B.6.3.3. Executable file selection </h6>
+
+Clicking on this button wil open a file dialog to select the executable file that will be run with this command. The file selection dialog has predefined file pattern selections:
+
+  - `*` for All files
+  - `*.py` for Pyhon files
+  - `*.sh` or `*.bat` for shell or batch files
+  - `*.bin` or `*.exe` for binary files
+
+<h6>5B.6.3.4. Executable file path </h6>
+
+This is the full path of the selected executable file.
+
+<h6>5B.6.3.5. Command line arguments</h6>
+
+Use the text box to edit the arguments given to the executable file as in `program arguments`.
+
+You can use special codes to insert information specific to the application context:
+
+  - `%1`: the address of the web REST API
+  - `%2`: the port of the web REST API
+  - `%3`: the currently selected device set index
+  
+<h6>5B.6.3.6. Key binding</h6>
+
+Use this checkbox to enable or disable the command execution binding to a key or combination of keys press or release event
+
+<h6>5B.6.3.7. Key binding capture</h6>
+
+Use this button to capture the key or key combination that will be used for the key binding. After pushing this button just type in the key or key combination.
+
+<h6>5B.6.3.8. Key binding display</h6>
+
+This shows the key or combination of keys used for the key binding.
+
+<h6>5B.6.3.9. Release key binding</h6>
+
+Use this checkbox to bind the key or combination of keys to the key release event. If unchecked the binding will be associated to the key press event.
+
+<h6>5B.6.3.10. Confirm changes</h6>
+
+Use the "OK" button to confirm the changes.
+
+<h6>5B.6.3.11. Cancel changes</h6>
+
+Use the "Cancel" button to cancel the changes.
+
+<h5>5B.6.4. Run command or groups of commands</h5>
+
+This will run the currently selected command. If the selection is a group it will run all commands of the group starting them in the displayed order. Please note that commands are run in independant processes and therefore all launched commands in the group will run concurrently.
+
+<h5>5B.6.5. View last command run details</h5>
+
+This dialog will show the results of the last run including the output (merged stdout and stderr).
+
+![Main Window command output](../doc/img/MainWindow_command_output.png)
+
+<h6>5B.6.5.1. Process status</h6>
+
+When the process is not running the stop icon (&#9632;) is displayed. The backgroumd color indicate different states:
+
+  - no color (same as backround): the process has never run during this session
+  - red: the process ended with error
+  - green: the process ended successfully. This does not mean that there was no programmatic error.
+  
+When the process is running the play icon (&#9654;) is displayed with an orange background.
+
+<h6>5B.6.5.2. Refresh data</h6>
+
+Pushing this button will update the data displayed with the latest status. Please note that the log is displayed only when the process is terminated.
+
+<h6>5B.6.5.3. Start time</h6>
+
+This is the timestamp of process start. It is filled with dots `...` if the process has never started during this session.
+
+<h6>5B.6.5.4. End time</h6>
+
+This is the timestamp of process end. It is filled with dots `...` if the process has never terminated during this session.
+
+<h6>5B.6.5.3. PID</h6>
+
+This is the process PID. It is 0 if the process has never run during this session.
+
+<h6>5B.6.5.6. Process kill</h6>
+
+Use this button to kill (send SIGKILL) the running process. It has no effect if the process is not runing.
+
+<h6>5B.6.5.7. Command line</h6>
+
+This shows the actual command line that was used to start the process
+
+<h6>5B.6.5.8. Error status</h6>
+
+This is the translation of `QProcess::ProcessError`. Possible values are:
+
+  - `...`: the process has never run during this session
+  - `Failed to start`: the process could not start. For example the executable file has no execution rights actually
+  - `Crashed`: the process ended with crash. This is the status when you killed the process
+  - `Timed out`: the last waitFor...() function timed out.
+  - `Write error`: an error occurred when attempting to write to the process. For example, the process may not be running, or it may have closed its input channel.
+  - `Read error`: an error occurred when attempting to read from the process. For example, the process may not be running.
+  - `Unknown error`: an unknown error occurred.
+  
+<h6>5B.6.5.9. Exit code</h6>
+
+This is the program exit code. When the process crashes this is the signal by which the process end was caused. For example if you kill the process with button (6) it sends the process a SIGKILL (code 9) and therefore the value is 9.
+
+<h6>5B.6.5.10. Exit status</h6>
+
+There are only two possibilities: either the program exits normally but possibly with a non zero exit code or it ends with a crash.
+
+<h6>5B.6.5.11. Process log</h6>
+
+This is the log of the process (merged stdout and stderr). Please note that it is updated only on program termination.
+
+<h6>5B.6.5.12. Exit</h6>
+
+By pushing the "Close" button the process output window is closed.
+
+<h5>5B.6.6. Save commands</h5>
+
+This will save the commands immediately. The commands will be automatically saved when the applicaiton exits normally.
+
+<h5>5B.6.7. Delete commands or group of commands</h5>
+
+This will delete the currently selected command or if selection is a group this will delete all commands in the group.
+
+<h5>5B.6.8. Activate keyboard binding</h5>
+
+Use this button to activate the keyboard binding. This requires that the focus is set to the main window. On a few occasions the main window looses focus and the button gets unselected. Just click again on this button to reactivate the keyboard binding. Note that you need to have this button selected (its background should be lit in beige/orange) for the key binding to be effective.
 
 <h3>6. Channels</h3>
 
