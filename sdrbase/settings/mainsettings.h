@@ -25,6 +25,7 @@ public:
 	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const;
 	void sortPresets();
 	void renamePresetGroup(const QString& oldGroupName, const QString& newGroupName);
+	void deletePresetGroup(const QString& groupName);
 
     void addCommand(Command *command);
     void deleteCommand(const Command* command);
@@ -33,6 +34,7 @@ public:
     const Command* getCommand(const QString& groupName, const QString& description) const;
     void sortCommands();
     void renameCommandGroup(const QString& oldGroupName, const QString& newGroupName);
+    void deleteCommandGroup(const QString& groupName);
 
 	Preset* getWorkingPreset() { return &m_workingPreset; }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }

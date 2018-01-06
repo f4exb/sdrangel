@@ -133,6 +133,20 @@ void MainSettings::deletePreset(const Preset* preset)
 	delete (Preset*)preset;
 }
 
+void MainSettings::deletePresetGroup(const QString& groupName)
+{
+    Presets::iterator it = m_presets.begin();
+
+    while (it != m_presets.end())
+    {
+        if ((*it)->getGroup() == groupName) {
+            it = m_presets.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 void MainSettings::sortPresets()
 {
     qSort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
@@ -178,6 +192,20 @@ void MainSettings::deleteCommand(const Command* command)
 {
     m_commands.removeAll((Command*)command);
     delete (Command*)command;
+}
+
+void MainSettings::deleteCommandGroup(const QString& groupName)
+{
+    Commands::iterator it = m_commands.begin();
+
+    while (it != m_commands.end())
+    {
+        if ((*it)->getGroup() == groupName) {
+            it = m_commands.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void MainSettings::sortCommands()

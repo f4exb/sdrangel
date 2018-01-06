@@ -975,23 +975,40 @@ void MainWindow::on_commandDelete_clicked()
 {
     QTreeWidgetItem* item = ui->commandTree->currentItem();
 
-    if(item == 0) {
-        return;
-    }
-
-    const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-
-    if(command == 0) {
-        return;
-    }
-
-    if (QMessageBox::question(this,
-            tr("Delete command"),
-            tr("Do you want to delete command '%1'?")
-                .arg(command->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+    if (item != 0)
     {
-        delete item;
-        m_settings.deleteCommand(command);
+        if (item->type() == PItem) // delete individual command
+        {
+            const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+
+            if(command)
+            {
+                if (QMessageBox::question(this,
+                        tr("Delete command"),
+                        tr("Do you want to delete command '%1'?")
+                            .arg(command->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                {
+                    delete item;
+                    m_settings.deleteCommand(command);
+                }
+            }
+        }
+        else if (item->type() == PGroup) // delete all commands in this group
+        {
+            if (QMessageBox::question(this,
+                    tr("Delete command group"),
+                    tr("Do you want to delete command group '%1'?")
+                        .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            {
+                m_settings.deleteCommandGroup(item->text(0));
+
+                ui->commandTree->clear();
+
+                for (int i = 0; i < m_settings.getCommandCount(); ++i) {
+                    addCommandToTree(m_settings.getCommand(i));
+                }
+            }
+        }
     }
 }
 
@@ -999,12 +1016,29 @@ void MainWindow::on_commandRun_clicked()
 {
     QTreeWidgetItem* item = ui->commandTree->currentItem();
 
-    if ((item != 0) && (item->type() == PItem))
+    if (item != 0)
     {
-        const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-        Command* command_mod = const_cast<Command*>(command);
         int currentDeviceSetIndex = ui->tabInputsSelect->currentIndex();
-        command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+
+        if (item->type() == PItem) // run individual command
+        {
+            const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
+            Command* command_mod = const_cast<Command*>(command);
+            command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+        }
+        else if (item->type() == PGroup) // run all commands in this group
+        {
+            QString group = item->text(0);
+
+            for (int i = 0; i < m_settings.getCommandCount(); ++i)
+            {
+                Command *command_mod = const_cast<Command*>(m_settings.getCommand(i));
+
+                if (command_mod->getGroup() == group) {
+                    command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+                }
+            }
+        }
     }
 }
 
@@ -1302,17 +1336,42 @@ void MainWindow::on_presetLoad_clicked()
 void MainWindow::on_presetDelete_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
-	if(item == 0) {
+
+	if (item == 0)
+	{
 		updatePresetControls();
 		return;
 	}
-	const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-	if(preset == 0)
-		return;
+	else
+	{
+        if (item->type() == PItem)
+        {
+            const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
 
-	if(QMessageBox::question(this, tr("Delete Preset"), tr("Do you want to delete preset '%1'?").arg(preset->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-		delete item;
-		m_settings.deletePreset(preset);
+            if (preset)
+            {
+                if(QMessageBox::question(this, tr("Delete Preset"), tr("Do you want to delete preset '%1'?").arg(preset->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+                    delete item;
+                    m_settings.deletePreset(preset);
+                }
+            }
+        }
+        else if (item->type() == PGroup)
+        {
+            if (QMessageBox::question(this,
+                    tr("Delete preset group"),
+                    tr("Do you want to delete preset group '%1'?")
+                        .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            {
+                m_settings.deletePresetGroup(item->text(0));
+
+                ui->commandTree->clear();
+
+                for (int i = 0; i < m_settings.getPresetCount(); ++i) {
+                    addPresetToTree(m_settings.getPreset(i));
+                }
+            }
+        }
 	}
 }
 
