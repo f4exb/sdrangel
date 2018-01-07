@@ -20,6 +20,7 @@
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QFontDatabase>
+#include <QSysInfo>
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
@@ -92,6 +93,17 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #endif
 	MainParser parser;
 	parser.parse(*qApp);
+
+#if QT_VERSION >= 0x050400
+	qInfo("%s v%s Qt %s %s %s",
+	        qPrintable(qApp->applicationName()),
+	        qPrintable(qApp->applicationVersion()),
+	        qPrintable(QString(QT_VERSION_STR)),
+	        qPrintable(QSysInfo::currentCpuArchitecture()),
+	        qPrintable(QSysInfo::prettyProductName()));
+#else
+    qInfo("%s v%s Qt %s", qPrintable(qApp->applicationName()), qPrintable((qApp->applicationVersion()), qPrintable(QString(QT_VERSION_STR)));
+#endif
 
 	MainWindow w(logger, parser);
 	w.show();

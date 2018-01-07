@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCoreApplication>
+#include <QSysInfo>
 
 #include <signal.h>
 #include <unistd.h>
@@ -62,6 +63,18 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     MainParser parser;
     parser.parse(a);
+
+#if QT_VERSION >= 0x050400
+    qInfo("%s v%s Qt %s %s %s",
+            qPrintable(qApp->applicationName()),
+            qPrintable(qApp->applicationVersion()),
+            qPrintable(QString(QT_VERSION_STR)),
+            qPrintable(QSysInfo::currentCpuArchitecture()),
+            qPrintable(QSysInfo::prettyProductName()));
+#else
+    qInfo("%s v%s Qt %s", qPrintable(qApp->applicationName()), qPrintable((qApp->applicationVersion()), qPrintable(QString(QT_VERSION_STR)));
+#endif
+
     MainCore m(logger, parser, &a);
 
     // This will cause the application to exit when the main core is finished
