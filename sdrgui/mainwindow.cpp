@@ -1737,7 +1737,7 @@ void MainWindow::setLoggingOptions()
                 .arg(QSysInfo::currentCpuArchitecture())
                 .arg(QSysInfo::prettyProductName()));
 #else
-        QString appInfoStr(tr("%1 v%2 Qt %3 %4b")
+        QString appInfoStr(tr("%1 %2 Qt %3 %4b")
                 .arg(qApp->applicationName())
                 .arg(qApp->applicationVersion())
                 .arg(QT_VERSION_STR)
