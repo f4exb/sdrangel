@@ -1010,6 +1010,7 @@ definitions:
     required:
       - version
       - qtVersion
+      - appname
       - devicesetlist
     properties:
       version:
@@ -1017,6 +1018,15 @@ definitions:
         type: string
       qtVersion:
         description: "Qt version with which the software was compiled"
+        type: string
+      appname:
+        description: "Application name: SDRangel for a GUI instance and SDRangelSrv for a server instance"
+        type: string
+      architecture:
+        description: "Codename of the CPU architecture on which the instance is running (available with Qt >= 5.4)"
+        type: string
+      os:
+        description: "Descriptive text of the operating system running the instance (available with Qt >= 5.4)"
         type: string
       logging:
         $ref: "#/definitions/LoggingInfo"

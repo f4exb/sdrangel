@@ -19,6 +19,7 @@
 #include <QCoreApplication>
 #include <QList>
 #include <QTextStream>
+#include <QSysInfo>
 
 #include <unistd.h>
 
@@ -68,8 +69,13 @@ int WebAPIAdapterSrv::instanceSummary(
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
 
+    *response.getAppname() = QCoreApplication::instance()->applicationName();
     *response.getVersion() = QCoreApplication::instance()->applicationVersion();
     *response.getQtVersion() = QString(QT_VERSION_STR);
+#if QT_VERSION >= 0x050400
+    *response.getArchitecture() = QString(QSysInfo::currentCpuArchitecture());
+    *response.getOs() = QString(QSysInfo::prettyProductName());
+#endif
 
     SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
     logging->init();

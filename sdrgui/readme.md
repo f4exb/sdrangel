@@ -634,16 +634,14 @@ Self explanatory
 
 Qt version with which this copy of SDRangel was compiled.
 
-<h4>8.3. System</h4>
+<h4>8.3. Architecture</h4>
 
-Pretty print of the system in which SDRangel is running.
+Codename of the CPU architecture in which SDRangel is running.
 
-<h4>8.4. Local date</h4>
+<h4>8.4. Operating system</h4>
 
-Local date according to system clock
+Pretty print of the operating system in which SDRangel is running.
 
-<h4>8.5. Local time</h4>
+<h4>8.5. Local date and time</h4>
 
-Local time according to system clock followed by the time zone code.
-
-
+Local time timestamp according to system clock

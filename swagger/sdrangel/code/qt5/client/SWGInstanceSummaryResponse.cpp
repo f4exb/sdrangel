@@ -39,6 +39,9 @@ void
 SWGInstanceSummaryResponse::init() {
     version = new QString("");
     qt_version = new QString("");
+    appname = new QString("");
+    architecture = new QString("");
+    os = new QString("");
     logging = new SWGLoggingInfo();
     devicesetlist = new SWGDeviceSetList();
 }
@@ -52,6 +55,18 @@ SWGInstanceSummaryResponse::cleanup() {
 
     if(qt_version != nullptr) {
         delete qt_version;
+    }
+
+    if(appname != nullptr) {
+        delete appname;
+    }
+
+    if(architecture != nullptr) {
+        delete architecture;
+    }
+
+    if(os != nullptr) {
+        delete os;
     }
 
     if(logging != nullptr) {
@@ -76,6 +91,9 @@ void
 SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
     ::SWGSDRangel::setValue(&qt_version, pJson["qtVersion"], "QString", "QString");
+    ::SWGSDRangel::setValue(&appname, pJson["appname"], "QString", "QString");
+    ::SWGSDRangel::setValue(&architecture, pJson["architecture"], "QString", "QString");
+    ::SWGSDRangel::setValue(&os, pJson["os"], "QString", "QString");
     ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
     ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
 }
@@ -97,6 +115,12 @@ SWGInstanceSummaryResponse::asJsonObject() {
     toJsonValue(QString("version"), version, obj, QString("QString"));
 
     toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
+
+    toJsonValue(QString("appname"), appname, obj, QString("QString"));
+
+    toJsonValue(QString("architecture"), architecture, obj, QString("QString"));
+
+    toJsonValue(QString("os"), os, obj, QString("QString"));
 
     toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
 
@@ -121,6 +145,33 @@ SWGInstanceSummaryResponse::getQtVersion() {
 void
 SWGInstanceSummaryResponse::setQtVersion(QString* qt_version) {
     this->qt_version = qt_version;
+}
+
+QString*
+SWGInstanceSummaryResponse::getAppname() {
+    return appname;
+}
+void
+SWGInstanceSummaryResponse::setAppname(QString* appname) {
+    this->appname = appname;
+}
+
+QString*
+SWGInstanceSummaryResponse::getArchitecture() {
+    return architecture;
+}
+void
+SWGInstanceSummaryResponse::setArchitecture(QString* architecture) {
+    this->architecture = architecture;
+}
+
+QString*
+SWGInstanceSummaryResponse::getOs() {
+    return os;
+}
+void
+SWGInstanceSummaryResponse::setOs(QString* os) {
+    this->os = os;
 }
 
 SWGLoggingInfo*
