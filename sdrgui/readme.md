@@ -589,6 +589,22 @@ Some channels can exchange data over UDP. Depending on the channel the data is t
     <td>Remote</td>
   </tr>
   <tr>
+    <td>SSB demod</td>
+    <td>Audio</td>
+    <td>Mono</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>
+  <tr>
+    <td>WFM demod</td>
+    <td>Audio</td>
+    <td>Mono</td>
+    <td>N/A</td>
+    <td>N/A</td>
+    <td>Remote</td>
+  </tr>
+  <tr>
     <td>UDP source</td>
     <td>Audio, I/Q</td>
     <td>Mono, Stereo</td>
