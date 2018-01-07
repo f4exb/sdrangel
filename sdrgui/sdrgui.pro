@@ -51,6 +51,7 @@ SOURCES += mainwindow.cpp\
         gui/clickablelabel.cpp\
         gui/colormapper.cpp\
         gui/commanditem.cpp\
+        gui/commandkeyreceiver.cpp\
         gui/commandoutputdialog.cpp\
         gui/cwkeyergui.cpp\
         gui/editcommanddialog.cpp\
@@ -101,6 +102,7 @@ HEADERS  += mainwindow.h\
         gui/clickablelabel.h\
         gui/colormapper.h\
         gui/commanditem.h\
+        gui/commandkeyreceiver.h\
         gui/commandoutputdialog.h\
         gui/cwkeyergui.h\
         gui/editcommanddialog.h\
