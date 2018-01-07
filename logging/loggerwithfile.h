@@ -74,6 +74,9 @@ public:
     void getFileMinMessageLevelStr(QString& levelStr);
     void getLogFileName(QString& fileName);
 
+    /** This will log to file only */
+    void logToFile(const QtMsgType type, const QString& message, const QString &file="", const QString &function="", const int line=0);
+
 private:
     /** First console logger */
     Logger* consoleLogger;

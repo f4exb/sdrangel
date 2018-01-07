@@ -48,6 +48,13 @@ void LoggerWithFile::log(const QtMsgType type, const QString& message, const QSt
     }
 }
 
+void LoggerWithFile::logToFile(const QtMsgType type, const QString& message, const QString &file, const QString &function, const int line)
+{
+    if (fileLogger && useFileFlogger) {
+        fileLogger->log(type,message,file,function,line);
+    }
+}
+
 void LoggerWithFile::clear(const bool buffer, const bool variables)
 {
     consoleLogger->clear(buffer,variables);

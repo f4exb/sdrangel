@@ -1725,6 +1725,25 @@ void MainWindow::setLoggingOptions()
     }
 
     m_logger->setUseFileLogger(m_settings.getUseLogFile());
+
+    if (m_settings.getUseLogFile())
+    {
+#if QT_VERSION >= 0x050400
+        QString appInfoStr(tr("%1 v%2 Qt %3 %4 %5")
+                .arg(qApp->applicationName())
+                .arg(qApp->applicationVersion())
+                .arg(QT_VERSION_STR)
+                .arg(QSysInfo::currentCpuArchitecture())
+                .arg(QSysInfo::prettyProductName()));
+#else
+        QString appInfoStr(tr("%1 v%2 Qt %3")
+                .arg(qApp->applicationName())
+                .arg(qApp->applicationVersion())
+                .arg(QT_VERSION_STR));
+ #endif
+
+        m_logger->logToFile(QtInfoMsg, appInfoStr);
+    }
 }
 
 void MainWindow::focusHasChanged(QWidget *oldWidget __attribute__((unused)), QWidget *newWidget)
