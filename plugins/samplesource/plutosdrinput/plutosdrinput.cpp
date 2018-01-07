@@ -259,7 +259,8 @@ bool PlutoSDRInput::openDevice()
         qDebug("PlutoSDRInput::openDevice: look at Tx buddy");
 
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        m_deviceShared = *((DevicePlutoSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+        DevicePlutoSDRShared* buddySharedPtr = (DevicePlutoSDRShared*) sinkBuddy->getBuddySharedPtr();
+        m_deviceShared.m_deviceParams = buddySharedPtr->m_deviceParams;
 
         if (m_deviceShared.m_deviceParams == 0)
         {

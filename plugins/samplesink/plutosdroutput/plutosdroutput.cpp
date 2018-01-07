@@ -230,7 +230,8 @@ bool PlutoSDROutput::openDevice()
         qDebug("PlutoSDROutput::openDevice: look at Rx buddy");
 
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        m_deviceShared = *((DevicePlutoSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy parameters
+        DevicePlutoSDRShared* buddySharedPtr = (DevicePlutoSDRShared*) sourceBuddy->getBuddySharedPtr();
+        m_deviceShared.m_deviceParams = buddySharedPtr->m_deviceParams;
 
         if (m_deviceShared.m_deviceParams == 0)
         {
