@@ -1729,19 +1729,20 @@ void MainWindow::setLoggingOptions()
     if (m_settings.getUseLogFile())
     {
 #if QT_VERSION >= 0x050400
-        QString appInfoStr(tr("%1 v%2 Qt %3 %4 %5")
+        QString appInfoStr(tr("%1 %2 Qt %3 %4b %5 %6")
                 .arg(qApp->applicationName())
                 .arg(qApp->applicationVersion())
                 .arg(QT_VERSION_STR)
+                .arg(QT_POINTER_SIZE*8)
                 .arg(QSysInfo::currentCpuArchitecture())
                 .arg(QSysInfo::prettyProductName()));
 #else
-        QString appInfoStr(tr("%1 v%2 Qt %3")
+        QString appInfoStr(tr("%1 v%2 Qt %3 %4b")
                 .arg(qApp->applicationName())
                 .arg(qApp->applicationVersion())
-                .arg(QT_VERSION_STR));
+                .arg(QT_VERSION_STR)
+                .arg(QT_POINTER_SIZE*8));
  #endif
-
         m_logger->logToFile(QtInfoMsg, appInfoStr);
     }
 }

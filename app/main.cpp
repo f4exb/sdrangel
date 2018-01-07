@@ -95,14 +95,19 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	parser.parse(*qApp);
 
 #if QT_VERSION >= 0x050400
-	qInfo("%s v%s Qt %s %s %s",
+	qInfo("%s %s Qt %s %db %s %s",
 	        qPrintable(qApp->applicationName()),
 	        qPrintable(qApp->applicationVersion()),
 	        qPrintable(QString(QT_VERSION_STR)),
+	        QT_POINTER_SIZE*8,
 	        qPrintable(QSysInfo::currentCpuArchitecture()),
 	        qPrintable(QSysInfo::prettyProductName()));
 #else
-    qInfo("%s v%s Qt %s", qPrintable(qApp->applicationName()), qPrintable((qApp->applicationVersion()), qPrintable(QString(QT_VERSION_STR)));
+    qInfo("%s %s Qt %s %db",
+            qPrintable(qApp->applicationName()),
+            qPrintable((qApp->applicationVersion()),
+            qPrintable(QString(QT_VERSION_STR)),
+            QT_POINTER_SIZE*8);
 #endif
 
 	MainWindow w(logger, parser);
