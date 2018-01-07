@@ -101,7 +101,10 @@ bool LimeSDRInput::openDevice()
         qDebug("LimeSDRInput::openDevice: look in Rx buddies");
 
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        m_deviceShared = *((DeviceLimeSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
+        //m_deviceShared = *((DeviceLimeSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
+        DeviceLimeSDRShared *deviceLimeSDRShared = (DeviceLimeSDRShared*) sourceBuddy->getBuddySharedPtr();
+        m_deviceShared.m_deviceParams = deviceLimeSDRShared->m_deviceParams;
+
         DeviceLimeSDRParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
 
         if (deviceParams == 0)
@@ -152,7 +155,9 @@ bool LimeSDRInput::openDevice()
         qDebug("LimeSDRInput::openDevice: look in Tx buddies");
 
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        m_deviceShared = *((DeviceLimeSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+        //m_deviceShared = *((DeviceLimeSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+        DeviceLimeSDRShared *deviceLimeSDRShared = (DeviceLimeSDRShared*) sinkBuddy->getBuddySharedPtr();
+        m_deviceShared.m_deviceParams = deviceLimeSDRShared->m_deviceParams;
 
         if (m_deviceShared.m_deviceParams == 0)
         {
@@ -219,7 +224,8 @@ void LimeSDRInput::suspendTxBuddies()
     {
         DeviceLimeSDRShared *buddySharedPtr = (DeviceLimeSDRShared *) (*itSink)->getBuddySharedPtr();
 
-        if (buddySharedPtr->m_thread) {
+        if ((buddySharedPtr->m_thread) && buddySharedPtr->m_thread->isRunning())
+        {
             buddySharedPtr->m_thread->stopWork();
             buddySharedPtr->m_threadWasRunning = true;
         }
