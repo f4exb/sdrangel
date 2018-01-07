@@ -25,6 +25,8 @@ def getInputOptions():
     parser.add_option("-U", "--copy-to-udp", dest="udp_copy", help="UDP audio copy to <address>[:<port>]", metavar="IP:PORT", type="string")
     parser.add_option("-s", "--sample-rate-rx", dest="sample_rate_rx", help="device to host (Rx) sample rate (kS/s)", metavar="RATE", type="int")
     parser.add_option("-S", "--sample-rate-tx", dest="sample_rate_tx", help="host to device (Tx) sample rate (kS/s)", metavar="RATE", type="int")    
+    parser.add_option("-n", "--antenna-path-rx", dest="antenna_path_rx", help="antenna path index (Rx)", metavar="INDEX", type="int")    
+    parser.add_option("-N", "--antenna-path-tx", dest="antenna_path_tx", help="antenna path index (Tx)", metavar="INDEX", type="int")    
 
     (options, args) = parser.parse_args()
     
@@ -48,6 +50,12 @@ def getInputOptions():
     
     if options.sample_rate_tx == None:
         options.sample_rate_tx = 2600
+    
+    if options.antenna_path_rx == None:
+        options.antenna_path_rx = 0
+    
+    if options.antenna_path_tx == None:
+        options.antenna_path_tx = 0
     
     return options
 
@@ -107,7 +115,7 @@ def main():
             exit(-1)
             
         if options.device_hwid_rx == "LimeSDR":
-            settings["limeSdrInputSettings"]["antennaPath"] = 1
+            settings["limeSdrInputSettings"]["antennaPath"] = options.antenna_path_rx
             settings["limeSdrInputSettings"]["devSampleRate"] = options.sample_rate_rx*1000
             settings["limeSdrInputSettings"]["log2HardDecim"] = 4
             settings["limeSdrInputSettings"]["log2SoftDecim"] = 3
@@ -188,7 +196,7 @@ def main():
             exit(-1)
 
         if options.device_hwid_tx == "LimeSDR":
-            settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path
+            settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path_tx
             settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate_tx*1000
             settings["limeSdrOutputSettings"]["log2HardInterp"] = 4
             settings["limeSdrOutputSettings"]["log2SoftInterp"] = 4

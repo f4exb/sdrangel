@@ -20,10 +20,11 @@ def getInputOptions():
     parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
     parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int") 
     parser.add_option("-D", "--device-hwid", dest="device_hwid", help="device hardware id", metavar="HWID", type="string") 
-    parser.add_option("-F", "--device-freq", dest="device_freq", help="device center frequency (Hz)", metavar="FREQ", type="int") 
+    parser.add_option("-F", "--device-freq", dest="device_freq", help="device center frequency (kHz)", metavar="FREQ", type="int") 
     parser.add_option("-f", "--channel-freq", dest="channel_freq", help="channel center frequency (Hz)", metavar="FREQ", type="int")
     parser.add_option("-s", "--sample-rate", dest="sample_rate", help="host to device sample rate (kS/s)", metavar="RATE", type="int")
     parser.add_option("-A", "--antenna-path", dest="antenna_path", help="antenna path number", metavar="NUMBER", type="int")
+    parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
 
     (options, args) = parser.parse_args()
     
@@ -37,7 +38,7 @@ def getInputOptions():
         options.device_hwid = "FileSource"
     
     if options.device_freq == None:
-        options.device_freq = 435000000
+        options.device_freq = 435000
     
     if options.channel_freq == None:
         options.channel_freq = 0
@@ -81,9 +82,10 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         
-        r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
-        if r is None:
-            exit(-1)
+        if options.create:
+            r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
+            if r is None:
+                exit(-1)
             
         deviceset_url = "/deviceset/%d" % options.device_index
         
@@ -99,10 +101,10 @@ def main():
 
         if options.device_hwid == "LimeSDR":
             settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path
-            settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate * 1000
+            settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate*1000
             settings["limeSdrOutputSettings"]["log2HardInterp"] = 4
             settings["limeSdrOutputSettings"]["log2SoftInterp"] = 4
-            settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq + 500000
+            settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq*1000 + 500000
             settings["limeSdrOutputSettings"]["ncoEnable"] = 1
             settings["limeSdrOutputSettings"]["ncoFrequency"] = -500000
             settings["limeSdrOutputSettings"]["lpfBW"] = 4050000
@@ -110,8 +112,8 @@ def main():
             settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1
         elif options.device_hwid == "HackRF":
             settings['hackRFOutputSettings']['LOppmTenths'] = -51
-            settings['hackRFOutputSettings']['centerFrequency'] = options.device_freq
-            settings['hackRFOutputSettings']['devSampleRate'] = options.sample_rate * 1000
+            settings['hackRFOutputSettings']['centerFrequency'] = options.device_freq*1000
+            settings['hackRFOutputSettings']['devSampleRate'] = options.sample_rate*1000
             settings['hackRFOutputSettings']['lnaExt'] = 0
             settings['hackRFOutputSettings']['log2Interp'] = 4
             settings['hackRFOutputSettings']['vgaGain'] = 24
