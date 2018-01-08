@@ -220,7 +220,7 @@ private:
     static const int m_udpBlockSize;
 
 //    void apply(bool force = false);
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
 };

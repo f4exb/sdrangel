@@ -67,6 +67,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 }
 
@@ -133,6 +134,7 @@ void AMDemod::start()
 	qDebug("AMDemod::start");
 	m_squelchCount = 0;
 	m_audioFifo.clear();
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void AMDemod::stop()
@@ -181,19 +183,19 @@ bool AMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void AMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+void AMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "AMDemod::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
-        (m_inputSampleRate != inputSampleRate))
+        (m_inputSampleRate != inputSampleRate) || force)
     {
         m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if (m_inputSampleRate != inputSampleRate)
+    if ((m_inputSampleRate != inputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.2f);

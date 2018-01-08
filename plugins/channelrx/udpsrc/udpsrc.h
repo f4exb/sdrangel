@@ -198,7 +198,7 @@ protected:
 
 	QMutex m_settingsMutex;
 
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = true);
     void applySettings(const UDPSrcSettings& settings, bool force = false);
 
     inline void calculateSquelch(double value)

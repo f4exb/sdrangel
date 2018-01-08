@@ -70,6 +70,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
 }
 
@@ -200,6 +201,7 @@ void WFMDemod::start()
 	m_squelchState = 0;
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
+	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void WFMDemod::stop()
@@ -253,19 +255,19 @@ bool WFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void WFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+void WFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "WFMDemod::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (inputSampleRate != m_inputSampleRate))
+        (inputSampleRate != m_inputSampleRate) || force)
     {
         m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if (inputSampleRate != m_inputSampleRate)
+    if ((inputSampleRate != m_inputSampleRate) || force)
     {
         qDebug() << "WFMDemod::applyChannelSettings: m_interpolator.create";
         m_interpolator.create(16, inputSampleRate, m_settings.m_afBandwidth);

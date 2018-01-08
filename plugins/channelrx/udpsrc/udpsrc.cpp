@@ -102,6 +102,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 }
 
@@ -313,6 +314,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 void UDPSrc::start()
 {
 	m_phaseDiscri.reset();
+	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void UDPSrc::stop()
@@ -445,19 +447,19 @@ void UDPSrc::audioReadyRead()
 	//qDebug("UDPSrc::audioReadyRead: done");
 }
 
-void UDPSrc::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+void UDPSrc::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "UDPSrc::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (inputSampleRate != m_inputSampleRate))
+        (inputSampleRate != m_inputSampleRate) || force)
     {
         m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if (inputSampleRate != m_inputSampleRate)
+    if ((inputSampleRate != m_inputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.0);

@@ -202,7 +202,7 @@ private:
 
     static const int m_udpBlockSize;
 
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
 };
 
