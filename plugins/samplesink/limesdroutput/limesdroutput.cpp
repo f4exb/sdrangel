@@ -546,7 +546,7 @@ bool LimeSDROutput::handleMessage(const Message& message)
     {
         DeviceLimeSDRShared::MsgReportBuddyChange& report = (DeviceLimeSDRShared::MsgReportBuddyChange&) message;
 
-        if (report.getRxElseTx())
+        if (report.getRxElseTx() && m_running)
         {
             double host_Hz;
             double rf_Hz;

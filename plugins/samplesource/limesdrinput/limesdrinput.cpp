@@ -550,7 +550,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
             m_settings.m_log2HardDecim   = report.getLog2HardDecimInterp();
             m_settings.m_centerFrequency = report.getCenterFrequency();
         }
-        else
+        else if (m_running)
         {
             double host_Hz;
             double rf_Hz;
