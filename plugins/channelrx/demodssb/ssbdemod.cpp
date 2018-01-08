@@ -91,6 +91,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
 }
 
@@ -282,6 +283,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void SSBDemod::start()
 {
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void SSBDemod::stop()
@@ -333,22 +335,22 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset)
+void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "SSBDemod::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
-        (m_inputSampleRate != inputSampleRate))
+        (m_inputSampleRate != inputSampleRate) || force)
     {
         m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
     }
 
-    if (m_inputSampleRate != inputSampleRate)
+    if ((m_inputSampleRate != inputSampleRate) || force)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, inputSampleRate, m_Bandwidth / 2.2f);
+        m_interpolator.create(16, inputSampleRate, m_Bandwidth * 1.3f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
         m_settingsMutex.unlock();
@@ -405,7 +407,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_LowCutoff = lowCutoff;
 
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth / 2.2f);
+        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.3f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_settings.m_audioSampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
