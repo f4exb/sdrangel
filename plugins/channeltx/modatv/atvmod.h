@@ -561,7 +561,7 @@ private:
     static const int m_nbBars; //!< number of bars in bar or chessboard patterns
     static const int m_cameraFPSTestNbFrames; //!< number of frames for camera FPS test
 
-    void applyChannelSettings(int outputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const ATVModSettings& settings, bool force = false);
     void pullFinalize(Complex& ci, Sample& sample);
     void pullVideo(Real& sample);

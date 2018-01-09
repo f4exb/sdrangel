@@ -310,7 +310,7 @@ private:
 
     static const int m_levelNbSamples;
 
-    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
     void calculateLevel(Real& sample);

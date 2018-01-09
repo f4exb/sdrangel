@@ -97,6 +97,7 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true); // does applyStandard() too;
 }
 
@@ -489,6 +490,7 @@ void ATVMod::start()
 {
     qDebug() << "ATVMod::start: m_outputSampleRate: " << m_outputSampleRate
             << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
+    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void ATVMod::stop()
@@ -1024,21 +1026,21 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
 }
 
-void ATVMod::applyChannelSettings(int outputSampleRate, int inputFrequencyOffset)
+void ATVMod::applyChannelSettings(int outputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "AMMod::applyChannelSettings:"
             << " outputSampleRate: " << outputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (outputSampleRate != m_outputSampleRate))
+        (outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if (outputSampleRate != m_outputSampleRate)
+    if ((outputSampleRate != m_outputSampleRate) || force)
     {
         getBaseValues(outputSampleRate, m_settings.m_nbLines * m_settings.m_fps, m_tvSampleRate, m_pointsPerLine);
 

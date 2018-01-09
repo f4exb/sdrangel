@@ -327,7 +327,7 @@ private:
 
     static const int m_levelNbSamples;
 
-    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const SSBModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
     void calculateLevel(Complex& sample);

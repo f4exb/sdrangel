@@ -104,6 +104,7 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 }
 
@@ -528,6 +529,7 @@ void SSBMod::start()
 			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
 	m_audioFifo.clear();
+	applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void SSBMod::stop()
@@ -645,7 +647,7 @@ void SSBMod::seekFileStream(int seekPercentage)
     }
 }
 
-void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset)
+void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "SSBMod::applyChannelSettings:"
             << " basebandSampleRate: " << basebandSampleRate
@@ -653,14 +655,14 @@ void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, 
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (outputSampleRate != m_outputSampleRate))
+        (outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if (outputSampleRate != m_outputSampleRate)
+    if ((outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;

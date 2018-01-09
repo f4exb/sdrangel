@@ -80,6 +80,7 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 }
 
@@ -255,6 +256,7 @@ void AMMod::start()
 			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
 	m_audioFifo.clear();
+	applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void AMMod::stop()
@@ -376,7 +378,7 @@ void AMMod::seekFileStream(int seekPercentage)
     }
 }
 
-void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset)
+void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "AMMod::applyChannelSettings:"
             << " basebandSampleRate: " << basebandSampleRate
@@ -384,14 +386,14 @@ void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, i
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (outputSampleRate != m_outputSampleRate))
+        (outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if (outputSampleRate != m_outputSampleRate)
+    if ((outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;

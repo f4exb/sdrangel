@@ -219,7 +219,7 @@ private:
     static const int m_sampleRateAverageItems = 17;
     static const int m_ssbFftLen = 1024;
 
-    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset);
+    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const UDPSinkSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);

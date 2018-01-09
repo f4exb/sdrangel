@@ -71,6 +71,7 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 }
 
@@ -87,6 +88,7 @@ UDPSink::~UDPSink()
 void UDPSink::start()
 {
     m_udpHandler.start();
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void UDPSink::stop()
@@ -439,7 +441,7 @@ void UDPSink::resetReadIndex()
     getInputMessageQueue()->push(cmd);
 }
 
-void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset)
+void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "UDPSink::applyChannelSettings:"
             << " basebandSampleRate: " << basebandSampleRate
@@ -447,14 +449,14 @@ void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate,
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (outputSampleRate != m_outputSampleRate))
+        (outputSampleRate != m_outputSampleRate) || force)
     {
         m_settingsMutex.lock();
         m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if ((outputSampleRate != m_outputSampleRate) && (!m_settings.m_autoRWBalance))
+    if (((outputSampleRate != m_outputSampleRate) && (!m_settings.m_autoRWBalance)) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
