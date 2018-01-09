@@ -2,6 +2,8 @@ sdrangel (3.10.1-1) unstable; urgency=medium
 
   * LimeSDR: fixed segfault when stopping one device in multiple stream confguration
   * PlutoSDR: fixed segfault when stopping one device in multiple stream confguration
+  * Channel plugins: apply initial channel settings at construction and start
+  * SSB demod: refactored decimator filtering
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 07 Jan 2018 23:14:18 +0100
 
