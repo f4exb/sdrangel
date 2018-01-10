@@ -25,6 +25,8 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 
+const int AirspyPlugin::m_maxDevices = 32;
+
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("Airspy Input"),
 	QString("3.9.0"),
@@ -69,7 +71,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 		qCritical("AirspyPlugin::enumSampleSources: failed to initiate Airspy library: %s", airspy_error_name(rc));
 	}
 
-	for (i=0; i < AIRSPY_MAX_DEVICE; i++)
+	for (i=0; i < m_maxDevices; i++)
 	{
 		rc = (airspy_error) airspy_open(&devinfo);
 

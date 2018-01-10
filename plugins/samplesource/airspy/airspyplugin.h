@@ -44,6 +44,7 @@ public:
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;
+    static const int m_maxDevices;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

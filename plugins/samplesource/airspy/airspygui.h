@@ -24,8 +24,6 @@
 #include "util/messagequeue.h"
 #include "airspyinput.h"
 
-#define AIRSPY_MAX_DEVICE (32)
-
 class DeviceUISet;
 
 namespace Ui {

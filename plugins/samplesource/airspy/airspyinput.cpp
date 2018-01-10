@@ -23,6 +23,7 @@
 
 #include "airspygui.h"
 #include "airspyinput.h"
+#include "airspyplugin.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
@@ -282,7 +283,7 @@ bool AirspyInput::handleMessage(const Message& message)
 
 		if (!success)
 		{
-			qDebug("Airspy config error");
+			qDebug("AirspyInput::handleMessage: Airspy config error");
 		}
 
 		return true;
@@ -340,7 +341,7 @@ void AirspyInput::setDeviceCenterFrequency(quint64 freq_hz)
 	}
 	else
 	{
-		qWarning("AirspyInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
+		qDebug("AirspyInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	}
 }
 
@@ -353,14 +354,10 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 	qDebug() << "AirspyInput::applySettings";
 
-	if (m_settings.m_dcBlock != settings.m_dcBlock)
-	{
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
 		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
-	}
-
-	if (m_settings.m_iqCorrection != settings.m_iqCorrection)
-	{
 		m_settings.m_iqCorrection = settings.m_iqCorrection;
 		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
 	}
@@ -596,15 +593,16 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 	struct airspy_device *devinfo;
 	airspy_error rc = AIRSPY_ERROR_OTHER;
 
-	for (int i = 0; i < AIRSPY_MAX_DEVICE; i++)
+	for (int i = 0; i < AirspyPlugin::m_maxDevices; i++)
 	{
 		rc = (airspy_error) airspy_open(&devinfo);
 
 		if (rc == AIRSPY_SUCCESS)
 		{
-			if (i == sequence)
-			{
+			if (i == sequence) {
 				return devinfo;
+			} else {
+			    airspy_close(devinfo);
 			}
 		}
 		else

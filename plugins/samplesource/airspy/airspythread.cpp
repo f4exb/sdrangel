@@ -84,7 +84,7 @@ void AirspyThread::run()
 
 	if (rc != AIRSPY_SUCCESS)
 	{
-		qCritical("AirspyInput::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
+		qCritical("AirspyThread::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
 	}
 	else
 	{
@@ -98,11 +98,11 @@ void AirspyThread::run()
 
 	if (rc == AIRSPY_SUCCESS)
 	{
-		qDebug("AirspyInput::run: stopped Airspy Rx");
+		qDebug("AirspyThread::run: stopped Airspy Rx");
 	}
 	else
 	{
-		qDebug("AirspyInput::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
+		qDebug("AirspyThread::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
 	}
 
 	m_running = false;
