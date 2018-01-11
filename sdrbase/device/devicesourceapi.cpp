@@ -254,21 +254,33 @@ void DeviceSourceAPI::loadSourceSettings(const Preset* preset)
             if (m_sampleSourcePluginInstanceUI != 0) // GUI flavor
             {
                 m_sampleSourcePluginInstanceUI->deserialize(*sourceConfig);
-                m_sampleSourcePluginInstanceUI->setCenterFrequency(centerFrequency);
             }
             else if (m_deviceSourceEngine->getSource() != 0) // Server flavor
             {
                 m_deviceSourceEngine->getSource()->deserialize(*sourceConfig);
-                m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
             }
             else
             {
-                qDebug("DeviceSourceAPI::loadSourceSettings: no source");
+                qDebug("DeviceSourceAPI::loadSourceSettings: deserializing no source");
             }
         }
         else
         {
             qDebug("DeviceSourceAPI::loadSourceSettings: source %s[%d]: %s not found", qPrintable(m_sampleSourceId), m_sampleSourceSequence, qPrintable(m_sampleSourceSerial));
+        }
+
+        // set center frequency anyway
+        if (m_sampleSourcePluginInstanceUI != 0) // GUI flavor
+        {
+            m_sampleSourcePluginInstanceUI->setCenterFrequency(centerFrequency);
+        }
+        else if (m_deviceSourceEngine->getSource() != 0) // Server flavor
+        {
+            m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
+        }
+        else
+        {
+            qDebug("DeviceSourceAPI::loadSourceSettings: no source");
         }
     }
     else

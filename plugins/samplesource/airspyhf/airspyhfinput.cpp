@@ -134,6 +134,8 @@ bool AirspyHFInput::openDevice()
 
     delete[] sampleRates;
 
+    airspyhf_set_sampleformat(m_dev, AIRSPYHF_SAMPLE_FORMAT_INT16);
+
     return true;
 }
 
@@ -387,6 +389,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	        || (m_settings.m_transverterMode != settings.m_transverterMode)
 	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
 	{
+	    m_settings.m_LOppmTenths = settings.m_LOppmTenths;
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
