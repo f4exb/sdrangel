@@ -1,3 +1,10 @@
+sdrangel (3.11.0-1) unstable; urgency=medium
+
+  * AirspyHF: support
+  * GUI: show REST API URL in about dialog
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 13 Jan 2018 12:14:18 +0100
+
 sdrangel (3.10.1-1) unstable; urgency=medium
 
   * LimeSDR: fixed segfault when stopping one device in multiple stream confguration

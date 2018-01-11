@@ -281,6 +281,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Band select</string>
+       </property>
        <item>
         <property name="text">
          <string>HF</string>
