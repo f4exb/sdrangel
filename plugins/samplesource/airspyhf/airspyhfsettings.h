@@ -33,6 +33,7 @@ struct AirspyHFSettings {
     bool m_iqCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    quint32 m_bandIndex;
 
     AirspyHFSettings();
 	void resetToDefaults();

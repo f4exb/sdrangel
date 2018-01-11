@@ -134,7 +134,7 @@ bool AirspyHFInput::openDevice()
 
     delete[] sampleRates;
 
-    airspyhf_set_sampleformat(m_dev, AIRSPYHF_SAMPLE_FORMAT_INT16);
+    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_NDSP_IQ);
 
     return true;
 }
@@ -320,6 +320,17 @@ bool AirspyHFInput::handleMessage(const Message& message)
 
 void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz)
 {
+    switch(m_settings.m_bandIndex)
+    {
+    case 1:
+        freq_hz = freq_hz < loLowLimitFreqVHF ? loLowLimitFreqVHF : freq_hz > loHighLimitFreqVHF ? loHighLimitFreqVHF : freq_hz;
+        break;
+    case 0:
+    default:
+        freq_hz = freq_hz < loLowLimitFreqHF ? loLowLimitFreqHF : freq_hz > loHighLimitFreqHF ? loHighLimitFreqHF : freq_hz;
+        break;
+    }
+
 	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
 	freq_hz += df;
 

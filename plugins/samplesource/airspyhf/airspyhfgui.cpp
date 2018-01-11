@@ -182,8 +182,22 @@ void AirspyHFGui::updateFrequencyLimits()
 {
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    qint64 minLimit = AirspyHFInput::loLowLimitFreqHF/1000 + deltaFrequency;
-    qint64 maxLimit = AirspyHFInput::loHighLimitFreqHF/1000 + deltaFrequency;
+
+    qint64 minLimit;
+    qint64 maxLimit;
+
+    switch(m_settings.m_bandIndex)
+    {
+    case 1:
+        minLimit = AirspyHFInput::loLowLimitFreqVHF/1000 + deltaFrequency;
+        maxLimit = AirspyHFInput::loHighLimitFreqVHF/1000 + deltaFrequency;
+        break;
+    case 0:
+    default:
+        minLimit = AirspyHFInput::loLowLimitFreqHF/1000 + deltaFrequency;
+        maxLimit = AirspyHFInput::loHighLimitFreqHF/1000 + deltaFrequency;
+        break;
+    }
 
     minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
     maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
@@ -328,6 +342,17 @@ void AirspyHFGui::on_transverter_clicked()
     qDebug("AirspyHFGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
+}
+
+void AirspyHFGui::on_band_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index > 1)) {
+        return;
+    }
+
+    m_settings.m_bandIndex = index;
+    updateFrequencyLimits();
     sendSettings();
 }
 

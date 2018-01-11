@@ -34,6 +34,7 @@ void AirspyHFSettings::resetToDefaults()
 	m_iqCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_bandIndex = 0;
 }
 
 QByteArray AirspyHFSettings::serialize() const
@@ -48,6 +49,7 @@ QByteArray AirspyHFSettings::serialize() const
 	s.writeBool(6, m_iqCorrection);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
+    s.writeU32(9, m_bandIndex);
 
 	return s.final();
 }
@@ -65,6 +67,7 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		quint32 uintval;
 
 		d.readU32(1, &m_devSampleRateIndex, 0);
 		d.readS32(2, &m_LOppmTenths, 0);
@@ -75,6 +78,8 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		d.readBool(6, &m_iqCorrection, false);
         d.readBool(7, &m_transverterMode, false);
         d.readS64(8, &m_transverterDeltaFrequency, 0);
+        d.readU32(9, &uintval, 0);
+        m_bandIndex = uintval > 1 ? 1 : uintval;
 
 		return true;
 	}

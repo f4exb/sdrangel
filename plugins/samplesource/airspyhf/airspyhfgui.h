@@ -86,6 +86,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_transverter_clicked();
+    void on_band_currentIndexChanged(int index);
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();
