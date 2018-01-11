@@ -331,6 +331,8 @@ private:
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
 	WebAPIAdapterGUI *m_apiAdapter;
+	QString m_apiHost;
+	int m_apiPort;
 
 	CommandKeyReceiver *m_commandKeyReceiver;
 

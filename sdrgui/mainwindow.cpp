@@ -183,7 +183,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_apiAdapter = new WebAPIAdapterGUI(*this);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
-	m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
+	m_apiHost = parser.getServerAddress();
+	m_apiPort = parser.getServerPort();
+	m_apiServer = new WebAPIServer(m_apiHost, m_apiPort, m_requestMapper);
 	m_apiServer->start();
 
 	connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), this, SLOT(focusHasChanged(QWidget *, QWidget *)));
@@ -1647,7 +1649,7 @@ void MainWindow::channelAddClicked(bool checked __attribute__((unused)))
 
 void MainWindow::on_action_About_triggered()
 {
-	AboutDialog dlg(this);
+	AboutDialog dlg(m_apiHost, m_apiPort, this);
 	dlg.exec();
 }
 

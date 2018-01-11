@@ -11,7 +11,7 @@ class AboutDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	explicit AboutDialog(QWidget* parent = NULL);
+	explicit AboutDialog(const QString& apiHost, int apiPort, QWidget* parent = 0);
 	~AboutDialog();
 
 private:
