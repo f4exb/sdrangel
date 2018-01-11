@@ -209,6 +209,8 @@ void AirspyHFGui::updateFrequencyLimits()
 
 void AirspyHFGui::displaySettings()
 {
+    blockApplySettings(true);
+    ui->band->setCurrentIndex(m_settings.m_bandIndex);
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
     updateFrequencyLimits();
@@ -223,8 +225,8 @@ void AirspyHFGui::displaySettings()
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
-
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
+	blockApplySettings(false);
 }
 
 void AirspyHFGui::displaySampleRates()
