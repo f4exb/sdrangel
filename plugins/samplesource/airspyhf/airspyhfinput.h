@@ -130,7 +130,7 @@ private:
 	void closeDevice();
 	bool applySettings(const AirspyHFSettings& settings, bool force);
 	airspyhf_device_t *open_airspyhf_from_serial(const QString& serialStr);
-	void setDeviceCenterFrequency(quint64 freq);
+	void setDeviceCenterFrequency(quint64 freq, const AirspyHFSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

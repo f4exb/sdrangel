@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgFileRecord, Message)
 
 const qint64 AirspyHFInput::loLowLimitFreqHF   =      9000L;
-const qint64 AirspyHFInput::loHighLimitFreqHF  =  31000000L;
+const qint64 AirspyHFInput::loHighLimitFreqHF  =  30995000L;
 const qint64 AirspyHFInput::loLowLimitFreqVHF  =  60000000L;
 const qint64 AirspyHFInput::loHighLimitFreqVHF = 260000000L;
 
@@ -318,9 +318,9 @@ bool AirspyHFInput::handleMessage(const Message& message)
 	}
 }
 
-void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz)
+void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFSettings& settings)
 {
-    switch(m_settings.m_bandIndex)
+    switch(settings.m_bandIndex)
     {
     case 1:
         freq_hz = freq_hz < loLowLimitFreqVHF ? loLowLimitFreqVHF : freq_hz > loHighLimitFreqVHF ? loHighLimitFreqVHF : freq_hz;
@@ -331,15 +331,15 @@ void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz)
         break;
     }
 
-	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+	qint64 df = ((qint64)freq_hz * settings.m_LOppmTenths) / 10000000LL;
 	freq_hz += df;
 
 	airspyhf_error rc = (airspyhf_error) airspyhf_set_freq(m_dev, static_cast<uint32_t>(freq_hz));
 
 	if (rc == AIRSPYHF_SUCCESS) {
-		qDebug("AirspyInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
+		qDebug("AirspyHFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	} else {
-		qWarning("AirspyInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
+		qWarning("AirspyHFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
 	}
 }
 
@@ -400,7 +400,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	        || (m_settings.m_transverterMode != settings.m_transverterMode)
 	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
 	{
-	    m_settings.m_LOppmTenths = settings.m_LOppmTenths;
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
@@ -427,9 +426,9 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 
 		if (m_dev != 0)
 		{
-			setDeviceCenterFrequency(deviceCenterFrequency);
+			setDeviceCenterFrequency(deviceCenterFrequency, settings);
 
-			qDebug() << "AirspyHFInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+			qDebug() << "AirspyHFInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
 					<< " device center freq: " << deviceCenterFrequency << " Hz"
 					<< " device sample rate: " << devSampleRate << "Hz"
 					<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"

@@ -355,6 +355,8 @@ void AirspyHFGui::on_band_currentIndexChanged(int index)
 
     m_settings.m_bandIndex = index;
     updateFrequencyLimits();
+    qDebug("AirspyHFGui::on_band_currentIndexChanged: freq: %llu", ui->centerFrequency->getValueNew() * 1000);
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew() * 1000;
     sendSettings();
 }
 
