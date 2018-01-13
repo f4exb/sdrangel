@@ -63,7 +63,7 @@ In case you cannot see anything related to HDMI or your desired audio device in 
 
 <h2>Airspy</h2>
 
-Airspy is supported through the libairspy library that should be installed in your system for proper build of the software and operation support. Add `libairspy-dev` to the list of dependencies to install.
+[Airspy R2](https://airspy.com/airspy-r2/) and [Airspy Mini](https://airspy.com/airspy-mini/) are supported through the libairspy library that should be installed in your system for proper build of the software and operation support. Add `libairspy-dev` to the list of dependencies to install.
 
 If you use your own location for libairspy install directory you need to specify library and include locations. Example with `/opt/install/libairspy` with the following defines on `cmake` command line:
 
@@ -73,9 +73,17 @@ Please note that if you are using a recent version of libairspy (>= 1.0.6) the d
 
 Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) are affected by a noise artifact so 10 MS/s is preferable for weak signal work or instrumentation. A decimation by 64 was implemented to facilitate narrow band work at 10 MS/s input rate.
 
+<h2>Airspy HF+</h2>
+
+[Airspy HF+](https://airspy.com/airspy-hf-plus/) is supported through [my fork of the airspyhf library](https://github.com/f4exb/airspyhf). This is needed because SDRangel uses integer samples at its input. The original library post processes the integer samples from the device and presents them as float samples without any other option. The maintainer of the original airspyhf library not being cooperative I had to keep changes on my own fork. There are also a few bug fixes.
+
+If you use your own location for libairspyhf install directory you need to specify library and include locations. Example with `/opt/install/libairspyhf` with the following defines on `cmake` command line:
+
+`-DLIBAIRSPYHF_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so -DLIBAIRSPYHF_INCLUDE_DIR=/opt/install/libairspyhf/include`
+
 <h2>BladeRF</h2>
 
-BladeRF is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
+[BladeRF](https://www.nuand.com/) is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
 
 If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
@@ -93,7 +101,7 @@ The Pro+ has trouble starting. The sound card interface is not recognized when y
 
 <h2>HackRF</h2>
 
-HackRF is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install. Please note that you will need a recent version (2015.07.2 at least) of libhackrf that supports the sequential listing of devices and the antenna power control (bias tee). To be safe anyway you may choose to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
+[HackRF](https://greatscottgadgets.com/hackrf/) is supported through the libhackrf library that should be installed in your system for proper build of the software and operation support. Add `libhackrf-dev` to the list of dependencies to install. Please note that you will need a recent version (2015.07.2 at least) of libhackrf that supports the sequential listing of devices and the antenna power control (bias tee). To be safe anyway you may choose to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
 
 If you use your own location for libhackrf install directory you need to specify library and include locations. Example with `/opt/install/libhackrf` with the following defines on `cmake` command line:
 
@@ -102,6 +110,8 @@ If you use your own location for libhackrf install directory you need to specify
 HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.2 MS/s rates are considered experimental and are way out of specs of the ADC. You may or may not achieve acceptable results depending on the unit. A too low sampling rate will typically create ghost signals (images) and/or raise the noise floor.
 
 <h2>LimeSDR</h2>
+
+[LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
 
 <p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental. At least you should always have one of the streams running.</b></p>
 
@@ -124,7 +134,7 @@ Then add the following defines on `cmake` command line:
 
 <h2>PlutoSDR</h2>
 
-PlutoSDR is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
+[PlutoSDR](https://wiki.analog.com/university/tools/pluto) is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
 If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSuse the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
 
@@ -140,11 +150,13 @@ If you use your own location for librtlsdr install directory you need to specify
 
 Linux only.
 
-SDRplay RSP1 devices are supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
+[SDRplay RSP1](https://www.sdrplay.com/rsp1/) is supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
 
 If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
 
 `-DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so -DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include`
+
+&#9888; The RSP1 has been discontinued in favor of RSP1A. Unfortunately due to their closed source nature RSP1A nor RSP2 can be supported in SDRangel.
 
 <h1>Plugins for special devices</h1>
 
@@ -235,14 +247,9 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
 
+  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.04, Ubuntu 17.10, Debian Stretch)
   - Windows 32 bit (runs also in 64 bit Windows) 
-  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.04, Debian Stretch)
   - Windows 64 bit
-  - Debian armv7l (Debian Jessie) until v3.5.0
-  
-<h2>Windows distributions</h2>
-
-This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
 <h2>Debian distributions</h2>
 
@@ -266,6 +273,12 @@ Since apt-get v 1.1 installation is possible from a local file:
     
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
+  
+<h2>Windows distributions</h2>
+
+This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
+
+<b>&#9888; Windows distributions are provided as by products thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for the Windows distributions.</b>
 
 <h1>Software build</h1>
 
@@ -274,8 +287,8 @@ The software is installed in `/opt/sdrangel` you can start it from the command l
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
   - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful)
-  - Windows 32 build is made with 5.9.1 and has Qt ANGLE support
-  - Windows 64 build is made with 5.9.1 and has no Qt ANGLE support
+  - Windows 32 build is made with 5.9.1 and has Qt ANGLE support (OpenGL emulation with DirectX)
+  - Windows 64 build is made with 5.9.1 and has no Qt ANGLE support (native OpenGL)
 
 <h2>Ubuntu</h2>
 
