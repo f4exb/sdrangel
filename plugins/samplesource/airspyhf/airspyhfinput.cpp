@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgFileRecord, Message)
 
 const qint64 AirspyHFInput::loLowLimitFreqHF   =      9000L;
-const qint64 AirspyHFInput::loHighLimitFreqHF  =  30995000L;
+const qint64 AirspyHFInput::loHighLimitFreqHF  =  31000000L;
 const qint64 AirspyHFInput::loLowLimitFreqVHF  =  60000000L;
 const qint64 AirspyHFInput::loHighLimitFreqVHF = 260000000L;
 
