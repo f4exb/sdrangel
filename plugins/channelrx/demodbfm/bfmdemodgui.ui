@@ -234,7 +234,7 @@
          <widget class="QLabel" name="pilotPower">
           <property name="minimumSize">
            <size>
-            <width>30</width>
+            <width>40</width>
             <height>0</height>
            </size>
           </property>
@@ -242,7 +242,10 @@
            <string>Pilot power</string>
           </property>
           <property name="text">
-           <string>0.0</string>
+           <string>-120.0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
