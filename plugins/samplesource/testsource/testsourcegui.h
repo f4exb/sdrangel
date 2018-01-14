@@ -97,7 +97,6 @@ private slots:
     void on_record_toggled(bool checked);
     void updateStatus();
     void updateHardware();
-	void tick();
 };
 
 #endif // _TESTSOURCE_TESTSOURCEGUI_H_

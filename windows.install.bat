@@ -17,6 +17,7 @@ copy logging\%1\logging.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
+copy libairspyhf\%1\libairspyhf.dll %2
 copy libbladerf\%1\libbladerf.dll %2
 copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
@@ -53,9 +54,11 @@ copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 REM copy plugins\channeltx\udpsink\%1\udpsink.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
+copy plugins\samplesource\testsource\%1\inputtestsource.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
+copy plugins\samplesource\airspyhf\%1\inputairspyhf.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
