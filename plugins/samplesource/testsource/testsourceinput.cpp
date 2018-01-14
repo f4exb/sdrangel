@@ -222,6 +222,14 @@ bool TestSourceInput::handleMessage(const Message& message)
 
 bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool force)
 {
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
+        qDebug("TestSourceInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
+                settings.m_dcBlock ? "true" : "false",
+                settings.m_iqImbalance ? "true" : "false");
+    }
+
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
         if (m_testSourceThread != 0)
@@ -284,6 +292,27 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         if (m_testSourceThread != 0) {
             m_testSourceThread->setAmplitudeBits(settings.m_amplitudeBits);
+        }
+    }
+
+    if ((m_settings.m_dcFactor != settings.m_dcFactor) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setDCFactor(settings.m_dcFactor);
+        }
+    }
+
+    if ((m_settings.m_iFactor != settings.m_iFactor) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setIFactor(settings.m_iFactor);
+        }
+    }
+
+    if ((m_settings.m_qFactor != settings.m_qFactor) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setQFactor(settings.m_qFactor);
         }
     }
 

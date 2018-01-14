@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>220</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>220</height>
+    <height>300</height>
    </size>
   </property>
   <property name="font">
@@ -184,6 +184,44 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="autoCorrectionsLayout">
+     <item>
+      <widget class="QLabel" name="autoCorrLabel">
+       <property name="text">
+        <string>Auto</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="text">
+        <string>DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="frequencyShiftLayout">
@@ -564,6 +602,160 @@
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="iqBiasLayout">
+     <item row="2" column="2">
+      <widget class="QSlider" name="qBias">
+       <property name="minimum">
+        <number>-99</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
+      <widget class="QLabel" name="qBiasText">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>-100 %</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="qBiasLabel">
+       <property name="text">
+        <string>Q bias</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLabel" name="qBiasPlusQLabel">
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="qBiasMinusLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="iBiasLabel">
+       <property name="text">
+        <string>I bias</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="iBiasMinusLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QSlider" name="iBias">
+       <property name="minimum">
+        <number>-99</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QLabel" name="iBiasText">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>-100 %</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="iBiasPlusLabel">
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="dcBiasLabel">
+       <property name="text">
+        <string>DC bias</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="dcBiasMinusLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QSlider" name="dcBias">
+       <property name="minimum">
+        <number>-99</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="dcBiasPlusLabel">
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="dcBiasText">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>-100 %</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

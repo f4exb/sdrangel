@@ -44,6 +44,9 @@ public:
     void setFcPos(int fcPos);
 	void setBitSize(uint32_t bitSizeIndex);
     void setAmplitudeBits(int32_t amplitudeBits);
+    void setDCFactor(float iFactor);
+    void setIFactor(float iFactor);
+    void setQFactor(float qFactor);
     void setFrequencyShift(int shift);
 
     void connectTimer(const QTimer& timer);
@@ -67,6 +70,12 @@ private:
 	uint32_t m_bitSizeIndex;
 	uint32_t m_bitShift;
     int32_t m_amplitudeBits;
+    float m_dcBias;
+    float m_iBias;
+    float m_qBias;
+    int32_t m_amplitudeBitsDC;
+    int32_t m_amplitudeBitsI;
+    int32_t m_amplitudeBitsQ;
 
     uint64_t m_frequency;
     int m_fcPosShift;

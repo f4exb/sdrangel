@@ -31,6 +31,11 @@ struct TestSourceSettings {
     fcPos_t m_fcPos;
 	quint32 m_sampleSizeIndex;
 	qint32 m_amplitudeBits;
+    bool m_dcBlock;
+    bool m_iqImbalance;
+    float m_dcFactor; //!< -1.0 < x < 1.0
+    float m_iFactor;  //!< -1.0 < x < 1.0
+    float m_qFactor;  //!< -1.0 < x < 1.0
 
 	TestSourceSettings();
 	void resetToDefaults();

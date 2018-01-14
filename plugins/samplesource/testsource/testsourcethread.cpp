@@ -37,6 +37,12 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_bitSizeIndex(0),
 	m_bitShift(8),
 	m_amplitudeBits(127),
+	m_dcBias(0.0f),
+	m_iBias(0.0f),
+	m_qBias(0.0f),
+	m_amplitudeBitsDC(0),
+	m_amplitudeBitsI(127),
+	m_amplitudeBitsQ(127),
 	m_frequency(435*1000),
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
@@ -109,6 +115,27 @@ void TestSourceThread::setBitSize(quint32 bitSizeIndex)
 void TestSourceThread::setAmplitudeBits(int32_t amplitudeBits)
 {
     m_amplitudeBits = amplitudeBits;
+    m_amplitudeBitsDC = m_dcBias * amplitudeBits;
+    m_amplitudeBitsI = (1.0f + m_iBias) * amplitudeBits;
+    m_amplitudeBitsQ = (1.0f + m_qBias) * amplitudeBits;
+}
+
+void TestSourceThread::setDCFactor(float dcFactor)
+{
+    m_dcBias = dcFactor;
+    m_amplitudeBitsDC = m_dcBias * m_amplitudeBits;
+}
+
+void TestSourceThread::setIFactor(float iFactor)
+{
+    m_iBias = iFactor;
+    m_amplitudeBitsI = (1.0f + m_iBias) * m_amplitudeBits;
+}
+
+void TestSourceThread::setQFactor(float iFactor)
+{
+    m_qBias = iFactor;
+    m_amplitudeBitsQ = (1.0f + m_qBias) * m_amplitudeBits;
 }
 
 void TestSourceThread::setFrequencyShift(int shift)
@@ -163,8 +190,8 @@ void TestSourceThread::generate(quint32 chunksize)
     for (int i = 0; i < n-1;)
     {
         Complex c = m_nco.nextIQ();
-        m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBits);
-        m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBits);
+        m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+        m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBitsQ);
     }
 
     callback(m_buf, n);

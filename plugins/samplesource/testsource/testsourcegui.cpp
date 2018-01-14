@@ -141,6 +141,19 @@ void TestSourceGui::on_centerFrequency_changed(quint64 value)
     sendSettings();
 }
 
+void TestSourceGui::on_dcOffset_toggled(bool checked)
+{
+    m_settings.m_dcBlock = checked;
+    sendSettings();
+}
+
+void TestSourceGui::on_iqImbalance_toggled(bool checked)
+{
+    m_settings.m_iqImbalance = checked;
+    sendSettings();
+}
+
+
 void TestSourceGui::on_frequencyShift_changed(qint64 value)
 {
     m_settings.m_frequencyShift = value;
@@ -201,6 +214,27 @@ void TestSourceGui::on_amplitudeFine_valueChanged(int value __attribute__((unuse
 {
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    sendSettings();
+}
+
+void TestSourceGui::on_dcBias_valueChanged(int value)
+{
+    ui->dcBiasText->setText(QString(tr("%1 %").arg(value)));
+    m_settings.m_dcFactor = value / 100.0f;
+    sendSettings();
+}
+
+void TestSourceGui::on_iBias_valueChanged(int value)
+{
+    ui->iBiasText->setText(QString(tr("%1 %").arg(value)));
+    m_settings.m_iFactor = value / 100.0f;
+    sendSettings();
+}
+
+void TestSourceGui::on_qBias_valueChanged(int value)
+{
+    ui->qBiasText->setText(QString(tr("%1 %").arg(value)));
+    m_settings.m_qFactor = value / 100.0f;
     sendSettings();
 }
 
@@ -309,6 +343,12 @@ void TestSourceGui::displaySettings()
     updateAmpFineLimit();
     ui->amplitudeFine->setValue(amplitudeBits%100);
     displayAmplitude();
+    int dcBiasPercent = roundf(m_settings.m_dcFactor * 100.0f);
+    ui->dcBiasText->setText(QString(tr("%1 %").arg(dcBiasPercent)));
+    int iBiasPercent = roundf(m_settings.m_iFactor * 100.0f);
+    ui->iBiasText->setText(QString(tr("%1 %").arg(iBiasPercent)));
+    int qBiasPercent = roundf(m_settings.m_qFactor * 100.0f);
+    ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
 
     blockApplySettings(false);
 }
