@@ -14,31 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _AIRSPYHF_AIRSPYHFSETTINGS_H_
-#define _AIRSPYHF_AIRSPYHFSETTINGS_H_
+#ifndef _TESTSOURCE_TESTSOURCEPLUGIN_H
+#define _TESTSOURCE_TESTSOURCEPLUGIN_H
 
-struct AirspyHFSettings {
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-	quint64 m_centerFrequency;
-	quint32 m_devSampleRateIndex;
-	qint32  m_LOppmTenths;
-	quint32 m_log2Decim;
-	fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool m_transverterMode;
-    qint64 m_transverterDeltaFrequency;
-    quint32 m_bandIndex;
+class PluginAPI;
 
-    AirspyHFSettings();
-	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
+#define TESTSOURCE_DEVICE_TYPE_ID "sdrangel.samplesource.testsource"
+
+class TestSourcePlugin : public QObject, public PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID TESTSOURCE_DEVICE_TYPE_ID)
+
+public:
+	explicit TestSourcePlugin(QObject* parent = NULL);
+
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
+
+	virtual SamplingDevices enumSampleSources();
+	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
+	        const QString& sourceId,
+	        QWidget **widget,
+	        DeviceUISet *deviceUISet);
+	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
+
+	static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
+
+private:
+	static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif /* _AIRSPYHF_AIRSPYHFSETTINGS_H_ */
+#endif // _TESTSOURCE_TESTSOURCEPLUGIN_H
