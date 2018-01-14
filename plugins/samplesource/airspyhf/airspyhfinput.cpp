@@ -134,7 +134,7 @@ bool AirspyHFInput::openDevice()
 
     delete[] sampleRates;
 
-    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_NDSP_IQ);
+    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_IQ);
 
     return true;
 }
