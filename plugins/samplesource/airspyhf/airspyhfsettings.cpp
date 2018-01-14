@@ -28,7 +28,6 @@ void AirspyHFSettings::resetToDefaults()
 	m_centerFrequency = 7150*1000;
 	m_devSampleRateIndex = 0;
 	m_log2Decim = 0;
-	m_fcPos = FC_POS_CENTER;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_bandIndex = 0;
@@ -40,7 +39,6 @@ QByteArray AirspyHFSettings::serialize() const
 
 	s.writeU32(1, m_devSampleRateIndex);
 	s.writeU32(3, m_log2Decim);
-	s.writeS32(4, m_fcPos);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
     s.writeU32(9, m_bandIndex);
@@ -66,7 +64,6 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		d.readU32(1, &m_devSampleRateIndex, 0);
 		d.readU32(3, &m_log2Decim, 0);
 		d.readS32(4, &intval, 0);
-		m_fcPos = (fcPos_t) intval;
         d.readBool(7, &m_transverterMode, false);
         d.readS64(8, &m_transverterDeltaFrequency, 0);
         d.readU32(9, &uintval, 0);

@@ -79,7 +79,6 @@ private slots:
 	void on_centerFrequency_changed(quint64 value);
 	void on_sampleRate_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
-	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_transverter_clicked();

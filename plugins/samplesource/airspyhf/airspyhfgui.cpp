@@ -219,7 +219,6 @@ void AirspyHFGui::displaySettings()
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
-	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	blockApplySettings(false);
 }
 
@@ -275,20 +274,6 @@ void AirspyHFGui::on_decim_currentIndexChanged(int index)
 		return;
 	m_settings.m_log2Decim = index;
 	sendSettings();
-}
-
-void AirspyHFGui::on_fcPos_currentIndexChanged(int index)
-{
-	if (index == 0) {
-		m_settings.m_fcPos = AirspyHFSettings::FC_POS_INFRA;
-		sendSettings();
-	} else if (index == 1) {
-		m_settings.m_fcPos = AirspyHFSettings::FC_POS_SUPRA;
-		sendSettings();
-	} else if (index == 2) {
-		m_settings.m_fcPos = AirspyHFSettings::FC_POS_CENTER;
-		sendSettings();
-	}
 }
 
 void AirspyHFGui::on_startStop_toggled(bool checked)

@@ -163,7 +163,6 @@ bool AirspyHFInput::start()
 
 	m_airspyHFThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
 	m_airspyHFThread->setLog2Decimation(m_settings.m_log2Decim);
-	m_airspyHFThread->setFcPos((int) m_settings.m_fcPos);
 
 	m_airspyHFThread->startWork();
 
@@ -386,7 +385,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	}
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-	        || (m_settings.m_fcPos != settings.m_fcPos)
 	        || (m_settings.m_transverterMode != settings.m_transverterMode)
 	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
 	{
@@ -395,24 +393,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
         qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = m_sampleRates[sampleRateIndex];
-
-		if ((settings.m_log2Decim == 0) || (settings.m_fcPos == AirspyHFSettings::FC_POS_CENTER))
-		{
-			f_img = deviceCenterFrequency;
-		}
-		else
-		{
-			if (settings.m_fcPos == AirspyHFSettings::FC_POS_INFRA)
-			{
-				deviceCenterFrequency += (devSampleRate / 4);
-				f_img = deviceCenterFrequency + devSampleRate/2;
-			}
-			else if (settings.m_fcPos == AirspyHFSettings::FC_POS_SUPRA)
-			{
-				deviceCenterFrequency -= (devSampleRate / 4);
-				f_img = deviceCenterFrequency - devSampleRate/2;
-			}
-		}
 
 		if (m_dev != 0)
 		{
@@ -426,15 +406,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		}
 
 		forwardChange = true;
-	}
-
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-	{
-		if (m_airspyHFThread != 0)
-		{
-		    m_airspyHFThread->setFcPos((int) settings.m_fcPos);
-			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) settings.m_fcPos;
-		}
 	}
 
 	if (forwardChange)

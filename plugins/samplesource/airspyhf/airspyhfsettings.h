@@ -17,17 +17,11 @@
 #ifndef _AIRSPYHF_AIRSPYHFSETTINGS_H_
 #define _AIRSPYHF_AIRSPYHFSETTINGS_H_
 
-struct AirspyHFSettings {
-	typedef enum {
-		FC_POS_INFRA = 0,
-		FC_POS_SUPRA,
-		FC_POS_CENTER
-	} fcPos_t;
-
+struct AirspyHFSettings
+{
 	quint64 m_centerFrequency;
 	quint32 m_devSampleRateIndex;
 	quint32 m_log2Decim;
-	fcPos_t m_fcPos;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;
