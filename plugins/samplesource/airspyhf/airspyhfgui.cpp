@@ -210,16 +210,19 @@ void AirspyHFGui::updateFrequencyLimits()
 void AirspyHFGui::displaySettings()
 {
     blockApplySettings(true);
+    ui->band->blockSignals(true);
+    m_settings.m_bandIndex = m_settings.m_centerFrequency <= 31000000UL ? 0 : 1; // override
     ui->band->setCurrentIndex(m_settings.m_bandIndex);
+    updateFrequencyLimits();
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
-    updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
-	blockApplySettings(false);
+    ui->band->blockSignals(false);
+    blockApplySettings(false);
 }
 
 void AirspyHFGui::displaySampleRates()
