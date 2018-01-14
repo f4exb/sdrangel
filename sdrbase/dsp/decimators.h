@@ -83,18 +83,18 @@ struct decimation_shifts<16, 12>
 template<>
 struct decimation_shifts<16, 8>
 {
-    static const uint pre1   = 6;
-    static const uint pre2   = 5;
+    static const uint pre1   = 8;
+    static const uint pre2   = 7;
     static const uint post2  = 0;
-    static const uint pre4   = 4;
+    static const uint pre4   = 6;
     static const uint post4  = 0;
-    static const uint pre8   = 3;
+    static const uint pre8   = 5;
     static const uint post8  = 0;
-    static const uint pre16  = 2;
+    static const uint pre16  = 4;
     static const uint post16 = 0;
-    static const uint pre32  = 1;
+    static const uint pre32  = 3;
     static const uint post32 = 0;
-    static const uint pre64  = 0;
+    static const uint pre64  = 2;
     static const uint post64 = 0;
 };
 
