@@ -26,11 +26,8 @@ struct AirspyHFSettings {
 
 	quint64 m_centerFrequency;
 	quint32 m_devSampleRateIndex;
-	qint32  m_LOppmTenths;
 	quint32 m_log2Decim;
 	fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;

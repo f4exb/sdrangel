@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>240</height>
+    <width>324</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>220</height>
+    <height>180</height>
    </size>
   </property>
   <property name="font">
@@ -173,78 +173,22 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_LOppm">
-     <property name="spacing">
-      <number>3</number>
+    <widget class="Line" name="line_freq">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="LOppmLabel">
-       <property name="toolTip">
-        <string>LO correction ppm</string>
-       </property>
-       <property name="text">
-        <string>LO ppm</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="LOppm">
-       <property name="toolTip">
-        <string>Local Oscillator frequency correction (ppm)</string>
-       </property>
-       <property name="minimum">
-        <number>-100</number>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="LOppmText">
-       <property name="text">
-        <string>0.0</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_corr">
-     <item row="0" column="1">
-      <widget class="ButtonSwitch" name="dcOffset">
-       <property name="toolTip">
-        <string>DC offset auto correction</string>
-       </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="bandLabel">
        <property name="text">
-        <string>DC</string>
+        <string>Band</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="ButtonSwitch" name="iqImbalance">
-       <property name="toolTip">
-        <string>IQ imbalance auto correction</string>
-       </property>
-       <property name="text">
-        <string>IQ</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="corrLabal">
-       <property name="text">
-        <string>Auto</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
       <spacer name="fcPosRightSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -257,7 +201,7 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="6">
+     <item row="0" column="5">
       <widget class="TransverterButton" name="transverter">
        <property name="maximumSize">
         <size>
@@ -273,7 +217,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
+     <item row="0" column="1">
       <widget class="QComboBox" name="band">
        <property name="maximumSize">
         <size>
@@ -296,21 +240,7 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="bandLabel">
-       <property name="text">
-        <string>Band</string>
-       </property>
-      </widget>
-     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_freq">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_samplerate">

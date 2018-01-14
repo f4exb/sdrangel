@@ -331,9 +331,6 @@ void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFSett
         break;
     }
 
-	qint64 df = ((qint64)freq_hz * settings.m_LOppmTenths) / 10000000LL;
-	freq_hz += df;
-
 	airspyhf_error rc = (airspyhf_error) airspyhf_set_freq(m_dev, static_cast<uint32_t>(freq_hz));
 
 	if (rc == AIRSPYHF_SUCCESS) {
@@ -352,12 +349,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	int sampleRateIndex = settings.m_devSampleRateIndex;
 
 	qDebug() << "AirspyHFInput::applySettings";
-
-	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-	{
-		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-	}
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
@@ -395,7 +386,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	}
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-	        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
 	        || (m_settings.m_fcPos != settings.m_fcPos)
 	        || (m_settings.m_transverterMode != settings.m_transverterMode)
 	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))

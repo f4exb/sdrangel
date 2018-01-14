@@ -216,13 +216,7 @@ void AirspyHFGui::displaySettings()
     updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
-	ui->LOppm->setValue(m_settings.m_LOppmTenths);
-	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
-
-	ui->dcOffset->setChecked(m_settings.m_dcBlock);
-	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
@@ -266,25 +260,6 @@ void AirspyHFGui::sendSettings()
 void AirspyHFGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
-	sendSettings();
-}
-
-void AirspyHFGui::on_LOppm_valueChanged(int value)
-{
-	m_settings.m_LOppmTenths = value;
-	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-	sendSettings();
-}
-
-void AirspyHFGui::on_dcOffset_toggled(bool checked)
-{
-	m_settings.m_dcBlock = checked;
-	sendSettings();
-}
-
-void AirspyHFGui::on_iqImbalance_toggled(bool checked)
-{
-	m_settings.m_iqCorrection = checked;
 	sendSettings();
 }
 
