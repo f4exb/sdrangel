@@ -30,6 +30,7 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
     m_chunksize(0),
 	m_convertBuffer(TESTSOURCE_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
+	m_frequencyShift(0),
 	m_samplerate(48000),
 	m_log2Decim(4),
 	m_fcPos(0),
@@ -39,10 +40,9 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_frequency(435*1000),
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
-    m_throttleToggle(false)
+    m_throttleToggle(false),
+    m_mutex(QMutex::Recursive)
 {
-    m_chunksize = (m_samplerate * 4 * m_throttlems) / 1000;
-    setBuffers(m_chunksize);
 }
 
 TestSourceThread::~TestSourceThread()
@@ -52,7 +52,6 @@ TestSourceThread::~TestSourceThread()
 
 void TestSourceThread::startWork()
 {
-    qDebug("TestSourceThread::startWork");
 	m_startWaitMutex.lock();
 	m_elapsedTimer.start();
 	start();
@@ -63,16 +62,18 @@ void TestSourceThread::startWork()
 
 void TestSourceThread::stopWork()
 {
-    qDebug("TestSourceThread::stopWork");
 	m_running = false;
 	wait();
 }
 
 void TestSourceThread::setSamplerate(int samplerate)
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
 	m_samplerate = samplerate;
-	m_chunksize = (m_samplerate * 4 * m_throttlems) / 1000;
-	setBuffers(m_chunksize);
+    m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
+    m_throttleToggle = !m_throttleToggle;
+	m_nco.setFreq(m_frequencyShift, m_samplerate);
 }
 
 void TestSourceThread::setLog2Decimation(unsigned int log2_decim)
@@ -120,14 +121,10 @@ void TestSourceThread::run()
     m_running = true;
     m_startWaiter.wakeAll();
 
-    qDebug("TestSourceThread::run: starting");
-
     while (m_running) // actual work is in the tick() function
     {
         sleep(1);
     }
-
-    qDebug("TestSourceThread::run: ending");
 
     m_running = false;
 }
@@ -140,43 +137,41 @@ void TestSourceThread::setBuffers(quint32 chunksize)
 
         if (m_buf == 0)
         {
-            qDebug() << "TestSourceThread::setBuffer: Allocate buffer";
-            m_buf = (quint8*) malloc(m_bufsize);
+            qDebug() << "TestSourceThread::setBuffer: Allocate buffer:    "
+                    << " size: " << m_bufsize << " bytes"
+                    << " #samples: " << (m_bufsize/4);
+            m_buf = (qint16*) malloc(m_bufsize);
         }
         else
         {
-            qDebug() << "TestSourceThread::setBuffer: Re-allocate buffer";
-            quint8 *buf = m_buf;
-            m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
-            if (!m_buf) free(buf);
+            qDebug() << "TestSourceThread::setBuffer: Re-allocate buffer: "
+                    << " size: " << m_bufsize << " bytes"
+                    << " #samples: " << (m_bufsize/4);
+            free(m_buf);
+            m_buf = (qint16*) malloc(m_bufsize);
         }
 
         m_convertBuffer.resize(chunksize/4);
-
-        qDebug() << "TestSourceThread::setBuffer: size: " << m_bufsize
-                << " #samples: " << (m_bufsize/4);
     }
 }
 
 void TestSourceThread::generate(quint32 chunksize)
 {
-    quint32 n = chunksize / 2;
-    qint16 *buf = (qint16*) m_buf;
+    int n = chunksize / 2;
+    setBuffers(chunksize);
 
-    for (unsigned int i = 0; i < n;)
+    for (int i = 0; i < n-1;)
     {
         Complex c = m_nco.nextIQ();
-        buf[i] = c.real() * (1<<m_bitShift);
-        i++;
-        buf[i] = c.imag() * (1<<m_bitShift);
-        i++;
+        m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBits);
+        m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBits);
     }
 
     callback(m_buf, n);
 }
 
 //  call appropriate conversion (decimation) routine depending on the number of sample bits
-void TestSourceThread::callback(const quint8* buf, qint32 len)
+void TestSourceThread::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -211,10 +206,10 @@ void TestSourceThread::tick()
 
         if (throttlems != m_throttlems)
         {
+            QMutexLocker mutexLocker(&m_mutex);
             m_throttlems = throttlems;
             m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
             m_throttleToggle = !m_throttleToggle;
-            setBuffers(m_chunksize);
         }
 
         generate(m_chunksize);

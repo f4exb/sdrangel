@@ -53,12 +53,13 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-	quint8  *m_buf;
+	qint16  *m_buf;
     quint32 m_bufsize;
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
 	NCOF m_nco;
+	int m_frequencyShift;
 
 	int m_samplerate;
     unsigned int m_log2Decim;
@@ -73,18 +74,19 @@ private:
     int m_throttlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
+    QMutex m_mutex;
 
-	Decimators<quint8, SDR_SAMP_SZ, 8> m_decimators_8;
-    Decimators<quint8, SDR_SAMP_SZ, 12> m_decimators_12;
-    Decimators<quint8, SDR_SAMP_SZ, 16> m_decimators_16;
+	Decimators<qint16, SDR_SAMP_SZ, 8> m_decimators_8;
+    Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators_12;
+    Decimators<qint16, SDR_SAMP_SZ, 16> m_decimators_16;
 
 	void run();
-	void callback(const quint8* buf, qint32 len);
+	void callback(const qint16* buf, qint32 len);
 	void setBuffers(quint32 chunksize);
     void generate(quint32 chunksize);
 
 	//  Decimate according to specified log2 (ex: log2=4 => decim=16)
-	inline void convert_8(SampleVector::iterator* it, const quint8* buf, qint32 len)
+	inline void convert_8(SampleVector::iterator* it, const qint16* buf, qint32 len)
 	{
 	    if (m_log2Decim == 0) {
 	        m_decimators_8.decimate1(it, buf, len);
@@ -162,7 +164,7 @@ private:
 	    }
 	}
 
-	void convert_12(SampleVector::iterator* it, const quint8* buf, qint32 len)
+	void convert_12(SampleVector::iterator* it, const qint16* buf, qint32 len)
     {
         if (m_log2Decim == 0) {
             m_decimators_12.decimate1(it, buf, len);
@@ -240,7 +242,7 @@ private:
         }
     }
 
-	void convert_16(SampleVector::iterator* it, const quint8* buf, qint32 len)
+	void convert_16(SampleVector::iterator* it, const qint16* buf, qint32 len)
     {
         if (m_log2Decim == 0) {
             m_decimators_16.decimate1(it, buf, len);
