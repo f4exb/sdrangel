@@ -52,10 +52,10 @@ private:
 	unsigned int m_log2Decim;
 	int m_fcPos;
 
-	Decimators<quint8, SDR_SAMP_SZ, 8> m_decimators;
+	Decimators<qint8, SDR_SAMP_SZ, 8> m_decimators;
 
 	void run();
-	void callback(const quint8* buf, qint32 len);
+	void callback(const qint8* buf, qint32 len);
 
 	static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
 };
