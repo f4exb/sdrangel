@@ -88,7 +88,7 @@ void RTLSDRThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void RTLSDRThread::callback(const qint8* buf, qint32 len)
+void RTLSDRThread::callback(const quint8* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -178,9 +178,6 @@ void RTLSDRThread::callback(const qint8* buf, qint32 len)
 void RTLSDRThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
 {
 	RTLSDRThread* thread = (RTLSDRThread*)ctx;
-	for (unsigned int i = 0; i < len; i++) {
-	    buf[i] = buf[i] - 127;
-	}
-	thread->callback((qint8 *) buf, len);
+	thread->callback(buf, len);
 }
 

@@ -96,6 +96,7 @@ set(sdrbase_HEADERS
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
     dsp/decimators.h
+    dsp/decimatorsu.h
     dsp/interpolators.h
     dsp/dspcommands.h
     dsp/dspengine.h
