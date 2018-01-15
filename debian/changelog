@@ -1,6 +1,7 @@
 sdrangel (3.11.0-1) unstable; urgency=medium
 
   * AirspyHF: support
+  * RTL-SDR: refactored 8 bit samples shifting during decimation 
   * GUI: show REST API URL in about dialog
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 13 Jan 2018 12:14:18 +0100
