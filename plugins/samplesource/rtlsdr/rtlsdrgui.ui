@@ -471,7 +471,7 @@
         <string>RTLSDR special direct sampling mode (HF Bands)</string>
        </property>
        <property name="text">
-        <string>No-mod Direct Sampling</string>
+        <string>No-mod DS</string>
        </property>
       </widget>
      </item>
@@ -487,6 +487,48 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="rfBWabel">
+       <property name="text">
+        <string>RFBW</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ValueDial" name="rfBW" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>RF filter bandwidth (kHz)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="rfBWUnits">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -572,7 +614,7 @@
    <item>
     <layout class="QHBoxLayout" name="fillerLayout">
      <item>
-      <spacer name="filerVerticalSpacer">
+      <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>

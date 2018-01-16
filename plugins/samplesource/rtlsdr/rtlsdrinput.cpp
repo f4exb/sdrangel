@@ -515,6 +515,23 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force)
+    {
+        m_settings.m_rfBandwidth = settings.m_rfBandwidth;
+
+        if (m_dev != 0)
+        {
+            if (rtlsdr_set_tuner_bandwidth( m_dev, m_settings.m_rfBandwidth) != 0)
+            {
+                qCritical("RTLSDRInput::applySettings: could not set RF bandwidth to %u", m_settings.m_rfBandwidth);
+            }
+            else
+            {
+                qDebug() << "RTLSDRInput::applySettings: set RF bandwidth to " << m_settings.m_rfBandwidth;
+            }
+        }
+    }
+
     if (forwardChange)
     {
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);

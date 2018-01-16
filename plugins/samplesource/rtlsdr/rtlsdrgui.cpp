@@ -49,6 +49,9 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateHighRangeMin, RTLSDRInput::sampleRateHighRangeMax);
 
+    ui->rfBW->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->rfBW->setValueRange(4, 350, 8000);
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -247,6 +250,7 @@ void RTLSDRGui::displaySettings()
     updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->sampleRate->setValue(m_settings.m_devSampleRate);
+	ui->rfBW->setValue(m_settings.m_rfBandwidth / 1000);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 	ui->ppm->setValue(m_settings.m_loPpmCorrection);
@@ -432,6 +436,12 @@ void RTLSDRGui::on_agc_stateChanged(int state)
 void RTLSDRGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    sendSettings();
+}
+
+void RTLSDRGui::on_rfBW_changed(quint64 value)
+{
+    m_settings.m_rfBandwidth = value * 1000;
     sendSettings();
 }
 

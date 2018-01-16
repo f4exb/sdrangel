@@ -38,6 +38,7 @@ void RTLSDRSettings::resetToDefaults()
 	m_noModMode = false;
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
+	m_rfBandwidth = 2500 * 1000; // Hz
 }
 
 QByteArray RTLSDRSettings::serialize() const
@@ -56,6 +57,7 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeBool(11, m_noModMode);
     s.writeBool(12, m_transverterMode);
     s.writeS64(13, m_transverterDeltaFrequency);
+    s.writeU32(14, m_rfBandwidth);
 
 	return s.final();
 }
@@ -87,6 +89,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readBool(11, &m_noModMode, false);
         d.readBool(12, &m_transverterMode, false);
         d.readS64(13, &m_transverterDeltaFrequency, 0);
+        d.readU32(4, &m_rfBandwidth, 2500 * 1000);
 
 		return true;
 	}

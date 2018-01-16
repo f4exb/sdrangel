@@ -37,6 +37,7 @@ struct RTLSDRSettings {
 	bool m_noModMode;
     bool m_transverterMode;
 	qint64 m_transverterDeltaFrequency;
+	quint32 m_rfBandwidth; //!< RF filter bandwidth in Hz
 
 	RTLSDRSettings();
 	void resetToDefaults();
