@@ -29,4 +29,6 @@ RtlSdrSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64      
+    rfBandwidth:
+      type: integer
     

@@ -50,11 +50,13 @@ SWGRtlSdrSettings::init() {
     no_mod_mode = 0;
     transverter_mode = 0;
     transverter_delta_frequency = 0L;
+    rf_bandwidth = 0;
 }
 
 void
 SWGRtlSdrSettings::cleanup() {
     
+
 
 
 
@@ -93,6 +95,7 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&no_mod_mode, pJson["noModMode"], "qint32", "");
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
 }
 
 QString
@@ -134,6 +137,8 @@ SWGRtlSdrSettings::asJsonObject() {
     obj->insert("transverterMode", QJsonValue(transverter_mode));
 
     obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+
+    obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
 
     return obj;
 }
@@ -253,6 +258,15 @@ SWGRtlSdrSettings::getTransverterDeltaFrequency() {
 void
 SWGRtlSdrSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
     this->transverter_delta_frequency = transverter_delta_frequency;
+}
+
+qint32
+SWGRtlSdrSettings::getRfBandwidth() {
+    return rf_bandwidth;
+}
+void
+SWGRtlSdrSettings::setRfBandwidth(qint32 rf_bandwidth) {
+    this->rf_bandwidth = rf_bandwidth;
 }
 
 

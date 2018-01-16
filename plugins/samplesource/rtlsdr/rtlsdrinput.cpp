@@ -604,6 +604,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getRtlSdrSettings()->getRfBandwidth() != 0;
+    }
 
     MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -633,6 +636,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
 }
 
 int RTLSDRInput::webapiRunGet(

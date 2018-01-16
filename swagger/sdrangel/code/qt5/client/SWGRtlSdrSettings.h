@@ -80,6 +80,9 @@ public:
     qint64 getTransverterDeltaFrequency();
     void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
 
+    qint32 getRfBandwidth();
+    void setRfBandwidth(qint32 rf_bandwidth);
+
 
 private:
     qint32 dev_sample_rate;
@@ -95,6 +98,7 @@ private:
     qint32 no_mod_mode;
     qint32 transverter_mode;
     qint64 transverter_delta_frequency;
+    qint32 rf_bandwidth;
 };
 
 }
