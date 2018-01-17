@@ -285,7 +285,7 @@ void AirspyHFGui::on_sampleRate_currentIndexChanged(int index)
 
 void AirspyHFGui::on_decim_currentIndexChanged(int index)
 {
-	if ((index <0) || (index > 6))
+	if ((index < 0) || (index > 5))
 		return;
 	m_settings.m_log2Decim = index;
 	sendSettings();
