@@ -217,9 +217,9 @@ void AirspyHFGui::displaySettings()
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-
+	ui->LOppm->setValue(m_settings.m_LOppmTenths);
+	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
-
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->band->blockSignals(false);
     blockApplySettings(false);
@@ -263,6 +263,18 @@ void AirspyHFGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
+}
+
+void AirspyHFGui::on_LOppm_valueChanged(int value)
+{
+    m_settings.m_LOppmTenths = value;
+    ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    sendSettings();
+}
+
+void AirspyHFGui::on_resetLOppm_clicked()
+{
+    ui->LOppm->setValue(0);
 }
 
 void AirspyHFGui::on_sampleRate_currentIndexChanged(int index)

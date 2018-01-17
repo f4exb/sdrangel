@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>120</height>
+    <height>132</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>120</height>
+    <height>132</height>
    </size>
   </property>
   <property name="font">
@@ -173,6 +173,71 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="loCorrectionLayout">
+     <item>
+      <widget class="QLabel" name="LOppmLabel">
+       <property name="text">
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="LOppm">
+       <property name="toolTip">
+        <string>Local Oscillator ppm correction</string>
+       </property>
+       <property name="minimum">
+        <number>-100</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="LOppmText">
+       <property name="minimumSize">
+        <size>
+         <width>36</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>LO correction value (ppm)</string>
+       </property>
+       <property name="text">
+        <string>-00.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetLOppm">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Rest LO ppm correction</string>
+       </property>
+       <property name="text">
+        <string>R</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line_freq">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -190,10 +255,10 @@
      </item>
      <item>
       <widget class="QComboBox" name="band">
-       <property name="maximumSize">
+       <property name="minimumSize">
         <size>
-         <width>50</width>
-         <height>16777215</height>
+         <width>56</width>
+         <height>0</height>
         </size>
        </property>
        <property name="toolTip">
@@ -347,7 +412,7 @@
    <item>
     <layout class="QHBoxLayout" name="paddingLayout">
      <item>
-      <spacer name="verticalPaddingSpacer">
+      <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>

@@ -384,6 +384,23 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		}
 	}
 
+	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+	{
+	    if (m_dev != 0)
+	    {
+	        rc = (airspyhf_error) airspyhf_set_calibration(m_dev, settings.m_LOppmTenths * 100);
+
+	        if (rc != AIRSPYHF_SUCCESS)
+            {
+                qCritical("AirspyHFInput::applySettings: could not set LO ppm correction to %f", settings.m_LOppmTenths / 10.0f);
+            }
+            else if (m_airspyHFThread != 0)
+            {
+                qDebug("AirspyHFInput::applySettings: LO ppm correction set to %f", settings.m_LOppmTenths / 10.0f);
+            }
+	    }
+	}
+
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
 	        || (m_settings.m_transverterMode != settings.m_transverterMode)
 	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))

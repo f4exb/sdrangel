@@ -20,6 +20,7 @@
 struct AirspyHFSettings
 {
 	quint64 m_centerFrequency;
+    qint32  m_LOppmTenths;
 	quint32 m_devSampleRateIndex;
 	quint32 m_log2Decim;
     bool m_transverterMode;

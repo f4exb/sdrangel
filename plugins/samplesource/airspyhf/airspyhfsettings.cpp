@@ -26,6 +26,7 @@ AirspyHFSettings::AirspyHFSettings()
 void AirspyHFSettings::resetToDefaults()
 {
 	m_centerFrequency = 7150*1000;
+	m_LOppmTenths = 0;
 	m_devSampleRateIndex = 0;
 	m_log2Decim = 0;
     m_transverterMode = false;
@@ -38,6 +39,7 @@ QByteArray AirspyHFSettings::serialize() const
 	SimpleSerializer s(1);
 
 	s.writeU32(1, m_devSampleRateIndex);
+	s.writeS32(2, m_LOppmTenths);
 	s.writeU32(3, m_log2Decim);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
@@ -62,6 +64,7 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		quint32 uintval;
 
 		d.readU32(1, &m_devSampleRateIndex, 0);
+        d.readS32(2, &m_LOppmTenths, 0);
 		d.readU32(3, &m_log2Decim, 0);
 		d.readS32(4, &intval, 0);
         d.readBool(7, &m_transverterMode, false);
