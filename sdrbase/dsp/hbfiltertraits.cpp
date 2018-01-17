@@ -24,7 +24,7 @@ const int16_t HBFIRFilterTraits<16>::hbMod[16+6] = {
 
 const int32_t HBFIRFilterTraits<16>::hbCoeffs[4] = {
         //* Firwin as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0052391810630145274965685509016566356877 * (1 << hbShift)),
+        (int32_t)(-0.0052391810630145274965685509016566356877 * (1 << hbShift)), // /190 => hbShift = 8
         (int32_t)(0.0232111017863650750947535073009930783883 * (1 << hbShift)),
         (int32_t)(-0.0761058457486735451258397233686991967261 * (1 << hbShift)),
         (int32_t)(0.3076987787367443383246268240327481180429 * (1 << hbShift)),
@@ -38,7 +38,7 @@ const int16_t HBFIRFilterTraits<32>::hbMod[32+6] = {
 
 const int32_t HBFIRFilterTraits<32>::hbCoeffs[8] = {
         //* Firwin as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0018878783958199373254477348993418672762 * (1 << hbShift)),
+        (int32_t)(-0.0018878783958199373254477348993418672762 * (1 << hbShift)), // ~1/529 => hbShift = 10
         (int32_t)( 0.0038624783041994003966734805288751886110 * (1 << hbShift)),
         (int32_t)(-0.0082424665965482504098593707908548822161 * (1 << hbShift)),
         (int32_t)( 0.0159471139705940345709933581019868142903 * (1 << hbShift)),
@@ -66,7 +66,7 @@ const int16_t HBFIRFilterTraits<48>::hbMod[48+6] = {
 
 const int32_t HBFIRFilterTraits<48>::hbCoeffs[12] = {
         //* Firwin as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0011627994808655962074434020436797254661 * (1 << hbShift)),
+        (int32_t)(-0.0011627994808655962074434020436797254661 * (1 << hbShift)), // ~1/859 => hbShift = 10
         (int32_t)( 0.0017451165792459334517860991553561689216 * (1 << hbShift)),
         (int32_t)(-0.0029357205890606303047563052643909031758 * (1 << hbShift)),
         (int32_t)( 0.0048726090910227891003780875678330630763 * (1 << hbShift)),
@@ -102,7 +102,7 @@ const int16_t HBFIRFilterTraits<64>::hbMod[64+6] = {
 
 const int32_t HBFIRFilterTraits<64>::hbCoeffs[16] = {
         //* Remez as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0004653050334792540416659067936677729449 * (1 << hbShift)),
+        (int32_t)(-0.0004653050334792540416659067936677729449 * (1 << hbShift)), // ~1/2149 => hbShift = 12
         (int32_t)( 0.0007120490624526883919470643391491648799 * (1 << hbShift)),
         (int32_t)(-0.0012303473710125558716887983479182366864 * (1 << hbShift)),
         (int32_t)( 0.0019716520179919017584369012041634050547 * (1 << hbShift)),
@@ -147,7 +147,7 @@ const int16_t HBFIRFilterTraits<80>::hbMod[80+6] = {
 
 const int32_t HBFIRFilterTraits<80>::hbCoeffs[20] = {
         //* Remez as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0001054430663706784843331246137587697831 * (1 << hbShift)),
+        (int32_t)(-0.0001054430663706784843331246137587697831 * (1 << hbShift)), // ~1/9483 => hbShift = 14
         (int32_t)( 0.0001895717826405601933066613629108587702 * (1 << hbShift)),
         (int32_t)(-0.0003519516996893227891822497621632237497 * (1 << hbShift)),
         (int32_t)( 0.0005975111594421821190753485453228677216 * (1 << hbShift)),
@@ -180,7 +180,7 @@ const int16_t HBFIRFilterTraits<96>::hbMod[96+6] = {
 
 const int32_t HBFIRFilterTraits<96>::hbCoeffs[24] = {
         //* Remez as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0000243052463317893968695708462046667364 * (1 << hbShift)),
+        (int32_t)(-0.0000243052463317893968695708462046667364 * (1 << hbShift)), // 1/41143 => hbShift = 16
         (int32_t)( 0.0000503567741519847557611806732058568059 * (1 << hbShift)),
         (int32_t)(-0.0001002354600628052128195172310043403741 * (1 << hbShift)),
         (int32_t)( 0.0001801275832684542921834081052878673290 * (1 << hbShift)),
@@ -218,7 +218,7 @@ const int16_t HBFIRFilterTraits<112>::hbMod[112+6] = {
 
 const int32_t HBFIRFilterTraits<112>::hbCoeffs[28] = {
         //* Remez as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0000057182612173497993884982611156875265 * (1 << hbShift)),
+        (int32_t)(-0.0000057182612173497993884982611156875265 * (1 << hbShift)), // ~1/174878 => hbShift = 18
         (int32_t)( 0.0000134089330475142792093150995169636985 * (1 << hbShift)),
         (int32_t)(-0.0000285019056923813186876261183133607346 * (1 << hbShift)),
         (int32_t)( 0.0000540489980941085909355720007241075109 * (1 << hbShift)),
@@ -261,7 +261,7 @@ const int16_t HBFIRFilterTraits<128>::hbMod[128+6] = {
 
 const int32_t HBFIRFilterTraits<128>::hbCoeffs[32] = {
         //* Remez as in https://www.dsprelated.com/showcode/270.php */
-        (int32_t)(-0.0000013530084481063586964138655693856705 * (1 << hbShift)),
+        (int32_t)(-0.0000013530084481063586964138655693856705 * (1 << hbShift)), // ~1/739098 => hbShift = 20
         (int32_t)( 0.0000035468835939308468221931557040615957 * (1 << hbShift)),
         (int32_t)(-0.0000080263259193852748679242486984364291 * (1 << hbShift)),
         (int32_t)( 0.0000160249362715262112246382419922241525 * (1 << hbShift)),
