@@ -61,8 +61,6 @@ private:
 	bool m_doApplySettings;
     bool m_forceSettings;
 	DeviceSampleSource* m_sampleSource;
-	int m_sampleRate;
-	quint64 m_centerFrequency;
 	std::size_t m_tickCount;
     int m_deviceSampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device

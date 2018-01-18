@@ -44,8 +44,6 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true),
     m_sampleSource(0),
-    m_sampleRate(0),
-    m_centerFrequency(0),
     m_tickCount(0),
     m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
@@ -98,12 +96,12 @@ void TestSourceGui::resetToDefaults()
 
 qint64 TestSourceGui::getCenterFrequency() const
 {
-    return m_centerFrequency;
+    return m_settings.m_centerFrequency;
 }
 
 void TestSourceGui::setCenterFrequency(qint64 centerFrequency)
 {
-    m_centerFrequency = centerFrequency;
+    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }
@@ -329,6 +327,7 @@ void TestSourceGui::updateFrequencyShiftLimit()
 void TestSourceGui::displaySettings()
 {
     blockApplySettings(true);
+    ui->sampleSize->blockSignals(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->decimation->setCurrentIndex(m_settings.m_log2Decim);
@@ -350,6 +349,7 @@ void TestSourceGui::displaySettings()
     int qBiasPercent = roundf(m_settings.m_qFactor * 100.0f);
     ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
 
+    ui->sampleSize->blockSignals(false);
     blockApplySettings(false);
 }
 
