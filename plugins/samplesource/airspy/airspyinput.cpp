@@ -393,23 +393,24 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
-		m_settings.m_log2Decim = settings.m_log2Decim;
 		forwardChange = true;
 
 		if (m_airspyThread != 0)
 		{
-			m_airspyThread->setLog2Decimation(m_settings.m_log2Decim);
-			qDebug() << "AirspyInput: set decimation to " << (1<<m_settings.m_log2Decim);
+			m_airspyThread->setLog2Decimation(settings.m_log2Decim);
+			qDebug() << "AirspyInput: set decimation to " << (1<<settings.m_log2Decim);
 		}
 	}
 
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-	        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-	        || (m_settings.m_fcPos != settings.m_fcPos)
-	        || (m_settings.m_transverterMode != settings.m_transverterMode)
-	        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
 	{
         m_settings.m_centerFrequency = settings.m_centerFrequency;
+        m_settings.m_log2Decim = settings.m_log2Decim;
         m_settings.m_transverterMode = settings.m_transverterMode;
         m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
         m_settings.m_LOppmTenths = settings.m_LOppmTenths;

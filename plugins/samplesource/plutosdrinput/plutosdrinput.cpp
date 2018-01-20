@@ -451,17 +451,18 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     std::vector<std::string> params;
     bool paramsToSet = false;
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_fcPos != settings.m_fcPos)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = settings.m_devSampleRate;
 
-        if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_CENTER))
+        if ((settings.m_log2Decim == 0) || (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_CENTER))
         {
             f_img = deviceCenterFrequency;
         }

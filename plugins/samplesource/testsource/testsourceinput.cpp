@@ -250,36 +250,34 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
             || (m_settings.m_fcPos != settings.m_fcPos)
-            || (m_settings.m_frequencyShift != settings.m_frequencyShift))
+            || (m_settings.m_frequencyShift != settings.m_frequencyShift)
+            || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-        qint64 f_img = 0;
+        qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = settings.m_sampleRate;
 
-        if ((settings.m_log2Decim == 0) || (settings.m_fcPos == TestSourceSettings::FC_POS_CENTER))
-        {
-            f_img = 0;
-        }
-        else
+        if (settings.m_log2Decim != 0)
         {
             if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA)
             {
                 deviceCenterFrequency += (devSampleRate / 4);
-                f_img = devSampleRate/2;
+                f_img = deviceCenterFrequency + devSampleRate/2;
             }
             else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA)
             {
                 deviceCenterFrequency -= (devSampleRate / 4);
-                f_img = devSampleRate/2;
+                f_img = deviceCenterFrequency - devSampleRate/2;
             }
         }
 
         if (m_testSourceThread != 0)
         {
             m_testSourceThread->setFcPos((int) settings.m_fcPos);
-            m_testSourceThread->setFrequencyShift(f_img + settings.m_frequencyShift);
-            qDebug() << "TestSourceInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
+            m_testSourceThread->setFrequencyShift(deviceCenterFrequency - settings.m_centerFrequency  + settings.m_frequencyShift);
+            qDebug() << "TestSourceInput::applySettings:"
+                    << " center freq: " << settings.m_centerFrequency << " Hz"
                     << " device center freq: " << deviceCenterFrequency << " Hz"
                     << " device sample rate: " << devSampleRate << "Hz"
                     << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"

@@ -26,12 +26,6 @@
  */
 struct LimeSDRInputSettings
 {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
-
     enum PathRFE
     {
         PATH_RFE_NONE = 0,

@@ -428,7 +428,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        m_settings.m_log2Decim = settings.m_log2Decim;
         forwardChange = true;
 
         if (m_rtlSDRThread != 0)
@@ -439,14 +438,16 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         qDebug("RTLSDRInput::applySettings: log2decim set to %d", m_settings.m_log2Decim);
     }
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_fcPos != settings.m_fcPos)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         m_settings.m_transverterMode = settings.m_transverterMode;
         m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+        m_settings.m_log2Decim = settings.m_log2Decim;
         qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
         deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;

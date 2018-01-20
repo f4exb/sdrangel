@@ -42,7 +42,6 @@ public:
     virtual void setDeviceSampleRate(int sampleRate __attribute__((unused))) {}
     virtual bool isRunning() { return m_running; }
     void setLog2Decimation(unsigned int log2_decim);
-    void setFcPos(int fcPos);
 
 private:
     QMutex m_startWaitMutex;
@@ -55,7 +54,6 @@ private:
     SampleSinkFifo* m_sampleFifo;
 
     unsigned int m_log2Decim; // soft decimation
-    int m_fcPos;
 
     Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
 

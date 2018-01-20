@@ -388,11 +388,12 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	    }
 	}
 
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-			(m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
-			(m_settings.m_fcPos != settings.m_fcPos))
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
+        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
+        (m_settings.m_log2Decim != settings.m_log2Decim) ||
+        (m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
+		if ((settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
 		{
 			deviceCenterFrequency = settings.m_centerFrequency;
 			f_img = deviceCenterFrequency;

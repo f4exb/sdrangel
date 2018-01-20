@@ -512,31 +512,36 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        m_settings.m_log2Decim = settings.m_log2Decim;
-        forwardChange = true;
-
         if (m_sdrPlayThread != 0)
         {
             m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
-            qDebug() << "SDRPlayInput::applySettings: set decimation to " << (1<<m_settings.m_log2Decim);
+            qDebug() << "SDRPlayInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
     }
 
-    if (m_settings.m_centerFrequency != settings.m_centerFrequency)
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
     {
-        forwardChange = true;
+        if (m_sdrPlayThread != 0)
+        {
+            m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
+            qDebug() << "SDRPlayInput: set fc pos (enum) to " << (int) settings.m_fcPos;
+        }
     }
 
-    qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-    qint64 f_img = deviceCenterFrequency;
-    quint32 devSampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
-
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-            || (m_settings.m_fcPos != settings.m_fcPos))
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         m_settings.m_LOppmTenths = settings.m_LOppmTenths;
+        m_settings.m_fcPos = settings.m_fcPos;
+        m_settings.m_log2Decim = settings.m_log2Decim;
+        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
+        qint64 f_img = deviceCenterFrequency;
+        quint32 devSampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
+
+        forwardChange = true;
 
         if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == SDRPlaySettings::FC_POS_CENTER))
         {
@@ -567,17 +572,6 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                         << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
                         << " img: " << f_img << "Hz";
             }
-        }
-    }
-
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-    {
-        m_settings.m_fcPos = settings.m_fcPos;
-
-        if (m_sdrPlayThread != 0)
-        {
-            m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
-            qDebug() << "SDRPlayInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
         }
     }
 
