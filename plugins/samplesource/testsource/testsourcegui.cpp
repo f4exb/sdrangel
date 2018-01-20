@@ -348,6 +348,8 @@ void TestSourceGui::displaySettings()
     ui->iBiasText->setText(QString(tr("%1 %").arg(iBiasPercent)));
     int qBiasPercent = roundf(m_settings.m_qFactor * 100.0f);
     ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
+    ui->dcOffset->setChecked(m_settings.m_dcBlock);
+    ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 
     ui->sampleSize->blockSignals(false);
     blockApplySettings(false);
