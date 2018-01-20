@@ -76,4 +76,4 @@ endif (BUILD_DEBIAN)
 
 qt5_use_modules(outputplutosdr Core Widgets)
 
-install(TARGETS outputplutosdr DESTINATION lib/plugins/sampleink)
+install(TARGETS outputplutosdr DESTINATION lib/plugins/samplesink)
