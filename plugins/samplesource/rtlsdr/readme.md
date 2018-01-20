@@ -49,7 +49,7 @@ These buttons control the local DSP auto correction options:
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance
   
-<h3>4: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
+<h3>4: Baseband center frequency position relative the center frequency</h3>
 
 Possible values are:
 
