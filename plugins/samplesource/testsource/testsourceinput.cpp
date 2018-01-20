@@ -254,7 +254,7 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
             || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+        int frequencyShift = settings.m_frequencyShift;
         qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = settings.m_sampleRate;
 
@@ -263,11 +263,13 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
             if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA)
             {
                 deviceCenterFrequency += (devSampleRate / 4);
+                frequencyShift -= (devSampleRate / 4);
                 f_img = deviceCenterFrequency + devSampleRate/2;
             }
             else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA)
             {
                 deviceCenterFrequency -= (devSampleRate / 4);
+                frequencyShift += (devSampleRate / 4);
                 f_img = deviceCenterFrequency - devSampleRate/2;
             }
         }
@@ -275,7 +277,7 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         if (m_testSourceThread != 0)
         {
             m_testSourceThread->setFcPos((int) settings.m_fcPos);
-            m_testSourceThread->setFrequencyShift(deviceCenterFrequency - settings.m_centerFrequency  + settings.m_frequencyShift);
+            m_testSourceThread->setFrequencyShift(frequencyShift);
             qDebug() << "TestSourceInput::applySettings:"
                     << " center freq: " << settings.m_centerFrequency << " Hz"
                     << " device center freq: " << deviceCenterFrequency << " Hz"
