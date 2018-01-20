@@ -3,9 +3,11 @@ sdrangel (3.11.0-1) unstable; urgency=medium
   * AirspyHF: support
   * Refactored 8 bit samples shifting during decimation (RTL-SDR and HackRF Rx) 
   * RTL-SDR: implemented RF filter control (tuner bandwidth)
+  * Airspy, BladeRF, HackRF, PlutoSDR, RTLSDR, SDRPlay: fix for no decimation
+  * Test source input plugin for test of software internals
   * GUI: show REST API URL in about dialog
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 13 Jan 2018 12:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Jan 2018 12:14:18 +0100
 
 sdrangel (3.10.1-1) unstable; urgency=medium
 
