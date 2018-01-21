@@ -82,8 +82,8 @@ protected:
 		typedef bool (IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
 		IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else
-		typedef bool (IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-		IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+		typedef bool (IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+		IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #endif
 		WorkFunction m_workFunction;
 		Mode m_mode;

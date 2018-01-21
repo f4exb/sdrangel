@@ -26,7 +26,7 @@
 #include "dsp/hbfiltertraits.h"
 #include "util/export.h"
 
-template<uint32_t HBFilterOrder>
+template<typename AccuType, uint32_t HBFilterOrder>
 class SDRANGEL_API IntHalfbandFilterDB {
 public:
     IntHalfbandFilterDB();
@@ -619,7 +619,7 @@ public:
     }
 
 protected:
-	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
+	AccuType m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
 	int m_ptr;
 	int m_size;
 	int m_state;
@@ -649,8 +649,8 @@ protected:
     {
         int a = m_ptr + m_size; // tip pointer
         int b = m_ptr + 1; // tail pointer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -671,8 +671,8 @@ protected:
     {
         int a = m_ptr + m_size; // tip pointer
         int b = m_ptr + 1; // tail pointer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -695,8 +695,8 @@ protected:
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -716,8 +716,8 @@ protected:
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -732,8 +732,8 @@ protected:
     }
 };
 
-template<uint32_t HBFilterOrder>
-IntHalfbandFilterDB<HBFilterOrder>::IntHalfbandFilterDB()
+template<typename AccuType, uint32_t HBFilterOrder>
+IntHalfbandFilterDB<AccuType, HBFilterOrder>::IntHalfbandFilterDB()
 {
     m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
 

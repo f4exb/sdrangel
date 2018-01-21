@@ -120,12 +120,12 @@ public:
 	void decimate64_cen(SampleSinkFifoDoubleBuffered& fifo, const T* buf, qint32 len);
 
 private:
-	IntHalfbandFilter<32> m_decimator2;  // 1st stages
-	IntHalfbandFilter<32> m_decimator4;  // 2nd stages
-	IntHalfbandFilter<32> m_decimator8;  // 3rd stages
-	IntHalfbandFilter<32> m_decimator16; // 4th stages
-	IntHalfbandFilter<32> m_decimator32; // 5th stages
-	IntHalfbandFilter<32> m_decimator64; // 6th stages
+	IntHalfbandFilter<qint32, 32> m_decimator2;  // 1st stages
+	IntHalfbandFilter<qint32, 32> m_decimator4;  // 2nd stages
+	IntHalfbandFilter<qint32, 32> m_decimator8;  // 3rd stages
+	IntHalfbandFilter<qint32, 32> m_decimator16; // 4th stages
+	IntHalfbandFilter<qint32, 32> m_decimator32; // 5th stages
+	IntHalfbandFilter<qint32, 32> m_decimator64; // 6th stages
 };
 
 template<typename T, uint32_t SdrBits, uint32_t InputBits>
