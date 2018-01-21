@@ -24,10 +24,14 @@
 #define INCLUDE_GPL_DSP_DECIMATORSU_H_
 
 #include "dsp/dsptypes.h"
+#ifdef SAMPLE_24BIT
+#include "dsp/inthalfbandfilterdb.h"
+#else
 #ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
+#endif
 #endif
 
 #define DECIMATORS_HB_FILTER_ORDER 64
@@ -51,6 +55,24 @@ struct decimation_shifts
 };
 
 template<>
+struct decimation_shifts<24, 24>
+{
+    static const uint pre1   = 0;
+    static const uint pre2   = 0;
+    static const uint post2  = 1;
+    static const uint pre4   = 0;
+    static const uint post4  = 2;
+    static const uint pre8   = 0;
+    static const uint post8  = 3;
+    static const uint pre16  = 0;
+    static const uint post16 = 4;
+    static const uint pre32  = 0;
+    static const uint post32 = 5;
+    static const uint pre64  = 0;
+    static const uint post64 = 6;
+};
+
+template<>
 struct decimation_shifts<16, 16>
 {
     static const uint pre1   = 0;
@@ -66,6 +88,24 @@ struct decimation_shifts<16, 16>
     static const uint post32 = 5;
     static const uint pre64  = 0;
     static const uint post64 = 6;
+};
+
+template<>
+struct decimation_shifts<24, 16>
+{
+    static const uint pre1   = 8;
+    static const uint pre2   = 7;
+    static const uint post2  = 0;
+    static const uint pre4   = 6;
+    static const uint post4  = 0;
+    static const uint pre8   = 5;
+    static const uint post8  = 0;
+    static const uint pre16  = 4;
+    static const uint post16 = 0;
+    static const uint pre32  = 3;
+    static const uint post32 = 0;
+    static const uint pre64  = 2;
+    static const uint post64 = 0;
 };
 
 template<>
@@ -87,6 +127,24 @@ struct decimation_shifts<16, 12>
 };
 
 template<>
+struct decimation_shifts<24, 12>
+{
+    static const uint pre1   = 12;
+    static const uint pre2   = 11;
+    static const uint post2  = 0;
+    static const uint pre4   = 10;
+    static const uint post4  = 0;
+    static const uint pre8   = 9;
+    static const uint post8  = 0;
+    static const uint pre16  = 8;
+    static const uint post16 = 0;
+    static const uint pre32  = 7;
+    static const uint post32 = 0;
+    static const uint pre64  = 6;
+    static const uint post64 = 0;
+};
+
+template<>
 struct decimation_shifts<16, 8>
 {
     static const uint pre1   = 8;
@@ -101,6 +159,24 @@ struct decimation_shifts<16, 8>
     static const uint pre32  = 3;
     static const uint post32 = 0;
     static const uint pre64  = 2;
+    static const uint post64 = 0;
+};
+
+template<>
+struct decimation_shifts<24, 8>
+{
+    static const uint pre1   = 16;
+    static const uint pre2   = 15;
+    static const uint post2  = 0;
+    static const uint pre4   = 14;
+    static const uint post4  = 0;
+    static const uint pre8   = 13;
+    static const uint post8  = 0;
+    static const uint pre16  = 12;
+    static const uint post16 = 0;
+    static const uint pre32  = 11;
+    static const uint post32 = 0;
+    static const uint pre64  = 10;
     static const uint post64 = 0;
 };
 
@@ -130,6 +206,14 @@ public:
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
+#ifdef SAMPLE_24BIT
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+#else
 #ifdef USE_SSE4_1
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
@@ -144,6 +228,7 @@ private:
 	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
 	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
 	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+#endif
 #endif
 };
 

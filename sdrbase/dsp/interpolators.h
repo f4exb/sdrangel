@@ -18,10 +18,14 @@
 #define INCLUDE_GPL_DSP_INTERPOLATORS_H_
 
 #include "dsp/dsptypes.h"
+#ifdef SAMPLE_24BIT
+#include "dsp/inthalfbandfilterdb.h"
+#else
 #ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
+#endif
 #endif
 
 #define INTERPOLATORS_HB_FILTER_ORDER_FIRST  64
@@ -114,6 +118,14 @@ public:
 	void interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len);
 
 private:
+#ifdef SAMPLE_24BIT
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_FIRST> m_interpolator2;  // 1st stages
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_SECOND> m_interpolator4;  // 2nd stages
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator8;  // 3rd stages
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator16; // 4th stages
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator32; // 5th stages
+    IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator64; // 6th stages
+#else
 #ifdef USE_SSE4_1
     IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_FIRST> m_interpolator2;  // 1st stages
     IntHalfbandFilterEO1<INTERPOLATORS_HB_FILTER_ORDER_SECOND> m_interpolator4;  // 2nd stages
@@ -128,6 +140,7 @@ private:
 	IntHalfbandFilterDB<qint32, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator16; // 4th stages
 	IntHalfbandFilterDB<qint32, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator32; // 5th stages
 	IntHalfbandFilterDB<qint32, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator64; // 6th stages
+#endif
 #endif
 };
 
