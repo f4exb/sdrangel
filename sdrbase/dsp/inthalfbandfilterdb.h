@@ -67,7 +67,7 @@ public:
         {
             case 0:
                 // insert sample into ring-buffer
-                storeSample(0, 0);
+                storeSample((FixReal) 0, (FixReal) 0);
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -128,7 +128,7 @@ public:
 	bool workDecimateCenter(qint32 *x, qint32 *y)
 	{
 		// insert sample into ring-buffer
-	    storeSample(*x, *y);
+	    storeSample32(*x, *y);
 
 		switch(m_state)
 		{
@@ -279,7 +279,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -315,7 +315,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -478,7 +478,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -514,7 +514,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -562,10 +562,10 @@ public:
 
     void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
     {
-        storeSample(x1, y1);
+        storeSample32(x1, y1);
         advancePointer();
 
-        storeSample(*x2, *y2);
+        storeSample32(*x2, *y2);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -577,7 +577,7 @@ public:
         doFIR(sample1);
         advancePointer();
 
-        storeSample(0, 0);
+        storeSample((FixReal) 0, (FixReal) 0);
         doFIR(sample2);
         advancePointer();
     }
@@ -585,11 +585,11 @@ public:
     /** Simple zero stuffing and filter */
     void myInterpolateZeroStuffing(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
     {
-        storeSample(*x1, *y1);
+        storeSample32(*x1, *y1);
         doFIR(x1, y1);
         advancePointer();
 
-        storeSample(0, 0);
+        storeSample32(0, 0);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -632,7 +632,7 @@ protected:
         m_samplesDB[m_ptr + m_size][1] = sampleQ;
     }
 
-    void storeSample(qint32 x, qint32 y)
+    void storeSample32(qint32 x, qint32 y)
     {
         m_samplesDB[m_ptr][0] = x;
         m_samplesDB[m_ptr][1] = y;
