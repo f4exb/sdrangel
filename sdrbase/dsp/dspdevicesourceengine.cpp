@@ -178,7 +178,7 @@ void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector:
 	double count;
 	int io = 0;
 	int qo = 0;
-	Sample corr((qint16)m_iOffset, (qint16)m_qOffset);
+	Sample corr((FixReal)m_iOffset, (FixReal)m_qOffset);
 
 	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++)
