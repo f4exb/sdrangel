@@ -70,7 +70,7 @@ public:
         {
             case 0:
                 // insert sample into ring-buffer
-                storeSample(0, 0);
+                storeSample((FixReal) 0, (FixReal) 0);
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -131,7 +131,7 @@ public:
     bool workDecimateCenter(int32_t *x, int32_t *y)
     {
         // insert sample into ring-buffer
-        storeSample(*x, *y);
+        storeSample32(*x, *y);
 
         switch(m_state)
         {
@@ -215,7 +215,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -251,7 +251,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -414,7 +414,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -450,7 +450,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSample((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -565,10 +565,10 @@ public:
 
     void myDecimate(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2)
     {
-        storeSample(x1, y1);
+        storeSample32(x1, y1);
         advancePointer();
 
-        storeSample(*x2, *y2);
+        storeSample32(*x2, *y2);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -580,7 +580,7 @@ public:
         doFIR(sample1);
         advancePointer();
 
-        storeSample(0, 0);
+        storeSample((FixReal) 0, (FixReal) 0);
         doFIR(sample2);
         advancePointer();
     }
@@ -588,11 +588,11 @@ public:
     /** Simple zero stuffing and filter */
     void myInterpolateZeroStuffing(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
     {
-        storeSample(*x1, *y1);
+        storeSample32(*x1, *y1);
         doFIR(x1, y1);
         advancePointer();
 
-        storeSample(0, 0);
+        storeSample32(0, 0);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -648,7 +648,7 @@ protected:
         }
     }
 
-    void storeSample(int32_t x, int32_t y)
+    void storeSample32(int32_t x, int32_t y)
     {
         if ((m_ptr % 2) == 0)
         {

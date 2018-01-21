@@ -22,12 +22,16 @@
 #include <vector>
 #include <QtGlobal>
 
+#ifdef SAMPLE_32BIT
+#define SDR_SAMP_SZ 32 // internal fixed arithmetic sample size
+typedef qint32 FixReal;
+#else
 #define SDR_SAMP_SZ 16 // internal fixed arithmetic sample size
+typedef qint16 FixReal;
+#endif
 
 typedef float Real;
 typedef std::complex<Real> Complex;
-
-typedef qint16 FixReal;
 
 #pragma pack(push, 1)
 struct Sample
