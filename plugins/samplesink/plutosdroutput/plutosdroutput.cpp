@@ -221,7 +221,6 @@ bool PlutoSDROutput::handleMessage(const Message& message)
 
 bool PlutoSDROutput::openDevice()
 {
-    //m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
     m_sampleSourceFifo.resize(32*PLUTOSDR_BLOCKSIZE_SAMPLES);
 
     // look for Rx buddy and get reference to common parameters

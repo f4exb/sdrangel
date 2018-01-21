@@ -129,8 +129,8 @@ void AMMod::pull(Sample& sample)
 
     m_settingsMutex.unlock();
 
-    Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-	magsq /= (1<<30);
+    double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+	magsq /= (SDR_SCALED*SDR_SCALED);
 	m_movingAverage.feed(magsq);
 	m_magsq = m_movingAverage.average();
 

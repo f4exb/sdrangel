@@ -229,16 +229,16 @@ private:
             if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
             {
                 m_sum /= decim;
-                m_magsq = (m_sum.real() * m_sum.real() + m_sum.imag() * m_sum.imag())/ (1<<30);
+                Real re = m_sum.real() / SDR_SCALED;
+                Real im = m_sum.imag() / SDR_SCALED;
+                m_magsq = re*re + im*im;
 
                 if (m_running.m_ssb & !m_usb)
                 { // invert spectrum for LSB
-                    //m_sampleBuffer.push_back(Sample(m_sum.imag() * 32768.0, m_sum.real() * 32768.0));
                     m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
                 }
                 else
                 {
-                    //m_sampleBuffer.push_back(Sample(m_sum.real() * 32768.0, m_sum.imag() * 32768.0));
                     m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
                 }
 

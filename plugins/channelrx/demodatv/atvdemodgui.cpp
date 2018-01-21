@@ -474,7 +474,7 @@ void ATVDemodGUI::tick()
         if (m_atvDemod)
         {
             m_objMagSqAverage.feed(m_atvDemod->getMagSq());
-            double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (1<<30));
+            double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (SDR_SCALED*SDR_SCALED));
             ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
 
             if (m_atvDemod->getBFOLocked()) {

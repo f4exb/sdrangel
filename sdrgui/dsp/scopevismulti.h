@@ -556,7 +556,7 @@ private:
                 switch (m_projectionType)
                 {
                 case ProjectionImag:
-                    v = s.m_imag / 32768.0f;
+                    v = s.m_imag / SDR_SCALEF;
                     break;
                 case ProjectionMagLin:
                 {
@@ -590,7 +590,7 @@ private:
                     break;
                 case ProjectionReal:
                 default:
-                    v = s.m_real / 32768.0f;
+                    v = s.m_real / SDR_SCALEF;
                     break;
                 }
 

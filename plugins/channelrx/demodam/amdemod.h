@@ -161,8 +161,9 @@ private:
 
 	void processOneSample(Complex &ci)
 	{
-        Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-        magsq /= (1<<30);
+	    Real re = ci.real() / SDR_SCALED;
+	    Real im = ci.imag() / SDR_SCALED;
+        Real magsq = re*re + im*im;
         m_movingAverage.feed(magsq);
         m_magsq = m_movingAverage.average();
         m_magsqSum += magsq;
@@ -209,7 +210,7 @@ private:
 
             Real attack = (m_squelchCount - 0.05f * m_settings.m_audioSampleRate) / (0.05f * m_settings.m_audioSampleRate);
             sample = demod * attack * 2048 * m_settings.m_volume;
-            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * 32768);
+            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * SDR_SCALEF);
 
             m_squelchOpen = true;
         }

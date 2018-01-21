@@ -338,8 +338,7 @@ void ATVDemod::demod(Complex& c)
         magSq = fltI*fltI + fltQ*fltQ;
         m_objMagSqAverage.feed(magSq);
         fltNorm = sqrt(magSq);
-        fltVal = fltNorm / (1<<15);
-        //fltVal = magSq / (1<<30);
+        fltVal = fltNorm / SDR_SCALEF;
 
         //********** Mini and Maxi Amplitude tracking **********
 

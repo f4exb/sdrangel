@@ -125,7 +125,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
-		Complex c(it->real() / 32768.0f, it->imag() / 32768.0f);
+		Complex c(it->real() / SDR_SCALEF, it->imag() / SDR_SCALEF);
 		c *= m_nco.nextIQ();
 
 		rf_out = m_rfFilter->runFilt(c, &rf); // filter RF before demod
@@ -163,7 +163,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (!m_settings.m_showPilot)
 			{
-				m_sampleBuffer.push_back(Sample(demod * (1<<15), 0.0));
+				m_sampleBuffer.push_back(Sample(demod * SDR_SCALEF, 0.0));
 			}
 
 			if (m_settings.m_rdsActive)
@@ -197,7 +197,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_settings.m_showPilot)
 				{
-					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * (1<<15), 0.0)); // debug 38 kHz pilot
+					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * SDR_SCALEF, 0.0)); // debug 38 kHz pilot
 				}
 
 				if (m_settings.m_lsbStereo)

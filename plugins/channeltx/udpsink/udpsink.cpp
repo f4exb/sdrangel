@@ -134,7 +134,7 @@ void UDPSink::pull(Sample& sample)
     m_settingsMutex.unlock();
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-    magsq /= (1<<30);
+    magsq /= (SDR_SCALED*SDR_SCALED);
     m_movingAverage.feed(magsq);
     m_magsq = m_movingAverage.average();
 
@@ -180,9 +180,9 @@ void UDPSink::modulateSample()
 
         if (m_squelchOpen)
         {
-            m_modPhasor += (m_settings.m_fmDeviation / m_settings.m_inputSampleRate) * (t / 32768.0f) * M_PI * 2.0f;
-            m_modSample.real(cos(m_modPhasor) * 10362.2f * m_settings.m_gainOut);
-            m_modSample.imag(sin(m_modPhasor) * 10362.2f * m_settings.m_gainOut);
+            m_modPhasor += (m_settings.m_fmDeviation / m_settings.m_inputSampleRate) * (t / SDR_SCALEF) * M_PI * 2.0f;
+            m_modSample.real(cos(m_modPhasor) * 0.3162292f * SDR_SCALEF * m_settings.m_gainOut);
+            m_modSample.imag(sin(m_modPhasor) * 0.3162292f * SDR_SCALEF * m_settings.m_gainOut);
             calculateLevel(m_modSample);
         }
         else
@@ -195,14 +195,14 @@ void UDPSink::modulateSample()
     {
         FixReal t;
         readMonoSample(t);
-        m_inMovingAverage.feed((t*t)/1073741824.0);
+        m_inMovingAverage.feed((t*t)/(SDR_SCALED*SDR_SCALED));
         m_inMagsq = m_inMovingAverage.average();
 
         calculateSquelch(m_inMagsq);
 
         if (m_squelchOpen)
         {
-            m_modSample.real(((t / 32768.0f)*m_settings.m_amModFactor*m_settings.m_gainOut + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
+            m_modSample.real(((t / SDR_SCALEF)*m_settings.m_amModFactor*m_settings.m_gainOut + 1.0f) * (SDR_SCALEF/2)); // modulate and scale zero frequency carrier
             m_modSample.imag(0.0f);
             calculateLevel(m_modSample);
         }
@@ -227,7 +227,7 @@ void UDPSink::modulateSample()
 
         if (m_squelchOpen)
         {
-            ci.real((t / 32768.0f) * m_settings.m_gainOut);
+            ci.real((t / SDR_SCALEF) * m_settings.m_gainOut);
             ci.imag(0.0f);
 
             n_out = m_SSBFilter->runSSB(ci, &filtered, (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSB));
@@ -239,8 +239,8 @@ void UDPSink::modulateSample()
             }
 
             c = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
-            m_modSample.real(m_SSBFilterBuffer[m_SSBFilterBufferIndex].real() * 32768.0f);
-            m_modSample.imag(m_SSBFilterBuffer[m_SSBFilterBufferIndex].imag() * 32768.0f);
+            m_modSample.real(m_SSBFilterBuffer[m_SSBFilterBufferIndex].real() * SDR_SCALEF);
+            m_modSample.imag(m_SSBFilterBuffer[m_SSBFilterBufferIndex].imag() * SDR_SCALEF);
             m_SSBFilterBufferIndex++;
 
             calculateLevel(m_modSample);
@@ -305,8 +305,8 @@ void UDPSink::calculateLevel(Complex sample)
     }
     else
     {
-        qreal rmsLevel = m_levelSum > 0.0 ? sqrt((m_levelSum/(1<<30)) / m_levelNbSamples) : 0.0;
-        emit levelChanged(rmsLevel, m_peakLevel / 32768.0, m_levelNbSamples);
+        qreal rmsLevel = m_levelSum > 0.0 ? sqrt((m_levelSum/(SDR_SCALED*SDR_SCALED)) / m_levelNbSamples) : 0.0;
+        emit levelChanged(rmsLevel, m_peakLevel / SDR_SCALEF, m_levelNbSamples);
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
         m_levelCalcCount = 0;
