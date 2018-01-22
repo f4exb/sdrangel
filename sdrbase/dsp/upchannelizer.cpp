@@ -207,26 +207,6 @@ void UpChannelizer::applyConfiguration()
     }
 }
 
-#ifdef SDR_TX_SAMPLE_24BIT
-UpChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterDB<qint64, UPCHANNELIZER_HB_FILTER_ORDER>),
-    m_workFunction(0)
-{
-    switch(mode) {
-        case ModeCenter:
-            m_workFunction = &IntHalfbandFilterDB<qint64, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
-            break;
-
-        case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint64, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
-            break;
-
-        case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint64, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
-            break;
-    }
-}
-#else
 #ifdef USE_SSE4_1
 UpChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>),
@@ -265,7 +245,6 @@ UpChannelizer::FilterStage::FilterStage(Mode mode) :
             break;
     }
 }
-#endif
 #endif
 
 UpChannelizer::FilterStage::~FilterStage()
