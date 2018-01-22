@@ -105,7 +105,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (SDR_SCALED*SDR_SCALED);
+			m_magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag())*rescale*rescale) / (SDR_RX_SCALED*SDR_RX_SCALED);
 			m_sampleBuffer.push_back(Sample(ci.real() * rescale, ci.imag() * rescale));
 			m_sampleDistanceRemain += m_inputSampleRate / m_outputSampleRate;
 		}
@@ -143,7 +143,7 @@ void TCPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 	if((m_sampleFormat == TCPSrcSettings::FormatNFM) && (m_ssbSockets.count() > 0)) {
 		for(SampleVector::const_iterator it = m_sampleBuffer.begin(); it != m_sampleBuffer.end(); ++it) {
-			Complex cj(it->real() / SDR_SCALEF, it->imag() / SDR_SCALEF);
+			Complex cj(it->real() / SDR_RX_SCALEF, it->imag() / SDR_RX_SCALEF);
 			// An FFT filter here is overkill, but was already set up for SSB
 			int n_out = TCPFilter->runFilt(cj, &sideband);
 			if (n_out) {

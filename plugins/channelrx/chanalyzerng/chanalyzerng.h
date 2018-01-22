@@ -229,8 +229,8 @@ private:
             if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
             {
                 m_sum /= decim;
-                Real re = m_sum.real() / SDR_SCALED;
-                Real im = m_sum.imag() / SDR_SCALED;
+                Real re = m_sum.real() / SDR_RX_SCALED;
+                Real im = m_sum.imag() / SDR_RX_SCALED;
                 m_magsq = re*re + im*im;
 
                 if (m_running.m_ssb & !m_usb)

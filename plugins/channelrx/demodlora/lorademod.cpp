@@ -261,7 +261,7 @@ void LoRaDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		Complex c(it->real() / SDR_SCALEF, it->imag() / SDR_SCALEF);
+		Complex c(it->real() / SDR_RX_SCALEF, it->imag() / SDR_RX_SCALEF);
 		c *= m_nco.nextIQ();
 
 		if(m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))

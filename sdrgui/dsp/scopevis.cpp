@@ -111,7 +111,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 			for(int i = 0; i < count; ++i)
 			{
-				*it++ = Complex(begin->real() / SDR_SCALEF, begin->imag() / SDR_SCALEF);
+				*it++ = Complex(begin->real() / SDR_RX_SCALEF, begin->imag() / SDR_RX_SCALEF);
 				++begin;
 			}
 
@@ -234,7 +234,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 				for(int i = 0; i < count; ++i)
 				{
-					*it++ = Complex(begin->real() / SDR_SCALEF, begin->imag() / SDR_SCALEF);
+					*it++ = Complex(begin->real() / SDR_RX_SCALEF, begin->imag() / SDR_RX_SCALEF);
 					++begin;
 				}
 
@@ -341,7 +341,7 @@ void ScopeVis::setSampleRate(int sampleRate)
 
 bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 {
-	Complex c(it->real()/SDR_SCALEF, it->imag()/SDR_SCALEF);
+	Complex c(it->real()/SDR_RX_SCALEF, it->imag()/SDR_RX_SCALEF);
     m_traceback.push_back(c); // store into trace memory FIFO
 
     if (m_tracebackCount < m_traceback.size())

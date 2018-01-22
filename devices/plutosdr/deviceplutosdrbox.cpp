@@ -639,7 +639,7 @@ void DevicePlutoSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t
     WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, normalizedBW, 0.0, normalizedBW < 0.2 ? WFIR::wtHAMMING : WFIR::wtBLACKMAN_HARRIS, 0.0);
 
     for (unsigned int i = 0; i < nbTaps; i++) {
-        ostr << (int16_t) (fcoeffs[i] * SDR_SCALEF) << ", " <<  (int16_t) (fcoeffs[i] * SDR_SCALEF) << std::endl;
+        ostr << (int16_t) (fcoeffs[i] * 32768.0f) << ", " <<  (int16_t) (fcoeffs[i] * 32768.0f) << std::endl;
     }
 
     delete[] fcoeffs;

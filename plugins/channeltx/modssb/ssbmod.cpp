@@ -160,12 +160,12 @@ void SSBMod::pull(Sample& sample)
     m_interpolatorDistanceRemain += m_interpolatorDistance;
 
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
-    ci *= 0.891235351562f * SDR_SCALEF; //scaling at -1 dB to account for possible filter overshoot
+    ci *= 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
 
     m_settingsMutex.unlock();
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-	magsq /= (SDR_SCALED*SDR_SCALED);
+	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
 	m_movingAverage.feed(magsq);
 	m_magsq = m_movingAverage.average();
 
@@ -298,13 +298,13 @@ void SSBMod::pullAF(Complex& sample)
     	{
         	if (m_settings.m_audioFlipChannels)
         	{
-                ci.real((m_audioBuffer[m_audioBufferFill].r / SDR_SCALEF) * m_settings.m_volumeFactor);
-                ci.imag((m_audioBuffer[m_audioBufferFill].l / SDR_SCALEF) * m_settings.m_volumeFactor);
+                ci.real((m_audioBuffer[m_audioBufferFill].r / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
+                ci.imag((m_audioBuffer[m_audioBufferFill].l / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
         	}
         	else
         	{
-                ci.real((m_audioBuffer[m_audioBufferFill].l / SDR_SCALEF) * m_settings.m_volumeFactor);
-                ci.imag((m_audioBuffer[m_audioBufferFill].r / SDR_SCALEF) * m_settings.m_volumeFactor);
+                ci.real((m_audioBuffer[m_audioBufferFill].l / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
+                ci.imag((m_audioBuffer[m_audioBufferFill].r / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
         	}
     	}
         else
@@ -419,8 +419,8 @@ void SSBMod::pullAF(Complex& sample)
 
                 if (!(m_undersampleCount++ & decim_mask))
                 {
-                    Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_SCALEF; //scaling at -1 dB to account for possible filter overshoot
-                    Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_SCALEF;
+                    Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
+                    Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
 
                     if (!m_settings.m_dsb & !m_settings.m_usb)
                     { // invert spectrum for LSB
@@ -443,8 +443,8 @@ void SSBMod::pullAF(Complex& sample)
 
         if (!(m_undersampleCount++ & decim_mask))
         {
-            Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_SCALEF; //scaling at -1 dB to account for possible filter overshoot
-            Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_SCALEF;
+            Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
+            Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
 
             if (!m_settings.m_dsb & !m_settings.m_usb)
             { // invert spectrum for LSB

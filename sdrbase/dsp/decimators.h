@@ -18,7 +18,7 @@
 #define INCLUDE_GPL_DSP_DECIMATORS_H_
 
 #include "dsp/dsptypes.h"
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_RX_SAMPLE_24BIT
 #include "dsp/inthalfbandfilterdb.h"
 #else
 #ifdef USE_SSE4_1
@@ -240,7 +240,7 @@ public:
     void decimate64_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len);
 
 private:
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_RX_SAMPLE_24BIT
     IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
     IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
     IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages

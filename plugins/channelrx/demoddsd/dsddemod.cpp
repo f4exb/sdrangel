@@ -128,8 +128,8 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         {
             qint16 sample, delayedSample;
 
-            Real re = ci.real() / SDR_SCALED;
-            Real im = ci.imag() / SDR_SCALED;
+            Real re = ci.real() / SDR_RX_SCALED;
+            Real im = ci.imag() / SDR_RX_SCALED;
             Real magsq = re*re + im*im;
             m_movingAverage.feed(magsq);
 
@@ -142,7 +142,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-            Real demod = SDR_SCALEF * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain;
+            Real demod = SDR_RX_SCALEF * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain;
             m_sampleCount++;
 
             // AF processing

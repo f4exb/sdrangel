@@ -85,7 +85,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 			for (std::size_t i = 0; i < samplesNeeded; ++i, ++begin)
 			{
-				*it++ = Complex(begin->real() / SDR_SCALEF, begin->imag() / SDR_SCALEF);
+				*it++ = Complex(begin->real() / SDR_RX_SCALEF, begin->imag() / SDR_RX_SCALEF);
 			}
 
 			// apply fft window (and copy from m_fftBuffer to m_fftIn)
@@ -144,7 +144,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			// not enough samples for FFT - just fill in new data and return
 			for(std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill; begin < end; ++begin)
 			{
-				*it++ = Complex(begin->real() / SDR_SCALEF, begin->imag() / SDR_SCALEF);
+				*it++ = Complex(begin->real() / SDR_RX_SCALEF, begin->imag() / SDR_RX_SCALEF);
 			}
 
 			m_fftBufferFill += todo;

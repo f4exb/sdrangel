@@ -53,10 +53,10 @@ private:
 	unsigned int m_log2Decim;
 	static AirspyHFThread *m_this;
 
-#ifdef SDR_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_SAMP_SZ, 16> m_decimators;
+#ifdef SDR_RX_SAMPLE_24BIT
+    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
 #else
-	Decimators<qint32, qint16, SDR_SAMP_SZ, 16> m_decimators;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
 #endif
 
 	void run();

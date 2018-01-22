@@ -112,7 +112,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		for (int i = 0 ; i < rf_out; i++)
 		{
 		    demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
-		    Real magsq = msq / (SDR_SCALED*SDR_SCALED);
+		    Real magsq = msq / (SDR_RX_SCALED*SDR_RX_SCALED);
 
 			m_movingAverage.feed(magsq);
             m_magsqSum += magsq;

@@ -22,17 +22,21 @@
 #include <vector>
 #include <QtGlobal>
 
-#ifdef SDR_SAMPLE_24BIT
-#define SDR_SAMP_SZ 24 // internal fixed arithmetic sample size
-#define SDR_SCALEF 8388608.0f
-#define SDR_SCALED 8388608.0
+#ifdef SDR_RX_SAMPLE_24BIT
+#define SDR_RX_SAMP_SZ 24 // internal fixed arithmetic sample size
+#define SDR_RX_SCALEF 8388608.0f
+#define SDR_RX_SCALED 8388608.0
 typedef qint32 FixReal;
 #else
-#define SDR_SAMP_SZ 16 // internal fixed arithmetic sample size
-#define SDR_SCALEF 32768.0f
-#define SDR_SCALED 32768.0
+#define SDR_RX_SAMP_SZ 16 // internal fixed arithmetic sample size
+#define SDR_RX_SCALEF 32768.0f
+#define SDR_RX_SCALED 32768.0
 typedef qint16 FixReal;
 #endif
+
+#define SDR_TX_SAMP_SZ 16
+#define SDR_TX_SCALEF 32768.0f
+#define SDR_TX_SCALED 32768.0
 
 typedef float Real;
 typedef std::complex<Real> Complex;

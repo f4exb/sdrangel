@@ -56,7 +56,7 @@ private:
     unsigned int m_log2Interp; // soft decimation
     int m_fcPos;
 
-    Interpolators<qint16, SDR_SAMP_SZ, 12> m_interpolators;
+    Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 
     void run();
     void callback(qint16* buf, qint32 len);

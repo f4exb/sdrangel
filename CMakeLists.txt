@@ -28,7 +28,7 @@ option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
 option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
 option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(HOST_RPI "Compiling on RPi" OFF)
-option(SAMPLE_24BIT "Internal 24 bit DSP" OFF)
+option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -187,8 +187,8 @@ elseif (${ARCHITECTURE} MATCHES "aarch64")
 endif()
 
 # Compiler flags.
-if (SAMPLE_24BIT)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_SAMPLE_24BIT")
+if (RX_SAMPLE_24BIT)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
 endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 

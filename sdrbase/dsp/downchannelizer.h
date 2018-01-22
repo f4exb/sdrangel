@@ -23,7 +23,7 @@
 #include <QMutex>
 #include "util/export.h"
 #include "util/message.h"
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_RX_SAMPLE_24BIT
 #include "dsp/inthalfbandfilterdb.h"
 #else
 #ifdef USE_SSE4_1
@@ -82,7 +82,7 @@ protected:
 			ModeUpperHalf
 		};
 
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_RX_SAMPLE_24BIT
         typedef bool (IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
         IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else

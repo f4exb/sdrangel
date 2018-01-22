@@ -54,7 +54,7 @@ private:
 
     unsigned int m_log2Interp; // soft interpolation
 
-    Interpolators<qint16, SDR_SAMP_SZ, 12> m_interpolators;
+    Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 
     void run();
     void convert(qint16* buf, qint32 len);

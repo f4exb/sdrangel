@@ -77,7 +77,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_magsqPeak = 0.0f;
 	m_magsqCount = 0;
 
-	m_agc.setClampMax(SDR_SCALED*SDR_SCALED);
+	m_agc.setClampMax(SDR_RX_SCALED*SDR_RX_SCALED);
 	m_agc.setClamping(m_agcClamping);
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
@@ -186,7 +186,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			{
 				Real avgr = m_sum.real() / decim;
 				Real avgi = m_sum.imag() / decim;
-				m_magsq = (avgr * avgr + avgi * avgi) / (SDR_SCALED*SDR_SCALED);
+				m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
 
                 m_magsqSum += m_magsq;
 
@@ -427,7 +427,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     {
         int agcNbSamples = 48 * (1<<settings.m_agcTimeLog2);
         m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -99);
-        double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_SCALED*SDR_SCALED);
+        double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
         int agcThresholdGate = 48 * settings.m_agcThresholdGate; // ms
         bool agcClamping = settings.m_agcClamping;
 

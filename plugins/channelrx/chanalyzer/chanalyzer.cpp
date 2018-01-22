@@ -114,8 +114,8 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
 			if (!(m_undersampleCount++ & decim_mask))
 			{
 				m_sum /= decim;
-				Real re = m_sum.real() / SDR_SCALED;
-				Real im = m_sum.imag() / SDR_SCALED;
+				Real re = m_sum.real() / SDR_RX_SCALED;
+				Real im = m_sum.imag() / SDR_RX_SCALED;
 				m_magsq = re*re + im*im;
 
 				if (m_ssb & !m_usb)

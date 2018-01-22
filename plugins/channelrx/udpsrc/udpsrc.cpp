@@ -92,7 +92,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 		qWarning("UDPSrc::UDPSrc: cannot bind audio port");
 	}
 
-    m_agc.setClampMax(SDR_SCALED*SDR_SCALED);
+    m_agc.setClampMax(SDR_RX_SCALED*SDR_RX_SCALED);
     m_agc.setClamping(true);
 
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
@@ -158,7 +158,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                 inMagSq = ci.real()*ci.real() + ci.imag()*ci.imag();
             }
 
-		    m_inMovingAverage.feed(inMagSq / (SDR_SCALED*SDR_SCALED));
+		    m_inMovingAverage.feed(inMagSq / (SDR_RX_SCALED*SDR_RX_SCALED));
 		    m_inMagsq = m_inMovingAverage.average();
 
 			Sample ss(ci.real(), ci.imag());
@@ -180,7 +180,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 						l = m_squelchOpen ? sideband[i].real() * m_settings.m_gain : 0;
 						r = m_squelchOpen ? sideband[i].imag() * m_settings.m_gain : 0;
 					    m_udpBuffer->write(Sample(l, r));
-					    m_outMovingAverage.feed((l*l + r*r) / (SDR_SCALED*SDR_SCALED));
+					    m_outMovingAverage.feed((l*l + r*r) / (SDR_RX_SCALED*SDR_RX_SCALED));
 					}
 				}
 			}
@@ -196,21 +196,21 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 						l = m_squelchOpen ? sideband[i].real() * m_settings.m_gain : 0;
 						r = m_squelchOpen ? sideband[i].imag() * m_settings.m_gain : 0;
 						m_udpBuffer->write(Sample(l, r));
-						m_outMovingAverage.feed((l*l + r*r) / (SDR_SCALED*SDR_SCALED));
+						m_outMovingAverage.feed((l*l + r*r) / (SDR_RX_SCALED*SDR_RX_SCALED));
 					}
 				}
 			}
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFM)
 			{
-				double demod = m_squelchOpen ? SDR_SCALED * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
+				double demod = m_squelchOpen ? SDR_RX_SCALED * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
 				m_udpBuffer->write(Sample(demod, demod));
-				m_outMovingAverage.feed((demod * demod) / (SDR_SCALED*SDR_SCALED));
+				m_outMovingAverage.feed((demod * demod) / (SDR_RX_SCALED*SDR_RX_SCALED));
 			}
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
 			{
-				FixReal demod = m_squelchOpen ? (FixReal) (SDR_SCALEF * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain) : 0;
+				FixReal demod = m_squelchOpen ? (FixReal) (SDR_RX_SCALEF * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain) : 0;
 				m_udpBufferMono->write(demod);
-				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+				m_outMovingAverage.feed((demod * demod) / SDR_RX_SCALED*SDR_RX_SCALED);
 			}
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
 			{
@@ -223,7 +223,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					{
 						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_settings.m_gain : 0;
 						m_udpBufferMono->write(l);
-						m_outMovingAverage.feed((l * l) / (SDR_SCALED*SDR_SCALED));
+						m_outMovingAverage.feed((l * l) / (SDR_RX_SCALED*SDR_RX_SCALED));
 					}
 				}
 			}
@@ -238,7 +238,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					{
 						l = m_squelchOpen ? (sideband[i].real() + sideband[i].imag()) * 0.7 * m_settings.m_gain : 0;
 						m_udpBufferMono->write(l);
-						m_outMovingAverage.feed((l * l) / (SDR_SCALED*SDR_SCALED));
+						m_outMovingAverage.feed((l * l) / (SDR_RX_SCALED*SDR_RX_SCALED));
 					}
 				}
 			}
@@ -246,7 +246,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			{
 				FixReal demod = m_squelchOpen ? (FixReal) (sqrt(inMagSq) * agcFactor * m_settings.m_gain) : 0;
 				m_udpBufferMono->write(demod);
-				m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+				m_outMovingAverage.feed((demod * demod) / SDR_RX_SCALED*SDR_RX_SCALED);
 			}
             else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMNoDCMono)
             {
@@ -256,7 +256,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     m_amMovingAverage.feed(demodf);
                     FixReal demod = (FixReal) ((demodf - m_amMovingAverage.average()) * agcFactor * m_settings.m_gain);
                     m_udpBufferMono->write(demod);
-                    m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+                    m_outMovingAverage.feed((demod * demod) / SDR_RX_SCALED*SDR_RX_SCALED);
                 }
                 else
                 {
@@ -273,7 +273,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     demodf /= 301.0;
                     FixReal demod = (FixReal) (demodf * agcFactor * m_settings.m_gain);
                     m_udpBufferMono->write(demod);
-                    m_outMovingAverage.feed((demod * demod) / 1073741824.0);
+                    m_outMovingAverage.feed((demod * demod) / SDR_RX_SCALED*SDR_RX_SCALED);
                 }
                 else
                 {
@@ -287,7 +287,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			    {
 	                Sample s(ci.real() * m_settings.m_gain, ci.imag() * m_settings.m_gain);
 	                m_udpBuffer->write(s);
-	                m_outMovingAverage.feed((inMagSq*m_settings.m_gain*m_settings.m_gain) / (SDR_SCALED*SDR_SCALED));
+	                m_outMovingAverage.feed((inMagSq*m_settings.m_gain*m_settings.m_gain) / (SDR_RX_SCALED*SDR_RX_SCALED));
 			    }
 			    else
 			    {

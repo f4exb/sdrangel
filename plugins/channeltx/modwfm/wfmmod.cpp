@@ -139,8 +139,8 @@ void WFMMod::pull(Sample& sample)
 	}
 
     m_modPhasor += (m_settings.m_fmDeviation / (float) m_outputSampleRate) * ri.real() * M_PI * 2.0f;
-    ci.real(cos(m_modPhasor) * 0.891235351562f * SDR_SCALEF); // -1 dB
-    ci.imag(sin(m_modPhasor) * 0.891235351562f * SDR_SCALEF);
+    ci.real(cos(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF); // -1 dB
+    ci.imag(sin(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF);
 
     // RF filtering
     rf_out = m_rfFilter->runFilt(ci, &rf);
@@ -158,7 +158,7 @@ void WFMMod::pull(Sample& sample)
     m_settingsMutex.unlock();
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-	magsq /= (SDR_SCALED*SDR_SCALED);
+	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
 	m_movingAverage.feed(magsq);
 	m_magsq = m_movingAverage.average();
 
