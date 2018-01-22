@@ -207,7 +207,7 @@ void UpChannelizer::applyConfiguration()
     }
 }
 
-#ifdef SAMPLE_24BIT
+#ifdef SDR_SAMPLE_24BIT
 UpChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterDB<qint64, UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)

@@ -53,7 +53,11 @@ private:
 	unsigned int m_log2Decim;
 	static AirspyHFThread *m_this;
 
-	Decimators<qint16, SDR_SAMP_SZ, 16> m_decimators;
+#ifdef SDR_SAMPLE_24BIT
+    Decimators<qint64, qint16, SDR_SAMP_SZ, 16> m_decimators;
+#else
+	Decimators<qint32, qint16, SDR_SAMP_SZ, 16> m_decimators;
+#endif
 
 	void run();
 	void callback(const qint16* buf, qint32 len);

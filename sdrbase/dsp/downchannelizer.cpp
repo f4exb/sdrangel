@@ -192,7 +192,7 @@ void DownChannelizer::applyConfiguration()
 	}
 }
 
-#ifdef SAMPLE_24BIT
+#ifdef SDR_SAMPLE_24BIT
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),

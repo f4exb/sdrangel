@@ -146,38 +146,38 @@ public:
         }
     }
 
-	bool workDecimateCenter(qint32 *x, qint32 *y)
-	{
-		// insert sample into ring-buffer
-		m_samples[m_ptr][0] = *x;
-		m_samples[m_ptr][1] = *y;
-
-		switch(m_state)
-		{
-			case 0:
-				// advance write-pointer
-				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
-
-				// next state
-				m_state = 1;
-
-				// tell caller we don't have a new sample
-				return false;
-
-			default:
-				// save result
-				doFIR(x, y);
-
-				// advance write-pointer
-				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
-
-				// next state
-				m_state = 0;
-
-				// tell caller we have a new sample
-				return true;
-		}
-	}
+//	bool workDecimateCenter(qint32 *x, qint32 *y)
+//	{
+//		// insert sample into ring-buffer
+//		m_samples[m_ptr][0] = *x;
+//		m_samples[m_ptr][1] = *y;
+//
+//		switch(m_state)
+//		{
+//			case 0:
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+//
+//				// next state
+//				m_state = 1;
+//
+//				// tell caller we don't have a new sample
+//				return false;
+//
+//			default:
+//				// save result
+//				doFIR(x, y);
+//
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+//
+//				// next state
+//				m_state = 0;
+//
+//				// tell caller we have a new sample
+//				return true;
+//		}
+//	}
 
 	// downsample by 2, return edges of spectrum rotated into center - unused
 //	bool workDecimateFullRotate(Sample* sample)

@@ -22,7 +22,7 @@
 #include <vector>
 #include <QtGlobal>
 
-#ifdef SAMPLE_24BIT
+#ifdef SDR_SAMPLE_24BIT
 #define SDR_SAMP_SZ 24 // internal fixed arithmetic sample size
 #define SDR_SCALEF 8388608.0f
 #define SDR_SCALED 8388608.0

@@ -188,7 +188,7 @@ endif()
 
 # Compiler flags.
 if (SAMPLE_24BIT)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSAMPLE_24BIT")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_SAMPLE_24BIT")
 endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 

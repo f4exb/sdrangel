@@ -85,9 +85,15 @@ private:
     bool m_throttleToggle;
     QMutex m_mutex;
 
-	Decimators<qint16, SDR_SAMP_SZ, 8> m_decimators_8;
-    Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators_12;
-    Decimators<qint16, SDR_SAMP_SZ, 16> m_decimators_16;
+#ifdef SDR_SAMPLE_24BIT
+    Decimators<qint64, qint16, SDR_SAMP_SZ, 8> m_decimators_8;
+    Decimators<qint64, qint16, SDR_SAMP_SZ, 12> m_decimators_12;
+    Decimators<qint64, qint16, SDR_SAMP_SZ, 16> m_decimators_16;
+#else
+	Decimators<qint32, qint16, SDR_SAMP_SZ, 8> m_decimators_8;
+    Decimators<qint32, qint16, SDR_SAMP_SZ, 12> m_decimators_12;
+    Decimators<qint32, qint16, SDR_SAMP_SZ, 16> m_decimators_16;
+#endif
 
 	void run();
 	void callback(const qint16* buf, qint32 len);
