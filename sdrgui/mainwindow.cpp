@@ -1731,19 +1731,25 @@ void MainWindow::setLoggingOptions()
     if (m_settings.getUseLogFile())
     {
 #if QT_VERSION >= 0x050400
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b %5 %6")
+        QString appInfoStr(tr("%1 %2 Qt %3 %4b %5 %6 DSP Rx:%7b Tx:%8b PID %9")
                 .arg(qApp->applicationName())
                 .arg(qApp->applicationVersion())
                 .arg(QT_VERSION_STR)
                 .arg(QT_POINTER_SIZE*8)
                 .arg(QSysInfo::currentCpuArchitecture())
-                .arg(QSysInfo::prettyProductName()));
+                .arg(QSysInfo::prettyProductName())
+                .arg(SDR_RX_SAMP_SZ)
+                .arg(SDR_TX_SAMP_SZ)
+                .arg(qApp->applicationPid()));
 #else
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b")
+        QString appInfoStr(tr("%1 %2 Qt %3 %4b DSP Rx:%5b Tx:%6b PID %7")
                 .arg(qApp->applicationName())
                 .arg(qApp->applicationVersion())
                 .arg(QT_VERSION_STR)
-                .arg(QT_POINTER_SIZE*8));
+                .arg(QT_POINTER_SIZE*8)
+                .arg(SDR_RX_SAMP_SZ)
+                .arg(SDR_TX_SAMP_SZ)
+                .arg(qApp->applicationPid()));
  #endif
         m_logger->logToFile(QtInfoMsg, appInfoStr);
     }

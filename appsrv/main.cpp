@@ -25,6 +25,7 @@
 
 #include "loggerwithfile.h"
 #include "maincore.h"
+#include "dsp/dsptypes.h"
 
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
@@ -65,19 +66,25 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     parser.parse(a);
 
 #if QT_VERSION >= 0x050400
-    qInfo("%s %s Qt %s %db %s %s",
-            qPrintable(qApp->applicationName()),
-            qPrintable(qApp->applicationVersion()),
+    qInfo("%s %s Qt %s %db %s %s DSP Rx:%db Tx:%db PID %lld",
+            qPrintable(QCoreApplication::applicationName()),
+            qPrintable(QCoreApplication::applicationVersion()),
             qPrintable(QString(QT_VERSION_STR)),
             QT_POINTER_SIZE*8,
             qPrintable(QSysInfo::currentCpuArchitecture()),
-            qPrintable(QSysInfo::prettyProductName()));
+            qPrintable(QSysInfo::prettyProductName()),
+            SDR_RX_SAMP_SZ,
+            SDR_TX_SAMP_SZ,
+            QCoreApplication::applicationPid());
 #else
-    qInfo("%s %s Qt %s %db",
-            qPrintable(qApp->applicationName()),
-            qPrintable((qApp->applicationVersion()),
+    qInfo("%s %s Qt %s %db DSP Rx:%db Tx:%db PID %lld",
+            qPrintable(QCoreApplication::applicationName()),
+            qPrintable((QCoreApplication::>applicationVersion()),
             qPrintable(QString(QT_VERSION_STR)),
-            QT_POINTER_SIZE*8);
+            QT_POINTER_SIZE*8,
+            SDR_RX_SAMP_SZ,
+            SDR_TX_SAMP_SZ,
+            QCoreApplication::applicationPid());
 #endif
 
     MainCore m(logger, parser, &a);

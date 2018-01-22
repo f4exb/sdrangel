@@ -1137,7 +1137,7 @@ margin-bottom: 20px;
   "description" : "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
 };
             defs.InstanceSummaryResponse = {
-  "required" : [ "appname", "devicesetlist", "qtVersion", "version" ],
+  "required" : [ "appname", "devicesetlist", "dspRxBits", "dspTxBits", "pid", "qtVersion", "version" ],
   "properties" : {
     "version" : {
       "type" : "string",
@@ -1146,6 +1146,18 @@ margin-bottom: 20px;
     "qtVersion" : {
       "type" : "string",
       "description" : "Qt version with which the software was compiled"
+    },
+    "dspRxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Rx DSP"
+    },
+    "dspTxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Tx DSP"
+    },
+    "pid" : {
+      "type" : "integer",
+      "description" : "PID of the SDRangel instance"
     },
     "appname" : {
       "type" : "string",
@@ -16909,7 +16921,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-01-16T19:54:59.982+01:00
+              Generated 2018-01-22T23:06:33.396+01:00
             </div>
           </div>
       </div>
