@@ -18,7 +18,7 @@
 #define INCLUDE_GPL_DSP_INTERPOLATORS_H_
 
 #include "dsp/dsptypes.h"
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_TX_SAMPLE_24BIT
 #include "dsp/inthalfbandfilterdb.h"
 #else
 #ifdef USE_SSE4_1
@@ -118,7 +118,7 @@ public:
 	void interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len);
 
 private:
-#ifdef SDR_SAMPLE_24BIT
+#ifdef SDR_TX_SAMPLE_24BIT
     IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_FIRST> m_interpolator2;  // 1st stages
     IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_SECOND> m_interpolator4;  // 2nd stages
     IntHalfbandFilterDB<qint64, INTERPOLATORS_HB_FILTER_ORDER_NEXT> m_interpolator8;  // 3rd stages
