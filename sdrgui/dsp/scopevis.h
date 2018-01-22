@@ -24,7 +24,7 @@ public:
 	static const uint m_traceChunkSize;
 	static const uint m_nbTriggers = 10;
 
-	ScopeVis(GLScope* glScope = NULL);
+	ScopeVis(Real scalef, GLScope* glScope = 0);
 	virtual ~ScopeVis();
 
 	void configure(MessageQueue* msgQueue,
@@ -140,6 +140,7 @@ private:
 	};
 
 	GLScope* m_glScope;
+	Real m_scalef;                               //!< Sample scale factor from [-1,+1] to integer sample size range
 	std::vector<Complex> m_trace;                //!< Raw trace to be used by GLScope
 	boost::circular_buffer<Complex> m_traceback; //!< FIFO for samples prior to triggering point to support pre-trigger (when in triggered mode)
     uint m_tracebackCount;                       //!< Count of samples stored into trace memory since triggering is active up to trace memory size

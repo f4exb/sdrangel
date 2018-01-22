@@ -549,14 +549,18 @@ private:
                     break;
                 case ProjectionMagLin:
                 {
-                    uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-                    v = std::sqrt(magsq/1073741824.0f);
+                	Real re = s.m_real / SDR_RX_SCALEF;
+                	Real im = s.m_imag / SDR_RX_SCALEF;
+                	Real magsq = re*re + im*im;
+                    v = std::sqrt(magsq);
                 }
                     break;
                 case ProjectionMagDB:
                 {
-                    uint32_t magsq = s.m_real*s.m_real + s.m_imag*s.m_imag;
-                    v = log10f(magsq/1073741824.0f) * 10.0f;
+                	Real re = s.m_real / SDR_RX_SCALEF;
+                	Real im = s.m_imag / SDR_RX_SCALEF;
+                	Real magsq = re*re + im*im;
+                    v = log10f(magsq) * 10.0f;
                 }
                     break;
                 case ProjectionPhase:

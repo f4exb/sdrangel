@@ -132,7 +132,7 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_tcpSrc = (TCPSrc*) rxChannel; //new TCPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_tcpSrc->setSpectrum(m_spectrumVis);
 

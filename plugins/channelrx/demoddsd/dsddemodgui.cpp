@@ -269,7 +269,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_scopeVis = new ScopeVis(ui->glScope);
+	m_scopeVis = new ScopeVis(SDR_RX_SCALEF, ui->glScope);
 	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_dsdDemod->setScopeSink(m_scopeVis);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
