@@ -26,7 +26,7 @@
 #include "bladerfinputgui.h"
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
-	QString("BladerRF Input"),
+	QString("BladeRF Input"),
 	QString("3.11.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
