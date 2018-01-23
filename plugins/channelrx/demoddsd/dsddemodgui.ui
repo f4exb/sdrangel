@@ -277,7 +277,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Zero crossing relaive position in number of samples (&lt;0 sampling point lags, &gt;0 it leads)</string>
+         <string>Zero crossing relative position in number of samples (&lt;0 sampling point lags, &gt;0 it leads)</string>
         </property>
         <property name="text">
          <string>-00</string>
