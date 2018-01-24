@@ -232,14 +232,14 @@ void DSPDeviceSourceEngine::imbalance(SampleVector::iterator begin, SampleVector
 	m_iRange = (m_iRange * 15 + (iMax - iMin)) >> 4;
 	m_qRange = (m_qRange * 15 + (qMax - qMin)) >> 4;
 
-	// calculate imbalance as Q15.16
+	// calculate imbalance on 32 bit full scale
 	if(m_qRange != 0) {
-		m_imbalance = ((uint)m_iRange << 16) / (uint)m_qRange;
+		m_imbalance = ((uint)m_iRange << (32-SDR_RX_SAMP_SZ)) / (uint)m_qRange;
 	}
 
-	// correct imbalance and convert back to signed int 16
+	// correct imbalance and convert back to sample size
 	for(SampleVector::iterator it = begin; it < end; it++) {
-		it->m_imag = (it->m_imag * m_imbalance) >> 16;
+		it->m_imag = (it->m_imag * m_imbalance) >> (32-SDR_RX_SAMP_SZ);
 	}
 }
 
