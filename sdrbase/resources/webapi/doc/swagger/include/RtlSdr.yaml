@@ -1,0 +1,34 @@
+RtlSdrSettings:
+  description: RTLSDR
+  properties:
+    devSampleRate:
+      type: integer
+    lowSampleRate:
+      type: integer
+    centerFrequency:
+      type: integer
+      format: int64
+    gain:
+      type: integer
+    loPpmCorrection:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    dcBlock:
+      type: integer
+    iqImbalance:
+      type: integer
+    agc:
+      type: integer
+    noModMode:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    rfBandwidth:
+      type: integer
+    

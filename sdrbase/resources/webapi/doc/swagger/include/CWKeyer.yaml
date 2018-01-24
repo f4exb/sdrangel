@@ -1,0 +1,12 @@
+CWKeyerSettings:
+  properties:
+    sampleRate:
+      type: integer
+    wpm:
+      type: integer
+    mode:
+      type: integer
+    text:
+      type: string
+    loop:
+      type: integer

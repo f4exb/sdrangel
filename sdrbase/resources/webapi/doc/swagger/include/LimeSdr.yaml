@@ -1,0 +1,74 @@
+LimeSdrInputSettings:
+  description: LimeSDR
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    log2HardDecim:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    log2SoftDecim:
+      type: integer
+    lpfBW:        
+      type: integer
+    lpfFIREnable: 
+      type: integer
+    lpfFIRBW:     
+      type: integer
+    gain:         
+      type: integer
+    ncoEnable:    
+      type: integer
+    ncoFrequency: 
+      type: integer
+    antennaPath:
+      type: integer
+    gainMode:     
+      type: integer
+    lnaGain:      
+      type: integer
+    tiaGain:      
+      type: integer
+    pgaGain:      
+      type: integer
+    extClock:     
+      type: integer
+    extClockFreq: 
+      type: integer
+      
+LimeSdrOutputSettings:
+  description: LimeSDR
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    log2HardInterp:
+      type: integer
+    log2SoftInterp:
+      type: integer
+    lpfBW:        
+      type: integer
+    lpfFIREnable: 
+      type: integer
+    lpfFIRBW:     
+      type: integer
+    gain:         
+      type: integer
+    ncoEnable:    
+      type: integer
+    ncoFrequency: 
+      type: integer
+    antennaPath:
+      type: integer
+    extClock:     
+      type: integer
+    extClockFreq: 
+      type: integer
+            

@@ -1,5 +1,27 @@
 <RCC>
     <qresource prefix="/">
-        <file>index.html</file>
+        <file>webapi/doc/html2/index.html</file>
+        <file>webapi/doc/swagger/swagger.yaml</file>
+        <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
+        <file>webapi/doc/swagger/include/FileSource.yaml</file>
+        <file>webapi/doc/swagger/include/HackRF.yaml</file>
+        <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
+        <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
+        <file>webapi/doc/swagger/include/NFMMod.yaml</file>
+        <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
+        <file>webapi/doc/swagger-ui/swagger-ui.js.map</file>
+        <file>webapi/doc/swagger-ui/swagger-ui.js</file>
+        <file>webapi/doc/swagger-ui/swagger-ui.css.map</file>
+        <file>webapi/doc/swagger-ui/swagger-ui.css</file>
+        <file>webapi/doc/swagger-ui/swagger-ui-standalone-preset.js.map</file>
+        <file>webapi/doc/swagger-ui/swagger-ui-standalone-preset.js</file>
+        <file>webapi/doc/swagger-ui/swagger-ui-bundle.js.map</file>
+        <file>webapi/doc/swagger-ui/swagger-ui-bundle.js</file>
+        <file>webapi/doc/swagger-ui/oauth2-redirect.html</file>
+        <file>webapi/doc/swagger-ui/index.html</file>
+        <file>webapi/doc/swagger-ui/favicon-32x32.png</file>
+        <file>webapi/doc/swagger-ui/favicon-16x16.png</file>
+        <file>webapi/index.html</file>
+        <file>webapi/sdrangel_logo.png</file>
     </qresource>
 </RCC>

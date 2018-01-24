@@ -1,0 +1,43 @@
+NFMDemodSettings:
+  description: NFMDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    afBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: integer
+    squelchGate:
+      type: integer
+    deltaSquelch:
+      type: integer
+    squelch:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    ctcssOn:
+      type: integer
+    audioMute:
+      type: integer
+    ctcssIndex:
+      type: integer
+    audioSampleRate:
+      type: integer
+    copyAudioToUDP:
+      type: integer
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    

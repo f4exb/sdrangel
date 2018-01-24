@@ -16,7 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-//#include <QDirIterator>
+#include <QDirIterator>
 #include <QJsonDocument>
 #include <QJsonArray>
 
@@ -47,7 +47,7 @@ WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     m_adapter(0)
 {
     qtwebapp::HttpDocrootSettings docrootSettings;
-    docrootSettings.path = ":/";
+    docrootSettings.path = ":/webapi";
     m_staticFileController = new qtwebapp::StaticFileController(docrootSettings, parent);
 }
 
@@ -119,11 +119,9 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelSettingsURLRe)) {
                 devicesetChannelSettingsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             }
-            else
+            else // serve static documentation pages
             {
-                QByteArray path = "/index.html";
-                response.setStatus(400, "API URL does not exist");
-                m_staticFileController->service(path, response);
+                m_staticFileController->service(request, response);
             }
 
 //            QDirIterator it(":", QDirIterator::Subdirectories);

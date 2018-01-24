@@ -1,0 +1,52 @@
+HackRFInputSettings:
+  description: HackRF
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    bandwidth:
+      type: integer
+    lnaGain:
+      type: integer
+    vgaGain:
+      type: integer
+    log2Decim:              
+      type: integer
+    fcPos:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    devSampleRate:
+      type: integer
+    biasT:
+      type: integer
+    lnaExt:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    linkTxFrequency:
+      type: integer
+
+HackRFOutputSettings:
+  description: HackRF
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    bandwidth:
+      type: integer
+    vgaGain:
+      type: integer
+    log2Interp:              
+      type: integer
+    devSampleRate:
+      type: integer
+    biasT:
+      type: integer
+    lnaExt:
+      type: integer
