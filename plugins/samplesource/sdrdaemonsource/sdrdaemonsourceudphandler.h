@@ -77,6 +77,8 @@ private:
 	int m_throttlems;
     uint32_t m_readLengthSamples;
     uint32_t m_readLength;
+    int32_t *m_converterBuffer;
+    uint32_t m_converterBufferNbSamples;
     bool m_throttleToggle;
     uint32_t m_rateDivider;
     bool m_autoCorrBuffer;

@@ -51,6 +51,8 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_throttlems(SDRDAEMONSOURCE_THROTTLE_MS),
     m_readLengthSamples(0),
     m_readLength(0),
+    m_converterBuffer(0),
+    m_converterBufferNbSamples(0),
     m_throttleToggle(false),
     m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_autoCorrBuffer(true)
@@ -72,6 +74,7 @@ SDRdaemonSourceUDPHandler::~SDRdaemonSourceUDPHandler()
 {
 	stop();
 	delete[] m_udpBuf;
+	if (m_converterBuffer) { delete[] m_converterBuffer; }
 #ifdef USE_INTERNAL_TIMER
     if (m_timer) {
         delete m_timer;
@@ -263,9 +266,32 @@ void SDRdaemonSourceUDPHandler::tick()
 
     m_readLength = m_readLengthSamples * SDRdaemonSourceBuffer::m_iqSampleSize;
 
-    // read samples directly feeding the SampleFifo (no callback)
-    m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
-    m_samplesCount += m_readLengthSamples;
+    if (SDR_RX_SAMP_SZ == 16)
+    {
+        // read samples directly feeding the SampleFifo (no callback)
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
+        m_samplesCount += m_readLengthSamples;
+    }
+    else if (SDR_RX_SAMP_SZ == 24)
+    {
+        if (m_readLengthSamples > m_converterBufferNbSamples)
+        {
+            if (m_converterBuffer) { delete[] m_converterBuffer; }
+            m_converterBuffer = new int32_t[m_readLengthSamples*2];
+        }
+
+        uint8_t *buf = m_sdrDaemonBuffer.readData(m_readLength);
+
+        for (unsigned int is = 0; is < m_readLengthSamples; is++)
+        {
+            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is];
+            m_converterBuffer[2*is]<<=8;
+            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1];
+            m_converterBuffer[2*is+1]<<=8;
+        }
+
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*4*2);
+    }
 
 	if (m_tickCount < m_rateDivider)
 	{
