@@ -21,8 +21,6 @@ info:
   contact:
     url: "https://github.com/f4exb/sdrangel"
     email: "f4exb06@gmail.com"
-# during dev, should point to your local machine
-host: localhost:8091
 # basePath prefixes all resource paths 
 basePath: /
 # 
