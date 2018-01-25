@@ -290,7 +290,7 @@ void SDRdaemonSourceUDPHandler::tick()
             m_converterBuffer[2*is+1]<<=8;
         }
 
-        m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*4*2);
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
     }
 
 	if (m_tickCount < m_rateDivider)
