@@ -136,7 +136,8 @@ void FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
     sampleFile.read((char *) &(header.centerFrequency), sizeof(quint64));
     sampleFile.read((char *) &(header.startTimeStamp), sizeof(std::time_t));
     sampleFile.read((char *) &(header.sampleSize), sizeof(quint32));
-    if ((header.sampleSize != 16) || (header.sampleSize != 24)) { // assume 16 bits if garbage (old I/Q file)
+    if ((header.sampleSize != 16) && (header.sampleSize != 24)) { // assume 16 bits if garbage (old I/Q file)
     	header.sampleSize = 16;
     }
+    qDebug("FileRecord::readHeader: sampleSize: %u", header.sampleSize);
 }

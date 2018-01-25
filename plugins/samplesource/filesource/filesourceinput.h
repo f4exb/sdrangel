@@ -173,30 +173,35 @@ public:
 
 	public:
 		int getSampleRate() const { return m_sampleRate; }
+		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
 		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
 		quint32 getRecordLength() const { return m_recordLength; }
 
 		static MsgReportFileSourceStreamData* create(int sampleRate,
+		        quint32 sampleSize,
 				quint64 centerFrequency,
 				std::time_t startingTimeStamp,
 				quint32 recordLength)
 		{
-			return new MsgReportFileSourceStreamData(sampleRate, centerFrequency, startingTimeStamp, recordLength);
+			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLength);
 		}
 
 	protected:
 		int m_sampleRate;
+		quint32 m_sampleSize;
 		quint64 m_centerFrequency;
 		std::time_t m_startingTimeStamp;
 		quint32 m_recordLength;
 
 		MsgReportFileSourceStreamData(int sampleRate,
+		        quint32 sampleSize,
 				quint64 centerFrequency,
 				std::time_t startingTimeStamp,
 				quint32 recordLength) :
 			Message(),
 			m_sampleRate(sampleRate),
+			m_sampleSize(sampleSize),
 			m_centerFrequency(centerFrequency),
 			m_startingTimeStamp(startingTimeStamp),
 			m_recordLength(recordLength)

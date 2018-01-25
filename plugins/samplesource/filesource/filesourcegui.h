@@ -63,6 +63,7 @@ private:
     bool m_acquisition;
     QString m_fileName;
 	int m_sampleRate;
+	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
 	quint32 m_recordLength;
 	std::time_t m_startingTimeStamp;

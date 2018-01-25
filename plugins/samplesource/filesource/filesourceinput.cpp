@@ -99,6 +99,7 @@ void FileSourceInput::openFileStream()
 			<< " length: " << m_recordLength << " seconds";
 
 	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
+	        m_sampleSize,
 			m_centerFrequency,
 			m_startingTimeStamp,
 			m_recordLength); // file stream data

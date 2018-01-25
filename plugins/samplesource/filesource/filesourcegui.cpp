@@ -175,6 +175,7 @@ bool FileSourceGui::handleMessage(const Message& message)
 	else if (FileSourceInput::MsgReportFileSourceStreamData::match(message))
 	{
 		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleRate();
+		m_sampleSize = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleSize();
 		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getCenterFrequency();
 		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
 		m_recordLength = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getRecordLength();
@@ -312,6 +313,7 @@ void FileSourceGui::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
 	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+	ui->sampleSizeText->setText(tr("%1b").arg(m_sampleSize));
 	ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addSecs(m_recordLength);
