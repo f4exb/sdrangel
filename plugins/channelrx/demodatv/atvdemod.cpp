@@ -413,7 +413,7 @@ void ATVDemod::demod(Complex& c)
     fltVal = (fltVal < -1.0f) ? -1.0f : (fltVal > 1.0f) ? 1.0f : fltVal;
 
     if ((m_running.m_intVideoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
-        m_scopeSampleBuffer.push_back(Sample(fltVal*32767.0f, 0.0f));
+        m_scopeSampleBuffer.push_back(Sample(fltVal*SDR_RX_SCALEF, 0.0f));
     }
 
     m_fltAmpLineAverage += fltVal;
