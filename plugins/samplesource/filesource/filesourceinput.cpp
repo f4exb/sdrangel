@@ -48,6 +48,7 @@ FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(),
 	m_fileName("..."),
 	m_sampleRate(0),
+	m_sampleSize(0),
 	m_centerFrequency(0),
 	m_recordLength(0),
     m_startingTimeStamp(0),
@@ -85,6 +86,7 @@ void FileSourceInput::openFileStream()
 	m_sampleRate = header.sampleRate;
 	m_centerFrequency = header.centerFrequency;
 	m_startingTimeStamp = header.startTimeStamp;
+	m_sampleSize = header.sampleSize;
 
 	if (fileSize > sizeof(FileRecord::Header)) {
 		m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
@@ -136,7 +138,7 @@ bool FileSourceInput::start()
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
 
-	if(!m_sampleFifo.setSize(m_sampleRate * 4)) {
+	if(!m_sampleFifo.setSize(m_sampleRate * sizeof(Sample))) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
@@ -149,7 +151,7 @@ bool FileSourceInput::start()
 		return false;
 	}
 
-	m_fileSourceThread->setSamplerate(m_sampleRate);
+	m_fileSourceThread->setSampleRateAndSize(m_sampleRate, m_sampleSize);
 	m_fileSourceThread->connectTimer(m_masterTimer);
 	m_fileSourceThread->startWork();
 	m_deviceDescription = "FileSource";

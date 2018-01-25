@@ -16,9 +16,10 @@ public:
 
     struct Header
     {
-        int         sampleRate;
+    	qint32      sampleRate;
         quint64     centerFrequency;
         std::time_t startTimeStamp;
+        quint32     sampleSize;
     };
 
 	FileRecord();
@@ -39,7 +40,7 @@ public:
 
 private:
 	std::string m_fileName;
-	int m_sampleRate;
+	qint32 m_sampleRate;
 	quint64 m_centerFrequency;
 	bool m_recordOn;
     bool m_recordStart;

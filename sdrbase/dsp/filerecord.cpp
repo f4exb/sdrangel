@@ -122,15 +122,21 @@ void FileRecord::handleConfigure(const std::string& fileName)
 
 void FileRecord::writeHeader()
 {
-    m_sampleFile.write((const char *) &m_sampleRate, sizeof(int));
-    m_sampleFile.write((const char *) &m_centerFrequency, sizeof(quint64));
+    m_sampleFile.write((const char *) &m_sampleRate, sizeof(qint32));         // 4 bytes
+    m_sampleFile.write((const char *) &m_centerFrequency, sizeof(quint64));   // 8 bytes
     std::time_t ts = time(0);
-    m_sampleFile.write((const char *) &ts, sizeof(std::time_t));
+    m_sampleFile.write((const char *) &ts, sizeof(std::time_t));              // 8 bytes
+    quint32 sampleSize = SDR_RX_SAMP_SZ;
+    m_sampleFile.write((const char *) &sampleSize, sizeof(int));              // 4 bytes
 }
 
 void FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
 {
-    sampleFile.read((char *) &(header.sampleRate), sizeof(int));
+    sampleFile.read((char *) &(header.sampleRate), sizeof(qint32));
     sampleFile.read((char *) &(header.centerFrequency), sizeof(quint64));
     sampleFile.read((char *) &(header.startTimeStamp), sizeof(std::time_t));
+    sampleFile.read((char *) &(header.sampleSize), sizeof(quint32));
+    if ((header.sampleSize != 16) || (header.sampleSize != 24)) { // assume 16 bits if garbage (old I/Q file)
+    	header.sampleSize = 16;
+    }
 }

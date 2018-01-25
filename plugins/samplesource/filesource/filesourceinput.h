@@ -265,6 +265,7 @@ public:
 	QString m_deviceDescription;
 	QString m_fileName;
 	int m_sampleRate;
+	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
 	quint32 m_recordLength; //!< record length in seconds computed from file size
 	std::time_t m_startingTimeStamp;
