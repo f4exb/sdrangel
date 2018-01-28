@@ -317,6 +317,24 @@ protected:
         }
     }
 
+    void udpWriteNorm(Real real, Real imag)
+    {
+        if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+            m_udpBuffer16->write(Sample16(real*32768.0, imag*32768.0));
+        } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+            m_udpBuffer24->write(Sample24(real*8388608.0, imag*8388608.0));
+        }
+    }
+
+    void udpWriteNormMono(Real sample)
+    {
+        if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+            m_udpBufferMono16->write(sample*32768.0);
+        } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+            m_udpBufferMono24->write(sample*8388608.0);
+        }
+    }
+
 };
 
 #endif // INCLUDE_UDPSRC_H

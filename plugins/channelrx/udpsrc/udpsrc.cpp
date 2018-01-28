@@ -207,15 +207,13 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFM)
 			{
                 Real discri = m_squelchOpen ? m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
-                FixReal demod = (FixReal) (SDR_RX_SCALEF * discri);
-				udpWrite(demod, demod);
+				udpWriteNorm(discri, discri);
 				m_outMovingAverage.feed(discri*discri);
 			}
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
 			{
 			    Real discri = m_squelchOpen ? m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
-				FixReal demod = (FixReal) (SDR_RX_SCALEF * discri);
-				udpWriteMono(demod);
+				udpWriteNormMono(discri);
 				m_outMovingAverage.feed(discri*discri);
 			}
 			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
