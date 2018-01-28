@@ -102,6 +102,9 @@
        <property name="text">
         <string>DSP Rx 24 bits Tx 16 bits</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
     </layout>
@@ -125,6 +128,9 @@
        </property>
        <property name="text">
         <string>PID: 00000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
