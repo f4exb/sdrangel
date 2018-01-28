@@ -142,6 +142,22 @@ protected:
 		{ }
 	};
 
+	struct Sample16
+	{
+	    Sample16() : m_r(0), m_i(0) {}
+	    Sample16(int16_t r, int16_t i) : m_r(r), m_i(i) {}
+	    int16_t m_r;
+	    int16_t m_i;
+	};
+
+    struct Sample24
+    {
+	    Sample24() : m_r(0), m_i(0) {}
+	    Sample24(int32_t r, int32_t i) : m_r(r), m_i(i) {}
+        int32_t m_r;
+        int32_t m_i;
+    };
+
     DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
@@ -167,8 +183,10 @@ protected:
 	fftfilt* UDPFilter;
 
 	SampleVector m_sampleBuffer;
-	UDPSink<Sample> *m_udpBuffer;
-	UDPSink<FixReal> *m_udpBufferMono;
+	UDPSink<Sample16> *m_udpBuffer16;
+	UDPSink<int16_t> *m_udpBufferMono16;
+    UDPSink<Sample24> *m_udpBuffer24;
+    UDPSink<int32_t> *m_udpBufferMono24;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
@@ -256,6 +274,46 @@ protected:
             m_squelchOpen = false;
             m_squelchOpenCount = 0;
             m_squelchCloseCount = 0;
+        }
+    }
+
+    void udpWrite(FixReal real, FixReal imag)
+    {
+        if (SDR_RX_SAMP_SZ == 16)
+        {
+            if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+                m_udpBuffer16->write(Sample16(real, imag));
+            } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+                m_udpBuffer24->write(Sample24(real<<8, imag<<8));
+            }
+        }
+        else if (SDR_RX_SAMP_SZ == 24)
+        {
+            if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+                m_udpBuffer16->write(Sample16(real>>8, imag>>8));
+            } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+                m_udpBuffer24->write(Sample24(real, imag));
+            }
+        }
+    }
+
+    void udpWriteMono(FixReal sample)
+    {
+        if (SDR_RX_SAMP_SZ == 16)
+        {
+            if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+                m_udpBufferMono16->write(sample);
+            } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+                m_udpBufferMono24->write(sample<<8);
+            }
+        }
+        else if (SDR_RX_SAMP_SZ == 24)
+        {
+            if (m_settings.m_sampleSize == UDPSrcSettings::Size16bits) {
+                m_udpBufferMono16->write(sample>>8);
+            } else if (m_settings.m_sampleSize == UDPSrcSettings::Size24bits) {
+                m_udpBufferMono24->write(sample);
+            }
         }
     }
 

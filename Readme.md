@@ -81,6 +81,8 @@ If you use your own location for libairspyhf install directory you need to speci
 
 `-DLIBAIRSPYHF_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so -DLIBAIRSPYHF_INCLUDE_DIR=/opt/install/libairspyhf/include`
 
+It is recommended to add `-DRX_SAMPLE_24BIT` on the cmake command line to activate the Rx 24 bit DSP build and take advantage of improved dynamic range when using decimation.
+
 <h2>BladeRF</h2>
 
 [BladeRF](https://www.nuand.com/) is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
@@ -160,7 +162,7 @@ If you use your own location for libmirisdr-4 install directory you need to spec
 
 <h1>Plugins for special devices</h1>
 
-These plugins do not use any hardware device connected to your system. They support "virtual" devices related to the file system or the network.
+These plugins do not use any hardware device connected to your system.
 
 <h2>File input</h2>
 
@@ -175,6 +177,10 @@ The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header contain
 The [File sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink) allows the recording of the I/Q baseband signal produced by a transmission chain to a file in the `.sdriq` format thus readable by the file source plugin described just above.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSink[0]` even if no physical device is connected.
+
+<h2>Test source</h2>
+
+The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/samplesource/testsource) is an internal continuous wave generator that can be used to carry out test of software internals. 
 
 <h2>SDRdaemon receiver input</h2>
 
@@ -289,6 +295,15 @@ To be sure you will need at least Qt version 5.5. It definitely does not work wi
   - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful)
   - Windows 32 build is made with 5.9.1 and has Qt ANGLE support (OpenGL emulation with DirectX)
   - Windows 64 build is made with 5.9.1 and has no Qt ANGLE support (native OpenGL)
+
+<h2>24 bit DSP</h2>
+
+By default all Rx DSP processes use 16 bit samples coded on int16 fields. In order to use 24 bit samples coded on int32 fields you can specify `-DRX_SAMPLE_24BIT` on the cmake command line. This will give more dynamic range when the number of bits with decimation exceeds 16 bits:
+
+  - RTL-SDR, HackRF: (8 bit native) no advantage
+  - Funcube Pro and Pro+: (16 bit native) no decimation hence no advantage
+  - Airspy, BladeRF, LimeSDR, PlutoSDR, SDRPlay: (12 bit native) advantage for decimation by 32 or 64
+  - AirspyHF: (16 bit native) advantage for any decimation
 
 <h2>Ubuntu</h2>
 

@@ -262,7 +262,7 @@ void UDPSrcGUI::setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleF
 {
     switch(sampleFormat)
     {
-        case UDPSrcSettings::FormatS16LE:
+        case UDPSrcSettings::FormatIQ:
             ui->sampleFormat->setCurrentIndex(0);
             break;
         case UDPSrcSettings::FormatNFM:
@@ -303,7 +303,7 @@ void UDPSrcGUI::setSampleFormat(int index)
     switch(index)
     {
         case 0:
-            m_settings.m_sampleFormat = UDPSrcSettings::FormatS16LE;
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ;
             ui->fmDeviation->setEnabled(false);
             break;
         case 1:
@@ -343,7 +343,7 @@ void UDPSrcGUI::setSampleFormat(int index)
             ui->fmDeviation->setEnabled(false);
             break;
         default:
-            m_settings.m_sampleFormat = UDPSrcSettings::FormatS16LE;
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ;
             ui->fmDeviation->setEnabled(false);
             break;
     }
@@ -393,6 +393,18 @@ void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSrcGUI::on_sampleSize_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index >= UDPSrcSettings::SizeNone)) {
+        return;
+    }
+
+    m_settings.m_sampleSize = (UDPSrcSettings::SampleSize) index;
+
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))

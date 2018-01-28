@@ -31,7 +31,8 @@ UDPSrcSettings::UDPSrcSettings() :
 void UDPSrcSettings::resetToDefaults()
 {
     m_outputSampleRate = 48000;
-    m_sampleFormat = FormatS16LE;
+    m_sampleFormat = FormatIQ;
+    m_sampleSize = Size16bits;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;
     m_fmDeviation = 2500;
@@ -77,6 +78,7 @@ QByteArray UDPSrcSettings::serialize() const
     s.writeS32(17, m_squelchGate);
     s.writeBool(18, m_agc);
     s.writeString(19, m_title);
+    s.writeS32(20, (int) m_sampleFormat);
 
     return s.final();
 
@@ -106,12 +108,12 @@ bool UDPSrcSettings::deserialize(const QByteArray& data)
         d.readS32(2, &s32tmp, 0);
         m_inputFrequencyOffset = s32tmp;
 
-        d.readS32(3, &s32tmp, FormatS16LE);
+        d.readS32(3, &s32tmp, FormatIQ);
 
         if ((s32tmp >= 0) && (s32tmp < (int) FormatNone)) {
             m_sampleFormat = (SampleFormat) s32tmp;
         } else {
-            m_sampleFormat = FormatS16LE;
+            m_sampleFormat = FormatIQ;
         }
 
         d.readReal(4, &m_outputSampleRate, 48000.0);
@@ -133,6 +135,14 @@ bool UDPSrcSettings::deserialize(const QByteArray& data)
         d.readS32(17, &m_squelchGate, 5);
         d.readBool(18, &m_agc, false);
         d.readString(19, &m_title, "UDP Sample Source");
+
+        d.readS32(20, &s32tmp, Size16bits);
+
+        if ((s32tmp >= 0) && (s32tmp < (int) SizeNone)) {
+            m_sampleSize = (SampleSize) s32tmp;
+        } else {
+            m_sampleSize = Size16bits;
+        }
 
         return true;
     }

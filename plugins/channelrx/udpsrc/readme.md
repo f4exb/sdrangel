@@ -36,20 +36,25 @@ The display is in the format `address:audio port/data port`
 
 Sample rate in samples per second of the signal that is sent over UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
 
-<h3>6: Type of samples</h3>
+<h3>6: Type and size of samples</h3>
 
-Combo box to specify the type of samples that are sent over UDP.
+Left: combo box to specify the type of samples that are sent over UDP:
 
-  - `S16LE I/Q`: Raw I/Q samples on signed 16 bits integers with Little Endian layout. Use it with software that accepts I/Q data as input like GNUradio with the `UDP source` block. The output is interleaved I and Q samples
-  - `S16LE NFM`: AF of FM demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs. The output is a repetition of NFM samples on real part and on imaginary part this facilitates integration wtih software expecting a stereo type of input with the same samples on L and R channels. With GNURadio just use a complex to real block.
-  - `S16LE NFM Mono`: This is the same as above but only one sample is output for one NFM sample. This can be used with software that accept a mono type of input like `dsd` or `multimon`.
-  - `S16LE USB`: AF of USB demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
-  - `S16LE LSB`: AF of LSB demodulated signal as 16 bits signed integers with Little Endian layout. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
-  - `S16LE LSB Mono`: AF of the LSB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
-  - `S16LE USB Mono`: AF of the USB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
-  - `S16LE AM Mono`: AF of the enveloppe demodulated signal i.e. channel magnitude or sqrt(I² + Q²) as "mono" samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
-  - `S16LE AM !DC Mono`: Same as above but with a DC block based on magnitude average over a 5 ms period     
-  - `S16LE AM BPF Mono`: Same as AM Mono but raw magnitude signal is passed through a bandpass filter with lower cutoff at 300 Hz and higher cutoff at RF bandwidth frequency     
+  - `I/Q`: Raw I/Q samples. Use it with software that accepts I/Q data as input like GNUradio with the `UDP source` block. The output is interleaved I and Q samples
+  - `NFM`: AF of FM demodulated signal. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs. The output is a repetition of NFM samples on real part and on imaginary part this facilitates integration wtih software expecting a stereo type of input with the same samples on L and R channels. With GNURadio just use a complex to real block.
+  - `NFM Mono`: This is the same as above but only one sample is output for one NFM sample. This can be used with software that accept a mono type of input like `dsd` or `multimon`.
+  - `USB`: AF of USB demodulated signal. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
+  - `LSB`: AF of LSB demodulated signal. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
+  - `LSB Mono`: AF of the LSB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
+  - `USB Mono`: AF of the USB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
+  - `AM Mono`: AF of the enveloppe demodulated signal i.e. channel magnitude or sqrt(I² + Q²) as "mono" samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
+  - `AM !DC Mono`: Same as above but with a DC block based on magnitude average over a 5 ms period     
+  - `AM BPF Mono`: Same as AM Mono but raw magnitude signal is passed through a bandpass filter with lower cutoff at 300 Hz and higher cutoff at RF bandwidth frequency     
+  
+Right: Sample size in bits:
+
+  - `16 bits`: samples are 16 bit signed with little endian layout (S16LE)
+  - `24 bits`: samples are 32 bit signed with little endian layout (S32LE) using only the 3 less significant bytes. This means that the range is -2²³ to 2²³ - 1
   
 <h3>7: Signal bandwidth</h3>
 
