@@ -43,7 +43,7 @@ void ATVModSettings::resetToDefaults()
     m_cameraPlay = false;
     m_channelMute = false;
     m_invertedVideo = false;
-    m_rfScalingFactor = 29204.0f; // -1dB
+    m_rfScalingFactor = 0.891235351562f * SDR_TX_SCALEF; // -1dB
     m_fmExcursion = 0.5f;         // half bandwidth
     m_forceDecimator = false;
     m_overlayText = "ATV";

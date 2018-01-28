@@ -135,8 +135,8 @@ void NFMMod::pull(Sample& sample)
 
     m_settingsMutex.unlock();
 
-    Real magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-	magsq /= (1<<30);
+    double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
+	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
 	m_movingAverage.feed(magsq);
 	m_magsq = m_movingAverage.average();
 
@@ -175,8 +175,8 @@ void NFMMod::modulateSample()
         m_modPhasor += (m_settings.m_fmDeviation / (float) m_settings.m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 378.0f);
     }
 
-    m_modSample.real(cos(m_modPhasor) * 29204.0f); // -1 dB
-    m_modSample.imag(sin(m_modPhasor) * 29204.0f);
+    m_modSample.real(cos(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF); // -1 dB
+    m_modSample.imag(sin(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF);
 }
 
 void NFMMod::pullAF(Real& sample)

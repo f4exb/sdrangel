@@ -26,7 +26,7 @@
 #include "dsp/hbfiltertraits.h"
 #include "util/export.h"
 
-template<uint32_t HBFilterOrder>
+template<typename AccuType, uint32_t HBFilterOrder>
 class SDRANGEL_API IntHalfbandFilterDB {
 public:
     IntHalfbandFilterDB();
@@ -35,7 +35,7 @@ public:
 	bool workDecimateCenter(Sample* sample)
 	{
 		// insert sample into ring-buffer
-	    storeSample((FixReal) sample->real(), (FixReal) sample->imag());
+	    storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
 
 		switch(m_state)
 		{
@@ -67,7 +67,7 @@ public:
         {
             case 0:
                 // insert sample into ring-buffer
-                storeSample(0, 0);
+                storeSampleFixReal((FixReal) 0, (FixReal) 0);
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -79,7 +79,7 @@ public:
 
             default:
                 // insert sample into ring-buffer
-                storeSample((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+                storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -125,32 +125,32 @@ public:
         }
     }
 
-	bool workDecimateCenter(qint32 *x, qint32 *y)
-	{
-		// insert sample into ring-buffer
-	    storeSample(*x, *y);
-
-		switch(m_state)
-		{
-			case 0:
-				// advance write-pointer
-                advancePointer();
-				// next state
-				m_state = 1;
-				// tell caller we don't have a new sample
-				return false;
-
-			default:
-				// save result
-				doFIR(x, y);
-				// advance write-pointer
-                advancePointer();
-				// next state
-				m_state = 0;
-				// tell caller we have a new sample
-				return true;
-		}
-	}
+//    bool workDecimateCenter(qint32 *x, qint32 *y)
+//    {
+//        // insert sample into ring-buffer
+//        storeSample32(*x, *y);
+//
+//        switch (m_state)
+//        {
+//        case 0:
+//            // advance write-pointer
+//            advancePointer();
+//            // next state
+//            m_state = 1;
+//            // tell caller we don't have a new sample
+//            return false;
+//
+//        default:
+//            // save result
+//            doFIR(x, y);
+//            // advance write-pointer
+//            advancePointer();
+//            // next state
+//            m_state = 0;
+//            // tell caller we have a new sample
+//            return true;
+//        }
+//    }
 
 	// downsample by 2, return lower half of original spectrum
 	bool workDecimateLowerHalf(Sample* sample)
@@ -159,7 +159,7 @@ public:
 		{
 			case 0:
 				// insert sample into ring-buffer
-			    storeSample((FixReal) -sample->imag(), (FixReal) sample->real());
+			    storeSampleFixReal((FixReal) -sample->imag(), (FixReal) sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -169,7 +169,7 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-                storeSample((FixReal) -sample->real(), (FixReal) -sample->imag());
+                storeSampleFixReal((FixReal) -sample->real(), (FixReal) -sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -181,7 +181,7 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-                storeSample((FixReal) sample->imag(), (FixReal) -sample->real());
+                storeSampleFixReal((FixReal) sample->imag(), (FixReal) -sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -191,7 +191,7 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-                storeSample((FixReal) sample->real(), (FixReal) sample->imag());
+                storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -279,7 +279,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSampleFixReal((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -297,7 +297,7 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            storeSample((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -315,7 +315,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSampleFixReal((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -333,7 +333,7 @@ public:
 
         default:
             // insert sample into ring-buffer
-            storeSample((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -358,7 +358,7 @@ public:
 		{
 			case 0:
 				// insert sample into ring-buffer
-	            storeSample((FixReal) sample->imag(), (FixReal) -sample->real());
+	            storeSampleFixReal((FixReal) sample->imag(), (FixReal) -sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -368,7 +368,7 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-                storeSample((FixReal) -sample->real(), (FixReal) -sample->imag());
+                storeSampleFixReal((FixReal) -sample->real(), (FixReal) -sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -380,7 +380,7 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-                storeSample((FixReal) -sample->imag(), (FixReal) sample->real());
+                storeSampleFixReal((FixReal) -sample->imag(), (FixReal) sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -390,7 +390,7 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-                storeSample((FixReal) sample->real(), (FixReal) sample->imag());
+                storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -478,7 +478,7 @@ public:
         {
         case 0:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSampleFixReal((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -496,7 +496,7 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            storeSample((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -514,7 +514,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSample(0, 0);
+            storeSampleFixReal((FixReal) 0, (FixReal) 0);
 
             // save result
             doFIR(&s);
@@ -532,7 +532,7 @@ public:
 
         default:
             // insert sample into ring-buffer
-            storeSample((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -552,47 +552,47 @@ public:
 
     void myDecimate(const Sample* sample1, Sample* sample2)
     {
-        storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
+        storeSampleFixReal((FixReal) sample1->real(), (FixReal) sample1->imag());
         advancePointer();
 
-        storeSample((FixReal) sample2->real(), (FixReal) sample2->imag());
+        storeSampleFixReal((FixReal) sample2->real(), (FixReal) sample2->imag());
         doFIR(sample2);
         advancePointer();
     }
 
-    void myDecimate(qint32 x1, qint32 y1, qint32 *x2, qint32 *y2)
+    void myDecimate(AccuType x1, AccuType y1, AccuType *x2, AccuType *y2)
     {
-        storeSample(x1, y1);
+        storeSampleAccu(x1, y1);
         advancePointer();
 
-        storeSample(*x2, *y2);
-        doFIR(x2, y2);
+        storeSampleAccu(*x2, *y2);
+        doFIRAccu(x2, y2);
         advancePointer();
     }
 
     /** Simple zero stuffing and filter */
     void myInterpolateZeroStuffing(Sample* sample1, Sample* sample2)
     {
-        storeSample((FixReal) sample1->real(), (FixReal) sample1->imag());
+        storeSampleFixReal((FixReal) sample1->real(), (FixReal) sample1->imag());
         doFIR(sample1);
         advancePointer();
 
-        storeSample(0, 0);
+        storeSampleFixReal((FixReal) 0, (FixReal) 0);
         doFIR(sample2);
         advancePointer();
     }
 
     /** Simple zero stuffing and filter */
-    void myInterpolateZeroStuffing(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
-    {
-        storeSample(*x1, *y1);
-        doFIR(x1, y1);
-        advancePointer();
-
-        storeSample(0, 0);
-        doFIR(x2, y2);
-        advancePointer();
-    }
+//    void myInterpolateZeroStuffing(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
+//    {
+//        storeSampleAccu(*x1, *y1);
+//        doFIR(x1, y1);
+//        advancePointer();
+//
+//        storeSampleAccu(0, 0);
+//        doFIR(x2, y2);
+//        advancePointer();
+//    }
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
     void myInterpolate(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2)
@@ -619,12 +619,12 @@ public:
     }
 
 protected:
-	qint32 m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
+	AccuType m_samplesDB[2*(HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1)][2]; // double buffer technique
 	int m_ptr;
 	int m_size;
 	int m_state;
 
-    void storeSample(const FixReal& sampleI, const FixReal& sampleQ)
+    void storeSampleFixReal(const FixReal& sampleI, const FixReal& sampleQ)
     {
         m_samplesDB[m_ptr][0] = sampleI;
         m_samplesDB[m_ptr][1] = sampleQ;
@@ -632,7 +632,7 @@ protected:
         m_samplesDB[m_ptr + m_size][1] = sampleQ;
     }
 
-    void storeSample(qint32 x, qint32 y)
+    void storeSampleAccu(AccuType x, AccuType y)
     {
         m_samplesDB[m_ptr][0] = x;
         m_samplesDB[m_ptr][1] = y;
@@ -649,8 +649,8 @@ protected:
     {
         int a = m_ptr + m_size; // tip pointer
         int b = m_ptr + 1; // tail pointer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -660,8 +660,8 @@ protected:
             b += 2;
         }
 
-        iAcc += ((qint32)m_samplesDB[b-1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-        qAcc += ((qint32)m_samplesDB[b-1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        iAcc += m_samplesDB[b-1][0] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        qAcc += m_samplesDB[b-1][1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
         sample->setReal(iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
         sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
@@ -671,8 +671,8 @@ protected:
     {
         int a = m_ptr + m_size; // tip pointer
         int b = m_ptr + 1; // tail pointer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -682,8 +682,30 @@ protected:
             b += 2;
         }
 
-        iAcc += ((qint32)m_samplesDB[b-1][0]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-        qAcc += ((qint32)m_samplesDB[b-1][1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        iAcc += m_samplesDB[b-1][0] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        qAcc += m_samplesDB[b-1][1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+
+        *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit
+        *y = qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
+    }
+
+    void doFIRAccu(AccuType *x, AccuType *y)
+    {
+        int a = m_ptr + m_size; // tip pointer
+        int b = m_ptr + 1; // tail pointer
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
+
+        for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
+        {
+            iAcc += (m_samplesDB[a][0] + m_samplesDB[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += (m_samplesDB[a][1] + m_samplesDB[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            a -= 2;
+            b += 2;
+        }
+
+        iAcc += m_samplesDB[b-1][0] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+        qAcc += m_samplesDB[b-1][1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
         *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit
         *y = qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
@@ -695,8 +717,8 @@ protected:
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -716,8 +738,8 @@ protected:
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -732,8 +754,8 @@ protected:
     }
 };
 
-template<uint32_t HBFilterOrder>
-IntHalfbandFilterDB<HBFilterOrder>::IntHalfbandFilterDB()
+template<typename AccuType, uint32_t HBFilterOrder>
+IntHalfbandFilterDB<AccuType, HBFilterOrder>::IntHalfbandFilterDB()
 {
     m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
 

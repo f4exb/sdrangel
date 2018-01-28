@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
+ // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -74,7 +74,7 @@ uint SampleSinkFifo::write(const quint8* data, uint count)
 	uint remaining;
 	uint len;
 	const Sample* begin = (const Sample*)data;
-	count /= 4;
+	count /= sizeof(Sample);
 
 	total = MIN(count, m_size - m_fill);
 	if(total < count) {

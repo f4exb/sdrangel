@@ -244,7 +244,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_ssbDemod = (SSBDemod*) rxChannel; //new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_ssbDemod->setSampleSink(m_spectrumVis);

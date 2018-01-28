@@ -395,7 +395,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
-	m_spectrumVis = new SpectrumVis(ui->glSpectrum);
+	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_scopeVis = new ScopeVisNG(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeNGComboVis(m_spectrumVis, m_scopeVis);
 	m_channelAnalyzer = (ChannelAnalyzerNG*) rxChannel; //new ChannelAnalyzerNG(m_deviceUISet->m_deviceSourceAPI);
@@ -464,8 +464,6 @@ bool ChannelAnalyzerNGGUI::setNewFinalRate(int spanLog2)
 	}
 
 	m_spanLog2 = spanLog2;
-	//m_rate = 48000 / (1<<spanLog2);
-	//m_rate = m_channelizer->getInputSampleRate() / (1<<spanLog2);
     m_rate = getRequestedChannelSampleRate() / (1<<spanLog2);
 
     if (m_rate == 0) {

@@ -27,12 +27,15 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo*
 	QThread(parent),
 	m_running(false),
 	m_ifstream(samplesStream),
-	m_buf(0),
+	m_fileBuf(0),
+	m_convertBuf(0),
 	m_bufsize(0),
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
     m_samplerate(0),
+	m_samplesize(0),
+	m_samplebytes(0),
     m_throttlems(FILESOURCE_THROTTLE_MS),
     m_throttleToggle(false)
 {
@@ -45,8 +48,12 @@ FileSourceThread::~FileSourceThread()
 		stopWork();
 	}
 
-	if (m_buf != 0) {
-		free(m_buf);
+	if (m_fileBuf != 0) {
+		free(m_fileBuf);
+	}
+
+	if (m_convertBuf != 0) {
+		free(m_convertBuf);
 	}
 }
 
@@ -77,49 +84,67 @@ void FileSourceThread::stopWork()
 	wait();
 }
 
-void FileSourceThread::setSamplerate(int samplerate)
+void FileSourceThread::setSampleRateAndSize(int samplerate, quint32 samplesize)
 {
-	qDebug() << "FileSourceThread::setSamplerate:"
-			<< " new:" << samplerate
-			<< " old:" << m_samplerate;
+	qDebug() << "FileSourceThread::setSampleRateAndSize:"
+			<< " new rate:" << samplerate
+			<< " new size:" << samplesize
+			<< " old rate:" << m_samplerate
+			<< " old size:" << m_samplesize;
 
-	if (samplerate != m_samplerate)
+	if ((samplerate != m_samplerate) || (samplesize != m_samplesize))
 	{
 		if (m_running) {
 			stopWork();
 		}
 
 		m_samplerate = samplerate;
-        // TODO: implement FF and slow motion here. 4 corresponds to live. 2 is half speed, 8 is doulbe speed
-        m_chunksize = (m_samplerate * 4 * m_throttlems) / 1000;
+		m_samplesize = samplesize;
+		m_samplebytes = m_samplesize > 16 ? sizeof(int32_t) : sizeof(int16_t);
+        // TODO: implement FF and slow motion here. 2 corresponds to live. 1 is half speed, 4 is double speed
+        m_chunksize = (m_samplerate * 2 * m_samplebytes * m_throttlems) / 1000;
 
-        setBuffer(m_chunksize);
+        setBuffers(m_chunksize);
 	}
 
 	//m_samplerate = samplerate;
 }
 
-void FileSourceThread::setBuffer(std::size_t chunksize)
+void FileSourceThread::setBuffers(std::size_t chunksize)
 {
     if (chunksize > m_bufsize)
     {
         m_bufsize = chunksize;
+        int nbSamples = m_bufsize/(2 * m_samplebytes);
 
-        if (m_buf == 0)
+        if (m_fileBuf == 0)
         {
-            qDebug() << "FileSourceThread::setBuffer: Allocate buffer";
-            m_buf = (quint8*) malloc(m_bufsize);
+            qDebug() << "FileSourceThread::setBuffers: Allocate file buffer";
+            m_fileBuf = (quint8*) malloc(m_bufsize);
         }
         else
         {
-            qDebug() << "FileSourceThread::setBuffer: Re-allocate buffer";
-            quint8 *buf = m_buf;
-            m_buf = (quint8*) realloc((void*) m_buf, m_bufsize);
-            if (!m_buf) free(buf);
+            qDebug() << "FileSourceThread::setBuffers: Re-allocate file buffer";
+            quint8 *buf = m_fileBuf;
+            m_fileBuf = (quint8*) realloc((void*) m_fileBuf, m_bufsize);
+            if (!m_fileBuf) free(buf);
         }
 
-        qDebug() << "FileSourceThread::setBuffer: size: " << m_bufsize
-                << " #samples: " << (m_bufsize/4);
+        if (m_convertBuf == 0)
+        {
+            qDebug() << "FileSourceThread::setBuffers: Allocate conversion buffer";
+            m_convertBuf = (quint8*) malloc(nbSamples*sizeof(Sample));
+        }
+        else
+        {
+            qDebug() << "FileSourceThread::setBuffers: Re-allocate conversion buffer";
+            quint8 *buf = m_convertBuf;
+            m_convertBuf = (quint8*) realloc((void*) m_convertBuf, nbSamples*sizeof(Sample));
+            if (!m_convertBuf) free(buf);
+        }
+
+        qDebug() << "FileSourceThread::setBuffers: size: " << m_bufsize
+                << " #samples: " << nbSamples;
     }
 }
 
@@ -151,17 +176,18 @@ void FileSourceThread::tick()
         if (throttlems != m_throttlems)
         {
             m_throttlems = throttlems;
-            m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
+            m_chunksize = 2 * m_samplebytes * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
             m_throttleToggle = !m_throttleToggle;
-            setBuffer(m_chunksize);
+            setBuffers(m_chunksize);
         }
 
 		// read samples directly feeding the SampleFifo (no callback)
-		m_ifstream->read(reinterpret_cast<char*>(m_buf), m_chunksize);
+		m_ifstream->read(reinterpret_cast<char*>(m_fileBuf), m_chunksize);
 
         if (m_ifstream->eof())
         {
-            m_sampleFifo->write(m_buf, m_ifstream->gcount());
+        	writeToSampleFifo(m_fileBuf, (qint32) m_ifstream->gcount());
+            //m_sampleFifo->write(m_buf, m_ifstream->gcount());
             // TODO: handle loop playback situation
     		m_ifstream->clear();
             m_ifstream->seekg(sizeof(FileRecord::Header), std::ios::beg);
@@ -171,8 +197,55 @@ void FileSourceThread::tick()
         }
         else
         {
-            m_sampleFifo->write(m_buf, m_chunksize);
-    		m_samplesCount += m_chunksize / 4;
+        	writeToSampleFifo(m_fileBuf, (qint32) m_chunksize);
+            //m_sampleFifo->write(m_buf, m_chunksize);
+    		m_samplesCount += m_chunksize / (2 * m_samplebytes);
         }
+	}
+}
+
+void FileSourceThread::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
+{
+	if (m_samplesize == 16)
+	{
+		if (SDR_RX_SAMP_SZ == 16)
+		{
+			m_sampleFifo->write(buf, nbBytes);
+		}
+		else if (SDR_RX_SAMP_SZ == 24)
+		{
+			FixReal *convertBuf = (FixReal *) m_convertBuf;
+			const int16_t *fileBuf = (int16_t *) buf;
+			int nbSamples = nbBytes / (2 * m_samplebytes);
+
+			for (int is = 0; is < nbSamples; is++)
+			{
+				convertBuf[2*is]   = fileBuf[2*is] << 8;
+				convertBuf[2*is+1] = fileBuf[2*is+1] << 8;
+			}
+
+			m_sampleFifo->write((quint8*) convertBuf, nbSamples*sizeof(Sample));
+		}
+	}
+	else if (m_samplesize == 24)
+	{
+		if (SDR_RX_SAMP_SZ == 24)
+		{
+			m_sampleFifo->write(buf, nbBytes);
+		}
+		else if (SDR_RX_SAMP_SZ == 16)
+		{
+			FixReal *convertBuf = (FixReal *) m_convertBuf;
+			const int32_t *fileBuf = (int32_t *) buf;
+			int nbSamples = nbBytes / (2 * m_samplebytes);
+
+			for (int is = 0; is < nbSamples; is++)
+			{
+				convertBuf[2*is]   = fileBuf[2*is] >> 8;
+				convertBuf[2*is+1] = fileBuf[2*is+1] >> 8;
+			}
+
+			m_sampleFifo->write((quint8*) convertBuf, nbSamples*sizeof(Sample));
+		}
 	}
 }

@@ -55,7 +55,11 @@ private:
 	int m_fcPos;
 	static AirspyThread *m_this;
 
-	Decimators<qint16, SDR_SAMP_SZ, 12> m_decimators;
+#ifdef SDR_RX_SAMPLE_24BIT
+    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+#else
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+#endif
 
 	void run();
 	void callback(const qint16* buf, qint32 len);

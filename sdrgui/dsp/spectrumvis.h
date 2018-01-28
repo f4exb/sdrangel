@@ -35,7 +35,7 @@ public:
 		FFTWindow::Function m_window;
 	};
 
-	SpectrumVis(GLSpectrum* glSpectrum = NULL);
+	SpectrumVis(Real scalef, GLSpectrum* glSpectrum = 0);
 	virtual ~SpectrumVis();
 
 	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
@@ -60,6 +60,7 @@ private:
 	std::size_t m_fftBufferFill;
 	bool m_needMoreSamples;
 
+	Real m_scalef;
 	GLSpectrum* m_glSpectrum;
 
 	QMutex m_mutex;

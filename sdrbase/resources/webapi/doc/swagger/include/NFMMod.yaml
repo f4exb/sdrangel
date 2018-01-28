@@ -1,0 +1,40 @@
+NFMModSettings:
+  description: NFMMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    afBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    toneFrequency:
+      type: number
+      format: float
+    volumeFactor:
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelMute:
+      type: integer
+    playLoop:
+      type: integer
+    ctcssOn:
+      type: integer
+    ctcssIndex:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    modAFInput:
+      type: integer
+    cwKeyer:
+      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    

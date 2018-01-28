@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>246</width>
+    <width>300</width>
     <height>190</height>
    </rect>
   </property>
@@ -231,16 +231,56 @@
     <layout class="QHBoxLayout" name="rateTimeLayout">
      <item>
       <widget class="QLabel" name="sampleRateText">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
-        <string>Record sample rate</string>
+        <string>Record sample rate (kS/s)</string>
        </property>
        <property name="text">
-        <string>0k</string>
+        <string>00000k</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sampleSizeText">
+       <property name="minimumSize">
+        <size>
+         <width>22</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Record sample size (bits)</string>
+       </property>
+       <property name="text">
+        <string>00b</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

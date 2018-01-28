@@ -153,7 +153,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);
 
-            Real magsq = magsqRaw / (1<<30);
+            Real magsq = magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED);
             m_movingAverage.feed(magsq);
             m_magsqSum += magsq;
 

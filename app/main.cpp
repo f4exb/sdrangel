@@ -24,6 +24,7 @@
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
+#include "dsp/dsptypes.h"
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -34,7 +35,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 */
 	QCoreApplication::setOrganizationName("f4exb");
 	QCoreApplication::setApplicationName("SDRangel");
-	QCoreApplication::setApplicationVersion("3.11.0");
+	QCoreApplication::setApplicationVersion("3.11.1");
 
 #if 1
 	qApp->setStyle(QStyleFactory::create("fusion"));
@@ -95,19 +96,25 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	parser.parse(*qApp);
 
 #if QT_VERSION >= 0x050400
-	qInfo("%s %s Qt %s %db %s %s",
+	qInfo("%s %s Qt %s %db %s %s DSP Rx:%db Tx:%db PID %lld",
 	        qPrintable(qApp->applicationName()),
 	        qPrintable(qApp->applicationVersion()),
 	        qPrintable(QString(QT_VERSION_STR)),
 	        QT_POINTER_SIZE*8,
 	        qPrintable(QSysInfo::currentCpuArchitecture()),
-	        qPrintable(QSysInfo::prettyProductName()));
+	        qPrintable(QSysInfo::prettyProductName()),
+	        SDR_RX_SAMP_SZ,
+	        SDR_TX_SAMP_SZ,
+	        qApp->applicationPid());
 #else
-    qInfo("%s %s Qt %s %db",
+    qInfo("%s %s Qt %s %db DSP Rx:%db Tx:%db PID: %lld",
             qPrintable(qApp->applicationName()),
             qPrintable((qApp->applicationVersion()),
             qPrintable(QString(QT_VERSION_STR)),
-            QT_POINTER_SIZE*8);
+            QT_POINTER_SIZE*8,
+            SDR_RX_SAMP_SZ,
+            SDR_TX_SAMP_SZ,
+            applicationPid);
 #endif
 
 	MainWindow w(logger, parser);

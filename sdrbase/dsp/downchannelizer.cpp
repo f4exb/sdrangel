@@ -192,6 +192,28 @@ void DownChannelizer::applyConfiguration()
 	}
 }
 
+#ifdef SDR_RX_SAMPLE_24BIT
+DownChannelizer::FilterStage::FilterStage(Mode mode) :
+    m_filter(new IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
+    m_workFunction(0),
+    m_mode(mode),
+    m_sse(false)
+{
+    switch(mode) {
+        case ModeCenter:
+            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+            break;
+
+        case ModeLowerHalf:
+            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+            break;
+
+        case ModeUpperHalf:
+            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+            break;
+    }
+}
+#else
 #ifdef USE_SSE4_1
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
 	m_filter(new IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>),
@@ -215,27 +237,27 @@ DownChannelizer::FilterStage::FilterStage(Mode mode) :
 }
 #else
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-	m_filter(new IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>),
+	m_filter(new IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>),
 	m_workFunction(0),
 	m_mode(mode),
 	m_sse(false)
 {
 	switch(mode) {
 		case ModeCenter:
-			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
 			break;
 
 		case ModeLowerHalf:
-			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
 			break;
 
 		case ModeUpperHalf:
-			m_workFunction = &IntHalfbandFilterDB<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
 			break;
 	}
 }
 #endif
-
+#endif
 DownChannelizer::FilterStage::~FilterStage()
 {
 	delete m_filter;

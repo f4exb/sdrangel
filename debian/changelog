@@ -1,3 +1,9 @@
+sdrangel (3.11.1-1) unstable; urgency=medium
+
+  * Replaced hardcoded bit scaling literals by defines. 24 bit sample option.
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Jan 2018 12:14:18 +0100
+
 sdrangel (3.11.0-1) unstable; urgency=medium
 
   * AirspyHF: support

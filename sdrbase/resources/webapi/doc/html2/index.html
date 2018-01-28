@@ -1137,7 +1137,7 @@ margin-bottom: 20px;
   "description" : "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
 };
             defs.InstanceSummaryResponse = {
-  "required" : [ "appname", "devicesetlist", "qtVersion", "version" ],
+  "required" : [ "appname", "devicesetlist", "dspRxBits", "dspTxBits", "pid", "qtVersion", "version" ],
   "properties" : {
     "version" : {
       "type" : "string",
@@ -1146,6 +1146,18 @@ margin-bottom: 20px;
     "qtVersion" : {
       "type" : "string",
       "description" : "Qt version with which the software was compiled"
+    },
+    "dspRxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Rx DSP"
+    },
+    "dspTxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Tx DSP"
+    },
+    "pid" : {
+      "type" : "integer",
+      "description" : "PID of the SDRangel instance"
     },
     "appname" : {
       "type" : "string",
@@ -1847,7 +1859,7 @@ margin-bottom: 20px;
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetChannelDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -2341,7 +2353,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/channel"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetChannelPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -2854,7 +2866,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelSettingsGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetChannelSettingsGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -3348,7 +3360,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelSettingsPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetChannelSettingsPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -3894,7 +3906,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelSettingsPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetChannelSettingsPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -4440,7 +4452,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDevicePut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDevicePut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -4953,7 +4965,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceRunDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceRunDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -5414,7 +5426,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceRunGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceRunGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -5875,7 +5887,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceRunPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceRunPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -6336,7 +6348,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSettingsGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSettingsGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -6754,7 +6766,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSettingsPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSettingsPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -7224,7 +7236,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSettingsPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSettingsPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -7694,7 +7706,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetFocusPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}/focus"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/deviceset/{deviceSetIndex}/focus"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetFocusPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -8155,7 +8167,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-devicesetGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/deviceset/{deviceSetIndex}"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-devicesetGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -8573,7 +8585,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-instanceDeviceSetDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/deviceset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/deviceset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-instanceDeviceSetDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -8951,7 +8963,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-instanceDeviceSetPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/deviceset?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset?tx="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-instanceDeviceSetPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -9327,7 +9339,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceAudioGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/audio"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/audio"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceAudioGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -9662,7 +9674,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceAudioPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/audio"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/audio"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -10049,7 +10061,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceChannels-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/channels?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/channels?tx="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceChannels-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -10422,7 +10434,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceDVSerialPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/dvserial?dvserial="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/dvserial?dvserial="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -10795,7 +10807,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -11173,7 +11185,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceDeviceSetsGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/devicesets"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/devicesets"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceDeviceSetsGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -11508,7 +11520,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceDevices-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/devices?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/devices?tx="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceDevices-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -11881,7 +11893,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceLocationGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/location"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/location"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceLocationGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -12216,7 +12228,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceLocationPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/location"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/location"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceLocationPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -12611,7 +12623,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceLoggingGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/logging"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/logging"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceLoggingGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -12946,7 +12958,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceLoggingPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/logging"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/logging"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceLoggingPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -13376,7 +13388,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost:8091/sdrangel/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -13849,7 +13861,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetFilePost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/preset/file"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/preset/file"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetFilePost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -14322,7 +14334,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetFilePut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/preset/file"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/preset/file"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetFilePut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -14795,7 +14807,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel/presets"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/presets"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -15130,7 +15142,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost:8091/sdrangel/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -15603,7 +15615,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost:8091/sdrangel/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -16119,7 +16131,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instancePresetPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost:8091/sdrangel/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instancePresetPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -16592,7 +16604,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceSummary-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost:8091/sdrangel"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceSummary-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -16909,7 +16921,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-01-16T19:54:59.982+01:00
+              Generated 2018-01-25T00:10:31.068+01:00
             </div>
           </div>
       </div>

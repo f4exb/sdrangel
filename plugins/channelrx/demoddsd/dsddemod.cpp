@@ -65,8 +65,9 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_sampleBuffer = new qint16[1<<17]; // 128 kS
+	m_sampleBuffer = new FixReal[1<<17]; // 128 kS
 	m_sampleBufferIndex = 0;
+	m_scaleFromShort = SDR_RX_SAMP_SZ < sizeof(short)*8 ? 1 : 1<<(SDR_RX_SAMP_SZ - sizeof(short)*8);
 
     m_movingAverage.resize(16, 0);
 	m_magsq = 0.0f;
@@ -126,9 +127,12 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
         if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
         {
-            qint16 sample, delayedSample;
+            FixReal sample, delayedSample;
+            qint16 sampleDSD;
 
-            Real magsq = ((ci.real()*ci.real() +  ci.imag()*ci.imag()))  / (1<<30);
+            Real re = ci.real() / SDR_RX_SCALED;
+            Real im = ci.imag() / SDR_RX_SCALED;
+            Real magsq = re*re + im*im;
             m_movingAverage.feed(magsq);
 
             m_magsqSum += magsq;
@@ -140,7 +144,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-            Real demod = 32768.0f * m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain;
+            Real demod = m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain; // [-1.0:1.0]
             m_sampleCount++;
 
             // AF processing
@@ -168,17 +172,19 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_squelchOpen)
             {
-                sample = demod;
+                sampleDSD = demod * 32768.0f;   // DSD decoder takes int16 samples
+                sample = demod * SDR_RX_SCALEF; // scale to sample size
             }
             else
             {
+                sampleDSD = 0;
                 sample = 0;
             }
 
-            m_dsdDecoder.pushSample(sample);
+            m_dsdDecoder.pushSample(sampleDSD);
 
             if (m_settings.m_enableCosineFiltering) { // show actual input to FSK demod
-            	sample = m_dsdDecoder.getFilteredSample();
+            	sample = m_dsdDecoder.getFilteredSample() * m_scaleFromShort;
             }
 
             if (m_sampleBufferIndex < (1<<17)) {
@@ -197,7 +203,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_settings.m_syncOrConstellation)
             {
-                Sample s(sample, m_dsdDecoder.getSymbolSyncSample());
+                Sample s(sample, m_dsdDecoder.getSymbolSyncSample() * m_scaleFromShort);
                 m_scopeSampleBuffer.push_back(s);
             }
             else

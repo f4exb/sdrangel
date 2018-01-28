@@ -70,7 +70,7 @@ private:
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 
-    Interpolators<qint16, SDR_SAMP_SZ, 16> m_interpolators;
+    Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators;
     int16_t *m_buf;
 
 	void run();

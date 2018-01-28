@@ -14,13 +14,14 @@ inline double log2f(double n)
 
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 
-SpectrumVis::SpectrumVis(GLSpectrum* glSpectrum) :
+SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	BasebandSampleSink(),
 	m_fft(FFTEngine::create()),
 	m_fftBuffer(MAX_FFT_SIZE),
 	m_logPowerSpectrum(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
+	m_scalef(scalef),
 	m_glSpectrum(glSpectrum),
 	m_mutex(QMutex::Recursive)
 {
@@ -85,7 +86,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 			for (std::size_t i = 0; i < samplesNeeded; ++i, ++begin)
 			{
-				*it++ = Complex(begin->real() / 32768.0f, begin->imag() / 32768.0f);
+				*it++ = Complex(begin->real() / m_scalef, begin->imag() / m_scalef);
 			}
 
 			// apply fft window (and copy from m_fftBuffer to m_fftIn)
@@ -144,7 +145,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			// not enough samples for FFT - just fill in new data and return
 			for(std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill; begin < end; ++begin)
 			{
-				*it++ = Complex(begin->real() / 32768.0f, begin->imag() / 32768.0f);
+				*it++ = Complex(begin->real() / m_scalef, begin->imag() / m_scalef);
 			}
 
 			m_fftBufferFill += todo;

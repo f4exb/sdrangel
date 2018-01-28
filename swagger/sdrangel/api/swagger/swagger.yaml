@@ -21,8 +21,6 @@ info:
   contact:
     url: "https://github.com/f4exb/sdrangel"
     email: "f4exb06@gmail.com"
-# during dev, should point to your local machine
-host: localhost:8091
 # basePath prefixes all resource paths 
 basePath: /
 # 
@@ -1010,6 +1008,9 @@ definitions:
     required:
       - version
       - qtVersion
+      - dspRxBits
+      - dspTxBits
+      - pid
       - appname
       - devicesetlist
     properties:
@@ -1019,6 +1020,15 @@ definitions:
       qtVersion:
         description: "Qt version with which the software was compiled"
         type: string
+      dspRxBits:
+        description: "Number of samples significant bits in software Rx DSP"
+        type: integer
+      dspTxBits:
+        description: "Number of samples significant bits in software Tx DSP"
+        type: integer
+      pid:
+        description: "PID of the SDRangel instance"
+        type: integer
       appname:
         description: "Application name: SDRangel for a GUI instance and SDRangelSrv for a server instance"
         type: string

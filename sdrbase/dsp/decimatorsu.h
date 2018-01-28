@@ -24,10 +24,14 @@
 #define INCLUDE_GPL_DSP_DECIMATORSU_H_
 
 #include "dsp/dsptypes.h"
+#ifdef SDR_RX_SAMPLE_24BIT
+#include "dsp/inthalfbandfilterdb.h"
+#else
 #ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
 #else
 #include "dsp/inthalfbandfilterdb.h"
+#endif
 #endif
 
 #define DECIMATORS_HB_FILTER_ORDER 64
@@ -51,6 +55,24 @@ struct decimation_shifts
 };
 
 template<>
+struct decimation_shifts<24, 24>
+{
+    static const uint pre1   = 0;
+    static const uint pre2   = 0;
+    static const uint post2  = 1;
+    static const uint pre4   = 0;
+    static const uint post4  = 2;
+    static const uint pre8   = 0;
+    static const uint post8  = 3;
+    static const uint pre16  = 0;
+    static const uint post16 = 4;
+    static const uint pre32  = 0;
+    static const uint post32 = 5;
+    static const uint pre64  = 0;
+    static const uint post64 = 6;
+};
+
+template<>
 struct decimation_shifts<16, 16>
 {
     static const uint pre1   = 0;
@@ -66,6 +88,24 @@ struct decimation_shifts<16, 16>
     static const uint post32 = 5;
     static const uint pre64  = 0;
     static const uint post64 = 6;
+};
+
+template<>
+struct decimation_shifts<24, 16>
+{
+    static const uint pre1   = 8;
+    static const uint pre2   = 7;
+    static const uint post2  = 0;
+    static const uint pre4   = 6;
+    static const uint post4  = 0;
+    static const uint pre8   = 5;
+    static const uint post8  = 0;
+    static const uint pre16  = 4;
+    static const uint post16 = 0;
+    static const uint pre32  = 3;
+    static const uint post32 = 0;
+    static const uint pre64  = 2;
+    static const uint post64 = 0;
 };
 
 template<>
@@ -87,6 +127,24 @@ struct decimation_shifts<16, 12>
 };
 
 template<>
+struct decimation_shifts<24, 12>
+{
+    static const uint pre1   = 12;
+    static const uint pre2   = 11;
+    static const uint post2  = 0;
+    static const uint pre4   = 10;
+    static const uint post4  = 0;
+    static const uint pre8   = 9;
+    static const uint post8  = 0;
+    static const uint pre16  = 8;
+    static const uint post16 = 0;
+    static const uint pre32  = 7;
+    static const uint post32 = 0;
+    static const uint pre64  = 6;
+    static const uint post64 = 0;
+};
+
+template<>
 struct decimation_shifts<16, 8>
 {
     static const uint pre1   = 8;
@@ -104,7 +162,25 @@ struct decimation_shifts<16, 8>
     static const uint post64 = 0;
 };
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
+template<>
+struct decimation_shifts<24, 8>
+{
+    static const uint pre1   = 16;
+    static const uint pre2   = 15;
+    static const uint post2  = 0;
+    static const uint pre4   = 14;
+    static const uint post4  = 0;
+    static const uint pre8   = 13;
+    static const uint post8  = 0;
+    static const uint pre16  = 12;
+    static const uint post16 = 0;
+    static const uint pre32  = 11;
+    static const uint post32 = 0;
+    static const uint pre64  = 10;
+    static const uint post64 = 0;
+};
+
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
 class DecimatorsU
 {
 public:
@@ -130,6 +206,14 @@ public:
 	void decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 
 private:
+#ifdef SDR_RX_SAMPLE_24BIT
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+#else
 #ifdef USE_SSE4_1
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
@@ -138,17 +222,18 @@ private:
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 #else
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-	IntHalfbandFilterDB<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+	IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+#endif
 #endif
 };
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate1(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate1(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	qint32 xreal, yimag;
 
@@ -162,8 +247,8 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate1(SampleVector::iterator
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	qint32 xreal, yimag;
 
@@ -183,10 +268,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_inf(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal, yimag;
+	AccuType xreal, yimag;
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
@@ -204,10 +289,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_sup(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal, yimag;
+	AccuType xreal, yimag;
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
@@ -221,8 +306,8 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_inf(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate4_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	// Sup (USB):
 	//            x  y   x  y   x   y  x   y  / x -> 1,-2,-5,6 / y -> -0,-3,4,7
@@ -230,7 +315,7 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_sup(SampleVector::iter
 	// Inf (LSB):
 	//            x  y   x  y   x   y  x   y  / x -> 0,-3,-4,7 / y -> 1,2,-5,-6
 	// [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-	qint32 xreal, yimag;
+	AccuType xreal, yimag;
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
@@ -244,10 +329,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_sup(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate8_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[2], yimag[2];
+	AccuType xreal[2], yimag[2];
 
 	for (int pos = 0; pos < len - 15; pos += 8)
 	{
@@ -267,10 +352,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_inf(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate8_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[2], yimag[2];
+	AccuType xreal[2], yimag[2];
 
 	for (int pos = 0; pos < len - 15; pos += 8)
 	{
@@ -290,12 +375,12 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_sup(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate16_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	// Offset tuning: 4x downsample and rotate, then
 	// downsample 4x more. [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-	qint32 xreal[4], yimag[4];
+	AccuType xreal[4], yimag[4];
 
 	for (int pos = 0; pos < len - 31; )
 	{
@@ -318,12 +403,12 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_inf(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate16_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	// Offset tuning: 4x downsample and rotate, then
 	// downsample 4x more. [ rotate:  1, 0, -2, 3, -5, -4, 6, -7]
-	qint32 xreal[4], yimag[4];
+	AccuType xreal[4], yimag[4];
 
 	for (int pos = 0; pos < len - 31; )
 	{
@@ -346,10 +431,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_sup(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate32_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[8], yimag[8];
+	AccuType xreal[8], yimag[8];
 
 	for (int pos = 0; pos < len - 63; )
 	{
@@ -377,10 +462,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_inf(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate32_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[8], yimag[8];
+	AccuType xreal[8], yimag[8];
 
 	for (int pos = 0; pos < len - 63; )
 	{
@@ -408,10 +493,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_sup(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[16], yimag[16];
+	AccuType xreal[16], yimag[16];
 
 	for (int pos = 0; pos < len - 127; )
 	{
@@ -448,10 +533,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate64_inf(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 xreal[16], yimag[16];
+	AccuType xreal[16], yimag[16];
 
 	for (int pos = 0; pos < len - 127; )
 	{
@@ -488,10 +573,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate64_sup(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[2];
+	AccuType intbuf[2];
 
 	for (int pos = 0; pos < len - 3; pos += 4)
 	{
@@ -510,10 +595,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate2_cen(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate4_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[4];
+	AccuType intbuf[4];
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
@@ -545,10 +630,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate4_cen(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate8_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[8];
+	AccuType intbuf[8];
 
 	for (int pos = 0; pos < len - 15; pos += 16)
 	{
@@ -605,10 +690,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate8_cen(SampleVector::iter
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate16_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[16];
+	AccuType intbuf[16];
 
 	for (int pos = 0; pos < len - 31; pos += 32)
 	{
@@ -714,10 +799,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate16_cen(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate32_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[32];
+	AccuType intbuf[32];
 
 	for (int pos = 0; pos < len - 63; pos += 64)
 	{
@@ -920,10 +1005,10 @@ void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate32_cen(SampleVector::ite
 	}
 }
 
-template<typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<T, SdrBits, InputBits, Shift>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename AccuType, typename T, uint SdrBits, uint InputBits, int Shift>
+void DecimatorsU<AccuType, T, SdrBits, InputBits, Shift>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	qint32 intbuf[64];
+	AccuType intbuf[64];
 
 	for (int pos = 0; pos < len - 127; pos += 128)
 	{

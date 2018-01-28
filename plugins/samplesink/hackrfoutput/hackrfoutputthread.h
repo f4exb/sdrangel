@@ -49,7 +49,7 @@ private:
 
 	unsigned int m_log2Interp;
 
-    Interpolators<qint8, SDR_SAMP_SZ, 8> m_interpolators;
+    Interpolators<qint8, SDR_TX_SAMP_SZ, 8> m_interpolators;
 
 	void run();
 	void callback(qint8* buf, qint32 len);

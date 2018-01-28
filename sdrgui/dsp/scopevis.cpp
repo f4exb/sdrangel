@@ -17,8 +17,9 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 
 const uint ScopeVis::m_traceChunkSize = 4800;
 
-ScopeVis::ScopeVis(GLScope* glScope) :
+ScopeVis::ScopeVis(Real scalef, GLScope* glScope) :
 	m_glScope(glScope),
+	m_scalef(scalef),
     m_tracebackCount(0),
 	m_fill(0),
 	m_triggerState(Untriggered),
@@ -111,7 +112,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 			for(int i = 0; i < count; ++i)
 			{
-				*it++ = Complex(begin->real() / 32768.0f, begin->imag() / 32768.0f);
+				*it++ = Complex(begin->real() / m_scalef, begin->imag() / m_scalef);
 				++begin;
 			}
 
@@ -234,7 +235,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
 				for(int i = 0; i < count; ++i)
 				{
-					*it++ = Complex(begin->real() / 32768.0f, begin->imag() / 32768.0f);
+					*it++ = Complex(begin->real() / m_scalef, begin->imag() / m_scalef);
 					++begin;
 				}
 
@@ -341,7 +342,7 @@ void ScopeVis::setSampleRate(int sampleRate)
 
 bool ScopeVis::triggerCondition(SampleVector::const_iterator& it)
 {
-	Complex c(it->real()/32768.0f, it->imag()/32768.0f);
+	Complex c(it->real()/m_scalef, it->imag()/m_scalef);
     m_traceback.push_back(c); // store into trace memory FIFO
 
     if (m_tracebackCount < m_traceback.size())

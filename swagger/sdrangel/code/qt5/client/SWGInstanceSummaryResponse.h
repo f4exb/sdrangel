@@ -50,6 +50,15 @@ public:
     QString* getQtVersion();
     void setQtVersion(QString* qt_version);
 
+    qint32 getDspRxBits();
+    void setDspRxBits(qint32 dsp_rx_bits);
+
+    qint32 getDspTxBits();
+    void setDspTxBits(qint32 dsp_tx_bits);
+
+    qint32 getPid();
+    void setPid(qint32 pid);
+
     QString* getAppname();
     void setAppname(QString* appname);
 
@@ -69,6 +78,9 @@ public:
 private:
     QString* version;
     QString* qt_version;
+    qint32 dsp_rx_bits;
+    qint32 dsp_tx_bits;
+    qint32 pid;
     QString* appname;
     QString* architecture;
     QString* os;

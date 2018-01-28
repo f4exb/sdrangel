@@ -39,6 +39,9 @@ void
 SWGInstanceSummaryResponse::init() {
     version = new QString("");
     qt_version = new QString("");
+    dsp_rx_bits = 0;
+    dsp_tx_bits = 0;
+    pid = 0;
     appname = new QString("");
     architecture = new QString("");
     os = new QString("");
@@ -56,6 +59,9 @@ SWGInstanceSummaryResponse::cleanup() {
     if(qt_version != nullptr) {
         delete qt_version;
     }
+
+
+
 
     if(appname != nullptr) {
         delete appname;
@@ -91,6 +97,9 @@ void
 SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
     ::SWGSDRangel::setValue(&qt_version, pJson["qtVersion"], "QString", "QString");
+    ::SWGSDRangel::setValue(&dsp_rx_bits, pJson["dspRxBits"], "qint32", "");
+    ::SWGSDRangel::setValue(&dsp_tx_bits, pJson["dspTxBits"], "qint32", "");
+    ::SWGSDRangel::setValue(&pid, pJson["pid"], "qint32", "");
     ::SWGSDRangel::setValue(&appname, pJson["appname"], "QString", "QString");
     ::SWGSDRangel::setValue(&architecture, pJson["architecture"], "QString", "QString");
     ::SWGSDRangel::setValue(&os, pJson["os"], "QString", "QString");
@@ -115,6 +124,12 @@ SWGInstanceSummaryResponse::asJsonObject() {
     toJsonValue(QString("version"), version, obj, QString("QString"));
 
     toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
+
+    obj->insert("dspRxBits", QJsonValue(dsp_rx_bits));
+
+    obj->insert("dspTxBits", QJsonValue(dsp_tx_bits));
+
+    obj->insert("pid", QJsonValue(pid));
 
     toJsonValue(QString("appname"), appname, obj, QString("QString"));
 
@@ -145,6 +160,33 @@ SWGInstanceSummaryResponse::getQtVersion() {
 void
 SWGInstanceSummaryResponse::setQtVersion(QString* qt_version) {
     this->qt_version = qt_version;
+}
+
+qint32
+SWGInstanceSummaryResponse::getDspRxBits() {
+    return dsp_rx_bits;
+}
+void
+SWGInstanceSummaryResponse::setDspRxBits(qint32 dsp_rx_bits) {
+    this->dsp_rx_bits = dsp_rx_bits;
+}
+
+qint32
+SWGInstanceSummaryResponse::getDspTxBits() {
+    return dsp_tx_bits;
+}
+void
+SWGInstanceSummaryResponse::setDspTxBits(qint32 dsp_tx_bits) {
+    this->dsp_tx_bits = dsp_tx_bits;
+}
+
+qint32
+SWGInstanceSummaryResponse::getPid() {
+    return pid;
+}
+void
+SWGInstanceSummaryResponse::setPid(qint32 pid) {
+    this->pid = pid;
 }
 
 QString*

@@ -69,9 +69,12 @@ int WebAPIAdapterSrv::instanceSummary(
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
 
-    *response.getAppname() = QCoreApplication::instance()->applicationName();
-    *response.getVersion() = QCoreApplication::instance()->applicationVersion();
+    *response.getAppname() = QCoreApplication::applicationName();
+    *response.getVersion() = QCoreApplication::applicationVersion();
     *response.getQtVersion() = QString(QT_VERSION_STR);
+    response.setDspRxBits(SDR_RX_SAMP_SZ);
+    response.setDspTxBits(SDR_TX_SAMP_SZ);
+    response.setPid(QCoreApplication::applicationPid());
 #if QT_VERSION >= 0x050400
     *response.getArchitecture() = QString(QSysInfo::currentCpuArchitecture());
     *response.getOs() = QString(QSysInfo::prettyProductName());

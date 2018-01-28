@@ -364,7 +364,7 @@
     <item row="4" column="0">
      <layout class="QHBoxLayout" name="FormatLayout">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="formatLabel">
         <property name="maximumSize">
          <size>
           <width>30</width>
@@ -386,52 +386,69 @@
         </property>
         <item>
          <property name="text">
-          <string>S16LE I/Q</string>
+          <string>I/Q</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE NFM</string>
+          <string>NFM</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE NFM Mono</string>
+          <string>NFM Mono</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE LSB</string>
+          <string>LSB</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE USB</string>
+          <string>USB</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE LSB Mono</string>
+          <string>LSB Mono</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE USB Mono</string>
+          <string>USB Mono</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE AM Mono</string>
+          <string>AM Mono</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE AM !DC Mono</string>
+          <string>AM !DC Mono</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>S16LE AM BPF Mono</string>
+          <string>AM BPF Mono</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sampleSize">
+        <property name="toolTip">
+         <string>Samples size</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>16 bits</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>24 bits</string>
          </property>
         </item>
        </widget>

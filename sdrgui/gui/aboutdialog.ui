@@ -89,18 +89,52 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="build">
-     <property name="text">
-      <string>Here goes the build info</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="buildLayout">
+     <item>
+      <widget class="QLabel" name="build">
+       <property name="text">
+        <string>Here goes the build info</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="dspBits">
+       <property name="text">
+        <string>DSP Rx 24 bits Tx 16 bits</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <widget class="QLabel" name="restApiUrl">
-     <property name="text">
-      <string>Here goes the REST API URL</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="runtimeLayout">
+     <item>
+      <widget class="QLabel" name="restApiUrl">
+       <property name="text">
+        <string>Here goes the REST API URL</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="pid">
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>PID: 00000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLabel" name="info">

@@ -23,7 +23,7 @@
 #include "dsp/hbfiltertraits.h"
 #include "util/export.h"
 
-template<uint32_t HBFilterOrder>
+template<typename AccuType, uint32_t HBFilterOrder>
 class SDRANGEL_API IntHalfbandFilter {
 public:
 	IntHalfbandFilter() :
@@ -146,38 +146,38 @@ public:
         }
     }
 
-	bool workDecimateCenter(qint32 *x, qint32 *y)
-	{
-		// insert sample into ring-buffer
-		m_samples[m_ptr][0] = *x;
-		m_samples[m_ptr][1] = *y;
-
-		switch(m_state)
-		{
-			case 0:
-				// advance write-pointer
-				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
-
-				// next state
-				m_state = 1;
-
-				// tell caller we don't have a new sample
-				return false;
-
-			default:
-				// save result
-				doFIR(x, y);
-
-				// advance write-pointer
-				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
-
-				// next state
-				m_state = 0;
-
-				// tell caller we have a new sample
-				return true;
-		}
-	}
+//	bool workDecimateCenter(qint32 *x, qint32 *y)
+//	{
+//		// insert sample into ring-buffer
+//		m_samples[m_ptr][0] = *x;
+//		m_samples[m_ptr][1] = *y;
+//
+//		switch(m_state)
+//		{
+//			case 0:
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+//
+//				// next state
+//				m_state = 1;
+//
+//				// tell caller we don't have a new sample
+//				return false;
+//
+//			default:
+//				// save result
+//				doFIR(x, y);
+//
+//				// advance write-pointer
+//				m_ptr = (m_ptr + HBFIRFilterTraits<HBFilterOrder>::hbOrder) % (HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1);
+//
+//				// next state
+//				m_state = 0;
+//
+//				// tell caller we have a new sample
+//				return true;
+//		}
+//	}
 
 	// downsample by 2, return edges of spectrum rotated into center - unused
 //	bool workDecimateFullRotate(Sample* sample)
@@ -748,7 +748,7 @@ public:
     }
 
 protected:
-	qint32 m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2];     // Valgrind optim (from qint16)
+	AccuType m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2];     // Valgrind optim (from qint16)
 	qint16 m_ptr;
 	int m_state;
 
@@ -759,8 +759,8 @@ protected:
 		int b = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 2]; //-1 - 1
 
 		// go through samples in buffer
-		qint32 iAcc = 0;
-		qint32 qAcc = 0;
+		AccuType iAcc = 0;
+		AccuType qAcc = 0;
 
 		for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
 		{
@@ -790,8 +790,8 @@ protected:
 	    qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+	    AccuType iAcc = 0;
+	    AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -811,8 +811,8 @@ protected:
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
 
         // go through samples in buffer
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
@@ -839,8 +839,8 @@ protected:
 		int b = HBFIRFilterTraits<HBFilterOrder>::hbMod[m_ptr + 2 - 2]; //-1 - 1
 
 		// go through samples in buffer
-		qint32 iAcc = 0;
-		qint32 qAcc = 0;
+		AccuType iAcc = 0;
+		AccuType qAcc = 0;
 
 		for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
 		{
