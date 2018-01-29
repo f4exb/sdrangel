@@ -7,7 +7,8 @@ set(sdrbase_SOURCES
     audio/audiofifo.cpp
     audio/audiooutput.cpp
     audio/audioinput.cpp
-
+    audio/audionetsink.cpp
+    
     channel/channelsinkapi.cpp
     channel/channelsourceapi.cpp
     commands/command.cpp
@@ -85,6 +86,7 @@ set(sdrbase_HEADERS
     audio/audiofifo.h
     audio/audiooutput.h
     audio/audioinput.h
+    audio/audionetsink.h
 
     channel/channelsinkapi.h
     channel/channelsourceapi.h
@@ -209,6 +211,15 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
+if (JRTPLIB_FOUND)
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        util/rtpsink.h
+    )
+    add_definitions(-DHAS_JRTPLIB)
+    include_directories(${JRTPLIB_INCLUDE_DIR})
+endif(JRTPLIB_FOUND)
+
 if (LIBSERIALDV_FOUND)
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
@@ -270,6 +281,10 @@ target_link_libraries(sdrbase
 if(FFTW3F_FOUND)
     target_link_libraries(sdrbase ${FFTW3F_LIBRARIES})
 endif(FFTW3F_FOUND)
+
+if (JRTPLIB_FOUND)
+    target_link_libraries(sdrbase ${JRTPLIB_LIBRARIES})
+endif(JRTPLIB_FOUND)
 
 if(LIBSERIALDV_FOUND)
     target_link_libraries(sdrbase ${LIBSERIALDV_LIBRARY})

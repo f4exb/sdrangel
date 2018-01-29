@@ -29,17 +29,29 @@ template<typename T>
 class UDPSink
 {
 public:
-	UDPSink(QObject *parent, unsigned int udpSize, unsigned int port) :
+	UDPSink(QObject *parent, unsigned int udpSize) :
 		m_udpSize(udpSize),
 		m_udpSamples(udpSize/sizeof(T)),
 		m_address(QHostAddress::LocalHost),
-		m_port(port),
+		m_port(9999),
 		m_sampleBufferIndex(0)
 	{
         assert(m_udpSamples > 0);
 		m_sampleBuffer = new T[m_udpSamples];
 		m_socket = new QUdpSocket(parent);
 	}
+
+    UDPSink(QObject *parent, unsigned int udpSize, unsigned int port) :
+        m_udpSize(udpSize),
+        m_udpSamples(udpSize/sizeof(T)),
+        m_address(QHostAddress::LocalHost),
+        m_port(port),
+        m_sampleBufferIndex(0)
+    {
+        assert(m_udpSamples > 0);
+        m_sampleBuffer = new T[m_udpSamples];
+        m_socket = new QUdpSocket(parent);
+    }
 
 	UDPSink (QObject *parent, unsigned int udpSize, QHostAddress& address, unsigned int port) :
 		m_udpSize(udpSize),
@@ -61,6 +73,12 @@ public:
 
 	void setAddress(QString& address) { m_address.setAddress(address); }
 	void setPort(unsigned int port) { m_port = port; }
+
+	void setDestination(const QString& address, int port)
+	{
+	    m_address.setAddress(const_cast<QString&>(address));
+	    m_port = port;
+	}
 
 	/**
 	 * Write one sample
