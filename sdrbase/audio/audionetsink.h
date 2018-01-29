@@ -21,10 +21,9 @@
 #include <QObject>
 #include "dsp/dsptypes.h"
 #include "util/export.h"
-#include "util/udpsink.h"
-#ifdef HAS_JRTPLIB
-#include "util/rtpsink.h"
-#endif
+
+template<typename T> class UDPSink;
+template<typename T> class RTPSink;
 
 class SDRANGEL_API AudioNetSink {
 public:
@@ -53,10 +52,8 @@ protected:
     SinkType m_type;
     UDPSink<qint16> *m_udpBufferAudioMono;
     UDPSink<AudioSample> *m_udpBufferAudioStereo;
-#ifdef HAS_JRTPLIB
     RTPSink<qint16> *m_rtpBufferAudioMono;
     RTPSink<AudioSample> *m_rtpBufferAudioStereo;
-#endif
 };
 
 

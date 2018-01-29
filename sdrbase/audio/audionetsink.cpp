@@ -16,6 +16,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "audionetsink.h"
+#include "util/udpsink.h"
+#ifdef HAS_JRTPLIB
+#include "util/rtpsink.h"
+#endif
 
 const int AudioNetSink::m_udpBlockSize = 512;
 
