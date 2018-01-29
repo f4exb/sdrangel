@@ -39,6 +39,7 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+class AudioNetSink;
 
 class NFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
@@ -211,7 +212,7 @@ private:
 	uint m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
-    UDPSink<qint16> *m_udpBufferAudio;
+    AudioNetSink *m_audioNetSink;
 
 	QMutex m_settingsMutex;
 

@@ -30,6 +30,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
+#include "audio/audionetsink.h"
 
 #include "nfmdemodgui.h"
 #include "nfmdemod.h"
@@ -79,7 +80,8 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+	m_audioNetSink = new AudioNetSink(this);
+	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -93,7 +95,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 NFMDemod::~NFMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-	delete m_udpBufferAudio;
+	delete m_audioNetSink;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -249,14 +251,18 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
                 {
                     sample = 0;
-                    if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(0);
+                    if (m_settings.m_copyAudioToUDP) {
+                        m_audioNetSink->write(0);
+                    }
                 }
                 else
                 {
                     demod = m_bandpass.filter(demod);
                     Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
                     sample = demod * m_settings.m_volume * squelchFactor;
-                    if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * 5.0f * squelchFactor);
+                    if (m_settings.m_copyAudioToUDP) {
+                        m_audioNetSink->write(demod * 5.0f * squelchFactor);
+                    }
                 }
             }
             else
@@ -272,7 +278,9 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
 
                 sample = 0;
-                if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(0);
+                if (m_settings.m_copyAudioToUDP) {
+                    m_audioNetSink->write(0);
+                }
             }
 
             m_audioBuffer[m_audioBufferFill].l = sample;
@@ -459,8 +467,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     if ((settings.m_udpAddress != m_settings.m_udpAddress)
         || (settings.m_udpPort != m_settings.m_udpPort) || force)
     {
-        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
-        m_udpBufferAudio->setPort(settings.m_udpPort);
+        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
     }
 
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force)
