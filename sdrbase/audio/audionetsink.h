@@ -23,7 +23,7 @@
 #include "util/export.h"
 
 template<typename T> class UDPSink;
-template<typename T> class RTPSink;
+class RTPSink;
 
 class SDRANGEL_API AudioNetSink {
 public:
@@ -39,7 +39,6 @@ public:
     void setDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
-    void setSampleRate(int sampleRate);
 
     void write(qint16 sample);
     void write(const AudioSample& sample);
@@ -52,8 +51,7 @@ protected:
     SinkType m_type;
     UDPSink<qint16> *m_udpBufferAudioMono;
     UDPSink<AudioSample> *m_udpBufferAudioStereo;
-    RTPSink<qint16> *m_rtpBufferAudioMono;
-    RTPSink<AudioSample> *m_rtpBufferAudioStereo;
+    RTPSink *m_rtpBufferAudio;
 };
 
 

@@ -26,33 +26,33 @@ const int AudioNetSink::m_udpBlockSize = 512;
 AudioNetSink::AudioNetSink(QObject *parent, bool stereo) :
     m_type(SinkUDP),
     m_udpBufferAudioMono(0),
-    m_udpBufferAudioStereo(0)
+    m_udpBufferAudioStereo(0),
+    m_rtpBufferAudio(0)
 {
-    if (stereo)
-    {
+    if (stereo) {
         m_udpBufferAudioStereo = new UDPSink<AudioSample>(parent, m_udpBlockSize);
-#ifdef HAS_JRTPLIB
-        m_rtpBufferAudioStereo = new RTPSink<AudioSample>("127.0.0.1", 9999, 48000);
-        m_rtpBufferAudioMono = 0;
-#endif
-    }
-    else
-    {
+    } else {
         m_udpBufferAudioMono = new UDPSink<int16_t>(parent, m_udpBlockSize);
-#ifdef HAS_JRTPLIB
-        m_rtpBufferAudioMono = new RTPSink<int16_t>("127.0.0.1", 9999, 48000);
-        m_rtpBufferAudioStereo = 0;
-#endif
     }
+
+#ifdef HAS_JRTPLIB
+    m_rtpBufferAudio = new RTPSink("127.0.0.1", 9999, stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
+#endif
 }
 
 AudioNetSink::~AudioNetSink()
 {
-    if (m_udpBufferAudioMono) { delete m_udpBufferAudioMono; }
-    if (m_udpBufferAudioStereo) { delete m_udpBufferAudioStereo; }
+    if (m_udpBufferAudioMono) {
+        delete m_udpBufferAudioMono;
+    }
+
+    if (m_udpBufferAudioStereo) {
+        delete m_udpBufferAudioStereo;
+    }
 #ifdef HAS_JRTPLIB
-    if (m_rtpBufferAudioMono) { delete m_rtpBufferAudioMono; }
-    if (m_rtpBufferAudioStereo) { delete m_rtpBufferAudioStereo; }
+    if (m_rtpBufferAudio) {
+        delete m_rtpBufferAudio;
+    }
 #endif
 }
 
@@ -87,51 +87,39 @@ void AudioNetSink::setDestination(const QString& address, uint16_t port)
     if (m_udpBufferAudioStereo) {
         m_udpBufferAudioStereo->setDestination(address, port);
     }
+
 #ifdef HAS_JRTPLIB
-    if (m_rtpBufferAudioMono) {
-        m_rtpBufferAudioMono->setDestination(address, port);
-    }
-    if (m_rtpBufferAudioStereo) {
-        m_rtpBufferAudioStereo->setDestination(address, port);
+    if (m_rtpBufferAudio) {
+        m_rtpBufferAudio->setDestination(address, port);
     }
 #endif
 }
 
+#ifdef HAS_JRTPLIB
 void AudioNetSink::addDestination(const QString& address, uint16_t port)
 {
-#ifdef HAS_JRTPLIB
-    if (m_rtpBufferAudioMono) {
-        m_rtpBufferAudioMono->addDestination(address, port);
+    if (m_rtpBufferAudio) {
+        m_rtpBufferAudio->addDestination(address, port);
     }
-    if (m_rtpBufferAudioStereo) {
-        m_rtpBufferAudioStereo->addDestination(address, port);
-    }
-#endif
 }
+#else
+void AudioNetSink::addDestination(const QString& address __attribute__((unused)), uint16_t port __attribute__((unused)))
+{
+}
+#endif
 
+#ifdef HAS_JRTPLIB
 void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
 {
-#ifdef HAS_JRTPLIB
-    if (m_rtpBufferAudioMono) {
-        m_rtpBufferAudioMono->deleteDestination(address, port);
+    if (m_rtpBufferAudio) {
+        m_rtpBufferAudio->deleteDestination(address, port);
     }
-    if (m_rtpBufferAudioStereo) {
-        m_rtpBufferAudioStereo->deleteDestination(address, port);
-    }
-#endif
 }
-
-void AudioNetSink::setSampleRate(int sampleRate)
+#else
+void AudioNetSink::deleteDestination(const QString& address __attribute__((unused)), uint16_t port __attribute__((unused)))
 {
-#ifdef HAS_JRTPLIB
-    if (m_rtpBufferAudioMono) {
-        m_rtpBufferAudioMono->setSampleRate(sampleRate);
-    }
-    if (m_rtpBufferAudioStereo) {
-        m_rtpBufferAudioStereo->setSampleRate(sampleRate);
-    }
-#endif
 }
+#endif
 
 void AudioNetSink::write(qint16 sample)
 {
@@ -143,6 +131,7 @@ void AudioNetSink::write(qint16 sample)
         m_udpBufferAudioMono->write(sample);
     } else if (m_type == SinkRTP) {
 #ifdef HAS_JRTPLIB
+        m_rtpBufferAudio->write((uint8_t *) &sample);
 #endif
     }
 }
@@ -157,6 +146,7 @@ void AudioNetSink::write(const AudioSample& sample)
         m_udpBufferAudioStereo->write(sample);
     } else if (m_type == SinkRTP) {
 #ifdef HAS_JRTPLIB
+        m_rtpBufferAudio->write((uint8_t *) &sample);
 #endif
     }
 }

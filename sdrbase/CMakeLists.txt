@@ -216,6 +216,10 @@ if (JRTPLIB_FOUND)
         ${sdrbase_HEADERS}
         util/rtpsink.h
     )
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        util/rtpsink.cpp
+    )
     add_definitions(-DHAS_JRTPLIB)
     include_directories(${JRTPLIB_INCLUDE_DIR})
 endif(JRTPLIB_FOUND)

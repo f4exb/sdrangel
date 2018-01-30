@@ -52,7 +52,7 @@ void NFMDemodSettings::resetToDefaults()
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";
-    m_udpPort = 9999;
+    m_udpPort = 9998;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Demodulator";
 }

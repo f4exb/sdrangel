@@ -83,6 +83,12 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_audioNetSink = new AudioNetSink(this);
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
+	if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
+	    qDebug("NFMDemod::NFMDemod: set audio sink to RTP mode");
+	} else {
+	    qWarning("NFMDemod::NFMDemod: RTP support for audio sink not available. Fall back too UDP");
+	}
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);

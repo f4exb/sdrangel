@@ -30,112 +30,40 @@
 #include "rtperrors.h"
 #include "rtplibraryversion.h"
 
-template<typename SampleType>
 class RTPSink
 {
 public:
-    RTPSink(const QString& address, uint16_t port, int sampleRate) :
-        m_destport(port),
-        m_sampleBuffer(0),
-        m_sampleBufferIndex(0),
-        m_mutex(QMutex::Recursive)
+    typedef enum
     {
-        m_destip = inet_addr(address.toStdString().c_str());
-        m_destip = ntohl(m_destip);
-        m_rtpSessionParams.SetOwnTimestampUnit(1.0/(double) sampleRate);
-        m_rtpTransmissionParams.SetPortbase(8092); // FIXME: sort this out
+        PayloadL16Mono,
+        PayloadL16Stereo,
+    } PayloadType;
 
-        int status = m_rtpSession.Create(m_rtpSessionParams, &m_rtpTransmissionParams);
+    RTPSink(const QString& address, uint16_t port, PayloadType payloadType = PayloadL16Mono);
+    ~RTPSink();
 
-        if (status < 0)
-        {
-            qCritical("RTPSink::RTPSink: cannot create session: %s", jrtplib::RTPGetErrorString(status).c_str());
-            return;
-        }
+    void setPayloadType(PayloadType payloadType);
 
-        status = m_rtpSession.AddDestination(jrtplib::RTPIPv4Address(m_destip, m_destport));
+    void setDestination(const QString& address, uint16_t port);
+    void deleteDestination(const QString& address, uint16_t port);
+    void addDestination(const QString& address, uint16_t port);
 
-        if (status < 0)
-        {
-            qCritical("RTPSink::RTPSink: cannot set destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
-            return;
-        }
-
-        m_sampleBuffer = new SampleType[sampleRate]; // store 1 second
-    }
-
-    ~RTPSink()
-    {
-        jrtplib::RTPTime delay = jrtplib::RTPTime(10.0);
-        m_rtpSession.BYEDestroy(delay, "Time's up", 9);
-
-        if (m_sampleBuffer) { delete[] m_sampleBuffer; }
-    }
-
-    void setDestination(const QString& address, uint16_t port)
-    {
-        if (!m_sampleBuffer) { return; }
-
-        m_rtpSession.ClearDestinations();
-        m_rtpSession.DeleteDestination(jrtplib::RTPIPv4Address(m_destip, m_destport));
-        m_destip = inet_addr(address.toStdString().c_str());
-        m_destip = ntohl(m_destip);
-        m_destport = port;
-
-        int status = m_rtpSession.AddDestination(jrtplib::RTPIPv4Address(m_destip, m_destport));
-
-        if (status < 0) {
-            qCritical("RTPSink::setDestination: cannot set destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
-        }
-    }
-
-    void deleteDestination(const QString& address, uint16_t port)
-    {
-        uint32_t destip = inet_addr(address.toStdString().c_str());
-        destip = ntohl(m_destip);
-
-        int status =  m_rtpSession.DeleteDestination(jrtplib::RTPIPv4Address(destip, port));
-
-        if (status < 0) {
-            qCritical("RTPSink::deleteDestination: cannot delete destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
-        }
-    }
-
-    void addDestination(const QString& address, uint16_t port)
-    {
-        uint32_t destip = inet_addr(address.toStdString().c_str());
-        destip = ntohl(m_destip);
-
-        int status = m_rtpSession.AddDestination(jrtplib::RTPIPv4Address(destip, port));
-
-        if (status < 0) {
-            qCritical("RTPSink::addDestination: cannot add destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
-        }
-    }
-
-    void setSampleRate(int sampleRate)
-    {
-        QMutexLocker locker(&m_mutex);
-        if (m_sampleBuffer) { delete[] m_sampleBuffer; }
-        m_sampleBuffer = new SampleType[sampleRate]; // store 1 second
-
-        int status = m_rtpSession.SetTimestampUnit(1.0 / (double) sampleRate);
-
-        if (status < 0)
-        {
-            qCritical("RTPSink::setSampleRate: cannot set timestamp unit: %s", jrtplib::RTPGetErrorString(status).c_str());
-            return;
-        }
-    }
+    void write(uint8_t *sampleByte);
+    void write(uint8_t *sampleByte, int nbSamples);
 
 protected:
+    PayloadType m_payloadType;
+    int m_sampleRate;
+    int m_sampleBytes;
+    int m_packetSamples;
+    int m_bufferSize;
+    int m_sampleBufferIndex;
+    uint8_t *m_byteBuffer;
     uint32_t m_destip;
     uint16_t m_destport;
     jrtplib::RTPSession m_rtpSession;
     jrtplib::RTPSessionParams m_rtpSessionParams;
     jrtplib::RTPUDPv4TransmissionParams m_rtpTransmissionParams;
-    SampleType *m_sampleBuffer;
-    int m_sampleBufferIndex;
     QMutex m_mutex;
 };
 
