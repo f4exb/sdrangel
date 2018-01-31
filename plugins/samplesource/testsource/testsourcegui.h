@@ -92,6 +92,7 @@ private slots:
     void on_dcBias_valueChanged(int value);
     void on_iBias_valueChanged(int value);
     void on_qBias_valueChanged(int value);
+    void on_phaseImbalance_valueChanged(int value);
     void on_record_toggled(bool checked);
     void updateStatus();
     void updateHardware();

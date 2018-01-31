@@ -47,6 +47,7 @@ public:
     void setDCFactor(float iFactor);
     void setIFactor(float iFactor);
     void setQFactor(float qFactor);
+    void setPhaseImbalance(float phaseImbalance);
     void setFrequencyShift(int shift);
 
     void connectTimer(const QTimer& timer);
@@ -73,6 +74,7 @@ private:
     float m_dcBias;
     float m_iBias;
     float m_qBias;
+    float m_phaseImbalance;
     int32_t m_amplitudeBitsDC;
     int32_t m_amplitudeBitsI;
     int32_t m_amplitudeBitsQ;

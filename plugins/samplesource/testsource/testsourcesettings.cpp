@@ -37,6 +37,7 @@ void TestSourceSettings::resetToDefaults()
     m_dcFactor = 0.0f;
     m_iFactor = 0.0f;
     m_qFactor = 0.0f;
+    m_phaseImbalance = 0.0f;
 }
 
 QByteArray TestSourceSettings::serialize() const
@@ -54,6 +55,7 @@ QByteArray TestSourceSettings::serialize() const
     s.writeFloat(10, m_dcFactor);
     s.writeFloat(11, m_iFactor);
     s.writeFloat(12, m_qFactor);
+    s.writeFloat(13, m_phaseImbalance);
 
     return s.final();
 }
@@ -84,6 +86,7 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         d.readFloat(10, &m_dcFactor, 0.0f);
         d.readFloat(11, &m_iFactor, 0.0f);
         d.readFloat(12, &m_qFactor, 0.0f);
+        d.readFloat(13, &m_phaseImbalance, 0.0f);
 
         return true;
     }

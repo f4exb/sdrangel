@@ -236,6 +236,13 @@ void TestSourceGui::on_qBias_valueChanged(int value)
     sendSettings();
 }
 
+void TestSourceGui::on_phaseImbalance_valueChanged(int value)
+{
+    ui->phaseImbalanceText->setText(QString(tr("%1 %").arg(value)));
+    m_settings.m_phaseImbalance = value / 100.0f;
+    sendSettings();
+}
+
 void TestSourceGui::on_record_toggled(bool checked)
 {
     if (checked) {

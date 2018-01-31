@@ -40,6 +40,7 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_dcBias(0.0f),
 	m_iBias(0.0f),
 	m_qBias(0.0f),
+	m_phaseImbalance(0.0f),
 	m_amplitudeBitsDC(0),
 	m_amplitudeBitsI(127),
 	m_amplitudeBitsQ(127),
@@ -138,6 +139,11 @@ void TestSourceThread::setQFactor(float iFactor)
     m_amplitudeBitsQ = (1.0f + m_qBias) * m_amplitudeBits;
 }
 
+void TestSourceThread::setPhaseImbalance(float phaseImbalance)
+{
+    m_phaseImbalance = phaseImbalance;
+}
+
 void TestSourceThread::setFrequencyShift(int shift)
 {
     m_nco.setFreq(shift, m_samplerate);
@@ -189,7 +195,7 @@ void TestSourceThread::generate(quint32 chunksize)
 
     for (int i = 0; i < n-1;)
     {
-        Complex c = m_nco.nextIQ();
+        Complex c = m_nco.nextIQ(m_phaseImbalance);
         m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
         m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBitsQ);
     }

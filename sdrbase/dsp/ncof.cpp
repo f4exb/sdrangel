@@ -61,6 +61,14 @@ Complex NCOF::nextIQ()
 	return Complex(m_table[phase], -m_table[(phase + TableSize / 4) % TableSize]);
 }
 
+Complex NCOF::nextIQ(float imbalance)
+{
+    int phase = nextPhase();
+    int phaseQ = imbalance < 0.0 ? phase + (int) (imbalance*TableSize) : phase;
+    int phaseI = imbalance < 0.0 ? phase : phase + (int) (imbalance*TableSize);
+    return Complex(m_table[phaseI % TableSize], -m_table[(phaseQ + TableSize / 4) % TableSize]);
+}
+
 Complex NCOF::nextQI()
 {
     int phase = nextPhase();

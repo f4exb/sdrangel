@@ -316,6 +316,13 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         }
     }
 
+    if ((m_settings.m_phaseImbalance != settings.m_phaseImbalance) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setPhaseImbalance(settings.m_phaseImbalance);
+        }
+    }
+
     if ((m_settings.m_sampleSizeIndex != settings.m_sampleSizeIndex) || force)
     {
         if (m_testSourceThread != 0) {
