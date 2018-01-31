@@ -48,10 +48,14 @@ public:
     void deleteDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
 
-    void write(uint8_t *sampleByte);
-    void write(uint8_t *sampleByte, int nbSamples);
+    void write(const uint8_t *sampleByte);
+    void write(const uint8_t *sampleByte, int nbSamples);
 
 protected:
+    /** Reverse endianess in destination buffer */
+    static void writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse);
+    static unsigned int elemLength(PayloadType payloadType);
+
     PayloadType m_payloadType;
     int m_sampleRate;
     int m_sampleBytes;
@@ -64,6 +68,7 @@ protected:
     jrtplib::RTPSession m_rtpSession;
     jrtplib::RTPSessionParams m_rtpSessionParams;
     jrtplib::RTPUDPv4TransmissionParams m_rtpTransmissionParams;
+    bool m_endianReverse;
     QMutex m_mutex;
 };
 

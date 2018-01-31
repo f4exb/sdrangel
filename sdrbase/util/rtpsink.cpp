@@ -17,6 +17,7 @@
 
 #include "rtpsink.h"
 #include "dsp/dsptypes.h"
+#include <algorithm>
 
 RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType) :
     m_sampleRate(48000),
@@ -28,7 +29,10 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
     m_destport(port),
     m_mutex(QMutex::Recursive)
 {
-    qDebug("RTPSink::RTPSink");
+    uint32_t endianTest32 = 1;
+    uint8_t *ptr = (uint8_t*) &endianTest32;
+    m_endianReverse = (*ptr == 1);
+
     m_destip = inet_addr(address.toStdString().c_str());
     m_destip = ntohl(m_destip);
 
@@ -165,13 +169,17 @@ void RTPSink::addDestination(const QString& address, uint16_t port)
     }
 }
 
-void RTPSink::write(uint8_t *sampleByte)
+void RTPSink::write(const uint8_t *sampleByte)
 {
     QMutexLocker locker(&m_mutex);
 
     if (m_sampleBufferIndex < m_packetSamples)
     {
-        memcpy(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes], sampleByte, m_sampleBytes);
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
+                sampleByte,
+                elemLength(m_payloadType),
+                m_sampleBytes,
+                m_endianReverse);
         m_sampleBufferIndex++;
     }
     else
@@ -182,12 +190,12 @@ void RTPSink::write(uint8_t *sampleByte)
             qCritical("RTPSink::write: cannot write packet: %s", jrtplib::RTPGetErrorString(status).c_str());
         }
 
-        memcpy(&m_byteBuffer[0], sampleByte, m_sampleBytes);
+        writeNetBuf(&m_byteBuffer[0], sampleByte,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
         m_sampleBufferIndex = 1;
     }
 }
 
-void RTPSink::write(uint8_t *samples, int nbSamples)
+void RTPSink::write(const uint8_t *samples, int nbSamples)
 {
     int samplesIndex = 0;
     QMutexLocker locker(&m_mutex);
@@ -195,10 +203,11 @@ void RTPSink::write(uint8_t *samples, int nbSamples)
     // fill remainder of buffer and send it
     if (m_sampleBufferIndex + nbSamples > m_packetSamples)
     {
-        memcpy(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
                 &samples[samplesIndex*m_sampleBytes],
-                (m_packetSamples - m_sampleBufferIndex)*m_sampleBytes);
-
+                elemLength(m_payloadType),
+                (m_packetSamples - m_sampleBufferIndex)*m_sampleBytes,
+                m_endianReverse);
         m_rtpSession.SendPacket((const void *) m_byteBuffer, (std::size_t) m_bufferSize);
         nbSamples -= (m_packetSamples - m_sampleBufferIndex);
         m_sampleBufferIndex = 0;
@@ -207,14 +216,46 @@ void RTPSink::write(uint8_t *samples, int nbSamples)
     // send complete packets
     while (nbSamples > m_packetSamples)
     {
-        m_rtpSession.SendPacket((const void *) &samples[samplesIndex*m_sampleBytes], (std::size_t) m_bufferSize);
+        writeNetBuf(m_byteBuffer,
+                samples,
+                elemLength(m_payloadType),
+                m_bufferSize,
+                m_endianReverse);
+        m_rtpSession.SendPacket((const void *) m_byteBuffer, (std::size_t) m_bufferSize);
         samplesIndex += m_packetSamples;
         nbSamples -= m_packetSamples;
     }
 
     // copy remainder of input to buffer
-    memcpy(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
+    writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
             &samples[samplesIndex*m_sampleBytes],
-            nbSamples*m_sampleBytes);
+            elemLength(m_payloadType),
+            nbSamples*m_sampleBytes,m_endianReverse);
+}
+
+void RTPSink::writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse)
+{
+    for (unsigned int i = 0; i < bytesLen; i += elemLen)
+    {
+        memcpy(&dest[i], &src[i], elemLen);
+
+        if (endianReverse) {
+            std::reverse(&dest[i], &dest[i+elemLen]);
+        }
+    }
+}
+
+unsigned int RTPSink::elemLength(PayloadType payloadType)
+{
+    switch (payloadType)
+    {
+    case PayloadL16Stereo:
+        return sizeof(int16_t);
+        break;
+    case PayloadL16Mono:
+    default:
+        return sizeof(int16_t);
+        break;
+    }
 }
 
