@@ -27,6 +27,7 @@
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "util/export.h"
+#include "util/movingaverage.h"
 
 class DeviceSampleSource;
 class BasebandSampleSink;
@@ -101,12 +102,17 @@ private:
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;
 	double m_iOffset, m_qOffset;
+	MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
+    MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
+    MovingAverageUtil<int64_t, int64_t, 1024> m_avgII;
+    MovingAverageUtil<int64_t, int64_t, 1024> m_avgIQ;
 	qint32 m_iRange;
 	qint32 m_qRange;
 	qint32 m_imbalance;
 
 	void run();
 
+	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, bool imbalanceCorrection);
 	void dcOffset(SampleVector::iterator begin, SampleVector::iterator end);
 	void imbalance(SampleVector::iterator begin, SampleVector::iterator end);
 	void work(); //!< transfer samples from source to sinks if in running state

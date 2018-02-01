@@ -173,25 +173,52 @@ QString DSPDeviceSourceEngine::sourceDeviceDescription()
 	return cmd.getDeviceDescription();
 }
 
+void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, bool imbalanceCorrection)
+{
+    for(SampleVector::iterator it = begin; it < end; it++)
+    {
+        m_iBeta(it->real());
+        m_qBeta(it->imag());
+
+        if (imbalanceCorrection)
+        {
+            int32_t xi = it->m_real - (int32_t) m_iBeta;
+            int32_t xq = it->m_imag - (int32_t) m_qBeta;
+            m_avgII(xi*xi);
+            m_avgIQ(xi*xq);
+            // TODO
+        }
+        else
+        {
+            it->m_real -= (int32_t) m_iBeta;
+            it->m_imag -= (int32_t) m_qBeta;
+        }
+    }
+}
+
 void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
 {
-	double count;
-	int io = 0;
-	int qo = 0;
-	Sample corr((FixReal)m_iOffset, (FixReal)m_qOffset);
+//	double count;
+//	int io = 0;
+//	int qo = 0;
+//	Sample corr((FixReal)m_iOffset, (FixReal)m_qOffset);
 
 	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++)
 	{
-		io += it->real();
-		qo += it->imag();
-		*it -= corr;
+	    m_iBeta(it->real());
+	    m_qBeta(it->imag());
+	    it->m_real -= (int32_t) m_iBeta;
+	    it->m_imag -= (int32_t) m_qBeta;
+//		io += it->real();
+//		qo += it->imag();
+//		*it -= corr;
 	}
 
-	// moving average
-	count = end - begin;
-	m_iOffset = (15.0 * m_iOffset + (double)io / count) / 16.0;
-	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
+//	// moving average
+//	count = end - begin;
+//	m_iOffset = (15.0 * m_iOffset + (double)io / count) / 16.0;
+//	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
 }
 
 void DSPDeviceSourceEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
