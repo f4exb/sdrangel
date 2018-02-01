@@ -40,6 +40,7 @@ endif(LIBUSB_FOUND AND LIBAIRSPY_FOUND)
 find_package(LibAIRSPYHF)
 if(LIBUSB_FOUND AND LIBAIRSPYHF_FOUND)
     add_subdirectory(airspyhf)
+    add_subdirectory(airspyhff)
 endif(LIBUSB_FOUND AND LIBAIRSPYHF_FOUND)
 
 find_package(LibHACKRF)

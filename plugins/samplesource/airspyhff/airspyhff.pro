@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia opengl
 
-TARGET = inputairspyhf
+TARGET = inputairspyhff
 
 CONFIG(MINGW32):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
 CONFIG(MINGW64):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
@@ -28,19 +28,19 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += airspyhfgui.cpp\
-  airspyhfinput.cpp\
-  airspyhfplugin.cpp\
-  airspyhfsettings.cpp\
-  airspyhfthread.cpp
+SOURCES += airspyhffgui.cpp\
+  airspyhffinput.cpp\
+  airspyhffplugin.cpp\
+  airspyhffsettings.cpp\
+  airspyhffthread.cpp
 
-HEADERS += airspyhfgui.h\
-  airspyhfinput.h\
-  airspyhfplugin.h\
-  airspyhfsettings.h\
-  airspyhfthread.h
+HEADERS += airspyhffgui.h\
+  airspyhffinput.h\
+  airspyhffplugin.h\
+  airspyhffsettings.h\
+  airspyhffthread.h
 
-FORMS += airspyhfgui.ui
+FORMS += airspyhffgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
