@@ -99,7 +99,7 @@ void AirspyHFFThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyHFFThread::callback(const qint16* buf, qint32 len)
+void AirspyHFFThread::callback(const float* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -136,7 +136,7 @@ void AirspyHFFThread::callback(const qint16* buf, qint32 len)
 
 int AirspyHFFThread::rx_callback(airspyhf_transfer_t* transfer)
 {
-	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
-	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
+	qint32 nbIAndQ = transfer->sample_count * 2;
+	m_this->callback((float *) transfer->samples, nbIAndQ);
 	return 0;
 }
