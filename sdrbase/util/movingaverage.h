@@ -29,19 +29,20 @@ class MovingAverageUtil
 {
   public:
     MovingAverageUtil()
-      : m_num_samples(0), m_total(0)
+      : m_num_samples(0), m_index(0), m_total(0)
     { }
 
     void operator()(T sample)
     {
-        if (m_num_samples < N)
+        if (m_num_samples < N) // fill up
         {
             m_samples[m_num_samples++] = sample;
             m_total += sample;
         }
-        else
+        else // roll
         {
-            T& oldest = m_samples[m_num_samples++ % N];
+            T& oldest = m_samples[m_index];
+            m_index = (m_index + 1) % N;
             m_total += sample - oldest;
             oldest = sample;
         }
@@ -54,6 +55,7 @@ class MovingAverageUtil
   private:
     T m_samples[N];
     int m_num_samples;
+    unsigned int m_index;
     Total m_total;
 };
 
