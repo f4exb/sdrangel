@@ -62,6 +62,7 @@ set(sdrbase_SOURCES
 
     util/CRC64.cpp
     util/db.cpp
+    util/fixedtraits.cpp
     util/message.cpp
     util/messagequeue.cpp
     util/prettyprint.cpp
@@ -168,6 +169,7 @@ set(sdrbase_HEADERS
     util/db.h
     util/doublebuffer.h
     util/export.h
+    util/fixedtraits.h
     util/message.h
     util/messagequeue.h
     util/movingaverage.h
