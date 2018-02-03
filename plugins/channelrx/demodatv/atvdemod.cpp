@@ -60,7 +60,6 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
         m_intRowIndex(0),
         m_intLineIndex(0),
         m_objAvgColIndex(3),
-        m_objMagSqAverage(40, 0),
         m_bfoPLL(200/1000000, 100/1000000, 0.01),
         m_bfoFilter(200.0, 1000000.0, 0.9),
         m_interpolatorDistance(1.0f),
@@ -77,8 +76,6 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
     m_intSynchroPoints=0;
     m_intNumberOfLines=0;
     m_interleaved = true;
-
-    m_objMagSqAverage.resize(32, 1.0);
 
     m_DSBFilter = new fftfilt((2.0f * m_rfConfig.m_fltRFBandwidth) / 1000000, 2 * m_ssbFftLen); // arbitrary 1 MS/s sample rate
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
@@ -281,7 +278,7 @@ void ATVDemod::demod(Complex& c)
     {
         //Amplitude FM
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage.feed(magSq);
+        m_objMagSqAverage(magSq);
         fltNorm = sqrt(magSq);
         fltNormI= fltI/fltNorm;
         fltNormQ= fltQ/fltNorm;
@@ -336,7 +333,7 @@ void ATVDemod::demod(Complex& c)
     {
         //Amplitude AM
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage.feed(magSq);
+        m_objMagSqAverage(magSq);
         fltNorm = sqrt(magSq);
         fltVal = fltNorm / SDR_RX_SCALEF;
 
@@ -359,7 +356,7 @@ void ATVDemod::demod(Complex& c)
     else if ((m_rfRunning.m_enmModulation == ATV_USB) || (m_rfRunning.m_enmModulation == ATV_LSB))
     {
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage.feed(magSq);
+        m_objMagSqAverage(magSq);
         fltNorm = sqrt(magSq);
 
         Real bfoValues[2];
@@ -398,13 +395,13 @@ void ATVDemod::demod(Complex& c)
         float rawDeviation;
         fltVal = m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation) + 0.5f;
         //fltVal = fltVal < 0.0f ? 0.0f : fltVal > 1.0f ? 1.0f : fltVal;
-        m_objMagSqAverage.feed(magSq);
+        m_objMagSqAverage(magSq);
         fltNorm = sqrt(magSq);
     }
     else
     {
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage.feed(magSq);
+        m_objMagSqAverage(magSq);
         fltNorm = sqrt(magSq);
         fltVal = 0.0f;
     }

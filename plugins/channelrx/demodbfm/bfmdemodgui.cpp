@@ -330,7 +330,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_rdsTimerCount(0),
-	m_channelPowerDbAvg(20,0),
 	m_rate(625000)
 {
 	ui->setupUi(this);
@@ -484,10 +483,6 @@ void BFMDemodGUI::tick()
             nbMagsqSamples);
 
     ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
-
-//	Real powDb = CalcDb::dbPower(m_bfmDemod->getMagSq());
-//	m_channelPowerDbAvg.feed(powDb);
-//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
 
 	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
 	QString pilotPowDbStr;

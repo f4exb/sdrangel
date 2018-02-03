@@ -26,7 +26,7 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
@@ -105,7 +105,7 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
-	double getMagSq() const { return m_movingAverage.average(); }
+	double getMagSq() const { return m_movingAverage.asDouble(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
@@ -151,7 +151,7 @@ private:
     int  m_magsqCount;
 
 	Real m_lastArgument;
-	MovingAverage<double> m_movingAverage;
+	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	Real m_fmExcursion;
 
 	AudioVector m_audioBuffer;

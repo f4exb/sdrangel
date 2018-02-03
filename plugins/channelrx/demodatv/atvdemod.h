@@ -29,7 +29,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
 #include "dsp/phaselock.h"
@@ -234,7 +234,7 @@ public:
     void setATVScreen(ATVScreenInterface *objScreen);
     int getSampleRate();
     int getEffectiveSampleRate();
-    double getMagSq() const { return m_objMagSqAverage.average(); } //!< Beware this is scaled to 2^30
+    double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
 
     static const QString m_channelIdURI;
@@ -457,7 +457,7 @@ private:
 
     //*************** RF  ***************
 
-    MovingAverage<double> m_objMagSqAverage;
+    MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     NCO m_nco;
     SimplePhaseLock m_bfoPLL;

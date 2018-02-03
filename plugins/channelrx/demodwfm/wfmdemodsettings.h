@@ -18,6 +18,8 @@
 #ifndef PLUGINS_CHANNELRX_DEMODWFM_WFMDEMODSETTINGS_H_
 #define PLUGINS_CHANNELRX_DEMODWFM_WFMDEMODSETTINGS_H_
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 struct WFMDemodSettings

@@ -166,8 +166,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false),
-	m_channelPowerDbAvg(20,0)
+	m_basicSettingsShown(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -290,10 +289,6 @@ void WFMDemodGUI::enterEvent(QEvent*)
 
 void WFMDemodGUI::tick()
 {
-//	Real powDb = CalcDb::dbPower(m_wfmDemod->getMagSq());
-//	m_channelPowerDbAvg.feed(powDb);
-//	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
-
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     m_wfmDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);

@@ -21,7 +21,6 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 #include "bfmdemodsettings.h"
 
@@ -71,7 +70,6 @@ private:
 	SpectrumVis* m_spectrumVis;
 
 	BFMDemod* m_bfmDemod;
-	MovingAverage<double> m_channelPowerDbAvg;
 	int m_rate;
 	std::vector<unsigned int> m_g14ComboIndex;
 	MessageQueue m_inputMessageQueue;

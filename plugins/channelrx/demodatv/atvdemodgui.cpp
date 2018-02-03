@@ -274,7 +274,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
         m_blnDoApplySettings(true),
-        m_objMagSqAverage(40, 0),
         m_intTickCount(0),
         m_inputSampleRate(48000)
 {
@@ -307,8 +306,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_deviceUISet->registerRxChannelInstance(ATVDemod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
-
-    m_objMagSqAverage.resize(4, 1.0);
 
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
@@ -473,8 +470,8 @@ void ATVDemodGUI::tick()
     {
         if (m_atvDemod)
         {
-            m_objMagSqAverage.feed(m_atvDemod->getMagSq());
-            double magSqDB = CalcDb::dbPower(m_objMagSqAverage.average() / (SDR_RX_SCALED*SDR_RX_SCALED));
+            m_objMagSqAverage(m_atvDemod->getMagSq());
+            double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
             ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
 
             if (m_atvDemod->getBFOLocked()) {

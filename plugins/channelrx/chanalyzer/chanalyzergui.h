@@ -20,7 +20,8 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
+#include "dsp/dsptypes.h"
+#include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
 class PluginAPI;
@@ -65,7 +66,7 @@ private:
 	bool m_doApplySettings;
 	int m_rate;
 	int m_spanLog2;
-	MovingAverage<Real> m_channelPowerDbAvg;
+	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
 
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;

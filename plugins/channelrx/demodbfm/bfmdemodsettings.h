@@ -17,6 +17,8 @@
 #ifndef PLUGINS_CHANNELRX_DEMODBFM_BFMDEMODSETTINGS_H_
 #define PLUGINS_CHANNELRX_DEMODBFM_BFMDEMODSETTINGS_H_
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 struct BFMDemodSettings

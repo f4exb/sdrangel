@@ -107,8 +107,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
         ui(new Ui::UDPSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
-        m_channelPowerAvg(4, 1e-10),
-        m_inPowerAvg(4, 1e-10),
         m_tickCount(0),
         m_channelMarker(this),
         m_rfBandwidthChanged(false),
@@ -454,14 +452,14 @@ void UDPSinkGUI::enterEvent(QEvent*)
 
 void UDPSinkGUI::tick()
 {
-    m_channelPowerAvg.feed(m_udpSink->getMagSq());
-    m_inPowerAvg.feed(m_udpSink->getInMagSq());
+    m_channelPowerAvg(m_udpSink->getMagSq());
+    m_inPowerAvg(m_udpSink->getInMagSq());
 
     if (m_tickCount % 4 == 0)
     {
-        double powDb = CalcDb::dbPower(m_channelPowerAvg.average());
+        double powDb = CalcDb::dbPower(m_channelPowerAvg.asDouble());
         ui->channelPower->setText(tr("%1 dB").arg(powDb, 0, 'f', 1));
-        double inPowDb = CalcDb::dbPower(m_inPowerAvg.average());
+        double inPowDb = CalcDb::dbPower(m_inPowerAvg.asDouble());
         ui->inputPower->setText(tr("%1").arg(inPowDb, 0, 'f', 1));
     }
 

@@ -29,7 +29,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
@@ -281,8 +281,7 @@ private:
     Bandpass<Real> m_bandpass;
 
     double m_magsq;
-    MovingAverage<double> m_movingAverage;
-    SimpleAGC m_volumeAGC;
+    MovingAverageUtil<double, double, 16> m_movingAverage;
 
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;

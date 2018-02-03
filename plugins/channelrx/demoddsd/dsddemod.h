@@ -29,7 +29,7 @@
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
 #include "dsp/afsquelch.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
@@ -175,7 +175,7 @@ private:
 	double m_squelchLevel;
 	bool m_squelchOpen;
 
-    MovingAverage<double> m_movingAverage;
+    MovingAverageUtil<Real, double, 16> m_movingAverage;
     double m_magsq;
     double m_magsqSum;
     double m_magsqPeak;

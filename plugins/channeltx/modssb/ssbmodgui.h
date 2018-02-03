@@ -22,7 +22,7 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
 #include "ssbmod.h"
@@ -69,7 +69,7 @@ private:
 
     SpectrumVis* m_spectrumVis;
     SSBMod* m_ssbMod;
-    MovingAverage<double> m_channelPowerDbAvg;
+    MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     QString m_fileName;
     quint32 m_recordLength;

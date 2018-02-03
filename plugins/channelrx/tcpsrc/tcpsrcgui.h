@@ -6,7 +6,7 @@
 
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
 #include "tcpsrc.h"
@@ -49,7 +49,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	TCPSrc* m_tcpSrc;
 	ChannelMarker m_channelMarker;
-	MovingAverage<double> m_channelPowerDbAvg;
+	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
 
 	// settings
 	TCPSrcSettings m_settings;

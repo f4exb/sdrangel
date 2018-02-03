@@ -60,7 +60,6 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_settingsMutex(QMutex::Recursive),
     m_horizontalCount(0),
     m_lineCount(0),
-    m_movingAverage(40, 0),
 	m_imageOK(false),
 	m_videoFPSq(1.0f),
     m_videoFPSCount(0.0f),
@@ -89,8 +88,6 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
 
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;
-
-    m_movingAverage.resize(16, 0);
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
@@ -165,7 +162,7 @@ void ATVMod::pullFinalize(Complex& ci, Sample& sample)
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
     magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
-    m_movingAverage.feed(magsq);
+    m_movingAverage(magsq);
 
     sample.m_real = (FixReal) ci.real();
     sample.m_imag = (FixReal) ci.imag();

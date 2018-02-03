@@ -21,7 +21,7 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
 class PluginAPI;
@@ -67,7 +67,7 @@ private:
 
     bool m_blnDoApplySettings;
 
-    MovingAverage<double> m_objMagSqAverage;
+    MovingAverageUtil<double, double, 4> m_objMagSqAverage;
     int m_intTickCount;
 
     ScopeVisNG* m_scopeVis;

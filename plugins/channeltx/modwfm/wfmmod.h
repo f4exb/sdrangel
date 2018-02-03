@@ -28,7 +28,7 @@
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
@@ -294,8 +294,7 @@ private:
     int m_rfFilterBufferIndex;
 
     double m_magsq;
-    MovingAverage<double> m_movingAverage;
-    SimpleAGC m_volumeAGC;
+    MovingAverageUtil<double, double, 16> m_movingAverage;
 
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;

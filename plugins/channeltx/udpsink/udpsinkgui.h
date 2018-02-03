@@ -23,6 +23,7 @@
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
+#include "util/movingaverage.h"
 
 #include "udpsink.h"
 #include "udpsinksettings.h"
@@ -62,8 +63,8 @@ private:
     DeviceUISet* m_deviceUISet;
     SpectrumVis* m_spectrumVis;
     UDPSink* m_udpSink;
-    MovingAverage<double> m_channelPowerAvg;
-    MovingAverage<double> m_inPowerAvg;
+    MovingAverageUtil<double, double, 4> m_channelPowerAvg;
+    MovingAverageUtil<double, double, 4> m_inPowerAvg;
     uint32_t m_tickCount;
     ChannelMarker m_channelMarker;
 

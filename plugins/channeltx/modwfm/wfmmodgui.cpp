@@ -272,7 +272,6 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0),
     m_recordLength(0),
     m_recordSampleRate(48000),
     m_samplesCount(0),
@@ -415,8 +414,8 @@ void WFMModGUI::enterEvent(QEvent*)
 void WFMModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_wfmMod->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
+	m_channelPowerDbAvg(powDb);
+	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
     if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == WFMMod::WFMModInputFile))
     {

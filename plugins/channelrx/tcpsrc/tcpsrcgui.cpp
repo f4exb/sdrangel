@@ -112,8 +112,8 @@ void TCPSrcGUI::channelMarkerHighlightedByCursor()
 void TCPSrcGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_tcpSrc->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	m_channelPowerDbAvg(powDb);
+	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.asDouble(), 'f', 1));
 }
 
 TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -123,7 +123,6 @@ TCPSrcGUI::TCPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_deviceUISet(deviceUISet),
 	m_tcpSrc(0),
 	m_channelMarker(this),
-	m_channelPowerDbAvg(40,0),
 	m_rfBandwidthChanged(false),
 	m_doApplySettings(true)
 {

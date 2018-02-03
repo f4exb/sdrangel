@@ -46,8 +46,6 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
     m_basebandSampleRate(48000),
     m_outputSampleRate(48000),
     m_inputFrequencyOffset(0),
-    m_movingAverage(40, 0),
-    m_volumeAGC(40, 0),
     m_audioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -63,8 +61,6 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_movingAverage.resize(16, 0);
-	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
@@ -131,8 +127,8 @@ void AMMod::pull(Sample& sample)
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
-	m_movingAverage.feed(magsq);
-	m_magsq = m_movingAverage.average();
+	m_movingAverage(magsq);
+	m_magsq = m_movingAverage.asDouble();
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();

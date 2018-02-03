@@ -51,7 +51,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         m_squelchGate(0),
         m_squelchLevel(1e-4),
         m_squelchOpen(false),
-        m_movingAverage(40, 0),
         m_fmExcursion(24),
         m_audioFifo1(48000),
         m_audioFifo2(48000),
@@ -69,7 +68,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 	m_sampleBufferIndex = 0;
 	m_scaleFromShort = SDR_RX_SAMP_SZ < sizeof(short)*8 ? 1 : 1<<(SDR_RX_SAMP_SZ - sizeof(short)*8);
 
-    m_movingAverage.resize(16, 0);
 	m_magsq = 0.0f;
     m_magsqSum = 0.0f;
     m_magsqPeak = 0.0f;
@@ -133,7 +131,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             Real re = ci.real() / SDR_RX_SCALED;
             Real im = ci.imag() / SDR_RX_SCALED;
             Real magsq = re*re + im*im;
-            m_movingAverage.feed(magsq);
+            m_movingAverage(magsq);
 
             m_magsqSum += magsq;
 
@@ -149,7 +147,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             // AF processing
 
-            if (m_movingAverage.average() > m_squelchLevel)
+            if (m_movingAverage.asDouble() > m_squelchLevel)
             {
                 if (m_squelchGate > 0)
                 {

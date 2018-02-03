@@ -24,7 +24,7 @@
 #include "channel/channelsinkapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
@@ -143,7 +143,7 @@ private:
 	double m_magsqPeak;
 	int  m_magsqCount;
 
-	MovingAverage<double> m_movingAverage;
+	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	SimpleAGC m_volumeAGC;
     Bandpass<Real> m_bandpass;
 
@@ -164,8 +164,8 @@ private:
 	    Real re = ci.real() / SDR_RX_SCALED;
 	    Real im = ci.imag() / SDR_RX_SCALED;
         Real magsq = re*re + im*im;
-        m_movingAverage.feed(magsq);
-        m_magsq = m_movingAverage.average();
+        m_movingAverage(magsq);
+        m_magsq = m_movingAverage.asDouble();
         m_magsqSum += magsq;
 
         if (magsq > m_magsqPeak)

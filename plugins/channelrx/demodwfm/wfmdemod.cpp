@@ -47,7 +47,6 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_movingAverage(40, 0),
         m_sampleSink(0),
         m_audioFifo(250000),
         m_settingsMutex(QMutex::Recursive)
@@ -59,8 +58,6 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
-
-	m_movingAverage.resize(16, 0);
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
 	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
@@ -114,7 +111,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		    demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
 		    Real magsq = msq / (SDR_RX_SCALED*SDR_RX_SCALED);
 
-			m_movingAverage.feed(magsq);
+			m_movingAverage(magsq);
             m_magsqSum += magsq;
 
             if (magsq > m_magsqPeak)
@@ -124,7 +121,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-			if(m_movingAverage.average() >= m_squelchLevel)
+			if((Real) m_movingAverage >= m_squelchLevel)
 				m_squelchState = m_settings.m_rfBandwidth / 20; // decay rate
 
 			if (m_squelchState > 0)

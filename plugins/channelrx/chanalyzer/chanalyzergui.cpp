@@ -196,8 +196,8 @@ void ChannelAnalyzerGUI::channelMarkerHighlightedByCursor()
 void ChannelAnalyzerGUI::tick()
 {
 	Real powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(QString::number(m_channelPowerDbAvg.average(), 'f', 1));
+	m_channelPowerDbAvg(powDb);
+	ui->channelPower->setText(QString::number((Real) m_channelPowerDbAvg, 'f', 1));
 }
 
 void ChannelAnalyzerGUI::on_deltaMinus_toggled(bool minus)
@@ -331,8 +331,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(3),
-	m_channelPowerDbAvg(40,0)
+	m_spanLog2(3)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);

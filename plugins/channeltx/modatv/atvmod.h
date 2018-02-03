@@ -31,7 +31,7 @@
 #include "channel/channelsourceapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "util/message.h"
 
@@ -412,7 +412,7 @@ public:
     virtual bool deserialize(const QByteArray& data);
 
     int getEffectiveSampleRate() const { return m_tvSampleRate; };
-    double getMagSq() const { return m_movingAverage.average(); }
+    double getMagSq() const { return m_movingAverage.asDouble(); }
     void getCameraNumbers(std::vector<int>& numbers);
 
     static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit);
@@ -512,7 +512,7 @@ private:
     int      m_lineCount;        //!< current line index in frame
     float    m_fps;              //!< resulting frames per second
 
-    MovingAverage<double> m_movingAverage;
+    MovingAverageUtil<double, double, 16> m_movingAverage;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;

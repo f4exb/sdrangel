@@ -55,7 +55,6 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_SSBFilterBufferIndex(0),
 	m_DSBFilterBufferIndex(0),
     m_sampleSink(0),
-    m_movingAverage(40, 0),
     m_audioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
@@ -84,7 +83,6 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
     m_undersampleCount = 0;
     m_sumCount = 0;
 
-	m_movingAverage.resize(16, 0);
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
@@ -166,8 +164,8 @@ void SSBMod::pull(Sample& sample)
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
 	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
-	m_movingAverage.feed(magsq);
-	m_magsq = m_movingAverage.average();
+	m_movingAverage(magsq);
+	m_magsq = m_movingAverage.asDouble();
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();

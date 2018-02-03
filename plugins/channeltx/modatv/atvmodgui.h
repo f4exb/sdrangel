@@ -20,7 +20,7 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
+#include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
 #include "atvmod.h"
@@ -65,7 +65,7 @@ private:
     bool m_doApplySettings;
 
     ATVMod* m_atvMod;
-    MovingAverage<double> m_channelPowerDbAvg;
+    MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     QString m_imageFileName;
     QString m_videoFileName;

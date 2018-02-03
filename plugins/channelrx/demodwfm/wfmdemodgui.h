@@ -4,7 +4,6 @@
 #include <plugin/plugininstancegui.h>
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
 #include "wfmdemodsettings.h"
@@ -52,7 +51,6 @@ private:
     bool m_squelchOpen;
 
 	WFMDemod* m_wfmDemod;
-	MovingAverage<double> m_channelPowerDbAvg;
 	MessageQueue m_inputMessageQueue;
 
 	explicit WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);

@@ -235,8 +235,8 @@ void ChannelAnalyzerNGGUI::channelMarkerHighlightedByCursor()
 void ChannelAnalyzerNGGUI::tick()
 {
 	double powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
+	m_channelPowerDbAvg(powDb);
+	ui->channelPower->setText(tr("%1 dB").arg((Real) m_channelPowerDbAvg, 0, 'f', 1));
 }
 
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
@@ -388,8 +388,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(0),
-	m_channelPowerDbAvg(40,0)
+	m_spanLog2(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);

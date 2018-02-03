@@ -33,6 +33,7 @@
 #include "dsp/ctcssdetector.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/movingaverage.h"
 
 #include "nfmdemodsettings.h"
 
@@ -200,7 +201,7 @@ private:
 	Real m_lastArgument;
 	//Complex m_m1Sample;
 	//Complex m_m2Sample;
-	MovingAverage<double> m_movingAverage;
+	MovingAverageUtil<Real, double, 32> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
 	Real m_agcFloor; // AGC will not go below this level

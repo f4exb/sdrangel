@@ -32,6 +32,13 @@ class MovingAverageUtil
       : m_num_samples(0), m_index(0), m_total(0)
     { }
 
+    void reset()
+    {
+        m_num_samples = 0;
+        m_index = 0;
+        m_total = 0;
+    }
+
     void operator()(T sample)
     {
         if (m_num_samples < N) // fill up
@@ -42,14 +49,14 @@ class MovingAverageUtil
         else // roll
         {
             T& oldest = m_samples[m_index];
-            m_index = (m_index + 1) % N;
             m_total += sample - oldest;
             oldest = sample;
+            m_index = (m_index + 1) % N;
         }
     }
 
-    operator double() const { return m_num_samples > 0 ? m_total / std::min(m_num_samples, N) : 0.0d; }
-    operator float() const { return m_num_samples > 0 ? m_total / std::min(m_num_samples, N) : 0.0f; }
+    double asDouble() const { return m_total / N; }
+    float asFloat() const { return m_total / N; }
     operator T() const { return  m_total / N; }
 
   private:

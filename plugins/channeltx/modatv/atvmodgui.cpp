@@ -586,7 +586,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
-	m_channelPowerDbAvg(20,0),
     m_videoLength(0),
     m_videoFrameRate(48000),
     m_frameCount(0),
@@ -741,8 +740,8 @@ void ATVModGUI::enterEvent(QEvent*)
 void ATVModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_atvMod->getMagSq());
-	m_channelPowerDbAvg.feed(powDb);
-	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.average(), 0, 'f', 1));
+	m_channelPowerDbAvg(powDb);
+	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
     if (((++m_tickCount & 0xf) == 0) && (ui->inputSelect->currentIndex() == (int) ATVModSettings::ATVModInputVideo))
     {

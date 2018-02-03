@@ -62,7 +62,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_movingAverage(40, 0),
         m_afSquelch(2, afSqTones),
         m_fmExcursion(2400),
         m_audioFifo(48000),
@@ -74,7 +73,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_audioBufferFill = 0;
 
 	m_agcLevel = 1.0;
-	m_movingAverage.resize(32, 0);
 
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
@@ -162,7 +160,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);
 
             Real magsq = magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED);
-            m_movingAverage.feed(magsq);
+            m_movingAverage(magsq);
             m_magsqSum += magsq;
 
             if (magsq > m_magsqPeak)
@@ -198,7 +196,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             }
             else
             {
-                if (m_movingAverage.average() < m_squelchLevel)
+                if ((Real) m_movingAverage < m_squelchLevel)
                 {
                     if (m_squelchCount > 0)
                     {
@@ -464,7 +462,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         else
         { // input is a value in centi-Bels
             m_squelchLevel = std::pow(10.0, settings.m_squelch / 100.0);
-            m_movingAverage.fill(0.0);
+            m_movingAverage.reset();
         }
 
         m_squelchCount = 0; // reset squelch open counter
