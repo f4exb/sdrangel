@@ -26,10 +26,11 @@ class FixedTraits
 };
 
 template<>
-class FixedTraits<28>
+struct FixedTraits<28>
 {
     static const uint32_t fixed_resolution_shift = 28; //!< 1.0 representation. 28 is the highest power of two that can represent 9.99999... safely on 64 bits internally
-    static const int64_t  fixed_resolution       = 1LL << 28;
+    static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
+    static const int32_t  max_power              = 63 - fixed_resolution_shift;
     static const int64_t  internal_pi            = 0x3243f6a8;
     static const int64_t  internal_two_pi        = 0x6487ed51;
     static const int64_t  internal_half_pi       = 0x1921fb54;
