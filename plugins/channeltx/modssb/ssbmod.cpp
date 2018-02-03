@@ -728,7 +728,9 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_agcTime != m_settings.m_agcTime) ||
         (settings.m_agcOrder != m_settings.m_agcOrder) || force)
     {
+        m_settingsMutex.lock();
         m_inAGC.resize(settings.m_agcTime, settings.m_agcOrder);
+        m_settingsMutex.unlock();
     }
 
     if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force)
