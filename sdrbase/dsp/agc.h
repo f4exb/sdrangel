@@ -9,6 +9,7 @@
 #define INCLUDE_GPL_DSP_AGC_H_
 
 #include "movingaverage.h"
+#include "util/movingaverage.h"
 
 class AGC
 {
@@ -81,56 +82,47 @@ private:
 	bool m_squelchOpen;
 };
 
-
+template<uint32_t AvgSize>
 class SimpleAGC
 {
 public:
-	SimpleAGC(int historySize, Real initial, Real cutoff=0, Real clip=0) :
-			m_squelchOpen(false),
-			m_fill(initial),
-			m_cutoff(cutoff),
-			m_clip(clip),
-			m_moving_average(historySize, initial)
+	SimpleAGC(Real cutoff=0, Real clip=0) :
+        m_squelchOpen(false),
+        m_cutoff(cutoff),
+        m_clip(clip)
 	{}
 
-	void resize(int historySize, Real initial, Real cutoff=0, Real clip=0)
+	void resize(Real cutoff=0, Real clip=0)
 	{
-			m_fill = initial;
-			m_cutoff = cutoff;
-			m_clip = clip;
-			m_moving_average.resize(historySize, initial);
-	}
-
-	void fill(double value)
-	{
-	    m_moving_average.fill(value);
+        m_cutoff = cutoff;
+        m_clip = clip;
 	}
 
 	Real getValue()
 	{
-			if (m_moving_average.average() > m_clip)
-			{
-					return m_moving_average.average();
-			} else
-			{
-					return m_clip;
-			}
+        if ((Real) m_moving_average > m_clip)
+        {
+            return (Real) m_moving_average;
+        } else
+        {
+            return m_clip;
+        }
 	}
 
     void feed(Real value)
     {
-            if (value > m_cutoff)
-            {
-                    m_moving_average.feed(value);
-            }
+        if (value > m_cutoff)
+        {
+            m_moving_average(value);
+        }
     }
 
 private:
     bool m_squelchOpen; // open for processing
-    Real m_fill;    // refill average at this level
     Real m_cutoff;  // consider samples only above this level
     Real m_clip;    // never go below this level
-    MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+    //MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+    MovingAverageUtil<Real, double, AvgSize> m_moving_average;
 };
 
 #endif /* INCLUDE_GPL_DSP_AGC_H_ */

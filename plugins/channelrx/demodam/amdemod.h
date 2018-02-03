@@ -144,7 +144,7 @@ private:
 	int  m_magsqCount;
 
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
-	SimpleAGC m_volumeAGC;
+	SimpleAGC<4096> m_volumeAGC;
     Bandpass<Real> m_bandpass;
 
 	AudioVector m_audioBuffer;
@@ -179,10 +179,6 @@ private:
         {
             if (m_squelchCount <= m_settings.m_audioSampleRate / 10)
             {
-                if (m_squelchCount == m_settings.m_audioSampleRate / 20) {
-                    m_volumeAGC.fill(1.0);
-                }
-
                 m_squelchCount++;
             }
         }

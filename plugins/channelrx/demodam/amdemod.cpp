@@ -45,7 +45,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_volumeAGC(1200, 1.0),
+        m_volumeAGC(0.003),
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -54,7 +54,6 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
-	m_volumeAGC.resize(4096, 0.003, 0);
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
