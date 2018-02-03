@@ -66,22 +66,6 @@ private:
     double m_clampMax;     //!< maximum to clamp to as power value
 };
 
-
-class AlphaAGC : public AGC
-{
-public:
-	AlphaAGC(int historySize, Real R);
-	AlphaAGC(int historySize, Real R, Real alpha);
-	virtual ~AlphaAGC();
-    void resize(int historySize, Real R, Real alpha);
-	virtual void feed(Complex& ci);
-	Real getMagSq() const { return m_magsq; }
-private:
-	Real m_alpha;
-	Real m_magsq;
-	bool m_squelchOpen;
-};
-
 template<uint32_t AvgSize>
 class SimpleAGC
 {
