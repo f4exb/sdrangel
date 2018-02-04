@@ -183,6 +183,44 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
 
         if (imbalanceCorrection)
         {
+#if IMBALANCE_INT
+            // acquisition
+            int64_t xi = (it->m_real - (int32_t) m_iBeta) << 5;
+            int64_t xq = (it->m_imag - (int32_t) m_qBeta) << 5;
+
+            // phase imbalance
+            m_avgII((xi*xi)>>28); // <I", I">
+            m_avgIQ((xi*xq)>>28); // <I", Q">
+
+            if ((int64_t) m_avgII != 0)
+            {
+                int64_t phi = (((int64_t) m_avgIQ)<<28) / (int64_t) m_avgII;
+                m_avgPhi(phi);
+            }
+
+            int64_t corrPhi = (((int64_t) m_avgPhi) * xq) >> 28;  //(m_avgPhi.asDouble()/16777216.0) * ((double) xq);
+
+            int64_t yi = xi - corrPhi;
+            int64_t yq = xq;
+
+            // amplitude I/Q imbalance
+            m_avgII2((yi*yi)>>28); // <I, I>
+            m_avgQQ2((yq*yq)>>28); // <Q, Q>
+
+            if ((int64_t) m_avgQQ2 != 0)
+            {
+                int64_t a = (((int64_t) m_avgII2)<<28) / (int64_t) m_avgQQ2;
+                Fixed<int64_t, 28> fA(Fixed<int64_t, 28>::internal(), a);
+                Fixed<int64_t, 28> sqrtA = sqrt((Fixed<int64_t, 28>) fA);
+                m_avgAmp(sqrtA.as_internal());
+            }
+
+            int64_t zq = (((int64_t) m_avgAmp) * yq) >> 28;
+
+            it->m_real = yi >> 5;
+            it->m_imag = zq >> 5;
+
+#else
             // DC correction and conversion
             float xi = (it->m_real - (int32_t) m_iBeta) / SDR_RX_SCALEF;
             float xq = (it->m_imag - (int32_t) m_qBeta) / SDR_RX_SCALEF;
@@ -214,6 +252,7 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
             // convert and store
             it->m_real = zi * SDR_RX_SCALEF;
             it->m_imag = zq * SDR_RX_SCALEF;
+#endif
         }
         else
         {

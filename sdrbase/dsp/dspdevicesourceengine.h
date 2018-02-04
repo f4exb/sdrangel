@@ -102,17 +102,30 @@ private:
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;
 	double m_iOffset, m_qOffset;
+
 	MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
     MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
+
+#if IMBALANCE_INT
+    // Fixed point DC + IQ corrections
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgII;
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgIQ;
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgPhi;
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgII2;
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgQQ2;
+    MovingAverageUtil<int64_t, int64_t, 128> m_avgAmp;
+
+#else
+    // Floating point DC + IQ corrections
     MovingAverageUtil<float, double, 128> m_avgII;
     MovingAverageUtil<float, double, 128> m_avgIQ;
     MovingAverageUtil<float, double, 128> m_avgII2;
     MovingAverageUtil<float, double, 128> m_avgQQ2;
     MovingAverageUtil<double, double, 128> m_avgPhi;
     MovingAverageUtil<double, double, 128> m_avgAmp;
-//    MovingAverageUtil<int64_t, int64_t, 1024> m_avgII;
-//    MovingAverageUtil<int64_t, int64_t, 1024> m_avgIQ;
-	qint32 m_iRange;
+#endif
+
+    qint32 m_iRange;
 	qint32 m_qRange;
 	qint32 m_imbalance;
 
