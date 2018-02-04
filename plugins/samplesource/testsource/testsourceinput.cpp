@@ -222,12 +222,21 @@ bool TestSourceInput::handleMessage(const Message& message)
 
 bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool force)
 {
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
+    if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
     {
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
-        qDebug("TestSourceInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
-                settings.m_dcBlock ? "true" : "false",
-                settings.m_iqImbalance ? "true" : "false");
+        switch(settings.m_autoCorrOptions)
+        {
+        case TestSourceSettings::AutoCorrDC:
+            m_deviceAPI->configureCorrections(true, false);
+            break;
+        case TestSourceSettings::AutoCorrDCAndIQ:
+            m_deviceAPI->configureCorrections(true, true);
+            break;
+        case TestSourceSettings::AutoCorrNone:
+        default:
+            m_deviceAPI->configureCorrections(false, false);
+            break;
+        }
     }
 
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)

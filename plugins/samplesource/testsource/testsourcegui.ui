@@ -190,22 +190,30 @@
      <item>
       <widget class="QLabel" name="autoCorrLabel">
        <property name="text">
-        <string>Auto</string>
+        <string>Corr</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="dcOffset">
-       <property name="text">
-        <string>DC</string>
+      <widget class="QComboBox" name="autoCorr">
+       <property name="toolTip">
+        <string>DC offset and IQ correction options</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="iqImbalance">
-       <property name="text">
-        <string>IQ</string>
-       </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DC+IQ</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

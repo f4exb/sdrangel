@@ -35,7 +35,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 */
 	QCoreApplication::setOrganizationName("f4exb");
 	QCoreApplication::setApplicationName("SDRangel");
-	QCoreApplication::setApplicationVersion("3.11.1");
+	QCoreApplication::setApplicationVersion("3.12.0");
 
 #if 1
 	qApp->setStyle(QStyleFactory::create("fusion"));

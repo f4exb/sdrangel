@@ -80,8 +80,7 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
-    void on_dcOffset_toggled(bool checked);
-    void on_iqImbalance_toggled(bool checked);
+    void on_autoCorr_currentIndexChanged(int index);
     void on_frequencyShift_changed(qint64 value);
     void on_decimation_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);

@@ -139,18 +139,15 @@ void TestSourceGui::on_centerFrequency_changed(quint64 value)
     sendSettings();
 }
 
-void TestSourceGui::on_dcOffset_toggled(bool checked)
+void TestSourceGui::on_autoCorr_currentIndexChanged(int index)
 {
-    m_settings.m_dcBlock = checked;
+    if ((index < 0) || (index > TestSourceSettings::AutoCorrDCAndIQ)) {
+        return;
+    }
+
+    m_settings.m_autoCorrOptions = (TestSourceSettings::AutoCorrOptions) index;
     sendSettings();
 }
-
-void TestSourceGui::on_iqImbalance_toggled(bool checked)
-{
-    m_settings.m_iqImbalance = checked;
-    sendSettings();
-}
-
 
 void TestSourceGui::on_frequencyShift_changed(qint64 value)
 {
@@ -355,9 +352,7 @@ void TestSourceGui::displaySettings()
     ui->iBiasText->setText(QString(tr("%1 %").arg(iBiasPercent)));
     int qBiasPercent = roundf(m_settings.m_qFactor * 100.0f);
     ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
-    ui->dcOffset->setChecked(m_settings.m_dcBlock);
-    ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
-
+    ui->autoCorr->setCurrentIndex(m_settings.m_autoCorrOptions);
     ui->sampleSize->blockSignals(false);
     blockApplySettings(false);
 }
