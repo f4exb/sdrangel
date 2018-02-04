@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <QDebug>
 #include "dsp/dspcommands.h"
+#include "util/fixed.h"
 #include "samplesinkfifo.h"
 #include "threadedbasebandsamplesink.h"
 
@@ -182,14 +183,41 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
 
         if (imbalanceCorrection)
         {
-            int32_t xi = it->m_real - (int32_t) m_iBeta;
-            int32_t xq = it->m_imag - (int32_t) m_qBeta;
-            m_avgII(xi*xi);
-            m_avgIQ(xi*xq);
-            // TODO
+            // DC correction and conversion
+            float xi = (it->m_real - (int32_t) m_iBeta) / SDR_RX_SCALEF;
+            float xq = (it->m_imag - (int32_t) m_qBeta) / SDR_RX_SCALEF;
+
+            // phase imbalance
+            m_avgII(xi*xi); // <I", I">
+            m_avgIQ(xi*xq); // <I", Q">
+
+
+            if (m_avgII.asDouble() != 0) {
+                m_avgPhi(m_avgIQ.asDouble()/m_avgII.asDouble());
+            }
+
+            float yi = xi - m_avgPhi.asDouble()*xq;
+            float yq = xq;
+
+            // amplitude I/Q imbalance
+            m_avgII2(yi*yi); // <I, I>
+            m_avgQQ2(yq*yq); // <Q, Q>
+
+            if (m_avgQQ2.asDouble() != 0) {
+                m_avgAmp(sqrt(m_avgII2.asDouble() / m_avgQQ2.asDouble()));
+            }
+
+            // final correction
+            float zi = yi;
+            float zq = m_avgAmp.asDouble() * yq;
+
+            // convert and store
+            it->m_real = zi * SDR_RX_SCALEF;
+            it->m_imag = zq * SDR_RX_SCALEF;
         }
         else
         {
+            // DC correction only
             it->m_real -= (int32_t) m_iBeta;
             it->m_imag -= (int32_t) m_qBeta;
         }
@@ -198,11 +226,6 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
 
 void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector::iterator end)
 {
-//	double count;
-//	int io = 0;
-//	int qo = 0;
-//	Sample corr((FixReal)m_iOffset, (FixReal)m_qOffset);
-
 	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++)
 	{
@@ -210,15 +233,7 @@ void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector:
 	    m_qBeta(it->imag());
 	    it->m_real -= (int32_t) m_iBeta;
 	    it->m_imag -= (int32_t) m_qBeta;
-//		io += it->real();
-//		qo += it->imag();
-//		*it -= corr;
 	}
-
-//	// moving average
-//	count = end - begin;
-//	m_iOffset = (15.0 * m_iOffset + (double)io / count) / 16.0;
-//	m_qOffset = (15.0 * m_qOffset + (double)qo / count) / 16.0;
 }
 
 void DSPDeviceSourceEngine::imbalance(SampleVector::iterator begin, SampleVector::iterator end)
@@ -289,15 +304,20 @@ void DSPDeviceSourceEngine::work()
 		if (part1begin != part1end)
 		{
 			// correct stuff
-			if (m_dcOffsetCorrection)
-			{
-				dcOffset(part1begin, part1end);
-			}
+            if (m_dcOffsetCorrection)
+            {
+                iqCorrections(part1begin, part1end, m_iqImbalanceCorrection);
+            }
 
-			if (m_iqImbalanceCorrection)
-			{
-				imbalance(part1begin, part1end);
-			}
+//			if (m_dcOffsetCorrection)
+//			{
+//				dcOffset(part1begin, part1end);
+//			}
+//
+//			if (m_iqImbalanceCorrection)
+//			{
+//				imbalance(part1begin, part1end);
+//			}
 
 			// feed data to direct sinks
 			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
@@ -316,15 +336,20 @@ void DSPDeviceSourceEngine::work()
 		if(part2begin != part2end)
 		{
 			// correct stuff
-			if (m_dcOffsetCorrection)
-			{
-				dcOffset(part2begin, part2end);
-			}
+            if (m_dcOffsetCorrection)
+            {
+                iqCorrections(part2begin, part2end, m_iqImbalanceCorrection);
+            }
 
-			if (m_iqImbalanceCorrection)
-			{
-				imbalance(part2begin, part2end);
-			}
+//            if (m_dcOffsetCorrection)
+//			{
+//				dcOffset(part2begin, part2end);
+//			}
+//
+//			if (m_iqImbalanceCorrection)
+//			{
+//				imbalance(part2begin, part2end);
+//			}
 
 			// feed data to direct sinks
 			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)

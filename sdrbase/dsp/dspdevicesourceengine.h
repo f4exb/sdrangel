@@ -104,8 +104,14 @@ private:
 	double m_iOffset, m_qOffset;
 	MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
     MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
-    MovingAverageUtil<int64_t, int64_t, 1024> m_avgII;
-    MovingAverageUtil<int64_t, int64_t, 1024> m_avgIQ;
+    MovingAverageUtil<float, double, 128> m_avgII;
+    MovingAverageUtil<float, double, 128> m_avgIQ;
+    MovingAverageUtil<float, double, 128> m_avgII2;
+    MovingAverageUtil<float, double, 128> m_avgQQ2;
+    MovingAverageUtil<double, double, 128> m_avgPhi;
+    MovingAverageUtil<double, double, 128> m_avgAmp;
+//    MovingAverageUtil<int64_t, int64_t, 1024> m_avgII;
+//    MovingAverageUtil<int64_t, int64_t, 1024> m_avgIQ;
 	qint32 m_iRange;
 	qint32 m_qRange;
 	qint32 m_imbalance;

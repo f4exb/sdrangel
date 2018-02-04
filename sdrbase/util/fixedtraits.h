@@ -58,6 +58,22 @@ struct FixedTraits<16>
 };
 
 template<>
+struct FixedTraits<23>
+{
+    static const uint32_t fixed_resolution_shift = 23;
+    static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
+    static const int32_t  max_power              = 63 - fixed_resolution_shift;
+    static const int64_t  internal_pi            = 26353589;
+    static const int64_t  internal_two_pi        = 52707179;
+    static const int64_t  internal_half_pi       = 13176795;
+    static const int64_t  internal_quarter_pi    = 6588397;
+    static const int64_t  log_two_power_n_reversed[40]; // 40 = 63 - 23
+    static const int64_t  log_one_plus_two_power_minus_n[23];
+    static const int64_t  log_one_over_one_minus_two_power_minus_n[23];
+    static const int64_t  arctantab[32];
+};
+
+template<>
 struct FixedTraits<24>
 {
     static const uint32_t fixed_resolution_shift = 24;
@@ -67,7 +83,7 @@ struct FixedTraits<24>
     static const int64_t  internal_two_pi        = 105414357;
     static const int64_t  internal_half_pi       = 26353589;
     static const int64_t  internal_quarter_pi    = 13176795;
-    static const int64_t  log_two_power_n_reversed[39]; // 39 = 63 - 16
+    static const int64_t  log_two_power_n_reversed[39]; // 39 = 63 - 24
     static const int64_t  log_one_plus_two_power_minus_n[24];
     static const int64_t  log_one_over_one_minus_two_power_minus_n[24];
     static const int64_t  arctantab[32];

@@ -12,6 +12,8 @@
 // Modified as fully templatized class with variable size and type internal      //
 // representation                                                                //
 //                                                                               //
+// sqrt requires even IntBits                                                    //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -479,9 +481,9 @@ Fixed<IntType, IntBits>& Fixed<IntType, IntBits>::operator/=(Fixed<IntType, IntB
 template<typename IntType, uint32_t IntBits>
 Fixed<IntType, IntBits> Fixed<IntType, IntBits>::sqrt() const
 {
-    unsigned const max_shift = 62;
+    unsigned int const max_shift = 62;
     uint64_t a_squared = 1LL << max_shift;
-    unsigned b_shift = (max_shift + FixedTraits<IntBits>::fixed_resolution_shift) / 2;
+    unsigned int b_shift = (max_shift + FixedTraits<IntBits>::fixed_resolution_shift) / 2;
     uint64_t a = 1LL << b_shift;
 
     uint64_t x = m_nVal;
