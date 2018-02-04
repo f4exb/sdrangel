@@ -4,6 +4,9 @@
 // Distributed under the Boost Software License, Version 1.0.                    //
 // See: http://www.boost.org/LICENSE_1_0.txt)                                    //
 //                                                                               //
+// Original article:                                                             //
+// http://www.drdobbs.com/cpp/optimizing-math-intensive-applications-w/207000448 //
+//                                                                               //
 // Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // Modified as fully templatized class with variable size and type internal      //
@@ -740,7 +743,7 @@ void Fixed<IntType, IntBits>::sin_cos(Fixed<IntType, IntBits> const& theta, Fixe
         negate_cos=true;
     }
 
-    int64_t x_cos = 1<<28, x_sin = 0;
+    int64_t x_cos = 1<<FixedTraits<IntBits>::fixed_resolution_shift, x_sin = 0;
 
     perform_cordic_rotation(x_cos, x_sin, (int64_t) x);
 
@@ -2347,7 +2350,7 @@ template<typename IntType, uint32_t IntBits>
 inline Fixed<IntType, IntBits> Fixed<IntType, IntBits>::sin() const
 {
     Fixed res;
-    sin_cos(*this,&res, 0);
+    sin_cos(*this, &res, 0);
     return res;
 }
 
@@ -2355,7 +2358,7 @@ template<typename IntType, uint32_t IntBits>
 inline Fixed<IntType, IntBits> Fixed<IntType, IntBits>::cos() const
 {
     Fixed res;
-    sin_cos(*this,0, &res);
+    sin_cos(*this, 0, &res);
     return res;
 }
 

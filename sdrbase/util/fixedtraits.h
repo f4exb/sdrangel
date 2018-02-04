@@ -41,4 +41,36 @@ struct FixedTraits<28>
     static const int64_t  arctantab[32];
 };
 
+template<>
+struct FixedTraits<16>
+{
+    static const uint32_t fixed_resolution_shift = 16;
+    static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
+    static const int32_t  max_power              = 63 - fixed_resolution_shift;
+    static const int64_t  internal_pi            = 205887;
+    static const int64_t  internal_two_pi        = 411775;
+    static const int64_t  internal_half_pi       = 102944;
+    static const int64_t  internal_quarter_pi    = 51472;
+    static const int64_t  log_two_power_n_reversed[47]; // 47 = 63 - 16
+    static const int64_t  log_one_plus_two_power_minus_n[16];
+    static const int64_t  log_one_over_one_minus_two_power_minus_n[16];
+    static const int64_t  arctantab[32];
+};
+
+template<>
+struct FixedTraits<24>
+{
+    static const uint32_t fixed_resolution_shift = 24;
+    static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
+    static const int32_t  max_power              = 63 - fixed_resolution_shift;
+    static const int64_t  internal_pi            = 52707179;
+    static const int64_t  internal_two_pi        = 105414357;
+    static const int64_t  internal_half_pi       = 26353589;
+    static const int64_t  internal_quarter_pi    = 13176795;
+    static const int64_t  log_two_power_n_reversed[39]; // 39 = 63 - 16
+    static const int64_t  log_one_plus_two_power_minus_n[24];
+    static const int64_t  log_one_over_one_minus_two_power_minus_n[24];
+    static const int64_t  arctantab[32];
+};
+
 #endif /* SDRBASE_UTIL_FIXEDTRAITS_H_ */
