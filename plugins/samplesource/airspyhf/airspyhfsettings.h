@@ -19,6 +19,13 @@
 
 struct AirspyHFSettings
 {
+    typedef enum {
+        AutoCorrNone,
+        AutoCorrDC,
+        AutoCorrDCAndIQ,
+        AutoCorrLast,
+    } AutoCorrOptions;
+
 	quint64 m_centerFrequency;
     qint32  m_LOppmTenths;
 	quint32 m_devSampleRateIndex;
@@ -26,6 +33,7 @@ struct AirspyHFSettings
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;
+    AutoCorrOptions m_autoCorrOptions;
 
     AirspyHFSettings();
 	void resetToDefaults();

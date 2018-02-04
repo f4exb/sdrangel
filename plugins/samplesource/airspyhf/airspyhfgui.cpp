@@ -219,6 +219,7 @@ void AirspyHFGui::displaySettings()
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    ui->autoCorr->setCurrentIndex(m_settings.m_autoCorrOptions);
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->band->blockSignals(false);
@@ -275,6 +276,16 @@ void AirspyHFGui::on_LOppm_valueChanged(int value)
 void AirspyHFGui::on_resetLOppm_clicked()
 {
     ui->LOppm->setValue(0);
+}
+
+void AirspyHFGui::on_autoCorr_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index > AirspyHFSettings::AutoCorrLast)) {
+        return;
+    }
+
+    m_settings.m_autoCorrOptions = (AirspyHFSettings::AutoCorrOptions) index;
+    sendSettings();
 }
 
 void AirspyHFGui::on_sampleRate_currentIndexChanged(int index)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>132</height>
+    <height>174</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -234,6 +234,52 @@
         <string>R</string>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="autoCorrLayout">
+     <item>
+      <widget class="QLabel" name="autoCorrLabel">
+       <property name="text">
+        <string>Corr</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="autoCorr">
+       <property name="toolTip">
+        <string>DC offset and IQ correction options</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DC+IQ</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

@@ -134,7 +134,7 @@ bool AirspyHFInput::openDevice()
 
     delete[] sampleRates;
 
-    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_IQ);
+    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_NDSP_IQ);
 
     return true;
 }
@@ -348,6 +348,23 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	int sampleRateIndex = settings.m_devSampleRateIndex;
 
 	qDebug() << "AirspyHFInput::applySettings";
+
+    if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
+    {
+        switch(settings.m_autoCorrOptions)
+        {
+        case AirspyHFSettings::AutoCorrDC:
+            m_deviceAPI->configureCorrections(true, false);
+            break;
+        case AirspyHFSettings::AutoCorrDCAndIQ:
+            m_deviceAPI->configureCorrections(true, true);
+            break;
+        case AirspyHFSettings::AutoCorrNone:
+        default:
+            m_deviceAPI->configureCorrections(false, false);
+            break;
+        }
+    }
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
