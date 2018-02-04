@@ -81,7 +81,7 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         d.readS32(7, &m_amplitudeBits, 128);
         d.readS32(8, &intval, 0);
 
-        if (intval < 0 || intval > (int) AutoCorrDCAndIQ) {
+        if (intval < 0 || intval > (int) AutoCorrLast) {
             m_autoCorrOptions = AutoCorrNone;
         } else {
             m_autoCorrOptions = (AutoCorrOptions) intval;

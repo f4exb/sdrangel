@@ -95,6 +95,7 @@ set(sdrbase_HEADERS
     commands/command.h
 
     dsp/afsquelch.h
+    dsp/autocorrector.h
     dsp/downchannelizer.h
     dsp/upchannelizer.h
     dsp/channelmarker.h

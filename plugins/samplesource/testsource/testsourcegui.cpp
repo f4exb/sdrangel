@@ -141,7 +141,7 @@ void TestSourceGui::on_centerFrequency_changed(quint64 value)
 
 void TestSourceGui::on_autoCorr_currentIndexChanged(int index)
 {
-    if ((index < 0) || (index > TestSourceSettings::AutoCorrDCAndIQ)) {
+    if ((index < 0) || (index > TestSourceSettings::AutoCorrLast)) {
         return;
     }
 

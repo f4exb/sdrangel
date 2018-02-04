@@ -27,7 +27,8 @@ struct TestSourceSettings {
     typedef enum {
         AutoCorrNone,
         AutoCorrDC,
-        AutoCorrDCAndIQ
+        AutoCorrDCAndIQ,
+        AutoCorrLast,
     } AutoCorrOptions;
 
     quint64 m_centerFrequency;
