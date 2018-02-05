@@ -31,6 +31,7 @@ struct AMDemodSettings
     bool m_audioMute;
     bool m_bandpassEnable;
     bool m_copyAudioToUDP;
+    bool m_copyAudioUseRTP;
     QString m_udpAddress;
     quint16 m_udpPort;
     quint32 m_rgbColor;
