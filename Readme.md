@@ -77,7 +77,7 @@ Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) a
 
 <h2>Airspy HF+</h2>
 
-[Airspy HF+](https://airspy.com/airspy-hf-plus/) is supported through [my fork of the airspyhf library](https://github.com/f4exb/airspyhf). This is needed because SDRangel uses integer samples at its input. The original library post processes the integer samples from the device and presents them as float samples without any other option.
+[Airspy HF+](https://airspy.com/airspy-hf-plus/) is supported through [the airspyhf library](https://github.com/airspy/airspyhf).
 
 If you use your own location for libairspyhf install directory you need to specify library and include locations. Example with `/opt/install/libairspyhf` with the following defines on `cmake` command line:
 

@@ -6,7 +6,7 @@ This input sample source plugin gets its samples from a [Airspy HF+ device](http
 
 <h2>Build</h2>
 
-The plugin will be built only if the [Airspy HF library](https://github.com/f4exb/airspyhf) is installed in your system. Please note that you should use my fork as it deals with integer samples. The branch to check out is `intsamples` but this is the default in Github. 
+The plugin will be built only if the [Airspy HF library](https://github.com/airspy/airspyhf) is installed in your system. 
 
 If you build it from source and install it in a custom location say: `/opt/install/libairspyhf` you will have to add `-DLIBRTLSDR_INCLUDE_DIR=/opt/install/libairspyhf/include -DLIBRTLSDR_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so` to the cmake command line.
 
