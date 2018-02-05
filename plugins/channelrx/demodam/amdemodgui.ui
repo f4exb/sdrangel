@@ -200,7 +200,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="useRTP">
+       <widget class="ButtonSwitch" name="useRTP">
         <property name="toolTip">
          <string>Use RTP protocol for copy audio to UDP</string>
         </property>
