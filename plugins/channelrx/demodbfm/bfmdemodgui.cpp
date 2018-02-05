@@ -207,6 +207,12 @@ void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy)
     applySettings();
 }
 
+void BFMDemodGUI::on_useRTP_toggled(bool checked)
+{
+    m_settings.m_copyAudioUseRTP = checked;
+    applySettings();
+}
+
 void BFMDemodGUI::on_showPilot_clicked()
 {
     m_settings.m_showPilot = ui->showPilot->isChecked();
@@ -383,6 +389,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->g00AltFrequenciesBox->setEnabled(false);
 	ui->g14MappedFrequencies->setEnabled(false);
 	ui->g14AltFrequencies->setEnabled(false);
+	ui->useRTP->setEnabled(m_bfmDemod->isAudioNetSinkRTPCapable());
 
 	rdsUpdateFixedFields();
 	rdsUpdate(true);
@@ -455,6 +462,10 @@ void BFMDemodGUI::displaySettings()
     ui->showPilot->setChecked(m_settings.m_showPilot);
     ui->rds->setChecked(m_settings.m_rdsActive);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
+
+    if (m_bfmDemod->isAudioNetSinkRTPCapable()) {
+        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
+    }
 
     blockApplySettings(false);
 }

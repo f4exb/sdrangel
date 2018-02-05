@@ -26,6 +26,7 @@
 #include <dsp/downchannelizer.h>
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
+#include "audio/audionetsink.h"
 
 #include "rdsparser.h"
 #include "bfmdemod.h"
@@ -84,7 +85,8 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_settings.m_udpPort);
+	m_audioNetSink = new AudioNetSink(this, true); // true = stereo
+	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -103,12 +105,17 @@ BFMDemod::~BFMDemod()
 	}
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-	delete m_udpBufferAudio;
+	delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+}
+
+bool BFMDemod::isAudioNetSinkRTPCapable() const
+{
+    return m_audioNetSink && m_audioNetSink->isRTPCapable();
 }
 
 void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -236,13 +243,17 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					{
 						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
 						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
-						if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+						if (m_settings.m_copyAudioToUDP) {
+							m_audioNetSink->write(m_audioBuffer[m_audioBufferFill]);
+						}
 					}
 					else
 					{
 						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
 						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
-                        if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+                        if (m_settings.m_copyAudioToUDP) {
+                        	m_audioNetSink->write(m_audioBuffer[m_audioBufferFill]);
+                        }
 					}
 				}
 				else
@@ -252,7 +263,9 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					quint16 sample = (qint16)(deemph * (1<<12) * m_settings.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
-                    if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+                    if (m_settings.m_copyAudioToUDP) {
+                    	m_audioNetSink->write(m_audioBuffer[m_audioBufferFill]);
+                    }
 				}
 
 				++m_audioBufferFill;
@@ -419,6 +432,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_showPilot: " << settings.m_showPilot
             << " m_rdsActive: " << settings.m_rdsActive
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+			<< " m_copyAudioUseRTP" << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;
@@ -483,8 +497,27 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     if ((settings.m_udpAddress != m_settings.m_udpAddress)
         || (settings.m_udpPort != m_settings.m_udpPort) || force)
     {
-        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
-        m_udpBufferAudio->setPort(settings.m_udpPort);
+    	m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
+    }
+
+    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
+    {
+        if (settings.m_copyAudioUseRTP)
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
+                qDebug("BFMDemod::applySettings: set audio sink to RTP mode");
+            } else {
+                qWarning("BFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
+            }
+        }
+        else
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
+                qDebug("BFMDemod::applySettings: set audio sink to UDP mode");
+            } else {
+                qWarning("BFMDemod::applySettings: failed to set audio sink to UDP mode");
+            }
+        }
     }
 
     m_settings = settings;

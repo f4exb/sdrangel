@@ -47,6 +47,7 @@ void BFMDemodSettings::resetToDefaults()
     m_showPilot = false;
     m_rdsActive = false;
     m_copyAudioToUDP = false;
+    m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(80, 120, 228).rgb();
@@ -75,6 +76,7 @@ QByteArray BFMDemodSettings::serialize() const
     }
 
     s.writeString(12, m_title);
+    s.writeBool(13, m_copyAudioUseRTP);
 
     return s.final();
 }
@@ -123,6 +125,7 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(12, &m_title, "Broadcast FM Demod");
+        d.readBool(13, &m_copyAudioUseRTP, false);
 
         return true;
     }
