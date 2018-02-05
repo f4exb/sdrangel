@@ -114,7 +114,6 @@ public:
         uint32_t getUnderrun() const { return m_underrun; }
         uint32_t getOverrun() const { return m_overrun; }
         uint32_t getDroppedPackets() const { return m_droppedPackets; }
-        float    getSampleRate() const { return m_sampleRate; }
         float    getLinkRate() const { return m_linkRate; }
         uint64_t getTimestamp() const { return m_timestamp; }
 
@@ -126,7 +125,6 @@ public:
                 uint32_t underrun,
                 uint32_t overrun,
                 uint32_t droppedPackets,
-                float    sampleRate,
                 float    linkRate,
                 uint64_t timestamp
                 )
@@ -139,7 +137,6 @@ public:
                     underrun,
                     overrun,
                     droppedPackets,
-                    sampleRate,
                     linkRate,
                     timestamp
                     );
@@ -154,7 +151,6 @@ public:
         uint32_t m_underrun; //!< FIFO underrun count
         uint32_t m_overrun; //!< FIFO overrun count
         uint32_t m_droppedPackets; //!< Number of dropped packets by HW
-        float    m_sampleRate; //!< Sampling rate of the stream
         float    m_linkRate; //!< Combined data rate of all stream of the same direction (TX or RX)
         uint64_t m_timestamp; //!< Current HW timestamp
 
@@ -166,7 +162,6 @@ public:
                 uint32_t underrun,
                 uint32_t overrun,
                 uint32_t droppedPackets,
-                float    sampleRate,
                 float    linkRate,
                 uint64_t timestamp
                 ) :
@@ -178,7 +173,6 @@ public:
             m_underrun(underrun),
             m_overrun(overrun),
             m_droppedPackets(droppedPackets),
-            m_sampleRate(sampleRate),
             m_linkRate(linkRate),
             m_timestamp(timestamp)
         { }

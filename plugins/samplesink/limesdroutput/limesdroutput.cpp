@@ -629,7 +629,6 @@ bool LimeSDROutput::handleMessage(const Message& message)
                         status.underrun,
                         status.overrun,
                         status.droppedPackets,
-                        status.sampleRate,
                         status.linkRate,
                         status.timestamp);
                 m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
@@ -647,7 +646,6 @@ bool LimeSDROutput::handleMessage(const Message& message)
                         0,     // status.underrun,
                         0,     // status.overrun,
                         0,     // status.droppedPackets,
-                        0,     // status.sampleRate,
                         0,     // status.linkRate,
                         0);    // status.timestamp);
                 m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
