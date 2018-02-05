@@ -51,6 +51,7 @@ void NFMDemodSettings::resetToDefaults()
     m_ctcssIndex = 0;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_copyAudioToUDP = false;
+    m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
     m_rgbColor = QColor(255, 0, 0).rgb();
@@ -77,6 +78,7 @@ QByteArray NFMDemodSettings::serialize() const
     }
 
     s.writeString(14, m_title);
+    s.writeBool(15, m_copyAudioUseRTP);
 
     return s.final();
 }
@@ -120,6 +122,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(11, &m_squelchGate, 5);
         d.readBool(12, &m_deltaSquelch, false);
         d.readString(14, &m_title, "NFM Demodulator");
+        d.readBool(15, &m_copyAudioUseRTP, false);
 
         return true;
     }
