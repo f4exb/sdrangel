@@ -22,6 +22,7 @@
 
 #include <libairspyhf/airspyhf.h>
 #include <dsp/devicesamplesource.h>
+
 #include "airspyhfsettings.h"
 
 class DeviceSourceAPI;

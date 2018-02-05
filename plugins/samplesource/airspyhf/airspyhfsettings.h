@@ -14,18 +14,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _AIRSPYHF_AIRSPYHFSETTINGS_H_
-#define _AIRSPYHF_AIRSPYHFSETTINGS_H_
+#ifndef _AIRSPYHFF_AIRSPYHFSETTINGS_H_
+#define _AIRSPYHFF_AIRSPYHFSETTINGS_H_
 
 struct AirspyHFSettings
 {
-    typedef enum {
-        AutoCorrNone,
-        AutoCorrDC,
-        AutoCorrDCAndIQ,
-        AutoCorrLast,
-    } AutoCorrOptions;
-
 	quint64 m_centerFrequency;
     qint32  m_LOppmTenths;
 	quint32 m_devSampleRateIndex;
@@ -33,7 +26,6 @@ struct AirspyHFSettings
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;
-    AutoCorrOptions m_autoCorrOptions;
 
     AirspyHFSettings();
 	void resetToDefaults();
@@ -41,4 +33,4 @@ struct AirspyHFSettings
 	bool deserialize(const QByteArray& data);
 };
 
-#endif /* _AIRSPYHF_AIRSPYHFSETTINGS_H_ */
+#endif /* _AIRSPYHFF_AIRSPYHFSETTINGS_H_ */

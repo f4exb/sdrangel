@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYHFFTHREAD_H
-#define INCLUDE_AIRSPYHFFTHREAD_H
+#ifndef INCLUDE_AIRSPYHFITHREAD_H
+#define INCLUDE_AIRSPYHFITHREAD_H
 
 #include <QThread>
 #include <QMutex>
@@ -23,16 +23,16 @@
 #include <libairspyhf/airspyhf.h>
 
 #include "dsp/samplesinkfifo.h"
-#include "dsp/decimatorsf.h"
+#include "dsp/decimators.h"
 
-#define AIRSPYHFF_BLOCKSIZE (1<<17)
+#define AIRSPYHFI_BLOCKSIZE (1<<17)
 
-class AirspyHFFThread : public QThread {
+class AirspyHFIThread : public QThread {
 	Q_OBJECT
 
 public:
-	AirspyHFFThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
-	~AirspyHFFThread();
+	AirspyHFIThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+	~AirspyHFIThread();
 
 	void startWork();
 	void stopWork();
@@ -45,19 +45,23 @@ private:
 	bool m_running;
 
 	airspyhf_device_t* m_dev;
-	qint16 m_buf[2*AIRSPYHFF_BLOCKSIZE];
+	qint16 m_buf[2*AIRSPYHFI_BLOCKSIZE];
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;
-	static AirspyHFFThread *m_this;
+	static AirspyHFIThread *m_this;
 
-	DecimatorsF m_decimators;
+#ifdef SDR_RX_SAMPLE_24BIT
+    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
+#else
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
+#endif
 
 	void run();
-	void callback(const float* buf, qint32 len);
+	void callback(const qint16* buf, qint32 len);
 	static int rx_callback(airspyhf_transfer_t* transfer);
 };
 
-#endif // INCLUDE_AIRSPYHFFTHREAD_H
+#endif // INCLUDE_AIRSPYHFITHREAD_H

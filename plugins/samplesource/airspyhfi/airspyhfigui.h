@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYHFFGUI_H
-#define INCLUDE_AIRSPYHFFGUI_H
+#ifndef INCLUDE_AIRSPYHFIGUI_H
+#define INCLUDE_AIRSPYHFIGUI_H
 
 #include <plugin/plugininstancegui.h>
 #include <QTimer>
@@ -23,21 +23,21 @@
 
 #include "util/messagequeue.h"
 
-#include "airspyhffinput.h"
+#include "airspyhfiinput.h"
 
 class DeviceUISet;
 
 namespace Ui {
-	class AirspyHFFGui;
-	class AirspyHFFSampleRates;
+	class AirspyHFIGui;
+	class AirspyHFISampleRates;
 }
 
-class AirspyHFFGui : public QWidget, public PluginInstanceGUI {
+class AirspyHFIGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit AirspyHFFGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~AirspyHFFGui();
+	explicit AirspyHFIGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~AirspyHFIGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -54,12 +54,12 @@ public:
 	int getDevSampleRateIndex(uint32_t sampleRate);
 
 private:
-	Ui::AirspyHFFGui* ui;
+	Ui::AirspyHFIGui* ui;
 
 	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
-	AirspyHFFSettings m_settings;
+	AirspyHFISettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;
@@ -80,6 +80,7 @@ private slots:
 	void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_resetLOppm_clicked();
+    void on_autoCorr_currentIndexChanged(int index);
 	void on_sampleRate_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
@@ -91,4 +92,4 @@ private slots:
 	void handleInputMessages();
 };
 
-#endif // INCLUDE_AIRSPYHFGUI_H
+#endif // INCLUDE_AIRSPYHFIGUI_H

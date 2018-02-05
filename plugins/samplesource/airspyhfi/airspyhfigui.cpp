@@ -23,16 +23,16 @@
 #include "device/deviceuiset.h"
 #include <dsp/filerecord.h>
 
-#include "ui_airspyhffgui.h"
+#include "ui_airspyhfigui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "airspyhffgui.h"
+#include "airspyhfigui.h"
 
-AirspyHFFGui::AirspyHFFGui(DeviceUISet *deviceUISet, QWidget* parent) :
+AirspyHFIGui::AirspyHFIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::AirspyHFFGui),
+	ui(new Ui::AirspyHFIGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
@@ -40,7 +40,7 @@ AirspyHFFGui::AirspyHFFGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(0),
 	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
 {
-    m_sampleSource = (AirspyHFFInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
+    m_sampleSource = (AirspyHFIInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -52,58 +52,58 @@ AirspyHFFGui::AirspyHFFGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
 
-	m_rates = ((AirspyHFFInput*) m_sampleSource)->getSampleRates();
+	m_rates = ((AirspyHFIInput*) m_sampleSource)->getSampleRates();
 	displaySampleRates();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
     sendSettings();
 }
 
-AirspyHFFGui::~AirspyHFFGui()
+AirspyHFIGui::~AirspyHFIGui()
 {
 	delete ui;
 }
 
-void AirspyHFFGui::destroy()
+void AirspyHFIGui::destroy()
 {
 	delete this;
 }
 
-void AirspyHFFGui::setName(const QString& name)
+void AirspyHFIGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString AirspyHFFGui::getName() const
+QString AirspyHFIGui::getName() const
 {
 	return objectName();
 }
 
-void AirspyHFFGui::resetToDefaults()
+void AirspyHFIGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 AirspyHFFGui::getCenterFrequency() const
+qint64 AirspyHFIGui::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void AirspyHFFGui::setCenterFrequency(qint64 centerFrequency)
+void AirspyHFIGui::setCenterFrequency(qint64 centerFrequency)
 {
 	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray AirspyHFFGui::serialize() const
+QByteArray AirspyHFIGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool AirspyHFFGui::deserialize(const QByteArray& data)
+bool AirspyHFIGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
@@ -116,20 +116,20 @@ bool AirspyHFFGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool AirspyHFFGui::handleMessage(const Message& message)
+bool AirspyHFIGui::handleMessage(const Message& message)
 {
-    if (AirspyHFFInput::MsgConfigureAirspyHF::match(message))
+    if (AirspyHFIInput::MsgConfigureAirspyHFI::match(message))
     {
-        const AirspyHFFInput::MsgConfigureAirspyHF& cfg = (AirspyHFFInput::MsgConfigureAirspyHF&) message;
+        const AirspyHFIInput::MsgConfigureAirspyHFI& cfg = (AirspyHFIInput::MsgConfigureAirspyHFI&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (AirspyHFFInput::MsgStartStop::match(message))
+    else if (AirspyHFIInput::MsgStartStop::match(message))
     {
-        AirspyHFFInput::MsgStartStop& notif = (AirspyHFFInput::MsgStartStop&) message;
+        AirspyHFIInput::MsgStartStop& notif = (AirspyHFIInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -142,7 +142,7 @@ bool AirspyHFFGui::handleMessage(const Message& message)
     }
 }
 
-void AirspyHFFGui::handleInputMessages()
+void AirspyHFIGui::handleInputMessages()
 {
     Message* message;
 
@@ -170,14 +170,14 @@ void AirspyHFFGui::handleInputMessages()
     }
 }
 
-void AirspyHFFGui::updateSampleRateAndFrequency()
+void AirspyHFIGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
-void AirspyHFFGui::updateFrequencyLimits()
+void AirspyHFIGui::updateFrequencyLimits()
 {
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
@@ -188,13 +188,13 @@ void AirspyHFFGui::updateFrequencyLimits()
     switch(m_settings.m_bandIndex)
     {
     case 1:
-        minLimit = AirspyHFFInput::loLowLimitFreqVHF/1000 + deltaFrequency;
-        maxLimit = AirspyHFFInput::loHighLimitFreqVHF/1000 + deltaFrequency;
+        minLimit = AirspyHFIInput::loLowLimitFreqVHF/1000 + deltaFrequency;
+        maxLimit = AirspyHFIInput::loHighLimitFreqVHF/1000 + deltaFrequency;
         break;
     case 0:
     default:
-        minLimit = AirspyHFFInput::loLowLimitFreqHF/1000 + deltaFrequency;
-        maxLimit = AirspyHFFInput::loHighLimitFreqHF/1000 + deltaFrequency;
+        minLimit = AirspyHFIInput::loLowLimitFreqHF/1000 + deltaFrequency;
+        maxLimit = AirspyHFIInput::loHighLimitFreqHF/1000 + deltaFrequency;
         break;
     }
 
@@ -206,7 +206,7 @@ void AirspyHFFGui::updateFrequencyLimits()
     ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
 }
 
-void AirspyHFFGui::displaySettings()
+void AirspyHFIGui::displaySettings()
 {
     blockApplySettings(true);
     ui->band->blockSignals(true);
@@ -218,13 +218,14 @@ void AirspyHFFGui::displaySettings()
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    ui->autoCorr->setCurrentIndex(m_settings.m_autoCorrOptions);
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->band->blockSignals(false);
     blockApplySettings(false);
 }
 
-void AirspyHFFGui::displaySampleRates()
+void AirspyHFIGui::displaySampleRates()
 {
 	unsigned int savedIndex = m_settings.m_devSampleRateIndex;
 	ui->sampleRate->blockSignals(true);
@@ -252,37 +253,47 @@ void AirspyHFFGui::displaySampleRates()
 	}
 }
 
-void AirspyHFFGui::sendSettings()
+void AirspyHFIGui::sendSettings()
 {
 	if(!m_updateTimer.isActive())
 		m_updateTimer.start(100);
 }
 
-void AirspyHFFGui::on_centerFrequency_changed(quint64 value)
+void AirspyHFIGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
 }
 
-void AirspyHFFGui::on_LOppm_valueChanged(int value)
+void AirspyHFIGui::on_LOppm_valueChanged(int value)
 {
     m_settings.m_LOppmTenths = value;
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
     sendSettings();
 }
 
-void AirspyHFFGui::on_resetLOppm_clicked()
+void AirspyHFIGui::on_resetLOppm_clicked()
 {
     ui->LOppm->setValue(0);
 }
 
-void AirspyHFFGui::on_sampleRate_currentIndexChanged(int index)
+void AirspyHFIGui::on_autoCorr_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index > AirspyHFISettings::AutoCorrLast)) {
+        return;
+    }
+
+    m_settings.m_autoCorrOptions = (AirspyHFISettings::AutoCorrOptions) index;
+    sendSettings();
+}
+
+void AirspyHFIGui::on_sampleRate_currentIndexChanged(int index)
 {
 	m_settings.m_devSampleRateIndex = index;
 	sendSettings();
 }
 
-void AirspyHFFGui::on_decim_currentIndexChanged(int index)
+void AirspyHFIGui::on_decim_currentIndexChanged(int index)
 {
 	if ((index < 0) || (index > 5))
 		return;
@@ -290,16 +301,16 @@ void AirspyHFFGui::on_decim_currentIndexChanged(int index)
 	sendSettings();
 }
 
-void AirspyHFFGui::on_startStop_toggled(bool checked)
+void AirspyHFIGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        AirspyHFFInput::MsgStartStop *message = AirspyHFFInput::MsgStartStop::create(checked);
+        AirspyHFIInput::MsgStartStop *message = AirspyHFIInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 
-void AirspyHFFGui::on_record_toggled(bool checked)
+void AirspyHFIGui::on_record_toggled(bool checked)
 {
     if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
@@ -307,11 +318,11 @@ void AirspyHFFGui::on_record_toggled(bool checked)
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    AirspyHFFInput::MsgFileRecord* message = AirspyHFFInput::MsgFileRecord::create(checked);
+    AirspyHFIInput::MsgFileRecord* message = AirspyHFIInput::MsgFileRecord::create(checked);
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void AirspyHFFGui::on_transverter_clicked()
+void AirspyHFIGui::on_transverter_clicked()
 {
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
     m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
@@ -321,7 +332,7 @@ void AirspyHFFGui::on_transverter_clicked()
     sendSettings();
 }
 
-void AirspyHFFGui::on_band_currentIndexChanged(int index)
+void AirspyHFIGui::on_band_currentIndexChanged(int index)
 {
     if ((index < 0) || (index > 1)) {
         return;
@@ -334,16 +345,16 @@ void AirspyHFFGui::on_band_currentIndexChanged(int index)
     sendSettings();
 }
 
-void AirspyHFFGui::updateHardware()
+void AirspyHFIGui::updateHardware()
 {
 	qDebug() << "AirspyHFGui::updateHardware";
-	AirspyHFFInput::MsgConfigureAirspyHF* message = AirspyHFFInput::MsgConfigureAirspyHF::create(m_settings, m_forceSettings);
+	AirspyHFIInput::MsgConfigureAirspyHFI* message = AirspyHFIInput::MsgConfigureAirspyHFI::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 
-void AirspyHFFGui::updateStatus()
+void AirspyHFIGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceSourceAPI->state();
 
@@ -372,7 +383,7 @@ void AirspyHFFGui::updateStatus()
     }
 }
 
-uint32_t AirspyHFFGui::getDevSampleRate(unsigned int rate_index)
+uint32_t AirspyHFIGui::getDevSampleRate(unsigned int rate_index)
 {
 	if (rate_index < m_rates.size())
 	{
@@ -384,7 +395,7 @@ uint32_t AirspyHFFGui::getDevSampleRate(unsigned int rate_index)
 	}
 }
 
-int AirspyHFFGui::getDevSampleRateIndex(uint32_t sampeRate)
+int AirspyHFIGui::getDevSampleRateIndex(uint32_t sampeRate)
 {
 	for (unsigned int i=0; i < m_rates.size(); i++)
 	{

@@ -18,12 +18,11 @@
 #include <QAction>
 #include <libairspyhf/airspyhf.h>
 
-#include "airspyhfgui.h"
-#include "airspyhfplugin.h"
-
 #include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "airspyhfplugin.h"
+#include "airspyhfgui.h"
 
 
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
@@ -84,7 +83,7 @@ PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources()
                     1,
                     0));
 
-            qDebug("AirspyPlugin::enumSampleSources: enumerated Airspy device #%d", i);
+            qDebug("AirspyHFPlugin::enumSampleSources: enumerated Airspy HF device #%d", i);
 	    }
 	    else
 	    {

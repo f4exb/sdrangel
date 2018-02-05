@@ -17,9 +17,8 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "airspyhfthread.h"
-
 #include "dsp/samplesinkfifo.h"
+#include "airspyhfthread.h"
 
 AirspyHFThread *AirspyHFThread::m_this = 0;
 
@@ -78,7 +77,7 @@ void AirspyHFThread::run()
 
 	if (rc != AIRSPYHF_SUCCESS)
 	{
-		qCritical("AirspyHFThread::run: failed to start Airspy Rx");
+		qCritical("AirspyHFFThread::run: failed to start Airspy HF Rx");
 	}
 	else
 	{
@@ -91,16 +90,16 @@ void AirspyHFThread::run()
 	rc = (airspyhf_error) airspyhf_stop(m_dev);
 
 	if (rc == AIRSPYHF_SUCCESS) {
-		qDebug("AirspyHFThread::run: stopped Airspy Rx");
+		qDebug("AirspyHFFThread::run: stopped Airspy HF Rx");
 	} else {
-		qDebug("AirspyHFThread::run: failed to stop Airspy Rx");
+		qDebug("AirspyHFFThread::run: failed to stop Airspy HF Rx");
 	}
 
 	m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyHFThread::callback(const qint16* buf, qint32 len)
+void AirspyHFThread::callback(const float* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -137,7 +136,7 @@ void AirspyHFThread::callback(const qint16* buf, qint32 len)
 
 int AirspyHFThread::rx_callback(airspyhf_transfer_t* transfer)
 {
-	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
-	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
+	qint32 nbIAndQ = transfer->sample_count * 2;
+	m_this->callback((float *) transfer->samples, nbIAndQ);
 	return 0;
 }

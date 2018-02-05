@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYHFFINPUT_H
-#define INCLUDE_AIRSPYHFFINPUT_H
+#ifndef INCLUDE_AIRSPYHFIINPUT_H
+#define INCLUDE_AIRSPYHFIINPUT_H
 
 #include <QString>
 #include <QByteArray>
@@ -23,31 +23,31 @@
 #include <libairspyhf/airspyhf.h>
 #include <dsp/devicesamplesource.h>
 
-#include "airspyhffsettings.h"
+#include "airspyhfisettings.h"
 
 class DeviceSourceAPI;
-class AirspyHFFThread;
+class AirspyHFIThread;
 class FileRecord;
 
-class AirspyHFFInput : public DeviceSampleSource {
+class AirspyHFIInput : public DeviceSampleSource {
 public:
-	class MsgConfigureAirspyHF : public Message {
+	class MsgConfigureAirspyHFI : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const AirspyHFFSettings& getSettings() const { return m_settings; }
+		const AirspyHFISettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureAirspyHF* create(const AirspyHFFSettings& settings, bool force)
+		static MsgConfigureAirspyHFI* create(const AirspyHFISettings& settings, bool force)
 		{
-			return new MsgConfigureAirspyHF(settings, force);
+			return new MsgConfigureAirspyHFI(settings, force);
 		}
 
 	private:
-		AirspyHFFSettings m_settings;
+		AirspyHFISettings m_settings;
 		bool m_force;
 
-		MsgConfigureAirspyHF(const AirspyHFFSettings& settings, bool force) :
+		MsgConfigureAirspyHFI(const AirspyHFISettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -92,8 +92,8 @@ public:
         { }
     };
 
-	AirspyHFFInput(DeviceSourceAPI *deviceAPI);
-	virtual ~AirspyHFFInput();
+	AirspyHFIInput(DeviceSourceAPI *deviceAPI);
+	virtual ~AirspyHFIInput();
 	virtual void destroy();
 
 	virtual void init();
@@ -129,19 +129,19 @@ public:
 private:
 	bool openDevice();
 	void closeDevice();
-	bool applySettings(const AirspyHFFSettings& settings, bool force);
+	bool applySettings(const AirspyHFISettings& settings, bool force);
 	airspyhf_device_t *open_airspyhf_from_serial(const QString& serialStr);
-	void setDeviceCenterFrequency(quint64 freq, const AirspyHFFSettings& settings);
+	void setDeviceCenterFrequency(quint64 freq, const AirspyHFISettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	AirspyHFFSettings m_settings;
+	AirspyHFISettings m_settings;
 	airspyhf_device_t* m_dev;
-	AirspyHFFThread* m_airspyHFThread;
+	AirspyHFIThread* m_airspyHFThread;
 	QString m_deviceDescription;
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };
 
-#endif // INCLUDE_AIRSPYHFFINPUT_H
+#endif // INCLUDE_AIRSPYHFIINPUT_H

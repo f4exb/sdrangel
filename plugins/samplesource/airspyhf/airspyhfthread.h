@@ -23,7 +23,7 @@
 #include <libairspyhf/airspyhf.h>
 
 #include "dsp/samplesinkfifo.h"
-#include "dsp/decimators.h"
+#include "dsp/decimatorsf.h"
 
 #define AIRSPYHF_BLOCKSIZE (1<<17)
 
@@ -53,14 +53,10 @@ private:
 	unsigned int m_log2Decim;
 	static AirspyHFThread *m_this;
 
-#ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
-#else
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
-#endif
+	DecimatorsF m_decimators;
 
 	void run();
-	void callback(const qint16* buf, qint32 len);
+	void callback(const float* buf, qint32 len);
 	static int rx_callback(airspyhf_transfer_t* transfer);
 };
 

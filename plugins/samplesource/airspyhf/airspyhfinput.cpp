@@ -21,14 +21,15 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 
-#include "airspyhfgui.h"
-#include "airspyhfinput.h"
-#include "airspyhfplugin.h"
-
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+
+#include "airspyhfinput.h"
+
+#include "airspyhfgui.h"
+#include "airspyhfplugin.h"
 #include "airspyhfsettings.h"
 #include "airspyhfthread.h"
 
@@ -87,12 +88,12 @@ bool AirspyHFInput::openDevice()
 
     if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSampleSourceSerial())) == 0)
     {
-        qCritical("AirspyHFInput::start: could not open Airspy with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qCritical("AirspyHFInput::start: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
         return false;
     }
     else
     {
-        qDebug("AirspyHFInput::start: opened Airspy with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qDebug("AirspyHFInput::start: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
     }
 
     uint32_t nbSampleRates;
@@ -102,11 +103,11 @@ bool AirspyHFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFInput::start: %d sample rates for AirspyHF", nbSampleRates);
+        qDebug("AirspyHFInput::start: %d sample rates for Airspy HF", nbSampleRates);
     }
     else
     {
-        qCritical("AirspyHFInput::start: could not obtain the number of AirspyHF sample rates");
+        qCritical("AirspyHFInput::start: could not obtain the number of Airspy HF sample rates");
         return false;
     }
 
@@ -116,11 +117,11 @@ bool AirspyHFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFInput::start: obtained AirspyHF sample rates");
+        qDebug("AirspyHFInput::start: obtained Airspy HF sample rates");
     }
     else
     {
-        qCritical("AirspyHFInput::start: could not obtain AirspyHF sample rates");
+        qCritical("AirspyHFInput::start: could not obtain Airspy HF sample rates");
         return false;
     }
 
@@ -134,7 +135,7 @@ bool AirspyHFInput::openDevice()
 
     delete[] sampleRates;
 
-    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_NDSP_IQ);
+    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_FLOAT32_IQ);
 
     return true;
 }
@@ -348,23 +349,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	int sampleRateIndex = settings.m_devSampleRateIndex;
 
 	qDebug() << "AirspyHFInput::applySettings";
-
-    if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
-    {
-        switch(settings.m_autoCorrOptions)
-        {
-        case AirspyHFSettings::AutoCorrDC:
-            m_deviceAPI->configureCorrections(true, false);
-            break;
-        case AirspyHFSettings::AutoCorrDCAndIQ:
-            m_deviceAPI->configureCorrections(true, true);
-            break;
-        case AirspyHFSettings::AutoCorrNone:
-        default:
-            m_deviceAPI->configureCorrections(false, false);
-            break;
-        }
-    }
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{

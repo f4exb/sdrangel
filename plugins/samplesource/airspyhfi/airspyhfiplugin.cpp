@@ -21,12 +21,13 @@
 #include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "airspyhffplugin.h"
-#include "airspyhffgui.h"
+#include "airspyhfiplugin.h"
+
+#include "airspyhfigui.h"
 
 
-const PluginDescriptor AirspyHFFPlugin::m_pluginDescriptor = {
-	QString("AirspyHF Input (float)"),
+const PluginDescriptor AirspyHFIPlugin::m_pluginDescriptor = {
+	QString("AirspyHF Input (int)"),
 	QString("3.12.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -34,26 +35,26 @@ const PluginDescriptor AirspyHFFPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString AirspyHFFPlugin::m_hardwareID = "AirspyHFF";
-const QString AirspyHFFPlugin::m_deviceTypeID = AIRSPYHFF_DEVICE_TYPE_ID;
-const int AirspyHFFPlugin::m_maxDevices = 32;
+const QString AirspyHFIPlugin::m_hardwareID = "AirspyHFI";
+const QString AirspyHFIPlugin::m_deviceTypeID = AIRSPYHFI_DEVICE_TYPE_ID;
+const int AirspyHFIPlugin::m_maxDevices = 32;
 
-AirspyHFFPlugin::AirspyHFFPlugin(QObject* parent) :
+AirspyHFIPlugin::AirspyHFIPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& AirspyHFFPlugin::getPluginDescriptor() const
+const PluginDescriptor& AirspyHFIPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void AirspyHFFPlugin::initPlugin(PluginAPI* pluginAPI)
+void AirspyHFIPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices AirspyHFFPlugin::enumSampleSources()
+PluginInterface::SamplingDevices AirspyHFIPlugin::enumSampleSources()
 {
 	SamplingDevices result;
 	int nbDevices;
@@ -63,7 +64,7 @@ PluginInterface::SamplingDevices AirspyHFFPlugin::enumSampleSources()
 
     if (nbDevices < 0)
     {
-        qCritical("AirspyHFPlugin::enumSampleSources: failed to list Airspy HF devices");
+        qCritical("AirspyHFIPlugin::enumSampleSources: failed to list Airspy HF devices");
     }
 
 	for (int i = 0; i < nbDevices; i++)
@@ -71,7 +72,7 @@ PluginInterface::SamplingDevices AirspyHFFPlugin::enumSampleSources()
 	    if (deviceSerials[i])
 	    {
             QString serial_str = QString::number(deviceSerials[i], 16);
-            QString displayedName(QString("AirspyHF(float)[%1] %2").arg(i).arg(serial_str));
+            QString displayedName(QString("AirspyHF(int)[%1] %2").arg(i).arg(serial_str));
 
             result.append(SamplingDevice(displayedName,
                     m_hardwareID,
@@ -83,11 +84,11 @@ PluginInterface::SamplingDevices AirspyHFFPlugin::enumSampleSources()
                     1,
                     0));
 
-            qDebug("AirspyHFFPlugin::enumSampleSources: enumerated Airspy HF device #%d", i);
+            qDebug("AirspyHFIPlugin::enumSampleSources: enumerated Airspy device #%d", i);
 	    }
 	    else
 	    {
-            qDebug("AirspyHFFPlugin::enumSampleSources: finished to enumerate Airspy HF. %d devices found", i);
+            qDebug("AirspyHFIPlugin::enumSampleSources: finished to enumerate Airspy HF. %d devices found", i);
 	        break; // finished
 	    }
 	}
@@ -95,14 +96,14 @@ PluginInterface::SamplingDevices AirspyHFFPlugin::enumSampleSources()
 	return result;
 }
 
-PluginInstanceGUI* AirspyHFFPlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* AirspyHFIPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if (sourceId == m_deviceTypeID)
 	{
-	    AirspyHFFGui* gui = new AirspyHFFGui(deviceUISet);
+	    AirspyHFIGui* gui = new AirspyHFIGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -112,11 +113,11 @@ PluginInstanceGUI* AirspyHFFPlugin::createSampleSourcePluginInstanceGUI(
 	}
 }
 
-DeviceSampleSource *AirspyHFFPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *AirspyHFIPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {
-        AirspyHFFInput* input = new AirspyHFFInput(deviceAPI);
+        AirspyHFIInput* input = new AirspyHFIInput(deviceAPI);
         return input;
     }
     else

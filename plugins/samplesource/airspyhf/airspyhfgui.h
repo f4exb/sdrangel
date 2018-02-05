@@ -22,6 +22,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
+
 #include "airspyhfinput.h"
 
 class DeviceUISet;
@@ -79,7 +80,6 @@ private slots:
 	void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_resetLOppm_clicked();
-    void on_autoCorr_currentIndexChanged(int index);
 	void on_sampleRate_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);

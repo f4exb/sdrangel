@@ -18,15 +18,15 @@
 #include <errno.h>
 
 #include "dsp/samplesinkfifo.h"
-#include "airspyhffthread.h"
+#include "airspyhfithread.h"
 
-AirspyHFFThread *AirspyHFFThread::m_this = 0;
+AirspyHFIThread *AirspyHFIThread::m_this = 0;
 
-AirspyHFFThread::AirspyHFFThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+AirspyHFIThread::AirspyHFIThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
-	m_convertBuffer(AIRSPYHFF_BLOCKSIZE),
+	m_convertBuffer(AIRSPYHFI_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(10),
 	m_log2Decim(0)
@@ -34,13 +34,13 @@ AirspyHFFThread::AirspyHFFThread(airspyhf_device_t* dev, SampleSinkFifo* sampleF
 	m_this = this;
 }
 
-AirspyHFFThread::~AirspyHFFThread()
+AirspyHFIThread::~AirspyHFIThread()
 {
 	stopWork();
 	m_this = 0;
 }
 
-void AirspyHFFThread::startWork()
+void AirspyHFIThread::startWork()
 {
 	m_startWaitMutex.lock();
 	start();
@@ -49,24 +49,24 @@ void AirspyHFFThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void AirspyHFFThread::stopWork()
+void AirspyHFIThread::stopWork()
 {
 	qDebug("AirspyThread::stopWork");
 	m_running = false;
 	wait();
 }
 
-void AirspyHFFThread::setSamplerate(uint32_t samplerate)
+void AirspyHFIThread::setSamplerate(uint32_t samplerate)
 {
 	m_samplerate = samplerate;
 }
 
-void AirspyHFFThread::setLog2Decimation(unsigned int log2_decim)
+void AirspyHFIThread::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void AirspyHFFThread::run()
+void AirspyHFIThread::run()
 {
     airspyhf_error rc;
 
@@ -77,7 +77,7 @@ void AirspyHFFThread::run()
 
 	if (rc != AIRSPYHF_SUCCESS)
 	{
-		qCritical("AirspyHFFThread::run: failed to start Airspy HF Rx");
+		qCritical("AirspyHFThread::run: failed to start Airspy Rx");
 	}
 	else
 	{
@@ -90,16 +90,16 @@ void AirspyHFFThread::run()
 	rc = (airspyhf_error) airspyhf_stop(m_dev);
 
 	if (rc == AIRSPYHF_SUCCESS) {
-		qDebug("AirspyHFFThread::run: stopped Airspy HF Rx");
+		qDebug("AirspyHFThread::run: stopped Airspy Rx");
 	} else {
-		qDebug("AirspyHFFThread::run: failed to stop Airspy HF Rx");
+		qDebug("AirspyHFThread::run: failed to stop Airspy Rx");
 	}
 
 	m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyHFFThread::callback(const float* buf, qint32 len)
+void AirspyHFIThread::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -134,9 +134,9 @@ void AirspyHFFThread::callback(const float* buf, qint32 len)
 }
 
 
-int AirspyHFFThread::rx_callback(airspyhf_transfer_t* transfer)
+int AirspyHFIThread::rx_callback(airspyhf_transfer_t* transfer)
 {
-	qint32 nbIAndQ = transfer->sample_count * 2;
-	m_this->callback((float *) transfer->samples, nbIAndQ);
+	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
+	m_this->callback((qint16 *) transfer->samples, bytes_to_write);
 	return 0;
 }

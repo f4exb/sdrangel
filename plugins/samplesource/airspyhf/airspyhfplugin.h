@@ -50,4 +50,4 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif // INCLUDE_AIRSPYPLUGIN_H
+#endif // INCLUDE_AIRSPYHFPLUGIN_H

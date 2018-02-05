@@ -26,28 +26,28 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
-#include "airspyhffinput.h"
+#include "airspyhfisettings.h"
+#include "airspyhfiinput.h"
 
-#include "airspyhffgui.h"
-#include "airspyhffplugin.h"
-#include "airspyhffsettings.h"
-#include "airspyhffthread.h"
+#include "airspyhfiplugin.h"
+#include "airspyhfithread.h"
+#include "airspyhfigui.h"
 
-MESSAGE_CLASS_DEFINITION(AirspyHFFInput::MsgConfigureAirspyHF, Message)
-MESSAGE_CLASS_DEFINITION(AirspyHFFInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(AirspyHFFInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(AirspyHFIInput::MsgConfigureAirspyHFI, Message)
+MESSAGE_CLASS_DEFINITION(AirspyHFIInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(AirspyHFIInput::MsgFileRecord, Message)
 
-const qint64 AirspyHFFInput::loLowLimitFreqHF   =      9000L;
-const qint64 AirspyHFFInput::loHighLimitFreqHF  =  31000000L;
-const qint64 AirspyHFFInput::loLowLimitFreqVHF  =  60000000L;
-const qint64 AirspyHFFInput::loHighLimitFreqVHF = 260000000L;
+const qint64 AirspyHFIInput::loLowLimitFreqHF   =      9000L;
+const qint64 AirspyHFIInput::loHighLimitFreqHF  =  31000000L;
+const qint64 AirspyHFIInput::loLowLimitFreqVHF  =  60000000L;
+const qint64 AirspyHFIInput::loHighLimitFreqVHF = 260000000L;
 
-AirspyHFFInput::AirspyHFFInput(DeviceSourceAPI *deviceAPI) :
+AirspyHFIInput::AirspyHFIInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
 	m_airspyHFThread(0),
-	m_deviceDescription("AirspyHFF"),
+	m_deviceDescription("AirspyHFI"),
 	m_running(false)
 {
     openDevice();
@@ -58,7 +58,7 @@ AirspyHFFInput::AirspyHFFInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addSink(m_fileSink);
 }
 
-AirspyHFFInput::~AirspyHFFInput()
+AirspyHFIInput::~AirspyHFIInput()
 {
     if (m_running) { stop(); }
     m_deviceAPI->removeSink(m_fileSink);
@@ -66,12 +66,12 @@ AirspyHFFInput::~AirspyHFFInput()
     closeDevice();
 }
 
-void AirspyHFFInput::destroy()
+void AirspyHFIInput::destroy()
 {
     delete this;
 }
 
-bool AirspyHFFInput::openDevice()
+bool AirspyHFIInput::openDevice()
 {
     if (m_dev != 0)
     {
@@ -82,18 +82,18 @@ bool AirspyHFFInput::openDevice()
 
     if (!m_sampleFifo.setSize(1<<19))
     {
-        qCritical("AirspyHFFInput::start: could not allocate SampleFifo");
+        qCritical("AirspyHFInput::start: could not allocate SampleFifo");
         return false;
     }
 
     if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSampleSourceSerial())) == 0)
     {
-        qCritical("AirspyHFFInput::start: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qCritical("AirspyHFInput::start: could not open Airspy with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
         return false;
     }
     else
     {
-        qDebug("AirspyHFFInput::start: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qDebug("AirspyHFInput::start: opened Airspy with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
     }
 
     uint32_t nbSampleRates;
@@ -103,11 +103,11 @@ bool AirspyHFFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFFInput::start: %d sample rates for Airspy HF", nbSampleRates);
+        qDebug("AirspyHFInput::start: %d sample rates for AirspyHF", nbSampleRates);
     }
     else
     {
-        qCritical("AirspyHFFInput::start: could not obtain the number of Airspy HF sample rates");
+        qCritical("AirspyHFInput::start: could not obtain the number of AirspyHF sample rates");
         return false;
     }
 
@@ -117,11 +117,11 @@ bool AirspyHFFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFFInput::start: obtained Airspy HF sample rates");
+        qDebug("AirspyHFInput::start: obtained AirspyHF sample rates");
     }
     else
     {
-        qCritical("AirspyHFFInput::start: could not obtain Airspy HF sample rates");
+        qCritical("AirspyHFInput::start: could not obtain AirspyHF sample rates");
         return false;
     }
 
@@ -130,22 +130,22 @@ bool AirspyHFFInput::openDevice()
     for (unsigned int i = 0; i < nbSampleRates; i++)
     {
         m_sampleRates.push_back(sampleRates[i]);
-        qDebug("AirspyHFFInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
+        qDebug("AirspyHFInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
     }
 
     delete[] sampleRates;
 
-    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_FLOAT32_IQ);
+    airspyhf_set_sample_type(m_dev, AIRSPYHF_SAMPLE_INT16_NDSP_IQ);
 
     return true;
 }
 
-void AirspyHFFInput::init()
+void AirspyHFIInput::init()
 {
     applySettings(m_settings, true);
 }
 
-bool AirspyHFFInput::start()
+bool AirspyHFIInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -155,7 +155,7 @@ bool AirspyHFFInput::start()
 
     if (m_running) { stop(); }
 
-	if ((m_airspyHFThread = new AirspyHFFThread(m_dev, &m_sampleFifo)) == 0)
+	if ((m_airspyHFThread = new AirspyHFIThread(m_dev, &m_sampleFifo)) == 0)
 	{
 		qFatal("AirspyHFInput::start: out of memory");
 		stop();
@@ -177,7 +177,7 @@ bool AirspyHFFInput::start()
 	return true;
 }
 
-void AirspyHFFInput::closeDevice()
+void AirspyHFIInput::closeDevice()
 {
     if (m_dev != 0)
     {
@@ -189,7 +189,7 @@ void AirspyHFFInput::closeDevice()
     m_deviceDescription.clear();
 }
 
-void AirspyHFFInput::stop()
+void AirspyHFIInput::stop()
 {
 	qDebug("AirspyHFInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
@@ -204,12 +204,12 @@ void AirspyHFFInput::stop()
 	m_running = false;
 }
 
-QByteArray AirspyHFFInput::serialize() const
+QByteArray AirspyHFIInput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool AirspyHFFInput::deserialize(const QByteArray& data)
+bool AirspyHFIInput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -219,54 +219,54 @@ bool AirspyHFFInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureAirspyHF* message = MsgConfigureAirspyHF::create(m_settings, true);
+    MsgConfigureAirspyHFI* message = MsgConfigureAirspyHFI::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAirspyHF* messageToGUI = MsgConfigureAirspyHF::create(m_settings, true);
+        MsgConfigureAirspyHFI* messageToGUI = MsgConfigureAirspyHFI::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
     return success;
 }
 
-const QString& AirspyHFFInput::getDeviceDescription() const
+const QString& AirspyHFIInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int AirspyHFFInput::getSampleRate() const
+int AirspyHFIInput::getSampleRate() const
 {
 	int rate = m_sampleRates[m_settings.m_devSampleRateIndex];
 	return (rate / (1<<m_settings.m_log2Decim));
 }
 
-quint64 AirspyHFFInput::getCenterFrequency() const
+quint64 AirspyHFIInput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void AirspyHFFInput::setCenterFrequency(qint64 centerFrequency)
+void AirspyHFIInput::setCenterFrequency(qint64 centerFrequency)
 {
-    AirspyHFFSettings settings = m_settings;
+    AirspyHFISettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureAirspyHF* message = MsgConfigureAirspyHF::create(settings, false);
+    MsgConfigureAirspyHFI* message = MsgConfigureAirspyHFI::create(settings, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAirspyHF* messageToGUI = MsgConfigureAirspyHF::create(settings, false);
+        MsgConfigureAirspyHFI* messageToGUI = MsgConfigureAirspyHFI::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
 
-bool AirspyHFFInput::handleMessage(const Message& message)
+bool AirspyHFIInput::handleMessage(const Message& message)
 {
-	if (MsgConfigureAirspyHF::match(message))
+	if (MsgConfigureAirspyHFI::match(message))
 	{
-	    MsgConfigureAirspyHF& conf = (MsgConfigureAirspyHF&) message;
+	    MsgConfigureAirspyHFI& conf = (MsgConfigureAirspyHFI&) message;
 		qDebug() << "MsgConfigureAirspyHF::handleMessage: MsgConfigureAirspyHF";
 
 		bool success = applySettings(conf.getSettings(), conf.getForce());
@@ -318,7 +318,7 @@ bool AirspyHFFInput::handleMessage(const Message& message)
 	}
 }
 
-void AirspyHFFInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFFSettings& settings)
+void AirspyHFIInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFISettings& settings)
 {
     switch(settings.m_bandIndex)
     {
@@ -340,7 +340,7 @@ void AirspyHFFInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFFSe
 	}
 }
 
-bool AirspyHFFInput::applySettings(const AirspyHFFSettings& settings, bool force)
+bool AirspyHFIInput::applySettings(const AirspyHFISettings& settings, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -349,6 +349,23 @@ bool AirspyHFFInput::applySettings(const AirspyHFFSettings& settings, bool force
 	int sampleRateIndex = settings.m_devSampleRateIndex;
 
 	qDebug() << "AirspyHFInput::applySettings";
+
+    if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
+    {
+        switch(settings.m_autoCorrOptions)
+        {
+        case AirspyHFISettings::AutoCorrDC:
+            m_deviceAPI->configureCorrections(true, false);
+            break;
+        case AirspyHFISettings::AutoCorrDCAndIQ:
+            m_deviceAPI->configureCorrections(true, true);
+            break;
+        case AirspyHFISettings::AutoCorrNone:
+        default:
+            m_deviceAPI->configureCorrections(false, false);
+            break;
+        }
+    }
 
 	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
 	{
@@ -439,7 +456,7 @@ bool AirspyHFFInput::applySettings(const AirspyHFFSettings& settings, bool force
 	return true;
 }
 
-airspyhf_device_t *AirspyHFFInput::open_airspyhf_from_serial(const QString& serialStr)
+airspyhf_device_t *AirspyHFIInput::open_airspyhf_from_serial(const QString& serialStr)
 {
     airspyhf_device_t *devinfo;
     bool ok;
@@ -464,7 +481,7 @@ airspyhf_device_t *AirspyHFFInput::open_airspyhf_from_serial(const QString& seri
     }
 }
 
-int AirspyHFFInput::webapiRunGet(
+int AirspyHFIInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -472,7 +489,7 @@ int AirspyHFFInput::webapiRunGet(
     return 200;
 }
 
-int AirspyHFFInput::webapiRun(
+int AirspyHFIInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))

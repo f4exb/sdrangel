@@ -16,15 +16,14 @@
 
 #include <QtGlobal>
 #include "util/simpleserializer.h"
+#include "airspyhfisettings.h"
 
-#include "airspyhffsettings.h"
-
-AirspyHFFSettings::AirspyHFFSettings()
+AirspyHFISettings::AirspyHFISettings()
 {
 	resetToDefaults();
 }
 
-void AirspyHFFSettings::resetToDefaults()
+void AirspyHFISettings::resetToDefaults()
 {
 	m_centerFrequency = 7150*1000;
 	m_LOppmTenths = 0;
@@ -33,15 +32,17 @@ void AirspyHFFSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_bandIndex = 0;
+    m_autoCorrOptions = AutoCorrNone;
 }
 
-QByteArray AirspyHFFSettings::serialize() const
+QByteArray AirspyHFISettings::serialize() const
 {
 	SimpleSerializer s(1);
 
 	s.writeU32(1, m_devSampleRateIndex);
 	s.writeS32(2, m_LOppmTenths);
 	s.writeU32(3, m_log2Decim);
+	s.writeS32(4, (int) m_autoCorrOptions);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
     s.writeU32(9, m_bandIndex);
@@ -49,7 +50,7 @@ QByteArray AirspyHFFSettings::serialize() const
 	return s.final();
 }
 
-bool AirspyHFFSettings::deserialize(const QByteArray& data)
+bool AirspyHFISettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
@@ -68,6 +69,13 @@ bool AirspyHFFSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_LOppmTenths, 0);
 		d.readU32(3, &m_log2Decim, 0);
 		d.readS32(4, &intval, 0);
+
+        if (intval < 0 || intval > (int) AutoCorrLast) {
+            m_autoCorrOptions = AutoCorrNone;
+        } else {
+            m_autoCorrOptions = (AutoCorrOptions) intval;
+        }
+
         d.readBool(7, &m_transverterMode, false);
         d.readS64(8, &m_transverterDeltaFrequency, 0);
         d.readU32(9, &uintval, 0);
