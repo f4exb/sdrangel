@@ -414,6 +414,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_ctcssOn: " << settings.m_ctcssOn
             << " m_audioMute: " << settings.m_audioMute
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+			<< " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;

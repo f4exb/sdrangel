@@ -39,7 +39,7 @@ struct DSDDemodSettings
     bool m_slot2On;
     bool m_tdmaStereo;
     bool m_pllLock;
-    bool m_udpCopyAudio;
+    bool m_copyAudioToUDP;
     QString m_udpAddress;
     quint16 m_udpPort;
     quint32 m_rgbColor;

@@ -215,7 +215,7 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
 
 void DSDDemodGUI::on_udpOutput_toggled(bool checked)
 {
-    m_settings.m_udpCopyAudio = checked;
+    m_settings.m_copyAudioToUDP = checked;
     applySettings();
 }
 
@@ -381,7 +381,7 @@ void DSDDemodGUI::displaySettings()
     ui->slot2On->setChecked(m_settings.m_slot2On);
     ui->tdmaStereoSplit->setChecked(m_settings.m_tdmaStereo);
     ui->audioMute->setChecked(m_settings.m_audioMute);
-    ui->udpOutput->setChecked(m_settings.m_udpCopyAudio);
+    ui->udpOutput->setChecked(m_settings.m_copyAudioToUDP);
     ui->symbolPLLLock->setChecked(m_settings.m_pllLock);
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));

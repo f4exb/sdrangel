@@ -46,7 +46,7 @@ void DSDDemodSettings::resetToDefaults()
     m_slot2On = false;
     m_tdmaStereo = false;
     m_pllLock = true;
-    m_udpCopyAudio = false;
+    m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 255, 255).rgb();

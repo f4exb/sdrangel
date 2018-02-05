@@ -414,7 +414,7 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_slot2On: " << m_settings.m_slot2On
             << " m_tdmaStereo: " << m_settings.m_tdmaStereo
             << " m_pllLock: " << m_settings.m_pllLock
-            << " m_udpCopyAudio: " << m_settings.m_udpCopyAudio
+            << " m_udpCopyAudio: " << m_settings.m_copyAudioToUDP
             << " m_udpAddress: " << m_settings.m_udpAddress
             << " m_udpPort: " << m_settings.m_udpPort
             << " m_highPassFilter: "<< m_settings.m_highPassFilter
@@ -479,12 +479,12 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         m_udpBufferAudio->setPort(settings.m_udpPort);
     }
 
-    if ((settings.m_udpCopyAudio != m_settings.m_udpCopyAudio)
+    if ((settings.m_copyAudioToUDP != m_settings.m_copyAudioToUDP)
         || (settings.m_slot1On != m_settings.m_slot1On)
         || (settings.m_slot2On != m_settings.m_slot2On) || force)
     {
-        m_audioFifo1.setCopyToUDP(settings.m_slot1On && settings.m_udpCopyAudio);
-        m_audioFifo2.setCopyToUDP(settings.m_slot2On && !settings.m_slot1On && settings.m_udpCopyAudio);
+        m_audioFifo1.setCopyToUDP(settings.m_slot1On && settings.m_copyAudioToUDP);
+        m_audioFifo2.setCopyToUDP(settings.m_slot2On && !settings.m_slot1On && settings.m_copyAudioToUDP);
     }
 
     if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
