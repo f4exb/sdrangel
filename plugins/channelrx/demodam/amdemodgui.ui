@@ -199,19 +199,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="useRTP">
-        <property name="toolTip">
-         <string>Use RTP protocol for copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>R</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>

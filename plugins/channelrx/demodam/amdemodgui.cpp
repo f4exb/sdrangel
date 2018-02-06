@@ -153,12 +153,6 @@ void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
     applySettings();
 }
 
-void AMDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -209,7 +203,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
-	ui->useRTP->setEnabled(m_amDemod->isAudioNetSinkRTPCapable());
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::yellow);
@@ -291,10 +284,6 @@ void AMDemodGUI::displaySettings()
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
-
-    if (m_amDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }
