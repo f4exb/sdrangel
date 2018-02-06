@@ -34,7 +34,6 @@ struct BFMDemodSettings
     bool m_showPilot;
     bool m_rdsActive;
     bool m_copyAudioToUDP;
-    bool m_copyAudioUseRTP;
     QString m_udpAddress;
     quint16 m_udpPort;
     quint32 m_rgbColor;
