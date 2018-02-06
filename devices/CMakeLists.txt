@@ -28,4 +28,9 @@ else(BUILD_DEBIAN)
         add_subdirectory(plutosdr)
     endif(LIBUSB_FOUND AND LIBIIO_FOUND)
     
+    find_package(LibPerseus)
+    if(LIBUSB_FOUND AND LIBPERSEUS_FOUND)
+        add_subdirectory(perseus)
+    endif()
+    
 endif (BUILD_DEBIAN)
