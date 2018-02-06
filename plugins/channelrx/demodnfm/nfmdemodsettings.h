@@ -40,7 +40,6 @@ struct NFMDemodSettings
     int  m_ctcssIndex;
     uint32_t m_audioSampleRate;
     bool m_copyAudioToUDP;
-    bool m_copyAudioUseRTP;
     QString m_udpAddress;
     uint16_t m_udpPort;
     quint32 m_rgbColor;

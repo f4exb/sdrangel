@@ -43,7 +43,6 @@ public:
     void write(qint16 sample);
     void write(const AudioSample& sample);
 
-    bool isRTPCapable() const;
     bool selectType(SinkType type);
 
     static const int m_udpBlockSize;

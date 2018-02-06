@@ -81,9 +81,6 @@ public:
     qint32 getCopyAudioToUdp();
     void setCopyAudioToUdp(qint32 copy_audio_to_udp);
 
-    qint32 getCopyAudioUseRtp();
-    void setCopyAudioUseRtp(qint32 copy_audio_use_rtp);
-
     QString* getUdpAddress();
     void setUdpAddress(QString* udp_address);
 
@@ -111,7 +108,6 @@ private:
     qint32 ctcss_index;
     qint32 audio_sample_rate;
     qint32 copy_audio_to_udp;
-    qint32 copy_audio_use_rtp;
     QString* udp_address;
     qint32 udp_port;
     qint32 rgb_color;

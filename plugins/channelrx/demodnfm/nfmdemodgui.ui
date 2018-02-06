@@ -611,19 +611,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="ButtonSwitch" name="useRTP">
-        <property name="toolTip">
-         <string>Use RTP protocol for sending audio via UDP</string>
-        </property>
-        <property name="text">
-         <string>R</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>

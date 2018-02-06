@@ -50,7 +50,6 @@ SWGNFMDemodSettings::init() {
     ctcss_index = 0;
     audio_sample_rate = 0;
     copy_audio_to_udp = 0;
-    copy_audio_use_rtp = 0;
     udp_address = new QString("");
     udp_port = 0;
     rgb_color = 0;
@@ -60,7 +59,6 @@ SWGNFMDemodSettings::init() {
 void
 SWGNFMDemodSettings::cleanup() {
     
-
 
 
 
@@ -109,7 +107,6 @@ SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ctcss_index, pJson["ctcssIndex"], "qint32", "");
     ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     ::SWGSDRangel::setValue(&copy_audio_to_udp, pJson["copyAudioToUDP"], "qint32", "");
-    ::SWGSDRangel::setValue(&copy_audio_use_rtp, pJson["copyAudioUseRTP"], "qint32", "");
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
@@ -155,8 +152,6 @@ SWGNFMDemodSettings::asJsonObject() {
     obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
 
     obj->insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
-
-    obj->insert("copyAudioUseRTP", QJsonValue(copy_audio_use_rtp));
 
     toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
 
@@ -284,15 +279,6 @@ SWGNFMDemodSettings::getCopyAudioToUdp() {
 void
 SWGNFMDemodSettings::setCopyAudioToUdp(qint32 copy_audio_to_udp) {
     this->copy_audio_to_udp = copy_audio_to_udp;
-}
-
-qint32
-SWGNFMDemodSettings::getCopyAudioUseRtp() {
-    return copy_audio_use_rtp;
-}
-void
-SWGNFMDemodSettings::setCopyAudioUseRtp(qint32 copy_audio_use_rtp) {
-    this->copy_audio_use_rtp = copy_audio_use_rtp;
 }
 
 QString*

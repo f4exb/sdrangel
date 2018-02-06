@@ -32,8 +32,6 @@ NFMDemodSettings:
       type: integer
     copyAudioToUDP:
       type: integer
-    copyAudioUseRTP:
-      type: integer
     udpAddress:
       type: string
     udpPort:
