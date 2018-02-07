@@ -17,12 +17,56 @@
 #include <QtGlobal>
 #include "perseusthread.h"
 
+PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+    QThread(parent),
+    m_running(false),
+    m_dev(dev),
+    m_convertBuffer(PERSEUS_NBSAMPLES),
+    m_sampleFifo(sampleFifo),
+    m_samplerate(10),
+    m_log2Decim(0)
+{
+    m_this = this;
+}
+
+PerseusThread::~PerseusThread()
+{
+    stopWork();
+    m_this = 0;
+}
+
+void PerseusThread::startWork()
+{
+    m_startWaitMutex.lock();
+    start();
+    while(!m_running)
+        m_startWaiter.wait(&m_startWaitMutex, 100);
+    m_startWaitMutex.unlock();
+}
+
+void PerseusThread::stopWork()
+{
+    qDebug("AirspyThread::stopWork");
+    m_running = false;
+    wait();
+}
+
+void PerseusThread::setSamplerate(uint32_t samplerate)
+{
+    m_samplerate = samplerate;
+}
+
+void PerseusThread::setLog2Decimation(unsigned int log2_decim)
+{
+    m_log2Decim = log2_decim;
+}
+
 void PerseusThread::run()
 {
 	m_running = true;
 	m_startWaiter.wakeAll();
 
-	int rc = perseus_start_async_input(m_dev, 6*1024, rx_callback, 0);
+	int rc = perseus_start_async_input(m_dev, PERSEUS_BLOCKSIZE, rx_callback, 0);
 
 	if (rc < 0) {
 		qCritical("PerseusThread::run: failed to start Perseus Rx: %s", perseus_errorstr());
@@ -47,12 +91,30 @@ void PerseusThread::run()
 
 void PerseusThread::callback(const uint8_t* buf, qint32 len)
 {
+    SampleVector::iterator it = m_convertBuffer.begin();
 
+    switch (m_log2Decim)
+    {
+    case 0:
+        m_decimators32.decimate1(&it, (TripleByteLE<qint32>*) buf, len);
+        break;
+    case 1:
+        m_decimators64.decimate2_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        break;
+    case 2:
+        m_decimators64.decimate4_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        break;
+    default:
+        break;
+    }
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-int PerseusThread::rx_callback(void *buf, int buf_size, void *extra)
+int PerseusThread::rx_callback(void *buf, int buf_size, void *extra __attribute__((unused)))
 {
 	qint32 nbIAndQ = buf_size / 3; // 3 bytes per I or Q
 	m_this->callback((uint8_t*) buf, nbIAndQ);
+	return 0;
 }
 

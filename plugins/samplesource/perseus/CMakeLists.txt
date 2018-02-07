@@ -7,7 +7,7 @@ set(perseus_SOURCES
 #    perseusinput.cpp
 #    perseusplugin.cpp
     perseussettings.cpp
-#    perseusthread.cpp
+    perseusthread.cpp
 )
 
 set(perseus_HEADERS
@@ -15,7 +15,7 @@ set(perseus_HEADERS
 #    perseusinput.h
 #    perseusplugin.h
     perseussettings.h
-#    perseusthread.h
+    perseusthread.h
 )
 
 set(perseus_FORMS
@@ -27,15 +27,15 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
-    ${LIBAIRSPYHFSRC}
-    ${LIBAIRSPYHFSRC}/libperseus/src
+    ${LIBPERSEUSSRC}
+    ${LIBPERSEUSSRC}/libperseus/src
 )
 else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
-    ${LIBAIRSPYHF_INCLUDE_DIR}
+    ${LIBPERSEUS_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 
@@ -65,7 +65,7 @@ target_link_libraries(inputperseus
 else (BUILD_DEBIAN)
 target_link_libraries(inputperseus
     ${QT_LIBRARIES}
-    ${LIBAIRSPYHF_LIBRARIES}
+    ${LIBPERSEUS_LIBRARIES}
     sdrbase
     sdrgui
     swagger

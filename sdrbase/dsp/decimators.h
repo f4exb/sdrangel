@@ -192,6 +192,96 @@ struct decimation_shifts<24, 8>
     static const uint post64 = 0;
 };
 
+template<typename T>
+struct TripleByteLE
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+        struct {
+            int32_t i;
+        } __attribute__((__packed__));
+        struct {
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        } __attribute__((__packed__));
+    } isample;
+
+    operator T() const {
+        isample s;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i;
+    }
+} __attribute__((__packed__));
+
+template<>
+struct TripleByteLE<qint32>
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+        struct {
+            qint32 i;
+        } __attribute__((__packed__));
+        struct {
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        } __attribute__((__packed__));
+    } isample;
+
+    operator qint32() const {
+        isample s;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i >> 8;
+    }
+} __attribute__((__packed__));
+
+template<>
+struct TripleByteLE<qint64>
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+        struct {
+            qint64 i;
+        } __attribute__((__packed__));
+        struct {
+            uint32_t ia;
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        } __attribute__((__packed__));
+    } isample;
+
+    operator qint64() const {
+        isample s;
+        s.ia = 0;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i >> 40;
+    }
+} __attribute__((__packed__));
+
+
 template<typename AccuType, typename T, uint SdrBits, uint InputBits>
 class Decimators
 {

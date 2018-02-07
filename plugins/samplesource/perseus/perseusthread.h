@@ -22,8 +22,11 @@
 #include <QWaitCondition>
 #include "perseus-sdr.h"
 
-//#define PERSEUS_NBSAMPLES = 1024   // Number of I/Q samples in each callback from Perseus
-//#define PERSEUS_BLOCKSIZE = 6*PERSEUS_NBSAMPLES // Perseus sends 2*3 bytes samples
+#include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
+
+#define PERSEUS_NBSAMPLES 1024   // Number of I/Q samples in each callback from Perseus
+#define PERSEUS_BLOCKSIZE 6*PERSEUS_NBSAMPLES // Perseus sends 2*3 bytes samples
 
 class PerseusThread : public QThread {
 	Q_OBJECT
@@ -43,7 +46,7 @@ private:
 	bool m_running;
 
 	perseus_descr* m_dev;
-	qint32 m_buf[2*1024];
+	qint32 m_buf[2*PERSEUS_NBSAMPLES];
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
 
@@ -51,7 +54,8 @@ private:
 	unsigned int m_log2Decim;
 	static PerseusThread *m_this;
 
-	Decimators m_decimators;
+	Decimators<qint64, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 16> m_decimators32;
+    Decimators<qint64, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 16> m_decimators64;
 
 	void run();
 	void callback(const uint8_t* buf, qint32 len); // inner call back
