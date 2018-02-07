@@ -71,6 +71,12 @@ if(CM256CC_FOUND AND LIBNANOMSG_FOUND)
     add_subdirectory(sdrdaemonsource)
 endif(CM256CC_FOUND AND LIBNANOMSG_FOUND)
 
+find_package(LibPerseus)
+if(LIBUSB_FOUND AND RX_SAMPLE_24BIT AND LIBPERSEUS_FOUND)
+    message(STATUS "Add Persesus plugin")
+    add_subdirectory(perseus)
+endif(LIBUSB_FOUND AND LIBPERSEUS_FOUND)
+
 if (BUILD_DEBIAN)
     if (LIBNANOMSG_FOUND)
         add_subdirectory(sdrdaemonsource)

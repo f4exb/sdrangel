@@ -37,14 +37,14 @@ void DevicePerseusScan::scan(int nbDevices)
 			continue;
 		}
 
-//			if (perseus_firmware_download(descr, 0) < 0) {
-//				qCritical("DevicePerseusScan::scan: firmware download error: %s", perseus_errorstr());
-//				continue;
-//			}
-//			else
-//			{
-//				qInfo("DevicePerseusScan::scan: device #%d firmware downloaded", deviceIndex);
-//			}
+        if (perseus_firmware_download(descr, 0) < 0) {
+            qCritical("DevicePerseusScan::scan: firmware download error: %s", perseus_errorstr());
+            continue;
+        }
+        else
+        {
+            qInfo("DevicePerseusScan::scan: device #%d firmware downloaded", deviceIndex);
+        }
 
 		if (perseus_get_product_id(descr,&prodid) < 0) {
 			qCritical("DevicePerseusScan::scan: get product id error: %s", perseus_errorstr());

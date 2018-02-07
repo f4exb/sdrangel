@@ -16,14 +16,13 @@
 
 #include <QtPlugin>
 #include <QAction>
-#include <perseus-sdr.h>
+#include "perseus-sdr.h"
 
 #include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "airspyhfplugin.h"
-#include "airspyhfgui.h"
-
+#include "perseusplugin.h"
+#include "perseusgui.h"
 
 const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
 	QString("Perseus Input"),

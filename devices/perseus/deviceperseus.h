@@ -25,11 +25,14 @@ public:
     static DevicePerseus& instance();
     void scan() { m_scan.scan(m_nbDevices); }
     void getSerials(std::vector<std::string>& serials) const { m_scan.getSerials(serials); }
+    int getSequenceFromSerial(const std::string& serial) const { return m_scan.getSequenceFromSerial(serial); }
+
 protected:
     DevicePerseus();
     DevicePerseus(const DevicePerseus&) : m_nbDevices(0) {}
     DevicePerseus& operator=(const DevicePerseus& other __attribute__((unused))) { return *this; }
     ~DevicePerseus();
+
 private:
     int m_nbDevices;
     DevicePerseusScan m_scan;
