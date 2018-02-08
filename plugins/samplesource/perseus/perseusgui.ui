@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>AirspyHF</string>
+   <string>Perseus</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

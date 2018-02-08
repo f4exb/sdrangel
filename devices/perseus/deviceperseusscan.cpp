@@ -57,7 +57,7 @@ void DevicePerseusScan::scan(int nbDevices)
 			uint32_t sigB = (prodid.signature[3]<<16) + prodid.signature[2];
 			uint32_t sigC = (prodid.signature[1]<<16) + prodid.signature[0];
 			std::stringstream ss;
-			ss << prodid.sn << "-" << std::hex << sigA << "-" << sigB << "-" << sigC;
+			ss <<  prodid.sn << "-" << std::hex << sigA << "-" << sigB << "-" << sigC;
 			m_scans.push_back({ss.str(), prodid.sn, deviceIndex});
 			m_serialMap[m_scans.back().m_serial] = &m_scans.back();
 			perseus_close(descr);

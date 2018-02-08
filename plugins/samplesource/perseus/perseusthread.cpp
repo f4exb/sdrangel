@@ -48,7 +48,7 @@ void PerseusThread::startWork()
 
 void PerseusThread::stopWork()
 {
-    qDebug("AirspyThread::stopWork");
+    qDebug("PerseusThread::stopWork");
     m_running = false;
     wait();
 }
@@ -75,6 +75,7 @@ void PerseusThread::run()
 	}
 	else
 	{
+	    qDebug("PerseusThread::run: start Perseus Rx");
 		while (m_running) {
 			sleep(1);
 		}

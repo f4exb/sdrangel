@@ -220,6 +220,16 @@ bool PerseusInput::handleMessage(const Message& message)
 
 bool PerseusInput::openDevice()
 {
+    if (m_perseusDescriptor != 0) {
+        closeDevice();
+    }
+
+    if (!m_sampleFifo.setSize(PERSEUS_NBSAMPLES))
+    {
+        qCritical("PerseusInput::start: could not allocate SampleFifo");
+        return false;
+    }
+
     m_deviceAPI->getSampleSourceSerial();
     int deviceSequence = DevicePerseus::instance().getSequenceFromSerial(m_deviceAPI->getSampleSourceSerial().toStdString());
 
@@ -264,7 +274,8 @@ void PerseusInput::setDeviceCenterFrequency(quint64 freq_hz, const PerseusSettin
     qint64 df = ((qint64)freq_hz * settings.m_LOppmTenths) / 10000000LL;
     freq_hz += df;
 
-    int rc = perseus_set_ddc_center_freq(m_perseusDescriptor, freq_hz, settings.m_wideBand ? 1 : 0);
+    // wideband flag is inverted since parameter is set to enable preselection filters
+    int rc = perseus_set_ddc_center_freq(m_perseusDescriptor, freq_hz, settings.m_wideBand ? 0 : 1);
 
     if (rc < 0) {
         qWarning("PerseusInput::setDeviceCenterFrequency: could not set frequency to %llu Hz: %s", freq_hz, perseus_errorstr());
@@ -297,7 +308,7 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
                 qCritical("PerseusInput::applySettings: could not set sample rate index %u (%d S/s): %s",
                         settings.m_devSampleRateIndex, rate, perseus_errorstr());
             }
-            else if (m_perseusDescriptor != 0)
+            else if (m_perseusThread != 0)
             {
                 qDebug("PerseusInput::applySettings: sample rate set to index: %u (%d S/s)", settings.m_devSampleRateIndex, rate);
                 m_perseusThread->setSamplerate(rate);
