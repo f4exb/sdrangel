@@ -3,7 +3,7 @@ project(perseus)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(perseus_SOURCES
-#    perseusgui.cpp
+    perseusgui.cpp
     perseusinput.cpp
 #    perseusplugin.cpp
     perseussettings.cpp
@@ -11,7 +11,7 @@ set(perseus_SOURCES
 )
 
 set(perseus_HEADERS
-#    perseusgui.h
+    perseusgui.h
     perseusinput.h
 #    perseusplugin.h
     perseussettings.h

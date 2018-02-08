@@ -119,6 +119,8 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
+
 private:
     DeviceSourceAPI *m_deviceAPI;
     FileRecord *m_fileSink;

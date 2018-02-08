@@ -188,8 +188,12 @@ endif()
 
 # Compiler flags.
 if (RX_SAMPLE_24BIT)
+	message(STATUS "Compiling for 24 bit Rx DSP chain")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
+else()
+	message(STATUS "Compiling for 16 bit Rx DSP chain")
 endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 
 ##############################################################################
