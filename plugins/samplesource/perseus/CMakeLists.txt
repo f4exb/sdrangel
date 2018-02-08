@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(perseus_SOURCES
     perseusgui.cpp
     perseusinput.cpp
-#    perseusplugin.cpp
+    perseusplugin.cpp
     perseussettings.cpp
     perseusthread.cpp
 )
@@ -13,7 +13,7 @@ set(perseus_SOURCES
 set(perseus_HEADERS
     perseusgui.h
     perseusinput.h
-#    perseusplugin.h
+    perseusplugin.h
     perseussettings.h
     perseusthread.h
 )
@@ -63,6 +63,7 @@ target_link_libraries(inputperseus
     sdrbase
     sdrgui
     swagger
+    perseusdevice
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputperseus
@@ -71,6 +72,7 @@ target_link_libraries(inputperseus
     sdrbase
     sdrgui
     swagger
+    perseusdevice
 )
 endif (BUILD_DEBIAN)
 

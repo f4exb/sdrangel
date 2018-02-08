@@ -121,18 +121,18 @@ void PluginManager::loadPluginsDir(const QDir& dir)
 	{
         if (fileName.endsWith(".so") || fileName.endsWith(".dll") || fileName.endsWith(".dylib"))
 		{
-			qDebug() << "PluginManager::loadPlugins: fileName: " << qPrintable(fileName);
+			qDebug() << "PluginManager::loadPluginsDir: fileName: " << qPrintable(fileName);
 
 			QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
 			PluginInterface* plugin = qobject_cast<PluginInterface*>(loader->instance());
 
 			if (loader->isLoaded())
 			{
-				qInfo("PluginManager::loadPlugins: loaded plugin %s", qPrintable(fileName));
+				qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
 			}
 			else
 			{
-				qWarning() << "PluginManager::loadPlugins: " << qPrintable(loader->errorString());
+				qWarning() << "PluginManager::loadPluginsDir: " << qPrintable(loader->errorString());
 			}
 
 			if (plugin != 0)

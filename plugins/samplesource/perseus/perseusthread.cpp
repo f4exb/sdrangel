@@ -17,6 +17,8 @@
 #include <QtGlobal>
 #include "perseusthread.h"
 
+PerseusThread *PerseusThread::m_this = 0;
+
 PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),

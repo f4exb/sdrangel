@@ -21,6 +21,7 @@
 #include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "perseus/deviceperseus.h"
 #include "perseusplugin.h"
 #include "perseusgui.h"
 
@@ -35,7 +36,7 @@ const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
 
 const QString PerseusPlugin::m_hardwareID = "Perseus";
 const QString PerseusPlugin::m_deviceTypeID = PERSEUS_DEVICE_TYPE_ID;
-const int AirspyHFPlugin::m_maxDevices = 32;
+const int PerseusPlugin::m_maxDevices = 32;
 
 PerseusPlugin::PerseusPlugin(QObject* parent) :
 	QObject(parent)
