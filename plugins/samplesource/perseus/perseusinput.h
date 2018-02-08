@@ -18,6 +18,8 @@
 #define PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSINPUT_H_
 
 #include <vector>
+#include "perseus-sdr.h"
+
 #include "dsp/devicesamplesource.h"
 #include "util/message.h"
 #include "perseussettings.h"
@@ -25,7 +27,6 @@
 class DeviceSourceAPI;
 class FileRecord;
 class PerseusThread;
-struct perseus_descr;
 
 class PerseusInput : public DeviceSampleSource {
 public:
@@ -131,6 +132,7 @@ private:
 
     bool openDevice();
     void closeDevice();
+    void setDeviceCenterFrequency(quint64 freq, const PerseusSettings& settings);
     bool applySettings(const PerseusSettings& settings, bool force = false);
 };
 

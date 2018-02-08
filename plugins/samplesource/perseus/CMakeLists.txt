@@ -4,7 +4,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(perseus_SOURCES
 #    perseusgui.cpp
-#    perseusinput.cpp
+    perseusinput.cpp
 #    perseusplugin.cpp
     perseussettings.cpp
     perseusthread.cpp
@@ -12,7 +12,7 @@ set(perseus_SOURCES
 
 set(perseus_HEADERS
 #    perseusgui.h
-#    perseusinput.h
+    perseusinput.h
 #    perseusplugin.h
     perseussettings.h
     perseusthread.h
@@ -26,7 +26,8 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/devices        
     ${LIBPERSEUSSRC}
     ${LIBPERSEUSSRC}/libperseus/src
 )
@@ -34,7 +35,8 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/devices        
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)

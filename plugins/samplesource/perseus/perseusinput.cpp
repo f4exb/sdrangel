@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 
@@ -21,6 +23,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "device/devicesourceapi.h"
+#include "perseus/deviceperseus.h"
 
 #include "perseusinput.h"
 #include "perseusthread.h"
@@ -69,15 +72,15 @@ bool PerseusInput::start()
 
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
+    if ((m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo)) == 0)
     {
-        qFatal("PlutoSDRInput::start: cannot create thread");
+        qFatal("PerseusInput::start: cannot create thread");
         stop();
         return false;
     }
     else
     {
-        qDebug("PlutoSDRInput::start: thread created");
+        qDebug("PerseusInput::start: thread created");
     }
 
     m_perseusThread->setLog2Decimation(m_settings.m_log2Decim);
@@ -133,7 +136,11 @@ const QString& PerseusInput::getDeviceDescription() const
 }
 int PerseusInput::getSampleRate() const
 {
-    return (m_settings.m_devSampleRate / (1<<m_settings.m_log2Decim));
+    if (m_settings.m_devSampleRateIndex < m_sampleRates.size()) {
+        return (m_sampleRates[m_settings.m_devSampleRateIndex] / (1<<m_settings.m_log2Decim));
+    } else {
+        return (m_sampleRates[0] / (1<<m_settings.m_log2Decim));
+    }
 }
 
 quint64 PerseusInput::getCenterFrequency() const
@@ -153,6 +160,61 @@ void PerseusInput::setCenterFrequency(qint64 centerFrequency)
     {
         MsgConfigurePerseus* messageToGUI = MsgConfigurePerseus::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
+    }
+}
+
+bool PerseusInput::handleMessage(const Message& message)
+{
+    if (MsgConfigurePerseus::match(message))
+    {
+        MsgConfigurePerseus& conf = (MsgConfigurePerseus&) message;
+        qDebug() << "PerseusInput::handleMessage: MsgConfigurePerseus";
+
+        bool success = applySettings(conf.getSettings(), conf.getForce());
+
+        if (!success) {
+            qDebug("MsgConfigurePerseus::handleMessage: Perseus config error");
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "PerseusInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+                DSPEngine::instance()->startAudioOutput();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+            DSPEngine::instance()->stopAudioOutput();
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "PerseusInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop()) {
+            m_fileSink->startRecording();
+        } else {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -197,3 +259,142 @@ void PerseusInput::closeDevice()
     }
 }
 
+void PerseusInput::setDeviceCenterFrequency(quint64 freq_hz, const PerseusSettings& settings)
+{
+    qint64 df = ((qint64)freq_hz * settings.m_LOppmTenths) / 10000000LL;
+    freq_hz += df;
+
+    int rc = perseus_set_ddc_center_freq(m_perseusDescriptor, freq_hz, settings.m_wideBand ? 1 : 0);
+
+    if (rc < 0) {
+        qWarning("PerseusInput::setDeviceCenterFrequency: could not set frequency to %llu Hz: %s", freq_hz, perseus_errorstr());
+    } else {
+        qDebug("PerseusInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
+    }
+}
+
+bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    bool forwardChange = false;
+    int sampleRateIndex = settings.m_devSampleRateIndex;
+
+    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+    {
+        forwardChange = true;
+
+        if (settings.m_devSampleRateIndex >= m_sampleRates.size()) {
+            sampleRateIndex = m_sampleRates.size() - 1;
+        }
+
+        if (m_perseusDescriptor != 0)
+        {
+            int rate = m_sampleRates[m_settings.m_devSampleRateIndex < m_sampleRates.size() ? m_settings.m_devSampleRateIndex: 0];
+            int rc = perseus_set_sampling_rate(m_perseusDescriptor, rate);
+
+            if (rc < 0) {
+                qCritical("PerseusInput::applySettings: could not set sample rate index %u (%d S/s): %s",
+                        settings.m_devSampleRateIndex, rate, perseus_errorstr());
+            }
+            else if (m_perseusDescriptor != 0)
+            {
+                qDebug("PerseusInput::applySettings: sample rate set to index: %u (%d S/s)", settings.m_devSampleRateIndex, rate);
+                m_perseusThread->setSamplerate(rate);
+            }
+        }
+    }
+
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        forwardChange = true;
+
+        if (m_perseusThread != 0)
+        {
+            m_perseusThread->setLog2Decimation(settings.m_log2Decim);
+            qDebug("PerseusInput: set decimation to %d", (1<<settings.m_log2Decim));
+        }
+    }
+
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
+            || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+            || (m_settings.m_wideBand != settings.m_wideBand)
+            || (m_settings.m_transverterMode != settings.m_transverterMode)
+            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+    {
+        qint64 deviceCenterFrequency = settings.m_centerFrequency;
+        deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+
+        if (m_perseusDescriptor != 0)
+        {
+            setDeviceCenterFrequency(deviceCenterFrequency, settings);
+            qDebug("PerseusInput::applySettings: center freq: %llu Hz", settings.m_centerFrequency);
+        }
+
+        forwardChange = true;
+    }
+
+    if ((m_settings.m_attenuator != settings.m_attenuator) || force)
+    {
+        int rc = perseus_set_attenuator_n(m_perseusDescriptor, (int) settings.m_attenuator);
+
+        if (rc < 0) {
+            qWarning("PerseusInput::applySettings: cannot set attenuator to %d dB: %s", (int) settings.m_attenuator*10, perseus_errorstr());
+        } else {
+            qDebug("PerseusInput::applySettings: attenuator set to %d dB", (int) settings.m_attenuator*10);
+        }
+    }
+
+    if ((m_settings.m_adcDither != settings.m_adcDither)
+       || (m_settings.m_adcPreamp != settings.m_adcPreamp) || force)
+    {
+        int rc = perseus_set_adc(m_perseusDescriptor, settings.m_adcDither ? 1 : 0, settings.m_adcPreamp ? 1 : 0);
+
+        if (rc < 0) {
+            qWarning("PerseusInput::applySettings: cannot set ADC to dither %s and preamp %s: %s",
+                    settings.m_adcDither ? "on" : "off", settings.m_adcPreamp ? "on" : "off", perseus_errorstr());
+        } else {
+            qDebug("PerseusInput::applySettings: ADC set to dither %s and preamp %s",
+                    settings.m_adcDither ? "on" : "off", settings.m_adcPreamp ? "on" : "off");
+        }
+    }
+
+    if (forwardChange)
+    {
+        int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
+        m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    m_settings = settings;
+    m_settings.m_devSampleRateIndex = sampleRateIndex;
+    return true;
+}
+
+int PerseusInput::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int PerseusInput::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
+}
