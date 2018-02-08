@@ -51,6 +51,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
+        audio/audionetsink.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
         commands/command.cpp\
@@ -65,6 +66,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         dsp/ctcssdetector.cpp\
         dsp/cwkeyer.cpp\
         dsp/cwkeyersettings.cpp\
+        dsp/decimatorsf.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
@@ -119,6 +121,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
+        audio/audionetsink.h\
         channel/channelsinkapi.h\
         channel/channelsourceapi.h\ 
         commands/command.h\       
@@ -133,6 +136,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/cwkeyersettings.h\
         dsp/complex.h\
         dsp/decimators.h\
+        dsp/decimatorsf.h\
         dsp/interpolators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
