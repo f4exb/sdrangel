@@ -79,10 +79,14 @@ private slots:
     void on_LOppm_valueChanged(int value);
     void on_resetLOppm_clicked();
 	void on_sampleRate_currentIndexChanged(int index);
+	void on_wideband_toggled(bool checked);
 	void on_decim_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_transverter_clicked();
+    void on_attenuator_currentIndexChanged(int index);
+    void on_adcDither_toggled(bool checked);
+    void on_adcPreamp_toggled(bool checked);
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();

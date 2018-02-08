@@ -185,6 +185,10 @@ void PerseusGui::displaySettings()
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
+	ui->wideband->setChecked(m_settings.m_wideBand);
+	ui->adcDither->setChecked(m_settings.m_adcDither);
+	ui->adcPreamp->setChecked(m_settings.m_adcPreamp);
+	ui->attenuator->setCurrentIndex((int) m_settings.m_attenuator);
     blockApplySettings(false);
 }
 
@@ -246,6 +250,12 @@ void PerseusGui::on_sampleRate_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void PerseusGui::on_wideband_toggled(bool checked)
+{
+	m_settings.m_wideBand = checked;
+	sendSettings();
+}
+
 void PerseusGui::on_decim_currentIndexChanged(int index)
 {
 	if ((index < 0) || (index > 5))
@@ -282,6 +292,27 @@ void PerseusGui::on_transverter_clicked()
     qDebug("PerseusGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
     sendSettings();
+}
+
+void PerseusGui::on_attenuator_currentIndexChanged(int index)
+{
+	if ((index < 0) || (index >= (int) PerseusSettings::Attenuator_last)) {
+		return;
+	}
+	m_settings.m_attenuator = (PerseusSettings::Attenuator) index;
+	sendSettings();
+}
+
+void PerseusGui::on_adcDither_toggled(bool checked)
+{
+	m_settings.m_adcDither = checked;
+	sendSettings();
+}
+
+void PerseusGui::on_adcPreamp_toggled(bool checked)
+{
+	m_settings.m_adcPreamp = checked;
+	sendSettings();
 }
 
 void PerseusGui::updateHardware()

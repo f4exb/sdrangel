@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>132</height>
+    <height>256</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -276,6 +276,9 @@
        <property name="toolTip">
         <string>Device sample rate in MS/s</string>
        </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
        <item>
         <property name="text">
          <string>0000</string>
@@ -287,6 +290,19 @@
       <widget class="QLabel" name="rateLabel">
        <property name="text">
         <string>k</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="wideband">
+       <property name="toolTip">
+        <string>Set wideband mode</string>
+       </property>
+       <property name="text">
+        <string>WB</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -360,21 +376,108 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="paddingLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <spacer name="verticalSpacer">
+      <widget class="QLabel" name="attenuatorLabel">
+       <property name="text">
+        <string>Att</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="attenuator">
+       <property name="toolTip">
+        <string>Attenuation (dB)</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>30</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="attenuatorUnits">
+       <property name="text">
+        <string>dB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="adcLabel">
+       <property name="text">
+        <string>ADC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="adcDither">
+       <property name="toolTip">
+        <string>ADC dithering</string>
+       </property>
+       <property name="text">
+        <string>DIT</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="adcPreamp">
+       <property name="toolTip">
+        <string>ADC preamplifier</string>
+       </property>
+       <property name="text">
+        <string>PRE</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>20</width>
-         <height>40</height>
+         <width>40</width>
+         <height>20</height>
         </size>
        </property>
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="paddingLayout"/>
    </item>
   </layout>
  </widget>
