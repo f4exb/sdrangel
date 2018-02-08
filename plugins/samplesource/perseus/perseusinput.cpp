@@ -301,7 +301,7 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 
         if (m_perseusDescriptor != 0)
         {
-            int rate = m_sampleRates[m_settings.m_devSampleRateIndex < m_sampleRates.size() ? m_settings.m_devSampleRateIndex: 0];
+            int rate = m_sampleRates[settings.m_devSampleRateIndex < m_sampleRates.size() ? settings.m_devSampleRateIndex: 0];
             int rc = perseus_set_sampling_rate(m_perseusDescriptor, rate);
 
             if (rc < 0) {
@@ -377,6 +377,15 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+    {
+        if (m_perseusThread && m_perseusThread->isRunning())
+        {
+            m_perseusThread->stopWork();
+            m_perseusThread->startWork();
+        }
     }
 
     m_settings = settings;
