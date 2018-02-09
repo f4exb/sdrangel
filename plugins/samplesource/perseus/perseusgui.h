@@ -71,6 +71,7 @@ private:
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void displaySampleRates();
+	void updateFrequencyLimits();
 	void sendSettings();
     void updateSampleRateAndFrequency();
 

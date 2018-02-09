@@ -42,6 +42,7 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+	updateFrequencyLimits();
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -178,6 +179,7 @@ void PerseusGui::updateSampleRateAndFrequency()
 void PerseusGui::displaySettings()
 {
     blockApplySettings(true);
+    updateFrequencyLimits();
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
@@ -218,6 +220,22 @@ void PerseusGui::displaySampleRates()
 	{
 		ui->sampleRate->setCurrentIndex((int) m_rates.size()-1);
 	}
+}
+
+void PerseusGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+
+    qint64 minLimit = 10 + deltaFrequency;
+    qint64 maxLimit = 40000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("PerseusGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
 }
 
 void PerseusGui::sendSettings()
@@ -290,6 +308,7 @@ void PerseusGui::on_transverter_clicked()
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
     m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
     qDebug("PerseusGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
     sendSettings();
 }
