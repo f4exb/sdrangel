@@ -21,6 +21,9 @@
 #include "settings/serializable.h"
 #include "ssbdemodsettings.h"
 
+const int SSBDemodSettings::m_minPowerThresholdDB = -120;
+const float SSBDemodSettings::m_mminPowerThresholdDBf = 120.0f;
+
 SSBDemodSettings::SSBDemodSettings() :
     m_channelMarker(0),
     m_spectrumGUI(0)

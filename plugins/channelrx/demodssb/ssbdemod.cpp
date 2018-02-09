@@ -426,7 +426,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         (m_settings.m_agcClamping != settings.m_agcClamping) || force)
     {
         int agcNbSamples = 48 * (1<<settings.m_agcTimeLog2);
-        m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -110);
+        m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -SSBDemodSettings::m_minPowerThresholdDB);
         double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
         int agcThresholdGate = 48 * settings.m_agcThresholdGate; // ms
         bool agcClamping = settings.m_agcClamping;

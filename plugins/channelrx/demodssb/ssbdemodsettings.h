@@ -53,6 +53,9 @@ struct SSBDemodSettings
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    static const int m_minPowerThresholdDB;
+    static const float m_mminPowerThresholdDBf;
 };
 
 
