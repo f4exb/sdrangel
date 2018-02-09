@@ -777,7 +777,7 @@
          <string>Power threshold (dB)</string>
         </property>
         <property name="minimum">
-         <number>-99</number>
+         <number>-110</number>
         </property>
         <property name="maximum">
          <number>0</number>
@@ -794,7 +794,7 @@
        <widget class="QLabel" name="agcPowerThresholdText">
         <property name="minimumSize">
          <size>
-          <width>20</width>
+          <width>26</width>
           <height>0</height>
          </size>
         </property>
@@ -802,7 +802,7 @@
          <string>Power threshold (dB)</string>
         </property>
         <property name="text">
-         <string>-00</string>
+         <string>-000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
