@@ -25,7 +25,7 @@
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
-#define PERSEUS_NBSAMPLES 1024   // Number of I/Q samples in each callback from Perseus
+#define PERSEUS_NBSAMPLES 2048   // Number of I/Q samples in each callback from Perseus
 #define PERSEUS_BLOCKSIZE 6*PERSEUS_NBSAMPLES // Perseus sends 2*3 bytes samples
 
 class PerseusThread : public QThread {
