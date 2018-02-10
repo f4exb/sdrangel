@@ -2,10 +2,11 @@ project(perseus)
 
 find_package(LibUSB)
 
+set (LIBPERSEUSSRC "/opt/build/libperseus-sdr")
+add_definitions(-DHAVE_CONFIG_H)
+
 set(perseus_SOURCES
     ${LIBPERSEUSSRC}/fifo.c
-    ${LIBPERSEUSSRC}/perseus24v11_512.c
-    ${LIBPERSEUSSRC}/perseus24v41_512.c
     ${LIBPERSEUSSRC}/perseuserr.c
     ${LIBPERSEUSSRC}/perseusfx2.c
     ${LIBPERSEUSSRC}/perseus-in.c
