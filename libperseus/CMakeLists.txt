@@ -2,7 +2,6 @@ project(perseus)
 
 find_package(LibUSB)
 
-set (LIBPERSEUSSRC "/opt/build/libperseus-sdr")
 add_definitions(-DHAVE_CONFIG_H)
 
 set(perseus_SOURCES
