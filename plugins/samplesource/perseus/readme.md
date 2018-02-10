@@ -56,7 +56,7 @@ This resets the LO ppm correction (zero the value).
 
 <h3>4: Device to hast sample rate</h3>
 
-This is the device to host sample rate in kilo samples per second (kS/s). With a recent (well: ~2011) version of the firmware it can be as low as 48 kS/s so there is no need for software decimation.
+This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation.
 
 <h3>5: Wideband mode</h5>
 
