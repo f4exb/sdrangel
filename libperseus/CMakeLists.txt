@@ -6,6 +6,7 @@ add_definitions(-DHAVE_CONFIG_H)
 
 set(perseus_SOURCES
     ${LIBPERSEUSSRC}/fifo.c
+    ${LIBPERSEUSSRC}/fpga_data.c
     ${LIBPERSEUSSRC}/perseuserr.c
     ${LIBPERSEUSSRC}/perseusfx2.c
     ${LIBPERSEUSSRC}/perseus-in.c
@@ -14,6 +15,7 @@ set(perseus_SOURCES
 
 set(perseus_HEADERS
     ${LIBPERSEUSSRC}/fifo.h
+    ${LIBPERSEUSSRC}/fpga_data.h
     ${LIBPERSEUSSRC}/perseuserr.h
     ${LIBPERSEUSSRC}/perseusfx2.h
     ${LIBPERSEUSSRC}/perseus-in.h
