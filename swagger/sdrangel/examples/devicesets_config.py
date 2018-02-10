@@ -19,7 +19,7 @@ commands = [
     ["/preset", "PATCH", None, {"deviceSetIndex": 1, "preset": {"groupName": "OM430", "centerFrequency": 439550000, "type": "R", "name": "F5ZKP Daemon RPi3 SUSE"}}, "load preset on Rx 1"],
     ["/deviceset", "POST", None, None, "add Rx 2 device set"],
 #    ["/deviceset/2/device", "PUT", None, {"hwType": "SDRplay1"}, "setup SDRplay on Rx 2"],
-    ["/deviceset/2/device", "PUT", None, {"hwType": "AirspyHF"}, "setup Airspy HF+ on Rx 2"],
+    ["/deviceset/2/device", "PUT", None, {"hwType": "Perseus"}, "setup Perseus on Rx 2"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 2, "preset": {"groupName": "40m", "centerFrequency": 7130000, "type": "R", "name": "SSB low"}}, "load preset on Rx 2"],
     ["/dvserial", "PATCH", {"dvserial": 1}, None, "set DV serial processing for AMBE frames decoding"],
 #    ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145640000, "type": "R", "name": "Repeaters extended"}}, "load preset on Rx 0 twice"],

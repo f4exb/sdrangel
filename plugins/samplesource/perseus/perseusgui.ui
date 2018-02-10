@@ -274,7 +274,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Device sample rate in MS/s</string>
+        <string>Device sample rate in kS/s</string>
        </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>

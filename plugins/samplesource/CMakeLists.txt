@@ -88,6 +88,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(bladerfinput)
     add_subdirectory(sdrplay)
     add_subdirectory(limesdrinput)
+    add_subdirectory(perseus)
     add_subdirectory(plutosdrinput)
 endif (BUILD_DEBIAN)
 

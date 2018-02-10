@@ -1,3 +1,13 @@
+sdrangel (3.12.0-1) unstable; urgency=medium
+
+  * Perseus support.
+  * 24 bit Rx DSP Debian builds
+  * DC and IQ correction fixes
+  * AirspyHF: fall back to official library support
+  * Test source: implemented phase imbalance 
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 11 Feb 2018 12:14:18 +0100
+
 sdrangel (3.11.1-1) unstable; urgency=medium
 
   * Replaced hardcoded bit scaling literals by defines. 24 bit sample option.

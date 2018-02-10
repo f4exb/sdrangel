@@ -23,6 +23,7 @@ SUBDIRS += libbladerf
 SUBDIRS += libhackrf
 SUBDIRS += libiio
 SUBDIRS += liblimesuite
+SUBDIRS += libperseus
 SUBDIRS += librtlsdr
 SUBDIRS += libsqlite3
 SUBDIRS += devices
