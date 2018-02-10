@@ -47,15 +47,13 @@ Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) div
 
 <h3>2: Lo ppm correction</h3>
 
-This is the correction factor in ppm applied to the local oscillator. The Airspy HF LO has 1 kHz increments so anything in between is obtained by mixing the signal with a Hz precision NCO. This is actually done in the AirspyHF library.
-
-On HF band the LO correction is not necessary because the LO is largely precise enough for the frequencies involved. You can disable the NCO in AirspyHF library by setting the value to zero. Since the LO control in SDRangel has a 1 kHz step the NCO correction will always be zero. In AirspyHF library (my fork) the NCO is not active (no extra complex multiplication) if the correction is zero. On HF band it is recommended not to use the LO correction (set it or leave it at 0). 
+This is the correction factor in ppm applied to the local oscillator. The Airspy HF LO has 1 kHz increments so anything in between is obtained by mixing the signal with a software NCO. This is actually done in the AirspyHF library.
 
 You can reset the ppm value anytime by pressing on button (3)
 
 <h3>3: Reset LO ppm correction</h3>
 
-THis resets the LO ppm correction (zero the value). By doing so the LO trimming NCO in AirspyHF libray is disabled.
+This resets the LO ppm correction (zero the value).
 
 <h3>4: Band select</h3>
 
@@ -66,7 +64,7 @@ Use this combo box to select the HF or VHF range. This will set the limits of th
 
 <h3>5: Device to hast sample rate</h3>
 
-This is the device to host sample rate in samples per second (S/s).
+This is the device to host sample rate in kilo samples per second (kS/s).
 
 Although the combo box is there to present a choice of sample rates at present the AirspyHF+ deals only with 768 kS/s. However the support library has provision to get a list of sample rates from the device incase of future developments.
 

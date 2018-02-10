@@ -68,7 +68,7 @@ Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 2
 These buttons control the software DSP auto correction options:
 
   - **DC**: (6) auto remove DC component
-  - **IQ**: (7) auto make I/Q balance
+  - **IQ**: (7) auto make I/Q balance. The DC correction must be enabled for this to be effective.
 
 &#9758; AD9363 has a good hardware DC and I/Q compensation so there should not be a use for this software auto-correction.
   

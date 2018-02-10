@@ -43,7 +43,7 @@ Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by 
 These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
-  - **IQ**: auto make I/Q balance
+  - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
   
 <h3>3: XB-200 add-on control</h3>
 

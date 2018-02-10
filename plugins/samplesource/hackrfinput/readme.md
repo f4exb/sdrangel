@@ -51,7 +51,7 @@ Use this slider to adjust LO correction in ppm. It can be varied from -10.0 to 1
 These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
-  - **IQ**: auto make I/Q balance
+  - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
 
 <h3>3A: Link Tx frequency</h3>
 

@@ -26,7 +26,7 @@ This is the correction in tenths of ppm steps. This is hardly useful with SDRpla
 
 <h3>3. DC and IQ imbalance correction</h3>
 
-These controls are also common with many source plugins. IQ imbalance is hardly useful but SDRplay is affected by DC bias when used at zero IF.
+These controls are also common with many source plugins. IQ imbalance is hardly useful but SDRplay is affected by DC bias when used at zero IF. Note that the DC correction must be enabled for the I/Q correction to be effective.
 
 <h3>4. Band selection</h3>
 

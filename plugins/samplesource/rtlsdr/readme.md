@@ -47,7 +47,7 @@ This is the correction to be applied to the local oscillator in ppm.
 These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
-  - **IQ**: auto make I/Q balance
+  - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
   
 <h3>4: Baseband center frequency position relative the center frequency</h3>
 

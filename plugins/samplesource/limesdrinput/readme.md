@@ -93,7 +93,7 @@ Enables or disables the auto remove DC component
 
 <h4>2.5: I/Q balance auto correction</h4>
 
-Enables or disables the auto I/Q balance correction
+Enables or disables the auto I/Q balance correction. The DC correction must be enabled for this to be effective.
 
 <h4>2.6: External clock control</h4>
 
