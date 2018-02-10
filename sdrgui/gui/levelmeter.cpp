@@ -283,6 +283,11 @@ LevelMeterSignalDB::~LevelMeterSignalDB()
 {
 }
 
+void LevelMeterSignalDB::setRange(int min, int max)
+{
+    m_scaleEngine.setRange(Unit::Decibel, min, max);
+}
+
 void LevelMeterSignalDB::resized()
 {
     if (m_backgroundPixmap)

@@ -161,6 +161,7 @@ public:
     virtual ~LevelMeterSignalDB();
 
     void setColorTheme(ColorTheme colorTheme) { m_colorTheme = colorTheme; }
+    void setRange(int min, int max);
 
     static const QColor m_avgColor[3];
     static const QColor m_decayedPeakColor[3];

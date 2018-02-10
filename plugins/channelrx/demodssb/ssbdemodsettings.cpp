@@ -21,8 +21,13 @@
 #include "settings/serializable.h"
 #include "ssbdemodsettings.h"
 
+#ifdef SDR_RX_SAMPLE_24BIT
 const int SSBDemodSettings::m_minPowerThresholdDB = -120;
 const float SSBDemodSettings::m_mminPowerThresholdDBf = 120.0f;
+#else
+const int SSBDemodSettings::m_minPowerThresholdDB = -100;
+const float SSBDemodSettings::m_mminPowerThresholdDBf = 100.0f;
+#endif
 
 SSBDemodSettings::SSBDemodSettings() :
     m_channelMarker(0),

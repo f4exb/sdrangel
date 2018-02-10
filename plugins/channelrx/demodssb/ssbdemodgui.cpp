@@ -413,6 +413,7 @@ void SSBDemodGUI::applyBandwidths(bool force)
     ui->lowCut->blockSignals(false);
     ui->BW->blockSignals(false);
 
+    ui->channelPowerMeter->setRange(SSBDemodSettings::m_minPowerThresholdDB, 0);
 
     m_settings.m_dsb = dsb;
     m_settings.m_spanLog2 = spanLog2;
@@ -553,8 +554,8 @@ void SSBDemodGUI::tick()
     double powDbPeak = CalcDb::dbPower(magsqPeak);
 
     ui->channelPowerMeter->levelChanged(
-            (100.0f + powDbAvg) / 100.0f,
-            (100.0f + powDbPeak) / 100.0f,
+            (SSBDemodSettings::m_mminPowerThresholdDBf + powDbAvg) / SSBDemodSettings::m_mminPowerThresholdDBf,
+            (SSBDemodSettings::m_mminPowerThresholdDBf + powDbPeak) / SSBDemodSettings::m_mminPowerThresholdDBf,
             nbMagsqSamples);
 
     if (m_tickCount % 4 == 0) {
