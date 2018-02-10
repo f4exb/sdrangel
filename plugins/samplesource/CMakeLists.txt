@@ -75,7 +75,7 @@ find_package(LibPerseus)
 if(LIBUSB_FOUND AND RX_SAMPLE_24BIT AND LIBPERSEUS_FOUND)
     message(STATUS "Add Persesus plugin")
     add_subdirectory(perseus)
-endif(LIBUSB_FOUND AND LIBPERSEUS_FOUND)
+endif(LIBUSB_FOUND AND RX_SAMPLE_24BIT AND LIBPERSEUS_FOUND)
 
 if (BUILD_DEBIAN)
     if (LIBNANOMSG_FOUND)

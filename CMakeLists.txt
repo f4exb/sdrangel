@@ -296,7 +296,6 @@ add_subdirectory(pluginssrv)
 if(LIBUSB_FOUND AND UNIX)
     add_subdirectory(fcdhid)
     add_subdirectory(fcdlib)
-    add_subdirectory(libperseus)
 endif(LIBUSB_FOUND AND UNIX)
 
 ##############################################################################
