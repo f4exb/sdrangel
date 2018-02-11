@@ -44,7 +44,7 @@ Record baseband I/Q stream toggle button
 
 <h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) divided by the decimation factor (4). 
+Baseband I/Q sample rate in kS/s. This is the device to host sample rate (4) divided by the software decimation factor (6).
 
 <h3>2: LO ppm correction</h3>
 
@@ -56,7 +56,7 @@ This resets the LO ppm correction (zero the value).
 
 <h3>4: Device to hast sample rate</h3>
 
-This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation.
+This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation. Note that at 48 kS/s some slight rate mismatch can appear with the audio that has the same nominal rate. This may cause some occasinal audio samples drops however hardly noticeable.
 
 <h3>5: Wideband mode</h5>
 
