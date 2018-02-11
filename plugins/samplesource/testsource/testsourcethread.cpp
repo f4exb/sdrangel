@@ -173,7 +173,7 @@ void TestSourceThread::setAMModulation(float amModulation)
 void TestSourceThread::setFMDeviation(float deviation)
 {
     float fmDeviationUnit = deviation / (float) m_samplerate;
-    m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 1.0f ? 1.0f : fmDeviationUnit;
+    m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 0.5f ? 0.5f : fmDeviationUnit;
     qDebug("TestSourceThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
 }
 
