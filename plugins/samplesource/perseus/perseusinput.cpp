@@ -286,8 +286,6 @@ void PerseusInput::setDeviceCenterFrequency(quint64 freq_hz, const PerseusSettin
 
 bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 {
-    QMutexLocker mutexLocker(&m_mutex);
-
     bool forwardChange = false;
     int sampleRateIndex = settings.m_devSampleRateIndex;
 

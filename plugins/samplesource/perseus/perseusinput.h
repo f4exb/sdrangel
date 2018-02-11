@@ -130,7 +130,6 @@ private:
     PerseusThread *m_perseusThread;
     perseus_descr *m_perseusDescriptor;
     std::vector<uint32_t> m_sampleRates;
-    QMutex m_mutex;
 
     bool openDevice();
     void closeDevice();
