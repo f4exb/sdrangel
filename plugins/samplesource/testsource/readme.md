@@ -36,22 +36,25 @@ Record baseband I/Q stream toggle button
 
 Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) divided by the decimation factor (4). 
 
-<h3>2: Auto correction options</h3>
+<h3>2: Various options</h3>
 
-These buttons control the local DSP auto correction options:
+![Test source input plugin GUI 2](../../../doc/img/TestSourceInput_plugin_2.png)
 
+<h4>2.1: Auto corrections</h4>
+
+This combo box control the local DSP auto correction options:
+
+  - **None**: no correction
   - **DC**: auto remove DC component
-  - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
+  - **DC+IQ**: auto remove DC component and correct I/Q balance.
 
-<h3>3: Carrier shift from center frequency</h3>
-
-Use this control to set the offset of the carrier from the center frequency of reception.
-
-<h3>4: Decimation factor</h3>
+<h4>2.2: Decimation factor</h4>
 
 The I/Q stream from the generator is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32. This exercises the decimation chain.
 
-<h3>5: Baseband center frequency position relative the center frequency</h3>
+This exercises the decimation chain.
+
+<h4>2.3: Baseband center frequency position relative the center frequency</h4>
 
 Possible values are:
 
@@ -59,44 +62,60 @@ Possible values are:
   - **Inf**: the decimation operation takes place around the center of the lower half of the BladeRF Rx passband. 
   - **Sup**: the decimation operation takes place around the center of the upper half of the BladeRF Rx passband. 
 
-This exercises the decimation chain.
-
-<h3>6: Sample rate</h3>
-
-This controls the generator sample rate in samples per second.
-
-<h3>7: Sample size</h3>
+<h3>2.4: Sample size</h3>
 
 This is the sample size in number of bits. It corresponds to the actual sample size used by the devices supported:
 
   - **8**: RTL-SDR, HackRF
   - **12**: Airspy, BladeRF, LimeSDR, PlutoSDR, SDRplay
   - **16**: Airspy HF+, FCD Pro, FCD Pro+
-  
-<h3>8: Amplitude coarse control</h3>
 
-This slider controls the number of amplitude bits by steps of 100 bits.
-  
-<h3>9: Number of amplitude bits</h3>
+<h3>3: Sample rate</h3>
 
-This is the signal peak amplitude in number of bits
+This controls the generator sample rate in samples per second.
+
+<h3>4: Modulation</h4>
+
+  - **No**: No modulation
+  - **AM**: Amplitude modulation (AM)
+  - **FM**: Frequency modulation (FM)
+  
+<h3>5: Modulating tone frequency</h3>
+
+This controls the modulating tone frequency in kHz in 10 Hz steps.
+
+<h3>6: Carrier shift from center frequency</h3>
+
+Use this control to set the offset of the carrier from the center frequency of reception.
+  
+<h3>7: AM modulation factor</h3>
+
+This controls the AM modulation factor from 0 to 99%
+
+<h3>8: FM deviation</h3>
+
+This controls the frequency modulation deviation in kHz in 100 Hz steps. It cannot exceed the sample rate.  
+  
+<h3>9: Amplitude coarse control</h3>
+
+This slider controls the number of amplitude bits by steps of 100 bits. The total number of amplitude bits appear on the right.
   
 <h3>10: Amplitude fine control</h3>
 
-This slider controls the number of amplitude bits by steps of 1 bit.
+This slider controls the number of amplitude bits by steps of 1 bit. The signal power in dB relative to the maximum power (full bit range) appear on the right.
   
-<h3>11: Signal power</h3>
-
-This is the signal power in dB relative to the maximum power (full bit range).
-
-<h3>12: DC bias</h3>
+<h3>11: DC bias</h3>
 
 Use this slider to give a DC component in percentage of maximum amplitude.
 
-<h3>13: I bias</h3>
+<h3>12: I bias</h3>
 
 Use this slider to give an in-phase (I) bias in percentage of maximum amplitude.
 
-<h3>14: Q bias</h3>
+<h3>13: Q bias</h3>
 
 Use this slider to give an quadrature-phase (Q) bias in percentage of maximum amplitude.
+
+<h3>14: Phase imbalance</h3>
+
+Use this slider to introduce a phase imbalance in percentage of full period (continuous wave) or percentage of I signal injected in Q (AM, FM).
