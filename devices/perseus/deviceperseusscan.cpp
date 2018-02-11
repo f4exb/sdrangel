@@ -33,7 +33,7 @@ void DevicePerseusScan::scan(int nbDevices)
 	for (int deviceIndex = 0; deviceIndex < nbDevices; deviceIndex++)
 	{
 		if ((descr = perseus_open(deviceIndex)) == 0) {
-			qCritical("DevicePerseusScan::scan: open error: %s\n", perseus_errorstr());
+			qCritical("DevicePerseusScan::scan: open error: %s", perseus_errorstr());
 			continue;
 		}
 

@@ -33,6 +33,10 @@ void TestSourceSettings::resetToDefaults()
     m_sampleSizeIndex = 0;
     m_amplitudeBits = 127;
     m_autoCorrOptions = AutoCorrNone;
+    m_modulation = ModulationNone;
+    m_modulationTone = 44; // 440 Hz
+    m_amModulation = 50; // 50%
+    m_fmDeviation = 50; // 5 kHz
     m_dcFactor = 0.0f;
     m_iFactor = 0.0f;
     m_qFactor = 0.0f;
@@ -54,6 +58,10 @@ QByteArray TestSourceSettings::serialize() const
     s.writeFloat(11, m_iFactor);
     s.writeFloat(12, m_qFactor);
     s.writeFloat(13, m_phaseImbalance);
+    s.writeS32(14, (int) m_modulation);
+    s.writeS32(15, m_modulationTone);
+    s.writeS32(16, m_amModulation);
+    s.writeS32(17, m_fmDeviation);
 
     return s.final();
 }
@@ -91,6 +99,17 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         d.readFloat(11, &m_iFactor, 0.0f);
         d.readFloat(12, &m_qFactor, 0.0f);
         d.readFloat(13, &m_phaseImbalance, 0.0f);
+        d.readS32(14, &intval, 0);
+
+        if (intval < 0 || intval > (int) ModulationLast) {
+            m_modulation = ModulationNone;
+        } else {
+            m_modulation = (Modulation) intval;
+        }
+
+        d.readS32(15, &m_modulationTone, 44);
+        d.readS32(16, &m_amModulation, 50);
+        d.readS32(17, &m_fmDeviation, 50);
 
         return true;
     }

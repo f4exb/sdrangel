@@ -28,6 +28,8 @@
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
 
+#include "testsourcesettings.h"
+
 #define TESTSOURCE_THROTTLE_MS 50
 
 class TestSourceThread : public QThread {
@@ -49,6 +51,10 @@ public:
     void setQFactor(float qFactor);
     void setPhaseImbalance(float phaseImbalance);
     void setFrequencyShift(int shift);
+    void setToneFrequency(int toneFrequency);
+    void setModulation(TestSourceSettings::Modulation modulation);
+    void setAMModulation(float amModulation);
+    void setFMDeviation(float deviation);
 
     void connectTimer(const QTimer& timer);
 
@@ -63,7 +69,13 @@ private:
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
 	NCOF m_nco;
+    NCOF m_toneNco;
 	int m_frequencyShift;
+	int m_toneFrequency;
+	TestSourceSettings::Modulation m_modulation;
+	float m_amModulation;
+	float m_fmDeviationUnit;
+	float m_fmPhasor;
 
 	int m_samplerate;
     unsigned int m_log2Decim;
@@ -101,6 +113,7 @@ private:
 	void callback(const qint16* buf, qint32 len);
 	void setBuffers(quint32 chunksize);
     void generate(quint32 chunksize);
+    void pullAF(Real& afSample);
 
 	//  Decimate according to specified log2 (ex: log2=4 => decim=16)
 	inline void convert_8(SampleVector::iterator* it, const qint16* buf, qint32 len)

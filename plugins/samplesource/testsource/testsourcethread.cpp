@@ -31,6 +31,11 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_convertBuffer(TESTSOURCE_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_frequencyShift(0),
+	m_toneFrequency(440),
+	m_modulation(TestSourceSettings::ModulationNone),
+	m_amModulation(0.5f),
+	m_fmDeviationUnit(0.0f),
+	m_fmPhasor(0.0f),
 	m_samplerate(48000),
 	m_log2Decim(4),
 	m_fcPos(0),
@@ -81,6 +86,7 @@ void TestSourceThread::setSamplerate(int samplerate)
     m_chunksize = 4 * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
     m_throttleToggle = !m_throttleToggle;
 	m_nco.setFreq(m_frequencyShift, m_samplerate);
+	m_toneNco.setFreq(m_toneFrequency, m_samplerate);
 }
 
 void TestSourceThread::setLog2Decimation(unsigned int log2_decim)
@@ -149,6 +155,28 @@ void TestSourceThread::setFrequencyShift(int shift)
     m_nco.setFreq(shift, m_samplerate);
 }
 
+void TestSourceThread::setToneFrequency(int toneFrequency)
+{
+    m_toneNco.setFreq(toneFrequency, m_samplerate);
+}
+
+void TestSourceThread::setModulation(TestSourceSettings::Modulation modulation)
+{
+    m_modulation = modulation;
+}
+
+void TestSourceThread::setAMModulation(float amModulation)
+{
+    m_amModulation = amModulation < 0.0f ? 0.0f : amModulation > 1.0f ? 1.0f : amModulation;
+}
+
+void TestSourceThread::setFMDeviation(float deviation)
+{
+    float fmDeviationUnit = deviation / (float) m_samplerate;
+    m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 1.0f ? 1.0f : fmDeviationUnit;
+    qDebug("TestSourceThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
+}
+
 void TestSourceThread::run()
 {
     m_running = true;
@@ -195,12 +223,50 @@ void TestSourceThread::generate(quint32 chunksize)
 
     for (int i = 0; i < n-1;)
     {
-        Complex c = m_nco.nextIQ(m_phaseImbalance);
-        m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
-        m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBitsQ);
+        switch (m_modulation)
+        {
+        case TestSourceSettings::ModulationAM:
+        {
+            Complex c = m_nco.nextIQ();
+            Real t, re, im;
+            pullAF(t);
+            t = (t*m_amModulation + 1.0f)*0.5f;
+            re = c.real()*t;
+            im = c.imag()*t + m_phaseImbalance*re;
+            m_buf[i++] = (int16_t) (re * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+            m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
+        }
+        break;
+        case TestSourceSettings::ModulationFM:
+        {
+            Complex c = m_nco.nextIQ();
+            Real t, re, im;
+            pullAF(t);
+            m_fmPhasor += m_fmDeviationUnit * t;
+            m_fmPhasor = m_fmPhasor < -1.0f ? -m_fmPhasor - 1.0f  : m_fmPhasor > 1.0f ? m_fmPhasor - 1.0f : m_fmPhasor;
+            re =  c.real()*cos(m_fmPhasor*M_PI) - c.imag()*sin(m_fmPhasor*M_PI);
+            im = (c.real()*sin(m_fmPhasor*M_PI) + c.imag()*cos(m_fmPhasor*M_PI)) + m_phaseImbalance*re;
+            m_buf[i++] = (int16_t) (re * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+            m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
+        }
+        break;
+        case TestSourceSettings::ModulationNone:
+        default:
+        {
+            Complex c = m_nco.nextIQ(m_phaseImbalance);
+            m_buf[i++] = (int16_t) (c.real() * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+            m_buf[i++] = (int16_t) (c.imag() * (float) m_amplitudeBitsQ);
+        }
+        break;
+        }
     }
 
     callback(m_buf, n);
+}
+
+void TestSourceThread::pullAF(Real& afSample)
+{
+    afSample = m_toneNco.next();
 }
 
 //  call appropriate conversion (decimation) routine depending on the number of sample bits

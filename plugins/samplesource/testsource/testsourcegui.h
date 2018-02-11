@@ -88,6 +88,10 @@ private slots:
     void on_sampleSize_currentIndexChanged(int index);
     void on_amplitudeCoarse_valueChanged(int value);
     void on_amplitudeFine_valueChanged(int value);
+    void on_modulation_currentIndexChanged(int index);
+    void on_modulationFrequency_valueChanged(int value);
+    void on_amModulation_valueChanged(int value);
+    void on_fmDeviation_valueChanged(int value);
     void on_dcBias_valueChanged(int value);
     void on_iBias_valueChanged(int value);
     void on_qBias_valueChanged(int value);

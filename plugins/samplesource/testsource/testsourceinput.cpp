@@ -350,6 +350,34 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
+    if ((m_settings.m_modulationTone != settings.m_modulationTone) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setToneFrequency(settings.m_modulationTone * 10);
+        }
+    }
+
+    if ((m_settings.m_modulation != settings.m_modulation) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setModulation(settings.m_modulation);
+        }
+    }
+
+    if ((m_settings.m_amModulation != settings.m_amModulation) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setAMModulation(settings.m_amModulation / 100.0f);
+        }
+    }
+
+    if ((m_settings.m_fmDeviation != settings.m_fmDeviation) || force)
+    {
+        if (m_testSourceThread != 0) {
+            m_testSourceThread->setFMDeviation(settings.m_fmDeviation * 100.0f);
+        }
+    }
+
     m_settings = settings;
     return true;
 }

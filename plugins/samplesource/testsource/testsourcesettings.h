@@ -31,6 +31,13 @@ struct TestSourceSettings {
         AutoCorrLast,
     } AutoCorrOptions;
 
+    typedef enum {
+        ModulationNone,
+        ModulationAM,
+        ModulationFM,
+        ModulationLast
+    } Modulation;
+
     quint64 m_centerFrequency;
 	qint32 m_frequencyShift;
 	quint32 m_sampleRate;
@@ -39,6 +46,10 @@ struct TestSourceSettings {
 	quint32 m_sampleSizeIndex;
 	qint32 m_amplitudeBits;
     AutoCorrOptions m_autoCorrOptions;
+    Modulation m_modulation;
+    int m_modulationTone;   //!< 10'Hz
+    int m_amModulation;     //!< percent
+    int m_fmDeviation;      //!< 100'Hz
     float m_dcFactor;       //!< -1.0 < x < 1.0
     float m_iFactor;        //!< -1.0 < x < 1.0
     float m_qFactor;        //!< -1.0 < x < 1.0

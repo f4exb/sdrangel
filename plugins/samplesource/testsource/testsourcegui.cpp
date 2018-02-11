@@ -57,6 +57,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setValueRange(7, 48000, 9999999);
     ui->frequencyShift->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->frequencyShift->setValueRange(false, 7, -9999999, 9999999);
+    ui->frequencyShiftLabel->setText(QString("%1").arg(QChar(0x94, 0x03)));
 
     displaySettings();
 
@@ -212,6 +213,37 @@ void TestSourceGui::on_amplitudeFine_valueChanged(int value __attribute__((unuse
     sendSettings();
 }
 
+void TestSourceGui::on_modulation_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index > TestSourceSettings::ModulationLast)) {
+        return;
+    }
+
+    m_settings.m_modulation = (TestSourceSettings::Modulation) index;
+    sendSettings();
+}
+
+void TestSourceGui::on_modulationFrequency_valueChanged(int value)
+{
+    m_settings.m_modulationTone = value;
+    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_modulationTone / 100.0, 0, 'f', 2));
+    sendSettings();
+}
+
+void TestSourceGui::on_amModulation_valueChanged(int value)
+{
+    m_settings.m_amModulation = value;
+    ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
+    sendSettings();
+}
+
+void TestSourceGui::on_fmDeviation_valueChanged(int value)
+{
+    m_settings.m_fmDeviation = value;
+    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
+    sendSettings();
+}
+
 void TestSourceGui::on_dcBias_valueChanged(int value)
 {
     ui->dcBiasText->setText(QString(tr("%1 %").arg(value)));
@@ -354,6 +386,13 @@ void TestSourceGui::displaySettings()
     ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
     ui->autoCorr->setCurrentIndex(m_settings.m_autoCorrOptions);
     ui->sampleSize->blockSignals(false);
+    ui->modulation->setCurrentIndex((int) m_settings.m_modulation);
+    ui->modulationFrequency->setValue(m_settings.m_modulationTone);
+    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_modulationTone / 100.0, 0, 'f', 2));
+    ui->amModulation->setValue(m_settings.m_amModulation);
+    ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
+    ui->fmDeviation->setValue(m_settings.m_fmDeviation);
+    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
     blockApplySettings(false);
 }
 
