@@ -90,7 +90,7 @@ void StaticFileController::service(QByteArray& path, HttpResponse& response)
         // Forbid access to files outside the docroot directory
         if (path.contains("/.."))
         {
-            qWarning("StaticFileController: detected forbidden characters in path %s",path.data());
+            qWarning("StaticFileController::service: detected forbidden characters in path %s",path.data());
             response.setStatus(403,"forbidden");
             response.write("403 forbidden",true);
             return;
@@ -137,13 +137,13 @@ void StaticFileController::service(QByteArray& path, HttpResponse& response)
         else {
             if (file.exists())
             {
-                qWarning("StaticFileController: Cannot open existing file %s for reading",qPrintable(file.fileName()));
+                qWarning("StaticFileController::service: Cannot open existing file %s for reading",qPrintable(file.fileName()));
                 response.setStatus(403,"forbidden");
                 response.write("403 forbidden",true);
             }
             else
             {
-                qWarning("StaticFileController: File %s not found",qPrintable(file.fileName()));
+                qWarning("StaticFileController::service: File %s not found",qPrintable(file.fileName()));
                 response.setStatus(404,"not found");
                 response.write("404 not found",true);
             }

@@ -88,7 +88,7 @@ HttpCookie::HttpCookie(const QByteArray source)
             }
             else
             {
-                qWarning("HttpCookie: Ignoring unknown %s=%s",name.data(),value.data());
+                qWarning("HttpCookie::HttpCookie: Ignoring unknown %s=%s",name.data(),value.data());
             }
         }
     }
