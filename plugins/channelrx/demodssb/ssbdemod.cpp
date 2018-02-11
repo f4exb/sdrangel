@@ -66,7 +66,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_inputFrequencyOffset = 0;
 	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
 
-	m_audioBuffer.resize(1<<9);
+	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 	m_sum = 0;
@@ -252,11 +252,11 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_audioBufferFill >= m_audioBuffer.size())
 			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
 				if (res != m_audioBufferFill)
 				{
-					qDebug("lost %u samples", m_audioBufferFill - res);
+				    qDebug("SSBDemod::feed: %u/%u samples written", res, m_audioBufferFill);
 				}
 
 				m_audioBufferFill = 0;
@@ -264,10 +264,13 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		}
 	}
 
-	if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+
+	if (res != m_audioBufferFill)
 	{
-		qDebug("SSBDemod::feed: lost samples");
+        qDebug("SSBDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
 	}
+
 	m_audioBufferFill = 0;
 
 	if (m_sampleSink != 0)
