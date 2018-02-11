@@ -524,7 +524,7 @@ void SSBDemodGUI::displayUDPAddress()
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)
 {
-    if (value == -SSBDemodSettings::m_minPowerThresholdDB)
+    if (value == SSBDemodSettings::m_minPowerThresholdDB)
     {
         ui->agcPowerThresholdText->setText("---");
     }
