@@ -234,8 +234,8 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
                 m_avgPhi(m_avgIQ.asDouble()/m_avgII.asDouble());
             }
 
-            float yi = xi - m_avgPhi.asDouble()*xq;
-            float yq = xq;
+            float& yi = xi; // the in phase remains the reference
+            float yq = xq - m_avgPhi.asDouble()*xi;
 
             // amplitude I/Q imbalance
             m_avgII2(yi*yi); // <I, I>
@@ -246,7 +246,7 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
             }
 
             // final correction
-            float zi = yi;
+            float& zi = yi; // the in phase remains the reference
             float zq = m_avgAmp.asDouble() * yq;
 
             // convert and store
