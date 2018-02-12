@@ -12,7 +12,7 @@
 
 /*
  * SWGDVSerialDevice.h
- * 
+ *
  * DV serial device details
  */
 
@@ -26,28 +26,31 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDVSerialDevice: public SWGObject {
 public:
     SWGDVSerialDevice();
-    SWGDVSerialDevice(QString* json);
-    virtual ~SWGDVSerialDevice();
+    SWGDVSerialDevice(QString json);
+    ~SWGDVSerialDevice();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDVSerialDevice* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDVSerialDevice* fromJson(QString jsonString);
 
     QString* getDeviceName();
     void setDeviceName(QString* device_name);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* device_name;
+    bool m_device_name_isSet;
+
 };
 
 }

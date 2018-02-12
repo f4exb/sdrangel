@@ -12,7 +12,7 @@
 
 /*
  * SWGDeviceSetList.h
- * 
+ *
  * List of device sets opened in this instance
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDeviceSetList: public SWGObject {
 public:
     SWGDeviceSetList();
-    SWGDeviceSetList(QString* json);
-    virtual ~SWGDeviceSetList();
+    SWGDeviceSetList(QString json);
+    ~SWGDeviceSetList();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSetList* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDeviceSetList* fromJson(QString jsonString);
 
     qint32 getDevicesetcount();
     void setDevicesetcount(qint32 devicesetcount);
@@ -53,10 +52,18 @@ public:
     void setDeviceSets(QList<SWGDeviceSet*>* device_sets);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 devicesetcount;
+    bool m_devicesetcount_isSet;
+
     qint32 devicesetfocus;
+    bool m_devicesetfocus_isSet;
+
     QList<SWGDeviceSet*>* device_sets;
+    bool m_device_sets_isSet;
+
 };
 
 }

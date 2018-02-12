@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGLoggingInfo::SWGLoggingInfo(QString* json) {
+SWGLoggingInfo::SWGLoggingInfo(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGLoggingInfo::SWGLoggingInfo() {
@@ -38,30 +38,31 @@ SWGLoggingInfo::~SWGLoggingInfo() {
 void
 SWGLoggingInfo::init() {
     console_level = new QString("");
+    m_console_level_isSet = false;
     file_level = new QString("");
+    m_file_level_isSet = false;
     dump_to_file = 0;
+    m_dump_to_file_isSet = false;
     file_name = new QString("");
+    m_file_name_isSet = false;
 }
 
 void
 SWGLoggingInfo::cleanup() {
-    
-    if(console_level != nullptr) {
+    if(console_level != nullptr) { 
         delete console_level;
     }
-
-    if(file_level != nullptr) {
+    if(file_level != nullptr) { 
         delete file_level;
     }
 
-
-    if(file_name != nullptr) {
+    if(file_name != nullptr) { 
         delete file_name;
     }
 }
 
 SWGLoggingInfo*
-SWGLoggingInfo::fromJson(QString &json) {
+SWGLoggingInfo::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,34 +71,41 @@ SWGLoggingInfo::fromJson(QString &json) {
 }
 
 void
-SWGLoggingInfo::fromJsonObject(QJsonObject &pJson) {
+SWGLoggingInfo::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&console_level, pJson["consoleLevel"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&file_level, pJson["fileLevel"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&dump_to_file, pJson["dumpToFile"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
+    
 }
 
 QString
 SWGLoggingInfo::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGLoggingInfo::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("consoleLevel"), console_level, obj, QString("QString"));
-
-    toJsonValue(QString("fileLevel"), file_level, obj, QString("QString"));
-
-    obj->insert("dumpToFile", QJsonValue(dump_to_file));
-
-    toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
+    QJsonObject obj;
+    if(console_level != nullptr && *console_level != QString("")){
+        toJsonValue(QString("consoleLevel"), console_level, obj, QString("QString"));
+    }
+    if(file_level != nullptr && *file_level != QString("")){
+        toJsonValue(QString("fileLevel"), file_level, obj, QString("QString"));
+    }
+    if(m_dump_to_file_isSet){
+        obj.insert("dumpToFile", QJsonValue(dump_to_file));
+    }
+    if(file_name != nullptr && *file_name != QString("")){
+        toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -109,6 +117,7 @@ SWGLoggingInfo::getConsoleLevel() {
 void
 SWGLoggingInfo::setConsoleLevel(QString* console_level) {
     this->console_level = console_level;
+    this->m_console_level_isSet = true;
 }
 
 QString*
@@ -118,6 +127,7 @@ SWGLoggingInfo::getFileLevel() {
 void
 SWGLoggingInfo::setFileLevel(QString* file_level) {
     this->file_level = file_level;
+    this->m_file_level_isSet = true;
 }
 
 qint32
@@ -127,6 +137,7 @@ SWGLoggingInfo::getDumpToFile() {
 void
 SWGLoggingInfo::setDumpToFile(qint32 dump_to_file) {
     this->dump_to_file = dump_to_file;
+    this->m_dump_to_file_isSet = true;
 }
 
 QString*
@@ -136,8 +147,20 @@ SWGLoggingInfo::getFileName() {
 void
 SWGLoggingInfo::setFileName(QString* file_name) {
     this->file_name = file_name;
+    this->m_file_name_isSet = true;
 }
 
 
+bool
+SWGLoggingInfo::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(console_level != nullptr && *console_level != QString("")){ isObjectUpdated = true; break;}
+        if(file_level != nullptr && *file_level != QString("")){ isObjectUpdated = true; break;}
+        if(m_dump_to_file_isSet){ isObjectUpdated = true; break;}
+        if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

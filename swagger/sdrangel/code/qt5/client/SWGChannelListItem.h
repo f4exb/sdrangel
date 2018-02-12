@@ -12,7 +12,7 @@
 
 /*
  * SWGChannelListItem.h
- * 
+ *
  * Summarized information about channel plugin
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGChannelListItem: public SWGObject {
 public:
     SWGChannelListItem();
-    SWGChannelListItem(QString* json);
-    virtual ~SWGChannelListItem();
+    SWGChannelListItem(QString json);
+    ~SWGChannelListItem();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGChannelListItem* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGChannelListItem* fromJson(QString jsonString);
 
     QString* getName();
     void setName(QString* name);
@@ -61,13 +60,27 @@ public:
     void setIndex(qint32 index);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* name;
+    bool m_name_isSet;
+
     QString* id_uri;
+    bool m_id_uri_isSet;
+
     QString* id;
+    bool m_id_isSet;
+
     qint32 tx;
+    bool m_tx_isSet;
+
     QString* version;
+    bool m_version_isSet;
+
     qint32 index;
+    bool m_index_isSet;
+
 };
 
 }

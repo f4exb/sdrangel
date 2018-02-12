@@ -12,7 +12,7 @@
 
 /*
  * SWGInstanceChannelsResponse.h
- * 
+ *
  * Summarized information about channel plugins available in this SDRangel instance
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGInstanceChannelsResponse: public SWGObject {
 public:
     SWGInstanceChannelsResponse();
-    SWGInstanceChannelsResponse(QString* json);
-    virtual ~SWGInstanceChannelsResponse();
+    SWGInstanceChannelsResponse(QString json);
+    ~SWGInstanceChannelsResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGInstanceChannelsResponse* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGInstanceChannelsResponse* fromJson(QString jsonString);
 
     qint32 getChannelcount();
     void setChannelcount(qint32 channelcount);
@@ -50,9 +49,15 @@ public:
     void setChannels(QList<SWGChannelListItem*>* channels);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 channelcount;
+    bool m_channelcount_isSet;
+
     QList<SWGChannelListItem*>* channels;
+    bool m_channels_isSet;
+
 };
 
 }

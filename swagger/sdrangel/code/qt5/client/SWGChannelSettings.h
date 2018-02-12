@@ -12,7 +12,7 @@
 
 /*
  * SWGChannelSettings.h
- * 
+ *
  * Base channel settings
  */
 
@@ -28,21 +28,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGChannelSettings: public SWGObject {
 public:
     SWGChannelSettings();
-    SWGChannelSettings(QString* json);
-    virtual ~SWGChannelSettings();
+    SWGChannelSettings(QString json);
+    ~SWGChannelSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGChannelSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGChannelSettings* fromJson(QString jsonString);
 
     QString* getChannelType();
     void setChannelType(QString* channel_type);
@@ -57,11 +56,21 @@ public:
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* channel_type;
+    bool m_channel_type_isSet;
+
     qint32 tx;
+    bool m_tx_isSet;
+
     SWGNFMDemodSettings* nfm_demod_settings;
+    bool m_nfm_demod_settings_isSet;
+
     SWGNFMModSettings* nfm_mod_settings;
+    bool m_nfm_mod_settings_isSet;
+
 };
 
 }

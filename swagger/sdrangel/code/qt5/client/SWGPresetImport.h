@@ -12,7 +12,7 @@
 
 /*
  * SWGPresetImport.h
- * 
+ *
  * Details to import preset from file in preset list
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGPresetImport: public SWGObject {
 public:
     SWGPresetImport();
-    SWGPresetImport(QString* json);
-    virtual ~SWGPresetImport();
+    SWGPresetImport(QString json);
+    ~SWGPresetImport();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGPresetImport* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGPresetImport* fromJson(QString jsonString);
 
     QString* getGroupName();
     void setGroupName(QString* group_name);
@@ -52,10 +51,18 @@ public:
     void setFilePath(QString* file_path);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* group_name;
+    bool m_group_name_isSet;
+
     QString* description;
+    bool m_description_isSet;
+
     QString* file_path;
+    bool m_file_path_isSet;
+
 };
 
 }

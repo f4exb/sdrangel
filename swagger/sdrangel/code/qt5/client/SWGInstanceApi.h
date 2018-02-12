@@ -48,45 +48,45 @@ public:
     QMap<QString, QString> defaultHeaders;
 
     void instanceAudioGet();
-    void instanceAudioPatch(SWGAudioDevicesSelect body);
+    void instanceAudioPatch(SWGAudioDevicesSelect& body);
     void instanceChannels(qint32 tx);
     void instanceDVSerialPatch(qint32 dvserial);
     void instanceDelete();
     void instanceDeviceSetsGet();
     void instanceDevices(qint32 tx);
     void instanceLocationGet();
-    void instanceLocationPut(SWGLocationInformation body);
+    void instanceLocationPut(SWGLocationInformation& body);
     void instanceLoggingGet();
-    void instanceLoggingPut(SWGLoggingInfo body);
-    void instancePresetDelete(SWGPresetIdentifier body);
-    void instancePresetFilePost(SWGPresetExport body);
-    void instancePresetFilePut(SWGPresetImport body);
+    void instanceLoggingPut(SWGLoggingInfo& body);
+    void instancePresetDelete(SWGPresetIdentifier& body);
+    void instancePresetFilePost(SWGPresetExport& body);
+    void instancePresetFilePut(SWGPresetImport& body);
     void instancePresetGet();
-    void instancePresetPatch(SWGPresetTransfer body);
-    void instancePresetPost(SWGPresetTransfer body);
-    void instancePresetPut(SWGPresetTransfer body);
+    void instancePresetPatch(SWGPresetTransfer& body);
+    void instancePresetPost(SWGPresetTransfer& body);
+    void instancePresetPut(SWGPresetTransfer& body);
     void instanceSummary();
     
 private:
-    void instanceAudioGetCallback (HttpRequestWorker * worker);
-    void instanceAudioPatchCallback (HttpRequestWorker * worker);
-    void instanceChannelsCallback (HttpRequestWorker * worker);
-    void instanceDVSerialPatchCallback (HttpRequestWorker * worker);
-    void instanceDeleteCallback (HttpRequestWorker * worker);
-    void instanceDeviceSetsGetCallback (HttpRequestWorker * worker);
-    void instanceDevicesCallback (HttpRequestWorker * worker);
-    void instanceLocationGetCallback (HttpRequestWorker * worker);
-    void instanceLocationPutCallback (HttpRequestWorker * worker);
-    void instanceLoggingGetCallback (HttpRequestWorker * worker);
-    void instanceLoggingPutCallback (HttpRequestWorker * worker);
-    void instancePresetDeleteCallback (HttpRequestWorker * worker);
-    void instancePresetFilePostCallback (HttpRequestWorker * worker);
-    void instancePresetFilePutCallback (HttpRequestWorker * worker);
-    void instancePresetGetCallback (HttpRequestWorker * worker);
-    void instancePresetPatchCallback (HttpRequestWorker * worker);
-    void instancePresetPostCallback (HttpRequestWorker * worker);
-    void instancePresetPutCallback (HttpRequestWorker * worker);
-    void instanceSummaryCallback (HttpRequestWorker * worker);
+    void instanceAudioGetCallback (SWGHttpRequestWorker * worker);
+    void instanceAudioPatchCallback (SWGHttpRequestWorker * worker);
+    void instanceChannelsCallback (SWGHttpRequestWorker * worker);
+    void instanceDVSerialPatchCallback (SWGHttpRequestWorker * worker);
+    void instanceDeleteCallback (SWGHttpRequestWorker * worker);
+    void instanceDeviceSetsGetCallback (SWGHttpRequestWorker * worker);
+    void instanceDevicesCallback (SWGHttpRequestWorker * worker);
+    void instanceLocationGetCallback (SWGHttpRequestWorker * worker);
+    void instanceLocationPutCallback (SWGHttpRequestWorker * worker);
+    void instanceLoggingGetCallback (SWGHttpRequestWorker * worker);
+    void instanceLoggingPutCallback (SWGHttpRequestWorker * worker);
+    void instancePresetDeleteCallback (SWGHttpRequestWorker * worker);
+    void instancePresetFilePostCallback (SWGHttpRequestWorker * worker);
+    void instancePresetFilePutCallback (SWGHttpRequestWorker * worker);
+    void instancePresetGetCallback (SWGHttpRequestWorker * worker);
+    void instancePresetPatchCallback (SWGHttpRequestWorker * worker);
+    void instancePresetPostCallback (SWGHttpRequestWorker * worker);
+    void instancePresetPutCallback (SWGHttpRequestWorker * worker);
+    void instanceSummaryCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void instanceAudioGetSignal(SWGAudioDevices* summary);
@@ -128,6 +128,26 @@ signals:
     void instancePresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetPutSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceSummarySignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    
+    void instanceAudioGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceAudioPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceChannelsSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDVSerialPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDevicesSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceLocationGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceLocationPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceLoggingGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceLoggingPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetFilePostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetFilePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceSummarySignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

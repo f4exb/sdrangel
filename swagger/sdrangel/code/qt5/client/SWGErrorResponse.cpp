@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGErrorResponse::SWGErrorResponse(QString* json) {
+SWGErrorResponse::SWGErrorResponse(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGErrorResponse::SWGErrorResponse() {
@@ -38,18 +38,18 @@ SWGErrorResponse::~SWGErrorResponse() {
 void
 SWGErrorResponse::init() {
     message = new QString("");
+    m_message_isSet = false;
 }
 
 void
 SWGErrorResponse::cleanup() {
-    
-    if(message != nullptr) {
+    if(message != nullptr) { 
         delete message;
     }
 }
 
 SWGErrorResponse*
-SWGErrorResponse::fromJson(QString &json) {
+SWGErrorResponse::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,25 +58,26 @@ SWGErrorResponse::fromJson(QString &json) {
 }
 
 void
-SWGErrorResponse::fromJsonObject(QJsonObject &pJson) {
+SWGErrorResponse::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&message, pJson["message"], "QString", "QString");
+    
 }
 
 QString
 SWGErrorResponse::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGErrorResponse::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("message"), message, obj, QString("QString"));
+    QJsonObject obj;
+    if(message != nullptr && *message != QString("")){
+        toJsonValue(QString("message"), message, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -88,8 +89,17 @@ SWGErrorResponse::getMessage() {
 void
 SWGErrorResponse::setMessage(QString* message) {
     this->message = message;
+    this->m_message_isSet = true;
 }
 
 
+bool
+SWGErrorResponse::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(message != nullptr && *message != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGChannelListItem::SWGChannelListItem(QString* json) {
+SWGChannelListItem::SWGChannelListItem(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGChannelListItem::SWGChannelListItem() {
@@ -38,37 +38,39 @@ SWGChannelListItem::~SWGChannelListItem() {
 void
 SWGChannelListItem::init() {
     name = new QString("");
+    m_name_isSet = false;
     id_uri = new QString("");
+    m_id_uri_isSet = false;
     id = new QString("");
+    m_id_isSet = false;
     tx = 0;
+    m_tx_isSet = false;
     version = new QString("");
+    m_version_isSet = false;
     index = 0;
+    m_index_isSet = false;
 }
 
 void
 SWGChannelListItem::cleanup() {
-    
-    if(name != nullptr) {
+    if(name != nullptr) { 
         delete name;
     }
-
-    if(id_uri != nullptr) {
+    if(id_uri != nullptr) { 
         delete id_uri;
     }
-
-    if(id != nullptr) {
+    if(id != nullptr) { 
         delete id;
     }
 
-
-    if(version != nullptr) {
+    if(version != nullptr) { 
         delete version;
     }
 
 }
 
 SWGChannelListItem*
-SWGChannelListItem::fromJson(QString &json) {
+SWGChannelListItem::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -77,40 +79,51 @@ SWGChannelListItem::fromJson(QString &json) {
 }
 
 void
-SWGChannelListItem::fromJsonObject(QJsonObject &pJson) {
+SWGChannelListItem::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&id_uri, pJson["idURI"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
 }
 
 QString
 SWGChannelListItem::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGChannelListItem::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("name"), name, obj, QString("QString"));
-
-    toJsonValue(QString("idURI"), id_uri, obj, QString("QString"));
-
-    toJsonValue(QString("id"), id, obj, QString("QString"));
-
-    obj->insert("tx", QJsonValue(tx));
-
-    toJsonValue(QString("version"), version, obj, QString("QString"));
-
-    obj->insert("index", QJsonValue(index));
+    QJsonObject obj;
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
+    }
+    if(id_uri != nullptr && *id_uri != QString("")){
+        toJsonValue(QString("idURI"), id_uri, obj, QString("QString"));
+    }
+    if(id != nullptr && *id != QString("")){
+        toJsonValue(QString("id"), id, obj, QString("QString"));
+    }
+    if(m_tx_isSet){
+        obj.insert("tx", QJsonValue(tx));
+    }
+    if(version != nullptr && *version != QString("")){
+        toJsonValue(QString("version"), version, obj, QString("QString"));
+    }
+    if(m_index_isSet){
+        obj.insert("index", QJsonValue(index));
+    }
 
     return obj;
 }
@@ -122,6 +135,7 @@ SWGChannelListItem::getName() {
 void
 SWGChannelListItem::setName(QString* name) {
     this->name = name;
+    this->m_name_isSet = true;
 }
 
 QString*
@@ -131,6 +145,7 @@ SWGChannelListItem::getIdUri() {
 void
 SWGChannelListItem::setIdUri(QString* id_uri) {
     this->id_uri = id_uri;
+    this->m_id_uri_isSet = true;
 }
 
 QString*
@@ -140,6 +155,7 @@ SWGChannelListItem::getId() {
 void
 SWGChannelListItem::setId(QString* id) {
     this->id = id;
+    this->m_id_isSet = true;
 }
 
 qint32
@@ -149,6 +165,7 @@ SWGChannelListItem::getTx() {
 void
 SWGChannelListItem::setTx(qint32 tx) {
     this->tx = tx;
+    this->m_tx_isSet = true;
 }
 
 QString*
@@ -158,6 +175,7 @@ SWGChannelListItem::getVersion() {
 void
 SWGChannelListItem::setVersion(QString* version) {
     this->version = version;
+    this->m_version_isSet = true;
 }
 
 qint32
@@ -167,8 +185,22 @@ SWGChannelListItem::getIndex() {
 void
 SWGChannelListItem::setIndex(qint32 index) {
     this->index = index;
+    this->m_index_isSet = true;
 }
 
 
+bool
+SWGChannelListItem::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+        if(id_uri != nullptr && *id_uri != QString("")){ isObjectUpdated = true; break;}
+        if(id != nullptr && *id != QString("")){ isObjectUpdated = true; break;}
+        if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(version != nullptr && *version != QString("")){ isObjectUpdated = true; break;}
+        if(m_index_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

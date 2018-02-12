@@ -12,7 +12,7 @@
 
 /*
  * SWGPresetTransfer.h
- * 
+ *
  * Preset transfer to or from a device set
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGPresetTransfer: public SWGObject {
 public:
     SWGPresetTransfer();
-    SWGPresetTransfer(QString* json);
-    virtual ~SWGPresetTransfer();
+    SWGPresetTransfer(QString json);
+    ~SWGPresetTransfer();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGPresetTransfer* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGPresetTransfer* fromJson(QString jsonString);
 
     qint32 getDeviceSetIndex();
     void setDeviceSetIndex(qint32 device_set_index);
@@ -49,9 +48,15 @@ public:
     void setPreset(SWGPresetIdentifier* preset);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 device_set_index;
+    bool m_device_set_index_isSet;
+
     SWGPresetIdentifier* preset;
+    bool m_preset_isSet;
+
 };
 
 }

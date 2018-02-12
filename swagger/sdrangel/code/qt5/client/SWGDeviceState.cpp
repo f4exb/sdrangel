@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceState::SWGDeviceState(QString* json) {
+SWGDeviceState::SWGDeviceState(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGDeviceState::SWGDeviceState() {
@@ -38,18 +38,18 @@ SWGDeviceState::~SWGDeviceState() {
 void
 SWGDeviceState::init() {
     state = new QString("");
+    m_state_isSet = false;
 }
 
 void
 SWGDeviceState::cleanup() {
-    
-    if(state != nullptr) {
+    if(state != nullptr) { 
         delete state;
     }
 }
 
 SWGDeviceState*
-SWGDeviceState::fromJson(QString &json) {
+SWGDeviceState::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,25 +58,26 @@ SWGDeviceState::fromJson(QString &json) {
 }
 
 void
-SWGDeviceState::fromJsonObject(QJsonObject &pJson) {
+SWGDeviceState::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&state, pJson["state"], "QString", "QString");
+    
 }
 
 QString
 SWGDeviceState::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGDeviceState::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("state"), state, obj, QString("QString"));
+    QJsonObject obj;
+    if(state != nullptr && *state != QString("")){
+        toJsonValue(QString("state"), state, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -88,8 +89,17 @@ SWGDeviceState::getState() {
 void
 SWGDeviceState::setState(QString* state) {
     this->state = state;
+    this->m_state_isSet = true;
 }
 
 
+bool
+SWGDeviceState::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(state != nullptr && *state != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

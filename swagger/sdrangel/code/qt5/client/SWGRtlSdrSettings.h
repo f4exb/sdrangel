@@ -12,7 +12,7 @@
 
 /*
  * SWGRtlSdrSettings.h
- * 
+ *
  * RTLSDR
  */
 
@@ -25,21 +25,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGRtlSdrSettings: public SWGObject {
 public:
     SWGRtlSdrSettings();
-    SWGRtlSdrSettings(QString* json);
-    virtual ~SWGRtlSdrSettings();
+    SWGRtlSdrSettings(QString json);
+    ~SWGRtlSdrSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGRtlSdrSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGRtlSdrSettings* fromJson(QString jsonString);
 
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
@@ -84,21 +83,51 @@ public:
     void setRfBandwidth(qint32 rf_bandwidth);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 dev_sample_rate;
+    bool m_dev_sample_rate_isSet;
+
     qint32 low_sample_rate;
+    bool m_low_sample_rate_isSet;
+
     qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     qint32 gain;
+    bool m_gain_isSet;
+
     qint32 lo_ppm_correction;
+    bool m_lo_ppm_correction_isSet;
+
     qint32 log2_decim;
+    bool m_log2_decim_isSet;
+
     qint32 fc_pos;
+    bool m_fc_pos_isSet;
+
     qint32 dc_block;
+    bool m_dc_block_isSet;
+
     qint32 iq_imbalance;
+    bool m_iq_imbalance_isSet;
+
     qint32 agc;
+    bool m_agc_isSet;
+
     qint32 no_mod_mode;
+    bool m_no_mod_mode_isSet;
+
     qint32 transverter_mode;
+    bool m_transverter_mode_isSet;
+
     qint64 transverter_delta_frequency;
+    bool m_transverter_delta_frequency_isSet;
+
     qint32 rf_bandwidth;
+    bool m_rf_bandwidth_isSet;
+
 };
 
 }

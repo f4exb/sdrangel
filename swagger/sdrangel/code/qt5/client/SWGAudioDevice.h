@@ -12,7 +12,7 @@
 
 /*
  * SWGAudioDevice.h
- * 
+ *
  * Audio device
  */
 
@@ -26,28 +26,31 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGAudioDevice: public SWGObject {
 public:
     SWGAudioDevice();
-    SWGAudioDevice(QString* json);
-    virtual ~SWGAudioDevice();
+    SWGAudioDevice(QString json);
+    ~SWGAudioDevice();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGAudioDevice* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGAudioDevice* fromJson(QString jsonString);
 
     QString* getName();
     void setName(QString* name);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* name;
+    bool m_name_isSet;
+
 };
 
 }

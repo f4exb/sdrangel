@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGHackRFOutputSettings::SWGHackRFOutputSettings(QString* json) {
+SWGHackRFOutputSettings::SWGHackRFOutputSettings(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGHackRFOutputSettings::SWGHackRFOutputSettings() {
@@ -38,18 +38,26 @@ SWGHackRFOutputSettings::~SWGHackRFOutputSettings() {
 void
 SWGHackRFOutputSettings::init() {
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     bandwidth = 0;
+    m_bandwidth_isSet = false;
     vga_gain = 0;
+    m_vga_gain_isSet = false;
     log2_interp = 0;
+    m_log2_interp_isSet = false;
     dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
     bias_t = 0;
+    m_bias_t_isSet = false;
     lna_ext = 0;
+    m_lna_ext_isSet = false;
 }
 
 void
 SWGHackRFOutputSettings::cleanup() {
-    
+
 
 
 
@@ -60,7 +68,7 @@ SWGHackRFOutputSettings::cleanup() {
 }
 
 SWGHackRFOutputSettings*
-SWGHackRFOutputSettings::fromJson(QString &json) {
+SWGHackRFOutputSettings::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -69,46 +77,61 @@ SWGHackRFOutputSettings::fromJson(QString &json) {
 }
 
 void
-SWGHackRFOutputSettings::fromJsonObject(QJsonObject &pJson) {
+SWGHackRFOutputSettings::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&vga_gain, pJson["vgaGain"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&lna_ext, pJson["lnaExt"], "qint32", "");
+    
 }
 
 QString
 SWGHackRFOutputSettings::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGHackRFOutputSettings::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
-
-    obj->insert("bandwidth", QJsonValue(bandwidth));
-
-    obj->insert("vgaGain", QJsonValue(vga_gain));
-
-    obj->insert("log2Interp", QJsonValue(log2_interp));
-
-    obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
-
-    obj->insert("biasT", QJsonValue(bias_t));
-
-    obj->insert("lnaExt", QJsonValue(lna_ext));
+    QJsonObject obj;
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_l_oppm_tenths_isSet){
+        obj.insert("LOppmTenths", QJsonValue(l_oppm_tenths));
+    }
+    if(m_bandwidth_isSet){
+        obj.insert("bandwidth", QJsonValue(bandwidth));
+    }
+    if(m_vga_gain_isSet){
+        obj.insert("vgaGain", QJsonValue(vga_gain));
+    }
+    if(m_log2_interp_isSet){
+        obj.insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_dev_sample_rate_isSet){
+        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+    }
+    if(m_bias_t_isSet){
+        obj.insert("biasT", QJsonValue(bias_t));
+    }
+    if(m_lna_ext_isSet){
+        obj.insert("lnaExt", QJsonValue(lna_ext));
+    }
 
     return obj;
 }
@@ -120,6 +143,7 @@ SWGHackRFOutputSettings::getCenterFrequency() {
 void
 SWGHackRFOutputSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 qint32
@@ -129,6 +153,7 @@ SWGHackRFOutputSettings::getLOppmTenths() {
 void
 SWGHackRFOutputSettings::setLOppmTenths(qint32 l_oppm_tenths) {
     this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
 }
 
 qint32
@@ -138,6 +163,7 @@ SWGHackRFOutputSettings::getBandwidth() {
 void
 SWGHackRFOutputSettings::setBandwidth(qint32 bandwidth) {
     this->bandwidth = bandwidth;
+    this->m_bandwidth_isSet = true;
 }
 
 qint32
@@ -147,6 +173,7 @@ SWGHackRFOutputSettings::getVgaGain() {
 void
 SWGHackRFOutputSettings::setVgaGain(qint32 vga_gain) {
     this->vga_gain = vga_gain;
+    this->m_vga_gain_isSet = true;
 }
 
 qint32
@@ -156,6 +183,7 @@ SWGHackRFOutputSettings::getLog2Interp() {
 void
 SWGHackRFOutputSettings::setLog2Interp(qint32 log2_interp) {
     this->log2_interp = log2_interp;
+    this->m_log2_interp_isSet = true;
 }
 
 qint32
@@ -165,6 +193,7 @@ SWGHackRFOutputSettings::getDevSampleRate() {
 void
 SWGHackRFOutputSettings::setDevSampleRate(qint32 dev_sample_rate) {
     this->dev_sample_rate = dev_sample_rate;
+    this->m_dev_sample_rate_isSet = true;
 }
 
 qint32
@@ -174,6 +203,7 @@ SWGHackRFOutputSettings::getBiasT() {
 void
 SWGHackRFOutputSettings::setBiasT(qint32 bias_t) {
     this->bias_t = bias_t;
+    this->m_bias_t_isSet = true;
 }
 
 qint32
@@ -183,8 +213,24 @@ SWGHackRFOutputSettings::getLnaExt() {
 void
 SWGHackRFOutputSettings::setLnaExt(qint32 lna_ext) {
     this->lna_ext = lna_ext;
+    this->m_lna_ext_isSet = true;
 }
 
 
+bool
+SWGHackRFOutputSettings::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
+        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
+        if(m_vga_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
+        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_bias_t_isSet){ isObjectUpdated = true; break;}
+        if(m_lna_ext_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

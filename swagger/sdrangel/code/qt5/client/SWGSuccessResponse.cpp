@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGSuccessResponse::SWGSuccessResponse(QString* json) {
+SWGSuccessResponse::SWGSuccessResponse(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGSuccessResponse::SWGSuccessResponse() {
@@ -38,18 +38,18 @@ SWGSuccessResponse::~SWGSuccessResponse() {
 void
 SWGSuccessResponse::init() {
     message = new QString("");
+    m_message_isSet = false;
 }
 
 void
 SWGSuccessResponse::cleanup() {
-    
-    if(message != nullptr) {
+    if(message != nullptr) { 
         delete message;
     }
 }
 
 SWGSuccessResponse*
-SWGSuccessResponse::fromJson(QString &json) {
+SWGSuccessResponse::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,25 +58,26 @@ SWGSuccessResponse::fromJson(QString &json) {
 }
 
 void
-SWGSuccessResponse::fromJsonObject(QJsonObject &pJson) {
+SWGSuccessResponse::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&message, pJson["message"], "QString", "QString");
+    
 }
 
 QString
 SWGSuccessResponse::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGSuccessResponse::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("message"), message, obj, QString("QString"));
+    QJsonObject obj;
+    if(message != nullptr && *message != QString("")){
+        toJsonValue(QString("message"), message, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -88,8 +89,17 @@ SWGSuccessResponse::getMessage() {
 void
 SWGSuccessResponse::setMessage(QString* message) {
     this->message = message;
+    this->m_message_isSet = true;
 }
 
 
+bool
+SWGSuccessResponse::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(message != nullptr && *message != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGChannelSettings::SWGChannelSettings(QString* json) {
+SWGChannelSettings::SWGChannelSettings(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGChannelSettings::SWGChannelSettings() {
@@ -38,30 +38,31 @@ SWGChannelSettings::~SWGChannelSettings() {
 void
 SWGChannelSettings::init() {
     channel_type = new QString("");
+    m_channel_type_isSet = false;
     tx = 0;
+    m_tx_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
+    m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
+    m_nfm_mod_settings_isSet = false;
 }
 
 void
 SWGChannelSettings::cleanup() {
-    
-    if(channel_type != nullptr) {
+    if(channel_type != nullptr) { 
         delete channel_type;
     }
 
-
-    if(nfm_demod_settings != nullptr) {
+    if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
     }
-
-    if(nfm_mod_settings != nullptr) {
+    if(nfm_mod_settings != nullptr) { 
         delete nfm_mod_settings;
     }
 }
 
 SWGChannelSettings*
-SWGChannelSettings::fromJson(QString &json) {
+SWGChannelSettings::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,34 +71,41 @@ SWGChannelSettings::fromJson(QString &json) {
 }
 
 void
-SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
+SWGChannelSettings::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&channel_type, pJson["channelType"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
+    
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
+    
 }
 
 QString
 SWGChannelSettings::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGChannelSettings::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("channelType"), channel_type, obj, QString("QString"));
-
-    obj->insert("tx", QJsonValue(tx));
-
-    toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
-
-    toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
+    QJsonObject obj;
+    if(channel_type != nullptr && *channel_type != QString("")){
+        toJsonValue(QString("channelType"), channel_type, obj, QString("QString"));
+    }
+    if(m_tx_isSet){
+        obj.insert("tx", QJsonValue(tx));
+    }
+    if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
+        toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
+    }
+    if((nfm_mod_settings != nullptr) && (nfm_mod_settings->isSet())){
+        toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
+    }
 
     return obj;
 }
@@ -109,6 +117,7 @@ SWGChannelSettings::getChannelType() {
 void
 SWGChannelSettings::setChannelType(QString* channel_type) {
     this->channel_type = channel_type;
+    this->m_channel_type_isSet = true;
 }
 
 qint32
@@ -118,6 +127,7 @@ SWGChannelSettings::getTx() {
 void
 SWGChannelSettings::setTx(qint32 tx) {
     this->tx = tx;
+    this->m_tx_isSet = true;
 }
 
 SWGNFMDemodSettings*
@@ -127,6 +137,7 @@ SWGChannelSettings::getNfmDemodSettings() {
 void
 SWGChannelSettings::setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings) {
     this->nfm_demod_settings = nfm_demod_settings;
+    this->m_nfm_demod_settings_isSet = true;
 }
 
 SWGNFMModSettings*
@@ -136,8 +147,20 @@ SWGChannelSettings::getNfmModSettings() {
 void
 SWGChannelSettings::setNfmModSettings(SWGNFMModSettings* nfm_mod_settings) {
     this->nfm_mod_settings = nfm_mod_settings;
+    this->m_nfm_mod_settings_isSet = true;
 }
 
 
+bool
+SWGChannelSettings::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(channel_type != nullptr && *channel_type != QString("")){ isObjectUpdated = true; break;}
+        if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

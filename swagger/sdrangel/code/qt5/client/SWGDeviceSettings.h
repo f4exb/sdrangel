@@ -12,7 +12,7 @@
 
 /*
  * SWGDeviceSettings.h
- * 
+ *
  * Base device settings
  */
 
@@ -32,21 +32,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDeviceSettings: public SWGObject {
 public:
     SWGDeviceSettings();
-    SWGDeviceSettings(QString* json);
-    virtual ~SWGDeviceSettings();
+    SWGDeviceSettings(QString json);
+    ~SWGDeviceSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDeviceSettings* fromJson(QString jsonString);
 
     QString* getDeviceHwType();
     void setDeviceHwType(QString* device_hw_type);
@@ -73,15 +72,33 @@ public:
     void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* device_hw_type;
+    bool m_device_hw_type_isSet;
+
     qint32 tx;
+    bool m_tx_isSet;
+
     SWGFileSourceSettings* file_source_settings;
+    bool m_file_source_settings_isSet;
+
     SWGHackRFInputSettings* hack_rf_input_settings;
+    bool m_hack_rf_input_settings_isSet;
+
     SWGHackRFOutputSettings* hack_rf_output_settings;
+    bool m_hack_rf_output_settings_isSet;
+
     SWGLimeSdrInputSettings* lime_sdr_input_settings;
+    bool m_lime_sdr_input_settings_isSet;
+
     SWGLimeSdrOutputSettings* lime_sdr_output_settings;
+    bool m_lime_sdr_output_settings_isSet;
+
     SWGRtlSdrSettings* rtl_sdr_settings;
+    bool m_rtl_sdr_settings_isSet;
+
 };
 
 }

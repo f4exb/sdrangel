@@ -65,20 +65,24 @@ swagger project start -m
 
 <h3>Installation</h3>
 
-The code generator is delivered in the form of a jar that you execute from the console using the java command. First make sure you have a JDK  or JRE version 1.7 or above. In our example it will be located in `/opt/install/jdk1.8.0_74/`
+The released code generator is presently creating memory leaks for the Qt5/cpp generated code. A fixed version is available [here](https://github.com/etherealjoy/swagger-codegen/tree/qt5cpp_rework_antis81_patch-1).
 
-Download the jar from [this archive](https://oss.sonatype.org/content/repositories/releases/io/swagger/swagger-codegen-cli/). Choose the latest version ex: 2.2.3 which can be done with wget. Say you want to install the jar in `/opt/install/swagger`:
+So you will have to clone this repository and checkout the `qt5cpp_rework_antis81_patch-1` branch. Then follow the build instructions which are very simple when using maven:
 
 ```shell
-cd /opt/install/swagger
-wget https://oss.sonatype.org/content/repositories/releases/io/swagger/swagger-codegen-cli/2.2.3/swagger-codegen-cli-2.2.3.jar
+sudo apt-get install maven # do this once to install maven
+cd swagger-codegen
+export JAVA_HOME=/opt/install/jdk1.8.0_74 # Example JDK change to your own
+mvn clean package # let it compile...
+mkdir -p /opt/install/swagger/swagger-codegen
+cp modules/swagger-codegen-cli/target/swagger-codegen-cli.jar /opt/install/swagger/swagger-codegen
 ```
 
-Then in the same directory write a little `swagger-codegen` shell script to facilitate the invocation. For example:
+Then in the `/opt/install/swagger/` directory write a little `swagger-codegen` shell script to facilitate the invocation. For example:
 
 ```shell
 #!/bin/sh
-/opt/install/jdk1.8.0_74/bin/java -jar /opt/install/swagger/swagger-codegen-cli-2.2.3.jar ${*}
+/opt/install/jdk1.8.0_74/bin/java -jar /opt/install/swagger/swagger-codegen-cli.jar ${*}
 ```
 
 Then invoke the generator with `/opt/install/swagger/swagger-codegen <commands>`

@@ -12,7 +12,7 @@
 
 /*
  * SWGDeviceState.h
- * 
+ *
  * Device running state
  */
 
@@ -26,28 +26,31 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDeviceState: public SWGObject {
 public:
     SWGDeviceState();
-    SWGDeviceState(QString* json);
-    virtual ~SWGDeviceState();
+    SWGDeviceState(QString json);
+    ~SWGDeviceState();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceState* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDeviceState* fromJson(QString jsonString);
 
     QString* getState();
     void setState(QString* state);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* state;
+    bool m_state_isSet;
+
 };
 
 }

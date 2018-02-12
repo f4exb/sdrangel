@@ -12,7 +12,7 @@
 
 /*
  * SWGNFMDemodSettings.h
- * 
+ *
  * NFMDemod
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGNFMDemodSettings: public SWGObject {
 public:
     SWGNFMDemodSettings();
-    SWGNFMDemodSettings(QString* json);
-    virtual ~SWGNFMDemodSettings();
+    SWGNFMDemodSettings(QString json);
+    ~SWGNFMDemodSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGNFMDemodSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGNFMDemodSettings* fromJson(QString jsonString);
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
@@ -94,24 +93,60 @@ public:
     void setTitle(QString* title);
 
 
+    virtual bool isSet() override;
+
 private:
     qint64 input_frequency_offset;
+    bool m_input_frequency_offset_isSet;
+
     float rf_bandwidth;
+    bool m_rf_bandwidth_isSet;
+
     float af_bandwidth;
+    bool m_af_bandwidth_isSet;
+
     qint32 fm_deviation;
+    bool m_fm_deviation_isSet;
+
     qint32 squelch_gate;
+    bool m_squelch_gate_isSet;
+
     qint32 delta_squelch;
+    bool m_delta_squelch_isSet;
+
     float squelch;
+    bool m_squelch_isSet;
+
     float volume;
+    bool m_volume_isSet;
+
     qint32 ctcss_on;
+    bool m_ctcss_on_isSet;
+
     qint32 audio_mute;
+    bool m_audio_mute_isSet;
+
     qint32 ctcss_index;
+    bool m_ctcss_index_isSet;
+
     qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
+
     qint32 copy_audio_to_udp;
+    bool m_copy_audio_to_udp_isSet;
+
     QString* udp_address;
+    bool m_udp_address_isSet;
+
     qint32 udp_port;
+    bool m_udp_port_isSet;
+
     qint32 rgb_color;
+    bool m_rgb_color_isSet;
+
     QString* title;
+    bool m_title_isSet;
+
 };
 
 }

@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGDVSerialDevice::SWGDVSerialDevice(QString* json) {
+SWGDVSerialDevice::SWGDVSerialDevice(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGDVSerialDevice::SWGDVSerialDevice() {
@@ -38,18 +38,18 @@ SWGDVSerialDevice::~SWGDVSerialDevice() {
 void
 SWGDVSerialDevice::init() {
     device_name = new QString("");
+    m_device_name_isSet = false;
 }
 
 void
 SWGDVSerialDevice::cleanup() {
-    
-    if(device_name != nullptr) {
+    if(device_name != nullptr) { 
         delete device_name;
     }
 }
 
 SWGDVSerialDevice*
-SWGDVSerialDevice::fromJson(QString &json) {
+SWGDVSerialDevice::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,25 +58,26 @@ SWGDVSerialDevice::fromJson(QString &json) {
 }
 
 void
-SWGDVSerialDevice::fromJsonObject(QJsonObject &pJson) {
+SWGDVSerialDevice::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&device_name, pJson["deviceName"], "QString", "QString");
+    
 }
 
 QString
 SWGDVSerialDevice::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGDVSerialDevice::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("deviceName"), device_name, obj, QString("QString"));
+    QJsonObject obj;
+    if(device_name != nullptr && *device_name != QString("")){
+        toJsonValue(QString("deviceName"), device_name, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -88,8 +89,17 @@ SWGDVSerialDevice::getDeviceName() {
 void
 SWGDVSerialDevice::setDeviceName(QString* device_name) {
     this->device_name = device_name;
+    this->m_device_name_isSet = true;
 }
 
 
+bool
+SWGDVSerialDevice::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(device_name != nullptr && *device_name != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

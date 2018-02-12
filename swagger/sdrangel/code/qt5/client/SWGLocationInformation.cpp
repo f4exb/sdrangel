@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGLocationInformation::SWGLocationInformation(QString* json) {
+SWGLocationInformation::SWGLocationInformation(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGLocationInformation::SWGLocationInformation() {
@@ -38,17 +38,19 @@ SWGLocationInformation::~SWGLocationInformation() {
 void
 SWGLocationInformation::init() {
     latitude = 0.0f;
+    m_latitude_isSet = false;
     longitude = 0.0f;
+    m_longitude_isSet = false;
 }
 
 void
 SWGLocationInformation::cleanup() {
-    
+
 
 }
 
 SWGLocationInformation*
-SWGLocationInformation::fromJson(QString &json) {
+SWGLocationInformation::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -57,28 +59,31 @@ SWGLocationInformation::fromJson(QString &json) {
 }
 
 void
-SWGLocationInformation::fromJsonObject(QJsonObject &pJson) {
+SWGLocationInformation::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
+    
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
 }
 
 QString
 SWGLocationInformation::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGLocationInformation::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("latitude", QJsonValue(latitude));
-
-    obj->insert("longitude", QJsonValue(longitude));
+    QJsonObject obj;
+    if(m_latitude_isSet){
+        obj.insert("latitude", QJsonValue(latitude));
+    }
+    if(m_longitude_isSet){
+        obj.insert("longitude", QJsonValue(longitude));
+    }
 
     return obj;
 }
@@ -90,6 +95,7 @@ SWGLocationInformation::getLatitude() {
 void
 SWGLocationInformation::setLatitude(float latitude) {
     this->latitude = latitude;
+    this->m_latitude_isSet = true;
 }
 
 float
@@ -99,8 +105,18 @@ SWGLocationInformation::getLongitude() {
 void
 SWGLocationInformation::setLongitude(float longitude) {
     this->longitude = longitude;
+    this->m_longitude_isSet = true;
 }
 
 
+bool
+SWGLocationInformation::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_latitude_isSet){ isObjectUpdated = true; break;}
+        if(m_longitude_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

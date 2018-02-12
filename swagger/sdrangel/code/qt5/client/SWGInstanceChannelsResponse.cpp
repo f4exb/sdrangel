@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGInstanceChannelsResponse::SWGInstanceChannelsResponse(QString* json) {
+SWGInstanceChannelsResponse::SWGInstanceChannelsResponse(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGInstanceChannelsResponse::SWGInstanceChannelsResponse() {
@@ -38,16 +38,17 @@ SWGInstanceChannelsResponse::~SWGInstanceChannelsResponse() {
 void
 SWGInstanceChannelsResponse::init() {
     channelcount = 0;
+    m_channelcount_isSet = false;
     channels = new QList<SWGChannelListItem*>();
+    m_channels_isSet = false;
 }
 
 void
 SWGInstanceChannelsResponse::cleanup() {
-    
 
-    if(channels != nullptr) {
-        QList<SWGChannelListItem*>* arr = channels;
-        foreach(SWGChannelListItem* o, *arr) {
+    if(channels != nullptr) { 
+        auto arr = channels;
+        for(auto o: *arr) { 
             delete o;
         }
         delete channels;
@@ -55,7 +56,7 @@ SWGInstanceChannelsResponse::cleanup() {
 }
 
 SWGInstanceChannelsResponse*
-SWGInstanceChannelsResponse::fromJson(QString &json) {
+SWGInstanceChannelsResponse::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -64,32 +65,31 @@ SWGInstanceChannelsResponse::fromJson(QString &json) {
 }
 
 void
-SWGInstanceChannelsResponse::fromJsonObject(QJsonObject &pJson) {
+SWGInstanceChannelsResponse::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&channelcount, pJson["channelcount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&channels, pJson["channels"], "QList", "SWGChannelListItem");
     
+    ::SWGSDRangel::setValue(&channels, pJson["channels"], "QList", "SWGChannelListItem");
 }
 
 QString
 SWGInstanceChannelsResponse::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGInstanceChannelsResponse::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("channelcount", QJsonValue(channelcount));
-
-    QJsonArray channelsJsonArray;
-    toJsonArray((QList<void*>*)channels, &channelsJsonArray, "channels", "SWGChannelListItem");
-    obj->insert("channels", channelsJsonArray);
+    QJsonObject obj;
+    if(m_channelcount_isSet){
+        obj.insert("channelcount", QJsonValue(channelcount));
+    }
+    if(channels->size() > 0){
+        toJsonArray((QList<void*>*)channels, obj, "channels", "SWGChannelListItem");
+    }
 
     return obj;
 }
@@ -101,6 +101,7 @@ SWGInstanceChannelsResponse::getChannelcount() {
 void
 SWGInstanceChannelsResponse::setChannelcount(qint32 channelcount) {
     this->channelcount = channelcount;
+    this->m_channelcount_isSet = true;
 }
 
 QList<SWGChannelListItem*>*
@@ -110,8 +111,18 @@ SWGInstanceChannelsResponse::getChannels() {
 void
 SWGInstanceChannelsResponse::setChannels(QList<SWGChannelListItem*>* channels) {
     this->channels = channels;
+    this->m_channels_isSet = true;
 }
 
 
+bool
+SWGInstanceChannelsResponse::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_channelcount_isSet){ isObjectUpdated = true; break;}
+        if(channels->size() > 0){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

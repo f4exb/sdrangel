@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGRtlSdrSettings::SWGRtlSdrSettings(QString* json) {
+SWGRtlSdrSettings::SWGRtlSdrSettings(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGRtlSdrSettings::SWGRtlSdrSettings() {
@@ -38,24 +38,38 @@ SWGRtlSdrSettings::~SWGRtlSdrSettings() {
 void
 SWGRtlSdrSettings::init() {
     dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
     low_sample_rate = 0;
+    m_low_sample_rate_isSet = false;
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     gain = 0;
+    m_gain_isSet = false;
     lo_ppm_correction = 0;
+    m_lo_ppm_correction_isSet = false;
     log2_decim = 0;
+    m_log2_decim_isSet = false;
     fc_pos = 0;
+    m_fc_pos_isSet = false;
     dc_block = 0;
+    m_dc_block_isSet = false;
     iq_imbalance = 0;
+    m_iq_imbalance_isSet = false;
     agc = 0;
+    m_agc_isSet = false;
     no_mod_mode = 0;
+    m_no_mod_mode_isSet = false;
     transverter_mode = 0;
+    m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     rf_bandwidth = 0;
+    m_rf_bandwidth_isSet = false;
 }
 
 void
 SWGRtlSdrSettings::cleanup() {
-    
+
 
 
 
@@ -72,7 +86,7 @@ SWGRtlSdrSettings::cleanup() {
 }
 
 SWGRtlSdrSettings*
-SWGRtlSdrSettings::fromJson(QString &json) {
+SWGRtlSdrSettings::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -81,64 +95,91 @@ SWGRtlSdrSettings::fromJson(QString &json) {
 }
 
 void
-SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
+SWGRtlSdrSettings::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&low_sample_rate, pJson["lowSampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&lo_ppm_correction, pJson["loPpmCorrection"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&iq_imbalance, pJson["iqImbalance"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&no_mod_mode, pJson["noModMode"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
+    
 }
 
 QString
 SWGRtlSdrSettings::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGRtlSdrSettings::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
-
-    obj->insert("lowSampleRate", QJsonValue(low_sample_rate));
-
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    obj->insert("gain", QJsonValue(gain));
-
-    obj->insert("loPpmCorrection", QJsonValue(lo_ppm_correction));
-
-    obj->insert("log2Decim", QJsonValue(log2_decim));
-
-    obj->insert("fcPos", QJsonValue(fc_pos));
-
-    obj->insert("dcBlock", QJsonValue(dc_block));
-
-    obj->insert("iqImbalance", QJsonValue(iq_imbalance));
-
-    obj->insert("agc", QJsonValue(agc));
-
-    obj->insert("noModMode", QJsonValue(no_mod_mode));
-
-    obj->insert("transverterMode", QJsonValue(transverter_mode));
-
-    obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
-
-    obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
+    QJsonObject obj;
+    if(m_dev_sample_rate_isSet){
+        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+    }
+    if(m_low_sample_rate_isSet){
+        obj.insert("lowSampleRate", QJsonValue(low_sample_rate));
+    }
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_gain_isSet){
+        obj.insert("gain", QJsonValue(gain));
+    }
+    if(m_lo_ppm_correction_isSet){
+        obj.insert("loPpmCorrection", QJsonValue(lo_ppm_correction));
+    }
+    if(m_log2_decim_isSet){
+        obj.insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_fc_pos_isSet){
+        obj.insert("fcPos", QJsonValue(fc_pos));
+    }
+    if(m_dc_block_isSet){
+        obj.insert("dcBlock", QJsonValue(dc_block));
+    }
+    if(m_iq_imbalance_isSet){
+        obj.insert("iqImbalance", QJsonValue(iq_imbalance));
+    }
+    if(m_agc_isSet){
+        obj.insert("agc", QJsonValue(agc));
+    }
+    if(m_no_mod_mode_isSet){
+        obj.insert("noModMode", QJsonValue(no_mod_mode));
+    }
+    if(m_transverter_mode_isSet){
+        obj.insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj.insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_rf_bandwidth_isSet){
+        obj.insert("rfBandwidth", QJsonValue(rf_bandwidth));
+    }
 
     return obj;
 }
@@ -150,6 +191,7 @@ SWGRtlSdrSettings::getDevSampleRate() {
 void
 SWGRtlSdrSettings::setDevSampleRate(qint32 dev_sample_rate) {
     this->dev_sample_rate = dev_sample_rate;
+    this->m_dev_sample_rate_isSet = true;
 }
 
 qint32
@@ -159,6 +201,7 @@ SWGRtlSdrSettings::getLowSampleRate() {
 void
 SWGRtlSdrSettings::setLowSampleRate(qint32 low_sample_rate) {
     this->low_sample_rate = low_sample_rate;
+    this->m_low_sample_rate_isSet = true;
 }
 
 qint64
@@ -168,6 +211,7 @@ SWGRtlSdrSettings::getCenterFrequency() {
 void
 SWGRtlSdrSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 qint32
@@ -177,6 +221,7 @@ SWGRtlSdrSettings::getGain() {
 void
 SWGRtlSdrSettings::setGain(qint32 gain) {
     this->gain = gain;
+    this->m_gain_isSet = true;
 }
 
 qint32
@@ -186,6 +231,7 @@ SWGRtlSdrSettings::getLoPpmCorrection() {
 void
 SWGRtlSdrSettings::setLoPpmCorrection(qint32 lo_ppm_correction) {
     this->lo_ppm_correction = lo_ppm_correction;
+    this->m_lo_ppm_correction_isSet = true;
 }
 
 qint32
@@ -195,6 +241,7 @@ SWGRtlSdrSettings::getLog2Decim() {
 void
 SWGRtlSdrSettings::setLog2Decim(qint32 log2_decim) {
     this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
 }
 
 qint32
@@ -204,6 +251,7 @@ SWGRtlSdrSettings::getFcPos() {
 void
 SWGRtlSdrSettings::setFcPos(qint32 fc_pos) {
     this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
 }
 
 qint32
@@ -213,6 +261,7 @@ SWGRtlSdrSettings::getDcBlock() {
 void
 SWGRtlSdrSettings::setDcBlock(qint32 dc_block) {
     this->dc_block = dc_block;
+    this->m_dc_block_isSet = true;
 }
 
 qint32
@@ -222,6 +271,7 @@ SWGRtlSdrSettings::getIqImbalance() {
 void
 SWGRtlSdrSettings::setIqImbalance(qint32 iq_imbalance) {
     this->iq_imbalance = iq_imbalance;
+    this->m_iq_imbalance_isSet = true;
 }
 
 qint32
@@ -231,6 +281,7 @@ SWGRtlSdrSettings::getAgc() {
 void
 SWGRtlSdrSettings::setAgc(qint32 agc) {
     this->agc = agc;
+    this->m_agc_isSet = true;
 }
 
 qint32
@@ -240,6 +291,7 @@ SWGRtlSdrSettings::getNoModMode() {
 void
 SWGRtlSdrSettings::setNoModMode(qint32 no_mod_mode) {
     this->no_mod_mode = no_mod_mode;
+    this->m_no_mod_mode_isSet = true;
 }
 
 qint32
@@ -249,6 +301,7 @@ SWGRtlSdrSettings::getTransverterMode() {
 void
 SWGRtlSdrSettings::setTransverterMode(qint32 transverter_mode) {
     this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
 }
 
 qint64
@@ -258,6 +311,7 @@ SWGRtlSdrSettings::getTransverterDeltaFrequency() {
 void
 SWGRtlSdrSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
     this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
 }
 
 qint32
@@ -267,8 +321,30 @@ SWGRtlSdrSettings::getRfBandwidth() {
 void
 SWGRtlSdrSettings::setRfBandwidth(qint32 rf_bandwidth) {
     this->rf_bandwidth = rf_bandwidth;
+    this->m_rf_bandwidth_isSet = true;
 }
 
 
+bool
+SWGRtlSdrSettings::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_low_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_lo_ppm_correction_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
+        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
+        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
+        if(m_iq_imbalance_isSet){ isObjectUpdated = true; break;}
+        if(m_agc_isSet){ isObjectUpdated = true; break;}
+        if(m_no_mod_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

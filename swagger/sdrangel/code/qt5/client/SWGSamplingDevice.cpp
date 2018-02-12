@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGSamplingDevice::SWGSamplingDevice(QString* json) {
+SWGSamplingDevice::SWGSamplingDevice(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGSamplingDevice::SWGSamplingDevice() {
@@ -38,42 +38,49 @@ SWGSamplingDevice::~SWGSamplingDevice() {
 void
 SWGSamplingDevice::init() {
     index = 0;
+    m_index_isSet = false;
     hw_type = new QString("");
+    m_hw_type_isSet = false;
     tx = 0;
+    m_tx_isSet = false;
     nb_streams = 0;
+    m_nb_streams_isSet = false;
     stream_index = 0;
+    m_stream_index_isSet = false;
     sequence = 0;
+    m_sequence_isSet = false;
     serial = new QString("");
+    m_serial_isSet = false;
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     bandwidth = 0;
+    m_bandwidth_isSet = false;
     state = new QString("");
+    m_state_isSet = false;
 }
 
 void
 SWGSamplingDevice::cleanup() {
-    
 
-    if(hw_type != nullptr) {
+    if(hw_type != nullptr) { 
         delete hw_type;
     }
 
 
 
 
-
-    if(serial != nullptr) {
+    if(serial != nullptr) { 
         delete serial;
     }
 
 
-
-    if(state != nullptr) {
+    if(state != nullptr) { 
         delete state;
     }
 }
 
 SWGSamplingDevice*
-SWGSamplingDevice::fromJson(QString &json) {
+SWGSamplingDevice::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -82,52 +89,71 @@ SWGSamplingDevice::fromJson(QString &json) {
 }
 
 void
-SWGSamplingDevice::fromJsonObject(QJsonObject &pJson) {
+SWGSamplingDevice::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&hw_type, pJson["hwType"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&sequence, pJson["sequence"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&serial, pJson["serial"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&state, pJson["state"], "QString", "QString");
+    
 }
 
 QString
 SWGSamplingDevice::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGSamplingDevice::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("index", QJsonValue(index));
-
-    toJsonValue(QString("hwType"), hw_type, obj, QString("QString"));
-
-    obj->insert("tx", QJsonValue(tx));
-
-    obj->insert("nbStreams", QJsonValue(nb_streams));
-
-    obj->insert("streamIndex", QJsonValue(stream_index));
-
-    obj->insert("sequence", QJsonValue(sequence));
-
-    toJsonValue(QString("serial"), serial, obj, QString("QString"));
-
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    obj->insert("bandwidth", QJsonValue(bandwidth));
-
-    toJsonValue(QString("state"), state, obj, QString("QString"));
+    QJsonObject obj;
+    if(m_index_isSet){
+        obj.insert("index", QJsonValue(index));
+    }
+    if(hw_type != nullptr && *hw_type != QString("")){
+        toJsonValue(QString("hwType"), hw_type, obj, QString("QString"));
+    }
+    if(m_tx_isSet){
+        obj.insert("tx", QJsonValue(tx));
+    }
+    if(m_nb_streams_isSet){
+        obj.insert("nbStreams", QJsonValue(nb_streams));
+    }
+    if(m_stream_index_isSet){
+        obj.insert("streamIndex", QJsonValue(stream_index));
+    }
+    if(m_sequence_isSet){
+        obj.insert("sequence", QJsonValue(sequence));
+    }
+    if(serial != nullptr && *serial != QString("")){
+        toJsonValue(QString("serial"), serial, obj, QString("QString"));
+    }
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_bandwidth_isSet){
+        obj.insert("bandwidth", QJsonValue(bandwidth));
+    }
+    if(state != nullptr && *state != QString("")){
+        toJsonValue(QString("state"), state, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -139,6 +165,7 @@ SWGSamplingDevice::getIndex() {
 void
 SWGSamplingDevice::setIndex(qint32 index) {
     this->index = index;
+    this->m_index_isSet = true;
 }
 
 QString*
@@ -148,6 +175,7 @@ SWGSamplingDevice::getHwType() {
 void
 SWGSamplingDevice::setHwType(QString* hw_type) {
     this->hw_type = hw_type;
+    this->m_hw_type_isSet = true;
 }
 
 qint32
@@ -157,6 +185,7 @@ SWGSamplingDevice::getTx() {
 void
 SWGSamplingDevice::setTx(qint32 tx) {
     this->tx = tx;
+    this->m_tx_isSet = true;
 }
 
 qint32
@@ -166,6 +195,7 @@ SWGSamplingDevice::getNbStreams() {
 void
 SWGSamplingDevice::setNbStreams(qint32 nb_streams) {
     this->nb_streams = nb_streams;
+    this->m_nb_streams_isSet = true;
 }
 
 qint32
@@ -175,6 +205,7 @@ SWGSamplingDevice::getStreamIndex() {
 void
 SWGSamplingDevice::setStreamIndex(qint32 stream_index) {
     this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
 }
 
 qint32
@@ -184,6 +215,7 @@ SWGSamplingDevice::getSequence() {
 void
 SWGSamplingDevice::setSequence(qint32 sequence) {
     this->sequence = sequence;
+    this->m_sequence_isSet = true;
 }
 
 QString*
@@ -193,6 +225,7 @@ SWGSamplingDevice::getSerial() {
 void
 SWGSamplingDevice::setSerial(QString* serial) {
     this->serial = serial;
+    this->m_serial_isSet = true;
 }
 
 qint64
@@ -202,6 +235,7 @@ SWGSamplingDevice::getCenterFrequency() {
 void
 SWGSamplingDevice::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 qint32
@@ -211,6 +245,7 @@ SWGSamplingDevice::getBandwidth() {
 void
 SWGSamplingDevice::setBandwidth(qint32 bandwidth) {
     this->bandwidth = bandwidth;
+    this->m_bandwidth_isSet = true;
 }
 
 QString*
@@ -220,8 +255,26 @@ SWGSamplingDevice::getState() {
 void
 SWGSamplingDevice::setState(QString* state) {
     this->state = state;
+    this->m_state_isSet = true;
 }
 
 
+bool
+SWGSamplingDevice::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_index_isSet){ isObjectUpdated = true; break;}
+        if(hw_type != nullptr && *hw_type != QString("")){ isObjectUpdated = true; break;}
+        if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(m_nb_streams_isSet){ isObjectUpdated = true; break;}
+        if(m_stream_index_isSet){ isObjectUpdated = true; break;}
+        if(m_sequence_isSet){ isObjectUpdated = true; break;}
+        if(serial != nullptr && *serial != QString("")){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
+        if(state != nullptr && *state != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

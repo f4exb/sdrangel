@@ -12,7 +12,7 @@
 
 /*
  * SWGPresetGroup.h
- * 
+ *
  * Group of presets
  */
 
@@ -28,21 +28,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGPresetGroup: public SWGObject {
 public:
     SWGPresetGroup();
-    SWGPresetGroup(QString* json);
-    virtual ~SWGPresetGroup();
+    SWGPresetGroup(QString json);
+    ~SWGPresetGroup();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGPresetGroup* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGPresetGroup* fromJson(QString jsonString);
 
     QString* getGroupName();
     void setGroupName(QString* group_name);
@@ -54,10 +53,18 @@ public:
     void setPresets(QList<SWGPresetItem*>* presets);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* group_name;
+    bool m_group_name_isSet;
+
     qint32 nb_presets;
+    bool m_nb_presets_isSet;
+
     QList<SWGPresetItem*>* presets;
+    bool m_presets_isSet;
+
 };
 
 }

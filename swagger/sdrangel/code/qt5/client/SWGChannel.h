@@ -12,7 +12,7 @@
 
 /*
  * SWGChannel.h
- * 
+ *
  * Channel summarized information
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGChannel: public SWGObject {
 public:
     SWGChannel();
-    SWGChannel(QString* json);
-    virtual ~SWGChannel();
+    SWGChannel(QString json);
+    ~SWGChannel();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGChannel* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGChannel* fromJson(QString jsonString);
 
     qint32 getIndex();
     void setIndex(qint32 index);
@@ -58,12 +57,24 @@ public:
     void setDeltaFrequency(qint32 delta_frequency);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 index;
+    bool m_index_isSet;
+
     QString* id;
+    bool m_id_isSet;
+
     qint64 uid;
+    bool m_uid_isSet;
+
     QString* title;
+    bool m_title_isSet;
+
     qint32 delta_frequency;
+    bool m_delta_frequency_isSet;
+
 };
 
 }

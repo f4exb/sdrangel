@@ -12,7 +12,7 @@
 
 /*
  * SWGLoggingInfo.h
- * 
+ *
  * Logging parameters setting
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGLoggingInfo: public SWGObject {
 public:
     SWGLoggingInfo();
-    SWGLoggingInfo(QString* json);
-    virtual ~SWGLoggingInfo();
+    SWGLoggingInfo(QString json);
+    ~SWGLoggingInfo();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGLoggingInfo* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGLoggingInfo* fromJson(QString jsonString);
 
     QString* getConsoleLevel();
     void setConsoleLevel(QString* console_level);
@@ -55,11 +54,21 @@ public:
     void setFileName(QString* file_name);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* console_level;
+    bool m_console_level_isSet;
+
     QString* file_level;
+    bool m_file_level_isSet;
+
     qint32 dump_to_file;
+    bool m_dump_to_file_isSet;
+
     QString* file_name;
+    bool m_file_name_isSet;
+
 };
 
 }

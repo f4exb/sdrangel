@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGDVSeralDevices::SWGDVSeralDevices(QString* json) {
+SWGDVSeralDevices::SWGDVSeralDevices(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGDVSeralDevices::SWGDVSeralDevices() {
@@ -38,16 +38,17 @@ SWGDVSeralDevices::~SWGDVSeralDevices() {
 void
 SWGDVSeralDevices::init() {
     nb_devices = 0;
+    m_nb_devices_isSet = false;
     dv_serial_devices = new QList<SWGDVSerialDevice*>();
+    m_dv_serial_devices_isSet = false;
 }
 
 void
 SWGDVSeralDevices::cleanup() {
-    
 
-    if(dv_serial_devices != nullptr) {
-        QList<SWGDVSerialDevice*>* arr = dv_serial_devices;
-        foreach(SWGDVSerialDevice* o, *arr) {
+    if(dv_serial_devices != nullptr) { 
+        auto arr = dv_serial_devices;
+        for(auto o: *arr) { 
             delete o;
         }
         delete dv_serial_devices;
@@ -55,7 +56,7 @@ SWGDVSeralDevices::cleanup() {
 }
 
 SWGDVSeralDevices*
-SWGDVSeralDevices::fromJson(QString &json) {
+SWGDVSeralDevices::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -64,32 +65,31 @@ SWGDVSeralDevices::fromJson(QString &json) {
 }
 
 void
-SWGDVSeralDevices::fromJsonObject(QJsonObject &pJson) {
+SWGDVSeralDevices::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&nb_devices, pJson["nbDevices"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&dv_serial_devices, pJson["dvSerialDevices"], "QList", "SWGDVSerialDevice");
     
+    ::SWGSDRangel::setValue(&dv_serial_devices, pJson["dvSerialDevices"], "QList", "SWGDVSerialDevice");
 }
 
 QString
 SWGDVSeralDevices::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGDVSeralDevices::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("nbDevices", QJsonValue(nb_devices));
-
-    QJsonArray dv_serial_devicesJsonArray;
-    toJsonArray((QList<void*>*)dv_serial_devices, &dv_serial_devicesJsonArray, "dv_serial_devices", "SWGDVSerialDevice");
-    obj->insert("dvSerialDevices", dv_serial_devicesJsonArray);
+    QJsonObject obj;
+    if(m_nb_devices_isSet){
+        obj.insert("nbDevices", QJsonValue(nb_devices));
+    }
+    if(dv_serial_devices->size() > 0){
+        toJsonArray((QList<void*>*)dv_serial_devices, obj, "dvSerialDevices", "SWGDVSerialDevice");
+    }
 
     return obj;
 }
@@ -101,6 +101,7 @@ SWGDVSeralDevices::getNbDevices() {
 void
 SWGDVSeralDevices::setNbDevices(qint32 nb_devices) {
     this->nb_devices = nb_devices;
+    this->m_nb_devices_isSet = true;
 }
 
 QList<SWGDVSerialDevice*>*
@@ -110,8 +111,18 @@ SWGDVSeralDevices::getDvSerialDevices() {
 void
 SWGDVSeralDevices::setDvSerialDevices(QList<SWGDVSerialDevice*>* dv_serial_devices) {
     this->dv_serial_devices = dv_serial_devices;
+    this->m_dv_serial_devices_isSet = true;
 }
 
 
+bool
+SWGDVSeralDevices::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_nb_devices_isSet){ isObjectUpdated = true; break;}
+        if(dv_serial_devices->size() > 0){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

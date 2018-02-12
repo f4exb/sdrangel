@@ -12,7 +12,7 @@
 
 /*
  * SWGHackRFInputSettings.h
- * 
+ *
  * HackRF
  */
 
@@ -25,21 +25,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGHackRFInputSettings: public SWGObject {
 public:
     SWGHackRFInputSettings();
-    SWGHackRFInputSettings(QString* json);
-    virtual ~SWGHackRFInputSettings();
+    SWGHackRFInputSettings(QString json);
+    ~SWGHackRFInputSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGHackRFInputSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGHackRFInputSettings* fromJson(QString jsonString);
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
@@ -81,20 +80,48 @@ public:
     void setLinkTxFrequency(qint32 link_tx_frequency);
 
 
+    virtual bool isSet() override;
+
 private:
     qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     qint32 l_oppm_tenths;
+    bool m_l_oppm_tenths_isSet;
+
     qint32 bandwidth;
+    bool m_bandwidth_isSet;
+
     qint32 lna_gain;
+    bool m_lna_gain_isSet;
+
     qint32 vga_gain;
+    bool m_vga_gain_isSet;
+
     qint32 log2_decim;
+    bool m_log2_decim_isSet;
+
     qint32 fc_pos;
+    bool m_fc_pos_isSet;
+
     qint32 dev_sample_rate;
+    bool m_dev_sample_rate_isSet;
+
     qint32 bias_t;
+    bool m_bias_t_isSet;
+
     qint32 lna_ext;
+    bool m_lna_ext_isSet;
+
     qint32 dc_block;
+    bool m_dc_block_isSet;
+
     qint32 iq_correction;
+    bool m_iq_correction_isSet;
+
     qint32 link_tx_frequency;
+    bool m_link_tx_frequency_isSet;
+
 };
 
 }

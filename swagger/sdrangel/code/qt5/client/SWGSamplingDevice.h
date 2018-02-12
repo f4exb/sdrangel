@@ -12,7 +12,7 @@
 
 /*
  * SWGSamplingDevice.h
- * 
+ *
  * Information about a logical device available from an attached hardware device that can be used as a sampling device
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGSamplingDevice: public SWGObject {
 public:
     SWGSamplingDevice();
-    SWGSamplingDevice(QString* json);
-    virtual ~SWGSamplingDevice();
+    SWGSamplingDevice(QString json);
+    ~SWGSamplingDevice();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGSamplingDevice* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGSamplingDevice* fromJson(QString jsonString);
 
     qint32 getIndex();
     void setIndex(qint32 index);
@@ -73,17 +72,39 @@ public:
     void setState(QString* state);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 index;
+    bool m_index_isSet;
+
     QString* hw_type;
+    bool m_hw_type_isSet;
+
     qint32 tx;
+    bool m_tx_isSet;
+
     qint32 nb_streams;
+    bool m_nb_streams_isSet;
+
     qint32 stream_index;
+    bool m_stream_index_isSet;
+
     qint32 sequence;
+    bool m_sequence_isSet;
+
     QString* serial;
+    bool m_serial_isSet;
+
     qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     qint32 bandwidth;
+    bool m_bandwidth_isSet;
+
     QString* state;
+    bool m_state_isSet;
+
 };
 
 }

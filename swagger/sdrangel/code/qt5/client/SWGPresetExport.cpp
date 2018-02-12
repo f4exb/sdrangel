@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGPresetExport::SWGPresetExport(QString* json) {
+SWGPresetExport::SWGPresetExport(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGPresetExport::SWGPresetExport() {
@@ -38,23 +38,23 @@ SWGPresetExport::~SWGPresetExport() {
 void
 SWGPresetExport::init() {
     file_path = new QString("");
+    m_file_path_isSet = false;
     preset = new SWGPresetIdentifier();
+    m_preset_isSet = false;
 }
 
 void
 SWGPresetExport::cleanup() {
-    
-    if(file_path != nullptr) {
+    if(file_path != nullptr) { 
         delete file_path;
     }
-
-    if(preset != nullptr) {
+    if(preset != nullptr) { 
         delete preset;
     }
 }
 
 SWGPresetExport*
-SWGPresetExport::fromJson(QString &json) {
+SWGPresetExport::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -63,28 +63,31 @@ SWGPresetExport::fromJson(QString &json) {
 }
 
 void
-SWGPresetExport::fromJsonObject(QJsonObject &pJson) {
+SWGPresetExport::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
+    
 }
 
 QString
 SWGPresetExport::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGPresetExport::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
-
-    toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
+    QJsonObject obj;
+    if(file_path != nullptr && *file_path != QString("")){
+        toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
+    }
+    if((preset != nullptr) && (preset->isSet())){
+        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
+    }
 
     return obj;
 }
@@ -96,6 +99,7 @@ SWGPresetExport::getFilePath() {
 void
 SWGPresetExport::setFilePath(QString* file_path) {
     this->file_path = file_path;
+    this->m_file_path_isSet = true;
 }
 
 SWGPresetIdentifier*
@@ -105,8 +109,18 @@ SWGPresetExport::getPreset() {
 void
 SWGPresetExport::setPreset(SWGPresetIdentifier* preset) {
     this->preset = preset;
+    this->m_preset_isSet = true;
 }
 
 
+bool
+SWGPresetExport::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(file_path != nullptr && *file_path != QString("")){ isObjectUpdated = true; break;}
+        if(preset != nullptr && preset->isSet()){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

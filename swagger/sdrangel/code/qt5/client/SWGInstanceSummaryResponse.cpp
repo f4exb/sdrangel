@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGInstanceSummaryResponse::SWGInstanceSummaryResponse(QString* json) {
+SWGInstanceSummaryResponse::SWGInstanceSummaryResponse(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGInstanceSummaryResponse::SWGInstanceSummaryResponse() {
@@ -38,54 +38,57 @@ SWGInstanceSummaryResponse::~SWGInstanceSummaryResponse() {
 void
 SWGInstanceSummaryResponse::init() {
     version = new QString("");
+    m_version_isSet = false;
     qt_version = new QString("");
+    m_qt_version_isSet = false;
     dsp_rx_bits = 0;
+    m_dsp_rx_bits_isSet = false;
     dsp_tx_bits = 0;
+    m_dsp_tx_bits_isSet = false;
     pid = 0;
+    m_pid_isSet = false;
     appname = new QString("");
+    m_appname_isSet = false;
     architecture = new QString("");
+    m_architecture_isSet = false;
     os = new QString("");
+    m_os_isSet = false;
     logging = new SWGLoggingInfo();
+    m_logging_isSet = false;
     devicesetlist = new SWGDeviceSetList();
+    m_devicesetlist_isSet = false;
 }
 
 void
 SWGInstanceSummaryResponse::cleanup() {
-    
-    if(version != nullptr) {
+    if(version != nullptr) { 
         delete version;
     }
-
-    if(qt_version != nullptr) {
+    if(qt_version != nullptr) { 
         delete qt_version;
     }
 
 
 
-
-    if(appname != nullptr) {
+    if(appname != nullptr) { 
         delete appname;
     }
-
-    if(architecture != nullptr) {
+    if(architecture != nullptr) { 
         delete architecture;
     }
-
-    if(os != nullptr) {
+    if(os != nullptr) { 
         delete os;
     }
-
-    if(logging != nullptr) {
+    if(logging != nullptr) { 
         delete logging;
     }
-
-    if(devicesetlist != nullptr) {
+    if(devicesetlist != nullptr) { 
         delete devicesetlist;
     }
 }
 
 SWGInstanceSummaryResponse*
-SWGInstanceSummaryResponse::fromJson(QString &json) {
+SWGInstanceSummaryResponse::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -94,52 +97,71 @@ SWGInstanceSummaryResponse::fromJson(QString &json) {
 }
 
 void
-SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
+SWGInstanceSummaryResponse::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&qt_version, pJson["qtVersion"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&dsp_rx_bits, pJson["dspRxBits"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dsp_tx_bits, pJson["dspTxBits"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&pid, pJson["pid"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&appname, pJson["appname"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&architecture, pJson["architecture"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&os, pJson["os"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
+    
     ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
+    
 }
 
 QString
 SWGInstanceSummaryResponse::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGInstanceSummaryResponse::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("version"), version, obj, QString("QString"));
-
-    toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
-
-    obj->insert("dspRxBits", QJsonValue(dsp_rx_bits));
-
-    obj->insert("dspTxBits", QJsonValue(dsp_tx_bits));
-
-    obj->insert("pid", QJsonValue(pid));
-
-    toJsonValue(QString("appname"), appname, obj, QString("QString"));
-
-    toJsonValue(QString("architecture"), architecture, obj, QString("QString"));
-
-    toJsonValue(QString("os"), os, obj, QString("QString"));
-
-    toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
-
-    toJsonValue(QString("devicesetlist"), devicesetlist, obj, QString("SWGDeviceSetList"));
+    QJsonObject obj;
+    if(version != nullptr && *version != QString("")){
+        toJsonValue(QString("version"), version, obj, QString("QString"));
+    }
+    if(qt_version != nullptr && *qt_version != QString("")){
+        toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
+    }
+    if(m_dsp_rx_bits_isSet){
+        obj.insert("dspRxBits", QJsonValue(dsp_rx_bits));
+    }
+    if(m_dsp_tx_bits_isSet){
+        obj.insert("dspTxBits", QJsonValue(dsp_tx_bits));
+    }
+    if(m_pid_isSet){
+        obj.insert("pid", QJsonValue(pid));
+    }
+    if(appname != nullptr && *appname != QString("")){
+        toJsonValue(QString("appname"), appname, obj, QString("QString"));
+    }
+    if(architecture != nullptr && *architecture != QString("")){
+        toJsonValue(QString("architecture"), architecture, obj, QString("QString"));
+    }
+    if(os != nullptr && *os != QString("")){
+        toJsonValue(QString("os"), os, obj, QString("QString"));
+    }
+    if((logging != nullptr) && (logging->isSet())){
+        toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
+    }
+    if((devicesetlist != nullptr) && (devicesetlist->isSet())){
+        toJsonValue(QString("devicesetlist"), devicesetlist, obj, QString("SWGDeviceSetList"));
+    }
 
     return obj;
 }
@@ -151,6 +173,7 @@ SWGInstanceSummaryResponse::getVersion() {
 void
 SWGInstanceSummaryResponse::setVersion(QString* version) {
     this->version = version;
+    this->m_version_isSet = true;
 }
 
 QString*
@@ -160,6 +183,7 @@ SWGInstanceSummaryResponse::getQtVersion() {
 void
 SWGInstanceSummaryResponse::setQtVersion(QString* qt_version) {
     this->qt_version = qt_version;
+    this->m_qt_version_isSet = true;
 }
 
 qint32
@@ -169,6 +193,7 @@ SWGInstanceSummaryResponse::getDspRxBits() {
 void
 SWGInstanceSummaryResponse::setDspRxBits(qint32 dsp_rx_bits) {
     this->dsp_rx_bits = dsp_rx_bits;
+    this->m_dsp_rx_bits_isSet = true;
 }
 
 qint32
@@ -178,6 +203,7 @@ SWGInstanceSummaryResponse::getDspTxBits() {
 void
 SWGInstanceSummaryResponse::setDspTxBits(qint32 dsp_tx_bits) {
     this->dsp_tx_bits = dsp_tx_bits;
+    this->m_dsp_tx_bits_isSet = true;
 }
 
 qint32
@@ -187,6 +213,7 @@ SWGInstanceSummaryResponse::getPid() {
 void
 SWGInstanceSummaryResponse::setPid(qint32 pid) {
     this->pid = pid;
+    this->m_pid_isSet = true;
 }
 
 QString*
@@ -196,6 +223,7 @@ SWGInstanceSummaryResponse::getAppname() {
 void
 SWGInstanceSummaryResponse::setAppname(QString* appname) {
     this->appname = appname;
+    this->m_appname_isSet = true;
 }
 
 QString*
@@ -205,6 +233,7 @@ SWGInstanceSummaryResponse::getArchitecture() {
 void
 SWGInstanceSummaryResponse::setArchitecture(QString* architecture) {
     this->architecture = architecture;
+    this->m_architecture_isSet = true;
 }
 
 QString*
@@ -214,6 +243,7 @@ SWGInstanceSummaryResponse::getOs() {
 void
 SWGInstanceSummaryResponse::setOs(QString* os) {
     this->os = os;
+    this->m_os_isSet = true;
 }
 
 SWGLoggingInfo*
@@ -223,6 +253,7 @@ SWGInstanceSummaryResponse::getLogging() {
 void
 SWGInstanceSummaryResponse::setLogging(SWGLoggingInfo* logging) {
     this->logging = logging;
+    this->m_logging_isSet = true;
 }
 
 SWGDeviceSetList*
@@ -232,8 +263,26 @@ SWGInstanceSummaryResponse::getDevicesetlist() {
 void
 SWGInstanceSummaryResponse::setDevicesetlist(SWGDeviceSetList* devicesetlist) {
     this->devicesetlist = devicesetlist;
+    this->m_devicesetlist_isSet = true;
 }
 
 
+bool
+SWGInstanceSummaryResponse::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(version != nullptr && *version != QString("")){ isObjectUpdated = true; break;}
+        if(qt_version != nullptr && *qt_version != QString("")){ isObjectUpdated = true; break;}
+        if(m_dsp_rx_bits_isSet){ isObjectUpdated = true; break;}
+        if(m_dsp_tx_bits_isSet){ isObjectUpdated = true; break;}
+        if(m_pid_isSet){ isObjectUpdated = true; break;}
+        if(appname != nullptr && *appname != QString("")){ isObjectUpdated = true; break;}
+        if(architecture != nullptr && *architecture != QString("")){ isObjectUpdated = true; break;}
+        if(os != nullptr && *os != QString("")){ isObjectUpdated = true; break;}
+        if(logging != nullptr && logging->isSet()){ isObjectUpdated = true; break;}
+        if(devicesetlist != nullptr && devicesetlist->isSet()){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

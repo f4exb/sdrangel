@@ -12,7 +12,7 @@
 
 /*
  * SWGLocationInformation.h
- * 
+ *
  * Instance geolocation information
  */
 
@@ -25,21 +25,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGLocationInformation: public SWGObject {
 public:
     SWGLocationInformation();
-    SWGLocationInformation(QString* json);
-    virtual ~SWGLocationInformation();
+    SWGLocationInformation(QString json);
+    ~SWGLocationInformation();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGLocationInformation* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGLocationInformation* fromJson(QString jsonString);
 
     float getLatitude();
     void setLatitude(float latitude);
@@ -48,9 +47,15 @@ public:
     void setLongitude(float longitude);
 
 
+    virtual bool isSet() override;
+
 private:
     float latitude;
+    bool m_latitude_isSet;
+
     float longitude;
+    bool m_longitude_isSet;
+
 };
 
 }

@@ -12,7 +12,7 @@
 
 /*
  * SWGPresetExport.h
- * 
+ *
  * Details to export a preset to file
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGPresetExport: public SWGObject {
 public:
     SWGPresetExport();
-    SWGPresetExport(QString* json);
-    virtual ~SWGPresetExport();
+    SWGPresetExport(QString json);
+    ~SWGPresetExport();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGPresetExport* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGPresetExport* fromJson(QString jsonString);
 
     QString* getFilePath();
     void setFilePath(QString* file_path);
@@ -50,9 +49,15 @@ public:
     void setPreset(SWGPresetIdentifier* preset);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* file_path;
+    bool m_file_path_isSet;
+
     SWGPresetIdentifier* preset;
+    bool m_preset_isSet;
+
 };
 
 }

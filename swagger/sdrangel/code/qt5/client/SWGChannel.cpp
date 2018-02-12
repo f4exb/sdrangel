@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGChannel::SWGChannel(QString* json) {
+SWGChannel::SWGChannel(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGChannel::SWGChannel() {
@@ -38,29 +38,32 @@ SWGChannel::~SWGChannel() {
 void
 SWGChannel::init() {
     index = 0;
+    m_index_isSet = false;
     id = new QString("");
+    m_id_isSet = false;
     uid = 0L;
+    m_uid_isSet = false;
     title = new QString("");
+    m_title_isSet = false;
     delta_frequency = 0;
+    m_delta_frequency_isSet = false;
 }
 
 void
 SWGChannel::cleanup() {
-    
 
-    if(id != nullptr) {
+    if(id != nullptr) { 
         delete id;
     }
 
-
-    if(title != nullptr) {
+    if(title != nullptr) { 
         delete title;
     }
 
 }
 
 SWGChannel*
-SWGChannel::fromJson(QString &json) {
+SWGChannel::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -69,37 +72,46 @@ SWGChannel::fromJson(QString &json) {
 }
 
 void
-SWGChannel::fromJsonObject(QJsonObject &pJson) {
+SWGChannel::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&uid, pJson["uid"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&delta_frequency, pJson["deltaFrequency"], "qint32", "");
+    
 }
 
 QString
 SWGChannel::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGChannel::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("index", QJsonValue(index));
-
-    toJsonValue(QString("id"), id, obj, QString("QString"));
-
-    obj->insert("uid", QJsonValue(uid));
-
-    toJsonValue(QString("title"), title, obj, QString("QString"));
-
-    obj->insert("deltaFrequency", QJsonValue(delta_frequency));
+    QJsonObject obj;
+    if(m_index_isSet){
+        obj.insert("index", QJsonValue(index));
+    }
+    if(id != nullptr && *id != QString("")){
+        toJsonValue(QString("id"), id, obj, QString("QString"));
+    }
+    if(m_uid_isSet){
+        obj.insert("uid", QJsonValue(uid));
+    }
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_delta_frequency_isSet){
+        obj.insert("deltaFrequency", QJsonValue(delta_frequency));
+    }
 
     return obj;
 }
@@ -111,6 +123,7 @@ SWGChannel::getIndex() {
 void
 SWGChannel::setIndex(qint32 index) {
     this->index = index;
+    this->m_index_isSet = true;
 }
 
 QString*
@@ -120,6 +133,7 @@ SWGChannel::getId() {
 void
 SWGChannel::setId(QString* id) {
     this->id = id;
+    this->m_id_isSet = true;
 }
 
 qint64
@@ -129,6 +143,7 @@ SWGChannel::getUid() {
 void
 SWGChannel::setUid(qint64 uid) {
     this->uid = uid;
+    this->m_uid_isSet = true;
 }
 
 QString*
@@ -138,6 +153,7 @@ SWGChannel::getTitle() {
 void
 SWGChannel::setTitle(QString* title) {
     this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -147,8 +163,21 @@ SWGChannel::getDeltaFrequency() {
 void
 SWGChannel::setDeltaFrequency(qint32 delta_frequency) {
     this->delta_frequency = delta_frequency;
+    this->m_delta_frequency_isSet = true;
 }
 
 
+bool
+SWGChannel::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_index_isSet){ isObjectUpdated = true; break;}
+        if(id != nullptr && *id != QString("")){ isObjectUpdated = true; break;}
+        if(m_uid_isSet){ isObjectUpdated = true; break;}
+        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
+        if(m_delta_frequency_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

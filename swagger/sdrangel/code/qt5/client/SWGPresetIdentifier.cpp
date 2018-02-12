@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGPresetIdentifier::SWGPresetIdentifier(QString* json) {
+SWGPresetIdentifier::SWGPresetIdentifier(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGPresetIdentifier::SWGPresetIdentifier() {
@@ -38,30 +38,31 @@ SWGPresetIdentifier::~SWGPresetIdentifier() {
 void
 SWGPresetIdentifier::init() {
     group_name = new QString("");
+    m_group_name_isSet = false;
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     type = new QString("");
+    m_type_isSet = false;
     name = new QString("");
+    m_name_isSet = false;
 }
 
 void
 SWGPresetIdentifier::cleanup() {
-    
-    if(group_name != nullptr) {
+    if(group_name != nullptr) { 
         delete group_name;
     }
 
-
-    if(type != nullptr) {
+    if(type != nullptr) { 
         delete type;
     }
-
-    if(name != nullptr) {
+    if(name != nullptr) { 
         delete name;
     }
 }
 
 SWGPresetIdentifier*
-SWGPresetIdentifier::fromJson(QString &json) {
+SWGPresetIdentifier::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,34 +71,41 @@ SWGPresetIdentifier::fromJson(QString &json) {
 }
 
 void
-SWGPresetIdentifier::fromJsonObject(QJsonObject &pJson) {
+SWGPresetIdentifier::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&type, pJson["type"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
+    
 }
 
 QString
 SWGPresetIdentifier::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGPresetIdentifier::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
-
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    toJsonValue(QString("type"), type, obj, QString("QString"));
-
-    toJsonValue(QString("name"), name, obj, QString("QString"));
+    QJsonObject obj;
+    if(group_name != nullptr && *group_name != QString("")){
+        toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
+    }
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(type != nullptr && *type != QString("")){
+        toJsonValue(QString("type"), type, obj, QString("QString"));
+    }
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -109,6 +117,7 @@ SWGPresetIdentifier::getGroupName() {
 void
 SWGPresetIdentifier::setGroupName(QString* group_name) {
     this->group_name = group_name;
+    this->m_group_name_isSet = true;
 }
 
 qint64
@@ -118,6 +127,7 @@ SWGPresetIdentifier::getCenterFrequency() {
 void
 SWGPresetIdentifier::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 QString*
@@ -127,6 +137,7 @@ SWGPresetIdentifier::getType() {
 void
 SWGPresetIdentifier::setType(QString* type) {
     this->type = type;
+    this->m_type_isSet = true;
 }
 
 QString*
@@ -136,8 +147,20 @@ SWGPresetIdentifier::getName() {
 void
 SWGPresetIdentifier::setName(QString* name) {
     this->name = name;
+    this->m_name_isSet = true;
 }
 
 
+bool
+SWGPresetIdentifier::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(group_name != nullptr && *group_name != QString("")){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(type != nullptr && *type != QString("")){ isObjectUpdated = true; break;}
+        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

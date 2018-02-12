@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGHackRFInputSettings::SWGHackRFInputSettings(QString* json) {
+SWGHackRFInputSettings::SWGHackRFInputSettings(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGHackRFInputSettings::SWGHackRFInputSettings() {
@@ -38,23 +38,36 @@ SWGHackRFInputSettings::~SWGHackRFInputSettings() {
 void
 SWGHackRFInputSettings::init() {
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     bandwidth = 0;
+    m_bandwidth_isSet = false;
     lna_gain = 0;
+    m_lna_gain_isSet = false;
     vga_gain = 0;
+    m_vga_gain_isSet = false;
     log2_decim = 0;
+    m_log2_decim_isSet = false;
     fc_pos = 0;
+    m_fc_pos_isSet = false;
     dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
     bias_t = 0;
+    m_bias_t_isSet = false;
     lna_ext = 0;
+    m_lna_ext_isSet = false;
     dc_block = 0;
+    m_dc_block_isSet = false;
     iq_correction = 0;
+    m_iq_correction_isSet = false;
     link_tx_frequency = 0;
+    m_link_tx_frequency_isSet = false;
 }
 
 void
 SWGHackRFInputSettings::cleanup() {
-    
+
 
 
 
@@ -70,7 +83,7 @@ SWGHackRFInputSettings::cleanup() {
 }
 
 SWGHackRFInputSettings*
-SWGHackRFInputSettings::fromJson(QString &json) {
+SWGHackRFInputSettings::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -79,61 +92,86 @@ SWGHackRFInputSettings::fromJson(QString &json) {
 }
 
 void
-SWGHackRFInputSettings::fromJsonObject(QJsonObject &pJson) {
+SWGHackRFInputSettings::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&lna_gain, pJson["lnaGain"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&vga_gain, pJson["vgaGain"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&lna_ext, pJson["lnaExt"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&link_tx_frequency, pJson["linkTxFrequency"], "qint32", "");
+    
 }
 
 QString
 SWGHackRFInputSettings::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGHackRFInputSettings::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
-
-    obj->insert("bandwidth", QJsonValue(bandwidth));
-
-    obj->insert("lnaGain", QJsonValue(lna_gain));
-
-    obj->insert("vgaGain", QJsonValue(vga_gain));
-
-    obj->insert("log2Decim", QJsonValue(log2_decim));
-
-    obj->insert("fcPos", QJsonValue(fc_pos));
-
-    obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
-
-    obj->insert("biasT", QJsonValue(bias_t));
-
-    obj->insert("lnaExt", QJsonValue(lna_ext));
-
-    obj->insert("dcBlock", QJsonValue(dc_block));
-
-    obj->insert("iqCorrection", QJsonValue(iq_correction));
-
-    obj->insert("linkTxFrequency", QJsonValue(link_tx_frequency));
+    QJsonObject obj;
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_l_oppm_tenths_isSet){
+        obj.insert("LOppmTenths", QJsonValue(l_oppm_tenths));
+    }
+    if(m_bandwidth_isSet){
+        obj.insert("bandwidth", QJsonValue(bandwidth));
+    }
+    if(m_lna_gain_isSet){
+        obj.insert("lnaGain", QJsonValue(lna_gain));
+    }
+    if(m_vga_gain_isSet){
+        obj.insert("vgaGain", QJsonValue(vga_gain));
+    }
+    if(m_log2_decim_isSet){
+        obj.insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_fc_pos_isSet){
+        obj.insert("fcPos", QJsonValue(fc_pos));
+    }
+    if(m_dev_sample_rate_isSet){
+        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+    }
+    if(m_bias_t_isSet){
+        obj.insert("biasT", QJsonValue(bias_t));
+    }
+    if(m_lna_ext_isSet){
+        obj.insert("lnaExt", QJsonValue(lna_ext));
+    }
+    if(m_dc_block_isSet){
+        obj.insert("dcBlock", QJsonValue(dc_block));
+    }
+    if(m_iq_correction_isSet){
+        obj.insert("iqCorrection", QJsonValue(iq_correction));
+    }
+    if(m_link_tx_frequency_isSet){
+        obj.insert("linkTxFrequency", QJsonValue(link_tx_frequency));
+    }
 
     return obj;
 }
@@ -145,6 +183,7 @@ SWGHackRFInputSettings::getCenterFrequency() {
 void
 SWGHackRFInputSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 qint32
@@ -154,6 +193,7 @@ SWGHackRFInputSettings::getLOppmTenths() {
 void
 SWGHackRFInputSettings::setLOppmTenths(qint32 l_oppm_tenths) {
     this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
 }
 
 qint32
@@ -163,6 +203,7 @@ SWGHackRFInputSettings::getBandwidth() {
 void
 SWGHackRFInputSettings::setBandwidth(qint32 bandwidth) {
     this->bandwidth = bandwidth;
+    this->m_bandwidth_isSet = true;
 }
 
 qint32
@@ -172,6 +213,7 @@ SWGHackRFInputSettings::getLnaGain() {
 void
 SWGHackRFInputSettings::setLnaGain(qint32 lna_gain) {
     this->lna_gain = lna_gain;
+    this->m_lna_gain_isSet = true;
 }
 
 qint32
@@ -181,6 +223,7 @@ SWGHackRFInputSettings::getVgaGain() {
 void
 SWGHackRFInputSettings::setVgaGain(qint32 vga_gain) {
     this->vga_gain = vga_gain;
+    this->m_vga_gain_isSet = true;
 }
 
 qint32
@@ -190,6 +233,7 @@ SWGHackRFInputSettings::getLog2Decim() {
 void
 SWGHackRFInputSettings::setLog2Decim(qint32 log2_decim) {
     this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
 }
 
 qint32
@@ -199,6 +243,7 @@ SWGHackRFInputSettings::getFcPos() {
 void
 SWGHackRFInputSettings::setFcPos(qint32 fc_pos) {
     this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
 }
 
 qint32
@@ -208,6 +253,7 @@ SWGHackRFInputSettings::getDevSampleRate() {
 void
 SWGHackRFInputSettings::setDevSampleRate(qint32 dev_sample_rate) {
     this->dev_sample_rate = dev_sample_rate;
+    this->m_dev_sample_rate_isSet = true;
 }
 
 qint32
@@ -217,6 +263,7 @@ SWGHackRFInputSettings::getBiasT() {
 void
 SWGHackRFInputSettings::setBiasT(qint32 bias_t) {
     this->bias_t = bias_t;
+    this->m_bias_t_isSet = true;
 }
 
 qint32
@@ -226,6 +273,7 @@ SWGHackRFInputSettings::getLnaExt() {
 void
 SWGHackRFInputSettings::setLnaExt(qint32 lna_ext) {
     this->lna_ext = lna_ext;
+    this->m_lna_ext_isSet = true;
 }
 
 qint32
@@ -235,6 +283,7 @@ SWGHackRFInputSettings::getDcBlock() {
 void
 SWGHackRFInputSettings::setDcBlock(qint32 dc_block) {
     this->dc_block = dc_block;
+    this->m_dc_block_isSet = true;
 }
 
 qint32
@@ -244,6 +293,7 @@ SWGHackRFInputSettings::getIqCorrection() {
 void
 SWGHackRFInputSettings::setIqCorrection(qint32 iq_correction) {
     this->iq_correction = iq_correction;
+    this->m_iq_correction_isSet = true;
 }
 
 qint32
@@ -253,8 +303,29 @@ SWGHackRFInputSettings::getLinkTxFrequency() {
 void
 SWGHackRFInputSettings::setLinkTxFrequency(qint32 link_tx_frequency) {
     this->link_tx_frequency = link_tx_frequency;
+    this->m_link_tx_frequency_isSet = true;
 }
 
 
+bool
+SWGHackRFInputSettings::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
+        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
+        if(m_lna_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_vga_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
+        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
+        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_bias_t_isSet){ isObjectUpdated = true; break;}
+        if(m_lna_ext_isSet){ isObjectUpdated = true; break;}
+        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
+        if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
+        if(m_link_tx_frequency_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

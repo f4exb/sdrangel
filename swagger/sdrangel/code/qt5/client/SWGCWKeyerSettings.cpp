@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGCWKeyerSettings::SWGCWKeyerSettings(QString* json) {
+SWGCWKeyerSettings::SWGCWKeyerSettings(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGCWKeyerSettings::SWGCWKeyerSettings() {
@@ -38,26 +38,30 @@ SWGCWKeyerSettings::~SWGCWKeyerSettings() {
 void
 SWGCWKeyerSettings::init() {
     sample_rate = 0;
+    m_sample_rate_isSet = false;
     wpm = 0;
+    m_wpm_isSet = false;
     mode = 0;
+    m_mode_isSet = false;
     text = new QString("");
+    m_text_isSet = false;
     loop = 0;
+    m_loop_isSet = false;
 }
 
 void
 SWGCWKeyerSettings::cleanup() {
-    
 
 
 
-    if(text != nullptr) {
+    if(text != nullptr) { 
         delete text;
     }
 
 }
 
 SWGCWKeyerSettings*
-SWGCWKeyerSettings::fromJson(QString &json) {
+SWGCWKeyerSettings::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -66,37 +70,46 @@ SWGCWKeyerSettings::fromJson(QString &json) {
 }
 
 void
-SWGCWKeyerSettings::fromJsonObject(QJsonObject &pJson) {
+SWGCWKeyerSettings::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&wpm, pJson["wpm"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&mode, pJson["mode"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&loop, pJson["loop"], "qint32", "");
+    
 }
 
 QString
 SWGCWKeyerSettings::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGCWKeyerSettings::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("sampleRate", QJsonValue(sample_rate));
-
-    obj->insert("wpm", QJsonValue(wpm));
-
-    obj->insert("mode", QJsonValue(mode));
-
-    toJsonValue(QString("text"), text, obj, QString("QString"));
-
-    obj->insert("loop", QJsonValue(loop));
+    QJsonObject obj;
+    if(m_sample_rate_isSet){
+        obj.insert("sampleRate", QJsonValue(sample_rate));
+    }
+    if(m_wpm_isSet){
+        obj.insert("wpm", QJsonValue(wpm));
+    }
+    if(m_mode_isSet){
+        obj.insert("mode", QJsonValue(mode));
+    }
+    if(text != nullptr && *text != QString("")){
+        toJsonValue(QString("text"), text, obj, QString("QString"));
+    }
+    if(m_loop_isSet){
+        obj.insert("loop", QJsonValue(loop));
+    }
 
     return obj;
 }
@@ -108,6 +121,7 @@ SWGCWKeyerSettings::getSampleRate() {
 void
 SWGCWKeyerSettings::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
+    this->m_sample_rate_isSet = true;
 }
 
 qint32
@@ -117,6 +131,7 @@ SWGCWKeyerSettings::getWpm() {
 void
 SWGCWKeyerSettings::setWpm(qint32 wpm) {
     this->wpm = wpm;
+    this->m_wpm_isSet = true;
 }
 
 qint32
@@ -126,6 +141,7 @@ SWGCWKeyerSettings::getMode() {
 void
 SWGCWKeyerSettings::setMode(qint32 mode) {
     this->mode = mode;
+    this->m_mode_isSet = true;
 }
 
 QString*
@@ -135,6 +151,7 @@ SWGCWKeyerSettings::getText() {
 void
 SWGCWKeyerSettings::setText(QString* text) {
     this->text = text;
+    this->m_text_isSet = true;
 }
 
 qint32
@@ -144,8 +161,21 @@ SWGCWKeyerSettings::getLoop() {
 void
 SWGCWKeyerSettings::setLoop(qint32 loop) {
     this->loop = loop;
+    this->m_loop_isSet = true;
 }
 
 
+bool
+SWGCWKeyerSettings::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_wpm_isSet){ isObjectUpdated = true; break;}
+        if(m_mode_isSet){ isObjectUpdated = true; break;}
+        if(text != nullptr && *text != QString("")){ isObjectUpdated = true; break;}
+        if(m_loop_isSet){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

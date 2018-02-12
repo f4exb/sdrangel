@@ -40,39 +40,39 @@ public:
     QMap<QString, QString> defaultHeaders;
 
     void devicesetChannelDelete(qint32 device_set_index, qint32 channel_index);
-    void devicesetChannelPost(qint32 device_set_index, SWGChannelSettings body);
+    void devicesetChannelPost(qint32 device_set_index, SWGChannelSettings& body);
     void devicesetChannelSettingsGet(qint32 device_set_index, qint32 channel_index);
-    void devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body);
-    void devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index, SWGChannelSettings body);
-    void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem body);
+    void devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index, SWGChannelSettings& body);
+    void devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index, SWGChannelSettings& body);
+    void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem& body);
     void devicesetDeviceRunDelete(qint32 device_set_index);
     void devicesetDeviceRunGet(qint32 device_set_index);
     void devicesetDeviceRunPost(qint32 device_set_index);
     void devicesetDeviceSettingsGet(qint32 device_set_index);
-    void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings body);
-    void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings body);
+    void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings& body);
+    void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings& body);
     void devicesetFocusPatch(qint32 device_set_index);
     void devicesetGet(qint32 device_set_index);
     void instanceDeviceSetDelete();
     void instanceDeviceSetPost(qint32 tx);
     
 private:
-    void devicesetChannelDeleteCallback (HttpRequestWorker * worker);
-    void devicesetChannelPostCallback (HttpRequestWorker * worker);
-    void devicesetChannelSettingsGetCallback (HttpRequestWorker * worker);
-    void devicesetChannelSettingsPatchCallback (HttpRequestWorker * worker);
-    void devicesetChannelSettingsPutCallback (HttpRequestWorker * worker);
-    void devicesetDevicePutCallback (HttpRequestWorker * worker);
-    void devicesetDeviceRunDeleteCallback (HttpRequestWorker * worker);
-    void devicesetDeviceRunGetCallback (HttpRequestWorker * worker);
-    void devicesetDeviceRunPostCallback (HttpRequestWorker * worker);
-    void devicesetDeviceSettingsGetCallback (HttpRequestWorker * worker);
-    void devicesetDeviceSettingsPatchCallback (HttpRequestWorker * worker);
-    void devicesetDeviceSettingsPutCallback (HttpRequestWorker * worker);
-    void devicesetFocusPatchCallback (HttpRequestWorker * worker);
-    void devicesetGetCallback (HttpRequestWorker * worker);
-    void instanceDeviceSetDeleteCallback (HttpRequestWorker * worker);
-    void instanceDeviceSetPostCallback (HttpRequestWorker * worker);
+    void devicesetChannelDeleteCallback (SWGHttpRequestWorker * worker);
+    void devicesetChannelPostCallback (SWGHttpRequestWorker * worker);
+    void devicesetChannelSettingsGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetChannelSettingsPatchCallback (SWGHttpRequestWorker * worker);
+    void devicesetChannelSettingsPutCallback (SWGHttpRequestWorker * worker);
+    void devicesetDevicePutCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceRunDeleteCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceRunGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceRunPostCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSettingsGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSettingsPatchCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSettingsPutCallback (SWGHttpRequestWorker * worker);
+    void devicesetFocusPatchCallback (SWGHttpRequestWorker * worker);
+    void devicesetGetCallback (SWGHttpRequestWorker * worker);
+    void instanceDeviceSetDeleteCallback (SWGHttpRequestWorker * worker);
+    void instanceDeviceSetPostCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void devicesetChannelDeleteSignal(SWGChannelSettings* summary);
@@ -108,6 +108,23 @@ signals:
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    
+    void devicesetChannelDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDevicePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceRunPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetFocusPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceDeviceSetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

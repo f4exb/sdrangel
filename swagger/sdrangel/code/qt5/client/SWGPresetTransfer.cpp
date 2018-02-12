@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGPresetTransfer::SWGPresetTransfer(QString* json) {
+SWGPresetTransfer::SWGPresetTransfer(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGPresetTransfer::SWGPresetTransfer() {
@@ -38,20 +38,21 @@ SWGPresetTransfer::~SWGPresetTransfer() {
 void
 SWGPresetTransfer::init() {
     device_set_index = 0;
+    m_device_set_index_isSet = false;
     preset = new SWGPresetIdentifier();
+    m_preset_isSet = false;
 }
 
 void
 SWGPresetTransfer::cleanup() {
-    
 
-    if(preset != nullptr) {
+    if(preset != nullptr) { 
         delete preset;
     }
 }
 
 SWGPresetTransfer*
-SWGPresetTransfer::fromJson(QString &json) {
+SWGPresetTransfer::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -60,28 +61,31 @@ SWGPresetTransfer::fromJson(QString &json) {
 }
 
 void
-SWGPresetTransfer::fromJsonObject(QJsonObject &pJson) {
+SWGPresetTransfer::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
+    
 }
 
 QString
 SWGPresetTransfer::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGPresetTransfer::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("deviceSetIndex", QJsonValue(device_set_index));
-
-    toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
+    QJsonObject obj;
+    if(m_device_set_index_isSet){
+        obj.insert("deviceSetIndex", QJsonValue(device_set_index));
+    }
+    if((preset != nullptr) && (preset->isSet())){
+        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
+    }
 
     return obj;
 }
@@ -93,6 +97,7 @@ SWGPresetTransfer::getDeviceSetIndex() {
 void
 SWGPresetTransfer::setDeviceSetIndex(qint32 device_set_index) {
     this->device_set_index = device_set_index;
+    this->m_device_set_index_isSet = true;
 }
 
 SWGPresetIdentifier*
@@ -102,8 +107,18 @@ SWGPresetTransfer::getPreset() {
 void
 SWGPresetTransfer::setPreset(SWGPresetIdentifier* preset) {
     this->preset = preset;
+    this->m_preset_isSet = true;
 }
 
 
+bool
+SWGPresetTransfer::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_device_set_index_isSet){ isObjectUpdated = true; break;}
+        if(preset != nullptr && preset->isSet()){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

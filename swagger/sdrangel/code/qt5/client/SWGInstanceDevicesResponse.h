@@ -12,7 +12,7 @@
 
 /*
  * SWGInstanceDevicesResponse.h
- * 
+ *
  * Summarized information about logical devices from hardware devices attached to this SDRangel instance
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGInstanceDevicesResponse: public SWGObject {
 public:
     SWGInstanceDevicesResponse();
-    SWGInstanceDevicesResponse(QString* json);
-    virtual ~SWGInstanceDevicesResponse();
+    SWGInstanceDevicesResponse(QString json);
+    ~SWGInstanceDevicesResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGInstanceDevicesResponse* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGInstanceDevicesResponse* fromJson(QString jsonString);
 
     qint32 getDevicecount();
     void setDevicecount(qint32 devicecount);
@@ -50,9 +49,15 @@ public:
     void setDevices(QList<SWGDeviceListItem*>* devices);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 devicecount;
+    bool m_devicecount_isSet;
+
     QList<SWGDeviceListItem*>* devices;
+    bool m_devices_isSet;
+
 };
 
 }

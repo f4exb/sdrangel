@@ -12,7 +12,7 @@
 
 /*
  * SWGCWKeyerSettings.h
- * 
+ *
  * 
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGCWKeyerSettings: public SWGObject {
 public:
     SWGCWKeyerSettings();
-    SWGCWKeyerSettings(QString* json);
-    virtual ~SWGCWKeyerSettings();
+    SWGCWKeyerSettings(QString json);
+    ~SWGCWKeyerSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGCWKeyerSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGCWKeyerSettings* fromJson(QString jsonString);
 
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
@@ -58,12 +57,24 @@ public:
     void setLoop(qint32 loop);
 
 
+    virtual bool isSet() override;
+
 private:
     qint32 sample_rate;
+    bool m_sample_rate_isSet;
+
     qint32 wpm;
+    bool m_wpm_isSet;
+
     qint32 mode;
+    bool m_mode_isSet;
+
     QString* text;
+    bool m_text_isSet;
+
     qint32 loop;
+    bool m_loop_isSet;
+
 };
 
 }

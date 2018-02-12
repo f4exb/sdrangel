@@ -12,7 +12,7 @@
 
 /*
  * SWGDeviceSet.h
- * 
+ *
  * Sampling device and its associated channels
  */
 
@@ -28,21 +28,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDeviceSet: public SWGObject {
 public:
     SWGDeviceSet();
-    SWGDeviceSet(QString* json);
-    virtual ~SWGDeviceSet();
+    SWGDeviceSet(QString json);
+    ~SWGDeviceSet();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSet* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDeviceSet* fromJson(QString jsonString);
 
     SWGSamplingDevice* getSamplingDevice();
     void setSamplingDevice(SWGSamplingDevice* sampling_device);
@@ -54,10 +53,18 @@ public:
     void setChannels(QList<SWGChannel*>* channels);
 
 
+    virtual bool isSet() override;
+
 private:
     SWGSamplingDevice* sampling_device;
+    bool m_sampling_device_isSet;
+
     qint32 channelcount;
+    bool m_channelcount_isSet;
+
     QList<SWGChannel*>* channels;
+    bool m_channels_isSet;
+
 };
 
 }

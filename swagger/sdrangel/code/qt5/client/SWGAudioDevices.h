@@ -12,7 +12,7 @@
 
 /*
  * SWGAudioDevices.h
- * 
+ *
  * List of audio devices available in the system
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGAudioDevices: public SWGObject {
 public:
     SWGAudioDevices();
-    SWGAudioDevices(QString* json);
-    virtual ~SWGAudioDevices();
+    SWGAudioDevices(QString json);
+    ~SWGAudioDevices();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGAudioDevices* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGAudioDevices* fromJson(QString jsonString);
 
     float getInputVolume();
     void setInputVolume(float input_volume);
@@ -65,14 +64,30 @@ public:
     void setOutputDevices(QList<SWGAudioDevice*>* output_devices);
 
 
+    virtual bool isSet() override;
+
 private:
     float input_volume;
+    bool m_input_volume_isSet;
+
     qint32 nb_input_devices;
+    bool m_nb_input_devices_isSet;
+
     qint32 input_device_selected_index;
+    bool m_input_device_selected_index_isSet;
+
     QList<SWGAudioDevice*>* input_devices;
+    bool m_input_devices_isSet;
+
     qint32 nb_output_devices;
+    bool m_nb_output_devices_isSet;
+
     qint32 output_device_selected_index;
+    bool m_output_device_selected_index_isSet;
+
     QList<SWGAudioDevice*>* output_devices;
+    bool m_output_devices_isSet;
+
 };
 
 }

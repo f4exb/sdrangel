@@ -12,7 +12,7 @@
 
 /*
  * SWGLimeSdrInputSettings.h
- * 
+ *
  * LimeSDR
  */
 
@@ -25,21 +25,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGLimeSdrInputSettings: public SWGObject {
 public:
     SWGLimeSdrInputSettings();
-    SWGLimeSdrInputSettings(QString* json);
-    virtual ~SWGLimeSdrInputSettings();
+    SWGLimeSdrInputSettings(QString json);
+    ~SWGLimeSdrInputSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGLimeSdrInputSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGLimeSdrInputSettings* fromJson(QString jsonString);
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
@@ -99,26 +98,66 @@ public:
     void setExtClockFreq(qint32 ext_clock_freq);
 
 
+    virtual bool isSet() override;
+
 private:
     qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     qint32 dev_sample_rate;
+    bool m_dev_sample_rate_isSet;
+
     qint32 log2_hard_decim;
+    bool m_log2_hard_decim_isSet;
+
     qint32 dc_block;
+    bool m_dc_block_isSet;
+
     qint32 iq_correction;
+    bool m_iq_correction_isSet;
+
     qint32 log2_soft_decim;
+    bool m_log2_soft_decim_isSet;
+
     qint32 lpf_bw;
+    bool m_lpf_bw_isSet;
+
     qint32 lpf_fir_enable;
+    bool m_lpf_fir_enable_isSet;
+
     qint32 lpf_firbw;
+    bool m_lpf_firbw_isSet;
+
     qint32 gain;
+    bool m_gain_isSet;
+
     qint32 nco_enable;
+    bool m_nco_enable_isSet;
+
     qint32 nco_frequency;
+    bool m_nco_frequency_isSet;
+
     qint32 antenna_path;
+    bool m_antenna_path_isSet;
+
     qint32 gain_mode;
+    bool m_gain_mode_isSet;
+
     qint32 lna_gain;
+    bool m_lna_gain_isSet;
+
     qint32 tia_gain;
+    bool m_tia_gain_isSet;
+
     qint32 pga_gain;
+    bool m_pga_gain_isSet;
+
     qint32 ext_clock;
+    bool m_ext_clock_isSet;
+
     qint32 ext_clock_freq;
+    bool m_ext_clock_freq_isSet;
+
 };
 
 }

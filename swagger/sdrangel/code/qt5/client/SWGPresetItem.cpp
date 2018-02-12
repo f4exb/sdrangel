@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGPresetItem::SWGPresetItem(QString* json) {
+SWGPresetItem::SWGPresetItem(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGPresetItem::SWGPresetItem() {
@@ -38,25 +38,26 @@ SWGPresetItem::~SWGPresetItem() {
 void
 SWGPresetItem::init() {
     center_frequency = 0L;
+    m_center_frequency_isSet = false;
     type = new QString("");
+    m_type_isSet = false;
     name = new QString("");
+    m_name_isSet = false;
 }
 
 void
 SWGPresetItem::cleanup() {
-    
 
-    if(type != nullptr) {
+    if(type != nullptr) { 
         delete type;
     }
-
-    if(name != nullptr) {
+    if(name != nullptr) { 
         delete name;
     }
 }
 
 SWGPresetItem*
-SWGPresetItem::fromJson(QString &json) {
+SWGPresetItem::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -65,31 +66,36 @@ SWGPresetItem::fromJson(QString &json) {
 }
 
 void
-SWGPresetItem::fromJsonObject(QJsonObject &pJson) {
+SWGPresetItem::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&type, pJson["type"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
+    
 }
 
 QString
 SWGPresetItem::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGPresetItem::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    obj->insert("centerFrequency", QJsonValue(center_frequency));
-
-    toJsonValue(QString("type"), type, obj, QString("QString"));
-
-    toJsonValue(QString("name"), name, obj, QString("QString"));
+    QJsonObject obj;
+    if(m_center_frequency_isSet){
+        obj.insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(type != nullptr && *type != QString("")){
+        toJsonValue(QString("type"), type, obj, QString("QString"));
+    }
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -101,6 +107,7 @@ SWGPresetItem::getCenterFrequency() {
 void
 SWGPresetItem::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 QString*
@@ -110,6 +117,7 @@ SWGPresetItem::getType() {
 void
 SWGPresetItem::setType(QString* type) {
     this->type = type;
+    this->m_type_isSet = true;
 }
 
 QString*
@@ -119,8 +127,19 @@ SWGPresetItem::getName() {
 void
 SWGPresetItem::setName(QString* name) {
     this->name = name;
+    this->m_name_isSet = true;
 }
 
 
+bool
+SWGPresetItem::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(type != nullptr && *type != QString("")){ isObjectUpdated = true; break;}
+        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

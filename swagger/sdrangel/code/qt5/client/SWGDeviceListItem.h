@@ -12,7 +12,7 @@
 
 /*
  * SWGDeviceListItem.h
- * 
+ *
  * Summarized information about attached hardware device
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGDeviceListItem: public SWGObject {
 public:
     SWGDeviceListItem();
-    SWGDeviceListItem(QString* json);
-    virtual ~SWGDeviceListItem();
+    SWGDeviceListItem(QString json);
+    ~SWGDeviceListItem();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceListItem* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGDeviceListItem* fromJson(QString jsonString);
 
     QString* getDisplayedName();
     void setDisplayedName(QString* displayed_name);
@@ -70,16 +69,36 @@ public:
     void setIndex(qint32 index);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* displayed_name;
+    bool m_displayed_name_isSet;
+
     QString* hw_type;
+    bool m_hw_type_isSet;
+
     QString* serial;
+    bool m_serial_isSet;
+
     qint32 sequence;
+    bool m_sequence_isSet;
+
     qint32 tx;
+    bool m_tx_isSet;
+
     qint32 nb_streams;
+    bool m_nb_streams_isSet;
+
     qint32 stream_index;
+    bool m_stream_index_isSet;
+
     qint32 device_set_index;
+    bool m_device_set_index_isSet;
+
     qint32 index;
+    bool m_index_isSet;
+
 };
 
 }

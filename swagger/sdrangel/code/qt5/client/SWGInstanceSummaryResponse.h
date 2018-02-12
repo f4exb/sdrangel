@@ -12,7 +12,7 @@
 
 /*
  * SWGInstanceSummaryResponse.h
- * 
+ *
  * Summarized information about this SDRangel instance
  */
 
@@ -28,21 +28,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGInstanceSummaryResponse: public SWGObject {
 public:
     SWGInstanceSummaryResponse();
-    SWGInstanceSummaryResponse(QString* json);
-    virtual ~SWGInstanceSummaryResponse();
+    SWGInstanceSummaryResponse(QString json);
+    ~SWGInstanceSummaryResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGInstanceSummaryResponse* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGInstanceSummaryResponse* fromJson(QString jsonString);
 
     QString* getVersion();
     void setVersion(QString* version);
@@ -75,17 +74,39 @@ public:
     void setDevicesetlist(SWGDeviceSetList* devicesetlist);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* version;
+    bool m_version_isSet;
+
     QString* qt_version;
+    bool m_qt_version_isSet;
+
     qint32 dsp_rx_bits;
+    bool m_dsp_rx_bits_isSet;
+
     qint32 dsp_tx_bits;
+    bool m_dsp_tx_bits_isSet;
+
     qint32 pid;
+    bool m_pid_isSet;
+
     QString* appname;
+    bool m_appname_isSet;
+
     QString* architecture;
+    bool m_architecture_isSet;
+
     QString* os;
+    bool m_os_isSet;
+
     SWGLoggingInfo* logging;
+    bool m_logging_isSet;
+
     SWGDeviceSetList* devicesetlist;
+    bool m_devicesetlist_isSet;
+
 };
 
 }

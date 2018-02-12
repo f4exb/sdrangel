@@ -22,9 +22,9 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceSet::SWGDeviceSet(QString* json) {
+SWGDeviceSet::SWGDeviceSet(QString json) {
     init();
-    this->fromJson(*json);
+    this->fromJson(json);
 }
 
 SWGDeviceSet::SWGDeviceSet() {
@@ -38,21 +38,22 @@ SWGDeviceSet::~SWGDeviceSet() {
 void
 SWGDeviceSet::init() {
     sampling_device = new SWGSamplingDevice();
+    m_sampling_device_isSet = false;
     channelcount = 0;
+    m_channelcount_isSet = false;
     channels = new QList<SWGChannel*>();
+    m_channels_isSet = false;
 }
 
 void
 SWGDeviceSet::cleanup() {
-    
-    if(sampling_device != nullptr) {
+    if(sampling_device != nullptr) { 
         delete sampling_device;
     }
 
-
-    if(channels != nullptr) {
-        QList<SWGChannel*>* arr = channels;
-        foreach(SWGChannel* o, *arr) {
+    if(channels != nullptr) { 
+        auto arr = channels;
+        for(auto o: *arr) { 
             delete o;
         }
         delete channels;
@@ -60,7 +61,7 @@ SWGDeviceSet::cleanup() {
 }
 
 SWGDeviceSet*
-SWGDeviceSet::fromJson(QString &json) {
+SWGDeviceSet::fromJson(QString json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -69,35 +70,36 @@ SWGDeviceSet::fromJson(QString &json) {
 }
 
 void
-SWGDeviceSet::fromJsonObject(QJsonObject &pJson) {
+SWGDeviceSet::fromJsonObject(QJsonObject pJson) {
     ::SWGSDRangel::setValue(&sampling_device, pJson["samplingDevice"], "SWGSamplingDevice", "SWGSamplingDevice");
+    
     ::SWGSDRangel::setValue(&channelcount, pJson["channelcount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&channels, pJson["channels"], "QList", "SWGChannel");
     
+    ::SWGSDRangel::setValue(&channels, pJson["channels"], "QList", "SWGChannel");
 }
 
 QString
 SWGDeviceSet::asJson ()
 {
-    QJsonObject* obj = this->asJsonObject();
-    
-    QJsonDocument doc(*obj);
+    QJsonObject obj = this->asJsonObject();
+    QJsonDocument doc(obj);
     QByteArray bytes = doc.toJson();
     return QString(bytes);
 }
 
-QJsonObject*
+QJsonObject
 SWGDeviceSet::asJsonObject() {
-    QJsonObject* obj = new QJsonObject();
-    
-    toJsonValue(QString("samplingDevice"), sampling_device, obj, QString("SWGSamplingDevice"));
-
-    obj->insert("channelcount", QJsonValue(channelcount));
-
-    QJsonArray channelsJsonArray;
-    toJsonArray((QList<void*>*)channels, &channelsJsonArray, "channels", "SWGChannel");
-    obj->insert("channels", channelsJsonArray);
+    QJsonObject obj;
+    if((sampling_device != nullptr) && (sampling_device->isSet())){
+        toJsonValue(QString("samplingDevice"), sampling_device, obj, QString("SWGSamplingDevice"));
+    }
+    if(m_channelcount_isSet){
+        obj.insert("channelcount", QJsonValue(channelcount));
+    }
+    if(channels->size() > 0){
+        toJsonArray((QList<void*>*)channels, obj, "channels", "SWGChannel");
+    }
 
     return obj;
 }
@@ -109,6 +111,7 @@ SWGDeviceSet::getSamplingDevice() {
 void
 SWGDeviceSet::setSamplingDevice(SWGSamplingDevice* sampling_device) {
     this->sampling_device = sampling_device;
+    this->m_sampling_device_isSet = true;
 }
 
 qint32
@@ -118,6 +121,7 @@ SWGDeviceSet::getChannelcount() {
 void
 SWGDeviceSet::setChannelcount(qint32 channelcount) {
     this->channelcount = channelcount;
+    this->m_channelcount_isSet = true;
 }
 
 QList<SWGChannel*>*
@@ -127,8 +131,19 @@ SWGDeviceSet::getChannels() {
 void
 SWGDeviceSet::setChannels(QList<SWGChannel*>* channels) {
     this->channels = channels;
+    this->m_channels_isSet = true;
 }
 
 
+bool
+SWGDeviceSet::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(sampling_device != nullptr && sampling_device->isSet()){ isObjectUpdated = true; break;}
+        if(m_channelcount_isSet){ isObjectUpdated = true; break;}
+        if(channels->size() > 0){ isObjectUpdated = true; break;}
+    }while(false);
+    return isObjectUpdated;
+}
 }
 

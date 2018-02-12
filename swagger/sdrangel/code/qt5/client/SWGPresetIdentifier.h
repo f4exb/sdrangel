@@ -12,7 +12,7 @@
 
 /*
  * SWGPresetIdentifier.h
- * 
+ *
  * Settings preset item
  */
 
@@ -26,21 +26,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGPresetIdentifier: public SWGObject {
 public:
     SWGPresetIdentifier();
-    SWGPresetIdentifier(QString* json);
-    virtual ~SWGPresetIdentifier();
+    SWGPresetIdentifier(QString json);
+    ~SWGPresetIdentifier();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGPresetIdentifier* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGPresetIdentifier* fromJson(QString jsonString);
 
     QString* getGroupName();
     void setGroupName(QString* group_name);
@@ -55,11 +54,21 @@ public:
     void setName(QString* name);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* group_name;
+    bool m_group_name_isSet;
+
     qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     QString* type;
+    bool m_type_isSet;
+
     QString* name;
+    bool m_name_isSet;
+
 };
 
 }

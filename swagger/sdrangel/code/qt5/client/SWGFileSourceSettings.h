@@ -12,7 +12,7 @@
 
 /*
  * SWGFileSourceSettings.h
- * 
+ *
  * FileSource
  */
 
@@ -26,28 +26,31 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGFileSourceSettings: public SWGObject {
 public:
     SWGFileSourceSettings();
-    SWGFileSourceSettings(QString* json);
-    virtual ~SWGFileSourceSettings();
+    SWGFileSourceSettings(QString json);
+    ~SWGFileSourceSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGFileSourceSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGFileSourceSettings* fromJson(QString jsonString);
 
     QString* getFileName();
     void setFileName(QString* file_name);
 
 
+    virtual bool isSet() override;
+
 private:
     QString* file_name;
+    bool m_file_name_isSet;
+
 };
 
 }

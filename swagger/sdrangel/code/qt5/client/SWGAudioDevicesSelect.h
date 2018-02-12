@@ -12,7 +12,7 @@
 
 /*
  * SWGAudioDevicesSelect.h
- * 
+ *
  * Audio devices selected
  */
 
@@ -25,21 +25,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGAudioDevicesSelect: public SWGObject {
 public:
     SWGAudioDevicesSelect();
-    SWGAudioDevicesSelect(QString* json);
-    virtual ~SWGAudioDevicesSelect();
+    SWGAudioDevicesSelect(QString json);
+    ~SWGAudioDevicesSelect();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGAudioDevicesSelect* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGAudioDevicesSelect* fromJson(QString jsonString);
 
     float getInputVolume();
     void setInputVolume(float input_volume);
@@ -51,10 +50,18 @@ public:
     void setOutputIndex(qint32 output_index);
 
 
+    virtual bool isSet() override;
+
 private:
     float input_volume;
+    bool m_input_volume_isSet;
+
     qint32 input_index;
+    bool m_input_index_isSet;
+
     qint32 output_index;
+    bool m_output_index_isSet;
+
 };
 
 }

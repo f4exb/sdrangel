@@ -12,7 +12,7 @@
 
 /*
  * SWGNFMModSettings.h
- * 
+ *
  * NFMMod
  */
 
@@ -27,21 +27,20 @@
 
 #include "SWGObject.h"
 
-
 namespace SWGSDRangel {
 
 class SWGNFMModSettings: public SWGObject {
 public:
     SWGNFMModSettings();
-    SWGNFMModSettings(QString* json);
-    virtual ~SWGNFMModSettings();
+    SWGNFMModSettings(QString json);
+    ~SWGNFMModSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGNFMModSettings* fromJson(QString &jsonString);
+    QJsonObject asJsonObject();
+    void fromJsonObject(QJsonObject json);
+    SWGNFMModSettings* fromJson(QString jsonString);
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
@@ -89,22 +88,54 @@ public:
     void setCwKeyer(SWGCWKeyerSettings* cw_keyer);
 
 
+    virtual bool isSet() override;
+
 private:
     qint64 input_frequency_offset;
+    bool m_input_frequency_offset_isSet;
+
     float rf_bandwidth;
+    bool m_rf_bandwidth_isSet;
+
     float af_bandwidth;
+    bool m_af_bandwidth_isSet;
+
     float fm_deviation;
+    bool m_fm_deviation_isSet;
+
     float tone_frequency;
+    bool m_tone_frequency_isSet;
+
     float volume_factor;
+    bool m_volume_factor_isSet;
+
     qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
+
     qint32 channel_mute;
+    bool m_channel_mute_isSet;
+
     qint32 play_loop;
+    bool m_play_loop_isSet;
+
     qint32 ctcss_on;
+    bool m_ctcss_on_isSet;
+
     qint32 ctcss_index;
+    bool m_ctcss_index_isSet;
+
     qint32 rgb_color;
+    bool m_rgb_color_isSet;
+
     QString* title;
+    bool m_title_isSet;
+
     qint32 mod_af_input;
+    bool m_mod_af_input_isSet;
+
     SWGCWKeyerSettings* cw_keyer;
+    bool m_cw_keyer_isSet;
+
 };
 
 }
