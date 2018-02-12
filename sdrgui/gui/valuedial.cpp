@@ -344,6 +344,7 @@ void ValueDial::wheelEvent(QWheelEvent* event)
 		}
 		setValue(m_valueNew);
 		emit changed(m_valueNew);
+		event->accept();
 	}
 }
 
