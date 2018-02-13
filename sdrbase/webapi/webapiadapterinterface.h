@@ -61,7 +61,6 @@ public:
             SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -74,7 +73,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -88,7 +86,6 @@ public:
             SWGSDRangel::SWGInstanceDevicesResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -102,7 +99,6 @@ public:
             SWGSDRangel::SWGInstanceChannelsResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -115,7 +111,6 @@ public:
             SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -128,7 +123,6 @@ public:
             SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -141,7 +135,6 @@ public:
             SWGSDRangel::SWGAudioDevices& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -154,7 +147,6 @@ public:
             SWGSDRangel::SWGAudioDevicesSelect& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -167,7 +159,6 @@ public:
             SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -180,7 +171,6 @@ public:
             SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -194,7 +184,6 @@ public:
             SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -207,7 +196,6 @@ public:
             SWGSDRangel::SWGPresets& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -221,7 +209,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -235,7 +222,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -249,7 +235,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -262,7 +247,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -276,7 +260,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -290,7 +273,6 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -303,7 +285,6 @@ public:
             SWGSDRangel::SWGDeviceSetList& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -317,7 +298,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -330,7 +310,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -344,7 +323,6 @@ public:
             SWGSDRangel::SWGDeviceSet& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -358,7 +336,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-        error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
     }
@@ -372,7 +349,6 @@ public:
             SWGSDRangel::SWGDeviceListItem& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -386,7 +362,6 @@ public:
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -402,7 +377,6 @@ public:
             SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -416,7 +390,6 @@ public:
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -430,7 +403,6 @@ public:
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -444,7 +416,6 @@ public:
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -459,7 +430,6 @@ public:
 			SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -474,7 +444,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
     {
-        error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
     }
@@ -489,7 +458,6 @@ public:
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -506,7 +474,6 @@ public:
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
