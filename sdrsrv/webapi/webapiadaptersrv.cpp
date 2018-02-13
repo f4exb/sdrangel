@@ -81,6 +81,7 @@ int WebAPIAdapterSrv::instanceSummary(
 #endif
 
     SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
+    logging->init();
     logging->setDumpToFile(m_mainCore.m_logger->getUseFileLogger() ? 1 : 0);
 
     if (logging->getDumpToFile()) {
@@ -103,6 +104,7 @@ int WebAPIAdapterSrv::instanceDelete(
     MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
     m_mainCore.getInputMessageQueue()->push(msg);
 
+    response.init();
     *response.getMessage() = QString("Message to stop the SDRangel instance (MsgDeleteInstance) was submitted successfully");
 
     return 202;
@@ -204,6 +206,7 @@ int WebAPIAdapterSrv::instanceLoggingPut(
     m_mainCore.setLoggingOptions();
 
     // build response
+    response.init();
     getMsgTypeString(m_mainCore.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
     response.setDumpToFile(m_mainCore.m_settings.getUseLogFile() ? 1 : 0);
     getMsgTypeString(m_mainCore.m_settings.getFileMinLogLevel(), *response.getFileLevel());
@@ -221,6 +224,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
+    response.init();
     response.setNbInputDevices(nbInputDevices);
     response.setInputDeviceSelectedIndex(m_mainCore.m_audioDeviceInfo.getInputDeviceIndex());
     response.setNbOutputDevices(nbOutputDevices);
@@ -312,6 +316,7 @@ int WebAPIAdapterSrv::instanceDVSerialPatch(
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     m_mainCore.m_dspEngine->setDVSerialSupport(dvserial);
+    response.init();
 
     if (dvserial)
     {
@@ -367,6 +372,7 @@ int WebAPIAdapterSrv::instancePresetFilePut(
                 preset->setDescription(*query.getDescription());
             }
 
+            response.init();
             response.setCenterFrequency(preset->getCenterFrequency());
             *response.getGroupName() = preset->getGroup();
             *response.getType() = preset->isSourcePreset() ? "R" : "T";
@@ -426,6 +432,7 @@ int WebAPIAdapterSrv::instancePresetFilePost(
             outstream << base64Str;
             exportFile.close();
 
+            response.init();
             response.setCenterFrequency(selectedPreset->getCenterFrequency());
             *response.getGroupName() = selectedPreset->getGroup();
             *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
@@ -454,6 +461,7 @@ int WebAPIAdapterSrv::instancePresetsGet(
     int nbGroups = 0;
     int nbPresetsThisGroup = 0;
     QString groupName;
+    response.init();
     QList<SWGSDRangel::SWGPresetGroup*> *groups = response.getGroups();
     QList<SWGSDRangel::SWGPresetItem*> *swgPresets = 0;
     int i = 0;
@@ -468,6 +476,7 @@ int WebAPIAdapterSrv::instancePresetsGet(
         {
             if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
             groups->append(new SWGSDRangel::SWGPresetGroup);
+            groups->back()->init();
             groupName = preset->getGroup();
             *groups->back()->getGroupName() = groupName;
             swgPresets = groups->back()->getPresets();
@@ -533,6 +542,7 @@ int WebAPIAdapterSrv::instancePresetPatch(
     MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
     m_mainCore.m_inputMessageQueue.push(msg);
 
+    response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
@@ -588,6 +598,7 @@ int WebAPIAdapterSrv::instancePresetPut(
     MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
     m_mainCore.m_inputMessageQueue.push(msg);
 
+    response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
@@ -643,6 +654,7 @@ int WebAPIAdapterSrv::instancePresetPost(
     MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
     m_mainCore.m_inputMessageQueue.push(msg);
 
+    response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
@@ -695,6 +707,7 @@ int WebAPIAdapterSrv::instanceDeviceSetPost(
     MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(tx);
     m_mainCore.m_inputMessageQueue.push(msg);
 
+    response.init();
     *response.getMessage() = QString("Message to add a new device set (MsgAddDeviceSet) was submitted successfully");
 
     return 202;
@@ -709,12 +722,14 @@ int WebAPIAdapterSrv::instanceDeviceSetDelete(
         MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
         m_mainCore.m_inputMessageQueue.push(msg);
 
+        response.init();
         *response.getMessage() = QString("Message to remove last device set (MsgRemoveLastDeviceSet) was submitted successfully");
 
         return 202;
     }
     else
     {
+        error.init();
         *error.getMessage() = "No more device sets to be removed";
 
         return 404;
@@ -735,6 +750,7 @@ int WebAPIAdapterSrv::devicesetGet(
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -801,6 +817,7 @@ int WebAPIAdapterSrv::devicesetDevicePut(
             MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, response.getTx() != 0);
             m_mainCore.m_inputMessageQueue.push(msg);
 
+            response.init();
             *response.getDisplayedName() = samplingDevice.displayedName;
             *response.getHwType() = samplingDevice.hardwareId;
             *response.getSerial() = samplingDevice.serial;
@@ -819,6 +836,7 @@ int WebAPIAdapterSrv::devicesetDevicePut(
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -850,12 +868,14 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -910,12 +930,14 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -942,12 +964,14 @@ int WebAPIAdapterSrv::devicesetDeviceRunGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -975,12 +999,14 @@ int WebAPIAdapterSrv::devicesetDeviceRunPost(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -1008,12 +1034,14 @@ int WebAPIAdapterSrv::devicesetDeviceRunDelete(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -1034,6 +1062,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
         {
             if (deviceSet->m_deviceSourceEngine == 0)
             {
+                error.init();
                 *error.getMessage() = QString("Device set at %1 is not a receive device set").arg(deviceSetIndex);
                 return 400;
             }
@@ -1053,12 +1082,14 @@ int WebAPIAdapterSrv::devicesetChannelPost(
                 MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
+                response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
 
                 return 202;
             }
             else
             {
+                error.init();
                 *error.getMessage() = QString("There is no receive channel with id %1").arg(*query.getChannelType());
                 return 404;
             }
@@ -1067,6 +1098,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
         {
             if (deviceSet->m_deviceSinkEngine == 0)
             {
+                error.init();
                 *error.getMessage() = QString("Device set at %1 is not a transmit device set").arg(deviceSetIndex);
                 return 400;
             }
@@ -1086,12 +1118,14 @@ int WebAPIAdapterSrv::devicesetChannelPost(
             	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
+                response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
 
                 return 202;
             }
             else
             {
+                error.init();
                 *error.getMessage() = QString("There is no transmit channel with id %1").arg(*query.getChannelType());
                 return 404;
             }
@@ -1099,6 +1133,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -1121,12 +1156,14 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
                 MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, false);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
+                response.init();
                 *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
 
                 return 202;
             }
             else
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel at index %1. There are %2 Rx channels")
                         .arg(channelIndex)
                         .arg(channelIndex < deviceSet->getNumberOfRxChannels());
@@ -1140,12 +1177,14 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
                 MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex, true);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
+                response.init();
                 *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
 
                 return 202;
             }
             else
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel at index %1. There are %2 Tx channels")
                         .arg(channelIndex)
                         .arg(channelIndex < deviceSet->getNumberOfRxChannels());
@@ -1154,12 +1193,14 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -1181,6 +1222,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
 
             if (channelAPI == 0)
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1198,6 +1240,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
 
             if (channelAPI == 0)
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1211,12 +1254,14 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -1240,6 +1285,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
 
             if (channelAPI == 0)
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1254,6 +1300,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
                 }
                 else
                 {
+                    error.init();
                     *error.getMessage() = QString("There is no channel type %1 at index %2. Found %3.")
                             .arg(*response.getChannelType())
                             .arg(channelIndex)
@@ -1268,6 +1315,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
 
             if (channelAPI == 0)
             {
+                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1282,6 +1330,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
                 }
                 else
                 {
+                    error.init();
                     *error.getMessage() = QString("There is no channel type %1 at index %2. Found %3.")
                             .arg(*response.getChannelType())
                             .arg(channelIndex)
@@ -1292,12 +1341,14 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
 
         return 404;
@@ -1307,6 +1358,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
 
 void WebAPIAdapterSrv::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
+    deviceSetList->init();
     deviceSetList->setDevicesetcount((int) m_mainCore.m_deviceSets.size());
 
     std::vector<DeviceSet*>::const_iterator it = m_mainCore.m_deviceSets.begin();
@@ -1323,6 +1375,7 @@ void WebAPIAdapterSrv::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
 void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex)
 {
     SWGSDRangel::SWGSamplingDevice *samplingDevice = swgDeviceSet->getSamplingDevice();
+    samplingDevice->init();
     samplingDevice->setIndex(deviceUISetIndex);
     samplingDevice->setTx(deviceSet->m_deviceSinkEngine != 0);
 
