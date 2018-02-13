@@ -24,6 +24,7 @@ CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
+CONFIG(MINGW32):LIBPERSEUSSRC = "D:\softs\libperseus-sdr"
 CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
 CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
@@ -32,6 +33,7 @@ INCLUDEPATH += ../sdrbase
 INCLUDEPATH += $$LIBBLADERFSRC
 INCLUDEPATH += $$LIBHACKRFSRC
 INCLUDEPATH += "D:\boost_1_58_0"
+INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
 INCLUDEPATH += ../liblimesuite/srcmw
 INCLUDEPATH += $$LIBLIMESUITESRC/src
 INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
@@ -43,6 +45,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
 INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
 INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
 INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
+INCLUDEPATH += $$LIBPERSEUSSRC
 INCLUDEPATH += $$LIBIIOSRC
 
 CONFIG(Release):build_subdir = release
@@ -59,6 +62,9 @@ SOURCES += hackrf/devicehackrf.cpp\
 SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
         limesdr/devicelimesdrshared.cpp
+
+SOURCES += perseus/deviceperseus.cpp\
+        perseus/deviceperseusscan.cpp
         
 SOURCES += plutosdr/deviceplutosdr.cpp\
         plutosdr/deviceplutosdrbox.cpp\
@@ -80,6 +86,9 @@ HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
         limesdr/devicelimesdrshared.h
 
+HEADERS += perseus/deviceperseus.h\
+        perseus/deviceperseusscan.h
+
 HEADERS += plutosdr/deviceplutosdr.h\
         plutosdr/deviceplutosdrbox.h\
         plutosdr/deviceplutosdrparams.h\
@@ -90,6 +99,7 @@ LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
 LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
+LIBS += -L../libperseus/$${build_subdir} -lperseus
 LIBS += -L../libiio/$${build_subdir} -llibiio
 
 macx {
