@@ -75,7 +75,7 @@ cd swagger-codegen
 export JAVA_HOME=/opt/install/jdk1.8.0_74 # Example JDK change to your own
 mvn clean package # let it compile...
 mkdir -p /opt/install/swagger/swagger-codegen
-cp modules/swagger-codegen-cli/target/swagger-codegen-cli.jar /opt/install/swagger/swagger-codegen
+cp modules/swagger-codegen-cli/target/swagger-codegen-cli.jar /opt/install/swagger
 ```
 
 Then in the `/opt/install/swagger/` directory write a little `swagger-codegen` shell script to facilitate the invocation. For example:
