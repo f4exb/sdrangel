@@ -252,7 +252,14 @@ std::time_t FileSourceInput::getStartingTimeStamp() const
 
 bool FileSourceInput::handleMessage(const Message& message)
 {
-	if (MsgConfigureFileSourceName::match(message))
+    if (MsgConfigureFileSource::match(message))
+    {
+        MsgConfigureFileSource& conf = (MsgConfigureFileSource&) message;
+        FileSourceSettings settings = conf.getSettings();
+        applySettings(settings);
+        return true;
+    }
+    else if (MsgConfigureFileSourceName::match(message))
 	{
 		MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) message;
 		m_fileName = conf.getFileName();
@@ -329,6 +336,16 @@ bool FileSourceInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool force)
+{
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+
+    m_settings = settings;
+    return true;
 }
 
 int FileSourceInput::webapiSettingsGet(

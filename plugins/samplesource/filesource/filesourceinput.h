@@ -278,6 +278,7 @@ public:
 
 	void openFileStream();
 	void seekFileStream(int seekPercentage);
+	bool applySettings(const FileSourceSettings& settings, bool force = false);
 };
 
 #endif // INCLUDE_FILESOURCEINPUT_H
