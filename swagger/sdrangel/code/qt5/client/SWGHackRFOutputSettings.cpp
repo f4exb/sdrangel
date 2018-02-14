@@ -22,13 +22,28 @@
 
 namespace SWGSDRangel {
 
-SWGHackRFOutputSettings::SWGHackRFOutputSettings(QString json) {
+SWGHackRFOutputSettings::SWGHackRFOutputSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGHackRFOutputSettings::SWGHackRFOutputSettings() {
-    init();
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
+    bandwidth = 0;
+    m_bandwidth_isSet = false;
+    vga_gain = 0;
+    m_vga_gain_isSet = false;
+    log2_interp = 0;
+    m_log2_interp_isSet = false;
+    dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
+    bias_t = 0;
+    m_bias_t_isSet = false;
+    lna_ext = 0;
+    m_lna_ext_isSet = false;
 }
 
 SWGHackRFOutputSettings::~SWGHackRFOutputSettings() {
@@ -68,7 +83,7 @@ SWGHackRFOutputSettings::cleanup() {
 }
 
 SWGHackRFOutputSettings*
-SWGHackRFOutputSettings::fromJson(QString json) {
+SWGHackRFOutputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -77,7 +92,7 @@ SWGHackRFOutputSettings::fromJson(QString json) {
 }
 
 void
-SWGHackRFOutputSettings::fromJsonObject(QJsonObject pJson) {
+SWGHackRFOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -99,38 +114,40 @@ SWGHackRFOutputSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGHackRFOutputSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGHackRFOutputSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_l_oppm_tenths_isSet){
-        obj.insert("LOppmTenths", QJsonValue(l_oppm_tenths));
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
     }
     if(m_bandwidth_isSet){
-        obj.insert("bandwidth", QJsonValue(bandwidth));
+        obj->insert("bandwidth", QJsonValue(bandwidth));
     }
     if(m_vga_gain_isSet){
-        obj.insert("vgaGain", QJsonValue(vga_gain));
+        obj->insert("vgaGain", QJsonValue(vga_gain));
     }
     if(m_log2_interp_isSet){
-        obj.insert("log2Interp", QJsonValue(log2_interp));
+        obj->insert("log2Interp", QJsonValue(log2_interp));
     }
     if(m_dev_sample_rate_isSet){
-        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+        obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_bias_t_isSet){
-        obj.insert("biasT", QJsonValue(bias_t));
+        obj->insert("biasT", QJsonValue(bias_t));
     }
     if(m_lna_ext_isSet){
-        obj.insert("lnaExt", QJsonValue(lna_ext));
+        obj->insert("lnaExt", QJsonValue(lna_ext));
     }
 
     return obj;

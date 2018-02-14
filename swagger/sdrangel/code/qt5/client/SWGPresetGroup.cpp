@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGPresetGroup::SWGPresetGroup(QString json) {
+SWGPresetGroup::SWGPresetGroup(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetGroup::SWGPresetGroup() {
-    init();
+    group_name = nullptr;
+    m_group_name_isSet = false;
+    nb_presets = 0;
+    m_nb_presets_isSet = false;
+    presets = nullptr;
+    m_presets_isSet = false;
 }
 
 SWGPresetGroup::~SWGPresetGroup() {
@@ -61,7 +66,7 @@ SWGPresetGroup::cleanup() {
 }
 
 SWGPresetGroup*
-SWGPresetGroup::fromJson(QString json) {
+SWGPresetGroup::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,7 +75,7 @@ SWGPresetGroup::fromJson(QString json) {
 }
 
 void
-SWGPresetGroup::fromJsonObject(QJsonObject pJson) {
+SWGPresetGroup::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&nb_presets, pJson["nbPresets"], "qint32", "");
@@ -82,20 +87,22 @@ SWGPresetGroup::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetGroup::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetGroup::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(group_name != nullptr && *group_name != QString("")){
         toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
     }
     if(m_nb_presets_isSet){
-        obj.insert("nbPresets", QJsonValue(nb_presets));
+        obj->insert("nbPresets", QJsonValue(nb_presets));
     }
     if(presets->size() > 0){
         toJsonArray((QList<void*>*)presets, obj, "presets", "SWGPresetItem");

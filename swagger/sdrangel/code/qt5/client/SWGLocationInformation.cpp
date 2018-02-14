@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGLocationInformation::SWGLocationInformation(QString json) {
+SWGLocationInformation::SWGLocationInformation(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGLocationInformation::SWGLocationInformation() {
-    init();
+    latitude = 0.0f;
+    m_latitude_isSet = false;
+    longitude = 0.0f;
+    m_longitude_isSet = false;
 }
 
 SWGLocationInformation::~SWGLocationInformation() {
@@ -50,7 +53,7 @@ SWGLocationInformation::cleanup() {
 }
 
 SWGLocationInformation*
-SWGLocationInformation::fromJson(QString json) {
+SWGLocationInformation::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -59,7 +62,7 @@ SWGLocationInformation::fromJson(QString json) {
 }
 
 void
-SWGLocationInformation::fromJsonObject(QJsonObject pJson) {
+SWGLocationInformation::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
@@ -69,20 +72,22 @@ SWGLocationInformation::fromJsonObject(QJsonObject pJson) {
 QString
 SWGLocationInformation::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGLocationInformation::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_latitude_isSet){
-        obj.insert("latitude", QJsonValue(latitude));
+        obj->insert("latitude", QJsonValue(latitude));
     }
     if(m_longitude_isSet){
-        obj.insert("longitude", QJsonValue(longitude));
+        obj->insert("longitude", QJsonValue(longitude));
     }
 
     return obj;

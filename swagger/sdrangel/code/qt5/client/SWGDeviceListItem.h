@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGDeviceListItem: public SWGObject {
 public:
     SWGDeviceListItem();
-    SWGDeviceListItem(QString json);
-    ~SWGDeviceListItem();
+    SWGDeviceListItem(QString* json);
+    virtual ~SWGDeviceListItem();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGDeviceListItem* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGDeviceListItem* fromJson(QString &jsonString);
 
     QString* getDisplayedName();
     void setDisplayedName(QString* displayed_name);

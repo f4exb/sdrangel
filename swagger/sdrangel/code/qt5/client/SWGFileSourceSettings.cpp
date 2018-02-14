@@ -22,13 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGFileSourceSettings::SWGFileSourceSettings(QString json) {
+SWGFileSourceSettings::SWGFileSourceSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGFileSourceSettings::SWGFileSourceSettings() {
-    init();
+    file_name = nullptr;
+    m_file_name_isSet = false;
 }
 
 SWGFileSourceSettings::~SWGFileSourceSettings() {
@@ -49,7 +50,7 @@ SWGFileSourceSettings::cleanup() {
 }
 
 SWGFileSourceSettings*
-SWGFileSourceSettings::fromJson(QString json) {
+SWGFileSourceSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,7 +59,7 @@ SWGFileSourceSettings::fromJson(QString json) {
 }
 
 void
-SWGFileSourceSettings::fromJsonObject(QJsonObject pJson) {
+SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
     
 }
@@ -66,15 +67,17 @@ SWGFileSourceSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGFileSourceSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGFileSourceSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
     }

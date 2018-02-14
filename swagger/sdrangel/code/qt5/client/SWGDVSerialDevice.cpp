@@ -22,13 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGDVSerialDevice::SWGDVSerialDevice(QString json) {
+SWGDVSerialDevice::SWGDVSerialDevice(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDVSerialDevice::SWGDVSerialDevice() {
-    init();
+    device_name = nullptr;
+    m_device_name_isSet = false;
 }
 
 SWGDVSerialDevice::~SWGDVSerialDevice() {
@@ -49,7 +50,7 @@ SWGDVSerialDevice::cleanup() {
 }
 
 SWGDVSerialDevice*
-SWGDVSerialDevice::fromJson(QString json) {
+SWGDVSerialDevice::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,7 +59,7 @@ SWGDVSerialDevice::fromJson(QString json) {
 }
 
 void
-SWGDVSerialDevice::fromJsonObject(QJsonObject pJson) {
+SWGDVSerialDevice::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&device_name, pJson["deviceName"], "QString", "QString");
     
 }
@@ -66,15 +67,17 @@ SWGDVSerialDevice::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDVSerialDevice::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDVSerialDevice::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(device_name != nullptr && *device_name != QString("")){
         toJsonValue(QString("deviceName"), device_name, obj, QString("QString"));
     }

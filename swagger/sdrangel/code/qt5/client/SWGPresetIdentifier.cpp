@@ -22,13 +22,20 @@
 
 namespace SWGSDRangel {
 
-SWGPresetIdentifier::SWGPresetIdentifier(QString json) {
+SWGPresetIdentifier::SWGPresetIdentifier(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetIdentifier::SWGPresetIdentifier() {
-    init();
+    group_name = nullptr;
+    m_group_name_isSet = false;
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    type = nullptr;
+    m_type_isSet = false;
+    name = nullptr;
+    m_name_isSet = false;
 }
 
 SWGPresetIdentifier::~SWGPresetIdentifier() {
@@ -62,7 +69,7 @@ SWGPresetIdentifier::cleanup() {
 }
 
 SWGPresetIdentifier*
-SWGPresetIdentifier::fromJson(QString json) {
+SWGPresetIdentifier::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -71,7 +78,7 @@ SWGPresetIdentifier::fromJson(QString json) {
 }
 
 void
-SWGPresetIdentifier::fromJsonObject(QJsonObject pJson) {
+SWGPresetIdentifier::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
@@ -85,20 +92,22 @@ SWGPresetIdentifier::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetIdentifier::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetIdentifier::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(group_name != nullptr && *group_name != QString("")){
         toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
     }
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(type != nullptr && *type != QString("")){
         toJsonValue(QString("type"), type, obj, QString("QString"));

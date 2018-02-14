@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGFileSourceSettings: public SWGObject {
 public:
     SWGFileSourceSettings();
-    SWGFileSourceSettings(QString json);
-    ~SWGFileSourceSettings();
+    SWGFileSourceSettings(QString* json);
+    virtual ~SWGFileSourceSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGFileSourceSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGFileSourceSettings* fromJson(QString &jsonString);
 
     QString* getFileName();
     void setFileName(QString* file_name);

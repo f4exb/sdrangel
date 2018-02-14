@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGAudioDevices: public SWGObject {
 public:
     SWGAudioDevices();
-    SWGAudioDevices(QString json);
-    ~SWGAudioDevices();
+    SWGAudioDevices(QString* json);
+    virtual ~SWGAudioDevices();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGAudioDevices* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGAudioDevices* fromJson(QString &jsonString);
 
     float getInputVolume();
     void setInputVolume(float input_volume);

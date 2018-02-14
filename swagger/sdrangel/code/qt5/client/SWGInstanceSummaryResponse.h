@@ -33,15 +33,15 @@ namespace SWGSDRangel {
 class SWGInstanceSummaryResponse: public SWGObject {
 public:
     SWGInstanceSummaryResponse();
-    SWGInstanceSummaryResponse(QString json);
-    ~SWGInstanceSummaryResponse();
+    SWGInstanceSummaryResponse(QString* json);
+    virtual ~SWGInstanceSummaryResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGInstanceSummaryResponse* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGInstanceSummaryResponse* fromJson(QString &jsonString);
 
     QString* getVersion();
     void setVersion(QString* version);

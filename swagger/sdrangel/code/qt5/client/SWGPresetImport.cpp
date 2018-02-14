@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGPresetImport::SWGPresetImport(QString json) {
+SWGPresetImport::SWGPresetImport(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetImport::SWGPresetImport() {
-    init();
+    group_name = nullptr;
+    m_group_name_isSet = false;
+    description = nullptr;
+    m_description_isSet = false;
+    file_path = nullptr;
+    m_file_path_isSet = false;
 }
 
 SWGPresetImport::~SWGPresetImport() {
@@ -59,7 +64,7 @@ SWGPresetImport::cleanup() {
 }
 
 SWGPresetImport*
-SWGPresetImport::fromJson(QString json) {
+SWGPresetImport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -68,7 +73,7 @@ SWGPresetImport::fromJson(QString json) {
 }
 
 void
-SWGPresetImport::fromJsonObject(QJsonObject pJson) {
+SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&description, pJson["description"], "QString", "QString");
@@ -80,15 +85,17 @@ SWGPresetImport::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetImport::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetImport::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(group_name != nullptr && *group_name != QString("")){
         toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
     }

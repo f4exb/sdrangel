@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGInstanceDevicesResponse::SWGInstanceDevicesResponse(QString json) {
+SWGInstanceDevicesResponse::SWGInstanceDevicesResponse(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGInstanceDevicesResponse::SWGInstanceDevicesResponse() {
-    init();
+    devicecount = 0;
+    m_devicecount_isSet = false;
+    devices = nullptr;
+    m_devices_isSet = false;
 }
 
 SWGInstanceDevicesResponse::~SWGInstanceDevicesResponse() {
@@ -56,7 +59,7 @@ SWGInstanceDevicesResponse::cleanup() {
 }
 
 SWGInstanceDevicesResponse*
-SWGInstanceDevicesResponse::fromJson(QString json) {
+SWGInstanceDevicesResponse::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -65,7 +68,7 @@ SWGInstanceDevicesResponse::fromJson(QString json) {
 }
 
 void
-SWGInstanceDevicesResponse::fromJsonObject(QJsonObject pJson) {
+SWGInstanceDevicesResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&devicecount, pJson["devicecount"], "qint32", "");
     
     
@@ -75,17 +78,19 @@ SWGInstanceDevicesResponse::fromJsonObject(QJsonObject pJson) {
 QString
 SWGInstanceDevicesResponse::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGInstanceDevicesResponse::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_devicecount_isSet){
-        obj.insert("devicecount", QJsonValue(devicecount));
+        obj->insert("devicecount", QJsonValue(devicecount));
     }
     if(devices->size() > 0){
         toJsonArray((QList<void*>*)devices, obj, "devices", "SWGDeviceListItem");

@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGPresetIdentifier: public SWGObject {
 public:
     SWGPresetIdentifier();
-    SWGPresetIdentifier(QString json);
-    ~SWGPresetIdentifier();
+    SWGPresetIdentifier(QString* json);
+    virtual ~SWGPresetIdentifier();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGPresetIdentifier* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGPresetIdentifier* fromJson(QString &jsonString);
 
     QString* getGroupName();
     void setGroupName(QString* group_name);

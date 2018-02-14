@@ -39,6 +39,7 @@
 #include "SWGChannelSettings.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
+#include "SWGDeviceState.h"
 
 #include "maincore.h"
 #include "loggerwithfile.h"
@@ -68,7 +69,7 @@ int WebAPIAdapterSrv::instanceSummary(
         SWGSDRangel::SWGInstanceSummaryResponse& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-
+    response.init();
     *response.getAppname() = QCoreApplication::applicationName();
     *response.getVersion() = QCoreApplication::applicationVersion();
     *response.getQtVersion() = QString(QT_VERSION_STR);
@@ -115,6 +116,7 @@ int WebAPIAdapterSrv::instanceDevices(
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
+    response.init();
     int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
     response.setDevicecount(nbSamplingDevices);
     QList<SWGSDRangel::SWGDeviceListItem*> *devices = response.getDevices();
@@ -123,6 +125,7 @@ int WebAPIAdapterSrv::instanceDevices(
     {
         PluginInterface::SamplingDevice samplingDevice = tx ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
         devices->append(new SWGSDRangel::SWGDeviceListItem);
+        devices->back()->init();
         *devices->back()->getDisplayedName() = samplingDevice.displayedName;
         *devices->back()->getHwType() = samplingDevice.hardwareId;
         *devices->back()->getSerial() = samplingDevice.serial;
@@ -141,6 +144,7 @@ int WebAPIAdapterSrv::instanceChannels(
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
+    response.init();
     PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainCore.m_pluginManager->getTxChannelRegistrations() : m_mainCore.m_pluginManager->getRxChannelRegistrations();
     int nbChannelDevices = channelRegistrations->size();
     response.setChannelcount(nbChannelDevices);
@@ -149,6 +153,7 @@ int WebAPIAdapterSrv::instanceChannels(
     for (int i = 0; i < nbChannelDevices; i++)
     {
         channels->append(new SWGSDRangel::SWGChannelListItem);
+        channels->back()->init();
         PluginInterface *channelInterface = channelRegistrations->at(i).m_plugin;
         const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
         *channels->back()->getVersion() = pluginDescriptor.version;
@@ -166,6 +171,7 @@ int WebAPIAdapterSrv::instanceLoggingGet(
         SWGSDRangel::SWGLoggingInfo& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
+    response.init();
     response.setDumpToFile(m_mainCore.m_logger->getUseFileLogger() ? 1 : 0);
 
     if (response.getDumpToFile()) {
@@ -179,14 +185,15 @@ int WebAPIAdapterSrv::instanceLoggingGet(
 }
 
 int WebAPIAdapterSrv::instanceLoggingPut(
+        SWGSDRangel::SWGLoggingInfo& query,
         SWGSDRangel::SWGLoggingInfo& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     // response input is the query actually
-    bool dumpToFile = (response.getDumpToFile() != 0);
-    QString* consoleLevel = response.getConsoleLevel();
-    QString* fileLevel = response.getFileLevel();
-    QString* fileName = response.getFileName();
+    bool dumpToFile = (query.getDumpToFile() != 0);
+    QString* consoleLevel = query.getConsoleLevel();
+    QString* fileLevel = query.getFileLevel();
+    QString* fileName = query.getFileName();
 
     // perform actions
     if (consoleLevel) {
@@ -236,12 +243,14 @@ int WebAPIAdapterSrv::instanceAudioGet(
     for (int i = 0; i < nbInputDevices; i++)
     {
         inputDevices->append(new SWGSDRangel::SWGAudioDevice);
+        inputDevices->back()->init();
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
     }
 
     for (int i = 0; i < nbOutputDevices; i++)
     {
         outputDevices->append(new SWGSDRangel::SWGAudioDevice);
+        outputDevices->back()->init();
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
     }
 
@@ -285,6 +294,7 @@ int WebAPIAdapterSrv::instanceLocationGet(
         SWGSDRangel::SWGLocationInformation& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
+    response.init();
     response.setLatitude(m_mainCore.m_settings.getLatitude());
     response.setLongitude(m_mainCore.m_settings.getLongitude());
 
@@ -331,6 +341,7 @@ int WebAPIAdapterSrv::instanceDVSerialPatch(
         while (it != deviceNames.end())
         {
             deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
+            deviceNamesList->back()->init();
             *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
             ++it;
         }
@@ -948,6 +959,8 @@ int WebAPIAdapterSrv::devicesetDeviceRunGet(
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
@@ -955,25 +968,24 @@ int WebAPIAdapterSrv::devicesetDeviceRunGet(
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            response.init();
             return source->webapiRunGet(response, *error.getMessage());
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            response.init();
             return sink->webapiRunGet(response, *error.getMessage());
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }
@@ -983,6 +995,8 @@ int WebAPIAdapterSrv::devicesetDeviceRunPost(
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
@@ -990,25 +1004,24 @@ int WebAPIAdapterSrv::devicesetDeviceRunPost(
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            response.init();
             return source->webapiRun(true, response, *error.getMessage());
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            response.init();
             return sink->webapiRun(true, response, *error.getMessage());
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }
@@ -1018,6 +1031,8 @@ int WebAPIAdapterSrv::devicesetDeviceRunDelete(
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
@@ -1025,25 +1040,24 @@ int WebAPIAdapterSrv::devicesetDeviceRunDelete(
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            response.init();
             return source->webapiRun(false, response, *error.getMessage());
        }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            response.init();
             return sink->webapiRun(false, response, *error.getMessage());
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }

@@ -22,13 +22,22 @@
 
 namespace SWGSDRangel {
 
-SWGChannel::SWGChannel(QString json) {
+SWGChannel::SWGChannel(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGChannel::SWGChannel() {
-    init();
+    index = 0;
+    m_index_isSet = false;
+    id = nullptr;
+    m_id_isSet = false;
+    uid = 0L;
+    m_uid_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
+    delta_frequency = 0;
+    m_delta_frequency_isSet = false;
 }
 
 SWGChannel::~SWGChannel() {
@@ -63,7 +72,7 @@ SWGChannel::cleanup() {
 }
 
 SWGChannel*
-SWGChannel::fromJson(QString json) {
+SWGChannel::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -72,7 +81,7 @@ SWGChannel::fromJson(QString json) {
 }
 
 void
-SWGChannel::fromJsonObject(QJsonObject pJson) {
+SWGChannel::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
     
     ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
@@ -88,29 +97,31 @@ SWGChannel::fromJsonObject(QJsonObject pJson) {
 QString
 SWGChannel::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGChannel::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_index_isSet){
-        obj.insert("index", QJsonValue(index));
+        obj->insert("index", QJsonValue(index));
     }
     if(id != nullptr && *id != QString("")){
         toJsonValue(QString("id"), id, obj, QString("QString"));
     }
     if(m_uid_isSet){
-        obj.insert("uid", QJsonValue(uid));
+        obj->insert("uid", QJsonValue(uid));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
     if(m_delta_frequency_isSet){
-        obj.insert("deltaFrequency", QJsonValue(delta_frequency));
+        obj->insert("deltaFrequency", QJsonValue(delta_frequency));
     }
 
     return obj;

@@ -22,13 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGErrorResponse::SWGErrorResponse(QString json) {
+SWGErrorResponse::SWGErrorResponse(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGErrorResponse::SWGErrorResponse() {
-    init();
+    message = nullptr;
+    m_message_isSet = false;
 }
 
 SWGErrorResponse::~SWGErrorResponse() {
@@ -49,7 +50,7 @@ SWGErrorResponse::cleanup() {
 }
 
 SWGErrorResponse*
-SWGErrorResponse::fromJson(QString json) {
+SWGErrorResponse::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,7 +59,7 @@ SWGErrorResponse::fromJson(QString json) {
 }
 
 void
-SWGErrorResponse::fromJsonObject(QJsonObject pJson) {
+SWGErrorResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&message, pJson["message"], "QString", "QString");
     
 }
@@ -66,15 +67,17 @@ SWGErrorResponse::fromJsonObject(QJsonObject pJson) {
 QString
 SWGErrorResponse::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGErrorResponse::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(message != nullptr && *message != QString("")){
         toJsonValue(QString("message"), message, obj, QString("QString"));
     }

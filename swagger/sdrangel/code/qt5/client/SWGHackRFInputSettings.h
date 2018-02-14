@@ -30,15 +30,15 @@ namespace SWGSDRangel {
 class SWGHackRFInputSettings: public SWGObject {
 public:
     SWGHackRFInputSettings();
-    SWGHackRFInputSettings(QString json);
-    ~SWGHackRFInputSettings();
+    SWGHackRFInputSettings(QString* json);
+    virtual ~SWGHackRFInputSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGHackRFInputSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGHackRFInputSettings* fromJson(QString &jsonString);
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);

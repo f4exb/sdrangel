@@ -22,13 +22,42 @@
 
 namespace SWGSDRangel {
 
-SWGNFMModSettings::SWGNFMModSettings(QString json) {
+SWGNFMModSettings::SWGNFMModSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGNFMModSettings::SWGNFMModSettings() {
-    init();
+    input_frequency_offset = 0L;
+    m_input_frequency_offset_isSet = false;
+    rf_bandwidth = 0.0f;
+    m_rf_bandwidth_isSet = false;
+    af_bandwidth = 0.0f;
+    m_af_bandwidth_isSet = false;
+    fm_deviation = 0.0f;
+    m_fm_deviation_isSet = false;
+    tone_frequency = 0.0f;
+    m_tone_frequency_isSet = false;
+    volume_factor = 0.0f;
+    m_volume_factor_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    channel_mute = 0;
+    m_channel_mute_isSet = false;
+    play_loop = 0;
+    m_play_loop_isSet = false;
+    ctcss_on = 0;
+    m_ctcss_on_isSet = false;
+    ctcss_index = 0;
+    m_ctcss_index_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
+    mod_af_input = 0;
+    m_mod_af_input_isSet = false;
+    cw_keyer = nullptr;
+    m_cw_keyer_isSet = false;
 }
 
 SWGNFMModSettings::~SWGNFMModSettings() {
@@ -93,7 +122,7 @@ SWGNFMModSettings::cleanup() {
 }
 
 SWGNFMModSettings*
-SWGNFMModSettings::fromJson(QString json) {
+SWGNFMModSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -102,7 +131,7 @@ SWGNFMModSettings::fromJson(QString json) {
 }
 
 void
-SWGNFMModSettings::fromJsonObject(QJsonObject pJson) {
+SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
@@ -138,56 +167,58 @@ SWGNFMModSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGNFMModSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGNFMModSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
-        obj.insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
+        obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
     if(m_rf_bandwidth_isSet){
-        obj.insert("rfBandwidth", QJsonValue(rf_bandwidth));
+        obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
     if(m_af_bandwidth_isSet){
-        obj.insert("afBandwidth", QJsonValue(af_bandwidth));
+        obj->insert("afBandwidth", QJsonValue(af_bandwidth));
     }
     if(m_fm_deviation_isSet){
-        obj.insert("fmDeviation", QJsonValue(fm_deviation));
+        obj->insert("fmDeviation", QJsonValue(fm_deviation));
     }
     if(m_tone_frequency_isSet){
-        obj.insert("toneFrequency", QJsonValue(tone_frequency));
+        obj->insert("toneFrequency", QJsonValue(tone_frequency));
     }
     if(m_volume_factor_isSet){
-        obj.insert("volumeFactor", QJsonValue(volume_factor));
+        obj->insert("volumeFactor", QJsonValue(volume_factor));
     }
     if(m_audio_sample_rate_isSet){
-        obj.insert("audioSampleRate", QJsonValue(audio_sample_rate));
+        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_channel_mute_isSet){
-        obj.insert("channelMute", QJsonValue(channel_mute));
+        obj->insert("channelMute", QJsonValue(channel_mute));
     }
     if(m_play_loop_isSet){
-        obj.insert("playLoop", QJsonValue(play_loop));
+        obj->insert("playLoop", QJsonValue(play_loop));
     }
     if(m_ctcss_on_isSet){
-        obj.insert("ctcssOn", QJsonValue(ctcss_on));
+        obj->insert("ctcssOn", QJsonValue(ctcss_on));
     }
     if(m_ctcss_index_isSet){
-        obj.insert("ctcssIndex", QJsonValue(ctcss_index));
+        obj->insert("ctcssIndex", QJsonValue(ctcss_index));
     }
     if(m_rgb_color_isSet){
-        obj.insert("rgbColor", QJsonValue(rgb_color));
+        obj->insert("rgbColor", QJsonValue(rgb_color));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
     if(m_mod_af_input_isSet){
-        obj.insert("modAFInput", QJsonValue(mod_af_input));
+        obj->insert("modAFInput", QJsonValue(mod_af_input));
     }
     if((cw_keyer != nullptr) && (cw_keyer->isSet())){
         toJsonValue(QString("cwKeyer"), cw_keyer, obj, QString("SWGCWKeyerSettings"));

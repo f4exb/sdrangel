@@ -54,6 +54,7 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLoggingPut(
+            SWGSDRangel::SWGLoggingInfo& query,
             SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error);
 

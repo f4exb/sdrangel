@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGPresets::SWGPresets(QString json) {
+SWGPresets::SWGPresets(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresets::SWGPresets() {
-    init();
+    nb_groups = 0;
+    m_nb_groups_isSet = false;
+    groups = nullptr;
+    m_groups_isSet = false;
 }
 
 SWGPresets::~SWGPresets() {
@@ -56,7 +59,7 @@ SWGPresets::cleanup() {
 }
 
 SWGPresets*
-SWGPresets::fromJson(QString json) {
+SWGPresets::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -65,7 +68,7 @@ SWGPresets::fromJson(QString json) {
 }
 
 void
-SWGPresets::fromJsonObject(QJsonObject pJson) {
+SWGPresets::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_groups, pJson["nbGroups"], "qint32", "");
     
     
@@ -75,17 +78,19 @@ SWGPresets::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresets::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresets::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_nb_groups_isSet){
-        obj.insert("nbGroups", QJsonValue(nb_groups));
+        obj->insert("nbGroups", QJsonValue(nb_groups));
     }
     if(groups->size() > 0){
         toJsonArray((QList<void*>*)groups, obj, "groups", "SWGPresetGroup");

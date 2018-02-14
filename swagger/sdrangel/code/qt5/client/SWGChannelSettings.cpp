@@ -22,13 +22,20 @@
 
 namespace SWGSDRangel {
 
-SWGChannelSettings::SWGChannelSettings(QString json) {
+SWGChannelSettings::SWGChannelSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGChannelSettings::SWGChannelSettings() {
-    init();
+    channel_type = nullptr;
+    m_channel_type_isSet = false;
+    tx = 0;
+    m_tx_isSet = false;
+    nfm_demod_settings = nullptr;
+    m_nfm_demod_settings_isSet = false;
+    nfm_mod_settings = nullptr;
+    m_nfm_mod_settings_isSet = false;
 }
 
 SWGChannelSettings::~SWGChannelSettings() {
@@ -62,7 +69,7 @@ SWGChannelSettings::cleanup() {
 }
 
 SWGChannelSettings*
-SWGChannelSettings::fromJson(QString json) {
+SWGChannelSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -71,7 +78,7 @@ SWGChannelSettings::fromJson(QString json) {
 }
 
 void
-SWGChannelSettings::fromJsonObject(QJsonObject pJson) {
+SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_type, pJson["channelType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
@@ -85,20 +92,22 @@ SWGChannelSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGChannelSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGChannelSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(channel_type != nullptr && *channel_type != QString("")){
         toJsonValue(QString("channelType"), channel_type, obj, QString("QString"));
     }
     if(m_tx_isSet){
-        obj.insert("tx", QJsonValue(tx));
+        obj->insert("tx", QJsonValue(tx));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));

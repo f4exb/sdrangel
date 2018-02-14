@@ -22,13 +22,28 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceSettings::SWGDeviceSettings(QString json) {
+SWGDeviceSettings::SWGDeviceSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDeviceSettings::SWGDeviceSettings() {
-    init();
+    device_hw_type = nullptr;
+    m_device_hw_type_isSet = false;
+    tx = 0;
+    m_tx_isSet = false;
+    file_source_settings = nullptr;
+    m_file_source_settings_isSet = false;
+    hack_rf_input_settings = nullptr;
+    m_hack_rf_input_settings_isSet = false;
+    hack_rf_output_settings = nullptr;
+    m_hack_rf_output_settings_isSet = false;
+    lime_sdr_input_settings = nullptr;
+    m_lime_sdr_input_settings_isSet = false;
+    lime_sdr_output_settings = nullptr;
+    m_lime_sdr_output_settings_isSet = false;
+    rtl_sdr_settings = nullptr;
+    m_rtl_sdr_settings_isSet = false;
 }
 
 SWGDeviceSettings::~SWGDeviceSettings() {
@@ -82,7 +97,7 @@ SWGDeviceSettings::cleanup() {
 }
 
 SWGDeviceSettings*
-SWGDeviceSettings::fromJson(QString json) {
+SWGDeviceSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -91,7 +106,7 @@ SWGDeviceSettings::fromJson(QString json) {
 }
 
 void
-SWGDeviceSettings::fromJsonObject(QJsonObject pJson) {
+SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&device_hw_type, pJson["deviceHwType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
@@ -113,20 +128,22 @@ SWGDeviceSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDeviceSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDeviceSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(device_hw_type != nullptr && *device_hw_type != QString("")){
         toJsonValue(QString("deviceHwType"), device_hw_type, obj, QString("QString"));
     }
     if(m_tx_isSet){
-        obj.insert("tx", QJsonValue(tx));
+        obj->insert("tx", QJsonValue(tx));
     }
     if((file_source_settings != nullptr) && (file_source_settings->isSet())){
         toJsonValue(QString("fileSourceSettings"), file_source_settings, obj, QString("SWGFileSourceSettings"));

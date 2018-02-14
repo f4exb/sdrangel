@@ -22,13 +22,38 @@
 
 namespace SWGSDRangel {
 
-SWGHackRFInputSettings::SWGHackRFInputSettings(QString json) {
+SWGHackRFInputSettings::SWGHackRFInputSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGHackRFInputSettings::SWGHackRFInputSettings() {
-    init();
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
+    bandwidth = 0;
+    m_bandwidth_isSet = false;
+    lna_gain = 0;
+    m_lna_gain_isSet = false;
+    vga_gain = 0;
+    m_vga_gain_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
+    dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
+    bias_t = 0;
+    m_bias_t_isSet = false;
+    lna_ext = 0;
+    m_lna_ext_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_correction = 0;
+    m_iq_correction_isSet = false;
+    link_tx_frequency = 0;
+    m_link_tx_frequency_isSet = false;
 }
 
 SWGHackRFInputSettings::~SWGHackRFInputSettings() {
@@ -83,7 +108,7 @@ SWGHackRFInputSettings::cleanup() {
 }
 
 SWGHackRFInputSettings*
-SWGHackRFInputSettings::fromJson(QString json) {
+SWGHackRFInputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -92,7 +117,7 @@ SWGHackRFInputSettings::fromJson(QString json) {
 }
 
 void
-SWGHackRFInputSettings::fromJsonObject(QJsonObject pJson) {
+SWGHackRFInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -124,53 +149,55 @@ SWGHackRFInputSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGHackRFInputSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGHackRFInputSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_l_oppm_tenths_isSet){
-        obj.insert("LOppmTenths", QJsonValue(l_oppm_tenths));
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
     }
     if(m_bandwidth_isSet){
-        obj.insert("bandwidth", QJsonValue(bandwidth));
+        obj->insert("bandwidth", QJsonValue(bandwidth));
     }
     if(m_lna_gain_isSet){
-        obj.insert("lnaGain", QJsonValue(lna_gain));
+        obj->insert("lnaGain", QJsonValue(lna_gain));
     }
     if(m_vga_gain_isSet){
-        obj.insert("vgaGain", QJsonValue(vga_gain));
+        obj->insert("vgaGain", QJsonValue(vga_gain));
     }
     if(m_log2_decim_isSet){
-        obj.insert("log2Decim", QJsonValue(log2_decim));
+        obj->insert("log2Decim", QJsonValue(log2_decim));
     }
     if(m_fc_pos_isSet){
-        obj.insert("fcPos", QJsonValue(fc_pos));
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_dev_sample_rate_isSet){
-        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+        obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_bias_t_isSet){
-        obj.insert("biasT", QJsonValue(bias_t));
+        obj->insert("biasT", QJsonValue(bias_t));
     }
     if(m_lna_ext_isSet){
-        obj.insert("lnaExt", QJsonValue(lna_ext));
+        obj->insert("lnaExt", QJsonValue(lna_ext));
     }
     if(m_dc_block_isSet){
-        obj.insert("dcBlock", QJsonValue(dc_block));
+        obj->insert("dcBlock", QJsonValue(dc_block));
     }
     if(m_iq_correction_isSet){
-        obj.insert("iqCorrection", QJsonValue(iq_correction));
+        obj->insert("iqCorrection", QJsonValue(iq_correction));
     }
     if(m_link_tx_frequency_isSet){
-        obj.insert("linkTxFrequency", QJsonValue(link_tx_frequency));
+        obj->insert("linkTxFrequency", QJsonValue(link_tx_frequency));
     }
 
     return obj;

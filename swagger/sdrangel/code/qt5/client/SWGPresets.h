@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGPresets: public SWGObject {
 public:
     SWGPresets();
-    SWGPresets(QString json);
-    ~SWGPresets();
+    SWGPresets(QString* json);
+    virtual ~SWGPresets();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGPresets* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGPresets* fromJson(QString &jsonString);
 
     qint32 getNbGroups();
     void setNbGroups(qint32 nb_groups);

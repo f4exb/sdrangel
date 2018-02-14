@@ -22,13 +22,40 @@
 
 namespace SWGSDRangel {
 
-SWGRtlSdrSettings::SWGRtlSdrSettings(QString json) {
+SWGRtlSdrSettings::SWGRtlSdrSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGRtlSdrSettings::SWGRtlSdrSettings() {
-    init();
+    dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
+    low_sample_rate = 0;
+    m_low_sample_rate_isSet = false;
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    gain = 0;
+    m_gain_isSet = false;
+    lo_ppm_correction = 0;
+    m_lo_ppm_correction_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_imbalance = 0;
+    m_iq_imbalance_isSet = false;
+    agc = 0;
+    m_agc_isSet = false;
+    no_mod_mode = 0;
+    m_no_mod_mode_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
+    rf_bandwidth = 0;
+    m_rf_bandwidth_isSet = false;
 }
 
 SWGRtlSdrSettings::~SWGRtlSdrSettings() {
@@ -86,7 +113,7 @@ SWGRtlSdrSettings::cleanup() {
 }
 
 SWGRtlSdrSettings*
-SWGRtlSdrSettings::fromJson(QString json) {
+SWGRtlSdrSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -95,7 +122,7 @@ SWGRtlSdrSettings::fromJson(QString json) {
 }
 
 void
-SWGRtlSdrSettings::fromJsonObject(QJsonObject pJson) {
+SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&low_sample_rate, pJson["lowSampleRate"], "qint32", "");
@@ -129,56 +156,58 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGRtlSdrSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGRtlSdrSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_dev_sample_rate_isSet){
-        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+        obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_low_sample_rate_isSet){
-        obj.insert("lowSampleRate", QJsonValue(low_sample_rate));
+        obj->insert("lowSampleRate", QJsonValue(low_sample_rate));
     }
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_gain_isSet){
-        obj.insert("gain", QJsonValue(gain));
+        obj->insert("gain", QJsonValue(gain));
     }
     if(m_lo_ppm_correction_isSet){
-        obj.insert("loPpmCorrection", QJsonValue(lo_ppm_correction));
+        obj->insert("loPpmCorrection", QJsonValue(lo_ppm_correction));
     }
     if(m_log2_decim_isSet){
-        obj.insert("log2Decim", QJsonValue(log2_decim));
+        obj->insert("log2Decim", QJsonValue(log2_decim));
     }
     if(m_fc_pos_isSet){
-        obj.insert("fcPos", QJsonValue(fc_pos));
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_dc_block_isSet){
-        obj.insert("dcBlock", QJsonValue(dc_block));
+        obj->insert("dcBlock", QJsonValue(dc_block));
     }
     if(m_iq_imbalance_isSet){
-        obj.insert("iqImbalance", QJsonValue(iq_imbalance));
+        obj->insert("iqImbalance", QJsonValue(iq_imbalance));
     }
     if(m_agc_isSet){
-        obj.insert("agc", QJsonValue(agc));
+        obj->insert("agc", QJsonValue(agc));
     }
     if(m_no_mod_mode_isSet){
-        obj.insert("noModMode", QJsonValue(no_mod_mode));
+        obj->insert("noModMode", QJsonValue(no_mod_mode));
     }
     if(m_transverter_mode_isSet){
-        obj.insert("transverterMode", QJsonValue(transverter_mode));
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
     }
     if(m_transverter_delta_frequency_isSet){
-        obj.insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
     if(m_rf_bandwidth_isSet){
-        obj.insert("rfBandwidth", QJsonValue(rf_bandwidth));
+        obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
 
     return obj;

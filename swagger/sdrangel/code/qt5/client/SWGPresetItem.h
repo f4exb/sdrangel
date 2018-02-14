@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGPresetItem: public SWGObject {
 public:
     SWGPresetItem();
-    SWGPresetItem(QString json);
-    ~SWGPresetItem();
+    SWGPresetItem(QString* json);
+    virtual ~SWGPresetItem();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGPresetItem* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGPresetItem* fromJson(QString &jsonString);
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);

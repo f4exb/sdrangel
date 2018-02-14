@@ -22,13 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGAudioDevice::SWGAudioDevice(QString json) {
+SWGAudioDevice::SWGAudioDevice(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGAudioDevice::SWGAudioDevice() {
-    init();
+    name = nullptr;
+    m_name_isSet = false;
 }
 
 SWGAudioDevice::~SWGAudioDevice() {
@@ -49,7 +50,7 @@ SWGAudioDevice::cleanup() {
 }
 
 SWGAudioDevice*
-SWGAudioDevice::fromJson(QString json) {
+SWGAudioDevice::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,7 +59,7 @@ SWGAudioDevice::fromJson(QString json) {
 }
 
 void
-SWGAudioDevice::fromJsonObject(QJsonObject pJson) {
+SWGAudioDevice::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
     
 }
@@ -66,15 +67,17 @@ SWGAudioDevice::fromJsonObject(QJsonObject pJson) {
 QString
 SWGAudioDevice::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGAudioDevice::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(name != nullptr && *name != QString("")){
         toJsonValue(QString("name"), name, obj, QString("QString"));
     }

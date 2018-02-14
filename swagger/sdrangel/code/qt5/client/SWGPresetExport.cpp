@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGPresetExport::SWGPresetExport(QString json) {
+SWGPresetExport::SWGPresetExport(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetExport::SWGPresetExport() {
-    init();
+    file_path = nullptr;
+    m_file_path_isSet = false;
+    preset = nullptr;
+    m_preset_isSet = false;
 }
 
 SWGPresetExport::~SWGPresetExport() {
@@ -54,7 +57,7 @@ SWGPresetExport::cleanup() {
 }
 
 SWGPresetExport*
-SWGPresetExport::fromJson(QString json) {
+SWGPresetExport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -63,7 +66,7 @@ SWGPresetExport::fromJson(QString json) {
 }
 
 void
-SWGPresetExport::fromJsonObject(QJsonObject pJson) {
+SWGPresetExport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
@@ -73,15 +76,17 @@ SWGPresetExport::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetExport::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetExport::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(file_path != nullptr && *file_path != QString("")){
         toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
     }

@@ -30,15 +30,15 @@ namespace SWGSDRangel {
 class SWGLimeSdrInputSettings: public SWGObject {
 public:
     SWGLimeSdrInputSettings();
-    SWGLimeSdrInputSettings(QString json);
-    ~SWGLimeSdrInputSettings();
+    SWGLimeSdrInputSettings(QString* json);
+    virtual ~SWGLimeSdrInputSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGLimeSdrInputSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGLimeSdrInputSettings* fromJson(QString &jsonString);
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);

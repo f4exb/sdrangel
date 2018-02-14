@@ -125,6 +125,7 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLoggingPut(
+            SWGSDRangel::SWGLoggingInfo& query __attribute__((unused)),
             SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {

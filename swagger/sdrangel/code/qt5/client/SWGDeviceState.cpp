@@ -22,13 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceState::SWGDeviceState(QString json) {
+SWGDeviceState::SWGDeviceState(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDeviceState::SWGDeviceState() {
-    init();
+    state = nullptr;
+    m_state_isSet = false;
 }
 
 SWGDeviceState::~SWGDeviceState() {
@@ -49,7 +50,7 @@ SWGDeviceState::cleanup() {
 }
 
 SWGDeviceState*
-SWGDeviceState::fromJson(QString json) {
+SWGDeviceState::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -58,7 +59,7 @@ SWGDeviceState::fromJson(QString json) {
 }
 
 void
-SWGDeviceState::fromJsonObject(QJsonObject pJson) {
+SWGDeviceState::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&state, pJson["state"], "QString", "QString");
     
 }
@@ -66,15 +67,17 @@ SWGDeviceState::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDeviceState::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDeviceState::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(state != nullptr && *state != QString("")){
         toJsonValue(QString("state"), state, obj, QString("QString"));
     }

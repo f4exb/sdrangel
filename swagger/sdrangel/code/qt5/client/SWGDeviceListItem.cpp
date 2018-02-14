@@ -22,13 +22,30 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceListItem::SWGDeviceListItem(QString json) {
+SWGDeviceListItem::SWGDeviceListItem(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDeviceListItem::SWGDeviceListItem() {
-    init();
+    displayed_name = nullptr;
+    m_displayed_name_isSet = false;
+    hw_type = nullptr;
+    m_hw_type_isSet = false;
+    serial = nullptr;
+    m_serial_isSet = false;
+    sequence = 0;
+    m_sequence_isSet = false;
+    tx = 0;
+    m_tx_isSet = false;
+    nb_streams = 0;
+    m_nb_streams_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
+    index = 0;
+    m_index_isSet = false;
 }
 
 SWGDeviceListItem::~SWGDeviceListItem() {
@@ -77,7 +94,7 @@ SWGDeviceListItem::cleanup() {
 }
 
 SWGDeviceListItem*
-SWGDeviceListItem::fromJson(QString json) {
+SWGDeviceListItem::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -86,7 +103,7 @@ SWGDeviceListItem::fromJson(QString json) {
 }
 
 void
-SWGDeviceListItem::fromJsonObject(QJsonObject pJson) {
+SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&displayed_name, pJson["displayedName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&hw_type, pJson["hwType"], "QString", "QString");
@@ -110,15 +127,17 @@ SWGDeviceListItem::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDeviceListItem::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDeviceListItem::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(displayed_name != nullptr && *displayed_name != QString("")){
         toJsonValue(QString("displayedName"), displayed_name, obj, QString("QString"));
     }
@@ -129,22 +148,22 @@ SWGDeviceListItem::asJsonObject() {
         toJsonValue(QString("serial"), serial, obj, QString("QString"));
     }
     if(m_sequence_isSet){
-        obj.insert("sequence", QJsonValue(sequence));
+        obj->insert("sequence", QJsonValue(sequence));
     }
     if(m_tx_isSet){
-        obj.insert("tx", QJsonValue(tx));
+        obj->insert("tx", QJsonValue(tx));
     }
     if(m_nb_streams_isSet){
-        obj.insert("nbStreams", QJsonValue(nb_streams));
+        obj->insert("nbStreams", QJsonValue(nb_streams));
     }
     if(m_stream_index_isSet){
-        obj.insert("streamIndex", QJsonValue(stream_index));
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_device_set_index_isSet){
-        obj.insert("deviceSetIndex", QJsonValue(device_set_index));
+        obj->insert("deviceSetIndex", QJsonValue(device_set_index));
     }
     if(m_index_isSet){
-        obj.insert("index", QJsonValue(index));
+        obj->insert("index", QJsonValue(index));
     }
 
     return obj;

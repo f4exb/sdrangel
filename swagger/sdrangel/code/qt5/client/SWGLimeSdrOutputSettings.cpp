@@ -22,13 +22,38 @@
 
 namespace SWGSDRangel {
 
-SWGLimeSdrOutputSettings::SWGLimeSdrOutputSettings(QString json) {
+SWGLimeSdrOutputSettings::SWGLimeSdrOutputSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGLimeSdrOutputSettings::SWGLimeSdrOutputSettings() {
-    init();
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
+    log2_hard_interp = 0;
+    m_log2_hard_interp_isSet = false;
+    log2_soft_interp = 0;
+    m_log2_soft_interp_isSet = false;
+    lpf_bw = 0;
+    m_lpf_bw_isSet = false;
+    lpf_fir_enable = 0;
+    m_lpf_fir_enable_isSet = false;
+    lpf_firbw = 0;
+    m_lpf_firbw_isSet = false;
+    gain = 0;
+    m_gain_isSet = false;
+    nco_enable = 0;
+    m_nco_enable_isSet = false;
+    nco_frequency = 0;
+    m_nco_frequency_isSet = false;
+    antenna_path = 0;
+    m_antenna_path_isSet = false;
+    ext_clock = 0;
+    m_ext_clock_isSet = false;
+    ext_clock_freq = 0;
+    m_ext_clock_freq_isSet = false;
 }
 
 SWGLimeSdrOutputSettings::~SWGLimeSdrOutputSettings() {
@@ -83,7 +108,7 @@ SWGLimeSdrOutputSettings::cleanup() {
 }
 
 SWGLimeSdrOutputSettings*
-SWGLimeSdrOutputSettings::fromJson(QString json) {
+SWGLimeSdrOutputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -92,7 +117,7 @@ SWGLimeSdrOutputSettings::fromJson(QString json) {
 }
 
 void
-SWGLimeSdrOutputSettings::fromJsonObject(QJsonObject pJson) {
+SWGLimeSdrOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -124,53 +149,55 @@ SWGLimeSdrOutputSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGLimeSdrOutputSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGLimeSdrOutputSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_dev_sample_rate_isSet){
-        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+        obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_log2_hard_interp_isSet){
-        obj.insert("log2HardInterp", QJsonValue(log2_hard_interp));
+        obj->insert("log2HardInterp", QJsonValue(log2_hard_interp));
     }
     if(m_log2_soft_interp_isSet){
-        obj.insert("log2SoftInterp", QJsonValue(log2_soft_interp));
+        obj->insert("log2SoftInterp", QJsonValue(log2_soft_interp));
     }
     if(m_lpf_bw_isSet){
-        obj.insert("lpfBW", QJsonValue(lpf_bw));
+        obj->insert("lpfBW", QJsonValue(lpf_bw));
     }
     if(m_lpf_fir_enable_isSet){
-        obj.insert("lpfFIREnable", QJsonValue(lpf_fir_enable));
+        obj->insert("lpfFIREnable", QJsonValue(lpf_fir_enable));
     }
     if(m_lpf_firbw_isSet){
-        obj.insert("lpfFIRBW", QJsonValue(lpf_firbw));
+        obj->insert("lpfFIRBW", QJsonValue(lpf_firbw));
     }
     if(m_gain_isSet){
-        obj.insert("gain", QJsonValue(gain));
+        obj->insert("gain", QJsonValue(gain));
     }
     if(m_nco_enable_isSet){
-        obj.insert("ncoEnable", QJsonValue(nco_enable));
+        obj->insert("ncoEnable", QJsonValue(nco_enable));
     }
     if(m_nco_frequency_isSet){
-        obj.insert("ncoFrequency", QJsonValue(nco_frequency));
+        obj->insert("ncoFrequency", QJsonValue(nco_frequency));
     }
     if(m_antenna_path_isSet){
-        obj.insert("antennaPath", QJsonValue(antenna_path));
+        obj->insert("antennaPath", QJsonValue(antenna_path));
     }
     if(m_ext_clock_isSet){
-        obj.insert("extClock", QJsonValue(ext_clock));
+        obj->insert("extClock", QJsonValue(ext_clock));
     }
     if(m_ext_clock_freq_isSet){
-        obj.insert("extClockFreq", QJsonValue(ext_clock_freq));
+        obj->insert("extClockFreq", QJsonValue(ext_clock_freq));
     }
 
     return obj;

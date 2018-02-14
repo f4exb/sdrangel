@@ -22,13 +22,26 @@
 
 namespace SWGSDRangel {
 
-SWGAudioDevices::SWGAudioDevices(QString json) {
+SWGAudioDevices::SWGAudioDevices(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGAudioDevices::SWGAudioDevices() {
-    init();
+    input_volume = 0.0f;
+    m_input_volume_isSet = false;
+    nb_input_devices = 0;
+    m_nb_input_devices_isSet = false;
+    input_device_selected_index = 0;
+    m_input_device_selected_index_isSet = false;
+    input_devices = nullptr;
+    m_input_devices_isSet = false;
+    nb_output_devices = 0;
+    m_nb_output_devices_isSet = false;
+    output_device_selected_index = 0;
+    m_output_device_selected_index_isSet = false;
+    output_devices = nullptr;
+    m_output_devices_isSet = false;
 }
 
 SWGAudioDevices::~SWGAudioDevices() {
@@ -77,7 +90,7 @@ SWGAudioDevices::cleanup() {
 }
 
 SWGAudioDevices*
-SWGAudioDevices::fromJson(QString json) {
+SWGAudioDevices::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -86,7 +99,7 @@ SWGAudioDevices::fromJson(QString json) {
 }
 
 void
-SWGAudioDevices::fromJsonObject(QJsonObject pJson) {
+SWGAudioDevices::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_volume, pJson["inputVolume"], "float", "");
     
     ::SWGSDRangel::setValue(&nb_input_devices, pJson["nbInputDevices"], "qint32", "");
@@ -106,32 +119,34 @@ SWGAudioDevices::fromJsonObject(QJsonObject pJson) {
 QString
 SWGAudioDevices::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGAudioDevices::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_input_volume_isSet){
-        obj.insert("inputVolume", QJsonValue(input_volume));
+        obj->insert("inputVolume", QJsonValue(input_volume));
     }
     if(m_nb_input_devices_isSet){
-        obj.insert("nbInputDevices", QJsonValue(nb_input_devices));
+        obj->insert("nbInputDevices", QJsonValue(nb_input_devices));
     }
     if(m_input_device_selected_index_isSet){
-        obj.insert("inputDeviceSelectedIndex", QJsonValue(input_device_selected_index));
+        obj->insert("inputDeviceSelectedIndex", QJsonValue(input_device_selected_index));
     }
     if(input_devices->size() > 0){
         toJsonArray((QList<void*>*)input_devices, obj, "inputDevices", "SWGAudioDevice");
     }
     if(m_nb_output_devices_isSet){
-        obj.insert("nbOutputDevices", QJsonValue(nb_output_devices));
+        obj->insert("nbOutputDevices", QJsonValue(nb_output_devices));
     }
     if(m_output_device_selected_index_isSet){
-        obj.insert("outputDeviceSelectedIndex", QJsonValue(output_device_selected_index));
+        obj->insert("outputDeviceSelectedIndex", QJsonValue(output_device_selected_index));
     }
     if(output_devices->size() > 0){
         toJsonArray((QList<void*>*)output_devices, obj, "outputDevices", "SWGAudioDevice");

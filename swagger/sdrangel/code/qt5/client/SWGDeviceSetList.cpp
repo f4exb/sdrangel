@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceSetList::SWGDeviceSetList(QString json) {
+SWGDeviceSetList::SWGDeviceSetList(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDeviceSetList::SWGDeviceSetList() {
-    init();
+    devicesetcount = 0;
+    m_devicesetcount_isSet = false;
+    devicesetfocus = 0;
+    m_devicesetfocus_isSet = false;
+    device_sets = nullptr;
+    m_device_sets_isSet = false;
 }
 
 SWGDeviceSetList::~SWGDeviceSetList() {
@@ -59,7 +64,7 @@ SWGDeviceSetList::cleanup() {
 }
 
 SWGDeviceSetList*
-SWGDeviceSetList::fromJson(QString json) {
+SWGDeviceSetList::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -68,7 +73,7 @@ SWGDeviceSetList::fromJson(QString json) {
 }
 
 void
-SWGDeviceSetList::fromJsonObject(QJsonObject pJson) {
+SWGDeviceSetList::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&devicesetcount, pJson["devicesetcount"], "qint32", "");
     
     ::SWGSDRangel::setValue(&devicesetfocus, pJson["devicesetfocus"], "qint32", "");
@@ -80,20 +85,22 @@ SWGDeviceSetList::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDeviceSetList::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDeviceSetList::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_devicesetcount_isSet){
-        obj.insert("devicesetcount", QJsonValue(devicesetcount));
+        obj->insert("devicesetcount", QJsonValue(devicesetcount));
     }
     if(m_devicesetfocus_isSet){
-        obj.insert("devicesetfocus", QJsonValue(devicesetfocus));
+        obj->insert("devicesetfocus", QJsonValue(devicesetfocus));
     }
     if(device_sets->size() > 0){
         toJsonArray((QList<void*>*)device_sets, obj, "deviceSets", "SWGDeviceSet");

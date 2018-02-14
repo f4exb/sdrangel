@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGPresetExport: public SWGObject {
 public:
     SWGPresetExport();
-    SWGPresetExport(QString json);
-    ~SWGPresetExport();
+    SWGPresetExport(QString* json);
+    virtual ~SWGPresetExport();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGPresetExport* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGPresetExport* fromJson(QString &jsonString);
 
     QString* getFilePath();
     void setFilePath(QString* file_path);

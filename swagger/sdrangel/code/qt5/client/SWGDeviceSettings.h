@@ -37,15 +37,15 @@ namespace SWGSDRangel {
 class SWGDeviceSettings: public SWGObject {
 public:
     SWGDeviceSettings();
-    SWGDeviceSettings(QString json);
-    ~SWGDeviceSettings();
+    SWGDeviceSettings(QString* json);
+    virtual ~SWGDeviceSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGDeviceSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGDeviceSettings* fromJson(QString &jsonString);
 
     QString* getDeviceHwType();
     void setDeviceHwType(QString* device_hw_type);

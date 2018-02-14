@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGPresetTransfer::SWGPresetTransfer(QString json) {
+SWGPresetTransfer::SWGPresetTransfer(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetTransfer::SWGPresetTransfer() {
-    init();
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
+    preset = nullptr;
+    m_preset_isSet = false;
 }
 
 SWGPresetTransfer::~SWGPresetTransfer() {
@@ -52,7 +55,7 @@ SWGPresetTransfer::cleanup() {
 }
 
 SWGPresetTransfer*
-SWGPresetTransfer::fromJson(QString json) {
+SWGPresetTransfer::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -61,7 +64,7 @@ SWGPresetTransfer::fromJson(QString json) {
 }
 
 void
-SWGPresetTransfer::fromJsonObject(QJsonObject pJson) {
+SWGPresetTransfer::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
@@ -71,17 +74,19 @@ SWGPresetTransfer::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetTransfer::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetTransfer::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_device_set_index_isSet){
-        obj.insert("deviceSetIndex", QJsonValue(device_set_index));
+        obj->insert("deviceSetIndex", QJsonValue(device_set_index));
     }
     if((preset != nullptr) && (preset->isSet())){
         toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));

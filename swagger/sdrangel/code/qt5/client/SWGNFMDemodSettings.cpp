@@ -22,13 +22,46 @@
 
 namespace SWGSDRangel {
 
-SWGNFMDemodSettings::SWGNFMDemodSettings(QString json) {
+SWGNFMDemodSettings::SWGNFMDemodSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGNFMDemodSettings::SWGNFMDemodSettings() {
-    init();
+    input_frequency_offset = 0L;
+    m_input_frequency_offset_isSet = false;
+    rf_bandwidth = 0.0f;
+    m_rf_bandwidth_isSet = false;
+    af_bandwidth = 0.0f;
+    m_af_bandwidth_isSet = false;
+    fm_deviation = 0;
+    m_fm_deviation_isSet = false;
+    squelch_gate = 0;
+    m_squelch_gate_isSet = false;
+    delta_squelch = 0;
+    m_delta_squelch_isSet = false;
+    squelch = 0.0f;
+    m_squelch_isSet = false;
+    volume = 0.0f;
+    m_volume_isSet = false;
+    ctcss_on = 0;
+    m_ctcss_on_isSet = false;
+    audio_mute = 0;
+    m_audio_mute_isSet = false;
+    ctcss_index = 0;
+    m_ctcss_index_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    copy_audio_to_udp = 0;
+    m_copy_audio_to_udp_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
 }
 
 SWGNFMDemodSettings::~SWGNFMDemodSettings() {
@@ -99,7 +132,7 @@ SWGNFMDemodSettings::cleanup() {
 }
 
 SWGNFMDemodSettings*
-SWGNFMDemodSettings::fromJson(QString json) {
+SWGNFMDemodSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -108,7 +141,7 @@ SWGNFMDemodSettings::fromJson(QString json) {
 }
 
 void
-SWGNFMDemodSettings::fromJsonObject(QJsonObject pJson) {
+SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
@@ -148,62 +181,64 @@ SWGNFMDemodSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGNFMDemodSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGNFMDemodSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
-        obj.insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
+        obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
     if(m_rf_bandwidth_isSet){
-        obj.insert("rfBandwidth", QJsonValue(rf_bandwidth));
+        obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
     if(m_af_bandwidth_isSet){
-        obj.insert("afBandwidth", QJsonValue(af_bandwidth));
+        obj->insert("afBandwidth", QJsonValue(af_bandwidth));
     }
     if(m_fm_deviation_isSet){
-        obj.insert("fmDeviation", QJsonValue(fm_deviation));
+        obj->insert("fmDeviation", QJsonValue(fm_deviation));
     }
     if(m_squelch_gate_isSet){
-        obj.insert("squelchGate", QJsonValue(squelch_gate));
+        obj->insert("squelchGate", QJsonValue(squelch_gate));
     }
     if(m_delta_squelch_isSet){
-        obj.insert("deltaSquelch", QJsonValue(delta_squelch));
+        obj->insert("deltaSquelch", QJsonValue(delta_squelch));
     }
     if(m_squelch_isSet){
-        obj.insert("squelch", QJsonValue(squelch));
+        obj->insert("squelch", QJsonValue(squelch));
     }
     if(m_volume_isSet){
-        obj.insert("volume", QJsonValue(volume));
+        obj->insert("volume", QJsonValue(volume));
     }
     if(m_ctcss_on_isSet){
-        obj.insert("ctcssOn", QJsonValue(ctcss_on));
+        obj->insert("ctcssOn", QJsonValue(ctcss_on));
     }
     if(m_audio_mute_isSet){
-        obj.insert("audioMute", QJsonValue(audio_mute));
+        obj->insert("audioMute", QJsonValue(audio_mute));
     }
     if(m_ctcss_index_isSet){
-        obj.insert("ctcssIndex", QJsonValue(ctcss_index));
+        obj->insert("ctcssIndex", QJsonValue(ctcss_index));
     }
     if(m_audio_sample_rate_isSet){
-        obj.insert("audioSampleRate", QJsonValue(audio_sample_rate));
+        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_copy_audio_to_udp_isSet){
-        obj.insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
+        obj->insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
     }
     if(udp_address != nullptr && *udp_address != QString("")){
         toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
     }
     if(m_udp_port_isSet){
-        obj.insert("udpPort", QJsonValue(udp_port));
+        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
-        obj.insert("rgbColor", QJsonValue(rgb_color));
+        obj->insert("rgbColor", QJsonValue(rgb_color));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));

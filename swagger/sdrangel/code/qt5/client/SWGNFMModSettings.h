@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGNFMModSettings: public SWGObject {
 public:
     SWGNFMModSettings();
-    SWGNFMModSettings(QString json);
-    ~SWGNFMModSettings();
+    SWGNFMModSettings(QString* json);
+    virtual ~SWGNFMModSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGNFMModSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGNFMModSettings* fromJson(QString &jsonString);
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);

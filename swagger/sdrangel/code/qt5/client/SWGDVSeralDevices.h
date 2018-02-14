@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGDVSeralDevices: public SWGObject {
 public:
     SWGDVSeralDevices();
-    SWGDVSeralDevices(QString json);
-    ~SWGDVSeralDevices();
+    SWGDVSeralDevices(QString* json);
+    virtual ~SWGDVSeralDevices();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGDVSeralDevices* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGDVSeralDevices* fromJson(QString &jsonString);
 
     qint32 getNbDevices();
     void setNbDevices(qint32 nb_devices);

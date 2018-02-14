@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGLoggingInfo: public SWGObject {
 public:
     SWGLoggingInfo();
-    SWGLoggingInfo(QString json);
-    ~SWGLoggingInfo();
+    SWGLoggingInfo(QString* json);
+    virtual ~SWGLoggingInfo();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGLoggingInfo* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGLoggingInfo* fromJson(QString &jsonString);
 
     QString* getConsoleLevel();
     void setConsoleLevel(QString* console_level);

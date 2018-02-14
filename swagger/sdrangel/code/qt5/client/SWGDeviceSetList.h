@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGDeviceSetList: public SWGObject {
 public:
     SWGDeviceSetList();
-    SWGDeviceSetList(QString json);
-    ~SWGDeviceSetList();
+    SWGDeviceSetList(QString* json);
+    virtual ~SWGDeviceSetList();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGDeviceSetList* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGDeviceSetList* fromJson(QString &jsonString);
 
     qint32 getDevicesetcount();
     void setDevicesetcount(qint32 devicesetcount);

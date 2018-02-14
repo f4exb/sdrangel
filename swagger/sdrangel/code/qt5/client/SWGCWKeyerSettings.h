@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGCWKeyerSettings: public SWGObject {
 public:
     SWGCWKeyerSettings();
-    SWGCWKeyerSettings(QString json);
-    ~SWGCWKeyerSettings();
+    SWGCWKeyerSettings(QString* json);
+    virtual ~SWGCWKeyerSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGCWKeyerSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGCWKeyerSettings* fromJson(QString &jsonString);
 
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);

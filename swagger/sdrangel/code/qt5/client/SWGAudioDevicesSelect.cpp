@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGAudioDevicesSelect::SWGAudioDevicesSelect(QString json) {
+SWGAudioDevicesSelect::SWGAudioDevicesSelect(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGAudioDevicesSelect::SWGAudioDevicesSelect() {
-    init();
+    input_volume = 0.0f;
+    m_input_volume_isSet = false;
+    input_index = 0;
+    m_input_index_isSet = false;
+    output_index = 0;
+    m_output_index_isSet = false;
 }
 
 SWGAudioDevicesSelect::~SWGAudioDevicesSelect() {
@@ -53,7 +58,7 @@ SWGAudioDevicesSelect::cleanup() {
 }
 
 SWGAudioDevicesSelect*
-SWGAudioDevicesSelect::fromJson(QString json) {
+SWGAudioDevicesSelect::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -62,7 +67,7 @@ SWGAudioDevicesSelect::fromJson(QString json) {
 }
 
 void
-SWGAudioDevicesSelect::fromJsonObject(QJsonObject pJson) {
+SWGAudioDevicesSelect::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_volume, pJson["inputVolume"], "float", "");
     
     ::SWGSDRangel::setValue(&input_index, pJson["inputIndex"], "qint32", "");
@@ -74,23 +79,25 @@ SWGAudioDevicesSelect::fromJsonObject(QJsonObject pJson) {
 QString
 SWGAudioDevicesSelect::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGAudioDevicesSelect::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_input_volume_isSet){
-        obj.insert("inputVolume", QJsonValue(input_volume));
+        obj->insert("inputVolume", QJsonValue(input_volume));
     }
     if(m_input_index_isSet){
-        obj.insert("inputIndex", QJsonValue(input_index));
+        obj->insert("inputIndex", QJsonValue(input_index));
     }
     if(m_output_index_isSet){
-        obj.insert("outputIndex", QJsonValue(output_index));
+        obj->insert("outputIndex", QJsonValue(output_index));
     }
 
     return obj;

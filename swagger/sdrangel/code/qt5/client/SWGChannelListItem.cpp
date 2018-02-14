@@ -22,13 +22,24 @@
 
 namespace SWGSDRangel {
 
-SWGChannelListItem::SWGChannelListItem(QString json) {
+SWGChannelListItem::SWGChannelListItem(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGChannelListItem::SWGChannelListItem() {
-    init();
+    name = nullptr;
+    m_name_isSet = false;
+    id_uri = nullptr;
+    m_id_uri_isSet = false;
+    id = nullptr;
+    m_id_isSet = false;
+    tx = 0;
+    m_tx_isSet = false;
+    version = nullptr;
+    m_version_isSet = false;
+    index = 0;
+    m_index_isSet = false;
 }
 
 SWGChannelListItem::~SWGChannelListItem() {
@@ -70,7 +81,7 @@ SWGChannelListItem::cleanup() {
 }
 
 SWGChannelListItem*
-SWGChannelListItem::fromJson(QString json) {
+SWGChannelListItem::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -79,7 +90,7 @@ SWGChannelListItem::fromJson(QString json) {
 }
 
 void
-SWGChannelListItem::fromJsonObject(QJsonObject pJson) {
+SWGChannelListItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&id_uri, pJson["idURI"], "QString", "QString");
@@ -97,15 +108,17 @@ SWGChannelListItem::fromJsonObject(QJsonObject pJson) {
 QString
 SWGChannelListItem::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGChannelListItem::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(name != nullptr && *name != QString("")){
         toJsonValue(QString("name"), name, obj, QString("QString"));
     }
@@ -116,13 +129,13 @@ SWGChannelListItem::asJsonObject() {
         toJsonValue(QString("id"), id, obj, QString("QString"));
     }
     if(m_tx_isSet){
-        obj.insert("tx", QJsonValue(tx));
+        obj->insert("tx", QJsonValue(tx));
     }
     if(version != nullptr && *version != QString("")){
         toJsonValue(QString("version"), version, obj, QString("QString"));
     }
     if(m_index_isSet){
-        obj.insert("index", QJsonValue(index));
+        obj->insert("index", QJsonValue(index));
     }
 
     return obj;

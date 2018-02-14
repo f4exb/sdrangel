@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGSuccessResponse: public SWGObject {
 public:
     SWGSuccessResponse();
-    SWGSuccessResponse(QString json);
-    ~SWGSuccessResponse();
+    SWGSuccessResponse(QString* json);
+    virtual ~SWGSuccessResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGSuccessResponse* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGSuccessResponse* fromJson(QString &jsonString);
 
     QString* getMessage();
     void setMessage(QString* message);

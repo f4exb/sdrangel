@@ -32,15 +32,15 @@ namespace SWGSDRangel {
 class SWGInstanceDevicesResponse: public SWGObject {
 public:
     SWGInstanceDevicesResponse();
-    SWGInstanceDevicesResponse(QString json);
-    ~SWGInstanceDevicesResponse();
+    SWGInstanceDevicesResponse(QString* json);
+    virtual ~SWGInstanceDevicesResponse();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGInstanceDevicesResponse* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGInstanceDevicesResponse* fromJson(QString &jsonString);
 
     qint32 getDevicecount();
     void setDevicecount(qint32 devicecount);

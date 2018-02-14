@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGPresetTransfer: public SWGObject {
 public:
     SWGPresetTransfer();
-    SWGPresetTransfer(QString json);
-    ~SWGPresetTransfer();
+    SWGPresetTransfer(QString* json);
+    virtual ~SWGPresetTransfer();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGPresetTransfer* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGPresetTransfer* fromJson(QString &jsonString);
 
     qint32 getDeviceSetIndex();
     void setDeviceSetIndex(qint32 device_set_index);

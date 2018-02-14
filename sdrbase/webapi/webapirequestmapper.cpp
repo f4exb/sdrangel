@@ -241,6 +241,7 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
 
 void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
+    SWGSDRangel::SWGLoggingInfo query;
     SWGSDRangel::SWGLoggingInfo normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
@@ -263,8 +264,8 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
 
         if (parseJsonBody(jsonStr, jsonObject, response))
         {
-            normalResponse.fromJson(jsonStr);
-            int status = m_adapter->instanceLoggingPut(normalResponse, errorResponse);
+            query.fromJson(jsonStr);
+            int status = m_adapter->instanceLoggingPut(query, normalResponse, errorResponse);
             response.setStatus(status);
 
             if (status/100 == 2) {

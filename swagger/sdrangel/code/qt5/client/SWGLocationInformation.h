@@ -30,15 +30,15 @@ namespace SWGSDRangel {
 class SWGLocationInformation: public SWGObject {
 public:
     SWGLocationInformation();
-    SWGLocationInformation(QString json);
-    ~SWGLocationInformation();
+    SWGLocationInformation(QString* json);
+    virtual ~SWGLocationInformation();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGLocationInformation* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGLocationInformation* fromJson(QString &jsonString);
 
     float getLatitude();
     void setLatitude(float latitude);

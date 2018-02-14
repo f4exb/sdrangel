@@ -22,13 +22,50 @@
 
 namespace SWGSDRangel {
 
-SWGLimeSdrInputSettings::SWGLimeSdrInputSettings(QString json) {
+SWGLimeSdrInputSettings::SWGLimeSdrInputSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGLimeSdrInputSettings::SWGLimeSdrInputSettings() {
-    init();
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    dev_sample_rate = 0;
+    m_dev_sample_rate_isSet = false;
+    log2_hard_decim = 0;
+    m_log2_hard_decim_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_correction = 0;
+    m_iq_correction_isSet = false;
+    log2_soft_decim = 0;
+    m_log2_soft_decim_isSet = false;
+    lpf_bw = 0;
+    m_lpf_bw_isSet = false;
+    lpf_fir_enable = 0;
+    m_lpf_fir_enable_isSet = false;
+    lpf_firbw = 0;
+    m_lpf_firbw_isSet = false;
+    gain = 0;
+    m_gain_isSet = false;
+    nco_enable = 0;
+    m_nco_enable_isSet = false;
+    nco_frequency = 0;
+    m_nco_frequency_isSet = false;
+    antenna_path = 0;
+    m_antenna_path_isSet = false;
+    gain_mode = 0;
+    m_gain_mode_isSet = false;
+    lna_gain = 0;
+    m_lna_gain_isSet = false;
+    tia_gain = 0;
+    m_tia_gain_isSet = false;
+    pga_gain = 0;
+    m_pga_gain_isSet = false;
+    ext_clock = 0;
+    m_ext_clock_isSet = false;
+    ext_clock_freq = 0;
+    m_ext_clock_freq_isSet = false;
 }
 
 SWGLimeSdrInputSettings::~SWGLimeSdrInputSettings() {
@@ -101,7 +138,7 @@ SWGLimeSdrInputSettings::cleanup() {
 }
 
 SWGLimeSdrInputSettings*
-SWGLimeSdrInputSettings::fromJson(QString json) {
+SWGLimeSdrInputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -110,7 +147,7 @@ SWGLimeSdrInputSettings::fromJson(QString json) {
 }
 
 void
-SWGLimeSdrInputSettings::fromJsonObject(QJsonObject pJson) {
+SWGLimeSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -154,71 +191,73 @@ SWGLimeSdrInputSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGLimeSdrInputSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGLimeSdrInputSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_dev_sample_rate_isSet){
-        obj.insert("devSampleRate", QJsonValue(dev_sample_rate));
+        obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_log2_hard_decim_isSet){
-        obj.insert("log2HardDecim", QJsonValue(log2_hard_decim));
+        obj->insert("log2HardDecim", QJsonValue(log2_hard_decim));
     }
     if(m_dc_block_isSet){
-        obj.insert("dcBlock", QJsonValue(dc_block));
+        obj->insert("dcBlock", QJsonValue(dc_block));
     }
     if(m_iq_correction_isSet){
-        obj.insert("iqCorrection", QJsonValue(iq_correction));
+        obj->insert("iqCorrection", QJsonValue(iq_correction));
     }
     if(m_log2_soft_decim_isSet){
-        obj.insert("log2SoftDecim", QJsonValue(log2_soft_decim));
+        obj->insert("log2SoftDecim", QJsonValue(log2_soft_decim));
     }
     if(m_lpf_bw_isSet){
-        obj.insert("lpfBW", QJsonValue(lpf_bw));
+        obj->insert("lpfBW", QJsonValue(lpf_bw));
     }
     if(m_lpf_fir_enable_isSet){
-        obj.insert("lpfFIREnable", QJsonValue(lpf_fir_enable));
+        obj->insert("lpfFIREnable", QJsonValue(lpf_fir_enable));
     }
     if(m_lpf_firbw_isSet){
-        obj.insert("lpfFIRBW", QJsonValue(lpf_firbw));
+        obj->insert("lpfFIRBW", QJsonValue(lpf_firbw));
     }
     if(m_gain_isSet){
-        obj.insert("gain", QJsonValue(gain));
+        obj->insert("gain", QJsonValue(gain));
     }
     if(m_nco_enable_isSet){
-        obj.insert("ncoEnable", QJsonValue(nco_enable));
+        obj->insert("ncoEnable", QJsonValue(nco_enable));
     }
     if(m_nco_frequency_isSet){
-        obj.insert("ncoFrequency", QJsonValue(nco_frequency));
+        obj->insert("ncoFrequency", QJsonValue(nco_frequency));
     }
     if(m_antenna_path_isSet){
-        obj.insert("antennaPath", QJsonValue(antenna_path));
+        obj->insert("antennaPath", QJsonValue(antenna_path));
     }
     if(m_gain_mode_isSet){
-        obj.insert("gainMode", QJsonValue(gain_mode));
+        obj->insert("gainMode", QJsonValue(gain_mode));
     }
     if(m_lna_gain_isSet){
-        obj.insert("lnaGain", QJsonValue(lna_gain));
+        obj->insert("lnaGain", QJsonValue(lna_gain));
     }
     if(m_tia_gain_isSet){
-        obj.insert("tiaGain", QJsonValue(tia_gain));
+        obj->insert("tiaGain", QJsonValue(tia_gain));
     }
     if(m_pga_gain_isSet){
-        obj.insert("pgaGain", QJsonValue(pga_gain));
+        obj->insert("pgaGain", QJsonValue(pga_gain));
     }
     if(m_ext_clock_isSet){
-        obj.insert("extClock", QJsonValue(ext_clock));
+        obj->insert("extClock", QJsonValue(ext_clock));
     }
     if(m_ext_clock_freq_isSet){
-        obj.insert("extClockFreq", QJsonValue(ext_clock_freq));
+        obj->insert("extClockFreq", QJsonValue(ext_clock_freq));
     }
 
     return obj;

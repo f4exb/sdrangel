@@ -22,13 +22,16 @@
 
 namespace SWGSDRangel {
 
-SWGInstanceChannelsResponse::SWGInstanceChannelsResponse(QString json) {
+SWGInstanceChannelsResponse::SWGInstanceChannelsResponse(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGInstanceChannelsResponse::SWGInstanceChannelsResponse() {
-    init();
+    channelcount = 0;
+    m_channelcount_isSet = false;
+    channels = nullptr;
+    m_channels_isSet = false;
 }
 
 SWGInstanceChannelsResponse::~SWGInstanceChannelsResponse() {
@@ -56,7 +59,7 @@ SWGInstanceChannelsResponse::cleanup() {
 }
 
 SWGInstanceChannelsResponse*
-SWGInstanceChannelsResponse::fromJson(QString json) {
+SWGInstanceChannelsResponse::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -65,7 +68,7 @@ SWGInstanceChannelsResponse::fromJson(QString json) {
 }
 
 void
-SWGInstanceChannelsResponse::fromJsonObject(QJsonObject pJson) {
+SWGInstanceChannelsResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channelcount, pJson["channelcount"], "qint32", "");
     
     
@@ -75,17 +78,19 @@ SWGInstanceChannelsResponse::fromJsonObject(QJsonObject pJson) {
 QString
 SWGInstanceChannelsResponse::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGInstanceChannelsResponse::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_channelcount_isSet){
-        obj.insert("channelcount", QJsonValue(channelcount));
+        obj->insert("channelcount", QJsonValue(channelcount));
     }
     if(channels->size() > 0){
         toJsonArray((QList<void*>*)channels, obj, "channels", "SWGChannelListItem");

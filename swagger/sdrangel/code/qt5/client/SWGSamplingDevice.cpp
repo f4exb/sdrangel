@@ -22,13 +22,32 @@
 
 namespace SWGSDRangel {
 
-SWGSamplingDevice::SWGSamplingDevice(QString json) {
+SWGSamplingDevice::SWGSamplingDevice(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGSamplingDevice::SWGSamplingDevice() {
-    init();
+    index = 0;
+    m_index_isSet = false;
+    hw_type = nullptr;
+    m_hw_type_isSet = false;
+    tx = 0;
+    m_tx_isSet = false;
+    nb_streams = 0;
+    m_nb_streams_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    sequence = 0;
+    m_sequence_isSet = false;
+    serial = nullptr;
+    m_serial_isSet = false;
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    bandwidth = 0;
+    m_bandwidth_isSet = false;
+    state = nullptr;
+    m_state_isSet = false;
 }
 
 SWGSamplingDevice::~SWGSamplingDevice() {
@@ -80,7 +99,7 @@ SWGSamplingDevice::cleanup() {
 }
 
 SWGSamplingDevice*
-SWGSamplingDevice::fromJson(QString json) {
+SWGSamplingDevice::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -89,7 +108,7 @@ SWGSamplingDevice::fromJson(QString json) {
 }
 
 void
-SWGSamplingDevice::fromJsonObject(QJsonObject pJson) {
+SWGSamplingDevice::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
     
     ::SWGSDRangel::setValue(&hw_type, pJson["hwType"], "QString", "QString");
@@ -115,41 +134,43 @@ SWGSamplingDevice::fromJsonObject(QJsonObject pJson) {
 QString
 SWGSamplingDevice::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGSamplingDevice::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_index_isSet){
-        obj.insert("index", QJsonValue(index));
+        obj->insert("index", QJsonValue(index));
     }
     if(hw_type != nullptr && *hw_type != QString("")){
         toJsonValue(QString("hwType"), hw_type, obj, QString("QString"));
     }
     if(m_tx_isSet){
-        obj.insert("tx", QJsonValue(tx));
+        obj->insert("tx", QJsonValue(tx));
     }
     if(m_nb_streams_isSet){
-        obj.insert("nbStreams", QJsonValue(nb_streams));
+        obj->insert("nbStreams", QJsonValue(nb_streams));
     }
     if(m_stream_index_isSet){
-        obj.insert("streamIndex", QJsonValue(stream_index));
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_sequence_isSet){
-        obj.insert("sequence", QJsonValue(sequence));
+        obj->insert("sequence", QJsonValue(sequence));
     }
     if(serial != nullptr && *serial != QString("")){
         toJsonValue(QString("serial"), serial, obj, QString("QString"));
     }
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(m_bandwidth_isSet){
-        obj.insert("bandwidth", QJsonValue(bandwidth));
+        obj->insert("bandwidth", QJsonValue(bandwidth));
     }
     if(state != nullptr && *state != QString("")){
         toJsonValue(QString("state"), state, obj, QString("QString"));

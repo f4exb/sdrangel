@@ -33,15 +33,15 @@ namespace SWGSDRangel {
 class SWGChannelSettings: public SWGObject {
 public:
     SWGChannelSettings();
-    SWGChannelSettings(QString json);
-    ~SWGChannelSettings();
+    SWGChannelSettings(QString* json);
+    virtual ~SWGChannelSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGChannelSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGChannelSettings* fromJson(QString &jsonString);
 
     QString* getChannelType();
     void setChannelType(QString* channel_type);

@@ -22,13 +22,32 @@
 
 namespace SWGSDRangel {
 
-SWGInstanceSummaryResponse::SWGInstanceSummaryResponse(QString json) {
+SWGInstanceSummaryResponse::SWGInstanceSummaryResponse(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGInstanceSummaryResponse::SWGInstanceSummaryResponse() {
-    init();
+    version = nullptr;
+    m_version_isSet = false;
+    qt_version = nullptr;
+    m_qt_version_isSet = false;
+    dsp_rx_bits = 0;
+    m_dsp_rx_bits_isSet = false;
+    dsp_tx_bits = 0;
+    m_dsp_tx_bits_isSet = false;
+    pid = 0;
+    m_pid_isSet = false;
+    appname = nullptr;
+    m_appname_isSet = false;
+    architecture = nullptr;
+    m_architecture_isSet = false;
+    os = nullptr;
+    m_os_isSet = false;
+    logging = nullptr;
+    m_logging_isSet = false;
+    devicesetlist = nullptr;
+    m_devicesetlist_isSet = false;
 }
 
 SWGInstanceSummaryResponse::~SWGInstanceSummaryResponse() {
@@ -88,7 +107,7 @@ SWGInstanceSummaryResponse::cleanup() {
 }
 
 SWGInstanceSummaryResponse*
-SWGInstanceSummaryResponse::fromJson(QString json) {
+SWGInstanceSummaryResponse::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -97,7 +116,7 @@ SWGInstanceSummaryResponse::fromJson(QString json) {
 }
 
 void
-SWGInstanceSummaryResponse::fromJsonObject(QJsonObject pJson) {
+SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&version, pJson["version"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&qt_version, pJson["qtVersion"], "QString", "QString");
@@ -123,15 +142,17 @@ SWGInstanceSummaryResponse::fromJsonObject(QJsonObject pJson) {
 QString
 SWGInstanceSummaryResponse::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGInstanceSummaryResponse::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(version != nullptr && *version != QString("")){
         toJsonValue(QString("version"), version, obj, QString("QString"));
     }
@@ -139,13 +160,13 @@ SWGInstanceSummaryResponse::asJsonObject() {
         toJsonValue(QString("qtVersion"), qt_version, obj, QString("QString"));
     }
     if(m_dsp_rx_bits_isSet){
-        obj.insert("dspRxBits", QJsonValue(dsp_rx_bits));
+        obj->insert("dspRxBits", QJsonValue(dsp_rx_bits));
     }
     if(m_dsp_tx_bits_isSet){
-        obj.insert("dspTxBits", QJsonValue(dsp_tx_bits));
+        obj->insert("dspTxBits", QJsonValue(dsp_tx_bits));
     }
     if(m_pid_isSet){
-        obj.insert("pid", QJsonValue(pid));
+        obj->insert("pid", QJsonValue(pid));
     }
     if(appname != nullptr && *appname != QString("")){
         toJsonValue(QString("appname"), appname, obj, QString("QString"));

@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGDeviceSet::SWGDeviceSet(QString json) {
+SWGDeviceSet::SWGDeviceSet(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGDeviceSet::SWGDeviceSet() {
-    init();
+    sampling_device = nullptr;
+    m_sampling_device_isSet = false;
+    channelcount = 0;
+    m_channelcount_isSet = false;
+    channels = nullptr;
+    m_channels_isSet = false;
 }
 
 SWGDeviceSet::~SWGDeviceSet() {
@@ -61,7 +66,7 @@ SWGDeviceSet::cleanup() {
 }
 
 SWGDeviceSet*
-SWGDeviceSet::fromJson(QString json) {
+SWGDeviceSet::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,7 +75,7 @@ SWGDeviceSet::fromJson(QString json) {
 }
 
 void
-SWGDeviceSet::fromJsonObject(QJsonObject pJson) {
+SWGDeviceSet::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sampling_device, pJson["samplingDevice"], "SWGSamplingDevice", "SWGSamplingDevice");
     
     ::SWGSDRangel::setValue(&channelcount, pJson["channelcount"], "qint32", "");
@@ -82,20 +87,22 @@ SWGDeviceSet::fromJsonObject(QJsonObject pJson) {
 QString
 SWGDeviceSet::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGDeviceSet::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if((sampling_device != nullptr) && (sampling_device->isSet())){
         toJsonValue(QString("samplingDevice"), sampling_device, obj, QString("SWGSamplingDevice"));
     }
     if(m_channelcount_isSet){
-        obj.insert("channelcount", QJsonValue(channelcount));
+        obj->insert("channelcount", QJsonValue(channelcount));
     }
     if(channels->size() > 0){
         toJsonArray((QList<void*>*)channels, obj, "channels", "SWGChannel");

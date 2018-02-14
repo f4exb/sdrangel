@@ -31,15 +31,15 @@ namespace SWGSDRangel {
 class SWGChannel: public SWGObject {
 public:
     SWGChannel();
-    SWGChannel(QString json);
-    ~SWGChannel();
+    SWGChannel(QString* json);
+    virtual ~SWGChannel();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGChannel* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGChannel* fromJson(QString &jsonString);
 
     qint32 getIndex();
     void setIndex(qint32 index);

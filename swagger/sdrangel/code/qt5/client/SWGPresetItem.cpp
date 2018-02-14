@@ -22,13 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGPresetItem::SWGPresetItem(QString json) {
+SWGPresetItem::SWGPresetItem(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGPresetItem::SWGPresetItem() {
-    init();
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    type = nullptr;
+    m_type_isSet = false;
+    name = nullptr;
+    m_name_isSet = false;
 }
 
 SWGPresetItem::~SWGPresetItem() {
@@ -57,7 +62,7 @@ SWGPresetItem::cleanup() {
 }
 
 SWGPresetItem*
-SWGPresetItem::fromJson(QString json) {
+SWGPresetItem::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -66,7 +71,7 @@ SWGPresetItem::fromJson(QString json) {
 }
 
 void
-SWGPresetItem::fromJsonObject(QJsonObject pJson) {
+SWGPresetItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&type, pJson["type"], "QString", "QString");
@@ -78,17 +83,19 @@ SWGPresetItem::fromJsonObject(QJsonObject pJson) {
 QString
 SWGPresetItem::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGPresetItem::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
-        obj.insert("centerFrequency", QJsonValue(center_frequency));
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
     if(type != nullptr && *type != QString("")){
         toJsonValue(QString("type"), type, obj, QString("QString"));

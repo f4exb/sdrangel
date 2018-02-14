@@ -22,13 +22,22 @@
 
 namespace SWGSDRangel {
 
-SWGCWKeyerSettings::SWGCWKeyerSettings(QString json) {
+SWGCWKeyerSettings::SWGCWKeyerSettings(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGCWKeyerSettings::SWGCWKeyerSettings() {
-    init();
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
+    wpm = 0;
+    m_wpm_isSet = false;
+    mode = 0;
+    m_mode_isSet = false;
+    text = nullptr;
+    m_text_isSet = false;
+    loop = 0;
+    m_loop_isSet = false;
 }
 
 SWGCWKeyerSettings::~SWGCWKeyerSettings() {
@@ -61,7 +70,7 @@ SWGCWKeyerSettings::cleanup() {
 }
 
 SWGCWKeyerSettings*
-SWGCWKeyerSettings::fromJson(QString json) {
+SWGCWKeyerSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,7 +79,7 @@ SWGCWKeyerSettings::fromJson(QString json) {
 }
 
 void
-SWGCWKeyerSettings::fromJsonObject(QJsonObject pJson) {
+SWGCWKeyerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&wpm, pJson["wpm"], "qint32", "");
@@ -86,29 +95,31 @@ SWGCWKeyerSettings::fromJsonObject(QJsonObject pJson) {
 QString
 SWGCWKeyerSettings::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGCWKeyerSettings::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(m_sample_rate_isSet){
-        obj.insert("sampleRate", QJsonValue(sample_rate));
+        obj->insert("sampleRate", QJsonValue(sample_rate));
     }
     if(m_wpm_isSet){
-        obj.insert("wpm", QJsonValue(wpm));
+        obj->insert("wpm", QJsonValue(wpm));
     }
     if(m_mode_isSet){
-        obj.insert("mode", QJsonValue(mode));
+        obj->insert("mode", QJsonValue(mode));
     }
     if(text != nullptr && *text != QString("")){
         toJsonValue(QString("text"), text, obj, QString("QString"));
     }
     if(m_loop_isSet){
-        obj.insert("loop", QJsonValue(loop));
+        obj->insert("loop", QJsonValue(loop));
     }
 
     return obj;

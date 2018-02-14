@@ -30,15 +30,15 @@ namespace SWGSDRangel {
 class SWGRtlSdrSettings: public SWGObject {
 public:
     SWGRtlSdrSettings();
-    SWGRtlSdrSettings(QString json);
-    ~SWGRtlSdrSettings();
+    SWGRtlSdrSettings(QString* json);
+    virtual ~SWGRtlSdrSettings();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGRtlSdrSettings* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGRtlSdrSettings* fromJson(QString &jsonString);
 
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);

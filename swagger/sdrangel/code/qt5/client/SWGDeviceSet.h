@@ -33,15 +33,15 @@ namespace SWGSDRangel {
 class SWGDeviceSet: public SWGObject {
 public:
     SWGDeviceSet();
-    SWGDeviceSet(QString json);
-    ~SWGDeviceSet();
+    SWGDeviceSet(QString* json);
+    virtual ~SWGDeviceSet();
     void init();
     void cleanup();
 
     QString asJson ();
-    QJsonObject asJsonObject();
-    void fromJsonObject(QJsonObject json);
-    SWGDeviceSet* fromJson(QString jsonString);
+    QJsonObject* asJsonObject();
+    void fromJsonObject(QJsonObject &json);
+    SWGDeviceSet* fromJson(QString &jsonString);
 
     SWGSamplingDevice* getSamplingDevice();
     void setSamplingDevice(SWGSamplingDevice* sampling_device);

@@ -22,13 +22,20 @@
 
 namespace SWGSDRangel {
 
-SWGLoggingInfo::SWGLoggingInfo(QString json) {
+SWGLoggingInfo::SWGLoggingInfo(QString* json) {
     init();
-    this->fromJson(json);
+    this->fromJson(*json);
 }
 
 SWGLoggingInfo::SWGLoggingInfo() {
-    init();
+    console_level = nullptr;
+    m_console_level_isSet = false;
+    file_level = nullptr;
+    m_file_level_isSet = false;
+    dump_to_file = 0;
+    m_dump_to_file_isSet = false;
+    file_name = nullptr;
+    m_file_name_isSet = false;
 }
 
 SWGLoggingInfo::~SWGLoggingInfo() {
@@ -62,7 +69,7 @@ SWGLoggingInfo::cleanup() {
 }
 
 SWGLoggingInfo*
-SWGLoggingInfo::fromJson(QString json) {
+SWGLoggingInfo::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -71,7 +78,7 @@ SWGLoggingInfo::fromJson(QString json) {
 }
 
 void
-SWGLoggingInfo::fromJsonObject(QJsonObject pJson) {
+SWGLoggingInfo::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&console_level, pJson["consoleLevel"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&file_level, pJson["fileLevel"], "QString", "QString");
@@ -85,15 +92,17 @@ SWGLoggingInfo::fromJsonObject(QJsonObject pJson) {
 QString
 SWGLoggingInfo::asJson ()
 {
-    QJsonObject obj = this->asJsonObject();
-    QJsonDocument doc(obj);
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
     QByteArray bytes = doc.toJson();
+    delete obj;
     return QString(bytes);
 }
 
-QJsonObject
+QJsonObject*
 SWGLoggingInfo::asJsonObject() {
-    QJsonObject obj;
+    QJsonObject* obj = new QJsonObject();
     if(console_level != nullptr && *console_level != QString("")){
         toJsonValue(QString("consoleLevel"), console_level, obj, QString("QString"));
     }
@@ -101,7 +110,7 @@ SWGLoggingInfo::asJsonObject() {
         toJsonValue(QString("fileLevel"), file_level, obj, QString("QString"));
     }
     if(m_dump_to_file_isSet){
-        obj.insert("dumpToFile", QJsonValue(dump_to_file));
+        obj->insert("dumpToFile", QJsonValue(dump_to_file));
     }
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
