@@ -17,7 +17,6 @@
 
 #include "dsp/dspcommands.h"
 
-MESSAGE_CLASS_DEFINITION(DSPExit, Message)
 MESSAGE_CLASS_DEFINITION(DSPAcquisitionInit, Message)
 MESSAGE_CLASS_DEFINITION(DSPAcquisitionStart, Message)
 MESSAGE_CLASS_DEFINITION(DSPAcquisitionStop, Message)

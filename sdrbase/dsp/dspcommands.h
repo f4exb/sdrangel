@@ -31,10 +31,6 @@ class BasebandSampleSource;
 class ThreadedBasebandSampleSource;
 class AudioFifo;
 
-class SDRANGEL_API DSPExit : public Message {
-	MESSAGE_CLASS_DECLARATION
-};
-
 class SDRANGEL_API DSPAcquisitionInit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };

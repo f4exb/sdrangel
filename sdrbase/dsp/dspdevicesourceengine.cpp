@@ -59,11 +59,8 @@ DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 void DSPDeviceSourceEngine::run()
 {
 	qDebug() << "DSPDeviceSourceEngine::run";
-
 	m_state = StIdle;
-
-    m_syncMessenger.done(); // Release start() that is waiting in main thread
-	exec();
+    exec();
 }
 
 void DSPDeviceSourceEngine::start()
@@ -612,13 +609,7 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
     Message *message = m_syncMessenger.getMessage();
 	qDebug() << "DSPDeviceSourceEngine::handleSynchronousMessages: " << message->getIdentifier();
 
-	if (DSPExit::match(*message))
-	{
-		gotoIdle();
-		m_state = StNotStarted;
-		exit();
-	}
-	else if (DSPAcquisitionInit::match(*message))
+	if (DSPAcquisitionInit::match(*message))
 	{
 		m_state = gotoIdle();
 
