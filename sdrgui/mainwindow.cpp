@@ -395,11 +395,13 @@ void MainWindow::removeLastDevice()
 	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
 	    }
 
-	    delete m_deviceUIs.back()->m_deviceSourceAPI;
+	    DeviceSourceAPI *sourceAPI = m_deviceUIs.back()->m_deviceSourceAPI;
 	    delete m_deviceUIs.back();
 
 	    lastDeviceEngine->stop();
 	    m_dspEngine->removeLastDeviceSourceEngine();
+
+	    delete sourceAPI;
 	}
 	else if (m_deviceUIs.back()->m_deviceSinkEngine) // sink tab
 	{
@@ -435,11 +437,13 @@ void MainWindow::removeLastDevice()
 	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
 	    }
 
-	    delete m_deviceUIs.back()->m_deviceSinkAPI;
+	    DeviceSinkAPI *sinkAPI = m_deviceUIs.back()->m_deviceSinkAPI;
 	    delete m_deviceUIs.back();
 
 	    lastDeviceEngine->stop();
 	    m_dspEngine->removeLastDeviceSinkEngine();
+
+	    delete sinkAPI;
 	}
 
     m_deviceUIs.pop_back();

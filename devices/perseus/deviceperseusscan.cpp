@@ -39,6 +39,7 @@ void DevicePerseusScan::scan(int nbDevices)
 
         if (perseus_firmware_download(descr, 0) < 0) {
             qCritical("DevicePerseusScan::scan: firmware download error: %s", perseus_errorstr());
+            perseus_close(descr);
             continue;
         }
         else
