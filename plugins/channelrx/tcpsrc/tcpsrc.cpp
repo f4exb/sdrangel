@@ -19,9 +19,10 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include <device/devicesourceapi.h>
+#include "dsp/dspcommands.h"
+#include "device/devicesourceapi.h"
 
 #include "tcpsrcgui.h"
 
@@ -305,6 +306,10 @@ bool TCPSrc::handleMessage(const Message& cmd)
 			processDeconnection();
 		}
 	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		if(m_spectrum != 0)

@@ -25,8 +25,8 @@
 #include "dsp/downchannelizer.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
@@ -173,6 +173,10 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		return false;

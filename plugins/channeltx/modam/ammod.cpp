@@ -19,12 +19,14 @@
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
+
 #include <stdio.h>
 #include <complex.h>
-#include <dsp/upchannelizer.h>
+
+#include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
 #include "dsp/threadedbasebandsamplesource.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
@@ -331,6 +333,10 @@ bool AMMod::handleMessage(const Message& cmd)
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
         getMessageQueueToGUI()->push(report);
 
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
 	else

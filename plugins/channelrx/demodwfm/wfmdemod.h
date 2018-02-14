@@ -91,7 +91,6 @@ public:
 	WFMDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~WFMDemod();
 	virtual void destroy() { delete this; }
-	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -158,7 +157,6 @@ private:
 	uint m_audioBufferFill;
     UDPSink<qint16> *m_udpBufferAudio;
 
-	BasebandSampleSink* m_sampleSink;
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;

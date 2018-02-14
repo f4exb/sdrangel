@@ -21,9 +21,10 @@
 #include <QDebug>
 #include <stdio.h>
 
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include <device/devicesourceapi.h>
+#include "dsp/dspcommands.h"
+#include "device/devicesourceapi.h"
 
 #include "lorademod.h"
 #include "lorabits.h"
@@ -347,6 +348,10 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		if(m_sampleSink != 0)

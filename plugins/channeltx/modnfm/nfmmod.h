@@ -310,6 +310,7 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings);
 };
 
 

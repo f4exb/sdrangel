@@ -21,6 +21,7 @@
 
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 
 #include "atvmod.h"
@@ -634,6 +635,10 @@ bool ATVMod::handleMessage(const Message& cmd)
         }
 
         m_showOverlayText = showOverlayText;
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
     else

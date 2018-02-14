@@ -22,10 +22,10 @@
 #include <complex.h>
 #include <algorithm>
 
-#include <dsp/upchannelizer.h>
+#include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
 #include "dsp/threadedbasebandsamplesource.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 
 #include "wfmmod.h"
@@ -357,6 +357,10 @@ bool WFMMod::handleMessage(const Message& cmd)
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
         getMessageQueueToGUI()->push(report);
 
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
 	else

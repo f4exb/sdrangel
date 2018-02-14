@@ -25,9 +25,9 @@
 #include <complex.h>
 #include <algorithm>
 
-#include <dsp/upchannelizer.h>
+#include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 #include "dsp/threadedbasebandsamplesource.h"
 
@@ -342,6 +342,10 @@ bool NFMMod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		return false;
@@ -503,27 +507,7 @@ int NFMMod::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
-    response.getNfmModSettings()->setAfBandwidth(m_settings.m_afBandwidth);
-    response.getNfmModSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
-    response.getNfmModSettings()->setChannelMute(m_settings.m_channelMute ? 1 : 0);
-    response.getNfmModSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
-    response.getNfmModSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
-    response.getNfmModSettings()->setFmDeviation(m_settings.m_fmDeviation);
-    response.getNfmModSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
-    response.getNfmModSettings()->setModAfInput((int) m_settings.m_modAFInput);
-    response.getNfmModSettings()->setPlayLoop(m_settings.m_playLoop ? 1 : 0);
-    response.getNfmModSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
-    response.getNfmModSettings()->setRgbColor(m_settings.m_rgbColor);
-    *response.getNfmModSettings()->getTitle() = m_settings.m_title;
-    response.getNfmModSettings()->setToneFrequency(m_settings.m_toneFrequency);
-    response.getNfmModSettings()->setVolumeFactor(m_settings.m_volumeFactor);
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
-    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
-    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
-    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
-    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
@@ -635,5 +619,49 @@ int NFMMod::webapiSettingsPutPatch(
         m_guiMessageQueue->push(msgToGUI);
     }
 
+    webapiFormatChannelSettings(response, settings);
+
     return 200;
+}
+
+void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings)
+{
+    response.getNfmModSettings()->setAfBandwidth(m_settings.m_afBandwidth);
+    response.getNfmModSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
+    response.getNfmModSettings()->setChannelMute(m_settings.m_channelMute ? 1 : 0);
+    response.getNfmModSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
+    response.getNfmModSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
+    response.getNfmModSettings()->setFmDeviation(m_settings.m_fmDeviation);
+    response.getNfmModSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
+    response.getNfmModSettings()->setModAfInput((int) m_settings.m_modAFInput);
+    response.getNfmModSettings()->setPlayLoop(m_settings.m_playLoop ? 1 : 0);
+    response.getNfmModSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
+    response.getNfmModSettings()->setRgbColor(m_settings.m_rgbColor);
+
+    if (response.getNfmModSettings()->getTitle()) {
+        *response.getNfmModSettings()->getTitle() = m_settings.m_title;
+    } else {
+        response.getNfmModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getNfmModSettings()->setToneFrequency(m_settings.m_toneFrequency);
+    response.getNfmModSettings()->setVolumeFactor(m_settings.m_volumeFactor);
+
+    if (!response.getNfmModSettings()->getCwKeyer()) {
+        response.getNfmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
+    }
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
 }

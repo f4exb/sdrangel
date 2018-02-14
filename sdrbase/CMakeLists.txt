@@ -37,7 +37,6 @@ set(sdrbase_SOURCES
     dsp/lowpass.cpp
     dsp/nco.cpp
     dsp/ncof.cpp
-    dsp/pidcontroller.cpp
     dsp/phaselock.cpp
     dsp/samplesinkfifo.cpp
     dsp/samplesourcefifo.cpp
@@ -138,7 +137,6 @@ set(sdrbase_HEADERS
     dsp/ncof.h
     dsp/phasediscri.h
     dsp/phaselock.h
-    dsp/pidcontroller.h
     dsp/recursivefilters.h
     dsp/samplesinkfifo.h
     dsp/samplesourcefifo.h

@@ -19,6 +19,7 @@
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
+#include "dsp/dspcommands.h"
 #include "util/db.h"
 
 #include "udpsinkmsg.h"
@@ -414,6 +415,10 @@ bool UDPSink::handleMessage(const Message& cmd)
 
         qDebug() << "UDPSink::handleMessage: MsgResetReadIndex";
 
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
     else

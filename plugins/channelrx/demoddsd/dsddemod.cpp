@@ -21,13 +21,12 @@
 #include <stdio.h>
 #include <complex.h>
 
-#include <dsp/downchannelizer.h>
 #include "audio/audiooutput.h"
-#include "dsp/pidcontroller.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include <dsp/downchannelizer.h>
-#include <device/devicesourceapi.h>
+#include "dsp/downchannelizer.h"
+#include "dsp/dspcommands.h"
+#include "device/devicesourceapi.h"
 
 #include "dsddemod.h"
 
@@ -365,6 +364,10 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_dsdDecoder.setMyPoint(cfg.getMyLatitude(), cfg.getMyLongitude());
 		return true;
 	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		return false;

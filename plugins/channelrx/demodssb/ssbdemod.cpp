@@ -23,8 +23,9 @@
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "util/db.h"
 
@@ -322,6 +323,10 @@ bool SSBDemod::handleMessage(const Message& cmd)
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
 	else

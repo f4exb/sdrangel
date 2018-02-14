@@ -23,10 +23,10 @@
 
 #include <dsp/downchannelizer.h>
 #include "dsp/threadedbasebandsamplesink.h"
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
+#include "dsp/dspcommands.h"
 
 #include "wfmdemod.h"
 
@@ -47,7 +47,6 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_sampleSink(0),
         m_audioFifo(250000),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -182,11 +181,6 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		m_audioBufferFill = 0;
 	}
 
-	if(m_sampleSink != 0)
-	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
-	}
-
 	m_sampleBuffer.clear();
 
 	m_settingsMutex.unlock();
@@ -238,16 +232,13 @@ bool WFMDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
-		if (m_sampleSink != 0)
-		{
-		    return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 }
 

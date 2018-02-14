@@ -22,7 +22,6 @@
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"

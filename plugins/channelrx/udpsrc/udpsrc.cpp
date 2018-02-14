@@ -22,6 +22,7 @@
 #include "util/db.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
 #include "udpsrcgui.h"
@@ -371,6 +372,10 @@ bool UDPSrc::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        return true;
+    }
 	else
 	{
 		if(m_spectrum != 0)

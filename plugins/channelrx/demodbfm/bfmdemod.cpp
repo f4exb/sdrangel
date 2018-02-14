@@ -22,9 +22,9 @@
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/pidcontroller.h"
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
 #include "rdsparser.h"
@@ -348,6 +348,10 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
         return true;
     }
 	else

@@ -83,7 +83,6 @@ SOURCES += audio/audiodeviceinfo.cpp\
         dsp/lowpass.cpp\
         dsp/nco.cpp\
         dsp/ncof.cpp\
-        dsp/pidcontroller.cpp\
         dsp/phaselock.cpp\
         dsp/recursivefilters.cpp\
         dsp/samplesinkfifo.cpp\
@@ -169,7 +168,6 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/ncof.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
-        dsp/pidcontroller.h\
         dsp/recursivefilters.h\
         dsp/samplesinkfifo.h\
         dsp/samplesourcefifo.h\
