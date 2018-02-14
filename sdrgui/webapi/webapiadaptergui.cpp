@@ -828,11 +828,13 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
         {
             if (response.getTx() != 0)
             {
+                error.init();
                 *error.getMessage() = QString("Rx device found but Tx device requested");
                 return 400;
             }
             if (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
             {
+                error.init();
                 *error.getMessage() = QString("Device mismatch. Found %1 input").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
                 return 400;
             }
@@ -846,11 +848,13 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
         {
             if (response.getTx() == 0)
             {
+                error.init();
                 *error.getMessage() = QString("Tx device found but Rx device requested");
                 return 400;
             }
             else if (deviceSet->m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
             {
+                error.init();
                 *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSinkAPI->getHardwareId());
                 return 400;
             }
@@ -871,7 +875,6 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
     {
         error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }
