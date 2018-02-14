@@ -650,11 +650,14 @@ int WebAPIAdapterSrv::instancePresetPost(
 
     DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
     int deviceCenterFrequency = 0;
+    bool isSourcePreset;
 
     if (deviceSet->m_deviceSourceEngine) { // Rx
         deviceCenterFrequency = deviceSet->m_deviceSourceEngine->getSource()->getCenterFrequency();
+        isSourcePreset = true;
     } else if (deviceSet->m_deviceSinkEngine) { // Tx
         deviceCenterFrequency = deviceSet->m_deviceSinkEngine->getSink()->getCenterFrequency();
+        isSourcePreset = false;
     } else {
         error.init();
         *error.getMessage() = QString("Device set error");
@@ -683,9 +686,9 @@ int WebAPIAdapterSrv::instancePresetPost(
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
-    response.setCenterFrequency(selectedPreset->getCenterFrequency());
+    response.setCenterFrequency(deviceCenterFrequency);
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getType() = isSourcePreset ? "R" : "T";
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
