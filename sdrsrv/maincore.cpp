@@ -342,12 +342,14 @@ void MainCore::removeLastDevice()
         m_deviceSets.back()->m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceSets.back()->m_deviceSourceAPI->getSampleSource());
         m_deviceSets.back()->m_deviceSourceAPI->clearBuddiesLists(); // clear old API buddies lists
-        delete m_deviceSets.back()->m_deviceSourceAPI;
 
+        DeviceSourceAPI *sourceAPI = m_deviceSets.back()->m_deviceSourceAPI;
         delete m_deviceSets.back();
 
         lastDeviceEngine->stop();
         m_dspEngine->removeLastDeviceSourceEngine();
+
+        delete sourceAPI;
     }
     else if (m_deviceSets.back()->m_deviceSinkEngine) // sink set
     {
@@ -360,12 +362,14 @@ void MainCore::removeLastDevice()
         m_deviceSets.back()->m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
                 m_deviceSets.back()->m_deviceSinkAPI->getSampleSink());
         m_deviceSets.back()->m_deviceSinkAPI->clearBuddiesLists(); // clear old API buddies lists
-        delete m_deviceSets.back()->m_deviceSinkAPI;
 
+        DeviceSinkAPI *sinkAPI = m_deviceSets.back()->m_deviceSinkAPI;
         delete m_deviceSets.back();
 
         lastDeviceEngine->stop();
         m_dspEngine->removeLastDeviceSinkEngine();
+
+        delete sinkAPI;
     }
 
     m_deviceSets.pop_back();
