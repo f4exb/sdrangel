@@ -370,6 +370,7 @@ public:
      */
     virtual int devicesetDevicePut(
             int deviceSetIndex __attribute__((unused)),
+            SWGSDRangel::SWGDeviceListItem& query __attribute__((unused)),
             SWGSDRangel::SWGDeviceListItem& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {

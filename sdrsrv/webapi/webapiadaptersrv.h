@@ -138,6 +138,7 @@ public:
 
     virtual int devicesetDevicePut(
             int deviceSetIndex,
+            SWGSDRangel::SWGDeviceListItem& query,
             SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error);
 

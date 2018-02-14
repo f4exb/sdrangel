@@ -395,6 +395,7 @@ void MainWindow::removeLastDevice()
 	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
 	    }
 
+	    delete m_deviceUIs.back()->m_deviceSourceAPI;
 	    delete m_deviceUIs.back();
 
 	    lastDeviceEngine->stop();
@@ -434,6 +435,7 @@ void MainWindow::removeLastDevice()
 	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
 	    }
 
+	    delete m_deviceUIs.back()->m_deviceSinkAPI;
 	    delete m_deviceUIs.back();
 
 	    lastDeviceEngine->stop();

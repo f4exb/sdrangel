@@ -696,6 +696,7 @@ int WebAPIAdapterGUI::devicesetFocusPatch(
 
 int WebAPIAdapterGUI::devicesetDevicePut(
         int deviceSetIndex,
+        SWGSDRangel::SWGDeviceListItem& query,
         SWGSDRangel::SWGDeviceListItem& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -703,46 +704,48 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     {
         DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
 
-        if ((response.getTx() == 0) && (deviceSet->m_deviceSinkEngine))
+        if ((query.getTx() == 0) && (deviceSet->m_deviceSinkEngine))
         {
+            error.init();
             *error.getMessage() = QString("Device type (Rx) and device set type (Tx) mismatch");
             return 404;
         }
 
-        if ((response.getTx() != 0) && (deviceSet->m_deviceSourceEngine))
+        if ((query.getTx() != 0) && (deviceSet->m_deviceSourceEngine))
         {
+            error.init();
             *error.getMessage() = QString("Device type (Tx) and device set type (Rx) mismatch");
             return 404;
         }
 
-        int nbSamplingDevices = response.getTx() != 0 ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
-        int tx = response.getTx();
+        int nbSamplingDevices = query.getTx() != 0 ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
+        int tx = query.getTx();
 
         for (int i = 0; i < nbSamplingDevices; i++)
         {
-            PluginInterface::SamplingDevice samplingDevice = response.getTx() ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
+            PluginInterface::SamplingDevice samplingDevice = query.getTx() ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
 
-            if (response.getDisplayedName() && (*response.getDisplayedName() != samplingDevice.displayedName)) {
+            if (query.getDisplayedName() && (*query.getDisplayedName() != samplingDevice.displayedName)) {
                 continue;
             }
 
-            if (response.getHwType() && (*response.getHwType() != samplingDevice.hardwareId)) {
+            if (query.getHwType() && (*query.getHwType() != samplingDevice.hardwareId)) {
                 continue;
             }
 
-            if ((response.getSequence() >= 0) && (response.getSequence() != samplingDevice.sequence)) {
+            if ((query.getSequence() >= 0) && (query.getSequence() != samplingDevice.sequence)) {
                 continue;
             }
 
-            if (response.getSerial() && (*response.getSerial() != samplingDevice.serial)) {
+            if (query.getSerial() && (*query.getSerial() != samplingDevice.serial)) {
                 continue;
             }
 
-            if ((response.getStreamIndex() >= 0) && (response.getStreamIndex() != samplingDevice.deviceItemIndex)) {
+            if ((query.getStreamIndex() >= 0) && (query.getStreamIndex() != samplingDevice.deviceItemIndex)) {
                 continue;
             }
 
-            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, response.getTx() != 0);
+            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getTx() != 0);
             m_mainWindow.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -759,6 +762,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
             return 202;
         }
 
+        error.init();
         *error.getMessage() = QString("Device not found");
         return 404;
     }
@@ -766,7 +770,6 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     {
         error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 }

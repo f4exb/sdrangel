@@ -868,11 +868,12 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
 
             if (parseJsonBody(jsonStr, jsonObject, response))
             {
+                SWGSDRangel::SWGDeviceListItem query;
                 SWGSDRangel::SWGDeviceListItem normalResponse;
 
-                if (validateDeviceListItem(normalResponse, jsonObject))
+                if (validateDeviceListItem(query, jsonObject))
                 {
-                    int status = m_adapter->devicesetDevicePut(deviceSetIndex, normalResponse, errorResponse);
+                    int status = m_adapter->devicesetDevicePut(deviceSetIndex, query, normalResponse, errorResponse);
                     response.setStatus(status);
 
                     if (status/100 == 2) {
