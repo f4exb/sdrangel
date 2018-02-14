@@ -264,7 +264,7 @@ void PerseusInput::closeDevice()
 {
     if (m_perseusDescriptor)
     {
-        perseus_stop_async_input(m_perseusDescriptor);
+        if (m_running) { stop(); }
         perseus_close(m_perseusDescriptor);
     }
 }

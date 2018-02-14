@@ -386,6 +386,7 @@ int WebAPIAdapterGUI::instancePresetsGet(
         }
 
         swgPresets->append(new SWGSDRangel::SWGPresetItem);
+        swgPresets->back()->init();
         swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
         *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
         *swgPresets->back()->getName() = preset->getDescription();
@@ -409,6 +410,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
@@ -419,6 +421,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
@@ -430,12 +433,14 @@ int WebAPIAdapterGUI::instancePresetPatch(
 
     if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
     {
+        error.init();
         *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
         return 404;
     }
 
     if (deviceUI->m_deviceSinkEngine && selectedPreset->isSourcePreset())
     {
+        error.init();
         *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
         return 404;
     }
@@ -463,6 +468,7 @@ int WebAPIAdapterGUI::instancePresetPut(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
@@ -473,6 +479,7 @@ int WebAPIAdapterGUI::instancePresetPut(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
@@ -485,12 +492,14 @@ int WebAPIAdapterGUI::instancePresetPut(
 
         if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
         {
+            error.init();
             *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
             return 404;
         }
 
         if (deviceUI->m_deviceSinkEngine && selectedPreset->isSourcePreset())
         {
+            error.init();
             *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
             return 404;
         }
@@ -519,12 +528,26 @@ int WebAPIAdapterGUI::instancePresetPost(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
 
+    DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+    int deviceCenterFrequency = 0;
+
+    if (deviceSet->m_deviceSourceEngine) { // Rx
+        deviceCenterFrequency = deviceSet->m_deviceSourceEngine->getSource()->getCenterFrequency();
+    } else if (deviceSet->m_deviceSinkEngine) { // Tx
+        deviceCenterFrequency = deviceSet->m_deviceSinkEngine->getSink()->getCenterFrequency();
+    } else {
+        error.init();
+        *error.getMessage() = QString("Device set error");
+        return 500;
+    }
+
     const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
-            presetIdentifier->getCenterFrequency(),
+            deviceCenterFrequency,
             *presetIdentifier->getName());
 
     if (selectedPreset == 0) // save on a new preset
@@ -533,9 +556,10 @@ int WebAPIAdapterGUI::instancePresetPost(
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("Preset already exists [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
-                .arg(presetIdentifier->getCenterFrequency())
+                .arg(deviceCenterFrequency)
                 .arg(*presetIdentifier->getName());
         return 409;
     }
@@ -1287,6 +1311,7 @@ void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
 
 void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex)
 {
+    deviceSet->init();
     SWGSDRangel::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
     samplingDevice->init();
     samplingDevice->setIndex(deviceUISetIndex);
@@ -1313,6 +1338,7 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
         for (int i = 0; i <  deviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
             ChannelSourceAPI *channel = deviceUISet->m_deviceSinkAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -1343,6 +1369,7 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
         for (int i = 0; i <  deviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
             ChannelSinkAPI *channel = deviceUISet->m_deviceSourceAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());

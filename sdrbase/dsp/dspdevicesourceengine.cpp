@@ -52,7 +52,8 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 
 DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 {
-	wait();
+    stop();
+    wait();
 }
 
 void DSPDeviceSourceEngine::run()

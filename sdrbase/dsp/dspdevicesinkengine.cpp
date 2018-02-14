@@ -48,6 +48,7 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 
 DSPDeviceSinkEngine::~DSPDeviceSinkEngine()
 {
+    stop();
 	wait();
 }
 
@@ -70,8 +71,11 @@ void DSPDeviceSinkEngine::start()
 void DSPDeviceSinkEngine::stop()
 {
 	qDebug() << "DSPDeviceSinkEngine::stop";
-	DSPExit cmd;
-	m_syncMessenger.sendWait(cmd);
+    gotoIdle();
+    m_state = StNotStarted;
+    QThread::exit();
+//	DSPExit cmd;
+//	m_syncMessenger.sendWait(cmd);
 }
 
 bool DSPDeviceSinkEngine::initGeneration()

@@ -393,12 +393,14 @@ int WebAPIAdapterSrv::instancePresetFilePut(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("File %1 not found or not readable").arg(fileName);
             return 404;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("Empty file path");
         return 404;
     }
@@ -418,6 +420,7 @@ int WebAPIAdapterSrv::instancePresetFilePost(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
@@ -453,12 +456,14 @@ int WebAPIAdapterSrv::instancePresetFilePost(
         }
         else
         {
+            error.init();
             *error.getMessage() = QString("File %1 cannot be written").arg(filePath);
             return 404;
         }
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("Empty file path");
         return 404;
     }
@@ -496,6 +501,7 @@ int WebAPIAdapterSrv::instancePresetsGet(
         }
 
         swgPresets->append(new SWGSDRangel::SWGPresetItem);
+        swgPresets->back()->init();
         swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
         *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
         *swgPresets->back()->getName() = preset->getDescription();
@@ -519,6 +525,7 @@ int WebAPIAdapterSrv::instancePresetPatch(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
@@ -529,6 +536,7 @@ int WebAPIAdapterSrv::instancePresetPatch(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
@@ -540,12 +548,14 @@ int WebAPIAdapterSrv::instancePresetPatch(
 
     if (deviceSet->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
     {
+        error.init();
         *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
         return 404;
     }
 
     if (deviceSet->m_deviceSinkEngine && selectedPreset->isSourcePreset())
     {
+        error.init();
         *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
         return 404;
     }
@@ -573,6 +583,7 @@ int WebAPIAdapterSrv::instancePresetPut(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
@@ -583,6 +594,7 @@ int WebAPIAdapterSrv::instancePresetPut(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
@@ -595,12 +607,14 @@ int WebAPIAdapterSrv::instancePresetPut(
 
         if (deviceSet->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
         {
+            error.init();
             *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
             return 404;
         }
 
         if (deviceSet->m_deviceSinkEngine && selectedPreset->isSourcePreset())
         {
+            error.init();
             *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
             return 404;
         }
@@ -629,6 +643,7 @@ int WebAPIAdapterSrv::instancePresetPost(
 
     if (deviceSetIndex >= nbDeviceSets)
     {
+        error.init();
         *error.getMessage() = QString("There is no device set at index %1. Number of device sets is %2").arg(deviceSetIndex).arg(nbDeviceSets);
         return 404;
     }
@@ -641,6 +656,7 @@ int WebAPIAdapterSrv::instancePresetPost(
     } else if (deviceSet->m_deviceSinkEngine) { // Tx
         deviceCenterFrequency = deviceSet->m_deviceSinkEngine->getSink()->getCenterFrequency();
     } else {
+        error.init();
         *error.getMessage() = QString("Device set error");
         return 500;
     }
@@ -655,6 +671,7 @@ int WebAPIAdapterSrv::instancePresetPost(
     }
     else
     {
+        error.init();
         *error.getMessage() = QString("Preset already exists [%1, %2, %3]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(deviceCenterFrequency)
@@ -684,6 +701,7 @@ int WebAPIAdapterSrv::instancePresetDelete(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3]")
                 .arg(*response.getGroupName())
                 .arg(response.getCenterFrequency())
@@ -1388,6 +1406,7 @@ void WebAPIAdapterSrv::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
 
 void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex)
 {
+    swgDeviceSet->init();
     SWGSDRangel::SWGSamplingDevice *samplingDevice = swgDeviceSet->getSamplingDevice();
     samplingDevice->init();
     samplingDevice->setIndex(deviceUISetIndex);
@@ -1414,6 +1433,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         for (int i = 0; i <  swgDeviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
             ChannelSourceAPI *channel = deviceSet->m_deviceSinkAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -1444,6 +1464,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         for (int i = 0; i <  swgDeviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
             ChannelSinkAPI *channel = deviceSet->m_deviceSourceAPI->getChanelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());

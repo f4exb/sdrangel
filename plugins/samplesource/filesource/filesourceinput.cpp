@@ -98,13 +98,12 @@ void FileSourceInput::openFileStream()
 			<< " fileSize: " << fileSize << "bytes"
 			<< " length: " << m_recordLength << " seconds";
 
-	MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
-	        m_sampleSize,
-			m_centerFrequency,
-			m_startingTimeStamp,
-			m_recordLength); // file stream data
-
 	if (getMessageQueueToGUI()) {
+	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
+	            m_sampleSize,
+	            m_centerFrequency,
+	            m_startingTimeStamp,
+	            m_recordLength); // file stream data
 	    getMessageQueueToGUI()->push(report);
 	}
 }
@@ -161,9 +160,8 @@ bool FileSourceInput::start()
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSourceInput::startInput: started");
 
-	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
-
 	if (getMessageQueueToGUI()) {
+        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
         getMessageQueueToGUI()->push(report);
 	}
 
@@ -184,9 +182,8 @@ void FileSourceInput::stop()
 
 	m_deviceDescription.clear();
 
-	MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
-
 	if (getMessageQueueToGUI()) {
+        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
         getMessageQueueToGUI()->push(report);
 	}
 }
@@ -209,10 +206,10 @@ bool FileSourceInput::deserialize(const QByteArray& data)
     MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
     m_inputMessageQueue.push(message);
 
-    if (m_guiMessageQueue)
+    if (getMessageQueueToGUI())
     {
         MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
-        m_guiMessageQueue->push(messageToGUI);
+        getMessageQueueToGUI()->push(messageToGUI);
     }
 
     return success;
@@ -241,10 +238,10 @@ void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
     MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
     m_inputMessageQueue.push(message);
 
-    if (m_guiMessageQueue)
+    if (getMessageQueueToGUI())
     {
         MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
-        m_guiMessageQueue->push(messageToGUI);
+        getMessageQueueToGUI()->push(messageToGUI);
     }
 }
 
@@ -299,9 +296,8 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		if (m_fileSourceThread != 0)
 		{
-			report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-
 			if (getMessageQueueToGUI()) {
+                report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
                 getMessageQueueToGUI()->push(report);
 			}
 		}
@@ -361,10 +357,10 @@ int FileSourceInput::webapiRun(
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
 
-    if (m_guiMessageQueue) // forward to GUI if any
+    if (getMessageQueueToGUI()) // forward to GUI if any
     {
         MsgStartStop *msgToGUI = MsgStartStop::create(run);
-        m_guiMessageQueue->push(msgToGUI);
+        getMessageQueueToGUI()->push(msgToGUI);
     }
 
     return 200;
