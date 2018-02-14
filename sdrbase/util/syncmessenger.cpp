@@ -33,16 +33,15 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 {
     m_message = &message;
 	m_mutex.lock();
-	m_complete.testAndSetAcquire(0, 1);
+	m_complete.store(0);
 
 	emit messageSent();
 
-	while (!m_complete.testAndSetAcquire(0, 1))
+	while (!m_complete.load())
 	{
 		m_waitCondition.wait(&m_mutex, msPollTime);
 	}
 
-	m_complete = 0;
 	int result = m_result;
 	m_mutex.unlock();
 
@@ -52,7 +51,7 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 void SyncMessenger::done(int result)
 {
 	m_result = result;
-	m_complete = 0;
+	m_complete.store(1);
 	m_waitCondition.wakeAll();
 }
 
