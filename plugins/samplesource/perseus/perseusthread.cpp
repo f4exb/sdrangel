@@ -39,6 +39,7 @@ PerseusThread::~PerseusThread()
 
 void PerseusThread::startWork()
 {
+    qDebug("PerseusThread::startWork");
     m_startWaitMutex.lock();
     start();
     while(!m_running)

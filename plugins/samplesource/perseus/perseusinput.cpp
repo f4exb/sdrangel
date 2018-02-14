@@ -381,8 +381,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
     {
         if (m_perseusThread && m_perseusThread->isRunning())
         {
-            m_perseusThread->stopWork();
-            m_perseusThread->startWork();
+            stop();
+            start();
         }
     }
 
