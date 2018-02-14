@@ -626,26 +626,26 @@ int NFMMod::webapiSettingsPutPatch(
 
 void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings)
 {
-    response.getNfmModSettings()->setAfBandwidth(m_settings.m_afBandwidth);
-    response.getNfmModSettings()->setAudioSampleRate(m_settings.m_audioSampleRate);
-    response.getNfmModSettings()->setChannelMute(m_settings.m_channelMute ? 1 : 0);
-    response.getNfmModSettings()->setCtcssIndex(m_settings.m_ctcssIndex);
-    response.getNfmModSettings()->setCtcssOn(m_settings.m_ctcssOn ? 1 : 0);
-    response.getNfmModSettings()->setFmDeviation(m_settings.m_fmDeviation);
-    response.getNfmModSettings()->setInputFrequencyOffset(m_settings.m_inputFrequencyOffset);
-    response.getNfmModSettings()->setModAfInput((int) m_settings.m_modAFInput);
-    response.getNfmModSettings()->setPlayLoop(m_settings.m_playLoop ? 1 : 0);
-    response.getNfmModSettings()->setRfBandwidth(m_settings.m_rfBandwidth);
-    response.getNfmModSettings()->setRgbColor(m_settings.m_rgbColor);
+    response.getNfmModSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getNfmModSettings()->setAudioSampleRate(settings.m_audioSampleRate);
+    response.getNfmModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getNfmModSettings()->setCtcssIndex(settings.m_ctcssIndex);
+    response.getNfmModSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
+    response.getNfmModSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getNfmModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getNfmModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getNfmModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getNfmModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getNfmModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getNfmModSettings()->getTitle()) {
-        *response.getNfmModSettings()->getTitle() = m_settings.m_title;
+        *response.getNfmModSettings()->getTitle() = settings.m_title;
     } else {
         response.getNfmModSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getNfmModSettings()->setToneFrequency(m_settings.m_toneFrequency);
-    response.getNfmModSettings()->setVolumeFactor(m_settings.m_volumeFactor);
+    response.getNfmModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getNfmModSettings()->setVolumeFactor(settings.m_volumeFactor);
 
     if (!response.getNfmModSettings()->getCwKeyer()) {
         response.getNfmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
