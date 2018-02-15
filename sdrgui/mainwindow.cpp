@@ -198,8 +198,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 MainWindow::~MainWindow()
 {
-    m_commandKeyReceiver->deleteLater();
-
     m_apiServer->stop();
     delete m_apiServer;
     delete m_requestMapper;
@@ -213,6 +211,7 @@ MainWindow::~MainWindow()
 
 	qDebug() << "MainWindow::~MainWindow: end";
 	delete m_logger;
+	delete m_commandKeyReceiver;
 }
 
 void MainWindow::addSourceDevice(int deviceIndex)
