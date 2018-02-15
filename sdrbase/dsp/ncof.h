@@ -25,8 +25,9 @@ private:
 	enum {
 		TableSize = (1 << 12),
 	};
-	static Real m_table[TableSize];
+	static Real m_table[TableSize+1];
 	static bool m_tableInitialized;
+	static float m_tableSizeLimit;
 
 	static void initTable();
 
@@ -42,10 +43,12 @@ public:
 	int nextPhase()        //!< Increment phase and return its integer value
 	{
 		m_phase += m_phaseIncrement;
-		while(m_phase >= TableSize)
+		while(m_phase >= m_tableSizeLimit) {
 			m_phase -= TableSize;
-		while(m_phase < 0)
+		}
+		while(m_phase < 0.0) {
 			m_phase += TableSize;
+		}
 		return (int) m_phase;
 	}
 

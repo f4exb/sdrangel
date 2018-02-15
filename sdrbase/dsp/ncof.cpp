@@ -23,16 +23,19 @@
 #undef M_PI
 #define M_PI		3.14159265358979323846
 
-Real NCOF::m_table[NCOF::TableSize];
+Real NCOF::m_table[NCOF::TableSize+1];
 bool NCOF::m_tableInitialized = false;
+float NCOF::m_tableSizeLimit = (float) NCOF::TableSize;
 
 void NCOF::initTable()
 {
-	if(m_tableInitialized)
+	if(m_tableInitialized) {
 		return;
+	}
 
-	for(int i = 0; i < TableSize; i++)
+	for(int i = 0; i <= TableSize; i++) {
 		m_table[i] = cos((2.0 * M_PI * i) / TableSize);
+	}
 
 	m_tableInitialized = true;
 }
