@@ -37,7 +37,6 @@ public:
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(uint32_t samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
 
 private:
@@ -50,7 +49,6 @@ private:
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
 
-	int m_samplerate;
 	unsigned int m_log2Decim;
 	static PerseusThread *m_this;
 

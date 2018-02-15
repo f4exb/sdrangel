@@ -300,16 +300,22 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         if (m_perseusDescriptor != 0)
         {
             int rate = m_sampleRates[settings.m_devSampleRateIndex < m_sampleRates.size() ? settings.m_devSampleRateIndex: 0];
-            int rc = perseus_set_sampling_rate(m_perseusDescriptor, rate);
+            int rc;
 
-            if (rc < 0) {
-                qCritical("PerseusInput::applySettings: could not set sample rate index %u (%d S/s): %s",
-                        settings.m_devSampleRateIndex, rate, perseus_errorstr());
-            }
-            else if (m_perseusThread != 0)
+            for (int i = 0; i < 2; i++) // it turns out that it has to be done twice
             {
-                qDebug("PerseusInput::applySettings: sample rate set to index: %u (%d S/s)", settings.m_devSampleRateIndex, rate);
-                m_perseusThread->setSamplerate(rate);
+                rc = perseus_set_sampling_rate(m_perseusDescriptor, rate);
+
+                if (rc < 0) {
+                    qCritical("PerseusInput::applySettings: could not set sample rate index %u (%d S/s): %s",
+                            settings.m_devSampleRateIndex, rate, perseus_errorstr());
+                    break;
+                }
+                else
+                {
+                    qDebug("PerseusInput::applySettings: sample rate set to index #%d: %u (%d S/s)",
+                            i, settings.m_devSampleRateIndex, rate);
+                }
             }
         }
     }
@@ -329,7 +335,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
             || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
             || (m_settings.m_wideBand != settings.m_wideBand)
             || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+            || (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex))
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
@@ -377,17 +384,20 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
-    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
-    {
-        if (m_perseusThread && m_perseusThread->isRunning())
-        {
-            stop();
-            start();
-        }
-    }
-
     m_settings = settings;
     m_settings.m_devSampleRateIndex = sampleRateIndex;
+
+    qDebug() << "PerseusInput::applySettings: "
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_devSampleRateIndex: " << m_settings.m_devSampleRateIndex
+            << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " m_adcDither: " << m_settings.m_adcDither
+            << " m_adcPreamp: " << m_settings.m_adcPreamp
+            << " m_wideBand: " << m_settings.m_wideBand
+            << " m_attenuator: " << m_settings.m_attenuator;
+
     return true;
 }
 

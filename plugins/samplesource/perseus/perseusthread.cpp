@@ -25,7 +25,6 @@ PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QOb
     m_dev(dev),
     m_convertBuffer(PERSEUS_NBSAMPLES),
     m_sampleFifo(sampleFifo),
-    m_samplerate(10),
     m_log2Decim(0)
 {
     m_this = this;
@@ -52,11 +51,6 @@ void PerseusThread::stopWork()
     qDebug("PerseusThread::stopWork");
     m_running = false;
     wait();
-}
-
-void PerseusThread::setSamplerate(uint32_t samplerate)
-{
-    m_samplerate = samplerate;
 }
 
 void PerseusThread::setLog2Decimation(unsigned int log2_decim)
