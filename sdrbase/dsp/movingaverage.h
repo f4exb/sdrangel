@@ -27,7 +27,7 @@ public:
         m_sum += value - oldest;
         oldest = value;
 
-        if (m_index < m_history.size()) {
+        if (m_index < m_history.size() - 1) {
             m_index++;
         } else {
             m_index = 0;
