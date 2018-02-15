@@ -70,43 +70,46 @@ template<uint32_t AvgSize>
 class SimpleAGC
 {
 public:
-	SimpleAGC(Real cutoff=0, Real clip=0) :
-        m_squelchOpen(false),
+	SimpleAGC(Real initial, Real cutoff=0, Real clip=0) :
         m_cutoff(cutoff),
-        m_clip(clip)
-	{}
+        m_clip(clip),
+        m_moving_average(AvgSize, initial)
+	{
+	}
 
-	void resize(Real cutoff=0, Real clip=0)
+	void resize(Real initial, Real cutoff=0, Real clip=0)
 	{
         m_cutoff = cutoff;
         m_clip = clip;
+        m_moving_average.resize(AvgSize, initial);
 	}
+
+    void fill(double value)
+    {
+        m_moving_average.fill(value);
+    }
 
 	Real getValue()
 	{
-        if ((Real) m_moving_average > m_clip)
-        {
-            return (Real) m_moving_average;
-        } else
-        {
+        if ((Real) m_moving_average.average() > m_clip) {
+            return (Real) m_moving_average.average();
+        } else {
             return m_clip;
         }
 	}
 
     void feed(Real value)
     {
-        if (value > m_cutoff)
-        {
-            m_moving_average(value);
+        if (value > m_cutoff) {
+            m_moving_average.feed(value);
         }
     }
 
 private:
-    bool m_squelchOpen; // open for processing
     Real m_cutoff;  // consider samples only above this level
     Real m_clip;    // never go below this level
-    //MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
-    MovingAverageUtil<Real, double, AvgSize> m_moving_average;
+    MovingAverage<double> m_moving_average; // Averaging engine. The stack length conditions the smoothness of AGC.
+    //MovingAverageUtil<Real, double, AvgSize> m_moving_average;
 };
 
 #endif /* INCLUDE_GPL_DSP_AGC_H_ */
