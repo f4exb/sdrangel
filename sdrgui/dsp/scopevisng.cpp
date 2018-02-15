@@ -794,6 +794,10 @@ void ScopeVisNG::updateMaxTraceDelay()
             maxTraceDelay = itData->m_traceDelay;
         }
 
+        if (itData->m_projectionType < 0) {
+            itData->m_projectionType = ProjectionReal;
+        }
+
         if (projectorCounts[(int) itData->m_projectionType] > 0)
         {
             allocateCache = true;
