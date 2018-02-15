@@ -60,8 +60,8 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()
 {
-	if (SSBFilter) delete SSBFilter;
-	if (DSBFilter) delete DSBFilter;
+	delete SSBFilter;
+	delete DSBFilter;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
