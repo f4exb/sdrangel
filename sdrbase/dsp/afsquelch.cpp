@@ -20,44 +20,6 @@
 #undef M_PI
 #define M_PI		3.14159265358979323846
 
-AFSquelch::AFSquelch() :
-            m_nbAvg(128),
-			m_N(0),
-			m_sampleRate(0),
-			m_samplesProcessed(0),
-            m_samplesAvgProcessed(0),
-			m_maxPowerIndex(0),
-			m_nTones(2),
-			m_samplesAttack(0),
-			m_attackCount(0),
-			m_samplesDecay(0),
-			m_decayCount(0),
-			m_squelchCount(0),
-			m_isOpen(false),
-			m_threshold(0.0)
-{
-	m_k = new double[m_nTones];
-	m_coef = new double[m_nTones];
-	m_toneSet = new double[m_nTones];
-	m_u0 = new double[m_nTones];
-	m_u1 = new double[m_nTones];
-	m_power = new double[m_nTones];
-	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 0.0f));
-
-	m_toneSet[0]  = 2000.0;
-	m_toneSet[1]  = 10000.0;
-
-    for (unsigned int j = 0; j < m_nTones; ++j)
-    {
-        m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
-        m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
-        m_u0[j] = 0.0;
-        m_u1[j] = 0.0;
-        m_power[j] = 0.0;
-        m_movingAverages[j].fill(0.0);
-    }
-}
-
 AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
             m_nbAvg(128),
 			m_N(0),

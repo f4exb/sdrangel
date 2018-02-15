@@ -25,8 +25,6 @@
  */
 class AFSquelch {
 public:
-    // Constructors and Destructor
-	AFSquelch();
     // allows user defined tone pair
 	AFSquelch(unsigned int nbTones,
 			const double *tones);
