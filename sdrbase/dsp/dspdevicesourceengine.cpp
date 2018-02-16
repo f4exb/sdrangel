@@ -712,6 +712,15 @@ void DSPDeviceSourceEngine::handleInputMessages()
 				m_imbalance = 65536;
 			}
 
+			m_avgAmp.reset();
+			m_avgII.reset();
+			m_avgII2.reset();
+			m_avgIQ.reset();
+			m_avgPhi.reset();
+			m_avgQQ2.reset();
+			m_iBeta.reset();
+			m_qBeta.reset();
+
 			delete message;
 		}
 		else if (DSPSignalNotification::match(*message))
