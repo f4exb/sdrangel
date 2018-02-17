@@ -82,18 +82,19 @@ bool AirspyHFInput::openDevice()
 
     if (!m_sampleFifo.setSize(1<<19))
     {
-        qCritical("AirspyHFInput::start: could not allocate SampleFifo");
+        qCritical("AirspyHFInput::openDevice: could not allocate SampleFifo");
         return false;
     }
 
     if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSampleSourceSerial())) == 0)
     {
-        qCritical("AirspyHFInput::start: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qCritical("AirspyHFInput::openDevice: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        m_dev = 0;
         return false;
     }
     else
     {
-        qDebug("AirspyHFInput::start: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qDebug("AirspyHFInput::openDevice: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
     }
 
     uint32_t nbSampleRates;
@@ -103,11 +104,12 @@ bool AirspyHFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFInput::start: %d sample rates for Airspy HF", nbSampleRates);
+        qDebug("AirspyHFInput::openDevice: %d sample rates for Airspy HF", nbSampleRates);
     }
     else
     {
-        qCritical("AirspyHFInput::start: could not obtain the number of Airspy HF sample rates");
+        qCritical("AirspyHFInput::openDevice: could not obtain the number of Airspy HF sample rates");
+        closeDevice();
         return false;
     }
 
@@ -117,11 +119,12 @@ bool AirspyHFInput::openDevice()
 
     if (rc == AIRSPYHF_SUCCESS)
     {
-        qDebug("AirspyHFInput::start: obtained Airspy HF sample rates");
+        qDebug("AirspyHFInput::openDevice: obtained Airspy HF sample rates");
     }
     else
     {
-        qCritical("AirspyHFInput::start: could not obtain Airspy HF sample rates");
+        qCritical("AirspyHFInput::openDevice: could not obtain Airspy HF sample rates");
+        closeDevice();
         return false;
     }
 
@@ -130,7 +133,7 @@ bool AirspyHFInput::openDevice()
     for (unsigned int i = 0; i < nbSampleRates; i++)
     {
         m_sampleRates.push_back(sampleRates[i]);
-        qDebug("AirspyHFInput::start: sampleRates[%d] = %u Hz", i, sampleRates[i]);
+        qDebug("AirspyHFInput::openDevice: sampleRates[%d] = %u Hz", i, sampleRates[i]);
     }
 
     delete[] sampleRates;
@@ -408,10 +411,10 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
         qint64 f_img = deviceCenterFrequency;
-        quint32 devSampleRate = m_sampleRates[sampleRateIndex];
 
 		if (m_dev != 0)
 		{
+            quint32 devSampleRate = m_sampleRates[sampleRateIndex];
 			setDeviceCenterFrequency(deviceCenterFrequency, settings);
 
 			qDebug() << "AirspyHFInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
@@ -424,7 +427,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		forwardChange = true;
 	}
 
-	if (forwardChange)
+	if (forwardChange && (sampleRateIndex >= 0))
 	{
 		int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
@@ -433,7 +436,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	}
 
 	m_settings = settings;
-	m_settings.m_devSampleRateIndex = sampleRateIndex;
 	return true;
 }
 
