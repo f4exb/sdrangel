@@ -184,7 +184,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             	sample = m_dsdDecoder.getFilteredSample() * m_scaleFromShort;
             }
 
-            if (m_sampleBufferIndex < (1<<17)) {
+            if (m_sampleBufferIndex < (1<<17)-1) {
                 m_sampleBufferIndex++;
             } else {
                 m_sampleBufferIndex = 0;
