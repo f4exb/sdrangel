@@ -319,6 +319,7 @@ DSDDemodGUI::~DSDDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_scopeVis;
 	delete ui;
 }
 
