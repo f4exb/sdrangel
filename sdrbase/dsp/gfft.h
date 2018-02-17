@@ -36,7 +36,7 @@
 template <typename FFT_TYPE>
 class g_fft {
 
-#define FFT_RECIPLN2  1.442695040888963407359924681001892137426 // 1.0/log(2) 
+#define FFT_RECIPLN2  1.442695040888963407359924681001892137426 // 1.0/log(2)
 
 // some useful conversions between a number and its power of 2
 #define LOG2(a) (FFT_RECIPLN2*log(a))		// floating point logarithm base 2
@@ -102,7 +102,7 @@ private:
 	void bitrevR2(FFT_TYPE *ioptr, int M, short *BRLow);
 	void fftBRInit(int M, short *BRLow);
 	void fftCosInit(int M, FFT_TYPE *Utbl);
-	
+
 public:
 	g_fft (int M = 8192)
     {
@@ -3247,7 +3247,9 @@ void g_fft<FFT_TYPE>::fftInit()
 	FFT_table_2[FFT_N/2] = new short[POW2(FFT_N/2 - 1)];
 	fftBRInit(FFT_N, FFT_table_2[FFT_N/2]);
 
-	FFT_table_2[(FFT_N - 1) / 2] = new short[POW2((FFT_N - 1) / 2 - 1)];
+	if ((FFT_N % 2) == 0) { // FFT_N/2 = (FFT_N-1)/2 if FFT_N is odd. Prevents memory leak
+        FFT_table_2[(FFT_N - 1) / 2] = new short[POW2((FFT_N - 1) / 2 - 1)];
+	}
 	fftBRInit(FFT_N - 1, FFT_table_2[(FFT_N - 1) / 2]);
 
 	Utbl = ((FFT_TYPE**) FFT_table_1)[FFT_N];
