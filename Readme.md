@@ -4,7 +4,7 @@
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
-**&#9888; Warning**: Windows distributions are provided as by products of the Qt toolchain. The platform of choice to run SDRangel is definitely Linux. You are encouraged to use the group to seek help from other Windows users but the author cannot give help or any support for problems related to running the software on Windows. Issues specific to Windows problems opened on Github will be closed systematically. Windows distributions may be discontinued in the future. 
+**&#9888; Warning**: Windows distribution is provided as a by product of the Qt toolchain. The platform of choice to run SDRangel is definitely Linux. You are encouraged to use the group to seek help from other Windows users but the author cannot give help or any support for problems related to running the software on Windows. Issues specific to Windows problems opened on Github will be closed systematically. Windows distribution may be discontinued in the future. 
 
 <h1>Source code</h1>
 
@@ -83,7 +83,9 @@ If you use your own location for libairspyhf install directory you need to speci
 
 `-DLIBAIRSPYHF_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so -DLIBAIRSPYHF_INCLUDE_DIR=/opt/install/libairspyhf/include`
 
-It is recommended to add `-DRX_SAMPLE_24BIT` on the cmake command line to activate the Rx 24 bit DSP build and take advantage of improved dynamic range when using decimation.
+It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to activate the Rx 24 bit DSP build and take advantage of improved dynamic range when using decimation.
+
+&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
 
 <h2>BladeRF</h2>
 
@@ -135,6 +137,18 @@ You will need a minimal installation of LimeSuite. Presently commit 04b57e0 or l
 Then add the following defines on `cmake` command line:
 
 `-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
+
+<h2>Perseus</h2>
+
+Linux only.
+
+[The Perseus](http://microtelecom.it/perseus/) is supported with [my fork of libperseus-sdr library](https://github.com/f4exb/libperseus-sdr.git) on the `fixes` branch which is the default. There are a few fixes from the original mainly to make it work in a multi-device context.
+
+Please note that the Perseus input plugin will be built only if the 24 bit Rx DSP chain is activated in the compilation with the `-DRX_SAMPLE_24BIT=ON` option on the cmake command line.
+
+If you use your own location for libperseus-sdr install directory you need to specify library and include locations. Example with `/opt/install/libperseus` with the following defines on `cmake` command line: `-DLIBPERSEUS_INCLUDE_DIR=/opt/install/libperseus/include -DLIBPERSEUS_LIBRARIES=/opt/install/libperseus/lib/libperseus-sdr.so`.
+
+&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option and Perseus input plugin.
 
 <h2>PlutoSDR</h2>
 
@@ -249,15 +263,14 @@ Possible copyright issues apart the audio quality with the DVSI AMBE chip is muc
 If you are not comfortable with this just do not install DSDcc and/or mbelib and the plugin will not be compiled and added to SDRangel. For packaged distributions just remove from the installation directory:
 
   - For Linux distributions: `plugins/channel/libdemoddsd.so`
-  - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
+  - For Windows distribution: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
 
 <h1>Software distributions</h1>
 
 In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
 
-  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.04, Ubuntu 17.10, Debian Stretch)
+  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.10, Debian Stretch)
   - Windows 32 bit (runs also in 64 bit Windows) 
-  - Windows 64 bit
 
 <h2>Debian distributions</h2>
 
@@ -282,11 +295,11 @@ Since apt-get v 1.1 installation is possible from a local file:
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
   
-<h2>Windows distributions</h2>
+<h2>Windows distribution</h2>
 
-This is the archive of the complete binary distribution that expands to the `sdrangel64` directory for the 64 bit version and `sdrangel` for the 32 bit version. You can install it anywhere you like and click on `sdrangel.exe` to start.
+This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
-<b>&#9888; Windows distributions are provided as by products thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for the Windows distributions.</b>
+<b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for the Windows distribution.</b>
 
 <h1>Software build</h1>
 
@@ -294,18 +307,19 @@ This is the archive of the complete binary distribution that expands to the `sdr
 
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
-  - Linux builds are made with 5.5.1 (Xenial), 5.7 (Zesty) and 5.9 (Artful)
-  - Windows 32 build is made with 5.9.1 and has Qt ANGLE support (OpenGL emulation with DirectX)
-  - Windows 64 build is made with 5.9.1 and has no Qt ANGLE support (native OpenGL)
+  - Linux builds are made with 5.5.1 (Xenial) and 5.9 (Artful, Stretch)
+  - Windows build is made with 5.10.1 in 32 bit mode and has Qt ANGLE support (OpenGL emulation with DirectX)
 
 <h2>24 bit DSP</h2>
 
-By default all Rx DSP processes use 16 bit samples coded on int16 fields. In order to use 24 bit samples coded on int32 fields you can specify `-DRX_SAMPLE_24BIT` on the cmake command line. This will give more dynamic range when the number of bits with decimation exceeds 16 bits:
+By default all Rx DSP processes use 16 bit samples coded on int16 fields. In order to use 24 bit samples coded on int32 fields you can specify `-DRX_SAMPLE_24BIT=ON` on the cmake command line. This will give more dynamic range when the number of bits with decimation exceeds 16 bits:
 
   - RTL-SDR, HackRF: (8 bit native) no advantage
   - Funcube Pro and Pro+: (16 bit native) no decimation hence no advantage
   - Airspy, BladeRF, LimeSDR, PlutoSDR, SDRPlay: (12 bit native) advantage for decimation by 32 or 64
   - AirspyHF: (16 bit native) advantage for any decimation
+
+&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
 
 <h2>Ubuntu</h2>
 
@@ -414,7 +428,8 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
 <h1>Limitations</h1>
 
   - Your hardware. Still SDRangel is relatively conservative on computer resources.
-  - OpenGL 3+ (Linux) and 4.3+ (Windows) is required
+  - OpenGL 3+ (Linux)
+  - OpenGL 4.3+ (Windows) for OpenGL native support however the Qt Angle framework may be able to make it work on systems supporting Direct-X only.
 
 <h1>Features</h1>
 
