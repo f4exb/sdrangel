@@ -209,6 +209,10 @@ void StaticFileController::setContentType(QString fileName, HttpResponse& respon
     {
         response.setHeader("Content-Type", "application/font-otf");
     }
+    else if (fileName.endsWith(".yaml"))
+    {
+        response.setHeader("Content-Type", "text/plain");
+    }
     // Todo: add all of your content types
     else
     {
