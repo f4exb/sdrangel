@@ -224,6 +224,13 @@ include_directories(
 )
 
 ##############################################################################
+# External binary resources
+include(${CMAKE_SOURCE_DIR}/cmake/include/Qt5ExternalResources.cmake)
+
+qt5_add_external_resources(sdrbase.rcc sdrbase/resources/res.qrc)
+
+
+##############################################################################
 # main GUI application
 
 set(sdrangel_SOURCES
@@ -318,6 +325,7 @@ install(TARGETS sdrangelsrv DESTINATION bin)
 #install files and directories
 install(DIRECTORY udev-rules DESTINATION share/sdrangel)
 install(FILES udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS WORLD_EXECUTE)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sdrbase.rcc DESTINATION bin)
 
 ##############################################################################
 

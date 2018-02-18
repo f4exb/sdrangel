@@ -26,6 +26,7 @@
 #include <QDateTime>
 #include <QSysInfo>
 #include <QKeyEvent>
+#include <QResource>
 
 #include <plugin/plugininstancegui.h>
 #include <plugin/plugininstancegui.h>
@@ -179,6 +180,14 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	updatePresetControls();
 
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
+
+	QString applicationDirPath = qApp->applicationDirPath();
+
+    if (QResource::registerResource(applicationDirPath + "/sdrbase.rcc")) {
+        qDebug("MainWindow::MainWindow: registered resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
+    } else {
+        qWarning("MainWindow::MainWindow: could not register resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
+    }
 
 	m_apiAdapter = new WebAPIAdapterGUI(*this);
 	m_requestMapper = new WebAPIRequestMapper(this);
