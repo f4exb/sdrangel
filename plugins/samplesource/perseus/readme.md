@@ -6,11 +6,14 @@ This input sample source plugin gets its samples from a [Perseus device](http://
 
 <h2>Build</h2>
 
-The plugin will be built only if the [perseus-sdr library](https://github.com/Microtelecom/libperseus-sdr) is installed in your system and you are building for the 24 bit Rx DSP chain with the `-DRX_SAMPLE_24BIT=ON` option. 
+This plugin will be built only if the following conditions are met:
+
+  - [My fork of libperseus-sdr library](https://github.com/f4exb/libperseus-sdr.git) is installed in your system. You will have to checkout the `fixes` branch which however is the default. There are a few fixes from the original mainly to make it work in a multi-device context.
+  - The 24 bit Rx DSP chain is activated in the compilation with the `-DRX_SAMPLE_24BIT=ON` option on the cmake command line.
 
 If you build it from source and install it in a custom location say: `/opt/install/libperseus` you will have to add `-DLIBPERSEUS_INCLUDE_DIR=/opt/install/libperseus/include -DLIBPERSEUS_LIBRARIES=/opt/install/libperseus/lib/libperseus-sdr.so` to the cmake command line.
 
-Note: if you use binary distributions this is included in the bundle.
+&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option and Perseus input plugin.
 
 <h2>Interface</h2>
 
