@@ -129,6 +129,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     AMDemodSettings m_settings;
+    bool m_running;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -227,7 +228,8 @@ private:
 
             if (res != m_audioBufferFill)
             {
-                qDebug("AMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+                qDebug("AMDemod::processOneSample: %u/%u audio samples written", res, m_audioBufferFill);
+                m_audioFifo.clear();
             }
 
             m_audioBufferFill = 0;

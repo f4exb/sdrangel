@@ -50,6 +50,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_deviceAPI(devieAPI),
         m_inputSampleRate(48000),
         m_inputFrequencyOffset(0),
+        m_running(false),
         m_ctcssIndex(0),
         m_sampleCount(0),
         m_squelchCount(0),
@@ -307,7 +308,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         }
 	}
 
-	if (m_audioBufferFill > 0)
+	if (m_running && (m_audioBufferFill > 0))
 	{
 		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
@@ -329,10 +330,13 @@ void NFMDemod::start()
 	m_audioFifo.clear();
 	m_phaseDiscri.reset();
 	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+	m_running = true;
 }
 
 void NFMDemod::stop()
 {
+    qDebug() << "NFMDemod::stop";
+    m_running = false;
 }
 
 bool NFMDemod::handleMessage(const Message& cmd)

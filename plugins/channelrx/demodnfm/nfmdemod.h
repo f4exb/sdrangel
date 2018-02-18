@@ -175,6 +175,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
 	NFMDemodSettings m_settings;
+	bool m_running;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

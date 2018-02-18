@@ -41,6 +41,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
         m_inputFrequencyOffset(0),
+        m_running(false),
         m_squelchOpen(false),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
@@ -110,7 +111,7 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 		}
 	}
 
-	if (m_audioBufferFill > 0)
+	if (m_running && (m_audioBufferFill > 0))
 	{
 		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
@@ -131,10 +132,13 @@ void AMDemod::start()
 	m_squelchCount = 0;
 	m_audioFifo.clear();
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+    m_running = true;
 }
 
 void AMDemod::stop()
 {
+    qDebug("AMDemod::stop");
+    m_running = false;
 }
 
 bool AMDemod::handleMessage(const Message& cmd)
