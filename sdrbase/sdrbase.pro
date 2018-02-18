@@ -207,7 +207,16 @@ HEADERS  += audio/audiodeviceinfo.h\
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 LIBS += -L../swagger/$${build_subdir} -lswagger
 
-RESOURCES = resources/res.qrc
+RCC_BINARY_SOURCES += resources/res.qrc
+
+asset_builder.commands = $$[QT_HOST_BINS]/rcc -binary ${QMAKE_FILE_IN} -o ${QMAKE_FILE_OUT} -no-compress
+asset_builder.depend_command = $$[QT_HOST_BINS]/rcc -list $$QMAKE_RESOURCE_FLAGS ${QMAKE_FILE_IN}
+asset_builder.input = RCC_BINARY_SOURCES
+asset_builder.output = $$OUT_PWD/$$DESTDIR/${QMAKE_FILE_IN_BASE}.qrb
+asset_builder.CONFIG += no_link target_predeps
+QMAKE_EXTRA_COMPILERS += asset_builder
+
+OTHER_FILES += $$RCC_BINARY_SOURCES
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
