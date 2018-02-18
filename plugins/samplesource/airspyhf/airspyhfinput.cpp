@@ -163,9 +163,17 @@ bool AirspyHFInput::start()
 		return false;
 	}
 
-	m_airspyHFThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
-	m_airspyHFThread->setLog2Decimation(m_settings.m_log2Decim);
+	int sampleRateIndex = m_settings.m_devSampleRateIndex;
 
+    if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {
+        sampleRateIndex = m_sampleRates.size() - 1;
+    }
+
+    if (sampleRateIndex >= 0) {
+        m_airspyHFThread->setSamplerate(m_sampleRates[sampleRateIndex]);
+    }
+
+	m_airspyHFThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_airspyHFThread->startWork();
 
 	mutexLocker.unlock();
@@ -239,8 +247,21 @@ const QString& AirspyHFInput::getDeviceDescription() const
 
 int AirspyHFInput::getSampleRate() const
 {
-	int rate = m_sampleRates[m_settings.m_devSampleRateIndex];
-	return (rate / (1<<m_settings.m_log2Decim));
+    int sampleRateIndex = m_settings.m_devSampleRateIndex;
+
+    if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {
+        sampleRateIndex = m_sampleRates.size() - 1;
+    }
+
+    if (sampleRateIndex >= 0)
+    {
+        int rate = m_sampleRates[sampleRateIndex];
+        return (rate / (1<<m_settings.m_log2Decim));
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 quint64 AirspyHFInput::getCenterFrequency() const
@@ -359,7 +380,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		    sampleRateIndex = m_sampleRates.size() - 1;
 		}
 
-		if (m_dev != 0)
+		if ((m_dev != 0) && (sampleRateIndex >= 0))
 		{
 			rc = (airspyhf_error) airspyhf_set_samplerate(m_dev, sampleRateIndex);
 
@@ -412,7 +433,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
         qint64 f_img = deviceCenterFrequency;
 
-		if (m_dev != 0)
+		if ((m_dev != 0) && (sampleRateIndex >= 0))
 		{
             quint32 devSampleRate = m_sampleRates[sampleRateIndex];
 			setDeviceCenterFrequency(deviceCenterFrequency, settings);
