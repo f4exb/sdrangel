@@ -6,6 +6,7 @@ SET libzlib1dir="D:\softs\zlib-1.2.5"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
+copy sdrbase\res.qrb %2\sdrbase.rcc
 copy sdrgui\%1\sdrgui.dll %2
 copy devices\%1\devices.dll %2
 copy mbelib\%1\mbelib.dll %2
