@@ -27,10 +27,10 @@ copy %libusbdir%\dll\libusb-1.0.dll %2
 copy %libxml2dir%\bin\libxml2.dll %2
 copy %libiconvdir%\bin\iconv.dll %2
 copy %libzlib1dir%\bin\zlib1.dll %2
-copy %opencvdir%\opencv_ffmpeg2413.dll %2
-copy %opencvdir%\libopencv_imgproc2413.dll %2
-copy %opencvdir%\libopencv_highgui2413.dll %2
-copy %opencvdir%\libopencv_core2413.dll %2
+REM copy %opencvdir%\opencv_ffmpeg2413.dll %2
+REM copy %opencvdir%\libopencv_imgproc2413.dll %2
+REM copy %opencvdir%\libopencv_highgui2413.dll %2
+REM copy %opencvdir%\libopencv_core2413.dll %2
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
 mkdir %2\plugins\channeltx
