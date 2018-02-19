@@ -83,6 +83,10 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 {
 	Complex ci;
 
+	if (!m_running) {
+        return;
+    }
+
 	m_settingsMutex.lock();
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
@@ -111,7 +115,7 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 		}
 	}
 
-	if (m_running && (m_audioBufferFill > 0))
+	if (m_audioBufferFill > 0)
 	{
 		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
 
