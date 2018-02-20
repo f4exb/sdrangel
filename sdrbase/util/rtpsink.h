@@ -20,15 +20,46 @@
 
 #include <QString>
 #include <QMutex>
+#include <QDebug>
 #include <stdint.h>
 
 // jrtplib includes
 #include "rtpsession.h"
-#include "rtpudpv4transmitter.h"
+#include "rtpudpv4transmitternobind.h"
 #include "rtpipv4address.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtplibraryversion.h"
+
+class RTPSinkMemoryManager : public jrtplib::RTPMemoryManager
+{
+public:
+    RTPSinkMemoryManager()
+    {
+        alloccount = 0;
+        freecount = 0;
+    }
+    ~RTPSinkMemoryManager()
+    {
+        qDebug() << "RTPSinkMemoryManager::~RTPSinkMemoryManager: alloc: " << alloccount << " free: " << freecount;
+    }
+    void *AllocateBuffer(size_t numbytes, int memtype)
+    {
+        void *buf = malloc(numbytes);
+        qDebug() << "RTPSinkMemoryManager::AllocateBuffer: Allocated " << numbytes << " bytes at location " << buf << " (memtype = " << memtype << ")";
+        alloccount++;
+        return buf;
+    }
+
+    void FreeBuffer(void *p)
+    {
+        qDebug() << "RTPSinkMemoryManager::FreeBuffer: Freeing block " << p;
+        freecount++;
+        free(p);
+    }
+private:
+    int alloccount,freecount;
+};
 
 class RTPSink
 {
@@ -57,7 +88,6 @@ protected:
     static void writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse);
     static unsigned int elemLength(PayloadType payloadType);
 
-    int m_rtpsock;
     bool m_valid;
     PayloadType m_payloadType;
     int m_sampleRate;
@@ -70,7 +100,9 @@ protected:
     uint16_t m_destport;
     jrtplib::RTPSession m_rtpSession;
     jrtplib::RTPSessionParams m_rtpSessionParams;
-    jrtplib::RTPUDPv4TransmissionParams m_rtpTransmissionParams;
+    jrtplib::RTPUDPv4TransmissionNoBindParams m_rtpTransmissionParams;
+    jrtplib::RTPUDPv4TransmitterNoBind m_rtpTransmitter;
+    RTPSinkMemoryManager m_rtpMemoryManager;
     bool m_endianReverse;
     QMutex m_mutex;
 };

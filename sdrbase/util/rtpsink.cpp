@@ -18,9 +18,9 @@
 #include "rtpsink.h"
 #include "dsp/dsptypes.h"
 #include <algorithm>
-#include <sys/socket.h>
 
 RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType) :
+    m_payloadType(payloadType),
     m_sampleRate(48000),
     m_sampleBytes(0),
     m_packetSamples(0),
@@ -28,6 +28,7 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
     m_sampleBufferIndex(0),
     m_byteBuffer(0),
     m_destport(port),
+    m_rtpTransmitter(&m_rtpMemoryManager),
     m_mutex(QMutex::Recursive)
 {
 	// Here we use JRTPLIB in a bit funny way since we do not want the socket to bind because we are only sending
@@ -36,25 +37,21 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
 	// By doing this the socket is left unbound but sending RTP packets with the library is still possible. Other functions may
 	// not work but we don't care
 
-	m_rtpsock = socket(PF_INET,SOCK_DGRAM,0);
+	m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
+    m_rtpTransmissionParams.SetRTCPMultiplexing(true); // do not allocate another socket for RTCP
 
-	if (m_rtpsock < 0) {
-		qCritical("RTPSink::RTPSink: cannot allocate socket");
-		m_valid = false;
-	}
+    int status = m_rtpTransmitter.Init(false);
+    if (status < 0) {
+        qCritical("RTPSink::RTPSink: cannot initialize transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
+        m_valid = false;
+    } else {
+        qDebug("RTPSink::RTPSink: initialized transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
+    }
 
-    uint32_t endianTest32 = 1;
-    uint8_t *ptr = (uint8_t*) &endianTest32;
-    m_endianReverse = (*ptr == 1);
+    m_rtpTransmitter.Create(m_rtpSessionParams.GetMaximumPacketSize(), &m_rtpTransmissionParams);
+    qDebug("RTPSink::RTPSink: created transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
 
-    m_destip = inet_addr(address.toStdString().c_str());
-    m_destip = ntohl(m_destip);
-
-    m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
-    m_rtpTransmissionParams.SetUseExistingSockets(m_rtpsock, m_rtpsock);
-
-    int status = m_rtpSession.Create(m_rtpSessionParams, &m_rtpTransmissionParams);
-
+    status = m_rtpSession.Create(m_rtpSessionParams, &m_rtpTransmitter);
     if (status < 0) {
         qCritical("RTPSink::RTPSink: cannot create session: %s", jrtplib::RTPGetErrorString(status).c_str());
         m_valid = false;
@@ -64,6 +61,14 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
 
     setPayloadType(payloadType);
     m_valid = true;
+
+    uint32_t endianTest32 = 1;
+    uint8_t *ptr = (uint8_t*) &endianTest32;
+    m_endianReverse = (*ptr == 1);
+
+    m_destip = inet_addr(address.toStdString().c_str());
+    m_destip = ntohl(m_destip);
+
 }
 
 RTPSink::~RTPSink()
