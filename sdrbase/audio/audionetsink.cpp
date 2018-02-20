@@ -56,6 +56,15 @@ AudioNetSink::~AudioNetSink()
 #endif
 }
 
+bool AudioNetSink::isRTPCapable() const
+{
+#ifdef HAS_JRTPLIB
+        return m_rtpBufferAudio->isValid();
+#else
+        return false;
+#endif
+}
+
 bool AudioNetSink::selectType(SinkType type)
 {
     if (type == SinkUDP)

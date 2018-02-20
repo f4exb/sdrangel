@@ -69,13 +69,11 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
 RTPSink::~RTPSink()
 {
     jrtplib::RTPTime delay = jrtplib::RTPTime(10.0);
-    m_rtpSession.sDestroy(delay, "Time's up", 9);
+    m_rtpSession.BYEDestroy(delay, "Time's up", 9);
 
     if (m_byteBuffer) {
         delete[] m_byteBuffer;
     }
-
-    close(m_rtpsock);
 }
 
 void RTPSink::setPayloadType(PayloadType payloadType)
