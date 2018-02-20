@@ -18,6 +18,7 @@
 #include "rtpsink.h"
 #include "dsp/dsptypes.h"
 #include <algorithm>
+#include <sys/socket.h>
 
 RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType) :
     m_sampleRate(48000),
@@ -29,6 +30,19 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
     m_destport(port),
     m_mutex(QMutex::Recursive)
 {
+	// Here we use JRTPLIB in a bit funny way since we do not want the socket to bind because we are only sending
+	// data to a remote party and we don't want to waste a port on the local machine for each possible connection that may not be used.
+	// Therefore we create a socket and assign it through the SetUseExistingSockets method of the RTPUDPv4TransmissionParams object
+	// By doing this the socket is left unbound but sending RTP packets with the library is still possible. Other functions may
+	// not work but we don't care
+
+	m_rtpsock = socket(PF_INET,SOCK_DGRAM,0);
+
+	if (m_rtpsock < 0) {
+		qCritical("RTPSink::RTPSink: cannot allocate socket");
+		m_valid = false;
+	}
+
     uint32_t endianTest32 = 1;
     uint8_t *ptr = (uint8_t*) &endianTest32;
     m_endianReverse = (*ptr == 1);
@@ -37,25 +51,31 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
     m_destip = ntohl(m_destip);
 
     m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
-    int status = m_rtpSession.Create(m_rtpSessionParams);
+    m_rtpTransmissionParams.SetUseExistingSockets(m_rtpsock, m_rtpsock);
+
+    int status = m_rtpSession.Create(m_rtpSessionParams, &m_rtpTransmissionParams);
 
     if (status < 0) {
         qCritical("RTPSink::RTPSink: cannot create session: %s", jrtplib::RTPGetErrorString(status).c_str());
+        m_valid = false;
     } else {
         qDebug("RTPSink::RTPSink: created session: %s", jrtplib::RTPGetErrorString(status).c_str());
     }
 
     setPayloadType(payloadType);
+    m_valid = true;
 }
 
 RTPSink::~RTPSink()
 {
     jrtplib::RTPTime delay = jrtplib::RTPTime(10.0);
-    m_rtpSession.BYEDestroy(delay, "Time's up", 9);
+    m_rtpSession.sDestroy(delay, "Time's up", 9);
 
     if (m_byteBuffer) {
         delete[] m_byteBuffer;
     }
+
+    close(m_rtpsock);
 }
 
 void RTPSink::setPayloadType(PayloadType payloadType)

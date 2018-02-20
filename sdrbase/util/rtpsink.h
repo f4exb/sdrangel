@@ -42,6 +42,7 @@ public:
     RTPSink(const QString& address, uint16_t port, PayloadType payloadType = PayloadL16Mono);
     ~RTPSink();
 
+    bool isValid() const { return m_valid; }
     void setPayloadType(PayloadType payloadType);
 
     void setDestination(const QString& address, uint16_t port);
@@ -56,6 +57,8 @@ protected:
     static void writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse);
     static unsigned int elemLength(PayloadType payloadType);
 
+    int m_rtpsock;
+    bool m_valid;
     PayloadType m_payloadType;
     int m_sampleRate;
     int m_sampleBytes;
