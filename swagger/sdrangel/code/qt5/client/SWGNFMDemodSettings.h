@@ -80,6 +80,9 @@ public:
     qint32 getCopyAudioToUdp();
     void setCopyAudioToUdp(qint32 copy_audio_to_udp);
 
+    qint32 getCopyAudioUseRtp();
+    void setCopyAudioUseRtp(qint32 copy_audio_use_rtp);
+
     QString* getUdpAddress();
     void setUdpAddress(QString* udp_address);
 
@@ -134,6 +137,9 @@ private:
 
     qint32 copy_audio_to_udp;
     bool m_copy_audio_to_udp_isSet;
+
+    qint32 copy_audio_use_rtp;
+    bool m_copy_audio_use_rtp_isSet;
 
     QString* udp_address;
     bool m_udp_address_isSet;
