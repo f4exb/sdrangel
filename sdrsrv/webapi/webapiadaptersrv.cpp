@@ -884,6 +884,8 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
@@ -904,14 +906,12 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -924,6 +924,8 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
@@ -932,13 +934,11 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         {
             if (response.getTx() != 0)
             {
-                error.init();
                 *error.getMessage() = QString("Rx device found but Tx device requested");
                 return 400;
             }
             if (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
             {
-                error.init();
                 *error.getMessage() = QString("Device mismatch. Found %1 input").arg(deviceSet->m_deviceSourceAPI->getHardwareId());
                 return 400;
             }
@@ -952,13 +952,11 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         {
             if (response.getTx() == 0)
             {
-                error.init();
                 *error.getMessage() = QString("Tx device found but Rx device requested");
                 return 400;
             }
             else if (deviceSet->m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
             {
-                error.init();
                 *error.getMessage() = QString("Device mismatch. Found %1 output").arg(deviceSet->m_deviceSinkAPI->getHardwareId());
                 return 400;
             }
@@ -970,14 +968,12 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
