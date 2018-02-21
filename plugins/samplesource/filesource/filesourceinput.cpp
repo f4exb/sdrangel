@@ -353,7 +353,7 @@ int FileSourceInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
-    *response.getFileSourceSettings()->getFileName() = m_settings.m_fileName;
+    response.getFileSourceSettings()->setFileName(new QString(m_settings.m_fileName));
     return 200;
 }
 

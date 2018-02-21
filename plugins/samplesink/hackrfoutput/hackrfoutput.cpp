@@ -473,6 +473,7 @@ int HackRFOutput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
+    response.getHackRfOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

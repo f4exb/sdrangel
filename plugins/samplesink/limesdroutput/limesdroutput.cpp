@@ -1111,6 +1111,7 @@ int LimeSDROutput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
+    response.getLimeSdrOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

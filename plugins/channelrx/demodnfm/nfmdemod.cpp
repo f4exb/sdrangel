@@ -544,6 +544,7 @@ int NFMDemod::webapiSettingsGet(
             QString& errorMessage __attribute__((unused)))
 {
     response.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+    response.getNfmDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }

@@ -553,6 +553,7 @@ int HackRFInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+    response.getHackRfInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

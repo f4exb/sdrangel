@@ -507,6 +507,7 @@ int NFMMod::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+    response.getNfmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }

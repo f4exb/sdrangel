@@ -554,6 +554,7 @@ int RTLSDRInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+    response.getRtlSdrSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
