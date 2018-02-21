@@ -1146,6 +1146,8 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
         DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
@@ -1156,7 +1158,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
 
             if (channelAPI == 0)
             {
-                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1174,7 +1175,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
 
             if (channelAPI == 0)
             {
-                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1188,14 +1188,12 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -1209,6 +1207,8 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
     {
         DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
@@ -1219,7 +1219,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
 
             if (channelAPI == 0)
             {
-                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1234,7 +1233,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
                 }
                 else
                 {
-                    error.init();
                     *error.getMessage() = QString("There is no channel type %1 at index %2. Found %3.")
                             .arg(*response.getChannelType())
                             .arg(channelIndex)
@@ -1249,7 +1247,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
 
             if (channelAPI == 0)
             {
-                error.init();
                 *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
@@ -1264,7 +1261,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
                 }
                 else
                 {
-                    error.init();
                     *error.getMessage() = QString("There is no channel type %1 at index %2. Found %3.")
                             .arg(*response.getChannelType())
                             .arg(channelIndex)
@@ -1275,16 +1271,13 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
         }
         else
         {
-            error.init();
             *error.getMessage() = QString("DeviceSet error");
             return 500;
         }
     }
     else
     {
-        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
         return 404;
     }
 
