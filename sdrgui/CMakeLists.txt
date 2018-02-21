@@ -36,7 +36,6 @@ set(sdrgui_SOURCES
     gui/rollupwidget.cpp
     gui/samplingdevicecontrol.cpp
     gui/samplingdevicedialog.cpp
-    gui/scale.cpp
     gui/scaleengine.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
@@ -92,7 +91,6 @@ set(sdrgui_HEADERS
     gui/rollupwidget.h
     gui/samplingdevicecontrol.h
     gui/samplingdevicedialog.h
-    gui/scale.h
     gui/scaleengine.h
     gui/tickedslider.h
     gui/transverterbutton.h

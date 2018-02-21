@@ -61,7 +61,7 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	qint16  *m_buf;
     quint32 m_bufsize;

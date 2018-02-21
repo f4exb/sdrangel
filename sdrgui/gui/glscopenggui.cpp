@@ -220,7 +220,7 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
         ui->verticalXY->setEnabled(false);
         ui->polar->setEnabled(false);
 
-        ui->traceMode->setCurrentIndex(intValue);
+        ui->traceMode->setCurrentIndex(0);
         d.readS32(1, &intValue, (int) GLScopeNG::DisplayX);
         m_glScope->setDisplayMode((GLScopeNG::DisplayMode) intValue);
 

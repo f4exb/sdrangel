@@ -451,7 +451,7 @@ void ATVMod::pullVideo(Real& sample)
                 if (camera.m_videoFPSCount < camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS)
                 {
                     camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
-                    camera.m_videoFPSCount += camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq;
+                    camera.m_videoFPSCount += (camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq);
                 }
                 else
                 {

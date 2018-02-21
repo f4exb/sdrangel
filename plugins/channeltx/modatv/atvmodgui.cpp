@@ -129,8 +129,12 @@ bool ATVModGUI::handleMessage(const Message& message)
         }
         else if (status == 2) // camera FPS scan is finished
         {
-            m_camBusyFPSMessageBox->close();
-            if (m_camBusyFPSMessageBox) delete m_camBusyFPSMessageBox;
+            if (m_camBusyFPSMessageBox)
+            {
+                m_camBusyFPSMessageBox->close();
+                delete m_camBusyFPSMessageBox;
+            }
+
             m_camBusyFPSMessageBox = 0;
         }
 

@@ -112,7 +112,7 @@ void FileSourceInput::seekFileStream(int seekPercentage)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if ((m_ifstream.is_open()) && !m_fileSourceThread->isRunning())
+	if ((m_ifstream.is_open()) && m_fileSourceThread && !m_fileSourceThread->isRunning())
 	{
 		int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
 		m_fileSourceThread->setSamplesCount(seekPoint);

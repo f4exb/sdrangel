@@ -55,7 +55,7 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	std::ofstream* m_ofstream;
 	std::size_t m_bufsize;

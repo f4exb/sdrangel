@@ -75,7 +75,6 @@ SOURCES += mainwindow.cpp\
         gui/samplingdevicecontrol.cpp\
         gui/samplingdevicedialog.cpp\
         gui/mypositiondialog.cpp\
-        gui/scale.cpp\
         gui/scaleengine.cpp\
         gui/transverterbutton.cpp\
         gui/transverterdialog.cpp\
@@ -126,7 +125,6 @@ HEADERS  += mainwindow.h\
         gui/samplingdevicecontrol.h\
         gui/samplingdevicedialog.h\
         gui/mypositiondialog.h\
-        gui/scale.h\
         gui/scaleengine.h\
         gui/tickedslider.h\
         gui/transverterbutton.h\

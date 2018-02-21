@@ -14,6 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <assert.h>
 #include "samplesourcefifo.h"
 
@@ -40,7 +41,8 @@ void SampleSourceFifo::resize(uint32_t size)
 
 void SampleSourceFifo::init()
 {
-    memset(&m_data[0], 0, sizeof(2*m_size*sizeof(Sample)));
+    static Sample zero = {0,0};
+    std::fill(m_data.begin(), m_data.end(), zero);
     m_ir = 0;
     m_iw = m_size/2;
     m_init = true;

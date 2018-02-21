@@ -12,6 +12,7 @@ HttpCookie::HttpCookie()
     version=1;
     maxAge=0;
     secure=false;
+    httpOnly=false;
 }
 
 HttpCookie::HttpCookie(const QByteArray name, const QByteArray value, const int maxAge, const QByteArray path, const QByteArray comment, const QByteArray domain, const bool secure, const bool httpOnly)

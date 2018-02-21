@@ -621,7 +621,7 @@ void DevicePlutoSDRBox::setLOPPMTenths(int ppmTenths)
     char buff[100];
     std::vector<std::string> params;
     int64_t newXO = m_xoInitial + ((m_xoInitial*ppmTenths) / 10000000L);
-    snprintf(buff, sizeof(buff), "xo_correction=%ld", newXO);
+    snprintf(buff, sizeof(buff), "xo_correction=%ld", (long int) newXO);
     params.push_back(std::string(buff));
     set_params(DEVICE_PHY, params);
     m_LOppmTenths = ppmTenths;

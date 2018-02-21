@@ -488,13 +488,16 @@ void HttpRequest::parseMultiPartFile()
                     #ifdef SUPERVERBOSE
                         qDebug("HttpRequest::parseMultiPartFile: finishing writing to uploaded file");
                     #endif
-                    uploadedFile->resize(uploadedFile->size()-2);
-                    uploadedFile->flush();
-                    uploadedFile->seek(0);
                     parameters.insert(fieldName,fileName);
-                    qDebug("HttpRequest::parseMultiPartFile: set parameter %s=%s",fieldName.data(),fileName.data());
-                    uploadedFiles.insert(fieldName,uploadedFile);
-                    qDebug("HttpRequest::parseMultiPartFile: uploaded file size is %i",(int) uploadedFile->size());
+                    if (uploadedFile)
+                    {
+                        uploadedFile->resize(uploadedFile->size()-2);
+                        uploadedFile->flush();
+                        uploadedFile->seek(0);
+                        qDebug("HttpRequest::parseMultiPartFile: set parameter %s=%s",fieldName.data(),fileName.data());
+                        uploadedFiles.insert(fieldName,uploadedFile);
+                        qDebug("HttpRequest::parseMultiPartFile: uploaded file size is %i",(int) uploadedFile->size());
+                    }
                 }
                 if (line.contains(boundary+"--"))
                 {

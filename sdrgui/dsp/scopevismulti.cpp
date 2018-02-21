@@ -542,7 +542,10 @@ bool ScopeVisMulti::handleMessage(const Message& message)
         if (m_preTriggerDelay != triggerPre)
         {
             m_preTriggerDelay = triggerPre;
-            m_glScope->setTriggerPre(m_preTriggerDelay);
+
+            if (m_glScope) {
+                m_glScope->setTriggerPre(m_preTriggerDelay);
+            }
         }
 
         if (freeRun != m_freeRun)

@@ -52,7 +52,7 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	std::ifstream* m_ifstream;
 	quint8  *m_fileBuf;

@@ -224,7 +224,7 @@ bool GLScopeMultiGUI::deserialize(const QByteArray& data)
         ui->verticalXY->setEnabled(false);
         ui->polar->setEnabled(false);
 
-        ui->traceMode->setCurrentIndex(intValue);
+        ui->traceMode->setCurrentIndex(0);
         d.readS32(1, &intValue, (int) GLScopeMulti::DisplayX);
         m_glScope->setDisplayMode((GLScopeMulti::DisplayMode) intValue);
 
