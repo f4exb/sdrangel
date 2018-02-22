@@ -197,9 +197,12 @@ void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Fu
 	{
 		m_overlapPercent = 0;
 	}
+	else
+	{
+        m_overlapPercent = overlapPercent;
+	}
 
 	m_fftSize = fftSize;
-	m_overlapPercent = overlapPercent;
 	m_fft->configure(m_fftSize, false);
 	m_window.create(window, m_fftSize);
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;

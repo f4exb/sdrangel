@@ -263,7 +263,7 @@ bool AudioFifo::create(uint32_t numSamples)
 	if(m_fifo != 0)
 	{
 		delete[] m_fifo;
-		m_fifo = NULL;
+		m_fifo = 0;
 	}
 
 	m_size = 0;
@@ -271,12 +271,8 @@ bool AudioFifo::create(uint32_t numSamples)
 	m_head = 0;
 	m_tail = 0;
 
-	if((m_fifo = new qint8[numSamples * m_sampleSize]) == 0)
-	{
-		qDebug("out of memory");
-		return false;
-	}
-
+	m_fifo = new qint8[numSamples * m_sampleSize];
 	m_size = numSamples;
-	return true;
+
+	return m_fifo != 0;
 }

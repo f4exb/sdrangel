@@ -168,8 +168,6 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
     float fltQ;
     Complex ci;
 
-    qint16 * ptrBufferToRelease = 0;
-
     //********** Let's rock and roll buddy ! **********
 
     m_objSettingsMutex.lock();
@@ -178,6 +176,7 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 #ifdef EXTENDED_DIRECT_SAMPLE
 
+    qint16 * ptrBufferToRelease = 0;
     qint16 * ptrBuffer;
     qint32 intLen;
 
@@ -232,10 +231,12 @@ void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
         m_scopeSampleBuffer.clear();
     }
 
+#ifdef EXTENDED_DIRECT_SAMPLE
     if (ptrBufferToRelease != 0)
     {
         delete ptrBufferToRelease;
     }
+#endif
 
     m_objSettingsMutex.unlock();
 }

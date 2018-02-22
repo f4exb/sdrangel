@@ -287,7 +287,6 @@ void CWKeyer::nextStateIambic()
         {
             if (m_dash)
             {
-                m_samplePointer = 0;
                 m_keyIambicState = KeyDash;
             }
             else if (!m_dot)
@@ -314,7 +313,6 @@ void CWKeyer::nextStateIambic()
         {
             if (m_dot)
             {
-                m_samplePointer = 0;
                 m_keyIambicState = KeyDot;
             }
             else if (!m_dash)

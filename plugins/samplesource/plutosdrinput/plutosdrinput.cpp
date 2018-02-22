@@ -87,7 +87,7 @@ bool PlutoSDRInput::start()
 
     if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
     {
-        qFatal("PlutoSDRInput::start: cannot create thread");
+        qCritical("PlutoSDRInput::start: cannot create thread");
         stop();
         return false;
     }
@@ -344,7 +344,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 {
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
-    bool suspendOwnThread       = false;
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
@@ -364,11 +363,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         suspendAllOtherThreads = true;
-        suspendOwnThread = true;
-    }
-    else
-    {
-        suspendOwnThread = true;
     }
 
     if (suspendAllOtherThreads)
@@ -391,13 +385,10 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
-    if (suspendOwnThread)
+    if (m_plutoSDRInputThread && m_plutoSDRInputThread->isRunning())
     {
-        if (m_plutoSDRInputThread && m_plutoSDRInputThread->isRunning())
-        {
-            m_plutoSDRInputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
+        m_plutoSDRInputThread->stopWork();
+        ownThreadWasRunning = true;
     }
 
     // apply settings
@@ -557,11 +548,8 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
         }
     }
 
-    if (suspendOwnThread)
-    {
-        if (ownThreadWasRunning) {
-            m_plutoSDRInputThread->startWork();
-        }
+    if (ownThreadWasRunning) {
+        m_plutoSDRInputThread->startWork();
     }
 
     // TODO: forward changes to other (Tx) DSP

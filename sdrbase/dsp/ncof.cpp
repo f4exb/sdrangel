@@ -44,6 +44,7 @@ NCOF::NCOF()
 {
 	initTable();
 	m_phase = 0.0f;
+	m_phaseIncrement = 0.0f;
 }
 
 void NCOF::setFreq(Real freq, Real sampleRate)

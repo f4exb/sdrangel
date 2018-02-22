@@ -74,7 +74,7 @@ bool PerseusInput::start()
 
     if ((m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo)) == 0)
     {
-        qFatal("PerseusInput::start: cannot create thread");
+        qCritical("PerseusInput::start: cannot create thread");
         stop();
         return false;
     }

@@ -261,6 +261,9 @@ void RDSParser::clearUpdateFlags()
 	m_g14_updated = false;
 	m_g14_data_available = false;
 	m_g15_updated = false;
+    radiotext_AB_flag = false;
+    debug = false;
+    log = false;
 }
 
 void RDSParser::clearAllFields()
@@ -272,6 +275,8 @@ void RDSParser::clearAllFields()
 	m_pi_area_coverage_index = 0;
 	m_pi_country_identification = 0;
 	m_pi_traffic_program = false;
+    pi_country_identification = 0;
+    pi_program_reference_number = 0;
 
 	// Group 00 data
 	m_g0_count = 0;
@@ -854,7 +859,7 @@ void RDSParser::decode_type8(unsigned int *group, bool B)
 
 	bool T = (group[1] >> 4) & 0x1; // 0 = user message, 1 = tuning info
 	bool F = (group[1] >> 3) & 0x1; // 0 = multi-group, 1 = single-group
-	bool D = (group[2] > 15) & 0x1; // 1 = diversion recommended
+	bool D = (group[2] >> 15) & 0x1; // 1 = diversion recommended
 	m_g8_diversion_recommended = D;
 
 	static unsigned long int free_format[4];

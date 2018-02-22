@@ -76,7 +76,7 @@ bool TestSourceInput::start()
 
 	if ((m_testSourceThread = new TestSourceThread(&m_sampleFifo)) == 0)
 	{
-		qFatal("TestSourceInput::start: out of memory");
+	    qCritical("TestSourceInput::start: out of memory");
 		stop();
 		return false;
 	}
@@ -257,10 +257,10 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         }
     }
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_fcPos != settings.m_fcPos)
-            || (m_settings.m_frequencyShift != settings.m_frequencyShift)
-            || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_frequencyShift != settings.m_frequencyShift)
+        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         int frequencyShift = settings.m_frequencyShift;

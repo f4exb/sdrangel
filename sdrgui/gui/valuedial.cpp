@@ -46,11 +46,14 @@ ValueDial::ValueDial(QWidget* parent, ColorMapper colorMapper) :
 	}
 
 	m_value =  0;
+	m_valueNew = 0;
 	m_valueMin = 0;
 	m_valueMax = 2200000;
 	m_numDigits = 7;
 	m_numDecimalPoints = m_numDigits / 3;
 	m_cursor = -1;
+	m_digitWidth = 0;
+	m_digitHeight = 0;
 
 	m_hightlightedDigit = -1;
 	m_text = formatText(m_value);

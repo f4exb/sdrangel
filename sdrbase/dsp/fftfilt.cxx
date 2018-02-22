@@ -78,6 +78,8 @@ void fftfilt::init_filter()
 fftfilt::fftfilt(float f1, float f2, int len)
 {
 	flen	= len;
+	pass    = 0;
+	window  = 0;
 	init_filter();
 	create_filter(f1, f2);
 }
@@ -85,6 +87,8 @@ fftfilt::fftfilt(float f1, float f2, int len)
 fftfilt::fftfilt(float f2, int len)
 {
 	flen	= len;
+    pass    = 0;
+    window  = 0;
 	init_filter();
 	create_dsb_filter(f2);
 }

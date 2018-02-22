@@ -731,7 +731,8 @@ private:
             m_nbSources(1),
             m_memSize(m_nbTraceMemories),
             m_currentMemIndex(0),
-            m_traceSize(m_traceChunkSize)
+            m_traceSize(m_traceChunkSize),
+            m_preTrigCount(0)
         {
             m_traceBackBuffers.resize(m_nbSources);
             m_sourceFill.resize(m_nbSources);

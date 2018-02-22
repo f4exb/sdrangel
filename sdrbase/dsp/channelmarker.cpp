@@ -196,7 +196,7 @@ bool ChannelMarker::deserialize(const QByteArray& data)
         d.readU32(6, &u32tmp, 9999);
         setUDPSendPort(u32tmp);
         d.readS32(7, &tmp, 0);
-        if ((tmp >= 0) || (tmp < FScaleDisplay_none)) {
+        if ((tmp >= 0) && (tmp < FScaleDisplay_none)) {
             setFrequencyScaleDisplayType((frequencyScaleDisplay_t) tmp);
         } else {
             setFrequencyScaleDisplayType(FScaleDisplay_freq);

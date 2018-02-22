@@ -165,7 +165,7 @@ bool AirspyInput::start()
 
 	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == 0)
 	{
-		qFatal("AirspyInput::start: out of memory");
+	    qCritical("AirspyInput::start: out of memory");
 		stop();
 		return false;
 	}

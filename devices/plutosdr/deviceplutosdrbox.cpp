@@ -28,6 +28,11 @@
 #include "deviceplutosdrbox.h"
 
 DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
+        m_devSampleRate(0),
+        m_LOppmTenths(0),
+        m_lpfFIREnable(false),
+        m_lpfFIRBW(100.0f),
+        m_lpfFIRlog2Decim(0),
         m_lpfFIRRxGain(0),
         m_lpfFIRTxGain(0),
         m_ctx(0),
@@ -39,7 +44,8 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_chnTx0q(0),
         m_rxBuf(0),
         m_txBuf(0),
-        m_xoInitial(0)
+        m_xoInitial(0),
+        m_temp(0.0f)
 {
     m_ctx = iio_create_context_from_uri(uri.c_str());
 

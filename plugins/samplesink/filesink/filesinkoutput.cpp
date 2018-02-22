@@ -92,7 +92,7 @@ bool FileSinkOutput::start()
 
 	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0)
 	{
-		qFatal("out of memory");
+	    qCritical("out of memory");
 		stop();
 		return false;
 	}
@@ -303,7 +303,7 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 
         if (m_fileSinkThread != 0)
         {
-            m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
+            m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
         }
 
         forwardChange = true;

@@ -43,6 +43,9 @@ HttpSession::HttpSession(const HttpSession& other)
 
 HttpSession& HttpSession::operator= (const HttpSession& other)
 {
+    if (this == &other) {
+        return *this;
+    }
     HttpSessionData* oldPtr=dataPtr;
     dataPtr=other.dataPtr;
     if (dataPtr)

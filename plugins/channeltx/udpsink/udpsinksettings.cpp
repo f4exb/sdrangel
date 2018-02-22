@@ -34,6 +34,7 @@ void UDPSinkSettings::resetToDefaults()
     m_inputSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;
+    m_lowCutoff = 0.0f;
     m_fmDeviation = 2500;
     m_amModFactor = 0.95;
     m_channelMute = false;

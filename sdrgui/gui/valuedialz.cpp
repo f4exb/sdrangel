@@ -50,11 +50,14 @@ ValueDialZ::ValueDialZ(bool positiveOnly, QWidget* parent, ColorMapper colorMapp
 	}
 
 	m_value = 0;
+	m_valueNew = 0;
 	m_valueMin = m_positiveOnly ? 0 : -2200000;
 	m_valueMax = 2200000;
 	m_numDigits = 7;
 	m_numDecimalPoints = m_numDigits / 3;
 	m_cursor = -1;
+	m_digitWidth = 0;
+	m_digitHeight = 0;
 
 	m_hightlightedDigit = -1;
 	m_text = formatText(m_value);
@@ -428,7 +431,7 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
 
         setValue(m_valueNew);
         emit changed(m_valueNew);
-	event->accept();	
+	event->accept();
     }
 }
 

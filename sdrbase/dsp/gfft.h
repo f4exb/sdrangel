@@ -65,13 +65,13 @@ private:
 
 // base fft methods
 	void riffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRLow);
-	void ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl);
+	void ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl);
 	void rifft8pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void rifft4pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void rifft2pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void rifft1pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void rffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRLow);
-	void frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl);
+	void frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl);
 	void rfft8pt(FFT_TYPE *ioptr);
 	void rfft4pt(FFT_TYPE *ioptr);
 	void rfft2pt(FFT_TYPE *ioptr);
@@ -79,27 +79,27 @@ private:
 	void iffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRLow);
 	void ifftrecurs(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustride,
 					 int NDiffU, int StageCnt);
-	void ibfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustride,
+	void ibfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl, int Ustride,
 					int NDiffU, int StageCnt);
 	void ibfR4(FFT_TYPE *ioptr, int M, int NDiffU);
 	void ibfR2(FFT_TYPE *ioptr, int M, int NDiffU);
 	void ifft8pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void ifft4pt(FFT_TYPE *ioptr, FFT_TYPE scale);
 	void ifft2pt(FFT_TYPE *ioptr, FFT_TYPE scale);
-	void scbitrevR2(FFT_TYPE *ioptr, int M, short *BRLow, FFT_TYPE scale);
+	void scbitrevR2(FFT_TYPE *ioptr, int M, short *inBRLow, FFT_TYPE scale);
 	void ffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRLow);
 	void fftrecurs(FFT_TYPE *ioptr, int M,
 				FFT_TYPE *Utbl, int Ustride, int NDiffU,
 				int StageCnt);
 	void bfstages(FFT_TYPE *ioptr, int M,
-				FFT_TYPE *Utbl, int Ustride,
+				FFT_TYPE *inUtbl, int Ustride,
 				int NDiffU, int StageCnt);
 	void bfR4(FFT_TYPE *ioptr, int M, int NDiffU);
 	void bfR2(FFT_TYPE *ioptr, int M, int NDiffU);
 	void fft8pt(FFT_TYPE *ioptr);
 	void fft4pt(FFT_TYPE *ioptr);
 	void fft2pt(FFT_TYPE *ioptr);
-	void bitrevR2(FFT_TYPE *ioptr, int M, short *BRLow);
+	void bitrevR2(FFT_TYPE *ioptr, int M, short *inBRLow);
 	void fftBRInit(int M, short *BRLow);
 	void fftCosInit(int M, FFT_TYPE *Utbl);
 
@@ -182,7 +182,7 @@ void g_fft<FFT_TYPE>::fftBRInit(int M, short *BRLow)
 // bit reverse and first radix 2 stage of forward or inverse fft
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::bitrevR2(FFT_TYPE *ioptr, int M, short *BRLow)
+void g_fft<FFT_TYPE>::bitrevR2(FFT_TYPE *ioptr, int M, short *inBRLow)
 {
 	FFT_TYPE f0r;
 	FFT_TYPE f0i;
@@ -229,9 +229,9 @@ void g_fft<FFT_TYPE>::bitrevR2(FFT_TYPE *ioptr, int M, short *BRLow)
 	for (; ioptr < iolimit; ioptr += POW2(M / 2 + 1)) {
 	  for (Colstart = Nroot_1; Colstart >= 0; Colstart--) {
 		iCol = Nroot_1;
-		p0r = ioptr + Nroot_1_ColInc + BRLow[Colstart] * 4;
+		p0r = ioptr + Nroot_1_ColInc + inBRLow[Colstart] * 4;
 		IOP = ioptr + (Colstart << ColstartShift);
-		p1r = IOP + BRLow[iCol] * 4;
+		p1r = IOP + inBRLow[iCol] * 4;
 		f0r = *(p0r);
 		f0i = *(p0r + 1);
 		f1r = *(p0r + posA);
@@ -290,7 +290,7 @@ void g_fft<FFT_TYPE>::bitrevR2(FFT_TYPE *ioptr, int M, short *BRLow)
 		  f1r = *(p0r + posA);
 		  f1i = *(p0r + posAi);
 		  iCol -= 1;
-		  p1r = IOP + BRLow[iCol] * 4;
+		  p1r = IOP + inBRLow[iCol] * 4;
 		}
 		f2r = *(p0r + 2);
 		f2i = *(p0r + (2 + 1));
@@ -840,7 +840,7 @@ void g_fft<FFT_TYPE>::bfR4(FFT_TYPE *ioptr, int M, int NDiffU)
 //   RADIX 8 Stages
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::bfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustride,
+void g_fft<FFT_TYPE>::bfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl, int Ustride,
 					 int NDiffU, int StageCnt)
 {
 	unsigned int pos;
@@ -876,8 +876,8 @@ void g_fft<FFT_TYPE>::bfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustri
 	U2toU3 = (POW2(M) / 8) * Ustride;
 	for (; StageCnt > 0; StageCnt--) {
 
-	  u0r = &Utbl[0];
-	  u0i = &Utbl[POW2(M - 2) * Ustride];
+	  u0r = &inUtbl[0];
+	  u0i = &inUtbl[POW2(M - 2) * Ustride];
 	  u1r = u0r;
 	  u1i = u0i;
 	  u2r = u0r;
@@ -1228,7 +1228,7 @@ void g_fft<FFT_TYPE>::ffts1(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, short *BRLow
 // scaled bit reverse and first radix 2 stage forward or inverse fft
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::scbitrevR2(FFT_TYPE *ioptr, int M, short *BRLow, FFT_TYPE scale)
+void g_fft<FFT_TYPE>::scbitrevR2(FFT_TYPE *ioptr, int M, short *inBRLow, FFT_TYPE scale)
 {
 	FFT_TYPE f0r;
 	FFT_TYPE f0i;
@@ -1275,9 +1275,9 @@ void g_fft<FFT_TYPE>::scbitrevR2(FFT_TYPE *ioptr, int M, short *BRLow, FFT_TYPE 
 	for (; ioptr < iolimit; ioptr += POW2(M / 2 + 1)) {
 	  for (Colstart = Nroot_1; Colstart >= 0; Colstart--) {
 		iCol = Nroot_1;
-		p0r = ioptr + Nroot_1_ColInc + BRLow[Colstart] * 4;
+		p0r = ioptr + Nroot_1_ColInc + inBRLow[Colstart] * 4;
 		IOP = ioptr + (Colstart << ColstartShift);
-		p1r = IOP + BRLow[iCol] * 4;
+		p1r = IOP + inBRLow[iCol] * 4;
 		f0r = *(p0r);
 		f0i = *(p0r + 1);
 		f1r = *(p0r + posA);
@@ -1336,7 +1336,7 @@ void g_fft<FFT_TYPE>::scbitrevR2(FFT_TYPE *ioptr, int M, short *BRLow, FFT_TYPE 
 		  f1r = *(p0r + posA);
 		  f1i = *(p0r + posAi);
 		  iCol -= 1;
-		  p1r = IOP + BRLow[iCol] * 4;
+		  p1r = IOP + inBRLow[iCol] * 4;
 		}
 		f2r = *(p0r + 2);
 		f2i = *(p0r + (2 + 1));
@@ -1886,7 +1886,7 @@ void g_fft<FFT_TYPE>::ibfR4(FFT_TYPE *ioptr, int M, int NDiffU)
 //   RADIX 8 Stages
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::ibfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustride,
+void g_fft<FFT_TYPE>::ibfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl, int Ustride,
 					  int NDiffU, int StageCnt)
 {
 	unsigned int pos;
@@ -1922,8 +1922,8 @@ void g_fft<FFT_TYPE>::ibfstages(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl, int Ustr
 	U2toU3 = (POW2(M) / 8) * Ustride;
 	for (; StageCnt > 0; StageCnt--) {
 
-	  u0r = &Utbl[0];
-	  u0i = &Utbl[POW2(M - 2) * Ustride];
+	  u0r = &inUtbl[0];
+	  u0i = &inUtbl[POW2(M - 2) * Ustride];
 	  u1r = u0r;
 	  u1i = u0i;
 	  u2r = u0r;
@@ -2567,7 +2567,7 @@ void g_fft<FFT_TYPE>::rfft8pt(FFT_TYPE *ioptr)
 //	  Finish RFFT
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
+void g_fft<FFT_TYPE>::frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl)
 {
 	unsigned int pos;
 	unsigned int posi;
@@ -2587,7 +2587,7 @@ void g_fft<FFT_TYPE>::frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
 	p0r = ioptr;
 	p1r = ioptr + pos / 2;
 
-	u0r = Utbl + POW2(M - 3);
+	u0r = inUtbl + POW2(M - 3);
 
 	w0r = *u0r, f0r = *(p0r);
 	f0i = *(p0r + 1);
@@ -2622,8 +2622,8 @@ void g_fft<FFT_TYPE>::frstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
 	*(p1r + pos) = f5r;
 	*(p1r + posi) = f5i;
 
-	u0r = Utbl + 1;
-	u0i = Utbl + (POW2(M - 2) - 1);
+	u0r = inUtbl + 1;
+	u0i = inUtbl + (POW2(M - 2) - 1);
 
 	w0r = *u0r, w0i = *u0i;
 
@@ -3038,7 +3038,7 @@ void g_fft<FFT_TYPE>::rifft8pt(FFT_TYPE *ioptr, FFT_TYPE scale)
 //	  Start RIFFT
 //------------------------------------------------------------------------------
 template <typename FFT_TYPE>
-void g_fft<FFT_TYPE>::ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
+void g_fft<FFT_TYPE>::ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *inUtbl)
 {
 	unsigned int pos;
 	unsigned int posi;
@@ -3058,7 +3058,7 @@ void g_fft<FFT_TYPE>::ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
 	p0r = ioptr;
 	p1r = ioptr + pos / 2;
 
-	u0r = Utbl + POW2(M - 3);
+	u0r = inUtbl + POW2(M - 3);
 
 	w0r = *u0r, f0r = *(p0r);
 	f0i = *(p0r + 1);
@@ -3093,8 +3093,8 @@ void g_fft<FFT_TYPE>::ifrstage(FFT_TYPE *ioptr, int M, FFT_TYPE *Utbl)
 	*(p1r + pos) = f5r;
 	*(p1r + posi) = f5i;
 
-	u0r = Utbl + 1;
-	u0i = Utbl + (POW2(M - 2) - 1);
+	u0r = inUtbl + 1;
+	u0i = inUtbl + (POW2(M - 2) - 1);
 
 	w0r = *u0r, w0i = *u0i;
 

@@ -170,7 +170,7 @@ bool SDRPlayInput::start()
 
     if((m_sdrPlayThread = new SDRPlayThread(m_dev, &m_sampleFifo)) == 0)
     {
-        qFatal("SDRPlayInput::start: failed to create thread");
+        qCritical("SDRPlayInput::start: failed to create thread");
         return false;
     }
 

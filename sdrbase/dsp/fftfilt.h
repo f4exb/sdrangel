@@ -38,7 +38,6 @@ protected:
 	int flen;
 	int flen2;
 	g_fft<float> *fft;
-	g_fft<float> *ift;
 	cmplx *filter;
     cmplx *filterOpp;
 	cmplx *data;
@@ -50,7 +49,7 @@ protected:
 
 	inline float fsinc(float fc, int i, int len) {
 		return (i == len/2) ? 2.0 * fc:
-				sin(2 * M_PI * fc * (i - len/2)) / (M_PI * (i - len/2));
+				sin(2 * M_PI * fc * (i - (len/2))) / (M_PI * (i - (len/2)));
 	}
 
 	inline float _blackman(int i, int len) {

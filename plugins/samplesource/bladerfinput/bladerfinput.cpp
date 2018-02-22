@@ -147,7 +147,7 @@ bool BladerfInput::start()
     if (m_running) stop();
 
 	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == 0) {
-		qFatal("BladerfInput::start: out of memory");
+	    qCritical("BladerfInput::start: out of memory");
 		stop();
 		return false;
 	}

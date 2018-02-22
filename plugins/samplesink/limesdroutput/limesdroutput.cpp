@@ -376,7 +376,7 @@ bool LimeSDROutput::start()
 
     if ((m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo)) == 0)
     {
-        qFatal("LimeSDROutput::start: cannot create thread");
+        qCritical("LimeSDROutput::start: cannot create thread");
         stop();
         return false;
     }

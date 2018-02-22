@@ -29,9 +29,9 @@ public:
 
 	void configure(MessageQueue* msgQueue,
 		uint triggerIndex,
-        TriggerChannel triggerChannel, 
-        Real triggerLevel, 
-        bool triggerPositiveEdge, 
+        TriggerChannel triggerChannel,
+        Real triggerLevel,
+        bool triggerPositiveEdge,
         bool triggerBothEdges,
         uint triggerPre,
         uint triggerDelay,
@@ -57,8 +57,8 @@ private:
 		uint getTriggerIndex() const { return m_triggerIndex; }
 		int getTriggerChannel() const { return m_triggerChannel; }
 		Real getTriggerLevel() const { return m_triggerLevel; }
-		Real getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
-		Real getTriggerBothEdges() const { return m_triggerBothEdges; }
+		bool getTriggerPositiveEdge() const { return m_triggerPositiveEdge; }
+		bool getTriggerBothEdges() const { return m_triggerBothEdges; }
         uint getTriggerPre() const { return m_triggerPre; }
         uint getTriggerDelay() const { return m_triggerDelay; }
         uint getTriggerCounts() const { return m_triggerCounts; }
@@ -66,8 +66,8 @@ private:
 
 		static MsgConfigureScopeVis* create(uint triggerIndex,
 			int triggerChannel,
-            Real triggerLevel, 
-            bool triggerPositiveEdge, 
+            Real triggerLevel,
+            bool triggerPositiveEdge,
             bool triggerBothEdges,
             uint triggerPre,
             uint triggerDelay,
@@ -98,8 +98,8 @@ private:
 
 		MsgConfigureScopeVis(uint triggerIndex,
 				int triggerChannel,
-                Real triggerLevel, 
-                bool triggerPositiveEdge, 
+                Real triggerLevel,
+                bool triggerPositiveEdge,
                 bool triggerBothEdges,
                 uint triggerPre,
                 uint triggerDelay,
@@ -120,7 +120,7 @@ private:
 
     /**
      *  TriggerState: (repeat at each successive non freerun trigger)
-     * 
+     *
      *            send a                       Trigger condition                                               +--------------------+
      *          dummy trace                    - Immediate                              m_triggerOneShot       |                    |
      *  Config -------------> Untriggered ----------------------------------> Triggered ----------------> WaitForReset              |

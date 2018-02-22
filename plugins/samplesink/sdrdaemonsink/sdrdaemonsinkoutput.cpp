@@ -66,7 +66,7 @@ bool SDRdaemonSinkOutput::start()
 
 	if((m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo)) == 0)
 	{
-		qFatal("out of memory");
+	    qCritical("out of memory");
 		stop();
 		return false;
 	}

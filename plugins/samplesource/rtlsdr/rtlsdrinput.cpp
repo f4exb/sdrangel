@@ -189,7 +189,7 @@ bool RTLSDRInput::start()
 
 	if ((m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo)) == NULL)
 	{
-		qFatal("RTLSDRInput::start: out of memory");
+	    qCritical("RTLSDRInput::start: out of memory");
 		stop();
 		return false;
 	}

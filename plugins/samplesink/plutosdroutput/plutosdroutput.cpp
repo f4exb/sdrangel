@@ -78,7 +78,7 @@ bool PlutoSDROutput::start()
 
     if ((m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo)) == 0)
     {
-        qFatal("PlutoSDROutput::start: cannot create thread");
+        qCritical("PlutoSDROutput::start: cannot create thread");
         stop();
         return false;
     }
@@ -314,7 +314,6 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 {
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
-    bool suspendOwnThread       = false;
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Rx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
@@ -334,11 +333,6 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
     {
         suspendAllOtherThreads = true;
-        suspendOwnThread = true;
-    }
-    else
-    {
-        suspendOwnThread = true;
     }
 
     if (suspendAllOtherThreads)
@@ -361,13 +355,10 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
         }
     }
 
-    if (suspendOwnThread)
+    if (m_plutoSDROutputThread && m_plutoSDROutputThread->isRunning())
     {
-        if (m_plutoSDROutputThread && m_plutoSDROutputThread->isRunning())
-        {
-            m_plutoSDROutputThread->stopWork();
-            ownThreadWasRunning = true;
-        }
+        m_plutoSDROutputThread->stopWork();
+        ownThreadWasRunning = true;
     }
 
     // apply settings
@@ -479,11 +470,8 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
         }
     }
 
-    if (suspendOwnThread)
-    {
-        if (ownThreadWasRunning) {
-            m_plutoSDROutputThread->startWork();
-        }
+    if (ownThreadWasRunning) {
+        m_plutoSDROutputThread->startWork();
     }
 
     // TODO: forward changes to other (Rx) DSP

@@ -11,6 +11,7 @@ const int LoRaDemodSettings::bandwidths[] = {7813,15625,20833,31250,62500};
 const int LoRaDemodSettings::nb_bandwidths = 5;
 
 LoRaDemodSettings::LoRaDemodSettings() :
+    m_centerFrequency(0),
     m_channelMarker(0),
     m_spectrumGUI(0)
 {

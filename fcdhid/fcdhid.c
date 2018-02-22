@@ -1,10 +1,10 @@
 /***************************************************************************
  *  This file is part of Qthid.
- * 
+ *
  *  Copyright (C) 2010  Howard Long, G6LVB
  *  CopyRight (C) 2011  Alexandru Csete, OZ9AEC
  *                      Mario Lorenz, DL5MLO
- * 
+ *
  *  Qthid is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -40,7 +40,7 @@ hid_device *fcdOpen(uint16_t usVID, uint16_t usPID, int whichdongle)
 
     while (phdi && which)
     {
-        phdi=phdi->next;    
+        phdi=phdi->next;
         which--;
     }
 
@@ -611,7 +611,6 @@ FCD_MODE_ENUM fcdBlWriteFirmware(hid_device *phd, char *pc, int64_t n64Size)
     uint32_t u32AddrStart;
     uint32_t u32AddrEnd;
     uint32_t u32Addr;
-    BOOL bFinished=FALSE;
 
     /*
     phd = fcdOpen();
@@ -671,7 +670,7 @@ FCD_MODE_ENUM fcdBlWriteFirmware(hid_device *phd, char *pc, int64_t n64Size)
     // Write blocks
     aucBufOut[0] = 0; // Report ID, ignored
     aucBufOut[1] = FCD_CMD_BL_WRITE_FLASH_BLOCK;
-    for (u32Addr=u32AddrStart; u32Addr+47<u32AddrEnd && u32Addr+47<n64Size && !bFinished; u32Addr+=48)
+    for (u32Addr=u32AddrStart; u32Addr+47<u32AddrEnd && u32Addr+47<n64Size; u32Addr+=48)
     {
         memcpy(&aucBufOut[3], &pc[u32Addr], 48);
 
@@ -681,7 +680,6 @@ FCD_MODE_ENUM fcdBlWriteFirmware(hid_device *phd, char *pc, int64_t n64Size)
 
         if (aucBufIn[0]!=FCD_CMD_BL_WRITE_FLASH_BLOCK || aucBufIn[1]!=1)
         {
-            bFinished = TRUE;
             /*
             fcdClose(phd);
             phd = NULL;*/
@@ -715,7 +713,6 @@ FCD_MODE_ENUM fcdBlVerifyFirmware(hid_device *phd, char *pc, int64_t n64Size)
     uint32_t u32AddrStart;
     uint32_t u32AddrEnd;
     uint32_t u32Addr;
-    BOOL bFinished=FALSE;
 
     /*
     phd = fcdOpen();
@@ -776,7 +773,7 @@ FCD_MODE_ENUM fcdBlVerifyFirmware(hid_device *phd, char *pc, int64_t n64Size)
     // Read blocks
     aucBufOut[0] = 0; // Report ID, ignored
     aucBufOut[1] = FCD_CMD_BL_READ_FLASH_BLOCK;
-    for (u32Addr=u32AddrStart; u32Addr+47<u32AddrEnd && u32Addr+47<n64Size && !bFinished; u32Addr+=48)
+    for (u32Addr=u32AddrStart; u32Addr+47<u32AddrEnd && u32Addr+47<n64Size; u32Addr+=48)
     {
         hid_write(phd, aucBufOut, 65);
         memset(aucBufIn, 0xCC, 65); // Clear out the response buffer
@@ -784,7 +781,6 @@ FCD_MODE_ENUM fcdBlVerifyFirmware(hid_device *phd, char *pc, int64_t n64Size)
 
         if (aucBufIn[0]!=FCD_CMD_BL_READ_FLASH_BLOCK || aucBufIn[1]!=1)
         {
-            bFinished = TRUE;
             /*
             fcdClose(phd);
             phd = NULL;*/
@@ -794,7 +790,6 @@ FCD_MODE_ENUM fcdBlVerifyFirmware(hid_device *phd, char *pc, int64_t n64Size)
 
         if (memcmp(&aucBufIn[2],&pc[u32Addr],48)!=0)
         {
-            bFinished = TRUE;
             /*
             fcdClose(phd);
             phd = NULL;*/

@@ -136,7 +136,7 @@ bool BladerfOutput::start()
 
 	if((m_bladerfThread = new BladerfOutputThread(m_dev, &m_sampleSourceFifo)) == 0)
 	{
-		qFatal("BladerfOutput::start: out of memory");
+		qCritical("BladerfOutput::start: out of memory");
         stop();
         return false;
 	}

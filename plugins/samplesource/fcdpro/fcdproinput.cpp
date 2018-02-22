@@ -123,7 +123,7 @@ bool FCDProInput::start()
 
 	if ((m_FCDThread = new FCDProThread(&m_sampleFifo)) == NULL)
 	{
-		qFatal("out of memory");
+	    qCritical("out of memory");
 		return false;
 	}
 

@@ -42,6 +42,7 @@ NCO::NCO()
 {
 	initTable();
 	m_phase = 0;
+	m_phaseIncrement = 0;
 }
 
 void NCO::setFreq(Real freq, Real sampleRate)

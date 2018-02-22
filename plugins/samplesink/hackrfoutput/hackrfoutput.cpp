@@ -118,7 +118,7 @@ bool HackRFOutput::start()
 
 	if((m_hackRFThread = new HackRFOutputThread(m_dev, &m_sampleSourceFifo)) == 0)
 	{
-		qFatal("HackRFOutput::start: out of memory");
+	    qCritical("HackRFOutput::start: out of memory");
 		stop();
 		return false;
 	}

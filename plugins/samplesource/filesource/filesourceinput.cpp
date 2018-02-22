@@ -146,7 +146,7 @@ bool FileSourceInput::start()
 	//openFileStream();
 
 	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {
-		qFatal("out of memory");
+	    qCritical("out of memory");
 		stop();
 		return false;
 	}

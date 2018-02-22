@@ -1279,10 +1279,10 @@ void GLSpectrum::applyChanges()
 
 		if (sidebands == ChannelMarker::usb) {
 			nw = dv->m_channelMarker->getLowCutoff();     // negative bandwidth
-			pw = dv->m_channelMarker->getBandwidth() / 2; // positive bandwidth
+			pw = (dv->m_channelMarker->getBandwidth() / 2); // positive bandwidth
 		} else if (sidebands == ChannelMarker::lsb) {
 			pw = dv->m_channelMarker->getLowCutoff();
-			nw = dv->m_channelMarker->getBandwidth() / 2;
+			nw = (dv->m_channelMarker->getBandwidth() / 2);
 		} else if (sidebands == ChannelMarker::vusb) {
             nw = -dv->m_channelMarker->getOppositeBandwidth(); // negative bandwidth
             pw = dv->m_channelMarker->getBandwidth(); // positive bandwidth
@@ -1554,7 +1554,7 @@ void GLSpectrum::applyChanges()
 
 		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);
 
-		if(m_histogramBuffer != NULL)
+		if(m_histogramBuffer != 0)
 		{
 			m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
 			m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
@@ -1581,15 +1581,21 @@ void GLSpectrum::applyChanges()
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 {
-	if(m_displayWaterfall && (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)) {
-		if(m_frequencyScaleRect.contains(event->pos())) {
-			if(m_cursorState == CSNormal) {
+	if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)
+	{
+		if(m_frequencyScaleRect.contains(event->pos()))
+		{
+			if(m_cursorState == CSNormal)
+			{
 				setCursor(Qt::SizeVerCursor);
 				m_cursorState = CSSplitter;
 				return;
 			}
-		} else {
-			if(m_cursorState == CSSplitter) {
+		}
+		else
+		{
+			if(m_cursorState == CSSplitter)
+			{
 				setCursor(Qt::ArrowCursor);
 				m_cursorState = CSNormal;
 				return;

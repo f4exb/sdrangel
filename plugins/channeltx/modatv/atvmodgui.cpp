@@ -537,8 +537,8 @@ void ATVModGUI::on_cameraManualFPSEnable_toggled(bool checked)
 {
 	ATVMod::MsgConfigureCameraData* message = ATVMod::MsgConfigureCameraData::create(
 			ui->camSelect->currentIndex(),
-			checked,
-			ui->cameraManualFPS->value() / 10.0f);
+			ui->cameraManualFPS->value() / 10.0f,
+			checked);
     m_atvMod->getInputMessageQueue()->push(message);
 }
 
@@ -547,8 +547,8 @@ void ATVModGUI::on_cameraManualFPS_valueChanged(int value)
     ui->cameraManualFPSText->setText(tr("%1 FPS").arg(value / 10.0f, 0, 'f', 1));
 	ATVMod::MsgConfigureCameraData* message = ATVMod::MsgConfigureCameraData::create(
 			ui->camSelect->currentIndex(),
-			ui->cameraManualFPSEnable->isChecked(),
-			value / 10.0f);
+			value / 10.0f,
+			ui->cameraManualFPSEnable->isChecked());
     m_atvMod->getInputMessageQueue()->push(message);
 }
 

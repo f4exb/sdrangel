@@ -20,6 +20,9 @@ void Preset::resetToDefaults()
 	m_channelConfigs.clear();
 	m_sourceId.clear();
 	m_sourceConfig.clear();
+	m_dcOffsetCorrection = false;
+	m_iqImbalanceCorrection = false;
+	m_sourceSequence = 0;
 }
 
 QByteArray Preset::serialize() const

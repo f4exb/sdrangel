@@ -50,6 +50,13 @@ RDSDemod::RDSDemod()
 	m_parms.reading_frame = 0;
 	m_parms.dbit = 0;
 	m_prev = 0.0f;
+	memset(m_xv, 0, 6*sizeof(Real));
+	memset(m_yv, 0, 6*sizeof(Real));
+    memset(m_xw, 0, 2*sizeof(Real));
+    memset(m_yw, 0, 2*sizeof(Real));
+    m_report.acc = 0.0f;
+    m_report.fclk = 0.0f;
+    m_report.qua = 0.0f;
 }
 
 RDSDemod::~RDSDemod()

@@ -27,12 +27,10 @@ const unsigned int RDSDecoder::syndrome[5] = {383,14,303,663,748};
 RDSDecoder::RDSDecoder()
 {
 	m_reg = 0;
-	m_sync = NO_SYNC;
 	m_presync = false;
 	m_lastseenOffsetCounter = 0;
 	m_bitCounter = 0;
 	m_lastseenOffset = 0;
-	m_wrongBlocksCounter   = 0;
 	m_blocksCounter        = 0;
 	m_blockBitCounter      = 0;
 	m_blockNumber          = 0;

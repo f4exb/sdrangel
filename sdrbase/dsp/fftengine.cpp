@@ -15,12 +15,11 @@ FFTEngine* FFTEngine::create()
 #ifdef USE_FFTW
 	qDebug("FFTEngine::create: using FFTW engine");
 	return new FFTWEngine;
-#endif // USE_FFTW
-#ifdef USE_KISSFFT
+#elif USE_KISSFFT
 	qDebug("FFTEngine::create: using KissFFT engine");
 	return new KissEngine;
-#endif // USE_KISSFFT
-
+#else // USE_KISSFFT
 	qCritical("FFTEngine::create: no engine built");
-	return NULL;
+	return 0;
+#endif
 }

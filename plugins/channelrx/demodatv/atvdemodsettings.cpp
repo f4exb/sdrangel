@@ -59,6 +59,9 @@ void ATVDemodSettings::resetToDefaults()
     m_blnVSync = false;
     m_blnInvertVideo = false;
     m_intVideoTabIndex = 0;
+    m_fltLineTimeMultiplier = 1.0f;
+    m_fltTopTimeMultiplier = 1.0f;
+    m_rfSliderDivisor = 1;
 
     m_intTVSampleRate = 0;
     m_intNumberSamplePerLine = 0;

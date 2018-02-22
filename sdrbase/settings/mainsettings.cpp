@@ -4,7 +4,7 @@
 #include "settings/mainsettings.h"
 #include "commands/command.h"
 
-MainSettings::MainSettings()
+MainSettings::MainSettings() : m_audioDeviceInfo(0)
 {
 	resetToDefaults();
 }
