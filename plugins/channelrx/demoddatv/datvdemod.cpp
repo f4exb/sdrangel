@@ -101,7 +101,7 @@ DATVDemod::~DATVDemod()
 
 bool DATVDemod::SetDATVScreen(DATVScreen *objScreen)
 {
-    m_objRegisteredDATVScreen = objScreen;    
+    m_objRegisteredDATVScreen = objScreen;
 }
 
 DATVideostream * DATVDemod::SetVideoRender(DATVideoRender *objScreen)
@@ -157,7 +157,7 @@ void DATVDemod::configure(MessageQueue* objMessageQueue,
                           int intCenterFrequency,
                           dvb_version enmStandard,
                           DATVModulation enmModulation,
-                          code_rate enmFEC,                          
+                          code_rate enmFEC,
                           int intSymbolRate,
                           int intNotchFilters,
                           bool blnAllowDrift,
@@ -549,7 +549,7 @@ void DATVDemod::InitDATVFramework()
     p_cnr = new pipebuf<f32>(m_objScheduler, "cnr", BUF_SLOW);
 
     if ( m_objCfg.cnr )
-    {        
+    {
         r_cnr = new cnr_fft<f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
         r_cnr->decimation = decimation(m_objCfg.Fs, 1);  // 1 Hz
     }
@@ -675,7 +675,7 @@ void DATVDemod::InitDATVFramework()
     m_objDemodulator->cstln = make_dvbs2_constellation(m_objCfg.constellation, m_objCfg.fec);
 
     if ( m_objCfg.hard_metric )
-    {      
+    {
       m_objDemodulator->cstln->harden();
     }
 
@@ -688,12 +688,12 @@ void DATVDemod::InitDATVFramework()
     }
 
     if ( m_objCfg.allow_drift )
-    {      
+    {
       m_objDemodulator->set_allow_drift(true);
     }
 
     if ( m_objCfg.viterbi )
-    {    
+    {
       m_objDemodulator->pll_adjustment /= 6;
     }
 
@@ -732,7 +732,7 @@ void DATVDemod::InitDATVFramework()
     if ( m_objCfg.viterbi )
     {
       if ( m_objCfg.fec==FEC23 && (m_objDemodulator->cstln->nsymbols==4 || m_objDemodulator->cstln->nsymbols==64) )
-      {     
+      {
         m_objCfg.fec = FEC46;
       }
 
@@ -813,7 +813,7 @@ void DATVDemod::InitDATVFramework()
     r_derand = new derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
 
 
-    // OUTPUT  
+    // OUTPUT
     r_videoplayer = new datvvideoplayer<tspacket>(m_objScheduler, *p_tspackets,m_objVideoStream);
 
     m_blnDVBInitialized=true;
@@ -821,7 +821,6 @@ void DATVDemod::InitDATVFramework()
 
 void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
-    qint16 * ptrBufferToRelease=NULL;
     float fltI;
     float fltQ;
     cf32 objIQ;
@@ -832,6 +831,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
 #ifdef EXTENDED_DIRECT_SAMPLE
 
+    qint16 * ptrBufferToRelease=NULL;
     qint16 * ptrBuffer;
     qint32 intLen;
 
@@ -850,7 +850,6 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
         ptrBuffer ++;
         fltQ= ((qint32) (*ptrBuffer)) << 4;
         ptrBuffer ++;
-
 #else
 
     for (SampleVector::const_iterator it = begin; it != end; ++it /* ++it **/)
@@ -915,10 +914,12 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
     }
 
+#ifdef EXTENDED_DIRECT_SAMPLE
     if(ptrBufferToRelease!=NULL)
     {
         delete ptrBufferToRelease;
     }
+#endif
 
     //m_objSettingsMutex.unlock();
 
