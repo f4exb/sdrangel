@@ -320,7 +320,10 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	QChar delta = QChar(0x94, 0x03);
 	ui->deltaSquelch->setText(delta);
-	ui->useRTP->setEnabled(m_nfmDemod->isAudioNetSinkRTPCapable());
+
+	if (!m_nfmDemod->isAudioNetSinkRTPCapable()) {
+	    ui->useRTP->hide();
+	}
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
