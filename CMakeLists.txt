@@ -213,6 +213,7 @@ add_subdirectory(sdrgui)
 add_subdirectory(sdrsrv)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
+add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 
 include_directories(
