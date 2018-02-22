@@ -63,9 +63,6 @@ SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
         limesdr/devicelimesdrshared.cpp
 
-SOURCES += perseus/deviceperseus.cpp\
-        perseus/deviceperseusscan.cpp
-        
 SOURCES += plutosdr/deviceplutosdr.cpp\
         plutosdr/deviceplutosdrbox.cpp\
         plutosdr/deviceplutosdrparams.cpp\
@@ -86,9 +83,6 @@ HEADERS += limesdr/devicelimesdr.h\
         limesdr/devicelimesdrparam.h\
         limesdr/devicelimesdrshared.h
 
-HEADERS += perseus/deviceperseus.h\
-        perseus/deviceperseusscan.h
-
 HEADERS += plutosdr/deviceplutosdr.h\
         plutosdr/deviceplutosdrbox.h\
         plutosdr/deviceplutosdrparams.h\
@@ -99,7 +93,6 @@ LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
 LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
 LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
-LIBS += -L../libperseus/$${build_subdir} -lperseus
 LIBS += -L../libiio/$${build_subdir} -llibiio
 
 macx {
