@@ -147,9 +147,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
             "QTabWidget::pane { border: 1px solid #808080; } "
             "QTabBar::tab:selected { background: rgb(100,100,100); }");
 
-    m_pluginManager = new PluginManager(this);
-    m_pluginManager->loadPlugins(QString("plugins"));
-
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -161,7 +158,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	loadSettings();
 
-	qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source) ...";
+    qDebug() << "MainWindow::MainWindow: load plugins...";
+
+    m_pluginManager = new PluginManager(this);
+    m_pluginManager->loadPlugins(QString("plugins"));
+
+    qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source) ...";
 
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file source device as default if device in settings is not enumerated
