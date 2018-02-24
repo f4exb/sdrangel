@@ -16,9 +16,9 @@ if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
 
-if (NOT RX_SAMPLE_24BIT)
+#if (NOT RX_SAMPLE_24BIT)
     add_subdirectory(demoddatv)
-endif()
+#endif()
 
 if (BUILD_DEBIAN)
     add_subdirectory(demoddsd)

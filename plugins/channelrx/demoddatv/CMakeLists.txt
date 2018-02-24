@@ -24,8 +24,6 @@ set(datv_FORMS
 	datvdemodgui.ui
 )
 
-set (CMAKE_CXX_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations")
-
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}

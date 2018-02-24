@@ -27,72 +27,82 @@
 namespace leansdr
 {
 
-    static const int DEFAULT_GUI_DECIMATION = 64;
+static const int DEFAULT_GUI_DECIMATION = 64;
 
-    template<typename T> struct datvconstellation : runnable
+template<typename T> struct datvconstellation: runnable
+{
+    T xymin;
+    T xymax;
+    unsigned long decimation;
+    unsigned long pixels_per_frame;
+    cstln_lut<256> **cstln;  // Optional ptr to optional constellation
+    pipereader<complex<T> > in;
+    unsigned long phase;
+    DATVScreen *m_objDATVScreen;
+
+    datvconstellation(
+            scheduler *sch,
+            pipebuf<complex<T> > &_in,
+            T _xymin,
+            T _xymax,
+            const char *_name = 0,
+            DATVScreen * objDATVScreen = 0) :
+        runnable(sch, _name ? _name : _in.name),
+        xymin(_xymin),
+        xymax(_xymax),
+        decimation(DEFAULT_GUI_DECIMATION),
+        pixels_per_frame(1024),
+        cstln(0),
+        in(_in),
+        phase(0),
+        m_objDATVScreen(objDATVScreen)
     {
-      T xymin, xymax;
-      unsigned long decimation;
-      unsigned long pixels_per_frame;
-      cstln_lut<256> **cstln;  // Optional ptr to optional constellation
-      DATVScreen *m_objDATVScreen;
+    }
 
-
-      datvconstellation(scheduler *sch, pipebuf< complex<T> > &_in, T _xymin, T _xymax, const char *_name=NULL, DATVScreen * objDATVScreen=NULL) :
-      runnable(sch, _name?_name:_in.name),
-      xymin(_xymin),
-      xymax(_xymax),
-      decimation(DEFAULT_GUI_DECIMATION),
-      pixels_per_frame(1024),
-      cstln(NULL),
-      in(_in),
-      phase(0),
-      m_objDATVScreen(objDATVScreen)
-      {
-
-      }
-
-      void run()
-      {
+    void run()
+    {
         //Symbols
 
-        while ( in.readable() >= pixels_per_frame )
+        while (in.readable() >= pixels_per_frame)
         {
-            if ( ! phase )
+            if (!phase)
             {
                 m_objDATVScreen->resetImage();
 
-                complex<T> *p = in.rd(), *pend = p+pixels_per_frame;
+                complex<T> *p = in.rd(), *pend = p + pixels_per_frame;
 
-                for ( ; p<pend; ++p )
+                for (; p < pend; ++p)
                 {
-                    if(m_objDATVScreen!=NULL)
+                    if (m_objDATVScreen != NULL)
                     {
 
-                        m_objDATVScreen->selectRow(256*(p->re-xymin)/(xymax-xymin));
-                        m_objDATVScreen->setDataColor(256- 256*((p->im-xymin)/(xymax-xymin)),255,0,255);
+                        m_objDATVScreen->selectRow(
+                                256 * (p->re - xymin) / (xymax - xymin));
+                        m_objDATVScreen->setDataColor(
+                                256 - 256 * ((p->im - xymin) / (xymax - xymin)),
+                                255, 0, 255);
                     }
 
                 }
 
-                if ( cstln && (*cstln) )
+                if (cstln && (*cstln))
                 {
-                  // Plot constellation points
+                    // Plot constellation points
 
-                  for ( int i=0; i<(*cstln)->nsymbols; ++i )
-                  {
-                    complex<signed char> *p = &(*cstln)->symbols[i];
-                    int x = 256*(p->re-xymin)/(xymax-xymin);
-                    int y = 256 - 256*(p->im-xymin)/(xymax-xymin);
-
-                    for ( int d=-4; d<=4; ++d )
+                    for (int i = 0; i < (*cstln)->nsymbols; ++i)
                     {
-                        m_objDATVScreen->selectRow(x+d);
-                        m_objDATVScreen->setDataColor(y,5,250,250);
-                        m_objDATVScreen->selectRow(x);
-                        m_objDATVScreen->setDataColor(y+d,5,250,250);
+                        complex<signed char> *p = &(*cstln)->symbols[i];
+                        int x = 256 * (p->re - xymin) / (xymax - xymin);
+                        int y = 256 - 256 * (p->im - xymin) / (xymax - xymin);
+
+                        for (int d = -4; d <= 4; ++d)
+                        {
+                            m_objDATVScreen->selectRow(x + d);
+                            m_objDATVScreen->setDataColor(y, 5, 250, 250);
+                            m_objDATVScreen->selectRow(x);
+                            m_objDATVScreen->setDataColor(y + d, 5, 250, 250);
+                        }
                     }
-                  }
                 }
 
                 m_objDATVScreen->renderImage(NULL);
@@ -101,27 +111,25 @@ namespace leansdr
 
             in.read(pixels_per_frame);
 
-            if ( ++phase >= decimation )
+            if (++phase >= decimation)
             {
                 phase = 0;
             }
-         }
-      }
+        }
+    }
 
-        //private:
-      pipereader< complex<T> > in;
-      unsigned long phase;
-      //gfx g;
+    //private:
+    //gfx g;
 
-      void draw_begin()
-      {
+    void draw_begin()
+    {
         //g.clear();
         //g.setfg(0, 255, 0);
         //g.line(g.w/2,0, g.w/2, g.h);
         //g.line(0,g.h/2, g.w,g.h/2);
-      }
+    }
 
-    };
+};
 
 }
 

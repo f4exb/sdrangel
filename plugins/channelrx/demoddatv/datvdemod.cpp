@@ -38,21 +38,22 @@ MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureChannelizer, Message)
 
 DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     ChannelSinkAPI(m_channelIdURI),
-    m_deviceAPI(deviceAPI),
-    m_objSettingsMutex(QMutex::NonRecursive),
-    m_objRegisteredDATVScreen(NULL),
-    m_objVideoStream(NULL),
-    m_objRegisteredVideoRender(NULL),
-    m_objRenderThread(NULL),
-    m_enmModulation(BPSK /*DATV_FM1*/),
     m_blnNeedConfigUpdate(false),
-    m_blnRenderingVideo(false)
+    m_deviceAPI(deviceAPI),
+    m_objRegisteredDATVScreen(NULL),
+    m_objRegisteredVideoRender(NULL),
+    m_objVideoStream(NULL),
+    m_objRenderThread(NULL),
+    m_blnRenderingVideo(false),
+    m_enmModulation(BPSK /*DATV_FM1*/),
+    m_objSettingsMutex(QMutex::NonRecursive)
 {
     setObjectName("DATVDemod");
+    qDebug("DATVDemod::DATVDemod: sizeof FixReal: %lu: SDR_RX_SAMP_SZ: %u", sizeof(FixReal), (unsigned int) SDR_RX_SAMP_SZ);
 
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
-    CleanUpDATVFramework(false);
+    CleanUpDATVFramework();
 
     m_objVideoStream = new DATVideostream();
 
@@ -102,6 +103,7 @@ DATVDemod::~DATVDemod()
 bool DATVDemod::SetDATVScreen(DATVScreen *objScreen)
 {
     m_objRegisteredDATVScreen = objScreen;
+    return true;
 }
 
 DATVideostream * DATVDemod::SetVideoRender(DATVideoRender *objScreen)
@@ -240,185 +242,185 @@ void DATVDemod::InitDATVParameters(int intMsps,
     m_blnInitialized=true;
 }
 
-void DATVDemod::CleanUpDATVFramework(bool blnRelease)
+void DATVDemod::CleanUpDATVFramework()
 {
     //if(blnRelease==true)
-    if(false)
-    {
-        if(m_objScheduler!=NULL)
-        {
-            m_objScheduler->shutdown();
-            delete m_objScheduler;
-        }
+//    if (false)
+//    {
+//        if(m_objScheduler!=NULL)
+//        {
+//            m_objScheduler->shutdown();
+//            delete m_objScheduler;
+//        }
+//
+//        // INPUT
+//        if(p_rawiq!=NULL) delete p_rawiq;
+//        if(p_rawiq_writer!=NULL) delete p_rawiq_writer;
+//        if(p_preprocessed!=NULL) delete p_preprocessed;
+//
+//        // NOTCH FILTER
+//        if(r_auto_notch!=NULL) delete r_auto_notch;
+//        if(p_autonotched!=NULL) delete p_autonotched;
+//
+//        // FREQUENCY CORRECTION : DEROTATOR
+//        if(p_derot!=NULL) delete p_derot;
+//        if(r_derot!=NULL) delete r_derot;
+//
+//        // CNR ESTIMATION
+//        if(p_cnr!=NULL) delete p_cnr;
+//        if(r_cnr!=NULL) delete r_cnr;
+//
+//        //FILTERING
+//        if(r_resample!=NULL) delete r_resample;
+//        if(p_resampled!=NULL) delete p_resampled;
+//        if(coeffs!=NULL) delete coeffs;
+//
+//        // OUTPUT PREPROCESSED DATA
+//        if(sampler!=NULL) delete sampler;
+//        if(coeffs_sampler!=NULL) delete coeffs_sampler;
+//        if(p_symbols!=NULL) delete p_symbols;
+//        if(p_freq!=NULL) delete p_freq;
+//        if(p_ss!=NULL) delete p_ss;
+//        if(p_mer!=NULL) delete p_mer;
+//        if(p_sampled!=NULL) delete p_sampled;
+//
+//        //DECIMATION
+//        if(p_decimated!=NULL) delete p_decimated;
+//        if(p_decim!=NULL) delete p_decim;
+//        if(r_ppout!=NULL) delete r_ppout;
+//
+//        //GENERIC CONSTELLATION RECEIVER
+//        if(m_objDemodulator!=NULL) delete m_objDemodulator;
+//
+//        //DECONVOLUTION AND SYNCHRONIZATION
+//        if(p_bytes!=NULL) delete p_bytes;
+//        if(r_deconv!=NULL) delete r_deconv;
+//        if(r!=NULL) delete r;
+//        if(p_descrambled!=NULL) delete p_descrambled;
+//        if(p_frames!=NULL) delete p_frames;
+//        if(r_etr192_descrambler!=NULL) delete r_etr192_descrambler;
+//        if(r_sync!=NULL) delete r_sync;
+//        if(p_mpegbytes!=NULL) delete p_mpegbytes;
+//        if(p_lock!=NULL) delete p_lock;
+//        if(p_locktime!=NULL) delete p_locktime;
+//        if(r_sync_mpeg!=NULL) delete r_sync_mpeg;
+//
+//
+//        // DEINTERLEAVING
+//        if(p_rspackets!=NULL) delete p_rspackets;
+//        if(r_deinter!=NULL) delete r_deinter;
+//        if(p_vbitcount!=NULL) delete p_vbitcount;
+//        if(p_verrcount!=NULL) delete p_verrcount;
+//        if(p_rtspackets!=NULL) delete p_rtspackets;
+//        if(r_rsdec!=NULL) delete r_rsdec;
+//
+//        //BER ESTIMATION
+//        if(p_vber!=NULL) delete p_vber;
+//        if(r_vber!=NULL) delete r_vber;
+//
+//        // DERANDOMIZATION
+//        if(p_tspackets!=NULL) delete p_tspackets;
+//        if(r_derand!=NULL) delete r_derand;
+//
+//
+//        //OUTPUT : To remove
+//        if(r_stdout!=NULL) delete r_stdout;
+//        if(r_videoplayer!=NULL) delete r_videoplayer;
+//
+//        //CONSTELLATION
+//        if(r_scope_symbols!=NULL) delete r_scope_symbols;
+//
+//    }
 
-        // INPUT
-        if(p_rawiq!=NULL) delete p_rawiq;
-        if(p_rawiq_writer!=NULL) delete p_rawiq_writer;
-        if(p_preprocessed!=NULL) delete p_preprocessed;
-
-        // NOTCH FILTER
-        if(r_auto_notch!=NULL) delete r_auto_notch;
-        if(p_autonotched!=NULL) delete p_autonotched;
-
-        // FREQUENCY CORRECTION : DEROTATOR
-        if(p_derot!=NULL) delete p_derot;
-        if(r_derot!=NULL) delete r_derot;
-
-        // CNR ESTIMATION
-        if(p_cnr!=NULL) delete p_cnr;
-        if(r_cnr!=NULL) delete r_cnr;
-
-        //FILTERING
-        if(r_resample!=NULL) delete r_resample;
-        if(p_resampled!=NULL) delete p_resampled;
-        if(coeffs!=NULL) delete coeffs;
-
-        // OUTPUT PREPROCESSED DATA
-        if(sampler!=NULL) delete sampler;
-        if(coeffs_sampler!=NULL) delete coeffs_sampler;
-        if(p_symbols!=NULL) delete p_symbols;
-        if(p_freq!=NULL) delete p_freq;
-        if(p_ss!=NULL) delete p_ss;
-        if(p_mer!=NULL) delete p_mer;
-        if(p_sampled!=NULL) delete p_sampled;
-
-        //DECIMATION
-        if(p_decimated!=NULL) delete p_decimated;
-        if(p_decim!=NULL) delete p_decim;
-        if(r_ppout!=NULL) delete r_ppout;
-
-        //GENERIC CONSTELLATION RECEIVER
-        if(m_objDemodulator!=NULL) delete m_objDemodulator;
-
-        //DECONVOLUTION AND SYNCHRONIZATION
-        if(p_bytes!=NULL) delete p_bytes;
-        if(r_deconv!=NULL) delete r_deconv;
-        if(r!=NULL) delete r;
-        if(p_descrambled!=NULL) delete p_descrambled;
-        if(p_frames!=NULL) delete p_frames;
-        if(r_etr192_descrambler!=NULL) delete r_etr192_descrambler;
-        if(r_sync!=NULL) delete r_sync;
-        if(p_mpegbytes!=NULL) delete p_mpegbytes;
-        if(p_lock!=NULL) delete p_lock;
-        if(p_locktime!=NULL) delete p_locktime;
-        if(r_sync_mpeg!=NULL) delete r_sync_mpeg;
-
-
-        // DEINTERLEAVING
-        if(p_rspackets!=NULL) delete p_rspackets;
-        if(r_deinter!=NULL) delete r_deinter;
-        if(p_vbitcount!=NULL) delete p_vbitcount;
-        if(p_verrcount!=NULL) delete p_verrcount;
-        if(p_rtspackets!=NULL) delete p_rtspackets;
-        if(r_rsdec!=NULL) delete r_rsdec;
-
-        //BER ESTIMATION
-        if(p_vber!=NULL) delete p_vber;
-        if(r_vber!=NULL) delete r_vber;
-
-        // DERANDOMIZATION
-        if(p_tspackets!=NULL) delete p_tspackets;
-        if(r_derand!=NULL) delete r_derand;
-
-
-        //OUTPUT : To remove
-        if(r_stdout!=NULL) delete r_stdout;
-        if(r_videoplayer!=NULL) delete r_videoplayer;
-
-        //CONSTELLATION
-        if(r_scope_symbols!=NULL) delete r_scope_symbols;
-
-    }
-
-    m_objScheduler=NULL;
+    m_objScheduler = 0;
 
     // INPUT
 
-    p_rawiq = NULL;
-    p_rawiq_writer = NULL;
+    p_rawiq = 0;
+    p_rawiq_writer = 0;
 
-    p_preprocessed = NULL;
+    p_preprocessed = 0;
 
     // NOTCH FILTER
-    r_auto_notch = NULL;
-    p_autonotched = NULL;
+    r_auto_notch = 0;
+    p_autonotched = 0;
 
     // FREQUENCY CORRECTION : DEROTATOR
-    p_derot = NULL;
-    r_derot=NULL;
+    p_derot = 0;
+    r_derot = 0;
 
     // CNR ESTIMATION
-    p_cnr = NULL;
-    r_cnr = NULL;
+    p_cnr = 0;
+    r_cnr = 0;
 
     //FILTERING
-    r_resample = NULL;
-    p_resampled = NULL;
-    coeffs = NULL;
-    ncoeffs=0;
+    r_resample = 0;
+    p_resampled = 0;
+    coeffs = 0;
+    ncoeffs = 0;
 
     // OUTPUT PREPROCESSED DATA
-    sampler = NULL;
-    coeffs_sampler=NULL;
-    ncoeffs_sampler=0;
+    sampler = 0;
+    coeffs_sampler = 0;
+    ncoeffs_sampler = 0;
 
-    p_symbols = NULL;
-    p_freq = NULL;
-    p_ss = NULL;
-    p_mer = NULL;
-    p_sampled = NULL;
+    p_symbols = 0;
+    p_freq = 0;
+    p_ss = 0;
+    p_mer = 0;
+    p_sampled = 0;
 
     //DECIMATION
-    p_decimated = NULL;
-    p_decim = NULL;
-    r_ppout = NULL;
+    p_decimated = 0;
+    p_decim = 0;
+    r_ppout = 0;
 
     //GENERIC CONSTELLATION RECEIVER
-    m_objDemodulator = NULL;
+    m_objDemodulator = 0;
 
     //DECONVOLUTION AND SYNCHRONIZATION
-    p_bytes=NULL;
-    r_deconv=NULL;
-    r = NULL;
+    p_bytes = 0;
+    r_deconv = 0;
+    r = 0;
 
-    p_descrambled = NULL;
-    p_frames = NULL;
-    r_etr192_descrambler = NULL;
-    r_sync = NULL;
+    p_descrambled = 0;
+    p_frames = 0;
+    r_etr192_descrambler = 0;
+    r_sync = 0;
 
-    p_mpegbytes = NULL;
-    p_lock = NULL;
-    p_locktime = NULL;
-    r_sync_mpeg = NULL;
+    p_mpegbytes = 0;
+    p_lock = 0;
+    p_locktime = 0;
+    r_sync_mpeg = 0;
 
 
     // DEINTERLEAVING
-    p_rspackets = NULL;
-    r_deinter = NULL;
+    p_rspackets = 0;
+    r_deinter = 0;
 
-    p_vbitcount = NULL;
-    p_verrcount = NULL;
-    p_rtspackets = NULL;
-    r_rsdec = NULL;
+    p_vbitcount = 0;
+    p_verrcount = 0;
+    p_rtspackets = 0;
+    r_rsdec = 0;
 
 
     //BER ESTIMATION
-    p_vber = NULL;
-    r_vber  = NULL;
+    p_vber = 0;
+    r_vber  = 0;
 
 
     // DERANDOMIZATION
-    p_tspackets = NULL;
-    r_derand = NULL;
+    p_tspackets = 0;
+    r_derand = 0;
 
 
     //OUTPUT : To remove
-    r_stdout = NULL;
-    r_videoplayer = NULL;
+    r_stdout = 0;
+    r_videoplayer = 0;
 
 
     //CONSTELLATION
-    r_scope_symbols = NULL;
+    r_scope_symbols = 0;
 }
 
 void DATVDemod::InitDATVFramework()
@@ -516,7 +518,7 @@ void DATVDemod::InitDATVFramework()
     m_lngExpectedReadIQ  = BUF_BASEBAND;
 
 
-    CleanUpDATVFramework(true);
+    CleanUpDATVFramework();
 
     m_objScheduler = new scheduler();
 
@@ -819,7 +821,7 @@ void DATVDemod::InitDATVFramework()
     m_blnDVBInitialized=true;
 }
 
-void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
     float fltI;
     float fltQ;
@@ -964,12 +966,12 @@ bool DATVDemod::handleMessage(const Message& cmd)
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
                 m_channelizer->getInputSampleRate(),
-                m_objRunning.intCenterFrequency);
+                cfg.getCenterFrequency());
+                //m_objRunning.intCenterFrequency);
 
-
-
-        qDebug() << "ATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
-                << " centerFrequency: " << m_objRunning.intCenterFrequency;
+        qDebug() << "DATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+                //<< " centerFrequency: " << m_objRunning.intCenterFrequency;
 
         return true;
     }

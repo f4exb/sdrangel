@@ -47,7 +47,7 @@ DATVDemodGUI* DATVDemodGUI::create(PluginAPI* objPluginAPI,
 }
 
 void DATVDemodGUI::destroy()
-{    
+{
     delete this;
 }
 
@@ -208,7 +208,7 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
     }
 }
 
-bool DATVDemodGUI::handleMessage(const Message& objMessage)
+bool DATVDemodGUI::handleMessage(const Message& objMessage __attribute__((unused)))
 {
     return false;
 }
@@ -233,7 +233,7 @@ void DATVDemodGUI::channelSampleRateChanged()
     applySettings();
 }
 
-void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void DATVDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 
@@ -258,7 +258,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         m_objChannelMarker(this),
         m_blnBasicSettingsShown(false),
         m_blnDoApplySettings(true)
-{    
+{
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -491,9 +491,9 @@ void DATVDemodGUI::enterEvent(QEvent*)
 }
 
 void DATVDemodGUI::tick()
-{     
+{
     if((m_intLastDecodedData-m_intPreviousDecodedData)>=0)
-    {        
+    {
         m_intLastSpeed = 8*(m_intLastDecodedData-m_intPreviousDecodedData);
         ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
     }
@@ -506,12 +506,12 @@ void DATVDemodGUI::tick()
     return;
 }
 
-void DATVDemodGUI::on_cmbStandard_currentIndexChanged(const QString &arg1)
-{   
+void DATVDemodGUI::on_cmbStandard_currentIndexChanged(const QString &arg1 __attribute__((unused)))
+{
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
+void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1 __attribute__((unused)))
 {
     QString strModulation;
     QString strFEC;
@@ -563,8 +563,8 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
 
 }
 
-void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
-{    
+void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1 __attribute__((unused)))
+{
     QString strFEC;
 
     strFEC = ui->cmbFEC->currentText();
@@ -625,7 +625,7 @@ void DATVDemodGUI::on_chkHardMetric_clicked()
 /*
 void DATVDemodGUI::on_pushButton_clicked()
 {
-    applySettings();    
+    applySettings();
 }
 */
 
@@ -641,12 +641,12 @@ void DATVDemodGUI::on_spiSampleRate_valueChanged(int arg1)
 }
 */
 
-void DATVDemodGUI::on_spiSymbolRate_valueChanged(int arg1)
+void DATVDemodGUI::on_spiSymbolRate_valueChanged(int arg1 __attribute__((unused)))
 {
     applySettings();
 }
 
-void DATVDemodGUI::on_spiNotchFilters_valueChanged(int arg1)
+void DATVDemodGUI::on_spiNotchFilters_valueChanged(int arg1 __attribute__((unused)))
 {
     applySettings();
 }
@@ -701,8 +701,8 @@ void DATVDemodGUI::on_pushButton_4_clicked()
 
 }
 
-void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj)
-{    
+void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj __attribute__((unused)))
+{
 }
 
 QString DATVDemodGUI::formatBytes(qint64 intBytes)
@@ -724,7 +724,7 @@ QString DATVDemodGUI::formatBytes(qint64 intBytes)
 }
 
 
-void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived)
+void DATVDemodGUI::on_StreamDataAvailable(int *intPackets __attribute__((unused)), int *intBytes, int *intPercent, qint64 *intTotalReceived)
 {
     ui->lblStatus->setText(QString("Decod: %1B").arg(formatBytes(*intTotalReceived)));
     m_intLastDecodedData = *intTotalReceived;
@@ -742,7 +742,7 @@ void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *i
 
 }
 
-void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1)
+void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1 __attribute__((unused)))
 {
     applySettings();
 }
