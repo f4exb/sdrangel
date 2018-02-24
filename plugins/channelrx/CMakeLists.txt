@@ -11,14 +11,11 @@ add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 add_subdirectory(chanalyzerng)
 add_subdirectory(demodatv)
+add_subdirectory(demoddatv)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
-
-#if (NOT RX_SAMPLE_24BIT)
-    add_subdirectory(demoddatv)
-#endif()
 
 if (BUILD_DEBIAN)
     add_subdirectory(demoddsd)
