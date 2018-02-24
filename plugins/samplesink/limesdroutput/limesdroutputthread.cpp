@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <errno.h>
+#include <algorithm>
 
 #include "limesdroutputthread.h"
 #include "limesdroutputsettings.h"
@@ -27,6 +28,7 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_log2Interp(0),
     m_fcPos(LimeSDROutputSettings::FC_POS_CENTER)
 {
+    std::fill(m_buf, m_buf + 2*LIMESDROUTPUT_BLOCKSIZE, 0);
 }
 
 LimeSDROutputThread::~LimeSDROutputThread()

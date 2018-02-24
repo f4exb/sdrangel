@@ -32,6 +32,25 @@ public:
 
 	~DoubleBufferSimple() {}
 
+	DoubleBufferSimple(const DoubleBufferSimple& other)
+	{
+	    m_size = other.m_size;
+	    m_data = other.m_data;
+	    m_current = m_data.begin();
+	}
+
+    DoubleBufferSimple& operator=(const DoubleBufferSimple& other)
+    {
+        if (&other == this) {
+            return *this;
+        }
+
+        m_size = other.m_size;
+        m_data = other.m_data;
+        m_current = m_data.begin();
+        return *this;
+    }
+
 	void resize(int size)
 	{
 	    m_size = size;

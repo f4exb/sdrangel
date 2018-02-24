@@ -232,18 +232,12 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
 					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
-					if (m_settings.m_lsbStereo)
-					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
-						if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
-					}
-					else
-					{
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
-                        if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
-					}
+                    m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
+                    m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
+
+                    if (m_settings.m_copyAudioToUDP) {
+                        m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+                    }
 				}
 				else
 				{
@@ -252,7 +246,10 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					quint16 sample = (qint16)(deemph * (1<<12) * m_settings.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
-                    if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+
+					if (m_settings.m_copyAudioToUDP) {
+                        m_udpBufferAudio->write(m_audioBuffer[m_audioBufferFill]);
+                    }
 				}
 
 				++m_audioBufferFill;

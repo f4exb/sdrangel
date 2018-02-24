@@ -16,6 +16,7 @@
 
 #include <QDebug>
 #include <stdint.h>
+#include <algorithm>
 
 #include "udpsinkmsg.h"
 #include "udpsinkudphandler.h"
@@ -41,6 +42,7 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_feedbackMessageQueue(0)
 {
     m_udpBuf = new udpBlk_t[m_minNbUDPFrames];
+    std::fill(m_udpDump, m_udpDump + m_udpBlockSize + 8192, 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()));
 }
 
@@ -180,7 +182,8 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
         else
         {
             m_rwDelta = m_writeIndex; // raw R/W delta estimate
-            float d = (m_rwDelta - (m_nbUDPFrames/2))/(float) m_nbUDPFrames;
+            int nbUDPFrames2 = m_nbUDPFrames/2;
+            float d = (m_rwDelta - nbUDPFrames2)/(float) m_nbUDPFrames;
             //qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
 
             if ((d < -0.45) || (d > 0.45))

@@ -33,6 +33,7 @@ DVSerialWorker::DVSerialWorker() :
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
     m_audioFifo = 0;
+    memset(m_dvAudioSamples, 0, SerialDV::MBE_AUDIO_BLOCK_SIZE*sizeof(short));
 }
 
 DVSerialWorker::~DVSerialWorker()

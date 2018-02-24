@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <algorithm>
 #include "bladerfoutputthread.h"
 
 
@@ -28,6 +29,7 @@ BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* 
 	m_log2Interp(0),
 	m_fcPos(0)
 {
+    std::fill(m_buf, m_buf + 2*BLADERFOUTPUT_BLOCKSIZE, 0);
 }
 
 BladerfOutputThread::~BladerfOutputThread()

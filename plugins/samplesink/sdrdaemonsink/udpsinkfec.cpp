@@ -115,7 +115,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
             metaData.m_crc32 = crc32.checksum();
 
-            memset((void *) &m_superBlock, 0, m_udpSize);
+            memset((void *) &m_superBlock, 0, sizeof(m_superBlock));
 
             m_superBlock.header.frameIndex = m_frameCount;
             m_superBlock.header.blockIndex = m_txBlockIndex;

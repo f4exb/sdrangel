@@ -68,20 +68,12 @@ bool PerseusInput::start()
 {
     if (m_running) stop();
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo)) == 0)
-    {
-        qCritical("PerseusInput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("PerseusInput::start: thread created");
-    }
+    m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo);
+    qDebug("PerseusInput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_perseusThread->setLog2Decimation(m_settings.m_log2Decim);
     m_perseusThread->startWork();

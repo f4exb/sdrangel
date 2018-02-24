@@ -448,7 +448,7 @@ void ATVMod::pullVideo(Real& sample)
                     resizeCamera();
                 }
 
-                if (camera.m_videoFPSCount < camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS)
+                if (camera.m_videoFPSCount < (camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS))
                 {
                     camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
                     camera.m_videoFPSCount += (camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq);
@@ -456,7 +456,7 @@ void ATVMod::pullVideo(Real& sample)
                 else
                 {
                     camera.m_videoPrevFPSCount = 0;
-                    camera.m_videoFPSCount = camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq;
+                    camera.m_videoFPSCount = (camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq);
                 }
             }
         }

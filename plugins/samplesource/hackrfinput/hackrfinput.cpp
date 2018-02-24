@@ -132,12 +132,7 @@ bool HackRFInput::start()
 
     if (m_running) stop();
 
-	if ((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
-	{
-	    qCritical("HackRFInput::start: out of memory");
-		stop();
-		return false;
-	}
+    m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo);
 
 //	mutexLocker.unlock();
 

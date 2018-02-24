@@ -18,6 +18,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 #include "sdrdaemonsourcebuffer.h"
@@ -62,6 +63,9 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer(uint32_t throttlems) :
     } else {
         m_cm256_OK = true;
     }
+
+    std::fill(m_decoderSlots, m_decoderSlots + nbDecoderSlots, DecoderSlot());
+    std::fill(m_frames, m_frames + nbDecoderSlots, BufferFrame());
 }
 
 SDRdaemonSourceBuffer::~SDRdaemonSourceBuffer()

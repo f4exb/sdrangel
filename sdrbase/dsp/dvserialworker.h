@@ -131,7 +131,7 @@ private:
     void upsample6(short *in, int nbSamplesIn, unsigned char channels);
 
     SerialDV::DVController m_dvController;
-    bool m_running;
+    volatile bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
     short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];

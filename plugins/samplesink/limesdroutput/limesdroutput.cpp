@@ -111,9 +111,6 @@ bool LimeSDROutput::openDevice()
 
         // check if the requested channel is busy and abort if so (should not happen if device management is working correctly)
 
-        char *busyChannels = new char[deviceParams->m_nbTxChannels];
-        memset(busyChannels, 0, deviceParams->m_nbTxChannels);
-
         for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
         {
             DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
@@ -122,13 +119,11 @@ bool LimeSDROutput::openDevice()
             if (buddyShared->m_channel == requestedChannel)
             {
                 qCritical("LimeSDROutput::openDevice: cannot open busy channel %u", requestedChannel);
-                delete[] busyChannels;
                 return false;
             }
         }
 
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
-        delete[] busyChannels;
     }
     // look for Rx buddies and get reference to common parameters
     // take the first Rx channel
@@ -370,20 +365,12 @@ bool LimeSDROutput::start()
         return false;
     }
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo)) == 0)
-    {
-        qCritical("LimeSDROutput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("LimeSDROutput::start: thread created");
-    }
+    m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo);
+    qDebug("LimeSDROutput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_limeSDROutputThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
 

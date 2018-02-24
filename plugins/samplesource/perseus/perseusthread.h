@@ -42,7 +42,7 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	perseus_descr* m_dev;
 	qint32 m_buf[2*PERSEUS_NBSAMPLES];

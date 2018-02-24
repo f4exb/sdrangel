@@ -150,7 +150,7 @@ void DVSerialEngine::getComList()
     const char* sysdir = "/sys/class/tty/";
 
     // Scan through /sys/class/tty - it contains all tty-devices in the system
-    n = scandir(sysdir, &namelist, NULL, NULL);
+    n = scandir(sysdir, &namelist, NULL, alphasort);
     if (n < 0)
         perror("scandir");
     else

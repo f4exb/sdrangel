@@ -31,6 +31,7 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_masterTimer(deviceAPI->getMasterTimer()),
     m_masterTimerConnected(false),
     m_running(false),
+    m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_sdrDaemonBuffer(m_rateDivider),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
@@ -54,7 +55,6 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_converterBuffer(0),
     m_converterBufferNbSamples(0),
     m_throttleToggle(false),
-    m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_autoCorrBuffer(true)
 {
     m_udpBuf = new char[SDRdaemonSourceBuffer::m_udpPayloadSize];

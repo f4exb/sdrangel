@@ -64,6 +64,9 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     setObjectName("ScopeVisNG");
     m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
     m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+    for (int i = 0; i < (int) nbProjectionTypes; i++) {
+        m_projectorCache[i] = 0.0;
+    }
 }
 
 ScopeVisNG::~ScopeVisNG()

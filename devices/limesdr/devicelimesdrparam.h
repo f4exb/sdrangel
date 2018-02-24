@@ -53,6 +53,29 @@ struct DeviceLimeSDRParams
         m_rxFrequency(1e6),
         m_txFrequency(1e6)
     {
+        m_lpfRangeRx.max = 0.0f;
+        m_lpfRangeRx.min = 0.0f;
+        m_lpfRangeRx.step = 0.0f;
+
+        m_lpfRangeTx.max = 0.0f;
+        m_lpfRangeTx.min = 0.0f;
+        m_lpfRangeTx.step = 0.0f;
+
+        m_loRangeRx.max = 0.0f;
+        m_loRangeRx.min = 0.0f;
+        m_loRangeRx.step = 0.0f;
+
+        m_loRangeTx.max = 0.0f;
+        m_loRangeTx.min = 0.0f;
+        m_loRangeTx.step = 0.0f;
+
+        m_srRangeRx.max = 0.0f;
+        m_srRangeRx.min = 0.0f;
+        m_srRangeRx.step = 0.0f;
+
+        m_srRangeTx.max = 0.0f;
+        m_srRangeTx.min = 0.0f;
+        m_srRangeTx.step = 0.0f;
     }
 
     /**

@@ -145,12 +145,7 @@ bool FileSourceInput::start()
 
 	//openFileStream();
 
-	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
-
+	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo);
 	m_fileSourceThread->setSampleRateAndSize(m_sampleRate, m_sampleSize);
 	m_fileSourceThread->connectTimer(m_masterTimer);
 	m_fileSourceThread->startWork();

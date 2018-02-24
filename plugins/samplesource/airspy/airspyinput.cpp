@@ -161,15 +161,9 @@ bool AirspyInput::start()
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) { stop(); }
 
-	if((m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo)) == 0)
-	{
-	    qCritical("AirspyInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+	m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo);
 	m_airspyThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
 	m_airspyThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_airspyThread->setFcPos((int) m_settings.m_fcPos);

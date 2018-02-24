@@ -187,13 +187,7 @@ bool RTLSDRInput::start()
 
     if (m_running) stop();
 
-	if ((m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo)) == NULL)
-	{
-	    qCritical("RTLSDRInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+	m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo);
 	m_rtlSDRThread->setSamplerate(m_settings.m_devSampleRate);
 	m_rtlSDRThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);

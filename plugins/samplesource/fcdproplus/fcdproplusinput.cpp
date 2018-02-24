@@ -115,12 +115,7 @@ bool FCDProPlusInput::start()
 		return false;
 	}
 
-	if ((m_FCDThread = new FCDProPlusThread(&m_sampleFifo)) == NULL)
-	{
-	    qCritical("out of memory");
-		return false;
-	}
-
+	m_FCDThread = new FCDProPlusThread(&m_sampleFifo);
 	m_FCDThread->startWork();
 
 //	mutexLocker.unlock();

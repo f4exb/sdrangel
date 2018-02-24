@@ -1279,10 +1279,12 @@ void GLSpectrum::applyChanges()
 
 		if (sidebands == ChannelMarker::usb) {
 			nw = dv->m_channelMarker->getLowCutoff();     // negative bandwidth
-			pw = (dv->m_channelMarker->getBandwidth() / 2); // positive bandwidth
+			int bw = dv->m_channelMarker->getBandwidth() / 2;
+			pw = (qreal) bw; // positive bandwidth
 		} else if (sidebands == ChannelMarker::lsb) {
 			pw = dv->m_channelMarker->getLowCutoff();
-			nw = (dv->m_channelMarker->getBandwidth() / 2);
+			int bw = dv->m_channelMarker->getBandwidth() / 2;
+			nw = (qreal) bw;
 		} else if (sidebands == ChannelMarker::vusb) {
             nw = -dv->m_channelMarker->getOppositeBandwidth(); // negative bandwidth
             pw = dv->m_channelMarker->getBandwidth(); // positive bandwidth

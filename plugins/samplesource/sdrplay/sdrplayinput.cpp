@@ -168,12 +168,7 @@ bool SDRPlayInput::start()
 		return false;
 	}
 
-    if((m_sdrPlayThread = new SDRPlayThread(m_dev, &m_sampleFifo)) == 0)
-    {
-        qCritical("SDRPlayInput::start: failed to create thread");
-        return false;
-    }
-
+	m_sdrPlayThread = new SDRPlayThread(m_dev, &m_sampleFifo);
     m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
 

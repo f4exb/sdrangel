@@ -146,12 +146,7 @@ bool BladerfInput::start()
 
     if (m_running) stop();
 
-	if((m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo)) == 0) {
-	    qCritical("BladerfInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+	m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo);
 	m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
 

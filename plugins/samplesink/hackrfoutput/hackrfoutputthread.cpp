@@ -29,6 +29,7 @@ HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sam
 	m_sampleFifo(sampleFifo),
 	m_log2Interp(0)
 {
+    std::fill(m_buf, m_buf + 2*HACKRF_BLOCKSIZE, 0);
 }
 
 HackRFOutputThread::~HackRFOutputThread()

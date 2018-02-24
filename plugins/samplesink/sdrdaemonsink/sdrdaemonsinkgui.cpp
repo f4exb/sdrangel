@@ -601,15 +601,11 @@ void SDRdaemonSinkGui::tick()
                         samplesCorr = 127*8;
                         quickStart = true;
                     }
-                    else if (queueLength < 8)
+                    else if (queueLength < 16)
                     {
                         samplesCorr = ((8 - queueLength)*16)/m_nbSinceLastFlowCheck;
                     }
-                    else if (queueLength > 8)
-                    {
-                        samplesCorr = ((8 - queueLength)*16)/m_nbSinceLastFlowCheck;
-                    }
-                    else if (queueLength > 16)
+                    else
                     {
                         samplesCorr = -127*16;
                         quickStart = true;

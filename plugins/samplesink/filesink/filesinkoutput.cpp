@@ -90,13 +90,7 @@ bool FileSinkOutput::start()
 
 	openFileStream();
 
-	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0)
-	{
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
-
+	m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo);
 	m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileSinkThread->connectTimer(m_masterTimer);

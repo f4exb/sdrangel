@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+        // Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtGlobal>
+#include <algorithm>
 #include "perseusthread.h"
 
 PerseusThread *PerseusThread::m_this = 0;
@@ -28,6 +29,7 @@ PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QOb
     m_log2Decim(0)
 {
     m_this = this;
+    std::fill(m_buf, m_buf + 2*PERSEUS_NBSAMPLES, 0);
 }
 
 PerseusThread::~PerseusThread()

@@ -86,6 +86,7 @@ GLScope::GLScope(QWidget* parent) :
 	m_x2Scale.setOrientation(Qt::Horizontal);
 	m_powerOverlayFont.setBold(true);
 	m_powerOverlayFont.setPointSize(font().pointSize()+1);
+	memset(m_sampleRates, 0, (1<<m_memHistorySizeLog2)*sizeof(int));
 }
 
 GLScope::~GLScope()

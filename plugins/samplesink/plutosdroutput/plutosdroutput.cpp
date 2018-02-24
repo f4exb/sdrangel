@@ -42,6 +42,13 @@ PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     m_plutoTxBuffer(0),
     m_plutoSDROutputThread(0)
 {
+    m_deviceSampleRates.m_addaConnvRate = 0;
+    m_deviceSampleRates.m_bbRateHz = 0;
+    m_deviceSampleRates.m_firRate = 0;
+    m_deviceSampleRates.m_hb1Rate = 0;
+    m_deviceSampleRates.m_hb2Rate = 0;
+    m_deviceSampleRates.m_hb3Rate = 0;
+
     suspendBuddies();
     openDevice();
     resumeBuddies();
@@ -72,20 +79,12 @@ bool PlutoSDROutput::start()
 
     if (m_running) stop();
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo)) == 0)
-    {
-        qCritical("PlutoSDROutput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("PlutoSDROutput::start: thread created");
-    }
+    m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo);
+    qDebug("PlutoSDROutput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_plutoSDROutputThread->setLog2Interpolation(m_settings.m_log2Interp);
     m_plutoSDROutputThread->startWork();
@@ -257,11 +256,9 @@ bool PlutoSDROutput::openDevice()
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
     // acquire the channel
-    suspendBuddies();
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openTx();
     m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false); // PlutoSDR buffer size is counted in number of (I,Q) samples
-    resumeBuddies();
 
     return true;
 }

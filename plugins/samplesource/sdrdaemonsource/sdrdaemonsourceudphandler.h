@@ -55,6 +55,7 @@ private:
 	const QTimer& m_masterTimer;
 	bool m_masterTimerConnected;
 	bool m_running;
+    uint32_t m_rateDivider;
 	SDRdaemonSourceBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
@@ -80,7 +81,6 @@ private:
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;
     bool m_throttleToggle;
-    uint32_t m_rateDivider;
     bool m_autoCorrBuffer;
 
 	void connectTimer();

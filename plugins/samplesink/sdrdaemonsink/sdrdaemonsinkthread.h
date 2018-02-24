@@ -63,7 +63,7 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;

@@ -266,7 +266,6 @@ bool AudioFifo::create(uint32_t numSamples)
 		m_fifo = 0;
 	}
 
-	m_size = 0;
 	m_fill = 0;
 	m_head = 0;
 	m_tail = 0;

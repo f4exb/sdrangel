@@ -74,13 +74,7 @@ bool TestSourceInput::start()
 
     if (m_running) stop();
 
-	if ((m_testSourceThread = new TestSourceThread(&m_sampleFifo)) == 0)
-	{
-	    qCritical("TestSourceInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+    m_testSourceThread = new TestSourceThread(&m_sampleFifo);
 	m_testSourceThread->setSamplerate(m_settings.m_sampleRate);
 	m_testSourceThread->connectTimer(m_masterTimer);
 	m_testSourceThread->startWork();

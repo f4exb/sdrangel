@@ -55,8 +55,8 @@ class MovingAverageUtil
         }
     }
 
-    double asDouble() const { return m_total / N; }
-    float asFloat() const { return m_total / N; }
+    double asDouble() const { return ((double)m_total) / N; }
+    float asFloat() const { return ((float)m_total) / N; }
     operator T() const { return  m_total / N; }
 
   private:

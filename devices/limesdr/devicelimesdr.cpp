@@ -180,10 +180,10 @@ bool DeviceLimeSDR::SetRBBPGA_dB(lms_device_t *device, std::size_t chan, float v
     int rcc_ctl_pga_rbb = (430.0*pow(0.65, (g_pga_rbb/10.0))-110.35)/20.4516 + 16;
 
     int c_ctl_pga_rbb = 0;
-    if (0 <= g_pga_rbb && g_pga_rbb < 8) c_ctl_pga_rbb = 3;
-    if (8 <= g_pga_rbb && g_pga_rbb < 13) c_ctl_pga_rbb = 2;
-    if (13 <= g_pga_rbb && g_pga_rbb < 21) c_ctl_pga_rbb = 1;
-    if (21 <= g_pga_rbb) c_ctl_pga_rbb = 0;
+    if (g_pga_rbb < 8) { c_ctl_pga_rbb = 3; }
+    if (8 <= g_pga_rbb && g_pga_rbb < 13) { c_ctl_pga_rbb = 2; }
+    if (13 <= g_pga_rbb && g_pga_rbb < 21) { c_ctl_pga_rbb = 1; }
+    if (21 <= g_pga_rbb) { c_ctl_pga_rbb = 0; }
 
     if (LMS_WriteParam(device, LMS7param(RCC_CTL_PGA_RBB), rcc_ctl_pga_rbb) < 0)
     {

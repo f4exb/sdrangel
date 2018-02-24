@@ -64,12 +64,7 @@ bool SDRdaemonSinkOutput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "SDRdaemonSinkOutput::start";
 
-	if((m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo)) == 0)
-	{
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
+	m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo);
 	m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
 	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);

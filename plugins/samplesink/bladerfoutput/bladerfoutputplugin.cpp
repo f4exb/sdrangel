@@ -58,23 +58,23 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 
 	int count = bladerf_get_device_list(&devinfo);
 
-	for(int i = 0; i < count; i++)
-	{
-		QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
-
-		result.append(SamplingDevice(displayedName,
-		        m_hardwareID,
-				m_deviceTypeID,
-				QString(devinfo[i].serial),
-				i,
-				PluginInterface::SamplingDevice::PhysicalDevice,
-				false,
-				1,
-				0));
-	}
-
 	if (devinfo)
 	{
+        for(int i = 0; i < count; i++)
+        {
+            QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+
+            result.append(SamplingDevice(displayedName,
+                    m_hardwareID,
+                    m_deviceTypeID,
+                    QString(devinfo[i].serial),
+                    i,
+                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    false,
+                    1,
+                    0));
+        }
+
 		bladerf_free_device_list(devinfo); // Valgrind memcheck
 	}
 

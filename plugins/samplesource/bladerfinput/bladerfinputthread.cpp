@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <algorithm>
 #include "dsp/samplesinkfifo.h"
 
 
@@ -31,6 +32,7 @@ BladerfInputThread::BladerfInputThread(struct bladerf* dev, SampleSinkFifo* samp
 	m_log2Decim(0),
 	m_fcPos(0)
 {
+    std::fill(m_buf, m_buf + 2*BLADERF_BLOCKSIZE, 0);
 }
 
 BladerfInputThread::~BladerfInputThread()
