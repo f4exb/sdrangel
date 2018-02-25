@@ -160,12 +160,13 @@ class DATVideoRenderThread: public QThread
 
             if(m_objRenderer->OpenStream(m_objStream))
             {
-                printf("PID: %d W: %d H: %d Codec: %s Data: %s %s\r\n",m_objRenderer->MetaData.PID
-                                                                      ,m_objRenderer->MetaData.Width
-                                                                      ,m_objRenderer->MetaData.Height
-                                                                      ,m_objRenderer->MetaData.CodecDescription.toStdString().c_str()
-                                                                      ,m_objRenderer->MetaData.Program.toStdString().c_str()
-                                                                      ,m_objRenderer->MetaData.Stream.toStdString().c_str());
+                qInfo("DATVideoRenderThread::run: PID: %d W: %d H: %d Codec: %s Data: %s Service: %s",
+                       m_objRenderer->MetaData.PID,
+                       m_objRenderer->MetaData.Width,
+                       m_objRenderer->MetaData.Height,
+                       m_objRenderer->MetaData.CodecDescription.toStdString().c_str(),
+                       m_objRenderer->MetaData.Program.toStdString().c_str(),
+                       m_objRenderer->MetaData.Stream.toStdString().c_str());
 
                 m_blnRenderingVideo=true;
             }

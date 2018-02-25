@@ -341,14 +341,14 @@ bool DATVideoRender::RenderStream()
     int intGotFrame;
     bool blnNeedRenderingSetup;
 
-    if(m_blnIsOpen=false)
+    if (!m_blnIsOpen)
     {
-        qDebug() << "DATVideoProcess::RenderStream Stream not open";
+        qDebug() << "DATVideoProcess::RenderStream: Stream not open";
 
         return false;
     }
 
-    if(m_blnRunning==true)
+    if (m_blnRunning)
     {
         return false;
     }
@@ -508,9 +508,9 @@ bool DATVideoRender::CloseStream(QIODevice *objDevice)
         return false;
     }
 
-    if(m_blnIsOpen=false)
+    if (!m_blnIsOpen)
     {
-        qDebug() << "DATVideoProcess::CloseStream Stream not open";
+        qDebug() << "DATVideoProcess::CloseStream: Stream not open";
 
         return false;
     }
