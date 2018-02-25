@@ -29,7 +29,6 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
 
-
 const QString DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
 const QString DATVDemod::m_channelId = "DATVDemod";
 
@@ -37,22 +36,22 @@ MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureDATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureChannelizer, Message)
 
 DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
-    ChannelSinkAPI(m_channelIdURI),
-    m_blnNeedConfigUpdate(false),
-    m_deviceAPI(deviceAPI),
-    m_objRegisteredDATVScreen(NULL),
-    m_objRegisteredVideoRender(NULL),
-    m_objVideoStream(NULL),
-    m_objRenderThread(NULL),
-    m_blnRenderingVideo(false),
-    m_enmModulation(BPSK /*DATV_FM1*/),
-    m_objSettingsMutex(QMutex::NonRecursive)
+        ChannelSinkAPI(m_channelIdURI),
+        m_blnNeedConfigUpdate(false),
+        m_deviceAPI(deviceAPI),
+        m_objRegisteredDATVScreen(0),
+        m_objRegisteredVideoRender(0),
+        m_objVideoStream(0),
+        m_objRenderThread(0),
+        m_blnRenderingVideo(false),
+        m_enmModulation(BPSK /*DATV_FM1*/),
+        m_objSettingsMutex(QMutex::NonRecursive)
 {
     setObjectName("DATVDemod");
     qDebug("DATVDemod::DATVDemod: sizeof FixReal: %lu: SDR_RX_SAMP_SZ: %u", sizeof(FixReal), (unsigned int) SDR_RX_SAMP_SZ);
 
     //*************** DATV PARAMETERS  ***************
-    m_blnInitialized=false;
+    m_blnInitialized = false;
     CleanUpDATVFramework();
 
     m_objVideoStream = new DATVideostream();
@@ -65,30 +64,28 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addChannelAPI(this);
 
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-
 }
 
 DATVDemod::~DATVDemod()
 {
-    m_blnInitialized=false;
+    m_blnInitialized = false;
 
-
-    if(m_objRenderThread!=NULL)
+    if (m_objRenderThread != NULL)
     {
-        if(m_objRenderThread->isRunning())
+        if (m_objRenderThread->isRunning())
         {
-           m_objRenderThread->stopRendering();
+            m_objRenderThread->stopRendering();
         }
     }
 
     //CleanUpDATVFramework(true);
 
-    if(m_objRFFilter!=NULL)
+    if (m_objRFFilter != NULL)
     {
         //delete m_objRFFilter;
     }
 
-    if(m_objVideoStream!=NULL)
+    if (m_objVideoStream != NULL)
     {
         //m_objVideoStream->close();
         //delete m_objVideoStream;
@@ -110,42 +107,41 @@ DATVideostream * DATVDemod::SetVideoRender(DATVideoRender *objScreen)
 {
     m_objRegisteredVideoRender = objScreen;
 
-    m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender,m_objVideoStream);
+    m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender, m_objVideoStream);
 
     return m_objVideoStream;
 }
 
-
 bool DATVDemod::PlayVideo(bool blnStartStop)
 {
 
-    if(m_objVideoStream==NULL)
+    if (m_objVideoStream == NULL)
     {
         return false;
     }
 
-    if(m_objRegisteredVideoRender==NULL)
+    if (m_objRegisteredVideoRender == NULL)
     {
         return false;
     }
 
-    if(m_objRenderThread==NULL)
+    if (m_objRenderThread == NULL)
     {
         return false;
     }
 
-    if(m_objRenderThread->isRunning())
+    if (m_objRenderThread->isRunning())
     {
-       if(blnStartStop==true)
-       {
-           m_objRenderThread->stopRendering();
-       }
+        if (blnStartStop == true)
+        {
+            m_objRenderThread->stopRendering();
+        }
 
-       return true;
+        return true;
     }
 
-    m_objRenderThread->setStreamAndRenderer(m_objRegisteredVideoRender,m_objVideoStream);
-    m_objVideoStream->MultiThreaded=true;
+    m_objRenderThread->setStreamAndRenderer(m_objRegisteredVideoRender, m_objVideoStream);
+    m_objVideoStream->MultiThreaded = true;
     m_objRenderThread->start();
 
     //m_objVideoStream->MultiThreaded=false;
@@ -154,54 +150,69 @@ bool DATVDemod::PlayVideo(bool blnStartStop)
     return true;
 }
 
-void DATVDemod::configure(MessageQueue* objMessageQueue,
-                          int intRFBandwidth,
-                          int intCenterFrequency,
-                          dvb_version enmStandard,
-                          DATVModulation enmModulation,
-                          code_rate enmFEC,
-                          int intSymbolRate,
-                          int intNotchFilters,
-                          bool blnAllowDrift,
-                          bool blnFastLock,
-                          bool blnHDLC,
-                          bool blnHardMetric,
-                          bool blnResample,
-                          bool blnViterbi)
+void DATVDemod::configure(
+        MessageQueue* objMessageQueue,
+        int intRFBandwidth,
+        int intCenterFrequency,
+        dvb_version enmStandard,
+        DATVModulation enmModulation,
+        code_rate enmFEC,
+        int intSymbolRate,
+        int intNotchFilters,
+        bool blnAllowDrift,
+        bool blnFastLock,
+        bool blnHDLC,
+        bool blnHardMetric,
+        bool blnResample,
+        bool blnViterbi)
 {
-    Message* msgCmd = MsgConfigureDATVDemod::create(intRFBandwidth,intCenterFrequency,enmStandard, enmModulation, enmFEC, intSymbolRate, intNotchFilters, blnAllowDrift,blnFastLock,blnHDLC,blnHardMetric,blnResample, blnViterbi);
+    Message* msgCmd = MsgConfigureDATVDemod::create(
+            intRFBandwidth,
+            intCenterFrequency,
+            enmStandard,
+            enmModulation,
+            enmFEC,
+            intSymbolRate,
+            intNotchFilters,
+            blnAllowDrift,
+            blnFastLock,
+            blnHDLC,
+            blnHardMetric,
+            blnResample,
+            blnViterbi);
     objMessageQueue->push(msgCmd);
 }
 
-void DATVDemod::InitDATVParameters(int intMsps,
-                                   int intRFBandwidth,
-                                   int intCenterFrequency,
-                                   dvb_version enmStandard,
-                                   DATVModulation enmModulation,
-                                   code_rate enmFEC,
-                                   int intSampleRate,
-                                   int intSymbolRate,
-                                   int intNotchFilters,
-                                   bool blnAllowDrift,
-                                   bool blnFastLock,
-                                   bool blnHDLC,
-                                   bool blnHardMetric,
-                                   bool blnResample,
-                                   bool blnViterbi)
+void DATVDemod::InitDATVParameters(
+        int intMsps,
+        int intRFBandwidth,
+        int intCenterFrequency,
+        dvb_version enmStandard,
+        DATVModulation enmModulation,
+        code_rate enmFEC,
+        int intSampleRate,
+        int intSymbolRate,
+        int intNotchFilters,
+        bool blnAllowDrift,
+        bool blnFastLock,
+        bool blnHDLC,
+        bool blnHardMetric,
+        bool blnResample,
+        bool blnViterbi)
 {
     Real fltLowCut;
     Real fltHiCut;
 
-    m_blnInitialized=false;
+    m_blnInitialized = false;
 
     m_objSettingsMutex.lock();
 
     //Recalibrage du filtre passe bande
 
-    fltLowCut = -((float)intRFBandwidth / 2.0) / (float)intMsps;
-    fltHiCut  = ((float)intRFBandwidth / 2.0) / (float)intMsps;
+    fltLowCut = -((float) intRFBandwidth / 2.0) / (float) intMsps;
+    fltHiCut = ((float) intRFBandwidth / 2.0) / (float) intMsps;
     m_objRFFilter->create_filter(fltLowCut, fltHiCut);
-    m_objNCO.setFreq(-(float)intCenterFrequency,(float)intMsps);
+    m_objNCO.setFreq(-(float) intCenterFrequency, (float) intMsps);
 
     //Mise à jour de la config
 
@@ -221,25 +232,24 @@ void DATVDemod::InitDATVParameters(int intMsps,
     m_objRunning.blnResample = blnResample;
     m_objRunning.blnViterbi = blnViterbi;
 
-    qDebug()  << "DATVDemod::InitDATVParameters:"
-                <<  " - Msps: " << intMsps
-                <<  " - Sample Rate: " << intSampleRate
-                <<  " - Symbol Rate: " << intSymbolRate
-                <<  " - Modulation: " << enmModulation
-                <<  " - Notch Filters: " << intNotchFilters
-                <<  " - Allow Drift: " << blnAllowDrift
-                <<  " - Fast Lock: " << blnFastLock
-                <<  " - HDLC: " << blnHDLC
-                <<  " - HARD METRIC: " << blnHardMetric
-                <<  " - Resample: " << blnResample
-                <<  " - Viterbi: " << blnViterbi;
-
+    qDebug() << "DATVDemod::InitDATVParameters:"
+            << " - Msps: " << intMsps
+            << " - Sample Rate: " << intSampleRate
+            << " - Symbol Rate: " << intSymbolRate
+            << " - Modulation: " << enmModulation
+            << " - Notch Filters: " << intNotchFilters
+            << " - Allow Drift: " << blnAllowDrift
+            << " - Fast Lock: " << blnFastLock
+            << " - HDLC: " << blnHDLC
+            << " - HARD METRIC: " << blnHardMetric
+            << " - Resample: " << blnResample
+            << " - Viterbi: " << blnViterbi;
 
     m_objSettingsMutex.unlock();
 
-    m_blnNeedConfigUpdate=true;
+    m_blnNeedConfigUpdate = true;
 
-    m_blnInitialized=true;
+    m_blnInitialized = true;
 }
 
 void DATVDemod::CleanUpDATVFramework()
@@ -393,7 +403,6 @@ void DATVDemod::CleanUpDATVFramework()
     p_locktime = 0;
     r_sync_mpeg = 0;
 
-
     // DEINTERLEAVING
     p_rspackets = 0;
     r_deinter = 0;
@@ -403,21 +412,17 @@ void DATVDemod::CleanUpDATVFramework()
     p_rtspackets = 0;
     r_rsdec = 0;
 
-
     //BER ESTIMATION
     p_vber = 0;
-    r_vber  = 0;
-
+    r_vber = 0;
 
     // DERANDOMIZATION
     p_tspackets = 0;
     r_derand = 0;
 
-
     //OUTPUT : To remove
     r_stdout = 0;
     r_videoplayer = 0;
-
 
     //CONSTELLATION
     r_scope_symbols = 0;
@@ -425,8 +430,8 @@ void DATVDemod::CleanUpDATVFramework()
 
 void DATVDemod::InitDATVFramework()
 {
-    m_blnDVBInitialized=false;
-    m_lngReadIQ=0;
+    m_blnDVBInitialized = false;
+    m_lngReadIQ = 0;
 
     m_objCfg.standard = m_objRunning.enmStandard;
 
@@ -435,46 +440,46 @@ void DATVDemod::InitDATVFramework()
     m_objCfg.Fm = (float) m_objRunning.intSymbolRate;
     m_objCfg.fastlock = m_objRunning.blnFastLock;
 
-    switch(m_objRunning.enmModulation)
+    switch (m_objRunning.enmModulation)
     {
-        case BPSK:
-           m_objCfg.constellation = cstln_lut<256>::BPSK;
+    case BPSK:
+        m_objCfg.constellation = cstln_lut<256>::BPSK;
         break;
 
-        case QPSK:
-            m_objCfg.constellation = cstln_lut<256>::QPSK;
+    case QPSK:
+        m_objCfg.constellation = cstln_lut<256>::QPSK;
         break;
 
-        case PSK8:
-            m_objCfg.constellation = cstln_lut<256>::PSK8;
+    case PSK8:
+        m_objCfg.constellation = cstln_lut<256>::PSK8;
         break;
 
-        case APSK16:
-            m_objCfg.constellation = cstln_lut<256>::APSK16;
+    case APSK16:
+        m_objCfg.constellation = cstln_lut<256>::APSK16;
         break;
 
-        case APSK32:
-           m_objCfg.constellation = cstln_lut<256>::APSK32;
+    case APSK32:
+        m_objCfg.constellation = cstln_lut<256>::APSK32;
         break;
 
-        case APSK64E:
-           m_objCfg.constellation = cstln_lut<256>::APSK64E;
+    case APSK64E:
+        m_objCfg.constellation = cstln_lut<256>::APSK64E;
         break;
 
-        case QAM16:
-           m_objCfg.constellation = cstln_lut<256>::QAM16;
+    case QAM16:
+        m_objCfg.constellation = cstln_lut<256>::QAM16;
         break;
 
-        case QAM64:
-           m_objCfg.constellation = cstln_lut<256>::QAM64;
+    case QAM64:
+        m_objCfg.constellation = cstln_lut<256>::QAM64;
         break;
 
-        case QAM256:
-           m_objCfg.constellation = cstln_lut<256>::QAM256;
+    case QAM256:
+        m_objCfg.constellation = cstln_lut<256>::QAM256;
         break;
 
-        default:
-           m_objCfg.constellation = cstln_lut<256>::BPSK;
+    default:
+        m_objCfg.constellation = cstln_lut<256>::BPSK;
         break;
     }
 
@@ -484,7 +489,6 @@ void DATVDemod::InitDATVFramework()
     m_objCfg.hdlc = m_objRunning.blnHDLC;
     m_objCfg.resample = m_objRunning.blnResample;
     m_objCfg.viterbi = m_objRunning.blnViterbi;
-
 
     // Min buffer size for baseband data
     //   scopes: 1024
@@ -515,8 +519,7 @@ void DATVDemod::InitDATVFramework()
     // Min buffer size for misc measurements: 1
     BUF_SLOW = m_objCfg.buf_factor;
 
-    m_lngExpectedReadIQ  = BUF_BASEBAND;
-
+    m_lngExpectedReadIQ = BUF_BASEBAND;
 
     CleanUpDATVFramework();
 
@@ -529,20 +532,19 @@ void DATVDemod::InitDATVFramework()
 
     // NOTCH FILTER
 
-    if ( m_objCfg.anf )
+    if (m_objCfg.anf)
     {
         p_autonotched = new pipebuf<cf32>(m_objScheduler, "autonotched", BUF_BASEBAND);
         r_auto_notch = new auto_notch<f32>(m_objScheduler, *p_preprocessed, *p_autonotched, m_objCfg.anf, 0);
         p_preprocessed = p_autonotched;
     }
 
-
     // FREQUENCY CORRECTION
 
-    if ( m_objCfg.Fderot )
+    if (m_objCfg.Fderot)
     {
         p_derot = new pipebuf<cf32>(m_objScheduler, "derotated", BUF_BASEBAND);
-        r_derot = new rotator<f32>(m_objScheduler, *p_preprocessed, *p_derot, -m_objCfg.Fderot/m_objCfg.Fs);
+        r_derot = new rotator<f32>(m_objScheduler, *p_preprocessed, *p_derot, -m_objCfg.Fderot / m_objCfg.Fs);
         p_preprocessed = p_derot;
     }
 
@@ -550,9 +552,9 @@ void DATVDemod::InitDATVFramework()
 
     p_cnr = new pipebuf<f32>(m_objScheduler, "cnr", BUF_SLOW);
 
-    if ( m_objCfg.cnr )
+    if (m_objCfg.cnr)
     {
-        r_cnr = new cnr_fft<f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
+        r_cnr = new cnr_fft<f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm / m_objCfg.Fs);
         r_cnr->decimation = decimation(m_objCfg.Fs, 1);  // 1 Hz
     }
 
@@ -560,168 +562,164 @@ void DATVDemod::InitDATVFramework()
 
     int decim = 1;
 
-    if ( m_objCfg.resample )
+    if (m_objCfg.resample)
     {
-      // Lowpass-filter and decimate.
-      if ( m_objCfg.decim )
-      {
-        decim = m_objCfg.decim;
-      }
-      else
-      {
-        // Decimate to just above 4 samples per symbol
-        float target_Fs = m_objCfg.Fm * 4;
-        decim = m_objCfg.Fs / target_Fs;
-        if ( decim < 1 )
+        // Lowpass-filter and decimate.
+        if (m_objCfg.decim)
         {
-            decim = 1;
+            decim = m_objCfg.decim;
         }
-      }
+        else
+        {
+            // Decimate to just above 4 samples per symbol
+            float target_Fs = m_objCfg.Fm * 4;
+            decim = m_objCfg.Fs / target_Fs;
+            if (decim < 1)
+            {
+                decim = 1;
+            }
+        }
 
-      float transition = (m_objCfg.Fm/2) * m_objCfg.rolloff;
-      int order = m_objCfg.resample_rej * m_objCfg.Fs / (22*transition);
-      order = ((order+1)/2) * 2;  // Make even
+        float transition = (m_objCfg.Fm / 2) * m_objCfg.rolloff;
+        int order = m_objCfg.resample_rej * m_objCfg.Fs / (22 * transition);
+        order = ((order + 1) / 2) * 2;  // Make even
 
-      p_resampled = new pipebuf<cf32>(m_objScheduler, "resampled", BUF_BASEBAND);
+        p_resampled = new pipebuf<cf32>(m_objScheduler, "resampled", BUF_BASEBAND);
 
+#if 1  // Cut in middle of roll-off region
+        float Fcut = (m_objCfg.Fm / 2) * (1 + m_objCfg.rolloff / 2) / m_objCfg.Fs;
+#else  // Cut at beginning of roll-off region
+        float Fcut = (m_objCfg.Fm/2) / cfg.Fs;
+#endif
 
-  #if 1  // Cut in middle of roll-off region
-      float Fcut = (m_objCfg.Fm/2) * (1+m_objCfg.rolloff/2) / m_objCfg.Fs;
-  #else  // Cut at beginning of roll-off region
-      float Fcut = (m_objCfg.Fm/2) / cfg.Fs;
-  #endif
+        ncoeffs = filtergen::lowpass(order, Fcut, &coeffs);
 
-      ncoeffs = filtergen::lowpass(order, Fcut, &coeffs);
+        filtergen::normalize_dcgain(ncoeffs, coeffs, 1);
 
-      filtergen::normalize_dcgain(ncoeffs, coeffs, 1);
-
-      r_resample = new fir_filter<cf32,float>(m_objScheduler, ncoeffs, coeffs, *p_preprocessed, *p_resampled, decim);
-      p_preprocessed = p_resampled;
-      m_objCfg.Fs /= decim;
+        r_resample = new fir_filter<cf32, float>(m_objScheduler, ncoeffs, coeffs, *p_preprocessed, *p_resampled, decim);
+        p_preprocessed = p_resampled;
+        m_objCfg.Fs /= decim;
     }
 
     // DECIMATION
     // (Unless already done in resampler)
 
-    if ( !m_objCfg.resample && m_objCfg.decim>1 )
+    if (!m_objCfg.resample && m_objCfg.decim > 1)
     {
-      decim = m_objCfg.decim;
+        decim = m_objCfg.decim;
 
-      p_decimated = new pipebuf<cf32>(m_objScheduler, "decimated", BUF_BASEBAND);
-      p_decim = new decimator<cf32>(m_objScheduler, decim, *p_preprocessed, *p_decimated);
-      p_preprocessed = p_decimated;
-      m_objCfg.Fs /= decim;
+        p_decimated = new pipebuf<cf32>(m_objScheduler, "decimated", BUF_BASEBAND);
+        p_decim = new decimator<cf32>(m_objScheduler, decim, *p_preprocessed, *p_decimated);
+        p_preprocessed = p_decimated;
+        m_objCfg.Fs /= decim;
     }
 
     //Resampling FS
 
-
     // Generic constellation receiver
 
     p_symbols = new pipebuf<softsymbol>(m_objScheduler, "PSK soft-symbols", BUF_SYMBOLS);
-    p_freq = new pipebuf<f32> (m_objScheduler, "freq", BUF_SLOW);
-    p_ss = new pipebuf<f32> (m_objScheduler, "SS", BUF_SLOW);
-    p_mer = new pipebuf<f32> (m_objScheduler, "MER", BUF_SLOW);
-    p_sampled = new pipebuf<cf32> (m_objScheduler, "PSK symbols", BUF_BASEBAND);
+    p_freq = new pipebuf<f32>(m_objScheduler, "freq", BUF_SLOW);
+    p_ss = new pipebuf<f32>(m_objScheduler, "SS", BUF_SLOW);
+    p_mer = new pipebuf<f32>(m_objScheduler, "MER", BUF_SLOW);
+    p_sampled = new pipebuf<cf32>(m_objScheduler, "PSK symbols", BUF_BASEBAND);
 
-    switch ( m_objCfg.sampler )
+    switch (m_objCfg.sampler)
     {
-        case SAMP_NEAREST:
-          sampler = new nearest_sampler<float>();
-          break;
+    case SAMP_NEAREST:
+        sampler = new nearest_sampler<float>();
+        break;
 
-        case SAMP_LINEAR:
-          sampler = new linear_sampler<float>();
-          break;
+    case SAMP_LINEAR:
+        sampler = new linear_sampler<float>();
+        break;
 
-        case SAMP_RRC:
+    case SAMP_RRC:
+    {
+
+        if (m_objCfg.rrc_steps == 0)
         {
-
-
-          if ( m_objCfg.rrc_steps == 0 )
-          {
             // At least 64 discrete sampling points between symbols
-            m_objCfg.rrc_steps = max(1, (int)(64*m_objCfg.Fm / m_objCfg.Fs));
-          }
-
-          float Frrc = m_objCfg.Fs * m_objCfg.rrc_steps;  // Sample freq of the RRC filter
-          float transition = (m_objCfg.Fm/2) * m_objCfg.rolloff;
-          int order = m_objCfg.rrc_rej * Frrc / (22*transition);
-          ncoeffs_sampler = filtergen::root_raised_cosine(order, m_objCfg.Fm/Frrc, m_objCfg.rolloff, &coeffs_sampler);
-
-          sampler = new fir_sampler<float,float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
-          break;
+            m_objCfg.rrc_steps = max(1, (int) (64 * m_objCfg.Fm / m_objCfg.Fs));
         }
 
-        default:
-          fatal("Interpolator not implemented");
+        float Frrc = m_objCfg.Fs * m_objCfg.rrc_steps; // Sample freq of the RRC filter
+        float transition = (m_objCfg.Fm / 2) * m_objCfg.rolloff;
+        int order = m_objCfg.rrc_rej * Frrc / (22 * transition);
+        ncoeffs_sampler = filtergen::root_raised_cosine(order, m_objCfg.Fm / Frrc, m_objCfg.rolloff, &coeffs_sampler);
+
+        sampler = new fir_sampler<float, float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
+        break;
+    }
+
+    default:
+        fatal("Interpolator not implemented");
     }
 
     m_objDemodulator = new cstln_receiver<f32>(m_objScheduler, sampler, *p_preprocessed, *p_symbols, p_freq, p_ss, p_mer, p_sampled);
 
-    if ( m_objCfg.standard == DVB_S )
+    if (m_objCfg.standard == DVB_S)
     {
-      if ( m_objCfg.constellation != cstln_lut<256>::QPSK && m_objCfg.constellation != cstln_lut<256>::BPSK )
-      {
-        fprintf(stderr, "Warning: non-standard constellation for DVB-S\n");
-      }
+        if (m_objCfg.constellation != cstln_lut<256>::QPSK && m_objCfg.constellation != cstln_lut<256>::BPSK)
+        {
+            qWarning("DATVDemod::InitDATVFramework: non-standard constellation for DVB-S");
+        }
     }
 
-    if ( m_objCfg.standard == DVB_S2 )
+    if (m_objCfg.standard == DVB_S2)
     {
-      // For DVB-S2 testing only.
-      // Constellation should be determined from PL signalling.
-      fprintf(stderr, "DVB-S2: Testing symbol sampler only.\n");
+        // For DVB-S2 testing only.
+        // Constellation should be determined from PL signalling.
+        qWarning("DATVDemod::InitDATVFramework: DVB-S2: Testing symbol sampler only.");
     }
 
     m_objDemodulator->cstln = make_dvbs2_constellation(m_objCfg.constellation, m_objCfg.fec);
 
-    if ( m_objCfg.hard_metric )
+    if (m_objCfg.hard_metric)
     {
-      m_objDemodulator->cstln->harden();
+        m_objDemodulator->cstln->harden();
     }
 
-    m_objDemodulator->set_omega(m_objCfg.Fs/m_objCfg.Fm);
+    m_objDemodulator->set_omega(m_objCfg.Fs / m_objCfg.Fm);
 
-    if ( m_objCfg.Ftune )
+    if (m_objCfg.Ftune)
     {
 
-      m_objDemodulator->set_freq(m_objCfg.Ftune/m_objCfg.Fs);
+        m_objDemodulator->set_freq(m_objCfg.Ftune / m_objCfg.Fs);
     }
 
-    if ( m_objCfg.allow_drift )
+    if (m_objCfg.allow_drift)
     {
-      m_objDemodulator->set_allow_drift(true);
+        m_objDemodulator->set_allow_drift(true);
     }
 
-    if ( m_objCfg.viterbi )
+    if (m_objCfg.viterbi)
     {
-      m_objDemodulator->pll_adjustment /= 6;
+        m_objDemodulator->pll_adjustment /= 6;
     }
 
     m_objDemodulator->meas_decimation = decimation(m_objCfg.Fs, m_objCfg.Finfo);
 
     // TRACKING FILTERS
 
-    if ( r_resample )
+    if (r_resample)
     {
-      r_resample->freq_tap = &m_objDemodulator->freq_tap;
-      r_resample->tap_multiplier = 1.0 / decim;
-      r_resample->freq_tol = m_objCfg.Fm/(m_objCfg.Fs*decim) * 0.1;
+        r_resample->freq_tap = &m_objDemodulator->freq_tap;
+        r_resample->tap_multiplier = 1.0 / decim;
+        r_resample->freq_tol = m_objCfg.Fm / (m_objCfg.Fs * decim) * 0.1;
     }
 
-
-    if ( r_cnr )
+    if (r_cnr)
     {
-      r_cnr->freq_tap = &m_objDemodulator->freq_tap;
-      r_cnr->tap_multiplier = 1.0 / decim;
+        r_cnr->freq_tap = &m_objDemodulator->freq_tap;
+        r_cnr->tap_multiplier = 1.0 / decim;
     }
 
     //constellation
 
-    m_objRegisteredDATVScreen->resizeDATVScreen(256,256);
+    m_objRegisteredDATVScreen->resizeDATVScreen(256, 256);
 
-    r_scope_symbols = new datvconstellation<f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
+    r_scope_symbols = new datvconstellation<f32>(m_objScheduler, *p_sampled, -128, 128, NULL, m_objRegisteredDATVScreen);
     r_scope_symbols->decimation = 1;
     r_scope_symbols->cstln = &m_objDemodulator->cstln;
 
@@ -731,94 +729,88 @@ void DATVDemod::InitDATVFramework()
 
     r_deconv = NULL;
 
-    if ( m_objCfg.viterbi )
+    if (m_objCfg.viterbi)
     {
-      if ( m_objCfg.fec==FEC23 && (m_objDemodulator->cstln->nsymbols==4 || m_objDemodulator->cstln->nsymbols==64) )
-      {
-        m_objCfg.fec = FEC46;
-      }
+        if (m_objCfg.fec == FEC23 && (m_objDemodulator->cstln->nsymbols == 4 || m_objDemodulator->cstln->nsymbols == 64))
+        {
+            m_objCfg.fec = FEC46;
+        }
 
-      //To uncomment -> Linking Problem : undefined symbol: _ZN7leansdr21viterbi_dec_interfaceIhhiiE6updateEPiS2_
-      r = new viterbi_sync(m_objScheduler, (*p_symbols), (*p_bytes), m_objDemodulator->cstln, m_objCfg.fec);
+        //To uncomment -> Linking Problem : undefined symbol: _ZN7leansdr21viterbi_dec_interfaceIhhiiE6updateEPiS2_
+        r = new viterbi_sync(m_objScheduler, (*p_symbols), (*p_bytes), m_objDemodulator->cstln, m_objCfg.fec);
 
-      if ( m_objCfg.fastlock )
-      {
-          r->resync_period = 1;
-      }
+        if (m_objCfg.fastlock)
+        {
+            r->resync_period = 1;
+        }
     }
     else
     {
-      r_deconv = make_deconvol_sync_simple(m_objScheduler, (*p_symbols), (*p_bytes), m_objCfg.fec);
-      r_deconv->fastlock = m_objCfg.fastlock;
+        r_deconv = make_deconvol_sync_simple(m_objScheduler, (*p_symbols), (*p_bytes), m_objCfg.fec);
+        r_deconv->fastlock = m_objCfg.fastlock;
     }
 
-
-    if ( m_objCfg.hdlc )
+    if (m_objCfg.hdlc)
     {
-      p_descrambled = new pipebuf<u8>(m_objScheduler, "descrambled", BUF_MPEGBYTES);
-      r_etr192_descrambler = new etr192_descrambler(m_objScheduler, (*p_bytes), *p_descrambled);
-      p_frames =  new pipebuf<u8>(m_objScheduler, "frames", BUF_MPEGBYTES);
-      r_sync = new hdlc_sync(m_objScheduler, *p_descrambled, *p_frames, 2, 278);
+        p_descrambled = new pipebuf<u8>(m_objScheduler, "descrambled", BUF_MPEGBYTES);
+        r_etr192_descrambler = new etr192_descrambler(m_objScheduler, (*p_bytes), *p_descrambled);
+        p_frames = new pipebuf<u8>(m_objScheduler, "frames", BUF_MPEGBYTES);
+        r_sync = new hdlc_sync(m_objScheduler, *p_descrambled, *p_frames, 2, 278);
 
-      if ( m_objCfg.fastlock )
-      {
-          r_sync->resync_period = 1;
-      }
+        if (m_objCfg.fastlock)
+        {
+            r_sync->resync_period = 1;
+        }
 
-      if ( m_objCfg.packetized )
-      {
-          r_sync->header16 = true;
-      }
+        if (m_objCfg.packetized)
+        {
+            r_sync->header16 = true;
+        }
 
     }
 
-    p_mpegbytes = new pipebuf<u8> (m_objScheduler, "mpegbytes", BUF_MPEGBYTES);
-    p_lock = new pipebuf<int> (m_objScheduler, "lock", BUF_SLOW);
-    p_locktime = new pipebuf<u32> (m_objScheduler, "locktime", BUF_PACKETS);
+    p_mpegbytes = new pipebuf<u8>(m_objScheduler, "mpegbytes", BUF_MPEGBYTES);
+    p_lock = new pipebuf<int>(m_objScheduler, "lock", BUF_SLOW);
+    p_locktime = new pipebuf<u32>(m_objScheduler, "locktime", BUF_PACKETS);
 
-    if ( ! m_objCfg.hdlc )
+    if (!m_objCfg.hdlc)
     {
-      r_sync_mpeg = new mpeg_sync<u8,0>(m_objScheduler, *p_bytes, *p_mpegbytes, r_deconv, p_lock, p_locktime);
-      r_sync_mpeg->fastlock = m_objCfg.fastlock;
+        r_sync_mpeg = new mpeg_sync<u8, 0>(m_objScheduler, *p_bytes, *p_mpegbytes, r_deconv, p_lock, p_locktime);
+        r_sync_mpeg->fastlock = m_objCfg.fastlock;
     }
 
     // DEINTERLEAVING
 
-    p_rspackets = new pipebuf< rspacket<u8> >(m_objScheduler, "RS-enc packets", BUF_PACKETS);
+    p_rspackets = new pipebuf<rspacket<u8> >(m_objScheduler, "RS-enc packets", BUF_PACKETS);
     r_deinter = new deinterleaver<u8>(m_objScheduler, *p_mpegbytes, *p_rspackets);
-
 
     // REED-SOLOMON
 
     p_vbitcount = new pipebuf<int>(m_objScheduler, "Bits processed", BUF_PACKETS);
     p_verrcount = new pipebuf<int>(m_objScheduler, "Bits corrected", BUF_PACKETS);
     p_rtspackets = new pipebuf<tspacket>(m_objScheduler, "rand TS packets", BUF_PACKETS);
-    r_rsdec = new rs_decoder<u8,0> (m_objScheduler, *p_rspackets, *p_rtspackets, p_vbitcount, p_verrcount);
-
+    r_rsdec = new rs_decoder<u8, 0>(m_objScheduler, *p_rspackets, *p_rtspackets, p_vbitcount, p_verrcount);
 
     // BER ESTIMATION
 
-
-    p_vber = new pipebuf<float> (m_objScheduler, "VBER", BUF_SLOW);
-    r_vber = new rate_estimator<float> (m_objScheduler, *p_verrcount, *p_vbitcount, *p_vber);
-    r_vber->sample_size = m_objCfg.Fm/2;  // About twice per second, depending on CR
+    p_vber = new pipebuf<float>(m_objScheduler, "VBER", BUF_SLOW);
+    r_vber = new rate_estimator<float>(m_objScheduler, *p_verrcount, *p_vbitcount, *p_vber);
+    r_vber->sample_size = m_objCfg.Fm / 2; // About twice per second, depending on CR
     // Require resolution better than 2E-5
-    if ( r_vber->sample_size < 50000 )
+    if (r_vber->sample_size < 50000)
     {
         r_vber->sample_size = 50000;
     }
-
 
     // DERANDOMIZATION
 
     p_tspackets = new pipebuf<tspacket>(m_objScheduler, "TS packets", BUF_PACKETS);
     r_derand = new derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
 
-
     // OUTPUT
-    r_videoplayer = new datvvideoplayer<tspacket>(m_objScheduler, *p_tspackets,m_objVideoStream);
+    r_videoplayer = new datvvideoplayer<tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream);
 
-    m_blnDVBInitialized=true;
+    m_blnDVBInitialized = true;
 }
 
 void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -829,7 +821,6 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
     //Complex objC;
     fftfilt::cmplx *objRF;
     int intRFOut;
-
 
 #ifdef EXTENDED_DIRECT_SAMPLE
 
@@ -860,28 +851,27 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
         fltQ = it->imag();
 #endif
 
-
         //********** demodulation **********
 
-        if((m_blnDVBInitialized==false) || (m_blnNeedConfigUpdate==true))
+        if ((m_blnDVBInitialized == false) || (m_blnNeedConfigUpdate == true))
         {
-            m_blnNeedConfigUpdate=false;
+            m_blnNeedConfigUpdate = false;
             InitDATVFramework();
         }
 
         //********** iq stream ****************
 
-        if(m_lngReadIQ>p_rawiq_writer->writable())
+        if (m_lngReadIQ > p_rawiq_writer->writable())
         {
             m_objScheduler->step();
 
             m_objRegisteredDATVScreen->renderImage(NULL);
 
-            m_lngReadIQ=0;
+            m_lngReadIQ = 0;
             p_rawiq_writer = new pipewriter<cf32>(*p_rawiq);
         }
 
-        if(false)
+        if (false)
         {
             objIQ.re = fltI;
             objIQ.im = fltQ;
@@ -893,24 +883,23 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
         else
         {
 
-            Complex objC(fltI,fltQ);
+            Complex objC(fltI, fltQ);
 
             objC *= m_objNCO.nextIQ();
 
             intRFOut = m_objRFFilter->runFilt(objC, &objRF); // filter RF before demod
 
-            for (int intI = 0 ; intI < intRFOut; intI++)
+            for (int intI = 0; intI < intRFOut; intI++)
             {
                 objIQ.re = objRF->real();
                 objIQ.im = objRF->imag();
 
                 p_rawiq_writer->write(objIQ);
 
-                objRF ++;
+                objRF++;
                 m_lngReadIQ++;
             }
         }
-
 
         //********** demodulation **********
 
@@ -939,61 +928,52 @@ void DATVDemod::stop()
 
 bool DATVDemod::handleMessage(const Message& cmd)
 {
-    qDebug() << "DATVDemod::handleMessage";
-
     if (DownChannelizer::MsgChannelizerNotification::match(cmd))
-	{
+    {
         DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-        if(m_objRunning.intMsps!=objNotif.getSampleRate())
+        qDebug() << "DATVDemod::handleMessage: MsgChannelizerNotification:" << " intMsps: " << objNotif.getSampleRate();
+
+        if (m_objRunning.intMsps != objNotif.getSampleRate())
         {
             m_objRunning.intMsps = objNotif.getSampleRate();
             m_objRunning.intSampleRate = m_objRunning.intMsps;
 
-            printf("Sample Rate: %d\r\n",m_objRunning.intSampleRate );
+            qDebug("DATVDemod::handleMessage: Sample Rate: %d", m_objRunning.intSampleRate);
             ApplySettings();
         }
 
-        qDebug() << "DATVDemod::handleMessage: MsgChannelizerNotification:"
-                << " intMsps: " << m_objRunning.intMsps;
-
         return true;
-	}
+    }
     else if (MsgConfigureChannelizer::match(cmd))
     {
 
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
 
-        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-                m_channelizer->getInputSampleRate(),
-                cfg.getCenterFrequency());
-                //m_objRunning.intCenterFrequency);
-
-        qDebug() << "DATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
+        qDebug() << "DATVDemod::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << m_channelizer->getInputSampleRate()
                 << " centerFrequency: " << cfg.getCenterFrequency();
-                //<< " centerFrequency: " << m_objRunning.intCenterFrequency;
+
+        m_channelizer->configure(m_channelizer->getInputMessageQueue(), m_channelizer->getInputSampleRate(), cfg.getCenterFrequency());
+        //m_objRunning.intCenterFrequency);
+        //<< " centerFrequency: " << m_objRunning.intCenterFrequency;
 
         return true;
     }
     else if (MsgConfigureDATVDemod::match(cmd))
-	{
+    {
+        qDebug() << "DATVDemod::handleMessage: MsgConfigureDATVDemod";
+
         MsgConfigureDATVDemod& objCfg = (MsgConfigureDATVDemod&) cmd;
 
-
-        if((objCfg.m_objMsgConfig.blnAllowDrift != m_objRunning.blnAllowDrift)
-           || (objCfg.m_objMsgConfig.intRFBandwidth != m_objRunning.intRFBandwidth)
-           || (objCfg.m_objMsgConfig.intCenterFrequency != m_objRunning.intCenterFrequency)
-           || (objCfg.m_objMsgConfig.blnFastLock != m_objRunning.blnFastLock)
-           || (objCfg.m_objMsgConfig.blnHardMetric != m_objRunning.blnHardMetric)
-           || (objCfg.m_objMsgConfig.blnHDLC != m_objRunning.blnHDLC)
-           || (objCfg.m_objMsgConfig.blnResample != m_objRunning.blnResample)
-           || (objCfg.m_objMsgConfig.blnViterbi != m_objRunning.blnViterbi)
-           || (objCfg.m_objMsgConfig.enmFEC != m_objRunning.enmFEC)
-           || (objCfg.m_objMsgConfig.enmModulation != m_objRunning.enmModulation)
-           || (objCfg.m_objMsgConfig.enmStandard != m_objRunning.enmStandard)
-           || (objCfg.m_objMsgConfig.intNotchFilters != m_objRunning.intNotchFilters)
-           || (objCfg.m_objMsgConfig.intSymbolRate != m_objRunning.intSymbolRate))
-         {
+        if ((objCfg.m_objMsgConfig.blnAllowDrift != m_objRunning.blnAllowDrift) || (objCfg.m_objMsgConfig.intRFBandwidth != m_objRunning.intRFBandwidth)
+                || (objCfg.m_objMsgConfig.intCenterFrequency != m_objRunning.intCenterFrequency) || (objCfg.m_objMsgConfig.blnFastLock != m_objRunning.blnFastLock)
+                || (objCfg.m_objMsgConfig.blnHardMetric != m_objRunning.blnHardMetric) || (objCfg.m_objMsgConfig.blnHDLC != m_objRunning.blnHDLC)
+                || (objCfg.m_objMsgConfig.blnResample != m_objRunning.blnResample) || (objCfg.m_objMsgConfig.blnViterbi != m_objRunning.blnViterbi)
+                || (objCfg.m_objMsgConfig.enmFEC != m_objRunning.enmFEC) || (objCfg.m_objMsgConfig.enmModulation != m_objRunning.enmModulation)
+                || (objCfg.m_objMsgConfig.enmStandard != m_objRunning.enmStandard) || (objCfg.m_objMsgConfig.intNotchFilters != m_objRunning.intNotchFilters)
+                || (objCfg.m_objMsgConfig.intSymbolRate != m_objRunning.intSymbolRate))
+        {
             m_objRunning.blnAllowDrift = objCfg.m_objMsgConfig.blnAllowDrift;
             m_objRunning.blnFastLock = objCfg.m_objMsgConfig.blnFastLock;
             m_objRunning.blnHardMetric = objCfg.m_objMsgConfig.blnHardMetric;
@@ -1009,42 +989,47 @@ bool DATVDemod::handleMessage(const Message& cmd)
             m_objRunning.intCenterFrequency = objCfg.m_objMsgConfig.intCenterFrequency;
 
             ApplySettings();
-         }
+        }
 
-
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+        return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
+        qDebug() << "DATVDemod::handleMessage: DSPSignalNotification";
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void DATVDemod::ApplySettings()
 {
 
-    if(m_objRunning.intMsps==0)
+    if (m_objRunning.intMsps == 0)
     {
         return;
     }
 
     //m_objSettingsMutex.lock();
 
-    InitDATVParameters(m_objRunning.intMsps,
-                       m_objRunning.intRFBandwidth,
-                       m_objRunning.intCenterFrequency,
-                       m_objRunning.enmStandard,
-                       m_objRunning.enmModulation,
-                       m_objRunning.enmFEC,
-                       m_objRunning.intSampleRate,
-                       m_objRunning.intSymbolRate,
-                       m_objRunning.intNotchFilters,
-                       m_objRunning.blnAllowDrift,
-                       m_objRunning.blnFastLock,
-                       m_objRunning.blnHDLC,
-                       m_objRunning.blnHardMetric,
-                       m_objRunning.blnResample,
-                       m_objRunning.blnViterbi);
+    InitDATVParameters(
+            m_objRunning.intMsps,
+            m_objRunning.intRFBandwidth,
+            m_objRunning.intCenterFrequency,
+            m_objRunning.enmStandard,
+            m_objRunning.enmModulation,
+            m_objRunning.enmFEC,
+            m_objRunning.intSampleRate,
+            m_objRunning.intSymbolRate,
+            m_objRunning.intNotchFilters,
+            m_objRunning.blnAllowDrift,
+            m_objRunning.blnFastLock,
+            m_objRunning.blnHDLC,
+            m_objRunning.blnHardMetric,
+            m_objRunning.blnResample,
+            m_objRunning.blnViterbi);
 
 }
 
@@ -1053,3 +1038,10 @@ int DATVDemod::GetSampleRate()
     return m_objRunning.intMsps;
 }
 
+void DATVDemod::channelSampleRateChanged()
+{
+    qDebug("DATVDemod::channelSampleRateChanged");
+    // reconfigure to get full available bandwidth
+    m_channelizer->configure(m_channelizer->getInputMessageQueue(), m_channelizer->getInputSampleRate(), m_channelizer->getRequestedCenterFrequency());
+    // TODO: forward to GUI if necessary
+}

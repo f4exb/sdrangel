@@ -496,6 +496,8 @@ private:
 
     void ApplySettings();
 
+private slots:
+    void channelSampleRateChanged();
 };
 
 #endif // INCLUDE_DATVDEMOD_H

@@ -68,6 +68,7 @@ public:
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
 	int getInputSampleRate() const { return m_inputSampleRate; }
+	int getRequestedCenterFrequency() const { return m_requestedCenterFrequency; }
 
 	virtual void start();
 	virtual void stop();
