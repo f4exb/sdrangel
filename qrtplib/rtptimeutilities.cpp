@@ -9,7 +9,7 @@
 
   This library was developed at the Expertise Centre for Digital Media
   (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
+  (http://www.uhasselt.be). The library is based upon work done for
   my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
   Permission is hereby granted, free of charge, to any person obtaining a
@@ -35,7 +35,7 @@
 //#include "rtpconfig.h"
 #include "rtptimeutilities.h"
 
-namespace jrtplib
+namespace qrtplib
 {
 
 RTPTimeInitializerObject::RTPTimeInitializerObject()

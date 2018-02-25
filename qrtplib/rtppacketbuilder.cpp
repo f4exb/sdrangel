@@ -9,7 +9,7 @@
 
   This library was developed at the Expertise Centre for Digital Media
   (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
+  (http://www.uhasselt.be). The library is based upon work done for
   my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
   Permission is hereby granted, free of charge, to any person obtaining a
@@ -46,6 +46,21 @@ namespace qrtplib
 RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) : rtprnd(r), lastwallclocktime(0,0)
 {
 	init = false;
+	deftsset = false;
+	defaultpayloadtype = 0;
+	lastrtptimestamp = 0;
+	ssrc = 0;
+	numcsrcs = 0;
+	defmarkset = false;
+	defaultmark = false;
+	defaulttimestampinc = 0;
+	timestamp = 0;
+	buffer = 0;
+	numpackets = 0;
+	seqnr = 0;
+	numpayloadbytes = 0;
+	prevrtptimestamp = 0;
+	defptset = false;
 }
 
 RTPPacketBuilder::~RTPPacketBuilder()
@@ -62,22 +77,22 @@ int RTPPacketBuilder::Init(std::size_t max)
 	if (max <= 0) {
 		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
 	}
-	
+
 	maxpacksize = max;
 	buffer = new uint8_t[max];
 	if (buffer == 0) {
 		return ERR_RTP_OUTOFMEM;
 	}
 	packetlength = 0;
-	
+
 	CreateNewSSRC();
 
 	deftsset = false;
 	defptset = false;
 	defmarkset = false;
-		
+
 	numcsrcs = 0;
-	
+
 	init = true;
 	return 0;
 }
@@ -102,7 +117,7 @@ int RTPPacketBuilder::SetMaximumPacketSize(std::size_t max)
 	if (newbuf == 0) {
 		return ERR_RTP_OUTOFMEM;
 	}
-	
+
 	delete[] buffer;
 	buffer = newbuf;
 	maxpacksize = max;
@@ -135,7 +150,7 @@ int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 	if (!init) {
 		return ERR_RTP_PACKBUILD_NOTINIT;
 	}
-	
+
 	int i = 0;
 	bool found = false;
 
@@ -151,7 +166,7 @@ int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 	if (!found) {
 		return ERR_RTP_PACKBUILD_CSRCNOTINLIST;
 	}
-	
+
 	// move the last csrc in the place of the deleted one
 	numcsrcs--;
 	if (numcsrcs > 0 && numcsrcs != i) {
@@ -184,13 +199,13 @@ uint32_t RTPPacketBuilder::CreateNewSSRC()
 uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
 {
 	bool found;
-	
+
 	do
 	{
 		ssrc = rtprnd.GetRandom32();
 		found = sources.GotEntry(ssrc);
 	} while (found);
-	
+
 	timestamp = rtprnd.GetRandom32();
 	seqnr = rtprnd.GetRandom16();
 
@@ -273,7 +288,7 @@ int RTPPacketBuilder::PrivateBuildPacket(const void *data, std::size_t len,
 		lastrtptimestamp = timestamp;
 		prevrtptimestamp = timestamp;
 	}
-	
+
 	numpayloadbytes += (uint32_t)p.GetPayloadLength();
 	numpackets++;
 	timestamp += timestampinc;

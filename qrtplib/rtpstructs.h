@@ -32,48 +32,99 @@
 
 */
 
-#include "rtprandom.h"
-#include "rtprandomurandom.h"
-#include "rtprandomrand48.h"
+/**
+ * \file rtpstructs.h
+ */
 
-#include <time.h>
-#include <unistd.h>
+#ifndef RTPSTRUCTS_H
 
-#include <QDateTime>
+#define RTPSTRUCTS_H
 
-//#include "rtpdebug.h"
+//#include "rtpconfig.h"
+//#include "rtptypes.h"
 
 namespace qrtplib
 {
 
-uint32_t RTPRandom::PickSeed()
+struct RTPHeader
 {
-	uint32_t x;
-	x = (uint32_t) getpid();
-	QDateTime currentDateTime = QDateTime::currentDateTime();
-	x += currentDateTime.toTime_t();
-#if defined(WIN32)
-	x += QDateTime::currentMSecsSinceEpoch() % 1000;
-#else
-	x += (uint32_t)clock();
-#endif
-	x ^= (uint32_t)((uint8_t *)this - (uint8_t *)0);
-	return x;
-}
+#ifdef RTP_BIG_ENDIAN
+	uint8_t version:2;
+	uint8_t padding:1;
+	uint8_t extension:1;
+	uint8_t csrccount:4;
 
-RTPRandom *RTPRandom::CreateDefaultRandomNumberGenerator()
+	uint8_t marker:1;
+	uint8_t payloadtype:7;
+#else // little endian
+	uint8_t csrccount:4;
+	uint8_t extension:1;
+	uint8_t padding:1;
+	uint8_t version:2;
+
+	uint8_t payloadtype:7;
+	uint8_t marker:1;
+#endif // RTP_BIG_ENDIAN
+
+	uint16_t sequencenumber;
+	uint32_t timestamp;
+	uint32_t ssrc;
+};
+
+struct RTPExtensionHeader
 {
-	RTPRandomURandom *r = new RTPRandomURandom();
-	RTPRandom *rRet = r;
+	uint16_t extid;
+	uint16_t length;
+};
 
-	if (r->Init() < 0) // fall back to rand48
-	{
-		delete r;
-		rRet = new RTPRandomRand48();
-	}
+struct RTPSourceIdentifier
+{
+	uint32_t ssrc;
+};
 
-	return rRet;
-}
+struct RTCPCommonHeader
+{
+#ifdef RTP_BIG_ENDIAN
+	uint8_t version:2;
+	uint8_t padding:1;
+	uint8_t count:5;
+#else // little endian
+	uint8_t count:5;
+	uint8_t padding:1;
+	uint8_t version:2;
+#endif // RTP_BIG_ENDIAN
+
+	uint8_t packettype;
+	uint16_t length;
+};
+
+struct RTCPSenderReport
+{
+	uint32_t ntptime_msw;
+	uint32_t ntptime_lsw;
+	uint32_t rtptimestamp;
+	uint32_t packetcount;
+	uint32_t octetcount;
+};
+
+struct RTCPReceiverReport
+{
+	uint32_t ssrc; // Identifies about which SSRC's data this report is...
+	uint8_t fractionlost;
+	uint8_t packetslost[3];
+	uint32_t exthighseqnr;
+	uint32_t jitter;
+	uint32_t lsr;
+	uint32_t dlsr;
+};
+
+struct RTCPSDESHeader
+{
+	uint8_t sdesid;
+	uint8_t length;
+};
 
 } // end namespace
+
+#endif // RTPSTRUCTS
 

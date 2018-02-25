@@ -1,22 +1,25 @@
 project(qrtplib)
 
 set(qrtplib_SOURCES
-	rtptimeutilities.cpp
-	rtprandomurandom.cpp
-	rtprandomrand48.cpp
-	rtprandom.cpp
 	rtperrors.cpp
+	rtppacket.cpp
+	rtprandom.cpp
+	rtprandomrand48.cpp
+	rtprandomurandom.cpp
+	rtptimeutilities.cpp
 )
 
 set(qrtplib_HEADERS
-	rtptimeutilities.h
-	rtprandom.h
-	rtprandomurandom.h
-	rtprandomrand48.h
-	rtprandom.h
-	rtpinternalutils.h
 	rtperrors.h
 	rtpdefines.h
+	rtpinternalutils.h
+	rtppacket.h
+	rtprandom.h
+	rtprandomrand48.h
+	rtprandomurandom.h
+	rtprawpacket.h
+	rtpstructs.h
+	rtptimeutilities.h
 )
 
 include_directories(

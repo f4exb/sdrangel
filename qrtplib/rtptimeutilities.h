@@ -9,7 +9,7 @@
 
   This library was developed at the Expertise Centre for Digital Media
   (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
+  (http://www.uhasselt.be). The library is based upon work done for
   my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
   Permission is hereby granted, free of charge, to any person obtaining a
@@ -51,11 +51,11 @@
 #define C1000000 1000000ULL
 #define CEPOCH 11644473600000000ULL
 
-namespace jrtplib
+namespace qrtplib
 {
 
 /**
- * This is a simple wrapper for the most significant word (MSW) and least 
+ * This is a simple wrapper for the most significant word (MSW) and least
  * significant word (LSW) of an NTP timestamp.
  */
 class RTPNTPTime
@@ -74,25 +74,25 @@ private:
 };
 
 /** This class is used to specify wallclock time, delay intervals etc.
- *  This class is used to specify wallclock time, delay intervals etc. 
+ *  This class is used to specify wallclock time, delay intervals etc.
  *  It stores a number of seconds and a number of microseconds.
  */
 class RTPTime
 {
 public:
-	/** Returns an RTPTime instance representing the current wallclock time. 
-	 *  Returns an RTPTime instance representing the current wallclock time. This is expressed 
+	/** Returns an RTPTime instance representing the current wallclock time.
+	 *  Returns an RTPTime instance representing the current wallclock time. This is expressed
 	 *  as a number of seconds since 00:00:00 UTC, January 1, 1970.
 	 */
 	static RTPTime CurrentTime();
 
 	/** This function waits the amount of time specified in \c delay. */
 	static void Wait(const RTPTime &delay);
-		
+
 	/** Creates an RTPTime instance representing \c t, which is expressed in units of seconds. */
 	RTPTime(double t);
 
-	/** Creates an instance that corresponds to \c ntptime. 
+	/** Creates an instance that corresponds to \c ntptime.
 	 *  Creates an instance that corresponds to \c ntptime.  If
 	 *  the conversion cannot be made, both the seconds and the
 	 *  microseconds are set to zero.
@@ -155,7 +155,7 @@ inline RTPTime::RTPTime(RTPNTPTime ntptime)
 	else
 	{
 		uint32_t sec = ntptime.GetMSW() - RTP_NTPTIMEOFFSET;
-		
+
 		double x = (double)ntptime.GetLSW();
 		x /= (65536.0*65536.0);
 		x *= 1000000.0;
@@ -233,7 +233,7 @@ inline RTPTime RTPTime::CurrentTime()
 inline RTPTime RTPTime::CurrentTime()
 {
 	struct timeval tv;
-	
+
 	gettimeofday(&tv,0);
 	return RTPTime((uint64_t)tv.tv_sec,(uint32_t)tv.tv_usec);
 }
@@ -260,13 +260,13 @@ inline void RTPTime::Wait(const RTPTime &delay)
 }
 
 inline RTPTime &RTPTime::operator-=(const RTPTime &t)
-{ 
+{
 	m_t -= t.m_t;
 	return *this;
 }
 
 inline RTPTime &RTPTime::operator+=(const RTPTime &t)
-{ 
+{
 	m_t += t.m_t;
 	return *this;
 }
@@ -279,7 +279,7 @@ inline RTPNTPTime RTPTime::GetNTPTime() const
 	uint32_t msw = sec+RTP_NTPTIMEOFFSET;
 	uint32_t lsw;
 	double x;
-	
+
     x = microsec/1000000.0;
 	x *= (65536.0*65536.0);
 	lsw = (uint32_t)x;
