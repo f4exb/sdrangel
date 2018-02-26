@@ -606,6 +606,9 @@
       <height>81</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>Stream information</string>
+    </property>
     <property name="readOnly">
      <bool>true</bool>
     </property>
