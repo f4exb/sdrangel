@@ -31,31 +31,24 @@ static const int DEFAULT_GUI_DECIMATION = 64;
 
 template<typename T> struct datvconstellation: runnable
 {
-    T xymin;
-    T xymax;
+    T xymin, xymax;
     unsigned long decimation;
     unsigned long pixels_per_frame;
     cstln_lut<256> **cstln;  // Optional ptr to optional constellation
+    DATVScreen *m_objDATVScreen;
     pipereader<complex<T> > in;
     unsigned long phase;
-    DATVScreen *m_objDATVScreen;
 
-    datvconstellation(
-            scheduler *sch,
-            pipebuf<complex<T> > &_in,
-            T _xymin,
-            T _xymax,
-            const char *_name = 0,
-            DATVScreen * objDATVScreen = 0) :
-        runnable(sch, _name ? _name : _in.name),
-        xymin(_xymin),
-        xymax(_xymax),
-        decimation(DEFAULT_GUI_DECIMATION),
-        pixels_per_frame(1024),
-        cstln(0),
-        in(_in),
-        phase(0),
-        m_objDATVScreen(objDATVScreen)
+    datvconstellation(scheduler *sch, pipebuf<complex<T> > &_in, T _xymin, T _xymax, const char *_name = NULL, DATVScreen * objDATVScreen = NULL) :
+            runnable(sch, _name ? _name : _in.name),
+            xymin(_xymin),
+            xymax(_xymax),
+            decimation(DEFAULT_GUI_DECIMATION),
+            pixels_per_frame(1024),
+            cstln(NULL),
+            m_objDATVScreen(objDATVScreen),
+            in(_in),
+            phase(0)
     {
     }
 
@@ -76,11 +69,8 @@ template<typename T> struct datvconstellation: runnable
                     if (m_objDATVScreen != NULL)
                     {
 
-                        m_objDATVScreen->selectRow(
-                                256 * (p->re - xymin) / (xymax - xymin));
-                        m_objDATVScreen->setDataColor(
-                                256 - 256 * ((p->im - xymin) / (xymax - xymin)),
-                                255, 0, 255);
+                        m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
+                        m_objDATVScreen->setDataColor(256 - 256 * ((p->im - xymin) / (xymax - xymin)), 255, 0, 255);
                     }
 
                 }
@@ -106,7 +96,6 @@ template<typename T> struct datvconstellation: runnable
                 }
 
                 m_objDATVScreen->renderImage(NULL);
-
             }
 
             in.read(pixels_per_frame);
@@ -118,15 +107,8 @@ template<typename T> struct datvconstellation: runnable
         }
     }
 
-    //private:
-    //gfx g;
-
     void draw_begin()
     {
-        //g.clear();
-        //g.setfg(0, 255, 0);
-        //g.line(g.w/2,0, g.w/2, g.h);
-        //g.line(0,g.h/2, g.w,g.h/2);
     }
 
 };

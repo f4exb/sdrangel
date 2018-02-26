@@ -37,6 +37,7 @@ public:
     ~DATVideostream();
 
     bool MultiThreaded;
+    int ThreadTimeOut;
 
     int pushData(const char * chrData, int intSize);
     bool setMemoryLimit(int intMemoryLimit);

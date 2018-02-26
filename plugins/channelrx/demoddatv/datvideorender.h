@@ -39,13 +39,18 @@ extern "C"
 #include <libavutil/samplefmt.h>
 
 #include "libswscale/swscale.h"
-
 }
 
 struct DataTSMetaData2
 {
     int PID;
     int CodecID;
+
+    bool OK_Data;
+    bool OK_Decoding;
+    bool OK_TransportStream;
+    bool OK_VideoStream;
+
     QString Program;
     QString Stream;
 
@@ -53,12 +58,16 @@ struct DataTSMetaData2
     int Height;
     int BitRate;
     int Channels;
+
+
     QString CodecDescription;
 
     DataTSMetaData2()
     {
         PID=-1;
         CodecID=-1;
+
+
         Program="";
         Stream="";
 
@@ -67,12 +76,19 @@ struct DataTSMetaData2
         BitRate=-1;
         Channels=-1;
         CodecDescription="";
+
+        OK_Data=false;
+        OK_Decoding=false;
+        OK_TransportStream=false;
+        OK_VideoStream=false;
+
     }
 };
 
 class DATVideoRender : public DATVScreen
 {
     Q_OBJECT
+
 public:
     explicit DATVideoRender(QWidget * parent);
     void SetFullScreen(bool blnFullScreen);
@@ -106,18 +122,17 @@ private:
 
     bool InitializeFFMPEG();
     bool PreprocessStream();
-
-
+    void ResetMetaData();
 
 protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 
 signals:
-
-public slots:
+    void onMetaDataChanged(DataTSMetaData2 *objMetaData);
 
 };
 
+//To run Video Rendering with a dedicated thread
 class DATVideoRenderThread: public QThread
 {
 
@@ -141,12 +156,11 @@ class DATVideoRenderThread: public QThread
             m_objRenderer = objRenderer;
             m_objStream = objStream;
             m_blnRenderingVideo=false;
-
         }
 
         void run()
         {
-            if(m_blnRenderingVideo==true)
+            if(m_blnRenderingVideo)
             {
                 return;
             }
@@ -156,19 +170,11 @@ class DATVideoRenderThread: public QThread
                 return ;
             }
 
-            m_blnRenderingVideo=false;
+            m_blnRenderingVideo = m_objRenderer->OpenStream(m_objStream);
 
-            if(m_objRenderer->OpenStream(m_objStream))
+            if(!m_blnRenderingVideo)
             {
-                qInfo("DATVideoRenderThread::run: PID: %d W: %d H: %d Codec: %s Data: %s Service: %s",
-                       m_objRenderer->MetaData.PID,
-                       m_objRenderer->MetaData.Width,
-                       m_objRenderer->MetaData.Height,
-                       m_objRenderer->MetaData.CodecDescription.toStdString().c_str(),
-                       m_objRenderer->MetaData.Program.toStdString().c_str(),
-                       m_objRenderer->MetaData.Stream.toStdString().c_str());
-
-                m_blnRenderingVideo=true;
+                return;
             }
 
             while((m_objRenderer->RenderStream()) && (m_blnRenderingVideo==true))
@@ -176,6 +182,8 @@ class DATVideoRenderThread: public QThread
             }
 
             m_objRenderer->CloseStream(m_objStream);
+
+            m_blnRenderingVideo=false;
 
         }
 
@@ -186,7 +194,6 @@ class DATVideoRenderThread: public QThread
 
 
     private:
-
         DATVideoRender *m_objRenderer;
         DATVideostream *m_objStream;
         bool m_blnRenderingVideo;

@@ -52,7 +52,7 @@ DATVScreen::~DATVScreen()
 
 QRgb* DATVScreen::getRowBuffer(int intRow)
 {
-    if (m_blnGLContextInitialized == false)
+    if (!m_blnGLContextInitialized)
     {
         return NULL;
     }
@@ -161,7 +161,7 @@ void DATVScreen::paintGL()
     m_objMutex.unlock();
 }
 
-void DATVScreen::mousePressEvent(QMouseEvent* event)
+void DATVScreen::mousePressEvent(QMouseEvent* event __attribute__((unused)))
 {
 }
 
@@ -194,13 +194,20 @@ bool DATVScreen::selectRow(int intLine)
     {
         return m_objGLShaderArray.SelectRow(intLine);
     }
+    else
+    {
+        return false;
+    }
 }
 
 bool DATVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
 {
     if (m_blnGLContextInitialized)
-    {        
-        return m_objGLShaderArray.SetDataColor(intCol,
-                qRgb(intRed, intGreen, intBlue));
-    }    
+    {
+        return m_objGLShaderArray.SetDataColor(intCol, qRgb(intRed, intGreen, intBlue));
+    }
+    else
+    {
+        return false;
+    }
 }

@@ -81,21 +81,14 @@ private slots:
     void on_cmbFEC_currentIndexChanged(const QString &arg1);
     void on_chkViterbi_clicked();
     void on_chkHardMetric_clicked();
-    //void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
-
-    //void on_spiSampleRate_valueChanged(int arg1);
 
     void on_spiSymbolRate_valueChanged(int arg1);
 
     void on_spiNotchFilters_valueChanged(int arg1);
 
-    void on_chkHDLC_clicked();
-
     void on_chkAllowDrift_clicked();
-
-    void on_chkResample_clicked();
 
     void on_pushButton_3_clicked();
 
@@ -103,18 +96,23 @@ private slots:
 
     void on_mouseEvent(QMouseEvent* obj);
     void on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived);
+    void on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData);
 
     void on_spiBandwidth_valueChanged(int arg1);
 
-
     void on_chkFastlock_clicked();
+
+    void on_cmbFilter_currentIndexChanged(int index);
+
+    void on_spiRollOff_valueChanged(int arg1);
+
+    void on_spiExcursion_valueChanged(int arg1);
 
 private:
     Ui::DATVDemodGUI* ui;
     PluginAPI* m_objPluginAPI;
     DeviceUISet* m_deviceUISet;
 
-    //DeviceSourceAPI* m_objDeviceAPI;
     ChannelMarker m_objChannelMarker;
     ThreadedBasebandSampleSink* m_objThreadedChannelizer;
     DownChannelizer* m_objChannelizer;
@@ -132,13 +130,14 @@ private:
     bool m_blnDoApplySettings;
     bool m_blnButtonPlayClicked;
 
-    //explicit DATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent = NULL);
     explicit DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
     virtual ~DATVDemodGUI();
 
     void blockApplySettings(bool blnBlock);
 	void applySettings();
     QString formatBytes(qint64 intBytes);
+
+    void displayRRCParameters(bool blnVisible);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

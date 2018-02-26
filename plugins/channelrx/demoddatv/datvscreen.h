@@ -33,11 +33,7 @@
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
-
-
 class QPainter;
-
-
 
 class SDRANGEL_API DATVScreen: public QGLWidget
 {
