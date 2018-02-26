@@ -964,8 +964,8 @@ struct cstln_receiver: runnable
             softsymbol *pout = out.wr(), *pout0 = pout;
 
             // These are scoped outside the loop for SS and MER estimation.
-            complex<float> sg; // Symbol before AGC;
-            complex<float> s;  // For MER estimation and constellation viewer
+            complex<float> sg(0.0, 0.0); // Symbol before AGC;
+            complex<float> s(0.0, 0.0);  // For MER estimation and constellation viewer
             complex<signed char> *cstln_point = NULL;
 
             while (pin < pend)
