@@ -13,13 +13,11 @@ namespace leansdr
 inline void fatal(const char *s)
 {
     perror(s);
-    exit(1);
 }
 
-inline void fail(const char *s)
+inline void fail(const char *f, const char *s)
 {
-    fprintf(stderr, "leansdr::fail: %s\n", s);
-    exit(1);
+    fprintf(stderr, "leansdr::%s: %s\n", f, s);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -114,16 +112,19 @@ struct scheduler
 
     void add_pipe(pipebuf_common *p)
     {
-        if (npipes == MAX_PIPES) {
-            fail("MAX_PIPES");
+        if (npipes == MAX_PIPES)
+        {
+            fail("scheduler::add_pipe", "MAX_PIPES");
+            return;
         }
         pipes[npipes++] = p;
     }
 
     void add_runnable(runnable_common *r)
     {
-        if (nrunnables == MAX_RUNNABLES) {
-            fail("MAX_RUNNABLES");
+        if (nrunnables == MAX_RUNNABLES)
+        {
+            fail("scheduler::add_runnable", "MAX_RUNNABLES");
         }
         runnables[nrunnables++] = r;
     }
@@ -211,8 +212,10 @@ struct pipebuf: pipebuf_common
 
     int add_reader()
     {
-        if (nrd == MAX_READERS) {
-            fail("too many readers");
+        if (nrd == MAX_READERS)
+        {
+            fail("pipebuf::add_reader", "too many readers");
+            return nrd;
         }
         rds[nrd] = wr;
         return nrd++;
@@ -295,8 +298,8 @@ struct pipewriter
     {
         if (buf.end < buf.wr)
         {
-            fprintf(stderr, "leansdr::pipewriter::writable: Bug: overflow to %s\n", buf.name);
-            exit(1);
+            fprintf(stderr, "leansdr::pipewriter::writable: overflow in %s buffer\n", buf.name);
+            return 0;
         }
 
         unsigned long delta = buf.end - buf.wr;
@@ -317,8 +320,8 @@ struct pipewriter
     {
         if (buf.wr + n > buf.end)
         {
-            fprintf(stderr, "leansdr::pipewriter::written: Bug: overflow to %s\n", buf.name);
-            exit(1);
+            fprintf(stderr, "leansdr::pipewriter::written: overflow in %s buffer\n", buf.name);
+            return;
         }
         buf.wr += n;
         buf.total_written += n;
@@ -378,8 +381,8 @@ struct pipereader
     {
         if (buf.rds[id] + n > buf.wr)
         {
-            fprintf(stderr, "leansdr::pipereader::read: Bug: underflow from %s\n", buf.name);
-            exit(1);
+            fprintf(stderr, "leansdr::pipereader::read: underflow in %s buffer\n", buf.name);
+            return;
         }
         buf.rds[id] += n;
         buf.total_read += n;

@@ -362,8 +362,10 @@ struct fir_resampler: runnable
             tap_multiplier(1),
             freq_tol(0.1)
     {
-        if (decim != 1)
-            fail("fir_resampler: decim not implemented");  // TBD
+        if (decim != 1) {
+            fail("fir_resampler::fir_resampler", "decim not implemented");  // TBD
+            return;
+        }
         shifted_coeffs = new T[ncoeffs];
         set_freq(0);
     }

@@ -59,7 +59,8 @@ inline cstln_lut<256> * make_dvbs2_constellation(cstln_lut<256>::predef c,
             gamma1 = 2.57;
             break;
         default:
-            fail("Code rate not supported with APSK16");
+            fail("cstln_lut<256>::make_dvbs2_constellation", "Code rate not supported with APSK16");
+            return 0;
         }
         break;
     case cstln_lut<256>::APSK32:
@@ -87,7 +88,8 @@ inline cstln_lut<256> * make_dvbs2_constellation(cstln_lut<256>::predef c,
             gamma2 = 4.30;
             break;
         default:
-            fail("Code rate not supported with APSK32");
+            fail("cstln_lut<256>::make_dvbs2_constellation", "Code rate not supported with APSK32");
+            return 0;
         }
         break;
     case cstln_lut<256>::APSK64E:
@@ -213,7 +215,10 @@ struct deconvol_sync: runnable
     void next_sync()
     {
         if (fastlock)
-            fail("Bug: next_sync() called with fastlock");
+        {
+            fail("deconvol_sync::next_sync", "Bug: next_sync() called with fastlock");
+            return;
+        }
         ++locked;
         if (locked == &syncs[NSYNCS])
         {
@@ -325,7 +330,10 @@ private:
             if (d == 0x00000000fb11d640LL)
                 d2 = 0x00fbea3c8679c980LL;
             if (d2 == d)
-                fail("Alt polynomial not provided");
+            {
+                fail("deconvol_sync::inverse_convolution", "Alt polynomial not provided");
+                return;
+            }
             deconv2[b] = d2;
         }
 
@@ -346,17 +354,27 @@ private:
                 int expect = (b == i) ? 1 : 0;
                 int d = parity(iq & deconv[b]);
                 if (d != expect)
-                    fail("Failed to inverse convolutional coding");
+                {
+                    fail("deconvol_sync::inverse_convolution", "Failed to inverse convolutional coding");
+                }
                 int d2 = parity(iq & deconv2[b]);
                 if (d2 != expect)
-                    fail("Failed to inverse convolutional coding (alt)");
+                {
+                    fail("deconvol_sync::inverse_convolution", "Failed to inverse convolutional coding (alt)");
+                }
             }
             if (traceback > sizeof(iq_t) * 8)
-                fail("Bug: traceback exceeds register size");
+            {
+                fail("deconvol_sync::inverse_convolution", "Bug: traceback exceeds register size");
+            }
             if (log2(deconv[b]) + 1 > traceback)
-                fail("traceback insufficient for deconvolution");
+            {
+                fail("deconvol_sync::inverse_convolution", "traceback insufficient for deconvolution");
+            }
             if (log2(deconv2[b]) + 1 > traceback)
-                fail("traceback insufficient for deconvolution (alt)");
+            {
+                fail("deconvol_sync::inverse_convolution", "traceback insufficient for deconvolution (alt)");
+            }
         }
     }
 
@@ -668,14 +686,20 @@ struct dvb_convol: runnable
     {
         fec_spec *fs = &fec_specs[fec];
         if (!fs->bits_in)
-            fail("Unexpected FEC");
+        {
+            fail("dvb_convol::dvb_convol", "Unexpected FEC");
+            return;
+        }
         convol.bits_in = fs->bits_in;
         convol.bits_out = fs->bits_out;
         convol.polys = fs->polys;
         convol.bps = bits_per_symbol;
         // FEC must output a whole number of IQ symbols
         if (convol.bits_out % convol.bps)
-            fail("Code rate not suitable for this constellation");
+        {
+            fail("dvb_convol::dvb_convol", "Code rate not suitable for this constellation");
+            return;
+        }
     }
 
     void run()
@@ -1187,7 +1211,10 @@ struct rs_decoder: runnable
             if (sizeof(Tbyte) == 1)
                 memcpy(pout, pin, SIZE_TSPACKET);
             else
-                fail("Erasures not implemented");
+            {
+                fail("rs_decoder::run", "Erasures not implemented");
+                return;
+            }
 
             u8 synd[16];
             bool corrupted = rs.syndromes(pin, synd);
@@ -1448,7 +1475,10 @@ public:
         { // Sanity check: FEC block size must be a multiple of label size.
             int symbols_per_block = fec->bits_out / bits_per_symbol;
             if (bits_per_symbol * symbols_per_block != fec->bits_out)
-                fail("Code rate not suitable for this constellation");
+            {
+                fail("viterbi_sync::viterbi_sync", "Code rate not suitable for this constellation");
+                return;
+            }
         }
         int nconj;
         switch (cstln->nsymbols)
@@ -1554,7 +1584,10 @@ public:
                 syncs[s].dec = new dvb_dec_78(trell);
         }
         else
-            fail("CR not supported");
+        {
+            fail("viterbi_sync::viterbi_sync", "CR not supported");
+            return;
+        }
 
     }
 
@@ -1640,7 +1673,10 @@ public:
             }  // chunk_size
             in.read(chunk_size * nshifts);
             if (nout)
-                fail("overlapping out");
+            {
+                fail("viterbi_sync::run", "overlapping out");
+                return;
+            }
             if (!resync_phase)
             {
                 // Switch to another decoder ?

@@ -531,7 +531,8 @@ struct cstln_lut
             make_qam(256);
             break;
         default:
-            fail("Constellation not implemented");
+            fail("cstln_lut::cstln_lut", "Constellation not implemented");
+            return;
         }
     }
     struct result
@@ -936,7 +937,10 @@ struct cstln_receiver: runnable
     void run()
     {
         if (!cstln)
-            fail("constellation not set");
+        {
+            fail("cstln_lut::run", "constellation not set");
+            return;
+        }
 
         // Magic constants that work with the qa recordings.
         float freq_alpha = 0.04;
@@ -1190,7 +1194,10 @@ struct fast_qpsk_receiver: runnable
         signed long freq_alpha = 0.04 * 65536;
         signed long freq_beta = 0.0012 * 256 * 65536 / omega * pll_adjustment;
         if (!freq_beta)
-            fail("Excessive oversampling");
+        {
+            fail("fast_qpsk_receiver::run", "Excessive oversampling");
+            return;
+        }
 
         float gain_mu = 0.02 / (cstln_amp * cstln_amp) * 2;
 
@@ -1431,7 +1438,10 @@ struct cstln_transmitter: runnable
     void run()
     {
         if (!cstln)
-            fail("constellation not set");
+        {
+            fail("cstln_transmitter::run", "constellation not set");
+            return;
+        }
         int count = min(in.readable(), out.writable());
         u8 *pin = in.rd(), *pend = pin + count;
         complex<Tout> *pout = out.wr();
@@ -1524,8 +1534,9 @@ struct cnr_fft: runnable
             avgpower(NULL),
             phase(0)
     {
-        if (bandwidth > 0.25)
-            fail("CNR estimator requires Fsampling > 4x Fsignal");
+        if (bandwidth > 0.25) {
+            fail("cnr_fft::cnr_fft", "CNR estimator requires Fsampling > 4x Fsignal");
+        }
     }
 
     float bandwidth;
