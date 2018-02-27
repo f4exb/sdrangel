@@ -17,6 +17,7 @@ set (qrtplib_HEADERS
 	rtpcollisionlist.h
 	rtpconfig.h
 	rtpdefines.h
+	rtpendian.h
 	rtperrors.h
 	rtphashtable.h
 	rtpinternalsourcedata.h
