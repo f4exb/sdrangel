@@ -59,10 +59,6 @@ using namespace std;
 										mreq.imr_interface.s_addr = htonl(mcastifaceIP);\
 										status = setsockopt(socket,IPPROTO_IP,type,(const char *)&mreq,sizeof(struct ip_mreq));\
 									}
-#define MAINMUTEX_LOCK
-#define MAINMUTEX_UNLOCK
-#define WAITMUTEX_LOCK
-#define WAITMUTEX_UNLOCK
 
 #define CLOSESOCKETS do { \
 	if (closesocketswhendone) \
@@ -77,9 +73,8 @@ namespace qrtplib
 {
 
 RTPUDPv4TransmitterNoBind::RTPUDPv4TransmitterNoBind() :
-        init(false), created(false), waitingfordata(false), rtpsock(-1), rtcpsock(-1), mcastifaceIP(0), m_rtpPort(0), m_rtcpPort(0), multicastTTL(0), receivemode(
-                AcceptAll), localhostname(0), localhostnamelength(0),
-                supportsmulticasting(false), maxpacksize(0), closesocketswhendone(false), m_pAbortDesc(0)
+        init(false), created(false), waitingfordata(false), rtpsock(-1), rtcpsock(-1), mcastifaceIP(0), m_rtpPort(0), m_rtcpPort(0), multicastTTL(0), receivemode(AcceptAll), localhostname(
+                0), localhostnamelength(0), supportsmulticasting(false), maxpacksize(0), closesocketswhendone(false), m_pAbortDesc(0)
 {
 }
 
@@ -270,11 +265,9 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
     if (!init)
         return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-    MAINMUTEX_LOCK
-
     if (created)
     {
-        MAINMUTEX_UNLOCK
+
         return ERR_RTP_UDPV4TRANS_ALREADYCREATED;
     }
 
@@ -286,7 +279,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
     {
         if (transparams->GetTransmissionProtocol() != RTPTransmitter::IPv4UDPProto)
         {
-            MAINMUTEX_UNLOCK
+
             return ERR_RTP_UDPV4TRANS_ILLEGALPARAMETERS;
         }
         params = (const RTPUDPv4TransmissionNoBindParams *) transparams;
@@ -309,7 +302,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
             int status = GetAutoSockets(params->GetBindIP(), params->GetAllowOddPortbase(), params->GetRTCPMultiplexing(), &rtpsock, &rtcpsock, &m_rtpPort, &m_rtcpPort);
             if (status < 0)
             {
-                MAINMUTEX_UNLOCK
+
                 return status;
             }
         }
@@ -318,7 +311,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
             // Check if portbase is even (if necessary)
             if (!params->GetAllowOddPortbase() && params->GetPortbase() % 2 != 0)
             {
-                MAINMUTEX_UNLOCK
+
                 return ERR_RTP_UDPV4TRANS_PORTBASENOTEVEN;
             }
 
@@ -327,7 +320,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
             rtpsock = socket(PF_INET, SOCK_DGRAM, 0);
             if (rtpsock == RTPSOCKERR)
             {
-                MAINMUTEX_UNLOCK
+
                 return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
             }
 
@@ -340,7 +333,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
                 if (rtcpsock == RTPSOCKERR)
                 {
                     RTPCLOSE(rtpsock);
-                    MAINMUTEX_UNLOCK
+
                     return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
                 }
             }
@@ -353,14 +346,14 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
         if (setsockopt(rtpsock, SOL_SOCKET, SO_RCVBUF, (const char *) &size, sizeof(int)) != 0)
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return ERR_RTP_UDPV4TRANS_CANTSETRTPRECEIVEBUF;
         }
         size = params->GetRTPSendBuffer();
         if (setsockopt(rtpsock, SOL_SOCKET, SO_SNDBUF, (const char *) &size, sizeof(int)) != 0)
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return ERR_RTP_UDPV4TRANS_CANTSETRTPTRANSMITBUF;
         }
 
@@ -370,14 +363,14 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
             if (setsockopt(rtcpsock, SOL_SOCKET, SO_RCVBUF, (const char *) &size, sizeof(int)) != 0)
             {
                 CLOSESOCKETS;
-                MAINMUTEX_UNLOCK
+
                 return ERR_RTP_UDPV4TRANS_CANTSETRTCPRECEIVEBUF;
             }
             size = params->GetRTCPSendBuffer();
             if (setsockopt(rtcpsock, SOL_SOCKET, SO_SNDBUF, (const char *) &size, sizeof(int)) != 0)
             {
                 CLOSESOCKETS;
-                MAINMUTEX_UNLOCK
+
                 return ERR_RTP_UDPV4TRANS_CANTSETRTCPTRANSMITBUF;
             }
         }
@@ -393,7 +386,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
         if ((status = CreateLocalIPList()) < 0)
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return status;
         }
     }
@@ -410,7 +403,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
     if (maximumpacketsize > RTPUDPV4TRANSNOBIND_MAXPACKSIZE)
     {
         CLOSESOCKETS;
-        MAINMUTEX_UNLOCK
+
         return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
     }
 
@@ -419,7 +412,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
         if ((status = m_abortDesc.Init()) < 0)
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return status;
         }
         m_pAbortDesc = &m_abortDesc;
@@ -430,7 +423,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
         if (!m_pAbortDesc->IsInitialized())
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return ERR_RTP_ABORTDESC_NOTINIT;
         }
     }
@@ -445,7 +438,7 @@ int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmi
 
     waitingfordata = false;
     created = true;
-    MAINMUTEX_UNLOCK
+
     return 0;
 }
 
@@ -453,7 +446,7 @@ int RTPUDPv4TransmitterNoBind::BindSockets(const RTPTransmissionParams *transpar
 {
     if (transparams->GetTransmissionProtocol() != RTPTransmitter::IPv4UDPProto)
     {
-        MAINMUTEX_UNLOCK
+
         return ERR_RTP_UDPV4TRANS_ILLEGALPARAMETERS;
     }
 
@@ -470,7 +463,7 @@ int RTPUDPv4TransmitterNoBind::BindSockets(const RTPTransmissionParams *transpar
     if (bind(rtpsock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) != 0)
     {
         CLOSESOCKETS;
-        MAINMUTEX_UNLOCK
+
         return ERR_RTP_UDPV4TRANS_CANTBINDRTPSOCKET;
     }
 
@@ -493,7 +486,7 @@ int RTPUDPv4TransmitterNoBind::BindSockets(const RTPTransmissionParams *transpar
         if (bind(rtcpsock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) != 0)
         {
             CLOSESOCKETS;
-            MAINMUTEX_UNLOCK
+
             return ERR_RTP_UDPV4TRANS_CANTBINDRTCPSOCKET;
         }
 
@@ -510,10 +503,9 @@ void RTPUDPv4TransmitterNoBind::Destroy()
     if (!init)
         return;
 
-    MAINMUTEX_LOCK
     if (!created)
     {
-        MAINMUTEX_UNLOCK;
+        ;
         return;
     }
 
@@ -538,605 +530,563 @@ void RTPUDPv4TransmitterNoBind::Destroy()
     {
         m_pAbortDesc->SendAbortSignal();
         m_abortDesc.Destroy(); // Doesn't do anything if not initialized
-    MAINMUTEX_UNLOCK
-    WAITMUTEX_LOCK// to make sure that the WaitForIncomingData function ended
-    WAITMUTEX_UNLOCK
-}
-else
-    m_abortDesc.Destroy(); // Doesn't do anything if not initialized
 
-MAINMUTEX_UNLOCK
+        // to make sure that the WaitForIncomingData function ended
+
+    }
+    else
+        m_abortDesc.Destroy(); // Doesn't do anything if not initialized
+
 }
 
 RTPTransmissionInfo *RTPUDPv4TransmitterNoBind::GetTransmissionInfo()
 {
-if (!init)
-return 0;
+    if (!init)
+        return 0;
 
-MAINMUTEX_LOCK
-RTPTransmissionInfo *tinf = new RTPUDPv4TransmissionNoBindInfo(localIPs, rtpsock, rtcpsock, m_rtpPort, m_rtcpPort);
-MAINMUTEX_UNLOCK
-return tinf;
+    RTPTransmissionInfo *tinf = new RTPUDPv4TransmissionNoBindInfo(localIPs, rtpsock, rtcpsock, m_rtpPort, m_rtcpPort);
+
+    return tinf;
 }
 
 void RTPUDPv4TransmitterNoBind::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-delete i;
+    delete i;
 }
 
 int RTPUDPv4TransmitterNoBind::GetLocalHostName(uint8_t *buffer, size_t *bufferlength)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-
-if (localhostname == 0)
-{
-if (localIPs.empty())
-{
-    MAINMUTEX_UNLOCK
-    return ERR_RTP_UDPV4TRANS_NOLOCALIPS;
-}
-
-std::list<uint32_t>::const_iterator it;
-std::list<std::string> hostnames;
-
-for (it = localIPs.begin(); it != localIPs.end(); it++)
-{
-    bool founddouble = false;
-    bool foundentry = true;
-
-    while (!founddouble && foundentry)
+    if (!created)
     {
-        struct hostent *he;
-        uint8_t addr[4];
-        uint32_t ip = (*it);
 
-        addr[0] = (uint8_t) ((ip >> 24) & 0xFF);
-        addr[1] = (uint8_t) ((ip >> 16) & 0xFF);
-        addr[2] = (uint8_t) ((ip >> 8) & 0xFF);
-        addr[3] = (uint8_t) (ip & 0xFF);
-        he = gethostbyaddr((char *) addr, 4, AF_INET);
-        if (he != 0)
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (localhostname == 0)
+    {
+        if (localIPs.empty())
         {
-            std::string hname = std::string(he->h_name);
+
+            return ERR_RTP_UDPV4TRANS_NOLOCALIPS;
+        }
+
+        std::list<uint32_t>::const_iterator it;
+        std::list<std::string> hostnames;
+
+        for (it = localIPs.begin(); it != localIPs.end(); it++)
+        {
+            bool founddouble = false;
+            bool foundentry = true;
+
+            while (!founddouble && foundentry)
+            {
+                struct hostent *he;
+                uint8_t addr[4];
+                uint32_t ip = (*it);
+
+                addr[0] = (uint8_t) ((ip >> 24) & 0xFF);
+                addr[1] = (uint8_t) ((ip >> 16) & 0xFF);
+                addr[2] = (uint8_t) ((ip >> 8) & 0xFF);
+                addr[3] = (uint8_t) (ip & 0xFF);
+                he = gethostbyaddr((char *) addr, 4, AF_INET);
+                if (he != 0)
+                {
+                    std::string hname = std::string(he->h_name);
+                    std::list<std::string>::const_iterator it;
+
+                    for (it = hostnames.begin(); !founddouble && it != hostnames.end(); it++)
+                        if ((*it) == hname)
+                            founddouble = true;
+
+                    if (!founddouble)
+                        hostnames.push_back(hname);
+
+                    int i = 0;
+                    while (!founddouble && he->h_aliases[i] != 0)
+                    {
+                        std::string hname = std::string(he->h_aliases[i]);
+
+                        for (it = hostnames.begin(); !founddouble && it != hostnames.end(); it++)
+                            if ((*it) == hname)
+                                founddouble = true;
+
+                        if (!founddouble)
+                        {
+                            hostnames.push_back(hname);
+                            i++;
+                        }
+                    }
+                }
+                else
+                    foundentry = false;
+            }
+        }
+
+        bool found = false;
+
+        if (!hostnames.empty())	// try to select the most appropriate hostname
+        {
             std::list<std::string>::const_iterator it;
 
-            for (it = hostnames.begin(); !founddouble && it != hostnames.end(); it++)
-                if ((*it) == hname)
-                    founddouble = true;
-
-            if (!founddouble)
-                hostnames.push_back(hname);
-
-            int i = 0;
-            while (!founddouble && he->h_aliases[i] != 0)
+            hostnames.sort();
+            for (it = hostnames.begin(); !found && it != hostnames.end(); it++)
             {
-                std::string hname = std::string(he->h_aliases[i]);
-
-                for (it = hostnames.begin(); !founddouble && it != hostnames.end(); it++)
-                    if ((*it) == hname)
-                        founddouble = true;
-
-                if (!founddouble)
+                if ((*it).find('.') != std::string::npos)
                 {
-                    hostnames.push_back(hname);
-                    i++;
+                    found = true;
+                    localhostnamelength = (*it).length();
+                    localhostname = new uint8_t[localhostnamelength + 1];
+                    if (localhostname == 0)
+                    {
+
+                        return ERR_RTP_OUTOFMEM;
+                    }
+                    memcpy(localhostname, (*it).c_str(), localhostnamelength);
+                    localhostname[localhostnamelength] = 0;
                 }
             }
         }
-        else
-            foundentry = false;
-    }
-}
 
-bool found = false;
-
-if (!hostnames.empty())	// try to select the most appropriate hostname
-{
-    std::list<std::string>::const_iterator it;
-
-    hostnames.sort();
-    for (it = hostnames.begin(); !found && it != hostnames.end(); it++)
-    {
-        if ((*it).find('.') != std::string::npos)
+        if (!found) // use an IP address
         {
-            found = true;
-            localhostnamelength = (*it).length();
+            uint32_t ip;
+            int len;
+            char str[16];
+
+            it = localIPs.begin();
+            ip = (*it);
+
+            RTP_SNPRINTF(str, 16, "%d.%d.%d.%d", (int) ((ip >> 24) & 0xFF), (int) ((ip >> 16) & 0xFF), (int) ((ip >> 8) & 0xFF), (int) (ip & 0xFF));
+            len = strlen(str);
+
+            localhostnamelength = len;
             localhostname = new uint8_t[localhostnamelength + 1];
             if (localhostname == 0)
             {
-                MAINMUTEX_UNLOCK
+
                 return ERR_RTP_OUTOFMEM;
             }
-            memcpy(localhostname, (*it).c_str(), localhostnamelength);
+            memcpy(localhostname, str, localhostnamelength);
             localhostname[localhostnamelength] = 0;
         }
     }
-}
 
-if (!found) // use an IP address
-{
-    uint32_t ip;
-    int len;
-    char str[16];
-
-    it = localIPs.begin();
-    ip = (*it);
-
-    RTP_SNPRINTF(str, 16, "%d.%d.%d.%d", (int) ((ip >> 24) & 0xFF), (int) ((ip >> 16) & 0xFF), (int) ((ip >> 8) & 0xFF), (int) (ip & 0xFF));
-    len = strlen(str);
-
-    localhostnamelength = len;
-    localhostname = new uint8_t[localhostnamelength + 1];
-    if (localhostname == 0)
+    if ((*bufferlength) < localhostnamelength)
     {
-        MAINMUTEX_UNLOCK
-        return ERR_RTP_OUTOFMEM;
+        *bufferlength = localhostnamelength; // tell the application the required size of the buffer
+
+        return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
     }
-    memcpy(localhostname, str, localhostnamelength);
-    localhostname[localhostnamelength] = 0;
-}
-}
 
-if ((*bufferlength) < localhostnamelength)
-{
-*bufferlength = localhostnamelength; // tell the application the required size of the buffer
-MAINMUTEX_UNLOCK
-return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
-}
+    memcpy(buffer, localhostname, localhostnamelength);
+    *bufferlength = localhostnamelength;
 
-memcpy(buffer, localhostname, localhostnamelength);
-*bufferlength = localhostnamelength;
-
-MAINMUTEX_UNLOCK
-return 0;
+    return 0;
 }
 
 bool RTPUDPv4TransmitterNoBind::ComesFromThisTransmitter(const RTPAddress *addr)
 {
-if (!init)
-return false;
+    if (!init)
+        return false;
 
-if (addr == 0)
-return false;
+    if (addr == 0)
+        return false;
 
-MAINMUTEX_LOCK
+    bool v;
 
-bool v;
+    if (created && addr->GetAddressType() == RTPAddress::IPv4Address)
+    {
+        const RTPIPv4Address *addr2 = (const RTPIPv4Address *) addr;
+        bool found = false;
+        std::list<uint32_t>::const_iterator it;
 
-if (created && addr->GetAddressType() == RTPAddress::IPv4Address)
-{
-const RTPIPv4Address *addr2 = (const RTPIPv4Address *) addr;
-bool found = false;
-std::list<uint32_t>::const_iterator it;
+        it = localIPs.begin();
+        while (!found && it != localIPs.end())
+        {
+            if (addr2->GetIP() == *it)
+                found = true;
+            else
+                ++it;
+        }
 
-it = localIPs.begin();
-while (!found && it != localIPs.end())
-{
-    if (addr2->GetIP() == *it)
-        found = true;
-    else
-        ++it;
-}
-
-if (!found)
-    v = false;
-else
-{
-    if (addr2->GetPort() == m_rtpPort || addr2->GetPort() == m_rtcpPort) // check for RTP port and RTCP port
-        v = true;
+        if (!found)
+            v = false;
+        else
+        {
+            if (addr2->GetPort() == m_rtpPort || addr2->GetPort() == m_rtcpPort) // check for RTP port and RTCP port
+                v = true;
+            else
+                v = false;
+        }
+    }
     else
         v = false;
-}
-}
-else
-v = false;
 
-MAINMUTEX_UNLOCK
-return v;
+    return v;
 }
 
 int RTPUDPv4TransmitterNoBind::Poll()
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-int status;
+    int status;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-status = PollSocket(true); // poll RTP socket
-if (rtpsock != rtcpsock) // no need to poll twice when multiplexing
-{
-if (status >= 0)
-    status = PollSocket(false); // poll RTCP socket
-}
-MAINMUTEX_UNLOCK
-return status;
+    if (!created)
+    {
+
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    status = PollSocket(true); // poll RTP socket
+    if (rtpsock != rtcpsock) // no need to poll twice when multiplexing
+    {
+        if (status >= 0)
+            status = PollSocket(false); // poll RTCP socket
+    }
+
+    return status;
 }
 
 int RTPUDPv4TransmitterNoBind::WaitForIncomingData(const RTPTime &delay, bool *dataavailable)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (waitingfordata)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_ALREADYWAITING;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (waitingfordata)
+    {
 
-SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
+        return ERR_RTP_UDPV4TRANS_ALREADYWAITING;
+    }
 
-SocketType socks[3] =
-{ rtpsock, rtcpsock, abortSocket };
-int8_t readflags[3] =
-{ 0, 0, 0 };
-const int idxRTP = 0;
-const int idxRTCP = 1;
-const int idxAbort = 2;
+    SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
 
-waitingfordata = true;
+    SocketType socks[3] =
+    { rtpsock, rtcpsock, abortSocket };
+    int8_t readflags[3] =
+    { 0, 0, 0 };
+    const int idxRTP = 0;
+    const int idxRTCP = 1;
+    const int idxAbort = 2;
 
-WAITMUTEX_LOCK
-MAINMUTEX_UNLOCK
+    waitingfordata = true;
 
-int status = RTPSelect(socks, readflags, 3, delay);
-if (status < 0)
-{
-MAINMUTEX_LOCK
-waitingfordata = false;
-MAINMUTEX_UNLOCK
-WAITMUTEX_UNLOCK
-return status;
-}
+    int status = RTPSelect(socks, readflags, 3, delay);
+    if (status < 0)
+    {
+        waitingfordata = false;
 
-MAINMUTEX_LOCK
-waitingfordata = false;
-if (!created) // destroy called
-{
-MAINMUTEX_UNLOCK;
-WAITMUTEX_UNLOCK
-return 0;
-}
+        return status;
+    }
 
- // if aborted, read from abort buffer
-if (readflags[idxAbort])
-m_pAbortDesc->ReadSignallingByte();
+    waitingfordata = false;
+    if (!created) // destroy called
+    {
+        ;
 
-if (dataavailable != 0)
-{
-if (readflags[idxRTP] || readflags[idxRTCP])
-    *dataavailable = true;
-else
-    *dataavailable = false;
-}
+        return 0;
+    }
 
-MAINMUTEX_UNLOCK
-WAITMUTEX_UNLOCK
-return 0;
+    // if aborted, read from abort buffer
+    if (readflags[idxAbort])
+        m_pAbortDesc->ReadSignallingByte();
+
+    if (dataavailable != 0)
+    {
+        if (readflags[idxRTP] || readflags[idxRTCP])
+            *dataavailable = true;
+        else
+            *dataavailable = false;
+    }
+
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::AbortWait()
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (!waitingfordata)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTWAITING;
-}
+    if (!created)
+    {
 
-m_pAbortDesc->SendAbortSignal();
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (!waitingfordata)
+    {
 
-MAINMUTEX_UNLOCK
-return 0;
+        return ERR_RTP_UDPV4TRANS_NOTWAITING;
+    }
+
+    m_pAbortDesc->SendAbortSignal();
+
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::SendRTPData(const void *data, size_t len)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (len > maxpacksize)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (len > maxpacksize)
+    {
 
-destinations.GotoFirstElement();
-while (destinations.HasCurrentElement())
-{
-sendto(rtpsock, (const char *) data, len, 0, (const struct sockaddr *) destinations.GetCurrentElement().GetRTPSockAddr(), sizeof(struct sockaddr_in));
-destinations.GotoNextElement();
-}
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
 
-MAINMUTEX_UNLOCK
-return 0;
+    destinations.GotoFirstElement();
+    while (destinations.HasCurrentElement())
+    {
+        sendto(rtpsock, (const char *) data, len, 0, (const struct sockaddr *) destinations.GetCurrentElement().GetRTPSockAddr(), sizeof(struct sockaddr_in));
+        destinations.GotoNextElement();
+    }
+
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::SendRTCPData(const void *data, size_t len)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (len > maxpacksize)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (len > maxpacksize)
+    {
 
-destinations.GotoFirstElement();
-while (destinations.HasCurrentElement())
-{
-sendto(rtcpsock, (const char *) data, len, 0, (const struct sockaddr *) destinations.GetCurrentElement().GetRTCPSockAddr(), sizeof(struct sockaddr_in));
-destinations.GotoNextElement();
-}
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
 
-MAINMUTEX_UNLOCK
-return 0;
+    destinations.GotoFirstElement();
+    while (destinations.HasCurrentElement())
+    {
+        sendto(rtcpsock, (const char *) data, len, 0, (const struct sockaddr *) destinations.GetCurrentElement().GetRTCPSockAddr(), sizeof(struct sockaddr_in));
+        destinations.GotoNextElement();
+    }
+
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::AddDestination(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
 
-RTPIPv4Destination dest;
-if (!RTPIPv4Destination::AddressToDestination(addr, dest))
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
+    RTPIPv4Destination dest;
+    if (!RTPIPv4Destination::AddressToDestination(addr, dest))
+    {
 
-int status = destinations.AddElement(dest);
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
 
-MAINMUTEX_UNLOCK
-return status;
+    int status = destinations.AddElement(dest);
+
+    return status;
 }
 
 int RTPUDPv4TransmitterNoBind::DeleteDestination(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-RTPIPv4Destination dest;
-if (!RTPIPv4Destination::AddressToDestination(addr, dest))
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    RTPIPv4Destination dest;
+    if (!RTPIPv4Destination::AddressToDestination(addr, dest))
+    {
 
-int status = destinations.DeleteElement(dest);
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
 
-MAINMUTEX_UNLOCK
-return status;
+    int status = destinations.DeleteElement(dest);
+
+    return status;
 }
 
 void RTPUDPv4TransmitterNoBind::ClearDestinations()
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (created)
-destinations.Clear();
-MAINMUTEX_UNLOCK
+    if (created)
+        destinations.Clear();
+
 }
 
 bool RTPUDPv4TransmitterNoBind::SupportsMulticasting()
 {
-if (!init)
-return false;
+    if (!init)
+        return false;
 
-MAINMUTEX_LOCK
+    bool v;
 
-bool v;
+    if (!created)
+        v = false;
+    else
+        v = supportsmulticasting;
 
-if (!created)
-v = false;
-else
-v = supportsmulticasting;
-
-MAINMUTEX_UNLOCK
-return v;
+    return v;
 }
 
 #ifdef RTP_SUPPORT_IPV4MULTICAST
 
 int RTPUDPv4TransmitterNoBind::JoinMulticastGroup(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-uint32_t mcastIP = address.GetIP();
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
 
-if (!RTPUDPV4TRANSNOBIND_IS_MCASTADDR(mcastIP))
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
-}
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    uint32_t mcastIP = address.GetIP();
 
-status = multicastgroups.AddElement(mcastIP);
-if (status >= 0)
-{
-RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_ADD_MEMBERSHIP, mcastIP, status);
-if (status != 0)
-{
-multicastgroups.DeleteElement(mcastIP);
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
-}
+    if (!RTPUDPV4TRANSNOBIND_IS_MCASTADDR(mcastIP))
+    {
 
-if (rtpsock != rtcpsock) // no need to join multicast group twice when multiplexing
-{
-RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_ADD_MEMBERSHIP, mcastIP, status);
-if (status != 0)
-{
-    RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
-    multicastgroups.DeleteElement(mcastIP);
-    MAINMUTEX_UNLOCK
-    return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
-}
-}
-}
-MAINMUTEX_UNLOCK
-return status;
+        return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
+    }
+
+    status = multicastgroups.AddElement(mcastIP);
+    if (status >= 0)
+    {
+        RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_ADD_MEMBERSHIP, mcastIP, status);
+        if (status != 0)
+        {
+            multicastgroups.DeleteElement(mcastIP);
+
+            return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+        }
+
+        if (rtpsock != rtcpsock) // no need to join multicast group twice when multiplexing
+        {
+            RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_ADD_MEMBERSHIP, mcastIP, status);
+            if (status != 0)
+            {
+                RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+                multicastgroups.DeleteElement(mcastIP);
+
+                return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+            }
+        }
+    }
+
+    return status;
 }
 
 int RTPUDPv4TransmitterNoBind::LeaveMulticastGroup(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-uint32_t mcastIP = address.GetIP();
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
 
-if (!RTPUDPV4TRANSNOBIND_IS_MCASTADDR(mcastIP))
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
-}
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    uint32_t mcastIP = address.GetIP();
 
-status = multicastgroups.DeleteElement(mcastIP);
-if (status >= 0)
-{
-RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
-if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
-RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+    if (!RTPUDPV4TRANSNOBIND_IS_MCASTADDR(mcastIP))
+    {
 
-status = 0;
-}
+        return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
+    }
 
-MAINMUTEX_UNLOCK
-return status;
+    status = multicastgroups.DeleteElement(mcastIP);
+    if (status >= 0)
+    {
+        RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+        if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
+            RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+
+        status = 0;
+    }
+
+    return status;
 }
 
 void RTPUDPv4TransmitterNoBind::LeaveAllMulticastGroups()
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (created)
-{
-multicastgroups.GotoFirstElement();
-while (multicastgroups.HasCurrentElement())
-{
-uint32_t mcastIP;
-int status __attribute__((unused)) = 0;
+    if (created)
+    {
+        multicastgroups.GotoFirstElement();
+        while (multicastgroups.HasCurrentElement())
+        {
+            uint32_t mcastIP;
+            int status __attribute__((unused)) = 0;
 
-mcastIP = multicastgroups.GetCurrentElement();
+            mcastIP = multicastgroups.GetCurrentElement();
 
-RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
-if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
-    RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+            RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
+            if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
+                RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
 
-multicastgroups.GotoNextElement();
-}
-multicastgroups.Clear();
-}
-MAINMUTEX_UNLOCK
+            multicastgroups.GotoNextElement();
+        }
+        multicastgroups.Clear();
+    }
+
 }
 
 #else // no multicast support
 
 int RTPUDPv4TransmitterNoBind::JoinMulticastGroup(const RTPAddress &addr)
 {
-return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
+    return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
 }
 
 int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
-return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
+    return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
 }
 
 void RTPUDPv4TransmitterNoBind::LeaveAllMulticastGroups()
@@ -1147,243 +1097,221 @@ void RTPUDPv4TransmitterNoBind::LeaveAllMulticastGroups()
 
 int RTPUDPv4TransmitterNoBind::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (m != receivemode)
-{
-receivemode = m;
-acceptignoreinfo.Clear();
-}
-MAINMUTEX_UNLOCK
-return 0;
+    if (!created)
+    {
+
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (m != receivemode)
+    {
+        receivemode = m;
+        acceptignoreinfo.Clear();
+    }
+
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::AddToIgnoreList(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
-if (receivemode != RTPTransmitter::IgnoreSome)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-status = ProcessAddAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
+    if (receivemode != RTPTransmitter::IgnoreSome)
+    {
 
-MAINMUTEX_UNLOCK
-return status;
+        return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+    }
+
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    status = ProcessAddAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+
+    return status;
 }
 
 int RTPUDPv4TransmitterNoBind::DeleteFromIgnoreList(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
-if (receivemode != RTPTransmitter::IgnoreSome)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
+    if (receivemode != RTPTransmitter::IgnoreSome)
+    {
 
-MAINMUTEX_UNLOCK
-return status;
+        return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+    }
+
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+
+    return status;
 }
 
 void RTPUDPv4TransmitterNoBind::ClearIgnoreList()
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (created && receivemode == RTPTransmitter::IgnoreSome)
-ClearAcceptIgnoreInfo();
-MAINMUTEX_UNLOCK
+    if (created && receivemode == RTPTransmitter::IgnoreSome)
+        ClearAcceptIgnoreInfo();
+
 }
 
 int RTPUDPv4TransmitterNoBind::AddToAcceptList(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
-if (receivemode != RTPTransmitter::AcceptSome)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-status = ProcessAddAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
+    if (receivemode != RTPTransmitter::AcceptSome)
+    {
 
-MAINMUTEX_UNLOCK
-return status;
+        return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+    }
+
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    status = ProcessAddAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+
+    return status;
 }
 
 int RTPUDPv4TransmitterNoBind::DeleteFromAcceptList(const RTPAddress &addr)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    int status;
 
-int status;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (addr.GetAddressType() != RTPAddress::IPv4Address)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
-}
-if (receivemode != RTPTransmitter::AcceptSome)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
-}
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (addr.GetAddressType() != RTPAddress::IPv4Address)
+    {
 
-const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
-status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+        return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+    }
+    if (receivemode != RTPTransmitter::AcceptSome)
+    {
 
-MAINMUTEX_UNLOCK
-return status;
+        return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+    }
+
+    const RTPIPv4Address &address = (const RTPIPv4Address &) addr;
+    status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(), address.GetPort());
+
+    return status;
 }
 
 void RTPUDPv4TransmitterNoBind::ClearAcceptList()
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (created && receivemode == RTPTransmitter::AcceptSome)
-ClearAcceptIgnoreInfo();
-MAINMUTEX_UNLOCK
+    if (created && receivemode == RTPTransmitter::AcceptSome)
+        ClearAcceptIgnoreInfo();
+
 }
 
 int RTPUDPv4TransmitterNoBind::SetMaximumPacketSize(size_t s)
 {
-if (!init)
-return ERR_RTP_UDPV4TRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_NOTCREATED;
-}
-if (s > RTPUDPV4TRANSNOBIND_MAXPACKSIZE)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
-}
-maxpacksize = s;
-MAINMUTEX_UNLOCK
-return 0;
+    if (!created)
+    {
+
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+    if (s > RTPUDPV4TRANSNOBIND_MAXPACKSIZE)
+    {
+
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
+    maxpacksize = s;
+
+    return 0;
 }
 
 bool RTPUDPv4TransmitterNoBind::NewDataAvailable()
 {
-if (!init)
-return false;
+    if (!init)
+        return false;
 
-MAINMUTEX_LOCK
+    bool v;
 
-bool v;
+    if (!created)
+        v = false;
+    else
+    {
+        if (rawpacketlist.empty())
+            v = false;
+        else
+            v = true;
+    }
 
-if (!created)
-v = false;
-else
-{
-if (rawpacketlist.empty())
-v = false;
-else
-v = true;
-}
-
-MAINMUTEX_UNLOCK
-return v;
+    return v;
 }
 
 RTPRawPacket *RTPUDPv4TransmitterNoBind::GetNextPacket()
 {
-if (!init)
-return 0;
+    if (!init)
+        return 0;
 
-MAINMUTEX_LOCK
+    RTPRawPacket *p;
 
-RTPRawPacket *p;
+    if (!created)
+    {
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return 0;
-}
-if (rawpacketlist.empty())
-{
-MAINMUTEX_UNLOCK
-return 0;
-}
+        return 0;
+    }
+    if (rawpacketlist.empty())
+    {
 
-p = *(rawpacketlist.begin());
-rawpacketlist.pop_front();
+        return 0;
+    }
 
-MAINMUTEX_UNLOCK
-return p;
+    p = *(rawpacketlist.begin());
+    rawpacketlist.pop_front();
+
+    return p;
 }
 
 // Here the private functions start...
@@ -1391,372 +1319,372 @@ return p;
 #ifdef RTP_SUPPORT_IPV4MULTICAST
 bool RTPUDPv4TransmitterNoBind::SetMulticastTTL(uint8_t ttl)
 {
-int ttl2, status;
+    int ttl2, status;
 
-ttl2 = (int) ttl;
-status = setsockopt(rtpsock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *) &ttl2, sizeof(int));
-if (status != 0)
-return false;
+    ttl2 = (int) ttl;
+    status = setsockopt(rtpsock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *) &ttl2, sizeof(int));
+    if (status != 0)
+        return false;
 
-if (rtpsock != rtcpsock) // no need to set TTL twice when multiplexing
-{
-status = setsockopt(rtcpsock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *) &ttl2, sizeof(int));
-if (status != 0)
-return false;
-}
-return true;
+    if (rtpsock != rtcpsock) // no need to set TTL twice when multiplexing
+    {
+        status = setsockopt(rtcpsock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *) &ttl2, sizeof(int));
+        if (status != 0)
+            return false;
+    }
+    return true;
 }
 #endif // RTP_SUPPORT_IPV4MULTICAST
 
 void RTPUDPv4TransmitterNoBind::FlushPackets()
 {
-std::list<RTPRawPacket*>::const_iterator it;
+    std::list<RTPRawPacket*>::const_iterator it;
 
-for (it = rawpacketlist.begin(); it != rawpacketlist.end(); ++it)
-delete *it;
-rawpacketlist.clear();
+    for (it = rawpacketlist.begin(); it != rawpacketlist.end(); ++it)
+        delete *it;
+    rawpacketlist.clear();
 }
 
 int RTPUDPv4TransmitterNoBind::PollSocket(bool rtp)
 {
-RTPSOCKLENTYPE fromlen;
-int recvlen;
-char packetbuffer[RTPUDPV4TRANSNOBIND_MAXPACKSIZE];
+    RTPSOCKLENTYPE fromlen;
+    int recvlen;
+    char packetbuffer[RTPUDPV4TRANSNOBIND_MAXPACKSIZE];
 #ifdef RTP_SOCKETTYPE_WINSOCK
-SOCKET sock;
-unsigned long len;
+    SOCKET sock;
+    unsigned long len;
 #else
-size_t len;
-int sock;
+    size_t len;
+    int sock;
 #endif // RTP_SOCKETTYPE_WINSOCK
-struct sockaddr_in srcaddr;
-bool dataavailable;
+    struct sockaddr_in srcaddr;
+    bool dataavailable;
 
-if (rtp)
-sock = rtpsock;
-else
-sock = rtcpsock;
+    if (rtp)
+        sock = rtpsock;
+    else
+        sock = rtcpsock;
 
-do
-{
-len = 0;
-RTPIOCTL(sock, FIONREAD, &len);
+    do
+    {
+        len = 0;
+        RTPIOCTL(sock, FIONREAD, &len);
 
-if (len <= 0) // make sure a packet of length zero is not queued
-{
- // An alternative workaround would be to just use non-blocking sockets.
- // However, since the user does have access to the sockets and I do not
- // know how this would affect anyone else's code, I chose to do it using
- // an extra select call in case ioctl says the length is zero.
+        if (len <= 0) // make sure a packet of length zero is not queued
+        {
+            // An alternative workaround would be to just use non-blocking sockets.
+            // However, since the user does have access to the sockets and I do not
+            // know how this would affect anyone else's code, I chose to do it using
+            // an extra select call in case ioctl says the length is zero.
 
-int8_t isset = 0;
-int status = RTPSelect(&sock, &isset, 1, RTPTime(0));
-if (status < 0)
-return status;
+            int8_t isset = 0;
+            int status = RTPSelect(&sock, &isset, 1, RTPTime(0));
+            if (status < 0)
+                return status;
 
-if (isset)
-dataavailable = true;
-else
-dataavailable = false;
-}
-else
-dataavailable = true;
+            if (isset)
+                dataavailable = true;
+            else
+                dataavailable = false;
+        }
+        else
+            dataavailable = true;
 
-if (dataavailable)
-{
-RTPTime curtime = RTPTime::CurrentTime();
-fromlen = sizeof(struct sockaddr_in);
-recvlen = recvfrom(sock, packetbuffer, RTPUDPV4TRANSNOBIND_MAXPACKSIZE, 0, (struct sockaddr *) &srcaddr, &fromlen);
-if (recvlen > 0)
-{
-bool acceptdata;
+        if (dataavailable)
+        {
+            RTPTime curtime = RTPTime::CurrentTime();
+            fromlen = sizeof(struct sockaddr_in);
+            recvlen = recvfrom(sock, packetbuffer, RTPUDPV4TRANSNOBIND_MAXPACKSIZE, 0, (struct sockaddr *) &srcaddr, &fromlen);
+            if (recvlen > 0)
+            {
+                bool acceptdata;
 
-			// got data, process it
-if (receivemode == RTPTransmitter::AcceptAll)
-acceptdata = true;
-else
-acceptdata = ShouldAcceptData(ntohl(srcaddr.sin_addr.s_addr), ntohs(srcaddr.sin_port));
+                // got data, process it
+                if (receivemode == RTPTransmitter::AcceptAll)
+                    acceptdata = true;
+                else
+                    acceptdata = ShouldAcceptData(ntohl(srcaddr.sin_addr.s_addr), ntohs(srcaddr.sin_port));
 
-if (acceptdata)
-{
-RTPRawPacket *pack;
-RTPIPv4Address *addr;
-uint8_t *datacopy;
+                if (acceptdata)
+                {
+                    RTPRawPacket *pack;
+                    RTPIPv4Address *addr;
+                    uint8_t *datacopy;
 
-addr = new RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr), ntohs(srcaddr.sin_port));
-if (addr == 0)
-return ERR_RTP_OUTOFMEM;
-datacopy = new uint8_t[recvlen];
-if (datacopy == 0)
-{
-delete addr;
-return ERR_RTP_OUTOFMEM;
-}
-memcpy(datacopy, packetbuffer, recvlen);
+                    addr = new RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr), ntohs(srcaddr.sin_port));
+                    if (addr == 0)
+                        return ERR_RTP_OUTOFMEM;
+                    datacopy = new uint8_t[recvlen];
+                    if (datacopy == 0)
+                    {
+                        delete addr;
+                        return ERR_RTP_OUTOFMEM;
+                    }
+                    memcpy(datacopy, packetbuffer, recvlen);
 
-bool isrtp = rtp;
-if (rtpsock == rtcpsock) // check payload type when multiplexing
-{
-isrtp = true;
+                    bool isrtp = rtp;
+                    if (rtpsock == rtcpsock) // check payload type when multiplexing
+                    {
+                        isrtp = true;
 
-if ((size_t) recvlen > sizeof(RTCPCommonHeader))
-{
-    RTCPCommonHeader *rtcpheader = (RTCPCommonHeader *) datacopy;
-    uint8_t packettype = rtcpheader->packettype;
+                        if ((size_t) recvlen > sizeof(RTCPCommonHeader))
+                        {
+                            RTCPCommonHeader *rtcpheader = (RTCPCommonHeader *) datacopy;
+                            uint8_t packettype = rtcpheader->packettype;
 
-    if (packettype >= 200 && packettype <= 204)
-        isrtp = false;
-}
-}
+                            if (packettype >= 200 && packettype <= 204)
+                                isrtp = false;
+                        }
+                    }
 
-pack = new RTPRawPacket(datacopy, recvlen, addr, curtime, isrtp);
-if (pack == 0)
-{
-delete addr;
-delete[] datacopy;
-return ERR_RTP_OUTOFMEM;
-}
-rawpacketlist.push_back(pack);
-}
-}
-}
-} while (dataavailable);
+                    pack = new RTPRawPacket(datacopy, recvlen, addr, curtime, isrtp);
+                    if (pack == 0)
+                    {
+                        delete addr;
+                        delete[] datacopy;
+                        return ERR_RTP_OUTOFMEM;
+                    }
+                    rawpacketlist.push_back(pack);
+                }
+            }
+        }
+    } while (dataavailable);
 
-return 0;
+    return 0;
 }
 
 int RTPUDPv4TransmitterNoBind::ProcessAddAcceptIgnoreEntry(uint32_t ip, uint16_t port)
 {
-acceptignoreinfo.GotoElement(ip);
-if (acceptignoreinfo.HasCurrentElement()) // An entry for this IP address already exists
-{
-PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
+    acceptignoreinfo.GotoElement(ip);
+    if (acceptignoreinfo.HasCurrentElement()) // An entry for this IP address already exists
+    {
+        PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
 
-if (port == 0) // select all ports
-{
-portinf->all = true;
-portinf->portlist.clear();
-}
-else if (!portinf->all)
-{
-std::list<uint16_t>::const_iterator it, begin, end;
+        if (port == 0) // select all ports
+        {
+            portinf->all = true;
+            portinf->portlist.clear();
+        }
+        else if (!portinf->all)
+        {
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = portinf->portlist.begin();
-end = portinf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == port) // already in list
-return 0;
-}
-portinf->portlist.push_front(port);
-}
-}
-else // got to create an entry for this IP address
-{
-PortInfo *portinf;
-int status;
+            begin = portinf->portlist.begin();
+            end = portinf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == port) // already in list
+                    return 0;
+            }
+            portinf->portlist.push_front(port);
+        }
+    }
+    else // got to create an entry for this IP address
+    {
+        PortInfo *portinf;
+        int status;
 
-portinf = new PortInfo();
-if (port == 0) // select all ports
-portinf->all = true;
-else
-portinf->portlist.push_front(port);
+        portinf = new PortInfo();
+        if (port == 0) // select all ports
+            portinf->all = true;
+        else
+            portinf->portlist.push_front(port);
 
-status = acceptignoreinfo.AddElement(ip, portinf);
-if (status < 0)
-{
-delete portinf;
-return status;
-}
-}
+        status = acceptignoreinfo.AddElement(ip, portinf);
+        if (status < 0)
+        {
+            delete portinf;
+            return status;
+        }
+    }
 
-return 0;
+    return 0;
 }
 
 void RTPUDPv4TransmitterNoBind::ClearAcceptIgnoreInfo()
 {
-acceptignoreinfo.GotoFirstElement();
-while (acceptignoreinfo.HasCurrentElement())
-{
-PortInfo *inf;
+    acceptignoreinfo.GotoFirstElement();
+    while (acceptignoreinfo.HasCurrentElement())
+    {
+        PortInfo *inf;
 
-inf = acceptignoreinfo.GetCurrentElement();
-delete inf;
-acceptignoreinfo.GotoNextElement();
-}
-acceptignoreinfo.Clear();
+        inf = acceptignoreinfo.GetCurrentElement();
+        delete inf;
+        acceptignoreinfo.GotoNextElement();
+    }
+    acceptignoreinfo.Clear();
 }
 
 int RTPUDPv4TransmitterNoBind::ProcessDeleteAcceptIgnoreEntry(uint32_t ip, uint16_t port)
 {
-acceptignoreinfo.GotoElement(ip);
-if (!acceptignoreinfo.HasCurrentElement())
-return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
+    acceptignoreinfo.GotoElement(ip);
+    if (!acceptignoreinfo.HasCurrentElement())
+        return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
 
-PortInfo *inf;
+    PortInfo *inf;
 
-inf = acceptignoreinfo.GetCurrentElement();
-if (port == 0) // delete all entries
-{
-inf->all = false;
-inf->portlist.clear();
-}
-else // a specific port was selected
-{
-if (inf->all) // currently, all ports are selected. Add the one to remove to the list
-{
- // we have to check if the list doesn't contain the port already
-std::list<uint16_t>::const_iterator it, begin, end;
+    inf = acceptignoreinfo.GetCurrentElement();
+    if (port == 0) // delete all entries
+    {
+        inf->all = false;
+        inf->portlist.clear();
+    }
+    else // a specific port was selected
+    {
+        if (inf->all) // currently, all ports are selected. Add the one to remove to the list
+        {
+            // we have to check if the list doesn't contain the port already
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == port) // already in list: this means we already deleted the entry
-return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
-}
-inf->portlist.push_front(port);
-}
-else // check if we can find the port in the list
-{
-std::list<uint16_t>::iterator it, begin, end;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == port) // already in list: this means we already deleted the entry
+                    return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
+            }
+            inf->portlist.push_front(port);
+        }
+        else // check if we can find the port in the list
+        {
+            std::list<uint16_t>::iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; ++it)
-{
-if (*it == port) // found it!
-{
-inf->portlist.erase(it);
-return 0;
-}
-}
- // didn't find it
-return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
-}
-}
-return 0;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; ++it)
+            {
+                if (*it == port) // found it!
+                {
+                    inf->portlist.erase(it);
+                    return 0;
+                }
+            }
+            // didn't find it
+            return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
+        }
+    }
+    return 0;
 }
 
 bool RTPUDPv4TransmitterNoBind::ShouldAcceptData(uint32_t srcip, uint16_t srcport)
 {
-if (receivemode == RTPTransmitter::AcceptSome)
-{
-PortInfo *inf;
+    if (receivemode == RTPTransmitter::AcceptSome)
+    {
+        PortInfo *inf;
 
-acceptignoreinfo.GotoElement(srcip);
-if (!acceptignoreinfo.HasCurrentElement())
-return false;
+        acceptignoreinfo.GotoElement(srcip);
+        if (!acceptignoreinfo.HasCurrentElement())
+            return false;
 
-inf = acceptignoreinfo.GetCurrentElement();
-if (!inf->all) // only accept the ones in the list
-{
-std::list<uint16_t>::const_iterator it, begin, end;
+        inf = acceptignoreinfo.GetCurrentElement();
+        if (!inf->all) // only accept the ones in the list
+        {
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == srcport)
-return true;
-}
-return false;
-}
-else // accept all, except the ones in the list
-{
-std::list<uint16_t>::const_iterator it, begin, end;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == srcport)
+                    return true;
+            }
+            return false;
+        }
+        else // accept all, except the ones in the list
+        {
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == srcport)
-return false;
-}
-return true;
-}
-}
-else // IgnoreSome
-{
-PortInfo *inf;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == srcport)
+                    return false;
+            }
+            return true;
+        }
+    }
+    else // IgnoreSome
+    {
+        PortInfo *inf;
 
-acceptignoreinfo.GotoElement(srcip);
-if (!acceptignoreinfo.HasCurrentElement())
-return true;
+        acceptignoreinfo.GotoElement(srcip);
+        if (!acceptignoreinfo.HasCurrentElement())
+            return true;
 
-inf = acceptignoreinfo.GetCurrentElement();
-if (!inf->all) // ignore the ports in the list
-{
-std::list<uint16_t>::const_iterator it, begin, end;
+        inf = acceptignoreinfo.GetCurrentElement();
+        if (!inf->all) // ignore the ports in the list
+        {
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == srcport)
-return false;
-}
-return true;
-}
-else // ignore all, except the ones in the list
-{
-std::list<uint16_t>::const_iterator it, begin, end;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == srcport)
+                    return false;
+            }
+            return true;
+        }
+        else // ignore all, except the ones in the list
+        {
+            std::list<uint16_t>::const_iterator it, begin, end;
 
-begin = inf->portlist.begin();
-end = inf->portlist.end();
-for (it = begin; it != end; it++)
-{
-if (*it == srcport)
-return true;
-}
-return false;
-}
-}
-return true;
+            begin = inf->portlist.begin();
+            end = inf->portlist.end();
+            for (it = begin; it != end; it++)
+            {
+                if (*it == srcport)
+                    return true;
+            }
+            return false;
+        }
+    }
+    return true;
 }
 
 int RTPUDPv4TransmitterNoBind::CreateLocalIPList()
 {
- // first try to obtain the list from the network interface info
+    // first try to obtain the list from the network interface info
 
-if (!GetLocalIPList_Interfaces())
-{
- // If this fails, we'll have to depend on DNS info
-GetLocalIPList_DNS();
-}
-AddLoopbackAddress();
-return 0;
+    if (!GetLocalIPList_Interfaces())
+    {
+        // If this fails, we'll have to depend on DNS info
+        GetLocalIPList_DNS();
+    }
+    AddLoopbackAddress();
+    return 0;
 }
 
 #ifdef RTP_SOCKETTYPE_WINSOCK
 
 bool RTPUDPv4TransmitterNoBind::GetLocalIPList_Interfaces()
 {
-unsigned char buffer[RTPUDPV4TRANSNOBIND_IFREQBUFSIZE];
-DWORD outputsize;
-DWORD numaddresses,i;
-SOCKET_ADDRESS_LIST *addrlist;
+    unsigned char buffer[RTPUDPV4TRANSNOBIND_IFREQBUFSIZE];
+    DWORD outputsize;
+    DWORD numaddresses,i;
+    SOCKET_ADDRESS_LIST *addrlist;
 
-if (WSAIoctl(rtpsock,SIO_ADDRESS_LIST_QUERY,NULL,0,&buffer,RTPUDPV4TRANSNOBIND_IFREQBUFSIZE,&outputsize,NULL,NULL))
-return false;
+    if (WSAIoctl(rtpsock,SIO_ADDRESS_LIST_QUERY,NULL,0,&buffer,RTPUDPV4TRANSNOBIND_IFREQBUFSIZE,&outputsize,NULL,NULL))
+    return false;
 
-addrlist = (SOCKET_ADDRESS_LIST *)buffer;
-numaddresses = addrlist->iAddressCount;
-for (i = 0; i < numaddresses; i++)
-{
-SOCKET_ADDRESS *sockaddr = &(addrlist->Address[i]);
-if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in)) // IPv4 address
-{
-struct sockaddr_in *addr = (struct sockaddr_in *)sockaddr->lpSockaddr;
+    addrlist = (SOCKET_ADDRESS_LIST *)buffer;
+    numaddresses = addrlist->iAddressCount;
+    for (i = 0; i < numaddresses; i++)
+    {
+        SOCKET_ADDRESS *sockaddr = &(addrlist->Address[i]);
+        if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in)) // IPv4 address
+        {
+            struct sockaddr_in *addr = (struct sockaddr_in *)sockaddr->lpSockaddr;
 
-localIPs.push_back(ntohl(addr->sin_addr.s_addr));
-}
-}
+            localIPs.push_back(ntohl(addr->sin_addr.s_addr));
+        }
+    }
 
-if (localIPs.empty())
-return false;
+    if (localIPs.empty())
+    return false;
 
-return true;
+    return true;
 }
 
 #else // use either getifaddrs or ioctl
@@ -1765,92 +1693,92 @@ return true;
 
 bool RTPUDPv4TransmitterNoBind::GetLocalIPList_Interfaces()
 {
-struct ifaddrs *addrs, *tmp;
+    struct ifaddrs *addrs, *tmp;
 
-getifaddrs(&addrs);
-tmp = addrs;
+    getifaddrs(&addrs);
+    tmp = addrs;
 
-while (tmp != 0)
-{
-if (tmp->ifa_addr != 0 && tmp->ifa_addr->sa_family == AF_INET)
-{
-struct sockaddr_in *inaddr = (struct sockaddr_in *) tmp->ifa_addr;
-localIPs.push_back(ntohl(inaddr->sin_addr.s_addr));
-}
-tmp = tmp->ifa_next;
-}
+    while (tmp != 0)
+    {
+        if (tmp->ifa_addr != 0 && tmp->ifa_addr->sa_family == AF_INET)
+        {
+            struct sockaddr_in *inaddr = (struct sockaddr_in *) tmp->ifa_addr;
+            localIPs.push_back(ntohl(inaddr->sin_addr.s_addr));
+        }
+        tmp = tmp->ifa_next;
+    }
 
-freeifaddrs(addrs);
+    freeifaddrs(addrs);
 
-if (localIPs.empty())
-return false;
-return true;
+    if (localIPs.empty())
+        return false;
+    return true;
 }
 
 #else // user ioctl
 
 bool RTPUDPv4TransmitterNoBind::GetLocalIPList_Interfaces()
 {
-int status;
-char buffer[RTPUDPV4TRANSNOBIND_IFREQBUFSIZE];
-struct ifconf ifc;
-struct ifreq *ifr;
-struct sockaddr *sa;
-char *startptr,*endptr;
-int remlen;
+    int status;
+    char buffer[RTPUDPV4TRANSNOBIND_IFREQBUFSIZE];
+    struct ifconf ifc;
+    struct ifreq *ifr;
+    struct sockaddr *sa;
+    char *startptr,*endptr;
+    int remlen;
 
-ifc.ifc_len = RTPUDPV4TRANSNOBIND_IFREQBUFSIZE;
-ifc.ifc_buf = buffer;
-status = ioctl(rtpsock,SIOCGIFCONF,&ifc);
-if (status < 0)
-return false;
+    ifc.ifc_len = RTPUDPV4TRANSNOBIND_IFREQBUFSIZE;
+    ifc.ifc_buf = buffer;
+    status = ioctl(rtpsock,SIOCGIFCONF,&ifc);
+    if (status < 0)
+    return false;
 
-startptr = (char *)ifc.ifc_req;
-endptr = startptr + ifc.ifc_len;
-remlen = ifc.ifc_len;
-while((startptr < endptr) && remlen >= (int)sizeof(struct ifreq))
-{
-ifr = (struct ifreq *)startptr;
-sa = &(ifr->ifr_addr);
+    startptr = (char *)ifc.ifc_req;
+    endptr = startptr + ifc.ifc_len;
+    remlen = ifc.ifc_len;
+    while((startptr < endptr) && remlen >= (int)sizeof(struct ifreq))
+    {
+        ifr = (struct ifreq *)startptr;
+        sa = &(ifr->ifr_addr);
 #ifdef RTP_HAVE_SOCKADDR_LEN
-if (sa->sa_len <= sizeof(struct sockaddr))
-{
-if (sa->sa_len == sizeof(struct sockaddr_in) && sa->sa_family == PF_INET)
-{
-uint32_t ip;
-struct sockaddr_in *addr = (struct sockaddr_in *)sa;
+        if (sa->sa_len <= sizeof(struct sockaddr))
+        {
+            if (sa->sa_len == sizeof(struct sockaddr_in) && sa->sa_family == PF_INET)
+            {
+                uint32_t ip;
+                struct sockaddr_in *addr = (struct sockaddr_in *)sa;
 
-ip = ntohl(addr->sin_addr.s_addr);
-localIPs.push_back(ip);
-}
-remlen -= sizeof(struct ifreq);
-startptr += sizeof(struct ifreq);
-}
-else
-{
-int l = sa->sa_len-sizeof(struct sockaddr)+sizeof(struct ifreq);
+                ip = ntohl(addr->sin_addr.s_addr);
+                localIPs.push_back(ip);
+            }
+            remlen -= sizeof(struct ifreq);
+            startptr += sizeof(struct ifreq);
+        }
+        else
+        {
+            int l = sa->sa_len-sizeof(struct sockaddr)+sizeof(struct ifreq);
 
-remlen -= l;
-startptr += l;
-}
+            remlen -= l;
+            startptr += l;
+        }
 #else // don't have sa_len in struct sockaddr
-if (sa->sa_family == PF_INET)
-{
-uint32_t ip;
-struct sockaddr_in *addr = (struct sockaddr_in *)sa;
+        if (sa->sa_family == PF_INET)
+        {
+            uint32_t ip;
+            struct sockaddr_in *addr = (struct sockaddr_in *)sa;
 
-ip = ntohl(addr->sin_addr.s_addr);
-localIPs.push_back(ip);
-}
-remlen -= sizeof(struct ifreq);
-startptr += sizeof(struct ifreq);
+            ip = ntohl(addr->sin_addr.s_addr);
+            localIPs.push_back(ip);
+        }
+        remlen -= sizeof(struct ifreq);
+        startptr += sizeof(struct ifreq);
 
 #endif // RTP_HAVE_SOCKADDR_LEN
-}
+    }
 
-if (localIPs.empty())
-return false;
-return true;
+    if (localIPs.empty())
+    return false;
+    return true;
 }
 
 #endif // RTP_SUPPORT_IFADDRS
@@ -1859,49 +1787,49 @@ return true;
 
 void RTPUDPv4TransmitterNoBind::GetLocalIPList_DNS()
 {
-struct hostent *he;
-char name[1024];
-bool done;
-int i, j;
+    struct hostent *he;
+    char name[1024];
+    bool done;
+    int i, j;
 
-gethostname(name, 1023);
-name[1023] = 0;
-he = gethostbyname(name);
-if (he == 0)
-return;
+    gethostname(name, 1023);
+    name[1023] = 0;
+    he = gethostbyname(name);
+    if (he == 0)
+        return;
 
-i = 0;
-done = false;
-while (!done)
-{
-if (he->h_addr_list[i] == NULL)
-done = true;
-else
-{
-uint32_t ip = 0;
+    i = 0;
+    done = false;
+    while (!done)
+    {
+        if (he->h_addr_list[i] == NULL)
+            done = true;
+        else
+        {
+            uint32_t ip = 0;
 
-for (j = 0; j < 4; j++)
-ip |= ((uint32_t) ((unsigned char) he->h_addr_list[i][j]) << ((3 - j) * 8));
-localIPs.push_back(ip);
-i++;
-}
-}
+            for (j = 0; j < 4; j++)
+                ip |= ((uint32_t) ((unsigned char) he->h_addr_list[i][j]) << ((3 - j) * 8));
+            localIPs.push_back(ip);
+            i++;
+        }
+    }
 }
 
 void RTPUDPv4TransmitterNoBind::AddLoopbackAddress()
 {
-uint32_t loopbackaddr = (((uint32_t) 127) << 24) | ((uint32_t) 1);
-std::list<uint32_t>::const_iterator it;
-bool found = false;
+    uint32_t loopbackaddr = (((uint32_t) 127) << 24) | ((uint32_t) 1);
+    std::list<uint32_t>::const_iterator it;
+    bool found = false;
 
-for (it = localIPs.begin(); !found && it != localIPs.end(); it++)
-{
-if (*it == loopbackaddr)
-found = true;
-}
+    for (it = localIPs.begin(); !found && it != localIPs.end(); it++)
+    {
+        if (*it == loopbackaddr)
+            found = true;
+    }
 
-if (!found)
-localIPs.push_back(loopbackaddr);
+    if (!found)
+        localIPs.push_back(loopbackaddr);
 }
 
 } // end namespace

@@ -42,11 +42,6 @@
 
 #include <iostream>
 
-#define MAINMUTEX_LOCK
-#define MAINMUTEX_UNLOCK
-#define WAITMUTEX_LOCK
-#define WAITMUTEX_UNLOCK
-
 namespace qrtplib
 {
 
@@ -82,11 +77,8 @@ int RTPExternalTransmitter::Create(size_t maximumpacketsize, const RTPTransmissi
     if (!init)
         return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-    MAINMUTEX_LOCK
-
     if (created)
     {
-        MAINMUTEX_UNLOCK
         return ERR_RTP_EXTERNALTRANS_ALREADYCREATED;
     }
 
@@ -94,12 +86,10 @@ int RTPExternalTransmitter::Create(size_t maximumpacketsize, const RTPTransmissi
 
     if (transparams == 0)
     {
-        MAINMUTEX_UNLOCK
         return ERR_RTP_EXTERNALTRANS_ILLEGALPARAMETERS;
     }
     if (transparams->GetTransmissionProtocol() != RTPTransmitter::ExternalProto)
     {
-        MAINMUTEX_UNLOCK
         return ERR_RTP_EXTERNALTRANS_ILLEGALPARAMETERS;
     }
 
@@ -107,7 +97,6 @@ int RTPExternalTransmitter::Create(size_t maximumpacketsize, const RTPTransmissi
 
     if ((status = m_abortDesc.Init()) < 0)
     {
-        MAINMUTEX_UNLOCK
         return status;
     }
     m_abortCount = 0;
@@ -121,7 +110,6 @@ int RTPExternalTransmitter::Create(size_t maximumpacketsize, const RTPTransmissi
 
     waitingfordata = false;
     created = true;
-    MAINMUTEX_UNLOCK
     return 0;
 }
 
@@ -130,10 +118,8 @@ void RTPExternalTransmitter::Destroy()
     if (!init)
         return;
 
-    MAINMUTEX_LOCK
     if (!created)
     {
-        MAINMUTEX_UNLOCK;
         return;
     }
 
@@ -152,262 +138,223 @@ void RTPExternalTransmitter::Destroy()
         m_abortDesc.SendAbortSignal();
         m_abortCount++;
         m_abortDesc.Destroy();
-    MAINMUTEX_UNLOCK
-    WAITMUTEX_LOCK // to make sure that the WaitForIncomingData function ended
-    WAITMUTEX_UNLOCK
-}
-else
-    m_abortDesc.Destroy();
+        // to make sure that the WaitForIncomingData function ended
 
-MAINMUTEX_UNLOCK
+    }
+    else
+        m_abortDesc.Destroy();
+
 }
 
 RTPTransmissionInfo *RTPExternalTransmitter::GetTransmissionInfo()
 {
-if (!init)
-return 0;
+    if (!init)
+        return 0;
 
-MAINMUTEX_LOCK
-RTPTransmissionInfo *tinf = new RTPExternalTransmissionInfo(&packetinjector);
-MAINMUTEX_UNLOCK
-return tinf;
+    RTPTransmissionInfo *tinf = new RTPExternalTransmissionInfo(&packetinjector);
+    return tinf;
 }
 
 void RTPExternalTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-delete i;
+    delete i;
 }
 
 int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer, size_t *bufferlength)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
 
-if (localhostname == 0)
-{
+    if (localhostname == 0)
+    {
 // We'll just use 'gethostname' for simplicity
 
-char name[1024];
+        char name[1024];
 
-if (gethostname(name, 1023) != 0)
-    strcpy(name, "localhost"); // failsafe
-else
-    name[1023] = 0; // ensure null-termination
+        if (gethostname(name, 1023) != 0)
+            strcpy(name, "localhost"); // failsafe
+        else
+            name[1023] = 0; // ensure null-termination
 
-localhostnamelength = strlen(name);
-localhostname = new uint8_t[localhostnamelength + 1];
+        localhostnamelength = strlen(name);
+        localhostname = new uint8_t[localhostnamelength + 1];
 
-memcpy(localhostname, name, localhostnamelength);
-localhostname[localhostnamelength] = 0;
-}
+        memcpy(localhostname, name, localhostnamelength);
+        localhostname[localhostnamelength] = 0;
+    }
 
-if ((*bufferlength) < localhostnamelength)
-{
-*bufferlength = localhostnamelength; // tell the application the required size of the buffer
-MAINMUTEX_UNLOCK
-return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
-}
+    if ((*bufferlength) < localhostnamelength)
+    {
+        *bufferlength = localhostnamelength; // tell the application the required size of the buffer
+        return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
+    }
 
-memcpy(buffer, localhostname, localhostnamelength);
-*bufferlength = localhostnamelength;
+    memcpy(buffer, localhostname, localhostnamelength);
+    *bufferlength = localhostnamelength;
 
-MAINMUTEX_UNLOCK
-return 0;
+    return 0;
 }
 
 bool RTPExternalTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 {
-MAINMUTEX_LOCK
-bool value = false;
-if (sender)
-value = sender->ComesFromThisSender(addr);
-MAINMUTEX_UNLOCK
-return value;
+
+    bool value = false;
+    if (sender)
+        value = sender->ComesFromThisSender(addr);
+    return value;
 }
 
 int RTPExternalTransmitter::Poll()
 {
-return 0;
+    return 0;
 }
 
 int RTPExternalTransmitter::WaitForIncomingData(const RTPTime &delay, bool *dataavailable)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    if (waitingfordata)
+    {
+        return ERR_RTP_EXTERNALTRANS_ALREADYWAITING;
+    }
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-if (waitingfordata)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_ALREADYWAITING;
-}
+    waitingfordata = true;
 
-waitingfordata = true;
+    if (!rawpacketlist.empty())
+    {
+        if (dataavailable != 0)
+            *dataavailable = true;
+        waitingfordata = false;
+        return 0;
+    }
 
-if (!rawpacketlist.empty())
-{
-if (dataavailable != 0)
-    *dataavailable = true;
-waitingfordata = false;
-MAINMUTEX_UNLOCK
-return 0;
-}
+    int8_t isset = 0;
+    SocketType abortSock = m_abortDesc.GetAbortSocket();
+    int status = RTPSelect(&abortSock, &isset, 1, delay);
+    if (status < 0)
+    {
 
-WAITMUTEX_LOCK
-MAINMUTEX_UNLOCK
+        waitingfordata = false;
 
-int8_t isset = 0;
-SocketType abortSock = m_abortDesc.GetAbortSocket();
-int status = RTPSelect(&abortSock, &isset, 1, delay);
-if (status < 0)
-{
-MAINMUTEX_LOCK
-waitingfordata = false;
-MAINMUTEX_UNLOCK
-WAITMUTEX_UNLOCK
-return status;
-}
+        return status;
+    }
 
-MAINMUTEX_LOCK
-waitingfordata = false;
-if (!created) // destroy called
-{
-MAINMUTEX_UNLOCK;
-WAITMUTEX_UNLOCK
-return 0;
-}
+    waitingfordata = false;
+    if (!created) // destroy called
+    {
 
- // if aborted, read from abort buffer
-if (isset)
-{
-m_abortDesc.ClearAbortSignal();
-m_abortCount = 0;
-}
+        return 0;
+    }
 
-if (dataavailable != 0)
-{
-if (rawpacketlist.empty())
-    *dataavailable = false;
-else
-    *dataavailable = true;
-}
+    // if aborted, read from abort buffer
+    if (isset)
+    {
+        m_abortDesc.ClearAbortSignal();
+        m_abortCount = 0;
+    }
 
-MAINMUTEX_UNLOCK
-WAITMUTEX_UNLOCK
-return 0;
+    if (dataavailable != 0)
+    {
+        if (rawpacketlist.empty())
+            *dataavailable = false;
+        else
+            *dataavailable = true;
+    }
+
+    return 0;
 }
 
 int RTPExternalTransmitter::AbortWait()
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-if (!waitingfordata)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTWAITING;
-}
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    if (!waitingfordata)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTWAITING;
+    }
 
-m_abortDesc.SendAbortSignal();
-m_abortCount++;
+    m_abortDesc.SendAbortSignal();
+    m_abortCount++;
 
-MAINMUTEX_UNLOCK
-return 0;
+    return 0;
 }
 
 int RTPExternalTransmitter::SendRTPData(const void *data, size_t len)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    if (len > maxpacksize)
+    {
+        return ERR_RTP_EXTERNALTRANS_SPECIFIEDSIZETOOBIG;
+    }
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-if (len > maxpacksize)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_SPECIFIEDSIZETOOBIG;
-}
+    if (!sender)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOSENDER;
+    }
 
-if (!sender)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOSENDER;
-}
+    if (!sender->SendRTP(data, len))
+        return ERR_RTP_EXTERNALTRANS_SENDERROR;
 
-MAINMUTEX_UNLOCK
-
-if (!sender->SendRTP(data, len))
-return ERR_RTP_EXTERNALTRANS_SENDERROR;
-
-return 0;
+    return 0;
 }
 
 int RTPExternalTransmitter::SendRTCPData(const void *data, size_t len)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    if (len > maxpacksize)
+    {
+        return ERR_RTP_EXTERNALTRANS_SPECIFIEDSIZETOOBIG;
+    }
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-if (len > maxpacksize)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_SPECIFIEDSIZETOOBIG;
-}
+    if (!sender)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOSENDER;
+    }
 
-if (!sender)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOSENDER;
-}
-MAINMUTEX_UNLOCK
+    if (!sender->SendRTCP(data, len))
+        return ERR_RTP_EXTERNALTRANS_SENDERROR;
 
-if (!sender->SendRTCP(data, len))
-return ERR_RTP_EXTERNALTRANS_SENDERROR;
-
-return 0;
+    return 0;
 }
 
 int RTPExternalTransmitter::AddDestination(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NODESTINATIONSSUPPORTED;
+    return ERR_RTP_EXTERNALTRANS_NODESTINATIONSSUPPORTED;
 }
 
 int RTPExternalTransmitter::DeleteDestination(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NODESTINATIONSSUPPORTED;
+    return ERR_RTP_EXTERNALTRANS_NODESTINATIONSSUPPORTED;
 }
 
 void RTPExternalTransmitter::ClearDestinations()
@@ -416,17 +363,17 @@ void RTPExternalTransmitter::ClearDestinations()
 
 bool RTPExternalTransmitter::SupportsMulticasting()
 {
-return false;
+    return false;
 }
 
 int RTPExternalTransmitter::JoinMulticastGroup(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOMULTICASTSUPPORT;
+    return ERR_RTP_EXTERNALTRANS_NOMULTICASTSUPPORT;
 }
 
 int RTPExternalTransmitter::LeaveMulticastGroup(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOMULTICASTSUPPORT;
+    return ERR_RTP_EXTERNALTRANS_NOMULTICASTSUPPORT;
 }
 
 void RTPExternalTransmitter::LeaveAllMulticastGroups()
@@ -435,32 +382,28 @@ void RTPExternalTransmitter::LeaveAllMulticastGroups()
 
 int RTPExternalTransmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-if (m != RTPTransmitter::AcceptAll)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_BADRECEIVEMODE;
-}
-MAINMUTEX_UNLOCK
-return 0;
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    if (m != RTPTransmitter::AcceptAll)
+    {
+        return ERR_RTP_EXTERNALTRANS_BADRECEIVEMODE;
+    }
+    return 0;
 }
 
 int RTPExternalTransmitter::AddToIgnoreList(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOIGNORELIST;
+    return ERR_RTP_EXTERNALTRANS_NOIGNORELIST;
 }
 
 int RTPExternalTransmitter::DeleteFromIgnoreList(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOIGNORELIST;
+    return ERR_RTP_EXTERNALTRANS_NOIGNORELIST;
 }
 
 void RTPExternalTransmitter::ClearIgnoreList()
@@ -469,12 +412,12 @@ void RTPExternalTransmitter::ClearIgnoreList()
 
 int RTPExternalTransmitter::AddToAcceptList(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOACCEPTLIST;
+    return ERR_RTP_EXTERNALTRANS_NOACCEPTLIST;
 }
 
 int RTPExternalTransmitter::DeleteFromAcceptList(const RTPAddress &)
 {
-return ERR_RTP_EXTERNALTRANS_NOACCEPTLIST;
+    return ERR_RTP_EXTERNALTRANS_NOACCEPTLIST;
 }
 
 void RTPExternalTransmitter::ClearAcceptList()
@@ -483,228 +426,207 @@ void RTPExternalTransmitter::ClearAcceptList()
 
 int RTPExternalTransmitter::SetMaximumPacketSize(size_t s)
 {
-if (!init)
-return ERR_RTP_EXTERNALTRANS_NOTINIT;
+    if (!init)
+        return ERR_RTP_EXTERNALTRANS_NOTINIT;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return ERR_RTP_EXTERNALTRANS_NOTCREATED;
-}
-maxpacksize = s;
-MAINMUTEX_UNLOCK
-return 0;
+    if (!created)
+    {
+        return ERR_RTP_EXTERNALTRANS_NOTCREATED;
+    }
+    maxpacksize = s;
+    return 0;
 }
 
 bool RTPExternalTransmitter::NewDataAvailable()
 {
-if (!init)
-return false;
+    if (!init)
+        return false;
 
-MAINMUTEX_LOCK
+    bool v;
 
-bool v;
+    if (!created)
+        v = false;
+    else
+    {
+        if (rawpacketlist.empty())
+            v = false;
+        else
+            v = true;
+    }
 
-if (!created)
-v = false;
-else
-{
-if (rawpacketlist.empty())
-    v = false;
-else
-    v = true;
-}
-
-MAINMUTEX_UNLOCK
-return v;
+    return v;
 }
 
 RTPRawPacket *RTPExternalTransmitter::GetNextPacket()
 {
-if (!init)
-return 0;
+    if (!init)
+        return 0;
 
-MAINMUTEX_LOCK
+    RTPRawPacket *p;
 
-RTPRawPacket *p;
+    if (!created)
+    {
+        return 0;
+    }
+    if (rawpacketlist.empty())
+    {
+        return 0;
+    }
 
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return 0;
-}
-if (rawpacketlist.empty())
-{
-MAINMUTEX_UNLOCK
-return 0;
-}
+    p = *(rawpacketlist.begin());
+    rawpacketlist.pop_front();
 
-p = *(rawpacketlist.begin());
-rawpacketlist.pop_front();
-
-MAINMUTEX_UNLOCK
-return p;
+    return p;
 }
 
 // Here the private functions start...
 
 void RTPExternalTransmitter::FlushPackets()
 {
-std::list<RTPRawPacket*>::const_iterator it;
+    std::list<RTPRawPacket*>::const_iterator it;
 
-for (it = rawpacketlist.begin(); it != rawpacketlist.end(); ++it)
-delete *it;
-rawpacketlist.clear();
+    for (it = rawpacketlist.begin(); it != rawpacketlist.end(); ++it)
+        delete *it;
+    rawpacketlist.clear();
 }
 
 void RTPExternalTransmitter::InjectRTP(const void *data, size_t len, const RTPAddress &a)
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return;
-}
+    if (!created)
+    {
+        return;
+    }
 
-RTPAddress *addr = a.CreateCopy();
-if (addr == 0)
-return;
+    RTPAddress *addr = a.CreateCopy();
+    if (addr == 0)
+        return;
 
-uint8_t *datacopy;
+    uint8_t *datacopy;
 
-datacopy = new uint8_t[len];
-if (datacopy == 0)
-{
-delete addr;
-return;
-}
-memcpy(datacopy, data, len);
+    datacopy = new uint8_t[len];
+    if (datacopy == 0)
+    {
+        delete addr;
+        return;
+    }
+    memcpy(datacopy, data, len);
 
-RTPTime curtime = RTPTime::CurrentTime();
-RTPRawPacket *pack;
+    RTPTime curtime = RTPTime::CurrentTime();
+    RTPRawPacket *pack;
 
-pack = new RTPRawPacket(datacopy, len, addr, curtime, true);
-if (pack == 0)
-{
-delete addr;
-delete[] localhostname;
-return;
-}
-rawpacketlist.push_back(pack);
+    pack = new RTPRawPacket(datacopy, len, addr, curtime, true);
+    if (pack == 0)
+    {
+        delete addr;
+        delete[] localhostname;
+        return;
+    }
+    rawpacketlist.push_back(pack);
 
-if (m_abortCount == 0)
-{
-m_abortDesc.SendAbortSignal();
-m_abortCount++;
-}
+    if (m_abortCount == 0)
+    {
+        m_abortDesc.SendAbortSignal();
+        m_abortCount++;
+    }
 
-MAINMUTEX_UNLOCK
 }
 
 void RTPExternalTransmitter::InjectRTCP(const void *data, size_t len, const RTPAddress &a)
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return;
-}
+    if (!created)
+    {
+        return;
+    }
 
-RTPAddress *addr = a.CreateCopy();
-if (addr == 0)
-return;
+    RTPAddress *addr = a.CreateCopy();
+    if (addr == 0)
+        return;
 
-uint8_t *datacopy;
+    uint8_t *datacopy;
 
-datacopy = new uint8_t[len];
-if (datacopy == 0)
-{
-delete addr;
-return;
-}
-memcpy(datacopy, data, len);
+    datacopy = new uint8_t[len];
+    if (datacopy == 0)
+    {
+        delete addr;
+        return;
+    }
+    memcpy(datacopy, data, len);
 
-RTPTime curtime = RTPTime::CurrentTime();
-RTPRawPacket *pack;
+    RTPTime curtime = RTPTime::CurrentTime();
+    RTPRawPacket *pack;
 
-pack = new RTPRawPacket(datacopy, len, addr, curtime, false);
-if (pack == 0)
-{
-delete addr;
-delete[] localhostname;
-return;
-}
-rawpacketlist.push_back(pack);
+    pack = new RTPRawPacket(datacopy, len, addr, curtime, false);
+    if (pack == 0)
+    {
+        delete addr;
+        delete[] localhostname;
+        return;
+    }
+    rawpacketlist.push_back(pack);
 
-if (m_abortCount == 0)
-{
-m_abortDesc.SendAbortSignal();
-m_abortCount++;
-}
+    if (m_abortCount == 0)
+    {
+        m_abortDesc.SendAbortSignal();
+        m_abortCount++;
+    }
 
-MAINMUTEX_UNLOCK
 }
 
 void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, size_t len, const RTPAddress &a)
 {
-if (!init)
-return;
+    if (!init)
+        return;
 
-MAINMUTEX_LOCK
-if (!created)
-{
-MAINMUTEX_UNLOCK
-return;
-}
+    if (!created)
+    {
+        return;
+    }
 
-RTPAddress *addr = a.CreateCopy();
-if (addr == 0)
-return;
+    RTPAddress *addr = a.CreateCopy();
+    if (addr == 0)
+        return;
 
-uint8_t *datacopy;
-bool rtp = true;
+    uint8_t *datacopy;
+    bool rtp = true;
 
-if (len >= 2)
-{
-const uint8_t *pData = (const uint8_t *) data;
-if (pData[1] >= 200 && pData[1] <= 204)
-rtp = false;
-}
+    if (len >= 2)
+    {
+        const uint8_t *pData = (const uint8_t *) data;
+        if (pData[1] >= 200 && pData[1] <= 204)
+            rtp = false;
+    }
 
-datacopy = new uint8_t[len];
-if (datacopy == 0)
-{
-delete addr;
-return;
-}
-memcpy(datacopy, data, len);
+    datacopy = new uint8_t[len];
+    if (datacopy == 0)
+    {
+        delete addr;
+        return;
+    }
+    memcpy(datacopy, data, len);
 
-RTPTime curtime = RTPTime::CurrentTime();
-RTPRawPacket *pack;
+    RTPTime curtime = RTPTime::CurrentTime();
+    RTPRawPacket *pack;
 
-pack = new RTPRawPacket(datacopy, len, addr, curtime, rtp);
-if (pack == 0)
-{
-delete addr;
-delete[] localhostname;
-return;
-}
-rawpacketlist.push_back(pack);
+    pack = new RTPRawPacket(datacopy, len, addr, curtime, rtp);
+    if (pack == 0)
+    {
+        delete addr;
+        delete[] localhostname;
+        return;
+    }
+    rawpacketlist.push_back(pack);
 
-if (m_abortCount == 0)
-{
-m_abortDesc.SendAbortSignal();
-m_abortCount++;
-}
-
-MAINMUTEX_UNLOCK
+    if (m_abortCount == 0)
+    {
+        m_abortDesc.SendAbortSignal();
+        m_abortCount++;
+    }
 
 }
 
