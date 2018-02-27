@@ -42,9 +42,7 @@
 #include "rtcppacket.h"
 #include "rtptimeutilities.h"
 #include "rtpstructs.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -125,6 +123,8 @@ public:
 
 private:
 	RTCPReceiverReport *GotoReport(int index) const;
+
+	RTPEndian m_endian;
 };
 
 inline uint32_t RTCPSRPacket::GetSenderSSRC() const
@@ -133,7 +133,7 @@ inline uint32_t RTCPSRPacket::GetSenderSSRC() const
 		return 0;
 
 	uint32_t *ssrcptr = (uint32_t *)(data+sizeof(RTCPCommonHeader));
-	return ntohl(*ssrcptr);
+	return m_endian.qToHost(*ssrcptr);
 }
 
 inline RTPNTPTime RTCPSRPacket::GetNTPTimestamp() const
@@ -142,7 +142,7 @@ inline RTPNTPTime RTCPSRPacket::GetNTPTimestamp() const
 		return RTPNTPTime(0,0);
 
 	RTCPSenderReport *sr = (RTCPSenderReport *)(data+sizeof(RTCPCommonHeader)+sizeof(uint32_t));
-	return RTPNTPTime(ntohl(sr->ntptime_msw),ntohl(sr->ntptime_lsw));
+	return RTPNTPTime(m_endian.qToHost(sr->ntptime_msw),m_endian.qToHost(sr->ntptime_lsw));
 }
 
 inline uint32_t RTCPSRPacket::GetRTPTimestamp() const
@@ -150,7 +150,7 @@ inline uint32_t RTCPSRPacket::GetRTPTimestamp() const
 	if (!knownformat)
 		return 0;
 	RTCPSenderReport *sr = (RTCPSenderReport *)(data+sizeof(RTCPCommonHeader)+sizeof(uint32_t));
-	return ntohl(sr->rtptimestamp);
+	return m_endian.qToHost(sr->rtptimestamp);
 }
 
 inline uint32_t RTCPSRPacket::GetSenderPacketCount() const
@@ -158,7 +158,7 @@ inline uint32_t RTCPSRPacket::GetSenderPacketCount() const
 	if (!knownformat)
 		return 0;
 	RTCPSenderReport *sr = (RTCPSenderReport *)(data+sizeof(RTCPCommonHeader)+sizeof(uint32_t));
-	return ntohl(sr->packetcount);
+	return m_endian.qToHost(sr->packetcount);
 }
 
 inline uint32_t RTCPSRPacket::GetSenderOctetCount() const
@@ -166,7 +166,7 @@ inline uint32_t RTCPSRPacket::GetSenderOctetCount() const
 	if (!knownformat)
 		return 0;
 	RTCPSenderReport *sr = (RTCPSenderReport *)(data+sizeof(RTCPCommonHeader)+sizeof(uint32_t));
-	return ntohl(sr->octetcount);
+	return m_endian.qToHost(sr->octetcount);
 }
 
 inline int RTCPSRPacket::GetReceptionReportCount() const
@@ -188,7 +188,7 @@ inline uint32_t RTCPSRPacket::GetSSRC(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->ssrc);
+	return m_endian.qToHost(r->ssrc);
 }
 
 inline uint8_t RTCPSRPacket::GetFractionLost(int index) const
@@ -216,7 +216,7 @@ inline uint32_t RTCPSRPacket::GetExtendedHighestSequenceNumber(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->exthighseqnr);
+	return m_endian.qToHost(r->exthighseqnr);
 }
 
 inline uint32_t RTCPSRPacket::GetJitter(int index) const
@@ -224,7 +224,7 @@ inline uint32_t RTCPSRPacket::GetJitter(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->jitter);
+	return m_endian.qToHost(r->jitter);
 }
 
 inline uint32_t RTCPSRPacket::GetLSR(int index) const
@@ -232,7 +232,7 @@ inline uint32_t RTCPSRPacket::GetLSR(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->lsr);
+	return m_endian.qToHost(r->lsr);
 }
 
 inline uint32_t RTCPSRPacket::GetDLSR(int index) const
@@ -240,7 +240,7 @@ inline uint32_t RTCPSRPacket::GetDLSR(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->dlsr);
+	return m_endian.qToHost(r->dlsr);
 }
 
 } // end namespace

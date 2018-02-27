@@ -41,9 +41,6 @@
 #include "rtcpbyepacket.h"
 #include "rtcpapppacket.h"
 #include "rtcpunknownpacket.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
 
 namespace qrtplib
 {
@@ -132,7 +129,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 			}
 		}
 
-		length = (size_t)ntohs(rtcphdr->length);
+		length = (size_t)m_endian.qToHost(rtcphdr->length);
 		length++;
 		length *= sizeof(uint32_t);
 

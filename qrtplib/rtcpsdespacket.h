@@ -42,9 +42,7 @@
 #include "rtcppacket.h"
 #include "rtpstructs.h"
 #include "rtpdefines.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -143,6 +141,7 @@ public:
 #endif // RTP_SUPPORT_SDESPRIV
 
 private:
+	RTPEndian m_endian;
 	uint8_t *currentchunk;
 	int curchunknum;
 	size_t itemoffset;
@@ -203,7 +202,7 @@ inline uint32_t RTCPSDESPacket::GetChunkSSRC() const
 	if (currentchunk == 0)
 		return 0;
 	uint32_t *ssrc = (uint32_t *)currentchunk;
-	return ntohl(*ssrc);
+	return m_endian.qToHost(*ssrc);
 }
 
 inline bool RTCPSDESPacket::GotoFirstItem()

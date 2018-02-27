@@ -34,9 +34,6 @@
 #include "rtpdefines.h"
 #include "rtpaddress.h"
 #include "rtpmemorymanager.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
 
 
 #define ACCEPTPACKETCODE									\

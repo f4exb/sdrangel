@@ -22,8 +22,6 @@ set (qrtplib_HEADERS
 	rtpinternalsourcedata.h
 	rtpipv4address.h
 	rtpipv4destination.h
-	rtpipv6address.h
-	rtpipv6destination.h
 	rtpkeyhashtable.h
 	rtplibraryversion.h
 	rtpmemorymanager.h
@@ -47,7 +45,6 @@ set (qrtplib_HEADERS
 	rtptypes.h
 	rtpudpv4transmitter.h
     rtpudpv4transmitternobind.h
-	rtpudpv6transmitter.h  
 	rtpbyteaddress.h
 	rtpexternaltransmitter.h
 	rtpsocketutil.h
@@ -72,9 +69,7 @@ set(qrtplib_SOURCES
 	rtperrors.cpp
 	rtpinternalsourcedata.cpp
 	rtpipv4address.cpp
-	rtpipv6address.cpp
 	rtpipv4destination.cpp
-	rtpipv6destination.cpp
 	rtplibraryversion.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
@@ -90,7 +85,6 @@ set(qrtplib_SOURCES
 	rtptimeutilities.cpp
 	rtpudpv4transmitter.cpp
     rtpudpv4transmitternobind.cpp
-	rtpudpv6transmitter.cpp 
 	rtpbyteaddress.cpp
 	rtpexternaltransmitter.cpp
 	rtpabortdescriptors.cpp

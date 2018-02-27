@@ -43,6 +43,7 @@
 #include "rtptimeutilities.h"
 #include "rtcpsdespacket.h"
 #include "rtperrors.h"
+#include "rtpendian.h"
 #include <list>
 
 namespace qrtplib
@@ -372,6 +373,7 @@ private:
 		std::list<SDESSource *>::const_iterator sdesit;
 	};
 
+	RTPEndian m_endian;
 	size_t maximumpacketsize;
 	uint8_t *buffer;
 	bool external;

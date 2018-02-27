@@ -42,6 +42,7 @@
 #include "rtptypes.h"
 #include "rtptimeutilities.h"
 #include "rtpmemoryobject.h"
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -155,6 +156,7 @@ private:
 	                bool gotextension,uint16_t extensionid,uint16_t extensionlen_numwords,const void *extensiondata,
 	                void *buffer,size_t maxsize);
 
+	RTPEndian m_endian;
 	int error;
 
 	bool hasextension,hasmarker;

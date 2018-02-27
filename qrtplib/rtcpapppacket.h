@@ -41,9 +41,7 @@
 #include "rtpconfig.h"
 #include "rtcppacket.h"
 #include "rtpstructs.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -79,6 +77,7 @@ public:
 	/** Returns the length of the actual data. */
 	size_t GetAPPDataLength() const;
 private:
+	RTPEndian m_endian;
 	size_t appdatalen;
 };
 
@@ -96,7 +95,7 @@ inline uint32_t RTCPAPPPacket::GetSSRC() const
 		return 0;
 
 	uint32_t *ssrc = (uint32_t *)(data+sizeof(RTCPCommonHeader));
-	return ntohl(*ssrc);
+	return m_endian.qToHost(*ssrc);
 }
 
 inline uint8_t *RTCPAPPPacket::GetName()

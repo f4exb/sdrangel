@@ -35,9 +35,6 @@
 #include "rtpdefines.h"
 #include "rtperrors.h"
 #include "rtprawpacket.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
 #include <string.h>
 
 namespace qrtplib
@@ -153,7 +150,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 		rtpextheader = (RTPExtensionHeader *)(packetbytes+payloadoffset);
 		payloadoffset += sizeof(RTPExtensionHeader);
 
-		uint16_t exthdrlen = ntohs(rtpextheader->length);
+		uint16_t exthdrlen = m_endian.qToHost(rtpextheader->length);
 		payloadoffset += ((int)exthdrlen)*sizeof(uint32_t);
 	}
 	else
@@ -171,8 +168,8 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	RTPPacket::hasextension = hasextension;
 	if (hasextension)
 	{
-		RTPPacket::extid = ntohs(rtpextheader->extid);
-		RTPPacket::extensionlength = ((int)ntohs(rtpextheader->length))*sizeof(uint32_t);
+		RTPPacket::extid = m_endian.qToHost(rtpextheader->extid);
+		RTPPacket::extensionlength = ((int)m_endian.qToHost(rtpextheader->length))*sizeof(uint32_t);
 		RTPPacket::extension = ((uint8_t *)rtpextheader)+sizeof(RTPExtensionHeader);
 	}
 
@@ -183,10 +180,10 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	// Note: we don't fill in the EXTENDED sequence number here, since we
 	// don't have information about the source here. We just fill in the low
 	// 16 bits
-	RTPPacket::extseqnr = (uint32_t)ntohs(rtpheader->sequencenumber);
+	RTPPacket::extseqnr = (uint32_t)m_endian.qToHost(rtpheader->sequencenumber);
 
-	RTPPacket::timestamp = ntohl(rtpheader->timestamp);
-	RTPPacket::ssrc = ntohl(rtpheader->ssrc);
+	RTPPacket::timestamp = m_endian.qToHost(rtpheader->timestamp);
+	RTPPacket::ssrc = m_endian.qToHost(rtpheader->ssrc);
 	RTPPacket::packet = packetbytes;
 	RTPPacket::payload = packetbytes+payloadoffset;
 	RTPPacket::packetlength = packetlen;
@@ -209,7 +206,7 @@ uint32_t RTPPacket::GetCSRC(int num) const
 
 	csrcpos = packet+sizeof(RTPHeader)+num*sizeof(uint32_t);
 	csrcval_nbo = (uint32_t *)csrcpos;
-	csrcval_hbo = ntohl(*csrcval_nbo);
+	csrcval_hbo = m_endian.qToHost(*csrcval_nbo);
 	return csrcval_hbo;
 }
 
@@ -285,24 +282,24 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 		rtphdr->extension = 0;
 	rtphdr->csrccount = numcsrcs;
 	rtphdr->payloadtype = payloadtype&127; // make sure high bit isn't set
-	rtphdr->sequencenumber = htons(seqnr);
-	rtphdr->timestamp = htonl(timestamp);
-	rtphdr->ssrc = htonl(ssrc);
+	rtphdr->sequencenumber = qToBigEndian(seqnr);
+	rtphdr->timestamp = qToBigEndian(timestamp);
+	rtphdr->ssrc = qToBigEndian(ssrc);
 
 	uint32_t *curcsrc;
 	int i;
 
 	curcsrc = (uint32_t *)(packet+sizeof(RTPHeader));
 	for (i = 0 ; i < numcsrcs ; i++,curcsrc++)
-		*curcsrc = htonl(csrcs[i]);
+		*curcsrc = qToBigEndian(csrcs[i]);
 
 	payload = packet+sizeof(RTPHeader)+((size_t)numcsrcs)*sizeof(uint32_t);
 	if (gotextension)
 	{
 		RTPExtensionHeader *rtpexthdr = (RTPExtensionHeader *)payload;
 
-		rtpexthdr->extid = htons(extensionid);
-		rtpexthdr->length = htons((uint16_t)extensionlen_numwords);
+		rtpexthdr->extid = qToBigEndian(extensionid);
+		rtpexthdr->length = qToBigEndian((uint16_t)extensionlen_numwords);
 
 		payload += sizeof(RTPExtensionHeader);
 		memcpy(payload,extensiondata,RTPPacket::extensionlength);

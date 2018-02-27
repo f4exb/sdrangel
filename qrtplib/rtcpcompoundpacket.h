@@ -41,6 +41,7 @@
 #include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtpmemoryobject.h"
+#include "rtpendian.h"
 #include <list>
 
 namespace qrtplib
@@ -92,6 +93,7 @@ protected:
 	void ClearPacketList();
 	int ParseData(uint8_t *packet, size_t len);
 
+	RTPEndian m_endian;
 	int error;
 
 	uint8_t *compoundpacket;

@@ -41,9 +41,7 @@
 #include "rtpconfig.h"
 #include "rtcppacket.h"
 #include "rtpstructs.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -113,6 +111,8 @@ public:
 
 private:
 	RTCPReceiverReport *GotoReport(int index) const;
+
+	RTPEndian m_endian;
 };
 
 inline uint32_t RTCPRRPacket::GetSenderSSRC() const
@@ -121,7 +121,7 @@ inline uint32_t RTCPRRPacket::GetSenderSSRC() const
 		return 0;
 
 	uint32_t *ssrcptr = (uint32_t *)(data+sizeof(RTCPCommonHeader));
-	return ntohl(*ssrcptr);
+	return m_endian.qToHost(*ssrcptr);
 }
 inline int RTCPRRPacket::GetReceptionReportCount() const
 {
@@ -142,7 +142,7 @@ inline uint32_t RTCPRRPacket::GetSSRC(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->ssrc);
+	return m_endian.qToHost(r->ssrc);
 }
 
 inline uint8_t RTCPRRPacket::GetFractionLost(int index) const
@@ -170,7 +170,7 @@ inline uint32_t RTCPRRPacket::GetExtendedHighestSequenceNumber(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->exthighseqnr);
+	return m_endian.qToHost(r->exthighseqnr);
 }
 
 inline uint32_t RTCPRRPacket::GetJitter(int index) const
@@ -178,7 +178,7 @@ inline uint32_t RTCPRRPacket::GetJitter(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->jitter);
+	return m_endian.qToHost(r->jitter);
 }
 
 inline uint32_t RTCPRRPacket::GetLSR(int index) const
@@ -186,7 +186,7 @@ inline uint32_t RTCPRRPacket::GetLSR(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->lsr);
+	return m_endian.qToHost(r->lsr);
 }
 
 inline uint32_t RTCPRRPacket::GetDLSR(int index) const
@@ -194,7 +194,7 @@ inline uint32_t RTCPRRPacket::GetDLSR(int index) const
 	if (!knownformat)
 		return 0;
 	RTCPReceiverReport *r = GotoReport(index);
-	return ntohl(r->dlsr);
+	return m_endian.qToHost(r->dlsr);
 }
 
 } // end namespace

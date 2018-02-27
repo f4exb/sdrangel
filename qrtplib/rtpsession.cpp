@@ -33,7 +33,6 @@
 #include "rtpsession.h"
 #include "rtperrors.h"
 #include "rtpudpv4transmitter.h"
-#include "rtpudpv6transmitter.h"
 #include "rtptcptransmitter.h"
 #include "rtpexternaltransmitter.h"
 #include "rtpsessionparams.h"
@@ -121,11 +120,6 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	case RTPTransmitter::IPv4UDPProto:
 		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv4Transmitter(GetMemoryManager());
 		break;
-#ifdef RTP_SUPPORT_IPV6
-	case RTPTransmitter::IPv6UDPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv6Transmitter(GetMemoryManager());
-		break;
-#endif // RTP_SUPPORT_IPV6
 	case RTPTransmitter::ExternalProto:
 		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPExternalTransmitter(GetMemoryManager());
 		break;

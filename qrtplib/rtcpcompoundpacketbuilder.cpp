@@ -39,9 +39,6 @@
 #ifdef RTP_SUPPORT_RTCPUNKNOWN
 	#include "rtcpunknownpacket.h"
 #endif // RTP_SUPPORT_RTCPUNKNOWN
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
 #include <string.h>
 
 namespace qrtplib
@@ -175,14 +172,14 @@ int RTCPCompoundPacketBuilder::StartSenderReport(uint32_t senderssrc,const RTPNT
 	report.isSR = true;
 
 	uint32_t *ssrc = (uint32_t *)report.headerdata;
-	*ssrc = htonl(senderssrc);
+	*ssrc = qToBigEndian(senderssrc);
 
 	RTCPSenderReport *sr = (RTCPSenderReport *)(report.headerdata + sizeof(uint32_t));
-	sr->ntptime_msw = htonl(ntptimestamp.GetMSW());
-	sr->ntptime_lsw = htonl(ntptimestamp.GetLSW());
-	sr->rtptimestamp = htonl(rtptimestamp);
-	sr->packetcount = htonl(packetcount);
-	sr->octetcount = htonl(octetcount);
+	sr->ntptime_msw = qToBigEndian(ntptimestamp.GetMSW());
+	sr->ntptime_lsw = qToBigEndian(ntptimestamp.GetLSW());
+	sr->rtptimestamp = qToBigEndian(rtptimestamp);
+	sr->packetcount = qToBigEndian(packetcount);
+	sr->octetcount = qToBigEndian(octetcount);
 
 	return 0;
 }
@@ -211,7 +208,7 @@ int RTCPCompoundPacketBuilder::StartReceiverReport(uint32_t senderssrc)
 	report.isSR = false;
 
 	uint32_t *ssrc = (uint32_t *)report.headerdata;
-	*ssrc = htonl(senderssrc);
+	*ssrc = qToBigEndian(senderssrc);
 
 	return 0;
 }
@@ -242,15 +239,15 @@ int RTCPCompoundPacketBuilder::AddReportBlock(uint32_t ssrc,uint8_t fractionlost
 	uint32_t *packlost = (uint32_t *)&packetslost;
 	uint32_t packlost2 = (*packlost);
 
-	rr->ssrc = htonl(ssrc);
+	rr->ssrc = qToBigEndian(ssrc);
 	rr->fractionlost = fractionlost;
 	rr->packetslost[2] = (uint8_t)(packlost2&0xFF);
 	rr->packetslost[1] = (uint8_t)((packlost2>>8)&0xFF);
 	rr->packetslost[0] = (uint8_t)((packlost2>>16)&0xFF);
-	rr->exthighseqnr = htonl(exthighestseq);
-	rr->jitter = htonl(jitter);
-	rr->lsr = htonl(lsr);
-	rr->dlsr = htonl(dlsr);
+	rr->exthighseqnr = qToBigEndian(exthighestseq);
+	rr->jitter = qToBigEndian(jitter);
+	rr->lsr = qToBigEndian(lsr);
+	rr->dlsr = qToBigEndian(dlsr);
 
 	report.reportblocks.push_back(Buffer(buf,sizeof(RTCPReceiverReport)));
 	return 0;
@@ -437,14 +434,14 @@ int RTCPCompoundPacketBuilder::AddBYEPacket(uint32_t *ssrcs,uint8_t numssrcs,con
 	hdr->count = numssrcs;
 
 	numwords = packsize/sizeof(uint32_t);
-	hdr->length = htons((uint16_t)(numwords-1));
+	hdr->length = qToBigEndian((uint16_t)(numwords-1));
 	hdr->packettype = RTP_RTCPTYPE_BYE;
 
 	uint32_t *sources = (uint32_t *)(buf+sizeof(RTCPCommonHeader));
 	uint8_t srcindex;
 
 	for (srcindex = 0 ; srcindex < numssrcs ; srcindex++)
-		sources[srcindex] = htonl(ssrcs[srcindex]);
+		sources[srcindex] = qToBigEndian(ssrcs[srcindex]);
 
 	if (reasonlength != 0)
 	{
@@ -498,11 +495,11 @@ int RTCPCompoundPacketBuilder::AddAPPPacket(uint8_t subtype,uint32_t ssrc,const 
 	hdr->padding = 0;
 	hdr->count = subtype;
 
-	hdr->length = htons((uint16_t)(appdatawords+2));
+	hdr->length = qToBigEndian((uint16_t)(appdatawords+2));
 	hdr->packettype = RTP_RTCPTYPE_APP;
 
 	uint32_t *source = (uint32_t *)(buf+sizeof(RTCPCommonHeader));
-	*source = htonl(ssrc);
+	*source = qToBigEndian(ssrc);
 
 	buf[sizeof(RTCPCommonHeader)+sizeof(uint32_t)+0] = name[0];
 	buf[sizeof(RTCPCommonHeader)+sizeof(uint32_t)+1] = name[1];
@@ -545,11 +542,11 @@ int RTCPCompoundPacketBuilder::AddUnknownPacket(uint8_t payload_type, uint8_t su
 	hdr->version = 2;
 	hdr->padding = 0;
 	hdr->count = subtype;
-	hdr->length = htons((uint16_t)(datawords+1));
+	hdr->length = qToBigEndian((uint16_t)(datawords+1));
 	hdr->packettype = payload_type;
 
 	uint32_t *source = (uint32_t *)(buf+sizeof(RTCPCommonHeader));
-	*source = htonl(ssrc);
+	*source = qToBigEndian(ssrc);
 
 	if (len > 0)
 		memcpy((buf+sizeof(RTCPCommonHeader)+sizeof(uint32_t)),data,len);
@@ -630,7 +627,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 
 			size_t numwords = offset/sizeof(uint32_t);
 
-			hdr->length = htons((uint16_t)(numwords-1));
+			hdr->length = qToBigEndian((uint16_t)(numwords-1));
 			hdr->count = count;
 
 			// add entry in parent's list
@@ -674,7 +671,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 			while (sourceit != sdes.sdessources.end() && sourcecount < 31)
 			{
 				uint32_t *ssrc = (uint32_t *)(curbuf+offset);
-				*ssrc = htonl((*sourceit)->ssrc);
+				*ssrc = qToBigEndian((*sourceit)->ssrc);
 				offset += sizeof(uint32_t);
 
 				std::list<Buffer>::const_iterator itemit,itemend;
@@ -709,7 +706,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 			size_t numwords = offset/4;
 
 			hdr->count = sourcecount;
-			hdr->length = htons((uint16_t)(numwords-1));
+			hdr->length = qToBigEndian((uint16_t)(numwords-1));
 
 			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSDESPACKET) RTCPSDESPacket(curbuf,offset);
 			if (p == 0)

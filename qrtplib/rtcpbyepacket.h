@@ -41,9 +41,7 @@
 #include "rtpconfig.h"
 #include "rtcppacket.h"
 #include "rtpstructs.h"
-#ifdef RTP_SUPPORT_NETINET_IN
-	#include <netinet/in.h>
-#endif // RTP_SUPPORT_NETINET_IN
+#include "rtpendian.h"
 
 namespace qrtplib
 {
@@ -80,6 +78,7 @@ public:
 	uint8_t *GetReasonData();
 
 private:
+	RTPEndian m_endian;
 	size_t reasonoffset;
 };
 
@@ -97,7 +96,7 @@ inline uint32_t RTCPBYEPacket::GetSSRC(int index) const
 	if (!knownformat)
 		return 0;
 	uint32_t *ssrc = (uint32_t *)(data+sizeof(RTCPCommonHeader)+sizeof(uint32_t)*index);
-	return ntohl(*ssrc);
+	return m_endian.qToHost(*ssrc);
 }
 
 inline bool RTCPBYEPacket::HasReasonForLeaving() const

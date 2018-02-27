@@ -7,7 +7,7 @@
 
   This library was developed at the Expertise Centre for Digital Media
   (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
+  (http://www.uhasselt.be). The library is based upon work done for
   my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
   Permission is hereby granted, free of charge, to any person obtaining a
@@ -41,8 +41,8 @@
 #define JRTPLIB_UNUSED(x) (void)(x)
 #endif // JRTPLIB_UNUSED
 
-#define JRTPLIB_IMPORT 
-#define JRTPLIB_EXPORT 
+#define JRTPLIB_IMPORT
+#define JRTPLIB_EXPORT
 #ifdef JRTPLIB_COMPILING
 	#define JRTPLIB_IMPORTEXPORT JRTPLIB_EXPORT
 #else
@@ -69,9 +69,9 @@
 
 #define RTP_SUPPORT_GETLOGINR
 
-#define RTP_SUPPORT_IPV6
+// no #define RTP_SUPPORT_IPV6
 
-#define RTP_SUPPORT_IPV6MULTICAST
+// no #define RTP_SUPPORT_IPV6MULTICAST
 
 #define RTP_SUPPORT_IFADDRS
 
@@ -81,7 +81,7 @@
 
 // No support for sending unknown RTCP packets
 
-#define RTP_SUPPORT_NETINET_IN
+// no #define RTP_SUPPORT_NETINET_IN
 
 // Not using winsock sockets
 
