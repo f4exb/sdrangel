@@ -28,8 +28,9 @@ class ChannelSinkAPI;
 class ChannelSourceAPI;
 class Preset;
 
-struct DeviceSet
+class DeviceSet
 {
+public:
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DeviceSourceAPI *m_deviceSourceAPI;
     DSPDeviceSinkEngine *m_deviceSinkEngine;

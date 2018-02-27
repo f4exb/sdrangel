@@ -32,8 +32,9 @@ class DeviceSinkAPI;
 class ChannelMarker;
 class PluginAPI;
 
-struct DeviceUISet
+class DeviceUISet
 {
+public:
     SpectrumVis *m_spectrumVis;
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;

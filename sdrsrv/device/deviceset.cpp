@@ -295,7 +295,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         // everything, that is still "available" is not needed anymore
         for(int i = 0; i < openChannels.count(); i++)
         {
-            qDebug("DeviceUISet::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+            qDebug("DeviceSet::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
             openChannels[i].m_channelSourceAPI->destroy();
         }
 
