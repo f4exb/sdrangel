@@ -49,7 +49,7 @@ namespace qrtplib
 {
 
 /** The class RTCPSDESInfo is a container for RTCP SDES information. */
-class JRTPLIB_IMPORTEXPORT RTCPSDESInfo
+class RTCPSDESInfo
 {
 public:
     /** Constructs an instance, optionally installing a memory manager. */

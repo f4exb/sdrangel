@@ -52,7 +52,7 @@
 namespace qrtplib
 {
 
-class JRTPLIB_IMPORTEXPORT RTPIPv4Destination
+class RTPIPv4Destination
 {
 public:
     RTPIPv4Destination()

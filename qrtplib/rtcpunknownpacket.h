@@ -51,7 +51,7 @@ class RTCPCompoundPacket;
  *  the ones it inherited. Note that since an unknown packet type doesn't have any format to check
  *  against, the IsKnownFormat function will trivially return \c true.
  */
-class JRTPLIB_IMPORTEXPORT RTCPUnknownPacket: public RTCPPacket
+class RTCPUnknownPacket: public RTCPPacket
 {
 public:
     /** Creates an instance based on the data in \c data with length \c datalen.

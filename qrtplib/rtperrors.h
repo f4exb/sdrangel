@@ -45,7 +45,7 @@ namespace qrtplib
 {
 
 /** Returns a string describing the error code \c errcode. */
-std::string JRTPLIB_IMPORTEXPORT RTPGetErrorString(int errcode);
+std::string RTPGetErrorString(int errcode);
 
 } // end namespace
 

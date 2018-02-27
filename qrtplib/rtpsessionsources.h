@@ -46,7 +46,7 @@ namespace qrtplib
 
 class RTPSession;
 
-class JRTPLIB_IMPORTEXPORT RTPSessionSources: public RTPSources
+class RTPSessionSources: public RTPSources
 {
 public:
     RTPSessionSources(RTPSession &sess) :

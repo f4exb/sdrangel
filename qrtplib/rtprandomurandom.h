@@ -46,7 +46,7 @@ namespace qrtplib
 {
 
 /** A random number generator which uses bytes delivered by the /dev/urandom device. */
-class JRTPLIB_IMPORTEXPORT RTPRandomURandom: public RTPRandom
+class RTPRandomURandom: public RTPRandom
 {
 public:
     RTPRandomURandom();

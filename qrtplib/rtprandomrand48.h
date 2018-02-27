@@ -46,7 +46,7 @@ namespace qrtplib
 {
 
 /** A random number generator using the algorithm of the rand48 set of functions. */
-class JRTPLIB_IMPORTEXPORT RTPRandomRand48: public RTPRandom
+class RTPRandomRand48: public RTPRandom
 {
 public:
     RTPRandomRand48();

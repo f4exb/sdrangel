@@ -57,7 +57,7 @@ class RTPMemoryManager;
  *  been built successfully. The member functions described below return \c ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT
  *  if the action would cause the maximum allowed size to be exceeded.
  */
-class JRTPLIB_IMPORTEXPORT RTCPCompoundPacketBuilder: public RTCPCompoundPacket
+class RTCPCompoundPacketBuilder: public RTCPCompoundPacket
 {
 public:
     /** Constructs an RTCPCompoundPacketBuilder instance, optionally installing a memory manager. */

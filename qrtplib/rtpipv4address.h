@@ -51,7 +51,7 @@ namespace qrtplib
  *  number is ignored. When an instance is used in one of the accept or ignore functions of the
  *  transmitter, a zero port number represents all ports for the specified IP address.
  */
-class JRTPLIB_IMPORTEXPORT RTPIPv4Address: public RTPAddress
+class RTPIPv4Address: public RTPAddress
 {
 public:
     /** Creates an instance with IP address \c ip and port number \c port (both

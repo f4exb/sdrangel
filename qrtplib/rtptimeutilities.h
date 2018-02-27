@@ -63,7 +63,7 @@ namespace qrtplib
  * This is a simple wrapper for the most significant word (MSW) and least
  * significant word (LSW) of an NTP timestamp.
  */
-class JRTPLIB_IMPORTEXPORT RTPNTPTime
+class RTPNTPTime
 {
 public:
     /** This constructor creates and instance with MSW \c m and LSW \c l. */
@@ -92,7 +92,7 @@ private:
  *  This class is used to specify wallclock time, delay intervals etc.
  *  It stores a number of seconds and a number of microseconds.
  */
-class JRTPLIB_IMPORTEXPORT RTPTime
+class RTPTime
 {
 public:
     /** Returns an RTPTime instance representing the current wallclock time.
@@ -392,7 +392,7 @@ inline bool RTPTime::operator>=(const RTPTime &t) const
     return m_t >= t.m_t;
 }
 
-class JRTPLIB_IMPORTEXPORT RTPTimeInitializerObject
+class RTPTimeInitializerObject
 {
 public:
     RTPTimeInitializerObject();

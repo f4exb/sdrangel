@@ -48,7 +48,7 @@
 namespace qrtplib
 {
 
-class JRTPLIB_IMPORTEXPORT RTPSources_GetHashIndex
+class RTPSources_GetHashIndex
 {
 public:
     static int GetIndex(const uint32_t &ssrc)
@@ -73,7 +73,7 @@ class RTPSourceData;
  *  is used to identify packets from our own session. The class also provides some overridable functions
  *  which can be used to catch certain events (new SSRC, SSRC collision, ...).
  */
-class JRTPLIB_IMPORTEXPORT RTPSources
+class RTPSources
 {
 public:
     /** Type of probation to use for new sources. */

@@ -50,7 +50,7 @@ namespace qrtplib
  *  should be used to send/receive data, and to know on which socket incoming data
  *  was received.
  */
-class JRTPLIB_IMPORTEXPORT RTPTCPAddress: public RTPAddress
+class RTPTCPAddress: public RTPAddress
 {
 public:
     /** Creates an instance with which you can use a specific socket

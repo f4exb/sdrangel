@@ -59,7 +59,7 @@ namespace qrtplib
 {
 
 /** Parameters for the UDP over IPv4 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionParams: public RTPTransmissionParams
+class RTPUDPv4TransmissionParams: public RTPTransmissionParams
 {
 public:
     RTPUDPv4TransmissionParams();
@@ -294,7 +294,7 @@ inline RTPUDPv4TransmissionParams::RTPUDPv4TransmissionParams() :
 }
 
 /** Additional information about the UDP over IPv4 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionInfo: public RTPTransmissionInfo
+class RTPUDPv4TransmissionInfo: public RTPTransmissionInfo
 {
 public:
     RTPUDPv4TransmissionInfo(std::list<uint32_t> iplist, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
@@ -346,7 +346,7 @@ private:
     uint16_t m_rtpPort, m_rtcpPort;
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_IPv4Dest
+class RTPUDPv4Trans_GetHashIndex_IPv4Dest
 {
 public:
     static int GetIndex(const RTPIPv4Destination &d)
@@ -355,7 +355,7 @@ public:
     }
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_uint32_t
+class RTPUDPv4Trans_GetHashIndex_uint32_t
 {
 public:
     static int GetIndex(const uint32_t &k)
@@ -373,7 +373,7 @@ public:
  *  argument require an argument of RTPIPv4Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv4TransmissionInfo.
  */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Transmitter: public RTPTransmitter
+class RTPUDPv4Transmitter: public RTPTransmitter
 {
 public:
     RTPUDPv4Transmitter();

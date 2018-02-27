@@ -49,7 +49,7 @@ namespace qrtplib
 class RTCPCompoundPacket;
 
 /** Describes an RTCP APP packet. */
-class JRTPLIB_IMPORTEXPORT RTCPAPPPacket: public RTCPPacket
+class RTCPAPPPacket: public RTCPPacket
 {
 public:
     /** Creates an instance based on the data in \c data with length \c datalen.

@@ -50,7 +50,7 @@ namespace qrtplib
 class RTCPCompoundPacket;
 
 /** Describes an RTCP source description packet. */
-class JRTPLIB_IMPORTEXPORT RTCPSDESPacket: public RTCPPacket
+class RTCPSDESPacket: public RTCPPacket
 {
 public:
     /** Identifies the type of an SDES item. */

@@ -53,7 +53,7 @@ class RTPSources;
 /** This class can be used to build RTP packets and is a bit more high-level than the RTPPacket
  *  class: it generates an SSRC identifier, keeps track of timestamp and sequence number etc.
  */
-class JRTPLIB_IMPORTEXPORT RTPPacketBuilder
+class RTPPacketBuilder
 {
 public:
     /** Constructs an instance which will use \c rtprand for generating random numbers

@@ -72,7 +72,7 @@ class RTCPAPPPacket;
  *  \note The RTPSession class is not meant to be thread safe. The user should use some kind of locking
  *        mechanism to prevent different threads from using the same RTPSession instance.
  */
-class JRTPLIB_IMPORTEXPORT RTPSession
+class RTPSession
 {
 public:
     /** Constructs an RTPSession instance, optionally using a specific instance of a random

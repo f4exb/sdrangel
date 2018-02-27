@@ -51,7 +51,7 @@ namespace qrtplib
  *  Describes the parameters for to be used by an RTPSession instance. Note that the own timestamp
  *  unit must be set to a valid number, otherwise the session can't be created.
  */
-class JRTPLIB_IMPORTEXPORT RTPSessionParams
+class RTPSessionParams
 {
 public:
     RTPSessionParams();

@@ -47,7 +47,7 @@ namespace qrtplib
 {
 
 /** This class is used by the transmission component to store the incoming RTP and RTCP data in. */
-class JRTPLIB_IMPORTEXPORT RTPRawPacket
+class RTPRawPacket
 {
 public:
     /** Creates an instance which stores data from \c data with length \c datalen.

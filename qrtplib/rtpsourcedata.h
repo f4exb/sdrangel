@@ -51,7 +51,7 @@ namespace qrtplib
 
 class RTPAddress;
 
-class JRTPLIB_IMPORTEXPORT RTCPSenderReportInfo
+class RTCPSenderReportInfo
 {
 public:
     RTCPSenderReportInfo() :
@@ -105,7 +105,7 @@ private:
     RTPTime receivetime;
 };
 
-class JRTPLIB_IMPORTEXPORT RTCPReceiverReportInfo
+class RTCPReceiverReportInfo
 {
 public:
     RTCPReceiverReportInfo() :
@@ -174,7 +174,7 @@ private:
     RTPTime receivetime;
 };
 
-class JRTPLIB_IMPORTEXPORT RTPSourceStats
+class RTPSourceStats
 {
 public:
     RTPSourceStats();
@@ -281,7 +281,7 @@ inline RTPSourceStats::RTPSourceStats() :
 }
 
 /** Describes an entry in the RTPSources source table. */
-class JRTPLIB_IMPORTEXPORT RTPSourceData
+class RTPSourceData
 {
 protected:
     RTPSourceData(uint32_t ssrc);

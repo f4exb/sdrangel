@@ -56,7 +56,7 @@ class RTPExternalTransmitter;
  *  so that the transmitter will call the \c SendRTP, \c SendRTCP and \c ComesFromThisSender
  *  methods of this instance when needed.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalSender
+class RTPExternalSender
 {
 public:
     RTPExternalSender()
@@ -83,7 +83,7 @@ public:
  *  be using, you can obtain the associated RTPExternalPacketInjecter instance. By calling it's
  *  member functions, you can then inject RTP or RTCP data into the library for further processing.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalPacketInjecter
+class RTPExternalPacketInjecter
 {
 public:
     RTPExternalPacketInjecter(RTPExternalTransmitter *trans)
@@ -107,7 +107,7 @@ private:
 };
 
 /** Parameters to initialize a transmitter of type RTPExternalTransmitter. */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmissionParams: public RTPTransmissionParams
+class RTPExternalTransmissionParams: public RTPTransmissionParams
 {
 public:
     /** Using this constructor you can specify which RTPExternalSender object you'll be using
@@ -133,7 +133,7 @@ private:
 };
 
 /** Additional information about the external transmission component. */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmissionInfo: public RTPTransmissionInfo
+class RTPExternalTransmissionInfo: public RTPTransmissionInfo
 {
 public:
     RTPExternalTransmissionInfo(RTPExternalPacketInjecter *p) :
@@ -160,7 +160,7 @@ private:
  *  sending the data. Obtain the RTPExternalTransmissionInfo object associated with this
  *  transmitter to obtain the functions needed to pass RTP/RTCP packets on to the transmitter.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmitter: public RTPTransmitter
+class RTPExternalTransmitter: public RTPTransmitter
 {
 public:
     RTPExternalTransmitter();

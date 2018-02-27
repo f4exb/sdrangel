@@ -41,14 +41,6 @@
 #define JRTPLIB_UNUSED(x) (void)(x)
 #endif // JRTPLIB_UNUSED
 
-#define JRTPLIB_IMPORT
-#define JRTPLIB_EXPORT
-#ifdef JRTPLIB_COMPILING
-#define JRTPLIB_IMPORTEXPORT JRTPLIB_EXPORT
-#else
-#define JRTPLIB_IMPORTEXPORT JRTPLIB_IMPORT
-#endif // JRTPLIB_COMPILING
-
 // Don't have <sys/filio.h>
 
 // Don't have <sys/sockio.h>

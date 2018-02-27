@@ -48,7 +48,7 @@ namespace qrtplib
 /**
  * Used to provide information about the version of the library.
  */
-class JRTPLIB_IMPORTEXPORT RTPLibraryVersion
+class RTPLibraryVersion
 {
 public:
     /** Returns an instance of RTPLibraryVersion describing the version of the library. */

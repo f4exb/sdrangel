@@ -47,7 +47,7 @@
 namespace qrtplib
 {
 
-class JRTPLIB_IMPORTEXPORT RTPInternalSourceData: public RTPSourceData
+class RTPInternalSourceData: public RTPSourceData
 {
 public:
     RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype);

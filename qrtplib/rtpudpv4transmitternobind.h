@@ -59,7 +59,7 @@ namespace qrtplib
 {
 
 /** Parameters for the UDP over IPv4 transmitter that does not automatically bind sockets */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionNoBindParams: public RTPTransmissionParams
+class RTPUDPv4TransmissionNoBindParams: public RTPTransmissionParams
 {
 public:
     RTPUDPv4TransmissionNoBindParams();
@@ -294,7 +294,7 @@ inline RTPUDPv4TransmissionNoBindParams::RTPUDPv4TransmissionNoBindParams() :
 }
 
 /** Additional information about the UDP over IPv4 transmitter that does not automatically bind sockets. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionNoBindInfo: public RTPTransmissionInfo
+class RTPUDPv4TransmissionNoBindInfo: public RTPTransmissionInfo
 {
 public:
     RTPUDPv4TransmissionNoBindInfo(std::list<uint32_t> iplist, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
@@ -346,7 +346,7 @@ private:
     uint16_t m_rtpPort, m_rtcpPort;
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransNoBind_GetHashIndex_IPv4Dest
+class RTPUDPv4TransNoBind_GetHashIndex_IPv4Dest
 {
 public:
     static int GetIndex(const RTPIPv4Destination &d)
@@ -355,7 +355,7 @@ public:
     }
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransNoBind_GetHashIndex_uint32_t
+class RTPUDPv4TransNoBind_GetHashIndex_uint32_t
 {
 public:
     static int GetIndex(const uint32_t &k)
@@ -375,7 +375,7 @@ public:
  *  This flavor of a RTPUDPv4Transmitter class does not automatically bind sockets. Use the
  *  BindSockets method to do so.
  */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmitterNoBind: public RTPTransmitter
+class RTPUDPv4TransmitterNoBind: public RTPTransmitter
 {
 public:
     RTPUDPv4TransmitterNoBind();

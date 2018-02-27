@@ -50,7 +50,7 @@ namespace qrtplib
 {
 
 /** Parameters for the TCP transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPTCPTransmissionParams: public RTPTransmissionParams
+class RTPTCPTransmissionParams: public RTPTransmissionParams
 {
 public:
     RTPTCPTransmissionParams();
@@ -81,7 +81,7 @@ inline RTPTCPTransmissionParams::RTPTCPTransmissionParams() :
 }
 
 /** Additional information about the TCP transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPTCPTransmissionInfo: public RTPTransmissionInfo
+class RTPTCPTransmissionInfo: public RTPTransmissionInfo
 {
 public:
     RTPTCPTransmissionInfo() :
@@ -117,7 +117,7 @@ public:
  *  To get notified of an error when sending over or receiving from a socket, override the
  *  RTPTCPTransmitter::OnSendError and RTPTCPTransmitter::OnReceiveError member functions.
  */
-class JRTPLIB_IMPORTEXPORT RTPTCPTransmitter : public RTPTransmitter
+class RTPTCPTransmitter : public RTPTransmitter
 {
 public:
     RTPTCPTransmitter();

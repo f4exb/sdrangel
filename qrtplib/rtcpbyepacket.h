@@ -49,7 +49,7 @@ namespace qrtplib
 class RTCPCompoundPacket;
 
 /** Describes an RTCP BYE packet. */
-class JRTPLIB_IMPORTEXPORT RTCPBYEPacket: public RTCPPacket
+class RTCPBYEPacket: public RTCPPacket
 {
 public:
     /** Creates an instance based on the data in \c data with length \c datalen.
