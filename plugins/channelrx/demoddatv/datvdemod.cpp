@@ -166,10 +166,13 @@ bool DATVDemod::PlayVideo(bool blnStartStop)
        return true;
     }
 
-    m_objRenderThread->setStreamAndRenderer(m_objRegisteredVideoRender,m_objVideoStream);
-    m_objVideoStream->MultiThreaded=true;
-    m_objVideoStream->ThreadTimeOut=5000; //5000 ms
-    m_objRenderThread->start();
+    if(m_objVideoStream->bytesAvailable()>0)
+    {
+        m_objRenderThread->setStreamAndRenderer(m_objRegisteredVideoRender,m_objVideoStream);
+        m_objVideoStream->MultiThreaded=true;
+        m_objVideoStream->ThreadTimeOut=5000; //5000 ms
+        m_objRenderThread->start();
+    }
 
     return true;
 }
