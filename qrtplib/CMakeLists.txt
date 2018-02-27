@@ -50,7 +50,6 @@ set (qrtplib_HEADERS
 	rtpudpv6transmitter.h  
 	rtpbyteaddress.h
 	rtpexternaltransmitter.h
-	rtpsecuresession.h
 	rtpsocketutil.h
 	rtpabortdescriptors.h
 	rtpselect.h
@@ -94,7 +93,6 @@ set(qrtplib_SOURCES
 	rtpudpv6transmitter.cpp 
 	rtpbyteaddress.cpp
 	rtpexternaltransmitter.cpp
-	rtpsecuresession.cpp
 	rtpabortdescriptors.cpp
 	rtptcpaddress.cpp
 	rtptcptransmitter.cpp
