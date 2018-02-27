@@ -106,7 +106,7 @@ public:
     /** Allocates a number of bytes for RTP or RTCP data using the memory manager that
      *  was used for this raw packet instance, can be useful if the RTPRawPacket::SetData
      *  function will be used. */
-    uint8_t *AllocateBytes(bool isrtp, int recvlen) const;
+    uint8_t *AllocateBytes(int recvlen) const;
 
     /** Deallocates the previously stored data and replaces it with the data that's
      *  specified, can be useful when e.g. decrypting data in RTPSession::OnChangeIncomingData */
@@ -150,9 +150,8 @@ inline void RTPRawPacket::DeleteData()
     senderaddress = 0;
 }
 
-inline uint8_t *RTPRawPacket::AllocateBytes(bool isrtp, int recvlen) const
+inline uint8_t *RTPRawPacket::AllocateBytes(int recvlen) const
 {
-    JRTPLIB_UNUSED(isrtp); // possibly unused
     return new uint8_t[recvlen];
 }
 

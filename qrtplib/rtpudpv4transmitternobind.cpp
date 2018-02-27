@@ -1112,14 +1112,13 @@ multicastgroups.GotoFirstElement();
 while (multicastgroups.HasCurrentElement())
 {
 uint32_t mcastIP;
-int status = 0;
+int status __attribute__((unused)) = 0;
 
 mcastIP = multicastgroups.GetCurrentElement();
 
 RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
 if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
     RTPUDPV4TRANSNOBIND_MCASTMEMBERSHIP(rtcpsock, IP_DROP_MEMBERSHIP, mcastIP, status);
-JRTPLIB_UNUSED(status);
 
 multicastgroups.GotoNextElement();
 }

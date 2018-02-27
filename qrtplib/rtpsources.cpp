@@ -48,10 +48,8 @@
 namespace qrtplib
 {
 
-RTPSources::RTPSources(ProbationType probtype)
+RTPSources::RTPSources()
 {
-    JRTPLIB_UNUSED(probtype); // possibly unused
-
     totalcount = 0;
     sendercount = 0;
     activecount = 0;

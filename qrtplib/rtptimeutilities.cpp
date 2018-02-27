@@ -38,8 +38,6 @@ namespace qrtplib
 
 RTPTimeInitializerObject::RTPTimeInitializerObject()
 {
-    RTPTime curtime = RTPTime::CurrentTime();
-    JRTPLIB_UNUSED(curtime);
     dummy = -1;
 }
 

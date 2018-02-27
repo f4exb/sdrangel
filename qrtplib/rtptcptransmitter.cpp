@@ -81,9 +81,8 @@ int RTPTCPTransmitter::Init(bool tsafe)
     return 0;
 }
 
-int RTPTCPTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionParams *transparams)
+int RTPTCPTransmitter::Create(size_t maximumpacketsize __attribute__((unused)), const RTPTransmissionParams *transparams)
 {
-    JRTPLIB_UNUSED(maximumpacketsize);
     const RTPTCPTransmissionParams *params, defaultparams;
     int status;
 

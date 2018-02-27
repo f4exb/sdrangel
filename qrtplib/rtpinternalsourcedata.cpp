@@ -51,7 +51,7 @@ RTPInternalSourceData::~RTPInternalSourceData()
 // The following function should delete rtppack if necessary
 int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack, const RTPTime &receivetime, bool *stored, RTPSources *sources)
 {
-    bool accept, onprobation, applyprobation;
+    bool accept;
     double tsunit;
 
     *stored = false;
@@ -61,9 +61,7 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack, const RTPTime &r
     else
         tsunit = timestampunit;
 
-    applyprobation = false;
-
-    stats.ProcessPacket(rtppack, receivetime, tsunit, ownssrc, &accept, applyprobation, &onprobation);
+    stats.ProcessPacket(rtppack, receivetime, tsunit, ownssrc, &accept);
 
     if (!accept)
         return 0;

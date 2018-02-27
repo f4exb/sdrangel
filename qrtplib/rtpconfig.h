@@ -34,13 +34,6 @@
 
 #define RTPCONFIG_UNIX_H
 
-#ifndef JRTPLIB_UNUSED
-/**
- * Provide a macro to use for marking method parameters as unused.
- */
-#define JRTPLIB_UNUSED(x) (void)(x)
-#endif // JRTPLIB_UNUSED
-
 // Don't have <sys/filio.h>
 
 // Don't have <sys/sockio.h>

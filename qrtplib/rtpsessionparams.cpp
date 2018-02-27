@@ -67,15 +67,13 @@ RTPSessionParams::RTPSessionParams() :
     predefinedssrc = 0;
 }
 
-int RTPSessionParams::SetUsePollThread(bool usethread)
+int RTPSessionParams::SetUsePollThread(bool usethread __attribute__((unused)))
 {
-    JRTPLIB_UNUSED(usethread);
     return ERR_RTP_NOTHREADSUPPORT;
 }
 
-int RTPSessionParams::SetNeedThreadSafety(bool s)
+int RTPSessionParams::SetNeedThreadSafety(bool __attribute__((unused)))
 {
-    JRTPLIB_UNUSED(s);
     return ERR_RTP_NOTHREADSUPPORT;
 }
 

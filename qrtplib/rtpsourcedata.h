@@ -178,7 +178,12 @@ class RTPSourceStats
 {
 public:
     RTPSourceStats();
-    void ProcessPacket(RTPPacket *pack, const RTPTime &receivetime, double tsunit, bool ownpacket, bool *accept, bool applyprobation, bool *onprobation);
+    void ProcessPacket(
+            RTPPacket *pack,
+            const RTPTime &receivetime,
+            double tsunit,
+            bool ownpacket,
+            bool *accept);
 
     bool HasSentData() const
     {

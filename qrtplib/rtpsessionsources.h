@@ -50,7 +50,7 @@ class RTPSessionSources: public RTPSources
 {
 public:
     RTPSessionSources(RTPSession &sess) :
-            RTPSources(RTPSources::ProbationStore), rtpsession(sess)
+            rtpsession(sess)
     {
         owncollision = false;
     }

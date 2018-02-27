@@ -85,7 +85,7 @@ public:
     };
 
     /** In the constructor you can select the probation type you'd like to use and also a memory manager. */
-    RTPSources(ProbationType = ProbationStore);
+    RTPSources();
     virtual ~RTPSources();
 
     /** Clears the source table. */
