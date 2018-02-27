@@ -180,15 +180,6 @@ public:
     int SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const void *appdata, size_t appdatalen);
 #endif // RTP_SUPPORT_SENDAPP
 
-#ifdef RTP_SUPPORT_RTCPUNKNOWN
-    /** Tries to send an Unknown packet immediately.
-     *  Tries to send an Unknown packet immediately. If successful, the function returns the number
-     *  of bytes in the RTCP compound packet. Note that this immediate sending is not compliant with the RTP
-     *  specification, so use with care.  Can send message along with a receiver report or a sender report
-     */
-    int SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype, const void *data, size_t len);
-#endif // RTP_SUPPORT_RTCPUNKNOWN
-
     /** With this function raw data can be sent directly over the RTP or
      *  RTCP channel (if they are different); the data is **not** passed through the
      *  RTPSession::OnChangeRTPOrRTCPData function. */

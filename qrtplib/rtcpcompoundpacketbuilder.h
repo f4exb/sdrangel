@@ -128,12 +128,6 @@ public:
      */
     int EndBuild();
 
-#ifdef RTP_SUPPORT_RTCPUNKNOWN
-    /** Adds the RTCP packet specified by the arguments to the compound packet.
-     *  Adds the RTCP packet specified by the arguments to the compound packet.
-     */
-    int AddUnknownPacket(uint8_t payload_type, uint8_t subtype, uint32_t ssrc, const void *data, size_t len);
-#endif // RTP_SUPPORT_RTCPUNKNOWN
 private:
     class Buffer
     {
@@ -402,11 +396,6 @@ private:
 
     std::list<Buffer> apppackets;
     size_t appsize;
-
-#ifdef RTP_SUPPORT_RTCPUNKNOWN
-    std::list<Buffer> unknownpackets;
-    size_t unknownsize;
-#endif // RTP_SUPPORT_RTCPUNKNOWN
 
     void ClearBuildBuffers();
 };
