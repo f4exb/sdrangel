@@ -32,10 +32,11 @@
 
 */
 
-#include "rtperrors.h"
-#include "rtpdefines.h"
-#include "rtpinternalutils.h"
+#include "../qrtplib.old/rtperrors.h"
+
 #include <stdio.h>
+#include "../qrtplib.old/rtpdefines.h"
+#include "../qrtplib.old/rtpinternalutils.h"
 
 //#include "rtpdebug.h"
 

@@ -33,7 +33,7 @@
 */
 
 //#include "rtpconfig.h"
-#include "rtptimeutilities.h"
+#include "../qrtplib.old/rtptimeutilities.h"
 
 namespace qrtplib
 {

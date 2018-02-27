@@ -32,14 +32,14 @@
 
 */
 
-#include "rtprandom.h"
-#include "rtprandomurandom.h"
-#include "rtprandomrand48.h"
+#include "../qrtplib.old/rtprandom.h"
 
 #include <time.h>
 #include <unistd.h>
 
 #include <QDateTime>
+#include "../qrtplib.old/rtprandomrand48.h"
+#include "../qrtplib.old/rtprandomurandom.h"
 
 //#include "rtpdebug.h"
 

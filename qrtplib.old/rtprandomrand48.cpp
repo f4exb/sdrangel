@@ -32,39 +32,58 @@
 
 */
 
-/**
- * \file rtprandomurandom.h
- */
-
-#ifndef RTPRANDOMURANDOM_H
-
-#define RTPRANDOMURANDOM_H
-
-//#include "rtpconfig.h"
-#include "rtprandom.h"
-#include <stdio.h>
+#include "../qrtplib.old/rtprandomrand48.h"
 
 namespace qrtplib
 {
 
-/** A random number generator which uses bytes delivered by the /dev/urandom device. */
-class RTPRandomURandom : public RTPRandom
+RTPRandomRand48::RTPRandomRand48()
 {
-public:
-	RTPRandomURandom();
-	~RTPRandomURandom();
+	SetSeed(PickSeed());
+}
 
-	/** Initialize the random number generator. */
-	int Init();
+RTPRandomRand48::RTPRandomRand48(uint32_t seed)
+{
+	SetSeed(seed);
+}
 
-	uint8_t GetRandom8();
-	uint16_t GetRandom16();
-	uint32_t GetRandom32();
-	double GetRandomDouble();
-private:
-	FILE *device;
-};
+RTPRandomRand48::~RTPRandomRand48()
+{
+}
+
+void RTPRandomRand48::SetSeed(uint32_t seed)
+{
+	state = ((uint64_t)seed) << 16 | 0x330EULL;
+}
+
+uint8_t RTPRandomRand48::GetRandom8()
+{
+	uint32_t x =  ((GetRandom32() >> 24)&0xff);
+
+	return (uint8_t)x;
+}
+
+uint16_t RTPRandomRand48::GetRandom16()
+{
+	uint32_t x =  ((GetRandom32() >> 16)&0xffff);
+
+	return (uint16_t)x;
+}
+
+uint32_t RTPRandomRand48::GetRandom32()
+{
+	state = ((0x5DEECE66DULL*state) + 0xBULL)&0x0000ffffffffffffULL;
+	uint32_t x = (uint32_t)((state>>16)&0xffffffffULL);
+	return x;
+}
+
+double RTPRandomRand48::GetRandomDouble()
+{
+	state = ((0x5DEECE66DULL*state) + 0xBULL)&0x0000ffffffffffffULL;
+	int64_t x = (int64_t)state;
+	double y = 3.552713678800500929355621337890625e-15 * (double)x;
+	return y;
+}
 
 } // end namespace
 
-#endif // RTPRANDOMURANDOM_H

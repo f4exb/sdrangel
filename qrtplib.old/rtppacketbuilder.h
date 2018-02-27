@@ -41,10 +41,10 @@
 #define RTPPACKETBUILDER_H
 
 //#include "rtpconfig.h"
-#include "rtperrors.h"
-#include "rtpdefines.h"
-#include "rtprandom.h"
-#include "rtptimeutilities.h"
+#include "../qrtplib.old/rtpdefines.h"
+#include "../qrtplib.old/rtperrors.h"
+#include "../qrtplib.old/rtprandom.h"
+#include "../qrtplib.old/rtptimeutilities.h"
 //#include "rtptypes.h"
 
 namespace qrtplib

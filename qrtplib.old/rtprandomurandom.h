@@ -33,39 +33,38 @@
 */
 
 /**
- * \file rtprandomrand48.h
+ * \file rtprandomurandom.h
  */
 
-#ifndef RTPRANDOMRAND48_H
+#ifndef RTPRANDOMURANDOM_H
 
-#define RTPRANDOMRAND48_H
+#define RTPRANDOMURANDOM_H
 
 //#include "rtpconfig.h"
-#include "rtprandom.h"
 #include <stdio.h>
-#include <stdint.h>
+#include "../qrtplib.old/rtprandom.h"
 
 namespace qrtplib
 {
 
-/** A random number generator using the algorithm of the rand48 set of functions. */
-class RTPRandomRand48 : public RTPRandom
+/** A random number generator which uses bytes delivered by the /dev/urandom device. */
+class RTPRandomURandom : public RTPRandom
 {
 public:
-	RTPRandomRand48();
-	RTPRandomRand48(uint32_t seed);
-	~RTPRandomRand48();
+	RTPRandomURandom();
+	~RTPRandomURandom();
+
+	/** Initialize the random number generator. */
+	int Init();
 
 	uint8_t GetRandom8();
 	uint16_t GetRandom16();
 	uint32_t GetRandom32();
 	double GetRandomDouble();
 private:
-	void SetSeed(uint32_t seed);
-	uint64_t state;
+	FILE *device;
 };
 
 } // end namespace
 
-#endif // RTPRANDOMRAND48_H
-
+#endif // RTPRANDOMURANDOM_H

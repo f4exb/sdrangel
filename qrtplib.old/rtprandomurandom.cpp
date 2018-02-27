@@ -9,7 +9,7 @@
 
   This library was developed at the Expertise Centre for Digital Media
   (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
+  (http://www.uhasselt.be). The library is based upon work done for
   my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
   Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,57 +32,100 @@
 
 */
 
-#include "rtprandomrand48.h"
+#include "../qrtplib.old/rtprandomurandom.h"
+
+#include "../qrtplib.old/rtperrors.h"
+
+//#include "rtpdebug.h"
 
 namespace qrtplib
 {
 
-RTPRandomRand48::RTPRandomRand48()
+RTPRandomURandom::RTPRandomURandom()
 {
-	SetSeed(PickSeed());
+	device = 0;
 }
 
-RTPRandomRand48::RTPRandomRand48(uint32_t seed)
+RTPRandomURandom::~RTPRandomURandom()
 {
-	SetSeed(seed);
+	if (device)
+		fclose(device);
 }
 
-RTPRandomRand48::~RTPRandomRand48()
+int RTPRandomURandom::Init()
 {
+	if (device)
+		return ERR_RTP_RTPRANDOMURANDOM_ALREADYOPEN;
+
+	device = fopen("/dev/urandom","rb");
+	if (device == 0)
+		return ERR_RTP_RTPRANDOMURANDOM_CANTOPEN;
+
+	return 0;
 }
 
-void RTPRandomRand48::SetSeed(uint32_t seed)
+uint8_t RTPRandomURandom::GetRandom8()
 {
-	state = ((uint64_t)seed) << 16 | 0x330EULL;
+	if (!device)
+		return 0;
+
+	uint8_t value;
+
+	if (fread(&value, sizeof(uint8_t), 1, device) == sizeof(uint8_t)) {
+	    return value;
+	} else {
+	    return 0;
+	}
 }
 
-uint8_t RTPRandomRand48::GetRandom8()
+uint16_t RTPRandomURandom::GetRandom16()
 {
-	uint32_t x =  ((GetRandom32() >> 24)&0xff);
+	if (!device)
+		return 0;
 
-	return (uint8_t)x;
+	uint16_t value;
+
+    if (fread(&value, sizeof(uint16_t), 1, device) == sizeof(uint16_t)) {
+        return value;
+    } else {
+        return 0;
+    }
 }
 
-uint16_t RTPRandomRand48::GetRandom16()
+uint32_t RTPRandomURandom::GetRandom32()
 {
-	uint32_t x =  ((GetRandom32() >> 16)&0xffff);
+	if (!device)
+		return 0;
 
-	return (uint16_t)x;
+	uint32_t value;
+
+    if (fread(&value, sizeof(uint32_t), 1, device) == sizeof(uint32_t)) {
+        return value;
+    } else {
+        return 0;
+    }
+
+	return value;
 }
 
-uint32_t RTPRandomRand48::GetRandom32()
+double RTPRandomURandom::GetRandomDouble()
 {
-	state = ((0x5DEECE66DULL*state) + 0xBULL)&0x0000ffffffffffffULL;
-	uint32_t x = (uint32_t)((state>>16)&0xffffffffULL);
-	return x;
-}
+	if (!device)
+		return 0;
 
-double RTPRandomRand48::GetRandomDouble()
-{
-	state = ((0x5DEECE66DULL*state) + 0xBULL)&0x0000ffffffffffffULL;
-	int64_t x = (int64_t)state;
-	double y = 3.552713678800500929355621337890625e-15 * (double)x;
-	return y;
+	uint64_t value;
+
+    if (fread(&value, sizeof(uint64_t), 1, device) == sizeof(uint64_t))
+    {
+        value &= 0x7fffffffffffffffULL;
+        int64_t value2 = (int64_t)value;
+        double x = RTPRANDOM_2POWMIN63*(double)value2;
+        return x;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 } // end namespace

@@ -32,12 +32,14 @@
 
 */
 
-#include "rtppacketbuilder.h"
-#include "rtperrors.h"
-#include "rtppacket.h"
-#include "rtpsources.h"
+#include "../qrtplib.old/rtppacketbuilder.h"
+
 #include <time.h>
 #include <stdlib.h>
+
+#include "../qrtplib.old/rtperrors.h"
+#include "../qrtplib.old/rtppacket.h"
+#include "../qrtplib.old/rtpsources.h"
 //#include "rtpdebug.h"
 
 namespace qrtplib
