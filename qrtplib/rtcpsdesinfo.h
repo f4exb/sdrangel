@@ -170,7 +170,7 @@ private:
 			else
 			{
 				len = (len>RTCP_SDES_MAXITEMLENGTH)?RTCP_SDES_MAXITEMLENGTH:len;
-				uint8_t *str2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_SDESITEM) uint8_t[len];
+				uint8_t *str2 = new uint8_t[len];
 				if (str2 == 0)
 					return ERR_RTP_OUTOFMEM;
 				memcpy(str2,s,len);

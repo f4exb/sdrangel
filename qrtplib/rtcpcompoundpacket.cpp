@@ -154,22 +154,22 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 		switch (rtcphdr->packettype)
 		{
 		case RTP_RTCPTYPE_SR:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSRPACKET) RTCPSRPacket(data,length);
+			p = new RTCPSRPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_RR:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPRRPACKET) RTCPRRPacket(data,length);
+			p = new RTCPRRPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_SDES:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSDESPACKET) RTCPSDESPacket(data,length);
+			p = new RTCPSDESPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_BYE:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPBYEPACKET) RTCPBYEPacket(data,length);
+			p = new RTCPBYEPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_APP:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPAPPPACKET) RTCPAPPPacket(data,length);
+			p = new RTCPAPPPacket(data,length);
 			break;
 		default:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPUNKNOWNPACKET) RTCPUnknownPacket(data,length);
+			p = new RTCPUnknownPacket(data,length);
 		}
 
 		if (p == 0)

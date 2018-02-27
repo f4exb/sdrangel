@@ -61,7 +61,7 @@ int RTPPacketBuilder::Init(size_t max)
 		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
 
 	maxpacksize = max;
-	buffer = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTPPACKETBUILDERBUFFER) uint8_t [max];
+	buffer = new uint8_t [max];
 	if (buffer == 0)
 		return ERR_RTP_OUTOFMEM;
 	packetlength = 0;
@@ -92,7 +92,7 @@ int RTPPacketBuilder::SetMaximumPacketSize(size_t max)
 
 	if (max <= 0)
 		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
-	newbuf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTPPACKETBUILDERBUFFER) uint8_t[max];
+	newbuf = new uint8_t[max];
 	if (newbuf == 0)
 		return ERR_RTP_OUTOFMEM;
 

@@ -235,7 +235,7 @@ inline void RTPDelete(ClassName *obj, RTPMemoryManager *mgr)
 
 #else
 
-#define RTPNew(a,b) 			new
+//#define RTPNew(a,b) 			new
 #define RTPDelete(a,b) 			delete a
 #define RTPDeleteByteArray(a,b) 	delete [] a;
 

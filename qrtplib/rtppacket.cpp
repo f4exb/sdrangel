@@ -244,7 +244,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 
 	if (buffer == 0)
 	{
-		packet = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTPPACKET) uint8_t [packetlength];
+		packet = new uint8_t [packetlength];
 		if (packet == 0)
 		{
 			packetlength = 0;

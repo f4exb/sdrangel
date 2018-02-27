@@ -173,7 +173,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 		RTPPacket *rtppack;
 
 		// First, we'll see if the packet can be parsed
-		rtppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPPACKET) RTPPacket(*rawpack,GetMemoryManager());
+		rtppack = new RTPPacket(*rawpack,GetMemoryManager());
 		if (rtppack == 0)
 			return ERR_RTP_OUTOFMEM;
 		if ((status = rtppack->GetCreationError()) < 0)
@@ -821,9 +821,9 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 	if (sourcelist.GotoElement(ssrc) < 0) // No entry for this source
 	{
 #ifdef RTP_SUPPORT_PROBATION
-		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,probationtype,GetMemoryManager());
+		srcdat2 = new RTPInternalSourceData(ssrc,probationtype,GetMemoryManager());
 #else
-		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,RTPSources::NoProbation,GetMemoryManager());
+		srcdat2 = new RTPInternalSourceData(ssrc,RTPSources::NoProbation,GetMemoryManager());
 #endif // RTP_SUPPORT_PROBATION
 		if (srcdat2 == 0)
 			return ERR_RTP_OUTOFMEM;

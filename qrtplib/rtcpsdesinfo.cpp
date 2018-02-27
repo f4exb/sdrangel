@@ -84,7 +84,7 @@ int RTCPSDESInfo::SetPrivateValue(const uint8_t *prefix,size_t prefixlen,const u
 
 		int status;
 
-		item = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_SDESPRIVATEITEM) SDESPrivateItem(GetMemoryManager());
+		item = new SDESPrivateItem(GetMemoryManager());
 		if (item == 0)
 			return ERR_RTP_OUTOFMEM;
 		if ((status = item->SetPrefix(prefix,prefixlen)) < 0)

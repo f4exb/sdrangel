@@ -134,7 +134,7 @@ inline void RTPRawPacket::DeleteData()
 inline uint8_t *RTPRawPacket::AllocateBytes(bool isrtp, int recvlen) const
 {
 	JRTPLIB_UNUSED(isrtp); // possibly unused
-	return RTPNew(GetMemoryManager(),(isrtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[recvlen];
+	return new uint8_t[recvlen];
 }
 
 inline void RTPRawPacket::SetData(uint8_t *data, size_t datalen)

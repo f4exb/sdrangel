@@ -65,7 +65,7 @@ bool RTPIPv4Address::IsFromSameHost(const RTPAddress *addr) const
 RTPAddress *RTPIPv4Address::CreateCopy(RTPMemoryManager *mgr) const
 {
 	JRTPLIB_UNUSED(mgr); // possibly unused
-	RTPIPv4Address *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv4Address(ip,port);
+	RTPIPv4Address *a = new RTPIPv4Address(ip,port);
 	return a;
 }
 

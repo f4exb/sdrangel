@@ -111,7 +111,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 
 	*pack = 0;
 
-	rtcpcomppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPCOMPOUNDPACKETBUILDER) RTCPCompoundPacketBuilder(GetMemoryManager());
+	rtcpcomppack = new RTCPCompoundPacketBuilder(GetMemoryManager());
 	if (rtcpcomppack == 0)
 		return ERR_RTP_OUTOFMEM;
 
@@ -634,7 +634,7 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 
 	*pack = 0;
 
-	rtcpcomppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPCOMPOUNDPACKETBUILDER) RTCPCompoundPacketBuilder(GetMemoryManager());
+	rtcpcomppack = new RTCPCompoundPacketBuilder(GetMemoryManager());
 	if (rtcpcomppack == 0)
 		return ERR_RTP_OUTOFMEM;
 

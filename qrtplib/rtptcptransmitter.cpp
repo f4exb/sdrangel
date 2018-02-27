@@ -173,7 +173,7 @@ RTPTransmissionInfo *RTPTCPTransmitter::GetTransmissionInfo()
 		return 0;
 
 	MAINMUTEX_LOCK
-	RTPTransmissionInfo *tinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMISSIONINFO) RTPTCPTransmissionInfo();
+	RTPTransmissionInfo *tinf = new RTPTCPTransmissionInfo();
 	MAINMUTEX_UNLOCK
 	return tinf;
 }
@@ -703,7 +703,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 					int dataLength = sdata.m_dataLength;
 					sdata.Reset();
 
-					RTPTCPAddress *pAddr = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPADDRESS) RTPTCPAddress(sock);
+					RTPTCPAddress *pAddr = new RTPTCPAddress(sock);
 					if (pAddr == 0)
 						return ERR_RTP_OUTOFMEM;
 
@@ -717,7 +717,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 							isrtp = false;
 					}
 
-					RTPRawPacket *pPack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(pBuf, dataLength, pAddr, curtime, isrtp, GetMemoryManager());
+					RTPRawPacket *pPack = new RTPRawPacket(pBuf, dataLength, pAddr, curtime, isrtp, GetMemoryManager());
 					if (pPack == 0)
 					{
 						RTPDelete(pAddr,GetMemoryManager());
@@ -865,7 +865,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 				l = 1;
 
 			// We don't yet know if it's an RTP or RTCP packet, so we'll stick to RTP
-			m_pDataBuffer = RTPNew(pMgr, RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET) uint8_t[l];
+			m_pDataBuffer = new uint8_t[l];
 			if (m_pDataBuffer == 0)
 				return ERR_RTP_OUTOFMEM;
 		}

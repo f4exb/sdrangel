@@ -60,7 +60,7 @@ bool RTPTCPAddress::IsFromSameHost(const RTPAddress *addr) const
 RTPAddress *RTPTCPAddress::CreateCopy(RTPMemoryManager *mgr) const
 {
 	JRTPLIB_UNUSED(mgr); // possibly unused
-	RTPTCPAddress *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPTCPAddress(m_socket);
+	RTPTCPAddress *a = new RTPTCPAddress(m_socket);
 	return a;
 }
 

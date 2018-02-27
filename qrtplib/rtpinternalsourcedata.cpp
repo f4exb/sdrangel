@@ -280,7 +280,7 @@ int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason,size_t reasonl
 	}
 
 	byetime = receivetime;
-	byereason = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTCPBYEREASON) uint8_t[reasonlen];
+	byereason = new uint8_t[reasonlen];
 	if (byereason == 0)
 		return ERR_RTP_OUTOFMEM;
 	memcpy(byereason,reason,reasonlen);

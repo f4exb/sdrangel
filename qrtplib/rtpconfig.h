@@ -77,7 +77,7 @@
 
 #define RTP_SUPPORT_SENDAPP
 
-#define RTP_SUPPORT_MEMORYMANAGEMENT
+// No #define RTP_SUPPORT_MEMORYMANAGEMENT
 
 // No support for sending unknown RTCP packets
 

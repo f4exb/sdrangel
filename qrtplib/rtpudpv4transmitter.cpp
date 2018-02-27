@@ -559,7 +559,7 @@ RTPTransmissionInfo *RTPUDPv4Transmitter::GetTransmissionInfo()
 		return 0;
 
 	MAINMUTEX_LOCK
-	RTPTransmissionInfo *tinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMISSIONINFO) RTPUDPv4TransmissionInfo(localIPs,rtpsock,rtcpsock,m_rtpPort,m_rtcpPort);
+	RTPTransmissionInfo *tinf = new RTPUDPv4TransmissionInfo(localIPs,rtpsock,rtcpsock,m_rtpPort,m_rtcpPort);
 	MAINMUTEX_UNLOCK
 	return tinf;
 }
@@ -657,7 +657,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 				{
 					found = true;
 					localhostnamelength = (*it).length();
-					localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength+1];
+					localhostname = new uint8_t [localhostnamelength+1];
 					if (localhostname == 0)
 					{
 						MAINMUTEX_UNLOCK
@@ -682,7 +682,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			len = strlen(str);
 
 			localhostnamelength = len;
-			localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength + 1];
+			localhostname = new uint8_t [localhostnamelength + 1];
 			if (localhostname == 0)
 			{
 				MAINMUTEX_UNLOCK
@@ -1487,10 +1487,10 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 					RTPIPv4Address *addr;
 					uint8_t *datacopy;
 
-					addr = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr),ntohs(srcaddr.sin_port));
+					addr = new RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr),ntohs(srcaddr.sin_port));
 					if (addr == 0)
 						return ERR_RTP_OUTOFMEM;
-					datacopy = RTPNew(GetMemoryManager(),(rtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[recvlen];
+					datacopy = new uint8_t[recvlen];
 					if (datacopy == 0)
 					{
 						RTPDelete(addr,GetMemoryManager());
@@ -1513,7 +1513,7 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 						}
 					}
 
-					pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,recvlen,addr,curtime,isrtp,GetMemoryManager());
+					pack = new RTPRawPacket(datacopy,recvlen,addr,curtime,isrtp,GetMemoryManager());
 					if (pack == 0)
 					{
 						RTPDelete(addr,GetMemoryManager());
@@ -1560,7 +1560,7 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 		PortInfo *portinf;
 		int status;
 
-		portinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_ACCEPTIGNOREPORTINFO) PortInfo();
+		portinf = new PortInfo();
 		if (port == 0) // select all ports
 			portinf->all = true;
 		else

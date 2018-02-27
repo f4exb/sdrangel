@@ -286,7 +286,7 @@ private:
 
 		int AddSSRC(uint32_t ssrc)
 		{
-			SDESSource *s = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_SDESSOURCE) SDESSource(ssrc,GetMemoryManager());
+			SDESSource *s = new SDESSource(ssrc,GetMemoryManager());
 			if (s == 0)
 				return ERR_RTP_OUTOFMEM;
 			sdessources.push_back(s);

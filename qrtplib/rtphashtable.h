@@ -265,7 +265,7 @@ inline int RTPHashTable<Element,GetIndex,hashsize>::AddElement(const Element &el
 
 	// Okay, the key doesn't exist, so we can add the new element in the hash table
 
-	newelem = RTPNew(GetMemoryManager(),memorytype) HashElement(elem,index);
+	newelem = new HashElement(elem,index);
 	if (newelem == 0)
 		return ERR_RTP_OUTOFMEM;
 

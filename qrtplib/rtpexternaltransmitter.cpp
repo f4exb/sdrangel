@@ -167,7 +167,7 @@ RTPTransmissionInfo *RTPExternalTransmitter::GetTransmissionInfo()
 		return 0;
 
 	MAINMUTEX_LOCK
-	RTPTransmissionInfo *tinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMISSIONINFO) RTPExternalTransmissionInfo(&packetinjector);
+	RTPTransmissionInfo *tinf = new RTPExternalTransmissionInfo(&packetinjector);
 	MAINMUTEX_UNLOCK
 	return tinf;
 }
@@ -204,7 +204,7 @@ int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlengt
 			name[1023] = 0; // ensure null-termination
 
 		localhostnamelength = strlen(name);
-		localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength+1];
+		localhostname = new uint8_t [localhostnamelength+1];
 
 		memcpy(localhostname, name, localhostnamelength);
 		localhostname[localhostnamelength] = 0;
@@ -575,7 +575,7 @@ void RTPExternalTransmitter::InjectRTP(const void *data, size_t len, const RTPAd
 
 	uint8_t *datacopy;
 
-	datacopy = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET) uint8_t[len];
+	datacopy = new uint8_t[len];
 	if (datacopy == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());
@@ -586,7 +586,7 @@ void RTPExternalTransmitter::InjectRTP(const void *data, size_t len, const RTPAd
 	RTPTime curtime = RTPTime::CurrentTime();
 	RTPRawPacket *pack;
 
-	pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,len,addr,curtime,true,GetMemoryManager());
+	pack = new RTPRawPacket(datacopy,len,addr,curtime,true,GetMemoryManager());
 	if (pack == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());
@@ -622,7 +622,7 @@ void RTPExternalTransmitter::InjectRTCP(const void *data, size_t len, const RTPA
 
 	uint8_t *datacopy;
 
-	datacopy = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[len];
+	datacopy = new uint8_t[len];
 	if (datacopy == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());
@@ -633,7 +633,7 @@ void RTPExternalTransmitter::InjectRTCP(const void *data, size_t len, const RTPA
 	RTPTime curtime = RTPTime::CurrentTime();
 	RTPRawPacket *pack;
 
-	pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,len,addr,curtime,false,GetMemoryManager());
+	pack = new RTPRawPacket(datacopy,len,addr,curtime,false,GetMemoryManager());
 	if (pack == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());
@@ -677,7 +677,7 @@ void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, size_t len, const
 			rtp = false;
 	}
 
-	datacopy = RTPNew(GetMemoryManager(),(rtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[len];
+	datacopy = new uint8_t[len];
 	if (datacopy == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());
@@ -688,7 +688,7 @@ void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, size_t len, const
 	RTPTime curtime = RTPTime::CurrentTime();
 	RTPRawPacket *pack;
 
-	pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,len,addr,curtime,rtp,GetMemoryManager());
+	pack = new RTPRawPacket(datacopy,len,addr,curtime,rtp,GetMemoryManager());
 	if (pack == 0)
 	{
 		RTPDelete(addr,GetMemoryManager());

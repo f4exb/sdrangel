@@ -118,10 +118,10 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	switch(protocol)
 	{
 	case RTPTransmitter::IPv4UDPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv4Transmitter(GetMemoryManager());
+		rtptrans = new RTPUDPv4Transmitter(GetMemoryManager());
 		break;
 	case RTPTransmitter::ExternalProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPExternalTransmitter(GetMemoryManager());
+		rtptrans = new RTPExternalTransmitter(GetMemoryManager());
 		break;
 	case RTPTransmitter::UserDefinedProto:
 		rtptrans = NewUserDefinedTransmitter();
@@ -129,7 +129,7 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 			return ERR_RTP_SESSION_USERDEFINEDTRANSMITTERNULL;
 		break;
 	case RTPTransmitter::TCPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPTCPTransmitter(GetMemoryManager());
+		rtptrans = new RTPTCPTransmitter(GetMemoryManager());
 		break;
 	default:
 		return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
@@ -677,7 +677,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	uint32_t ssrc = packetbuilder.GetSSRC();
 	BUILDER_UNLOCK
 
-	RTCPCompoundPacketBuilder* rtcpcomppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPCOMPOUNDPACKETBUILDER) RTCPCompoundPacketBuilder(GetMemoryManager());
+	RTCPCompoundPacketBuilder* rtcpcomppack = new RTCPCompoundPacketBuilder(GetMemoryManager());
 	if (rtcpcomppack == 0)
 	{
 		RTPDelete(rtcpcomppack,GetMemoryManager());
