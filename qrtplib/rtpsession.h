@@ -51,10 +51,6 @@
 #include "rtpmemoryobject.h"
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
-
 namespace qrtplib
 {
 
@@ -532,28 +528,6 @@ protected:
 
 	/** Is called when an RTCP compound packet has just been sent (useful to inspect outgoing RTCP data). */
 	virtual void OnSendRTCPCompoundPacket(RTCPCompoundPacket *pack);
-#ifdef RTP_SUPPORT_THREAD
-	/** Is called when error \c errcode was detected in the poll thread. */
-	virtual void OnPollThreadError(int errcode);
-
-	/** Is called each time the poll thread loops.
-	 *  Is called each time the poll thread loops. This happens when incoming data was
-	 *  detected or when it's time to send an RTCP compound packet.
-	 */
-	virtual void OnPollThreadStep();
-
-	/** Is called when the poll thread is started.
-	 *  Is called when the poll thread is started. This happens just before entering the
-	 *  thread main loop.
-	 *  \param stop This can be used to stop the thread immediately without entering the loop.
-	*/
-	virtual void OnPollThreadStart(bool &stop);
-
-	/** Is called when the poll thread is going to stop.
-	 *  Is called when the poll thread is going to stop. This happens just before termitating the thread.
-	 */
-	virtual void OnPollThreadStop();
-#endif // RTP_SUPPORT_THREAD
 
 	/** If this is set to true, outgoing data will be passed through RTPSession::OnChangeRTPOrRTCPData
 	 *  and RTPSession::OnSentRTPOrRTCPData, allowing you to modify the data (e.g. to encrypt it). */
@@ -636,12 +610,6 @@ private:
 
 	std::list<RTCPCompoundPacket *> byepackets;
 
-#ifdef RTP_SUPPORT_THREAD
-	RTPPollThread *pollthread;
-	jthread::JMutex sourcesmutex,buildermutex,schedmutex,packsentmutex;
-
-	friend class RTPPollThread;
-#endif // RTP_SUPPORT_THREAD
 	friend class RTPSessionSources;
 	friend class RTCPSessionPacketBuilder;
 };
@@ -669,13 +637,6 @@ inline void RTPSession::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, siz
 
 inline void RTPSession::OnBYEPacket(RTPSourceData *)                                                    { }
 inline void RTPSession::OnSendRTCPCompoundPacket(RTCPCompoundPacket *)                                  { }
-
-#ifdef RTP_SUPPORT_THREAD
-inline void RTPSession::OnPollThreadError(int)                                                          { }
-inline void RTPSession::OnPollThreadStep()                                                              { }
-inline void RTPSession::OnPollThreadStart(bool &)                                                       { }
-inline void RTPSession::OnPollThreadStop()                                                              { }
-#endif // RTP_SUPPORT_THREAD
 
 inline int RTPSession::OnChangeRTPOrRTCPData(const void *, size_t, bool, void **, size_t *) {
 	return ERR_RTP_RTPSESSION_CHANGEREQUESTEDBUTNOTIMPLEMENTED;

@@ -40,9 +40,6 @@
 
 #include "rtpconfig.h"
 #include "rtprandom.h"
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
 #include <stdio.h>
 
 namespace qrtplib
@@ -63,9 +60,6 @@ public:
 private:
 	void SetSeed(uint32_t seed);
 
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex mutex;
-#endif // RTP_SUPPORT_THREAD
 	uint64_t state;
 };
 

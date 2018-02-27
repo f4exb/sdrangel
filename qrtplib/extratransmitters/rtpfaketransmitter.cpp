@@ -75,17 +75,10 @@
 										mreq.imr_interface.s_addr = htonl(bindIP);\
 										status = setsockopt(socket,IPPROTO_IP,type,(const char *)&mreq,sizeof(struct ip_mreq));\
 									}*/
-#ifdef RTP_SUPPORT_THREAD
-	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.Lock(); }
-	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.Unlock(); }
-	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.Lock(); }
-	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.Unlock(); }
-#else
-	#define MAINMUTEX_LOCK
-	#define MAINMUTEX_UNLOCK
-	#define WAITMUTEX_LOCK
-	#define WAITMUTEX_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+#define MAINMUTEX_LOCK
+#define MAINMUTEX_UNLOCK
+#define WAITMUTEX_LOCK
+#define WAITMUTEX_UNLOCK
 
 namespace qrtplib
 {
@@ -110,23 +103,8 @@ int RTPFakeTransmitter::Init(bool tsafe)
     if (tsafe)
         return ERR_RTP_NOTHREADSUPPORT;
 
-#ifdef RTP_SUPPORT_THREAD
-	threadsafe = tsafe;
-	if (threadsafe)
-	{
-		int status;
-
-		status = mainmutex.Init();
-		if (status < 0)
-			return ERR_RTP_FAKETRANS_CANTINITMUTEX;
-		status = waitmutex.Init();
-		if (status < 0)
-			return ERR_RTP_FAKETRANS_CANTINITMUTEX;
-	}
-#else
 	if (tsafe)
 		return ERR_RTP_NOTHREADSUPPORT;
-#endif // RTP_SUPPORT_THREAD
 
 	init = true;
 	return 0;

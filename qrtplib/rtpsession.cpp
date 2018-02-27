@@ -32,7 +32,6 @@
 
 #include "rtpsession.h"
 #include "rtperrors.h"
-#include "rtppollthread.h"
 #include "rtpudpv4transmitter.h"
 #include "rtpudpv6transmitter.h"
 #include "rtptcptransmitter.h"
@@ -58,25 +57,14 @@
 #endif // WIN32
 
 
-#ifdef RTP_SUPPORT_THREAD
-	#define SOURCES_LOCK					{ if (needthreadsafety) sourcesmutex.Lock(); }
-	#define SOURCES_UNLOCK					{ if (needthreadsafety) sourcesmutex.Unlock(); }
-	#define BUILDER_LOCK					{ if (needthreadsafety) buildermutex.Lock(); }
-	#define BUILDER_UNLOCK					{ if (needthreadsafety) buildermutex.Unlock(); }
-	#define SCHED_LOCK						{ if (needthreadsafety) schedmutex.Lock(); }
-	#define SCHED_UNLOCK					{ if (needthreadsafety) schedmutex.Unlock(); }
-	#define PACKSENT_LOCK					{ if (needthreadsafety) packsentmutex.Lock(); }
-	#define PACKSENT_UNLOCK					{ if (needthreadsafety) packsentmutex.Unlock(); }
-#else
-	#define SOURCES_LOCK
-	#define SOURCES_UNLOCK
-	#define BUILDER_LOCK
-	#define BUILDER_UNLOCK
-	#define SCHED_LOCK
-	#define SCHED_UNLOCK
-	#define PACKSENT_LOCK
-	#define PACKSENT_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+#define SOURCES_LOCK
+#define SOURCES_UNLOCK
+#define BUILDER_LOCK
+#define BUILDER_UNLOCK
+#define SCHED_LOCK
+#define SCHED_UNLOCK
+#define PACKSENT_LOCK
+#define PACKSENT_UNLOCK
 
 namespace qrtplib
 {
@@ -330,82 +318,6 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 
 	// Do thread stuff if necessary
 
-#ifdef RTP_SUPPORT_THREAD
-	pollthread = 0;
-	if (usingpollthread)
-	{
-		if (!sourcesmutex.IsInitialized())
-		{
-			if (sourcesmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
-			}
-		}
-		if (!buildermutex.IsInitialized())
-		{
-			if (buildermutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
-			}
-		}
-		if (!schedmutex.IsInitialized())
-		{
-			if (schedmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
-			}
-		}
-		if (!packsentmutex.IsInitialized())
-		{
-			if (packsentmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
-			}
-		}
-
-		pollthread = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPPOLLTHREAD) RTPPollThread(*this,rtcpsched);
-		if (pollthread == 0)
-		{
-			if (deletetransmitter)
-				RTPDelete(rtptrans,GetMemoryManager());
-			packetbuilder.Destroy();
-			sources.Clear();
-			rtcpbuilder.Destroy();
-			return ERR_RTP_OUTOFMEM;
-		}
-		if ((status = pollthread->Start(rtptrans)) < 0)
-		{
-			if (deletetransmitter)
-				RTPDelete(rtptrans,GetMemoryManager());
-			RTPDelete(pollthread,GetMemoryManager());
-			packetbuilder.Destroy();
-			sources.Clear();
-			rtcpbuilder.Destroy();
-			return status;
-		}
-	}
-#endif // RTP_SUPPORT_THREAD
-
 	created = true;
 	return 0;
 }
@@ -415,11 +327,6 @@ void RTPSession::Destroy()
 {
 	if (!created)
 		return;
-
-#ifdef RTP_SUPPORT_THREAD
-	if (pollthread)
-		RTPDelete(pollthread,GetMemoryManager());
-#endif // RTP_SUPPORT_THREAD
 
 	if (deletetransmitter)
 		RTPDelete(rtptrans,GetMemoryManager());
@@ -444,11 +351,6 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 		return;
 
 	// first, stop the thread so we have full control over all components
-
-#ifdef RTP_SUPPORT_THREAD
-	if (pollthread)
-		RTPDelete(pollthread,GetMemoryManager());
-#endif // RTP_SUPPORT_THREAD
 
 	RTPTime stoptime = RTPTime::CurrentTime();
 	stoptime += maxwaittime;

@@ -49,17 +49,10 @@ using namespace std;
 
 #define RTPTCPTRANS_MAXPACKSIZE							65535
 
-#ifdef RTP_SUPPORT_THREAD
-	#define MAINMUTEX_LOCK 		{ if (m_threadsafe) m_mainMutex.Lock(); }
-	#define MAINMUTEX_UNLOCK	{ if (m_threadsafe) m_mainMutex.Unlock(); }
-	#define WAITMUTEX_LOCK		{ if (m_threadsafe) m_waitMutex.Lock(); }
-	#define WAITMUTEX_UNLOCK	{ if (m_threadsafe) m_waitMutex.Unlock(); }
-#else
-	#define MAINMUTEX_LOCK
-	#define MAINMUTEX_UNLOCK
-	#define WAITMUTEX_LOCK
-	#define WAITMUTEX_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+#define MAINMUTEX_LOCK
+#define MAINMUTEX_UNLOCK
+#define WAITMUTEX_LOCK
+#define WAITMUTEX_UNLOCK
 
 namespace qrtplib
 {
@@ -80,23 +73,8 @@ int RTPTCPTransmitter::Init(bool tsafe)
 	if (m_init)
 		return ERR_RTP_TCPTRANS_ALREADYINIT;
 
-#ifdef RTP_SUPPORT_THREAD
-	m_threadsafe = tsafe;
-	if (m_threadsafe)
-	{
-		int status;
-
-		status = m_mainMutex.Init();
-		if (status < 0)
-			return ERR_RTP_TCPTRANS_CANTINITMUTEX;
-		status = m_waitMutex.Init();
-		if (status < 0)
-			return ERR_RTP_TCPTRANS_CANTINITMUTEX;
-	}
-#else
 	if (tsafe)
 		return ERR_RTP_NOTHREADSUPPORT;
-#endif // RTP_SUPPORT_THREAD
 
 	m_maxPackSize = RTPTCPTRANS_MAXPACKSIZE;
 	m_init = true;

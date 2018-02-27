@@ -43,10 +43,6 @@
 #include "rtpabortdescriptors.h"
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
-
 namespace qrtplib
 {
 
@@ -203,10 +199,6 @@ private:
 
 	RTPAbortDescriptors m_abortDesc;
 	int m_abortCount;
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex mainmutex,waitmutex;
-	int threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 inline void RTPExternalPacketInjecter::InjectRTP(const void *data, size_t len, const RTPAddress &a)

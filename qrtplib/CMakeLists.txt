@@ -30,7 +30,6 @@ set (qrtplib_HEADERS
 	rtpmemoryobject.h
 	rtppacket.h
 	rtppacketbuilder.h
-	rtppollthread.h
 	rtprandom.h
 	rtprandomrand48.h
 	rtprandomrands.h
@@ -80,7 +79,6 @@ set(qrtplib_SOURCES
 	rtplibraryversion.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
-	rtppollthread.cpp
 	rtprandom.cpp
 	rtprandomrand48.cpp
 	rtprandomrands.cpp

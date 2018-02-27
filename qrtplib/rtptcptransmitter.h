@@ -192,10 +192,6 @@ private:
 	RTPAbortDescriptors m_abortDesc;
 	RTPAbortDescriptors *m_pAbortDesc; // in case an external one was specified
 
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex m_mainMutex, m_waitMutex;
-	bool m_threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 inline void RTPTCPTransmitter::OnSendError(SocketType) { }

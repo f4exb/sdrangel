@@ -54,10 +54,6 @@
 #include "rtpkeyhashtable.h"
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
-
 #define RTPFAKETRANS_HASHSIZE									8317
 #define RTPFAKETRANS_DEFAULTPORTBASE								5000
 
@@ -232,10 +228,6 @@ private:
 	int CreateAbortDescriptors();
 	void DestroyAbortDescriptors();
 	void AbortWaitInternal();
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex mainmutex,waitmutex;
-	int threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 } // end namespace

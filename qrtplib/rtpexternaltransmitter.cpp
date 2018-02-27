@@ -42,17 +42,10 @@
 
 #include <iostream>
 
-#ifdef RTP_SUPPORT_THREAD
-	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.Lock(); }
-	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.Unlock(); }
-	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.Lock(); }
-	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.Unlock(); }
-#else
-	#define MAINMUTEX_LOCK
-	#define MAINMUTEX_UNLOCK
-	#define WAITMUTEX_LOCK
-	#define WAITMUTEX_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+#define MAINMUTEX_LOCK
+#define MAINMUTEX_UNLOCK
+#define WAITMUTEX_LOCK
+#define WAITMUTEX_UNLOCK
 
 namespace qrtplib
 {
@@ -73,23 +66,8 @@ int RTPExternalTransmitter::Init(bool tsafe)
 	if (init)
 		return ERR_RTP_EXTERNALTRANS_ALREADYINIT;
 
-#ifdef RTP_SUPPORT_THREAD
-	threadsafe = tsafe;
-	if (threadsafe)
-	{
-		int status;
-
-		status = mainmutex.Init();
-		if (status < 0)
-			return ERR_RTP_EXTERNALTRANS_CANTINITMUTEX;
-		status = waitmutex.Init();
-		if (status < 0)
-			return ERR_RTP_EXTERNALTRANS_CANTINITMUTEX;
-	}
-#else
 	if (tsafe)
 		return ERR_RTP_NOTHREADSUPPORT;
-#endif // RTP_SUPPORT_THREAD
 
 	init = true;
 	return 0;
