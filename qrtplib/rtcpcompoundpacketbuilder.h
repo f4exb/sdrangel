@@ -49,8 +49,6 @@
 namespace qrtplib
 {
 
-class RTPMemoryManager;
-
 /** This class can be used to construct an RTCP compound packet.
  *  The RTCPCompoundPacketBuilder class can be used to construct an RTCP compound packet. It inherits the member
  *  functions of RTCPCompoundPacket which can be used to access the information in the compound packet once it has

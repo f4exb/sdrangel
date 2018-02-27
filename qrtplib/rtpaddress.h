@@ -44,8 +44,6 @@
 namespace qrtplib
 {
 
-class RTPMemoryManager;
-
 /** This class is an abstract class which is used to specify destinations, multicast groups etc. */
 class RTPAddress
 {

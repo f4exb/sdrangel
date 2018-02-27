@@ -44,7 +44,6 @@ set (qrtplib_HEADERS
 	rtptypes.h
 	rtpudpv4transmitter.h
     rtpudpv4transmitternobind.h
-	rtpbyteaddress.h
 	rtpexternaltransmitter.h
 	rtpsocketutil.h
 	rtpabortdescriptors.h
@@ -84,7 +83,6 @@ set(qrtplib_SOURCES
 	rtptimeutilities.cpp
 	rtpudpv4transmitter.cpp
     rtpudpv4transmitternobind.cpp
-	rtpbyteaddress.cpp
 	rtpexternaltransmitter.cpp
 	rtpabortdescriptors.cpp
 	rtptcpaddress.cpp
