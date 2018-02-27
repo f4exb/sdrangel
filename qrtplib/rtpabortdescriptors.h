@@ -1,34 +1,34 @@
 /*
 
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
+ This file is a part of JRTPLIB
+ Copyright (c) 1999-2017 Jori Liesenborgs
 
-  Contact: jori.liesenborgs@gmail.com
+ Contact: jori.liesenborgs@gmail.com
 
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
+ This library was developed at the Expertise Centre for Digital Media
+ (http://www.edm.uhasselt.be), a research center of the Hasselt University
+ (http://www.uhasselt.be). The library is based upon work done for
+ my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ IN THE SOFTWARE.
 
-*/
+ */
 
 /**
  * \file rtpabortdescriptors.h
@@ -64,38 +64,44 @@ namespace qrtplib
 class JRTPLIB_IMPORTEXPORT RTPAbortDescriptors
 {
 public:
-	RTPAbortDescriptors();
-	~RTPAbortDescriptors();
+    RTPAbortDescriptors();
+    ~RTPAbortDescriptors();
 
-	/** Initializes this instance. */
-	int Init();
+    /** Initializes this instance. */
+    int Init();
 
-	/** Returns the socket descriptor that can be included in a call to
-	 *  'select' (for example).*/
-	SocketType GetAbortSocket() const													{ return m_descriptors[0]; }
+    /** Returns the socket descriptor that can be included in a call to
+     *  'select' (for example).*/
+    SocketType GetAbortSocket() const
+    {
+        return m_descriptors[0];
+    }
 
-	/** Returns a flag indicating if this instance was initialized. */
-	bool IsInitialized() const															{ return m_init; }
+    /** Returns a flag indicating if this instance was initialized. */
+    bool IsInitialized() const
+    {
+        return m_init;
+    }
 
-	/** De-initializes this instance. */
-	void Destroy();
+    /** De-initializes this instance. */
+    void Destroy();
 
-	/** Send a signal to the socket that's returned by RTPAbortDescriptors::GetAbortSocket,
-	 *  causing the 'select' call to detect that data is available, making the call
-	 *  end. */
-	int SendAbortSignal();
+    /** Send a signal to the socket that's returned by RTPAbortDescriptors::GetAbortSocket,
+     *  causing the 'select' call to detect that data is available, making the call
+     *  end. */
+    int SendAbortSignal();
 
-	/** For each RTPAbortDescriptors::SendAbortSignal function that's called, a call
-	 *  to this function can be made to clear the state again. */
-	int ReadSignallingByte();
+    /** For each RTPAbortDescriptors::SendAbortSignal function that's called, a call
+     *  to this function can be made to clear the state again. */
+    int ReadSignallingByte();
 
-	/** Similar to ReadSignallingByte::ReadSignallingByte, this function clears the signalling
-	 *  state, but this also works independently from the amount of times that
-	 *  RTPAbortDescriptors::SendAbortSignal was called. */
-	int ClearAbortSignal();
+    /** Similar to ReadSignallingByte::ReadSignallingByte, this function clears the signalling
+     *  state, but this also works independently from the amount of times that
+     *  RTPAbortDescriptors::SendAbortSignal was called. */
+    int ClearAbortSignal();
 private:
-	SocketType m_descriptors[2];
-	bool m_init;
+    SocketType m_descriptors[2];
+    bool m_init;
 };
 
 } // end namespace

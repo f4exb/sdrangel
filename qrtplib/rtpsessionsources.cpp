@@ -1,34 +1,34 @@
 /*
 
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
+ This file is a part of JRTPLIB
+ Copyright (c) 1999-2017 Jori Liesenborgs
 
-  Contact: jori.liesenborgs@gmail.com
+ Contact: jori.liesenborgs@gmail.com
 
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
+ This library was developed at the Expertise Centre for Digital Media
+ (http://www.edm.uhasselt.be), a research center of the Hasselt University
+ (http://www.uhasselt.be). The library is based upon work done for
+ my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ IN THE SOFTWARE.
 
-*/
+ */
 
 #include "rtpsessionsources.h"
 #include "rtpsession.h"
@@ -37,103 +37,101 @@
 namespace qrtplib
 {
 
-void RTPSessionSources::OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnRTPPacket(RTPPacket *pack, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
-	rtpsession.OnRTPPacket(pack,receivetime,senderaddress);
+    rtpsession.OnRTPPacket(pack, receivetime, senderaddress);
 }
 
-void RTPSessionSources::OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnRTCPCompoundPacket(RTCPCompoundPacket *pack, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
-	if (senderaddress != 0) // don't analyse own RTCP packets again (they're already analysed on their way out)
-		rtpsession.rtcpsched.AnalyseIncoming(*pack);
-	rtpsession.OnRTCPCompoundPacket(pack,receivetime,senderaddress);
+    if (senderaddress != 0) // don't analyse own RTCP packets again (they're already analysed on their way out)
+        rtpsession.rtcpsched.AnalyseIncoming(*pack);
+    rtpsession.OnRTCPCompoundPacket(pack, receivetime, senderaddress);
 }
 
-void RTPSessionSources::OnSSRCCollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp)
+void RTPSessionSources::OnSSRCCollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, bool isrtp)
 {
-	if (srcdat->IsOwnSSRC())
-		owncollision = true;
-	rtpsession.OnSSRCCollision(srcdat,senderaddress,isrtp);
+    if (srcdat->IsOwnSSRC())
+        owncollision = true;
+    rtpsession.OnSSRCCollision(srcdat, senderaddress, isrtp);
 }
 
-void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,const uint8_t *cname,size_t cnamelength)
+void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, size_t cnamelength)
 {
-	rtpsession.OnCNAMECollision(srcdat,senderaddress,cname,cnamelength);
+    rtpsession.OnCNAMECollision(srcdat, senderaddress, cname, cnamelength);
 }
 
 void RTPSessionSources::OnNewSource(RTPSourceData *srcdat)
 {
-	rtpsession.OnNewSource(srcdat);
+    rtpsession.OnNewSource(srcdat);
 }
 
 void RTPSessionSources::OnRemoveSource(RTPSourceData *srcdat)
 {
-	rtpsession.OnRemoveSource(srcdat);
+    rtpsession.OnRemoveSource(srcdat);
 }
 
 void RTPSessionSources::OnTimeout(RTPSourceData *srcdat)
 {
-	rtpsession.rtcpsched.ActiveMemberDecrease();
-	rtpsession.OnTimeout(srcdat);
+    rtpsession.rtcpsched.ActiveMemberDecrease();
+    rtpsession.OnTimeout(srcdat);
 }
 
 void RTPSessionSources::OnBYETimeout(RTPSourceData *srcdat)
 {
-	rtpsession.OnBYETimeout(srcdat);
+    rtpsession.OnBYETimeout(srcdat);
 }
 
 void RTPSessionSources::OnBYEPacket(RTPSourceData *srcdat)
 {
-	rtpsession.rtcpsched.ActiveMemberDecrease();
-	rtpsession.OnBYEPacket(srcdat);
+    rtpsession.rtcpsched.ActiveMemberDecrease();
+    rtpsession.OnBYEPacket(srcdat);
 }
 
-void RTPSessionSources::OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnAPPPacket(RTCPAPPPacket *apppacket, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
-	rtpsession.OnAPPPacket(apppacket,receivetime,senderaddress);
+    rtpsession.OnAPPPacket(apppacket, receivetime, senderaddress);
 }
 
-void RTPSessionSources::OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime, const RTPAddress *senderaddress)
+void RTPSessionSources::OnUnknownPacketType(RTCPPacket *rtcppack, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
-	rtpsession.OnUnknownPacketType(rtcppack,receivetime,senderaddress);
+    rtpsession.OnUnknownPacketType(rtcppack, receivetime, senderaddress);
 }
 
-void RTPSessionSources::OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnUnknownPacketFormat(RTCPPacket *rtcppack, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
-	rtpsession.OnUnknownPacketFormat(rtcppack,receivetime,senderaddress);
+    rtpsession.OnUnknownPacketFormat(rtcppack, receivetime, senderaddress);
 }
 
 void RTPSessionSources::OnNoteTimeout(RTPSourceData *srcdat)
 {
-	rtpsession.OnNoteTimeout(srcdat);
+    rtpsession.OnNoteTimeout(srcdat);
 }
 
 void RTPSessionSources::OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled)
 {
-	rtpsession.OnValidatedRTPPacket(srcdat, rtppack, isonprobation, ispackethandled);
+    rtpsession.OnValidatedRTPPacket(srcdat, rtppack, isonprobation, ispackethandled);
 }
 
 void RTPSessionSources::OnRTCPSenderReport(RTPSourceData *srcdat)
 {
-	rtpsession.OnRTCPSenderReport(srcdat);
+    rtpsession.OnRTCPSenderReport(srcdat);
 }
 
 void RTPSessionSources::OnRTCPReceiverReport(RTPSourceData *srcdat)
 {
-	rtpsession.OnRTCPReceiverReport(srcdat);
+    rtpsession.OnRTCPReceiverReport(srcdat);
 }
 
-void RTPSessionSources::OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t,
-							const void *itemdata, size_t itemlength)
+void RTPSessionSources::OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, size_t itemlength)
 {
-	rtpsession.OnRTCPSDESItem(srcdat, t, itemdata, itemlength);
+    rtpsession.OnRTCPSDESItem(srcdat, t, itemdata, itemlength);
 }
 
 #ifdef RTP_SUPPORT_SDESPRIV
-void RTPSessionSources::OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen,
-								   const void *valuedata, size_t valuelen)
+void RTPSessionSources::OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen)
 {
-	rtpsession.OnRTCPSDESPrivateItem(srcdat, prefixdata, prefixlen, valuedata, valuelen);
+    rtpsession.OnRTCPSDESPrivateItem(srcdat, prefixdata, prefixlen, valuedata, valuelen);
 }
 #endif // RTP_SUPPORT_SDESPRIV
 

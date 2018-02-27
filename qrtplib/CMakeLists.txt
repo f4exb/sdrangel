@@ -25,8 +25,6 @@ set (qrtplib_HEADERS
 	rtpipv4destination.h
 	rtpkeyhashtable.h
 	rtplibraryversion.h
-	rtpmemorymanager.h
-	rtpmemoryobject.h
 	rtppacket.h
 	rtppacketbuilder.h
 	rtprandom.h

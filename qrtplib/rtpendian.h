@@ -24,7 +24,8 @@ public:
     }
 
     template<typename T>
-    T qToHost(const T& x) const {
+    T qToHost(const T& x) const
+    {
         return m_isLittleEndian ? qToLittleEndian(x) : qToBigEndian(x);
     }
 
@@ -33,7 +34,5 @@ private:
 };
 
 }
-
-
 
 #endif /* QRTPLIB_RTPENDIAN_H_ */
