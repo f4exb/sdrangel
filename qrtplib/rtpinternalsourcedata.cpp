@@ -39,13 +39,9 @@
 namespace qrtplib
 {
 
-RTPInternalSourceData::RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype) :
+RTPInternalSourceData::RTPInternalSourceData(uint32_t ssrc) :
         RTPSourceData(ssrc)
 {
-    JRTPLIB_UNUSED(probtype); // possibly unused
-#ifdef RTP_SUPPORT_PROBATION
-    probationtype = probtype;
-#endif // RTP_SUPPORT_PROBATION
 }
 
 RTPInternalSourceData::~RTPInternalSourceData()
@@ -65,45 +61,13 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack, const RTPTime &r
     else
         tsunit = timestampunit;
 
-#ifdef RTP_SUPPORT_PROBATION
-    if (validated) 				// If the source is our own process, we can already be validated. No
-        applyprobation = false;		// probation should be applied in that case.
-    else
-    {
-        if (probationtype == RTPSources::NoProbation)
-            applyprobation = false;
-        else
-            applyprobation = true;
-    }
-#else
     applyprobation = false;
-#endif // RTP_SUPPORT_PROBATION
 
     stats.ProcessPacket(rtppack, receivetime, tsunit, ownssrc, &accept, applyprobation, &onprobation);
 
-#ifdef RTP_SUPPORT_PROBATION
-    switch (probationtype)
-    {
-    case RTPSources::ProbationStore:
-        if (!(onprobation || accept))
-            return 0;
-        if (accept)
-            validated = true;
-        break;
-    case RTPSources::ProbationDiscard:
-    case RTPSources::NoProbation:
-        if (!accept)
-            return 0;
-        validated = true;
-        break;
-    default:
-        return ERR_RTP_INTERNALSOURCEDATA_INVALIDPROBATIONTYPE;
-    }
-#else
     if (!accept)
-    return 0;
+        return 0;
     validated = true;
-#endif // RTP_SUPPORT_PROBATION;
 
     if (validated && !ownssrc) // for own ssrc these variables depend on the outgoing packets, not on the incoming
         issender = true;

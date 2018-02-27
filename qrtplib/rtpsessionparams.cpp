@@ -48,9 +48,6 @@ RTPSessionParams::RTPSessionParams() :
     acceptown = false;
     owntsunit = -1; // The user will have to set it to the correct value himself
     resolvehostname = false;
-#ifdef RTP_SUPPORT_PROBATION
-    probationtype = RTPSources::ProbationStore;
-#endif // RTP_SUPPORT_PROBATION
 
     mininterval = RTPTime(RTCP_DEFAULTMININTERVAL);
     sessionbandwidth = RTP_DEFAULTSESSIONBANDWIDTH;

@@ -50,7 +50,7 @@ namespace qrtplib
 class RTPInternalSourceData: public RTPSourceData
 {
 public:
-    RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype);
+    RTPInternalSourceData(uint32_t ssrc);
     ~RTPInternalSourceData();
 
     int ProcessRTPPacket(RTPPacket *rtppack, const RTPTime &receivetime, bool *stored, RTPSources *sources);
@@ -107,10 +107,6 @@ public:
         SDESinf.SetNote(0, 0);
     }
 
-#ifdef RTP_SUPPORT_PROBATION
-private:
-    RTPSources::ProbationType probationtype;
-#endif // RTP_SUPPORT_PROBATION
 };
 
 inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)

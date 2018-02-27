@@ -254,10 +254,6 @@ private:
     RTPTime lastnotetime;
     uint32_t numnewpackets;
     uint32_t savedextseqnr;
-#ifdef RTP_SUPPORT_PROBATION
-    uint16_t prevseqnr;
-    int probation;
-#endif // RTP_SUPPORT_PROBATION
 };
 
 inline RTPSourceStats::RTPSourceStats() :
@@ -274,10 +270,6 @@ inline RTPSourceStats::RTPSourceStats() :
     prevtimestamp = 0;
     djitter = 0;
     savedextseqnr = 0;
-#ifdef RTP_SUPPORT_PROBATION
-    probation = 0;
-    prevseqnr = 0;
-#endif // RTP_SUPPORT_PROBATION
 }
 
 /** Describes an entry in the RTPSources source table. */

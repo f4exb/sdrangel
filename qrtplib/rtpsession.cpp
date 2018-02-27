@@ -193,13 +193,6 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
     if (sessparams.GetUsePredefinedSSRC())
         packetbuilder.AdjustSSRC(sessparams.GetPredefinedSSRC());
 
-#ifdef RTP_SUPPORT_PROBATION
-
-    // Set probation type
-    sources.SetProbationType(sessparams.GetProbationType());
-
-#endif // RTP_SUPPORT_PROBATION
-
     // Add our own ssrc to the source table
 
     if ((status = sources.CreateOwnSSRC(packetbuilder.GetSSRC())) < 0)

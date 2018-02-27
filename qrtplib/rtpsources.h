@@ -90,13 +90,6 @@ public:
 
     /** Clears the source table. */
     void Clear();
-#ifdef RTP_SUPPORT_PROBATION
-    /** Changes the current probation type. */
-    void SetProbationType(ProbationType probtype)
-    {
-        probationtype = probtype;
-    }
-#endif // RTP_SUPPORT_PROBATION
 
     /** Creates an entry for our own SSRC identifier. */
     int CreateOwnSSRC(uint32_t ssrc);
@@ -369,10 +362,6 @@ private:
     int sendercount;
     int totalcount;
     int activecount;
-
-#ifdef RTP_SUPPORT_PROBATION
-    ProbationType probationtype;
-#endif // RTP_SUPPORT_PROBATION
 
     RTPInternalSourceData *owndata;
 

@@ -56,9 +56,6 @@ RTPSources::RTPSources(ProbationType probtype)
     sendercount = 0;
     activecount = 0;
     owndata = 0;
-#ifdef RTP_SUPPORT_PROBATION
-    probationtype = probtype;
-#endif // RTP_SUPPORT_PROBATION
 }
 
 RTPSources::~RTPSources()
@@ -812,11 +809,7 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc, RTPInternalSourceData **
 
     if (sourcelist.GotoElement(ssrc) < 0) // No entry for this source
     {
-#ifdef RTP_SUPPORT_PROBATION
-        srcdat2 = new RTPInternalSourceData(ssrc, probationtype);
-#else
-        srcdat2 = new RTPInternalSourceData(ssrc,RTPSources::NoProbation);
-#endif // RTP_SUPPORT_PROBATION
+        srcdat2 = new RTPInternalSourceData(ssrc);
         if (srcdat2 == 0)
             return ERR_RTP_OUTOFMEM;
         if ((status = sourcelist.AddElement(ssrc, srcdat2)) < 0)

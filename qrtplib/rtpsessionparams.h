@@ -143,19 +143,6 @@ public:
     {
         return resolvehostname;
     }
-#ifdef RTP_SUPPORT_PROBATION
-    /** If probation support is enabled, this function sets the probation type to be used. */
-    void SetProbationType(RTPSources::ProbationType probtype)
-    {
-        probationtype = probtype;
-    }
-
-    /** Returns the probation type which will be used (default is RTPSources::ProbationStore). */
-    RTPSources::ProbationType GetProbationType() const
-    {
-        return probationtype;
-    }
-#endif // RTP_SUPPORT_PROBATION
 
     /** Sets the session bandwidth in bytes per second. */
     void SetSessionBandwidth(double sessbw)
@@ -357,9 +344,6 @@ private:
     double owntsunit;
     RTPTransmitter::ReceiveMode receivemode;
     bool resolvehostname;
-#ifdef RTP_SUPPORT_PROBATION
-    RTPSources::ProbationType probationtype;
-#endif // RTP_SUPPORT_PROBATION
 
     double sessionbandwidth;
     double controlfrac;

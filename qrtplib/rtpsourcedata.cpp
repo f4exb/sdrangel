@@ -75,61 +75,7 @@ void RTPSourceStats::ProcessPacket(RTPPacket *pack, const RTPTime &receivetime, 
 
     if (!sentdata) // no valid packets received yet
     {
-#ifdef RTP_SUPPORT_PROBATION
-        if (applyprobation)
-        {
-            bool acceptpack = false;
-
-            if (probation)
-            {
-                uint16_t pseq;
-                uint32_t pseq2;
-
-                pseq = prevseqnr;
-                pseq++;
-                pseq2 = (uint32_t) pseq;
-                if (pseq2 == pack->GetExtendedSequenceNumber()) // ok, its the next expected packet
-                {
-                    prevseqnr = (uint16_t) pack->GetExtendedSequenceNumber();
-                    probation--;
-                    if (probation == 0) // probation over
-                        acceptpack = true;
-                    else
-                        *onprobation = true;
-                }
-                else // not next packet
-                {
-                    probation = RTP_PROBATIONCOUNT;
-                    prevseqnr = (uint16_t) pack->GetExtendedSequenceNumber();
-                    *onprobation = true;
-                }
-            }
-            else // first packet received with this SSRC ID, start probation
-            {
-                probation = RTP_PROBATIONCOUNT;
-                prevseqnr = (uint16_t) pack->GetExtendedSequenceNumber();
-                *onprobation = true;
-            }
-
-            if (acceptpack)
-            {
-                ACCEPTPACKETCODE
-            }
-            else
-            {
-                *accept = false;
-                lastmsgtime = receivetime;
-            }
-        }
-        else // No probation
-        {
-            ACCEPTPACKETCODE
-        }
-#else // No compiled-in probation support
-
         ACCEPTPACKETCODE
-
-#endif // RTP_SUPPORT_PROBATION
     }
     else // already got packets
     {
