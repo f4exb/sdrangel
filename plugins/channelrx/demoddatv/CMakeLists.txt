@@ -27,6 +27,9 @@ set(datv_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${AVCODEC_INCLUDE_DIRS}
+	${AVFORMAT_INCLUDE_DIRS}
+	${SWSCALE_INCLUDE_DIRS}
 )
 
 #include(${QT_USE_FILE})
@@ -47,9 +50,9 @@ target_link_libraries(demoddatv
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
-	avcodec
-	avformat
-	swscale
+	${AVCODEC_LIBRARIES}
+	${AVFORMAT_LIBRARIES}
+	${SWSCALE_LIBRARIES}
 )
 
 qt5_use_modules(demoddatv Core Widgets Multimedia MultimediaWidgets)

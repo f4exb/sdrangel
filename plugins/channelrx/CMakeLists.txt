@@ -11,12 +11,17 @@ add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 add_subdirectory(chanalyzerng)
 add_subdirectory(demodatv)
-add_subdirectory(demoddatv)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
 
+find_package(FFmpeg)
+if(FFMPEG_FOUND)
+    add_subdirectory(demoddatv)
+endif()
+
 if (BUILD_DEBIAN)
     add_subdirectory(demoddsd)
+    add_subdirectory(demoddatv)
 endif (BUILD_DEBIAN)
