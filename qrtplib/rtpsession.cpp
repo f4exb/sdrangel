@@ -32,9 +32,10 @@
 
 #include "rtpsession.h"
 #include "rtperrors.h"
-#include "rtpudpv4transmitter.h"
-#include "rtptcptransmitter.h"
-#include "rtpexternaltransmitter.h"
+// TODO: this is for Create with transmitter creation. See if we keep it.
+//#include "rtpudpv4transmitter.h"
+//#include "rtptcptransmitter.h"
+//#include "rtpexternaltransmitter.h"
 #include "rtpsessionparams.h"
 #include "rtpdefines.h"
 #include "rtprawpacket.h"
@@ -113,20 +114,21 @@ int RTPSession::Create(const RTPSessionParams &sessparams, const RTPTransmission
     rtptrans = 0;
     switch (protocol)
     {
-    case RTPTransmitter::IPv4UDPProto:
-        rtptrans = new RTPUDPv4Transmitter();
-        break;
-    case RTPTransmitter::ExternalProto:
-        rtptrans = new RTPExternalTransmitter();
-        break;
-    case RTPTransmitter::UserDefinedProto:
-        rtptrans = NewUserDefinedTransmitter();
-        if (rtptrans == 0)
-            return ERR_RTP_SESSION_USERDEFINEDTRANSMITTERNULL;
-        break;
-    case RTPTransmitter::TCPProto:
-        rtptrans = new RTPTCPTransmitter();
-        break;
+    // TODO: see if we keep this Create method or use the one with the transmitter specified
+//    case RTPTransmitter::IPv4UDPProto:
+//        rtptrans = new RTPUDPv4Transmitter();
+//        break;
+//    case RTPTransmitter::ExternalProto:
+//        rtptrans = new RTPExternalTransmitter();
+//        break;
+//    case RTPTransmitter::UserDefinedProto:
+//        rtptrans = NewUserDefinedTransmitter();
+//        if (rtptrans == 0)
+//            return ERR_RTP_SESSION_USERDEFINEDTRANSMITTERNULL;
+//        break;
+//    case RTPTransmitter::TCPProto:
+//        rtptrans = new RTPTCPTransmitter();
+//        break;
     default:
         return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
     }

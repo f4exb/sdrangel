@@ -63,6 +63,7 @@ set(qrtplib_SOURCES
 	rtcpsdesinfo.cpp
 	rtcpsdespacket.cpp
 	rtcpsrpacket.cpp
+    rtpaddress.cpp	
 	rtpcollisionlist.cpp
 	rtperrors.cpp
 	rtpinternalsourcedata.cpp
