@@ -120,15 +120,15 @@ void RTCPScheduler::AnalyseIncoming(RTCPCompoundPacket &rtcpcomppack)
 
     if (!isbye)
     {
-        size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
-        avgrtcppacksize = (size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgrtcppacksize));
+        std::size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
+        avgrtcppacksize = (std::size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgrtcppacksize));
     }
     else
     {
         if (byescheduled)
         {
-            size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
-            avgbyepacketsize = (size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgbyepacketsize));
+            std::size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
+            avgbyepacketsize = (std::size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgbyepacketsize));
             byemembers++;
         }
     }
@@ -148,8 +148,8 @@ void RTCPScheduler::AnalyseOutgoing(RTCPCompoundPacket &rtcpcomppack)
 
     if (!isbye)
     {
-        size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
-        avgrtcppacksize = (size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgrtcppacksize));
+        std::size_t packsize = headeroverhead + rtcpcomppack.GetCompoundPacketLength();
+        avgrtcppacksize = (std::size_t)((1.0 / 16.0) * ((double) packsize) + (15.0 / 16.0) * ((double) avgrtcppacksize));
     }
 
     hassentrtcp = true;
@@ -354,7 +354,7 @@ void RTCPScheduler::PerformReverseReconsideration()
     pmembers = members;
 }
 
-void RTCPScheduler::ScheduleBYEPacket(size_t packetsize)
+void RTCPScheduler::ScheduleBYEPacket(std::size_t packetsize)
 {
     if (byescheduled)
         return;

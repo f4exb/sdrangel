@@ -58,7 +58,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack)
     }
 
     uint8_t *data = rawpack.GetData();
-    size_t datalen = rawpack.GetDataLength();
+    std::size_t datalen = rawpack.GetDataLength();
 
     error = ParseData(data, datalen);
     if (error < 0)
@@ -73,7 +73,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack)
     rtcppackit = rtcppacklist.begin();
 }
 
-RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, size_t packetlen, bool deletedata)
+RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, std::size_t packetlen, bool deletedata)
 {
     compoundpacket = 0;
     compoundpacketlength = 0;
@@ -97,7 +97,7 @@ RTCPCompoundPacket::RTCPCompoundPacket()
     deletepacket = true;
 }
 
-int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
+int RTCPCompoundPacket::ParseData(uint8_t *data, std::size_t datalen)
 {
     bool first;
 
@@ -109,7 +109,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
     do
     {
         RTCPCommonHeader *rtcphdr;
-        size_t length;
+        std::size_t length;
 
         rtcphdr = (RTCPCommonHeader *) data;
         if (rtcphdr->version != RTP_VERSION) // check version
@@ -129,7 +129,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
             }
         }
 
-        length = (size_t) m_endian.qToHost(rtcphdr->length);
+        length = (std::size_t) m_endian.qToHost(rtcphdr->length);
         length++;
         length *= sizeof(uint32_t);
 
@@ -182,7 +182,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 
         datalen -= length;
         data += length;
-    } while (datalen >= (size_t) sizeof(RTCPCommonHeader));
+    } while (datalen >= (std::size_t) sizeof(RTCPCommonHeader));
 
     if (datalen != 0) // some remaining bytes
     {

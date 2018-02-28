@@ -76,7 +76,7 @@ int RTPTCPTransmitter::Init(bool tsafe)
     return 0;
 }
 
-int RTPTCPTransmitter::Create(size_t maximumpacketsize __attribute__((unused)), const RTPTransmissionParams *transparams)
+int RTPTCPTransmitter::Create(std::size_t maximumpacketsize __attribute__((unused)), const RTPTransmissionParams *transparams)
 {
     const RTPTCPTransmissionParams *params, defaultparams;
     int status;
@@ -167,7 +167,7 @@ void RTPTCPTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
     delete i;
 }
 
-int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer, size_t *bufferlength)
+int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength)
 {
     if (!m_init)
         return ERR_RTP_TCPTRANS_NOTINIT;
@@ -259,7 +259,7 @@ int RTPTCPTransmitter::Poll()
         ++it;
     }
 
-    for (size_t i = 0; i < errSockets.size(); i++)
+    for (std::size_t i = 0; i < errSockets.size(); i++)
         OnReceiveError(errSockets[i]);
 
     return status;
@@ -324,7 +324,7 @@ int RTPTCPTransmitter::WaitForIncomingData(const RTPTime &delay, bool *dataavail
     {
         bool avail = false;
 
-        for (size_t i = 0; i < m_tmpFlags.size(); i++)
+        for (std::size_t i = 0; i < m_tmpFlags.size(); i++)
         {
             if (m_tmpFlags[i])
             {
@@ -362,12 +362,12 @@ int RTPTCPTransmitter::AbortWait()
     return 0;
 }
 
-int RTPTCPTransmitter::SendRTPData(const void *data, size_t len)
+int RTPTCPTransmitter::SendRTPData(const void *data, std::size_t len)
 {
     return SendRTPRTCPData(data, len);
 }
 
-int RTPTCPTransmitter::SendRTCPData(const void *data, size_t len)
+int RTPTCPTransmitter::SendRTCPData(const void *data, std::size_t len)
 {
     return SendRTPRTCPData(data, len);
 }
@@ -523,7 +523,7 @@ void RTPTCPTransmitter::ClearAcceptList()
 {
 }
 
-int RTPTCPTransmitter::SetMaximumPacketSize(size_t s)
+int RTPTCPTransmitter::SetMaximumPacketSize(std::size_t s)
 {
     if (!m_init)
         return ERR_RTP_TCPTRANS_NOTINIT;
@@ -603,7 +603,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 #ifdef RTP_SOCKETTYPE_WINSOCK
     unsigned long len;
 #else
-    size_t len;
+    std::size_t len;
 #endif // RTP_SOCKETTYPE_WINSOCK
     bool dataavailable;
 
@@ -668,7 +668,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
     return 0;
 }
 
-int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
+int RTPTCPTransmitter::SendRTPRTCPData(const void *data, std::size_t len)
 {
     if (!m_init)
         return ERR_RTP_TCPTRANS_NOTINIT;
@@ -706,7 +706,7 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 
     if (errSockets.size() != 0)
     {
-        for (size_t i = 0; i < errSockets.size(); i++)
+        for (std::size_t i = 0; i < errSockets.size(); i++)
             OnSendError(errSockets[i]);
     }
 

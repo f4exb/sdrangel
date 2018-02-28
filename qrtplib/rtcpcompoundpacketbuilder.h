@@ -66,13 +66,13 @@ public:
      *  Starts building an RTCP compound packet with maximum size \c maxpacketsize. New memory will be allocated
      *  to store the packet.
      */
-    int InitBuild(size_t maxpacketsize);
+    int InitBuild(std::size_t maxpacketsize);
 
     /** Starts building a RTCP compound packet.
      *  Starts building a RTCP compound packet. Data will be stored in \c externalbuffer which
      *  can contain \c buffersize bytes.
      */
-    int InitBuild(void *externalbuffer, size_t buffersize);
+    int InitBuild(void *externalbuffer, std::size_t buffersize);
 
     /** Adds a sender report to the compound packet.
      *  Tells the packet builder that the packet should start with a sender report which will contain
@@ -118,7 +118,7 @@ public:
      *  Adds the APP packet specified by the arguments to the compound packet. Note that \c appdatalen has to be
      *  a multiple of four.
      */
-    int AddAPPPacket(uint8_t subtype, uint32_t ssrc, const uint8_t name[4], const void *appdata, size_t appdatalen);
+    int AddAPPPacket(uint8_t subtype, uint32_t ssrc, const uint8_t name[4], const void *appdata, std::size_t appdatalen);
 
     /** Finishes building the compound packet.
      *  Finishes building the compound packet. If successful, the RTCPCompoundPacket member functions
@@ -134,13 +134,13 @@ private:
                 packetdata(0), packetlength(0)
         {
         }
-        Buffer(uint8_t *data, size_t len) :
+        Buffer(uint8_t *data, std::size_t len) :
                 packetdata(data), packetlength(len)
         {
         }
 
         uint8_t *packetdata;
-        size_t packetlength;
+        std::size_t packetlength;
     };
 
     class Report
@@ -170,9 +170,9 @@ private:
             headerlength = 0;
         }
 
-        size_t NeededBytes()
+        std::size_t NeededBytes()
         {
-            size_t x, n, d, r;
+            std::size_t x, n, d, r;
             n = reportblocks.size();
             if (n == 0)
             {
@@ -194,9 +194,9 @@ private:
             return x;
         }
 
-        size_t NeededBytesWithExtraReportBlock()
+        std::size_t NeededBytesWithExtraReportBlock()
         {
-            size_t x, n, d, r;
+            std::size_t x, n, d, r;
             n = reportblocks.size() + 1; // +1 for the extra block
             x = n * sizeof(RTCPReceiverReport);
             d = n / 31; // max 31 reportblocks per report
@@ -213,7 +213,7 @@ private:
 
         uint8_t *headerdata;
         uint32_t headerdata32[(sizeof(uint32_t) + sizeof(RTCPSenderReport)) / sizeof(uint32_t)]; // either for ssrc and sender info or just ssrc
-        size_t headerlength;
+        std::size_t headerlength;
         std::list<Buffer> reportblocks;
     };
 
@@ -235,9 +235,9 @@ private:
             items.clear();
         }
 
-        size_t NeededBytes()
+        std::size_t NeededBytes()
         {
-            size_t x, r;
+            std::size_t x, r;
             x = totalitemsize + 1; // +1 for the 0 byte which terminates the item list
             r = x % sizeof(uint32_t);
             if (r != 0)
@@ -246,10 +246,10 @@ private:
             return x;
         }
 
-        size_t NeededBytesWithExtraItem(uint8_t itemdatalength)
+        std::size_t NeededBytesWithExtraItem(uint8_t itemdatalength)
         {
-            size_t x, r;
-            x = totalitemsize + sizeof(RTCPSDESHeader) + (size_t) itemdatalength + 1;
+            std::size_t x, r;
+            x = totalitemsize + sizeof(RTCPSDESHeader) + (std::size_t) itemdatalength + 1;
             r = x % sizeof(uint32_t);
             if (r != 0)
                 x += (sizeof(uint32_t) - r); // make sure it ends on a 32 bit boundary
@@ -257,7 +257,7 @@ private:
             return x;
         }
 
-        void AddItem(uint8_t *buf, size_t len)
+        void AddItem(uint8_t *buf, std::size_t len)
         {
             Buffer b(buf, len);
             totalitemsize += len;
@@ -267,7 +267,7 @@ private:
         uint32_t ssrc;
         std::list<Buffer> items;
     private:
-        size_t totalitemsize;
+        std::size_t totalitemsize;
     };
 
     class SDES
@@ -302,7 +302,7 @@ private:
             return 0;
         }
 
-        int AddItem(uint8_t *buf, size_t len)
+        int AddItem(uint8_t *buf, std::size_t len)
         {
             if (sdessources.empty())
                 return ERR_RTP_RTCPCOMPPACKBUILDER_NOCURRENTSOURCE;
@@ -310,11 +310,11 @@ private:
             return 0;
         }
 
-        size_t NeededBytes()
+        std::size_t NeededBytes()
         {
             std::list<SDESSource *>::const_iterator it;
-            size_t x = 0;
-            size_t n, d, r;
+            std::size_t x = 0;
+            std::size_t n, d, r;
 
             if (sdessources.empty())
                 return 0;
@@ -330,11 +330,11 @@ private:
             return x;
         }
 
-        size_t NeededBytesWithExtraItem(uint8_t itemdatalength)
+        std::size_t NeededBytesWithExtraItem(uint8_t itemdatalength)
         {
             std::list<SDESSource *>::const_iterator it;
-            size_t x = 0;
-            size_t n, d, r;
+            std::size_t x = 0;
+            std::size_t n, d, r;
 
             if (sdessources.empty())
                 return 0;
@@ -351,11 +351,11 @@ private:
             return x;
         }
 
-        size_t NeededBytesWithExtraSource()
+        std::size_t NeededBytesWithExtraSource()
         {
             std::list<SDESSource *>::const_iterator it;
-            size_t x = 0;
-            size_t n, d, r;
+            std::size_t x = 0;
+            std::size_t n, d, r;
 
             if (sdessources.empty())
                 return 0;
@@ -381,7 +381,7 @@ private:
     };
 
     RTPEndian m_endian;
-    size_t maximumpacketsize;
+    std::size_t maximumpacketsize;
     uint8_t *buffer;
     bool external;
     bool arebuilding;
@@ -390,10 +390,10 @@ private:
     SDES sdes;
 
     std::list<Buffer> byepackets;
-    size_t byesize;
+    std::size_t byesize;
 
     std::list<Buffer> apppackets;
-    size_t appsize;
+    std::size_t appsize;
 
     void ClearBuildBuffers();
 };

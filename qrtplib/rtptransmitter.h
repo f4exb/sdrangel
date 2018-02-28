@@ -41,6 +41,7 @@
 #include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtptimeutilities.h"
+#include <cstddef>
 
 namespace qrtplib
 {
@@ -107,7 +108,7 @@ public:
      *  from RTPTransmissionParams. If \c transparams is NULL, the default transmission parameters
      *  for the component will be used.
      */
-    virtual int Create(size_t maxpacksize, const RTPTransmissionParams *transparams) = 0;
+    virtual int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams) = 0;
 
     /** By calling this function, buffers are cleared and the component cannot be used anymore.
      *  By calling this function, buffers are cleared and the component cannot be used anymore.
@@ -137,14 +138,14 @@ public:
      *  it returns \c ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL and stores the number of bytes needed in
      *  \c bufferlength.
      */
-    virtual int GetLocalHostName(uint8_t *buffer, size_t *bufferlength) = 0;
+    virtual int GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength) = 0;
 
     /** Returns \c true if the address specified by \c addr is one of the addresses of the transmitter. */
     virtual bool ComesFromThisTransmitter(const RTPAddress *addr) = 0;
 
     /** Returns the amount of bytes that will be added to the RTP packet by the underlying layers (excluding
      *  the link layer). */
-    virtual size_t GetHeaderOverhead() = 0;
+    virtual std::size_t GetHeaderOverhead() = 0;
 
     /** Checks for incoming data and stores it. */
     virtual int Poll() = 0;
@@ -159,10 +160,10 @@ public:
     virtual int AbortWait() = 0;
 
     /** Send a packet with length \c len containing \c data	to all RTP addresses of the current destination list. */
-    virtual int SendRTPData(const void *data, size_t len) = 0;
+    virtual int SendRTPData(const void *data, std::size_t len) = 0;
 
     /** Send a packet with length \c len containing \c data to all RTCP addresses of the current destination list. */
-    virtual int SendRTCPData(const void *data, size_t len) = 0;
+    virtual int SendRTCPData(const void *data, std::size_t len) = 0;
 
     /** Adds the address specified by \c addr to the list of destinations. */
     virtual int AddDestination(const RTPAddress &addr) = 0;
@@ -211,7 +212,7 @@ public:
     virtual void ClearAcceptList() = 0;
 
     /** Sets the maximum packet size which the transmitter should allow to \c s. */
-    virtual int SetMaximumPacketSize(size_t s) = 0;
+    virtual int SetMaximumPacketSize(std::size_t s) = 0;
 
     /** Returns \c true if packets can be obtained using the GetNextPacket member function. */
     virtual bool NewDataAvailable() = 0;

@@ -52,7 +52,7 @@ RTCPPacketBuilder::~RTCPPacketBuilder()
     Destroy();
 }
 
-int RTCPPacketBuilder::Init(size_t maxpacksize, double tsunit, const void *cname, size_t cnamelen)
+int RTCPPacketBuilder::Init(std::size_t maxpacksize, double tsunit, const void *cname, std::size_t cnamelen)
 {
     if (init)
         return ERR_RTP_RTCPPACKETBUILDER_ALREADYINIT;
@@ -163,7 +163,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
     }
 
     uint8_t *owncname;
-    size_t owncnamelen;
+    std::size_t owncnamelen;
 
     owncname = ownsdesinfo.GetCNAME(&owncnamelen);
 
@@ -506,7 +506,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack, bool 
 {
     int status;
     uint8_t *data;
-    size_t datalen;
+    std::size_t datalen;
 
     *full = false;
     *processedall = false;
@@ -626,7 +626,7 @@ void RTCPPacketBuilder::ClearAllSDESFlags()
     ownsdesinfo.ClearFlags();
 }
 
-int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack, const void *reason, size_t reasonlength, bool useSRifpossible)
+int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack, const void *reason, std::size_t reasonlength, bool useSRifpossible)
 {
     if (!init)
         return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -697,7 +697,7 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack, const void *rea
     }
 
     uint8_t *owncname;
-    size_t owncnamelen;
+    std::size_t owncnamelen;
 
     owncname = ownsdesinfo.GetCNAME(&owncnamelen);
 

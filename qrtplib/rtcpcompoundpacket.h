@@ -61,7 +61,7 @@ public:
      *  flag specifies if the data in \c packet should be deleted when the compound packet is destroyed. If
      *  specified, a memory manager will be installed.
      */
-    RTCPCompoundPacket(uint8_t *packet, size_t len, bool deletedata = true);
+    RTCPCompoundPacket(uint8_t *packet, std::size_t len, bool deletedata = true);
 protected:
     RTCPCompoundPacket(); // this is for the compoundpacket builder
 public:
@@ -83,7 +83,7 @@ public:
     }
 
     /** Returns the size of the entire RTCP compound packet. */
-    size_t GetCompoundPacketLength()
+    std::size_t GetCompoundPacketLength()
     {
         return compoundpacketlength;
     }
@@ -109,13 +109,13 @@ public:
 
 protected:
     void ClearPacketList();
-    int ParseData(uint8_t *packet, size_t len);
+    int ParseData(uint8_t *packet, std::size_t len);
 
     RTPEndian m_endian;
     int error;
 
     uint8_t *compoundpacket;
-    size_t compoundpacketlength;
+    std::size_t compoundpacketlength;
     bool deletepacket;
 
     std::list<RTCPPacket *> rtcppacklist;

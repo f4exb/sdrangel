@@ -68,13 +68,13 @@ public:
      *  \c maxpacksize. The arguments of the constructor are self-explanatory. Note that the size of a header
      *  extension is specified in a number of 32-bit words. A memory manager can be installed.
      */
-    RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, size_t maxpacksize);
+    RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, std::size_t maxpacksize);
 
     /** This constructor is similar to the other constructor, but here data is stored in an external buffer
      *  \c buffer with size \c buffersize. */
-    RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, size_t buffersize);
+    RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t buffersize);
 
     virtual ~RTPPacket()
     {
@@ -163,13 +163,13 @@ public:
     }
 
     /** Returns the length of the entire packet. */
-    size_t GetPacketLength() const
+    std::size_t GetPacketLength() const
     {
         return packetlength;
     }
 
     /** Returns the payload length. */
-    size_t GetPayloadLength() const
+    std::size_t GetPayloadLength() const
     {
         return payloadlength;
     }
@@ -187,7 +187,7 @@ public:
     }
 
     /** Returns the length of the header extension data. */
-    size_t GetExtensionLength() const
+    std::size_t GetExtensionLength() const
     {
         return extensionlength;
     }
@@ -204,8 +204,8 @@ public:
 private:
     void Clear();
     int ParseRawPacket(RTPRawPacket &rawpack);
-    int BuildPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, size_t maxsize);
+    int BuildPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+            const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t maxsize);
 
     RTPEndian m_endian;
     int error;
@@ -216,11 +216,11 @@ private:
     uint8_t payloadtype;
     uint32_t extseqnr, timestamp, ssrc;
     uint8_t *packet, *payload;
-    size_t packetlength, payloadlength;
+    std::size_t packetlength, payloadlength;
 
     uint16_t extid;
     uint8_t *extension;
-    size_t extensionlength;
+    std::size_t extensionlength;
 
     bool externalbuffer;
 

@@ -124,14 +124,14 @@ public:
     ~RTPTCPTransmitter();
 
     int Init(bool treadsafe);
-    int Create(size_t maxpacksize, const RTPTransmissionParams *transparams);
+    int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
     void Destroy();
     RTPTransmissionInfo *GetTransmissionInfo();
     void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
-    int GetLocalHostName(uint8_t *buffer, size_t *bufferlength);
+    int GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength);
     bool ComesFromThisTransmitter(const RTPAddress *addr);
-    size_t GetHeaderOverhead()
+    std::size_t GetHeaderOverhead()
     {
         return RTPTCPTRANS_HEADERSIZE;
     }
@@ -140,8 +140,8 @@ public:
     int WaitForIncomingData(const RTPTime &delay, bool *dataavailable = 0);
     int AbortWait();
 
-    int SendRTPData(const void *data, size_t len);
-    int SendRTCPData(const void *data, size_t len);
+    int SendRTPData(const void *data, std::size_t len);
+    int SendRTCPData(const void *data, std::size_t len);
 
     int AddDestination(const RTPAddress &addr);
     int DeleteDestination(const RTPAddress &addr);
@@ -159,7 +159,7 @@ public:
     int AddToAcceptList(const RTPAddress &addr);
     int DeleteFromAcceptList(const RTPAddress &addr);
     void ClearAcceptList();
-    int SetMaximumPacketSize(size_t s);
+    int SetMaximumPacketSize(std::size_t s);
 
     bool NewDataAvailable();
     RTPRawPacket *GetNextPacket();
@@ -191,7 +191,7 @@ private:
         int ProcessAvailableBytes(SocketType sock, int availLen, bool &complete);
     };
 
-    int SendRTPRTCPData(const void *data, size_t len);
+    int SendRTPRTCPData(const void *data, std::size_t len);
     void FlushPackets();
     int PollSocket(SocketType sock, SocketData &sdata);
     void ClearDestSockets();
@@ -205,7 +205,7 @@ private:
     std::vector<SocketType> m_tmpSocks;
     std::vector<int8_t> m_tmpFlags;
     std::vector<uint8_t> m_localHostname;
-    size_t m_maxPackSize;
+    std::size_t m_maxPackSize;
 
     std::list<RTPRawPacket*> m_rawpacketlist;
 

@@ -40,6 +40,7 @@
 
 #include "rtpconfig.h"
 #include "rtptypes.h"
+#include <cstddef>
 
 namespace qrtplib
 {
@@ -61,7 +62,7 @@ public:
         Unknown /**< The type of RTCP packet was not recognized. */
     };
 protected:
-    RTCPPacket(PacketType t, uint8_t *d, size_t dlen) :
+    RTCPPacket(PacketType t, uint8_t *d, std::size_t dlen) :
             data(d), datalen(dlen), packettype(t)
     {
         knownformat = false;
@@ -90,14 +91,14 @@ public:
     }
 
     /** Returns the length of this RTCP packet. */
-    size_t GetPacketLength() const
+    std::size_t GetPacketLength() const
     {
         return datalen;
     }
 
 protected:
     uint8_t *data;
-    size_t datalen;
+    std::size_t datalen;
     bool knownformat;
 private:
     const PacketType packettype;

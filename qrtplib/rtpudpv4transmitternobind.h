@@ -382,16 +382,16 @@ public:
     ~RTPUDPv4TransmitterNoBind();
 
     int Init(bool treadsafe);
-    int Create(size_t maxpacksize, const RTPTransmissionParams *transparams);
+    int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
     /** Bind the RTP and RTCP sockets to ports defined in the transmission parameters */
     int BindSockets(const RTPTransmissionParams *transparams);
     void Destroy();
     RTPTransmissionInfo *GetTransmissionInfo();
     void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
-    int GetLocalHostName(uint8_t *buffer, size_t *bufferlength);
+    int GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength);
     bool ComesFromThisTransmitter(const RTPAddress *addr);
-    size_t GetHeaderOverhead()
+    std::size_t GetHeaderOverhead()
     {
         return RTPUDPV4TRANSNOBIND_HEADERSIZE;
     }
@@ -400,8 +400,8 @@ public:
     int WaitForIncomingData(const RTPTime &delay, bool *dataavailable = 0);
     int AbortWait();
 
-    int SendRTPData(const void *data, size_t len);
-    int SendRTCPData(const void *data, size_t len);
+    int SendRTPData(const void *data, std::size_t len);
+    int SendRTCPData(const void *data, std::size_t len);
 
     int AddDestination(const RTPAddress &addr);
     int DeleteDestination(const RTPAddress &addr);
@@ -419,7 +419,7 @@ public:
     int AddToAcceptList(const RTPAddress &addr);
     int DeleteFromAcceptList(const RTPAddress &addr);
     void ClearAcceptList();
-    int SetMaximumPacketSize(size_t s);
+    int SetMaximumPacketSize(std::size_t s);
 
     bool NewDataAvailable();
     RTPRawPacket *GetNextPacket();
@@ -453,7 +453,7 @@ private:
     RTPTransmitter::ReceiveMode receivemode;
 
     uint8_t *localhostname;
-    size_t localhostnamelength;
+    std::size_t localhostnamelength;
 
     RTPHashTable<const RTPIPv4Destination, RTPUDPv4TransNoBind_GetHashIndex_IPv4Dest, RTPUDPV4TRANSNOBIND_HASHSIZE> destinations;
 #ifdef RTP_SUPPORT_IPV4MULTICAST
@@ -462,7 +462,7 @@ private:
     std::list<RTPRawPacket*> rawpacketlist;
 
     bool supportsmulticasting;
-    size_t maxpacksize;
+    std::size_t maxpacksize;
 
     class PortInfo
     {

@@ -35,7 +35,7 @@
 namespace qrtplib
 {
 
-RTCPSDESPacket::RTCPSDESPacket(uint8_t *data, size_t datalength) :
+RTCPSDESPacket::RTCPSDESPacket(uint8_t *data, std::size_t datalength) :
         RTCPPacket(SDES, data, datalength)
 {
     knownformat = false;
@@ -44,16 +44,16 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data, size_t datalength) :
     curchunknum = 0;
 
     RTCPCommonHeader *hdr = (RTCPCommonHeader *) data;
-    size_t len = datalength;
+    std::size_t len = datalength;
 
     if (hdr->padding)
     {
         uint8_t padcount = data[datalength - 1];
         if ((padcount & 0x03) != 0) // not a multiple of four! (see rfc 3550 p 37)
             return;
-        if (((size_t) padcount) >= len)
+        if (((std::size_t) padcount) >= len)
             return;
-        len -= (size_t) padcount;
+        len -= (std::size_t) padcount;
     }
 
     if (hdr->count == 0)
@@ -93,10 +93,10 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data, size_t datalength) :
                     len--;
                     chunkoffset++;
 
-                    size_t r = (chunkoffset & 0x03);
+                    std::size_t r = (chunkoffset & 0x03);
                     if (r != 0)
                     {
-                        size_t addoffset = 4 - r;
+                        std::size_t addoffset = 4 - r;
 
                         if (addoffset > len)
                             return;
@@ -113,7 +113,7 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data, size_t datalength) :
                     len -= sizeof(RTCPSDESHeader);
                     chunkoffset += sizeof(RTCPSDESHeader);
 
-                    size_t itemlen = (size_t)(sdeshdr->length);
+                    std::size_t itemlen = (std::size_t)(sdeshdr->length);
                     if (itemlen > len)
                         return;
 

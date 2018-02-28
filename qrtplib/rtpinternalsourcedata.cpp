@@ -147,7 +147,7 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack, const RTPTime &r
     return 0;
 }
 
-int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, size_t itemlen, const RTPTime &receivetime, bool *cnamecollis)
+int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, std::size_t itemlen, const RTPTime &receivetime, bool *cnamecollis)
 {
     *cnamecollis = false;
 
@@ -157,7 +157,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, 
     {
     case RTCP_SDES_ID_CNAME:
     {
-        size_t curlen;
+        std::size_t curlen;
         uint8_t *oldcname;
 
         // NOTE: we're going to make sure that the CNAME is only set once.
@@ -182,7 +182,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, 
         break;
     case RTCP_SDES_ID_NAME:
     {
-        size_t oldlen;
+        std::size_t oldlen;
 
         SDESinf.GetName(&oldlen);
         if (oldlen == 0) // Name not set
@@ -191,7 +191,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, 
         break;
     case RTCP_SDES_ID_EMAIL:
     {
-        size_t oldlen;
+        std::size_t oldlen;
 
         SDESinf.GetEMail(&oldlen);
         if (oldlen == 0)
@@ -204,7 +204,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, 
         return SDESinf.SetLocation(data, itemlen);
     case RTCP_SDES_ID_TOOL:
     {
-        size_t oldlen;
+        std::size_t oldlen;
 
         SDESinf.GetTool(&oldlen);
         if (oldlen == 0)
@@ -220,7 +220,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid, const uint8_t *data, 
 
 #ifdef RTP_SUPPORT_SDESPRIV
 
-int RTPInternalSourceData::ProcessPrivateSDESItem(const uint8_t *prefix, size_t prefixlen, const uint8_t *value, size_t valuelen, const RTPTime &receivetime)
+int RTPInternalSourceData::ProcessPrivateSDESItem(const uint8_t *prefix, std::size_t prefixlen, const uint8_t *value, std::size_t valuelen, const RTPTime &receivetime)
 {
     int status;
 
@@ -233,7 +233,7 @@ int RTPInternalSourceData::ProcessPrivateSDESItem(const uint8_t *prefix, size_t 
 
 #endif // RTP_SUPPORT_SDESPRIV
 
-int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason, size_t reasonlen, const RTPTime &receivetime)
+int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason, std::size_t reasonlen, const RTPTime &receivetime)
 {
     if (byereason)
     {

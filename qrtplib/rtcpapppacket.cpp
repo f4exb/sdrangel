@@ -35,13 +35,13 @@
 namespace qrtplib
 {
 
-RTCPAPPPacket::RTCPAPPPacket(uint8_t *data, size_t datalength) :
+RTCPAPPPacket::RTCPAPPPacket(uint8_t *data, std::size_t datalength) :
         RTCPPacket(APP, data, datalength)
 {
     knownformat = false;
 
     RTCPCommonHeader *hdr;
-    size_t len = datalength;
+    std::size_t len = datalength;
 
     hdr = (RTCPCommonHeader *) data;
     if (hdr->padding)
@@ -49,9 +49,9 @@ RTCPAPPPacket::RTCPAPPPacket(uint8_t *data, size_t datalength) :
         uint8_t padcount = data[datalength - 1];
         if ((padcount & 0x03) != 0) // not a multiple of four! (see rfc 3550 p 37)
             return;
-        if (((size_t) padcount) >= len)
+        if (((std::size_t) padcount) >= len)
             return;
-        len -= (size_t) padcount;
+        len -= (std::size_t) padcount;
     }
 
     if (len < (sizeof(RTCPCommonHeader) + sizeof(uint32_t) * 2))

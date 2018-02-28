@@ -57,7 +57,7 @@ public:
      *  is referenced inside the class (no copy of the data is made) one must make sure that the memory it
      *  points to is valid as long as the class instance exists.
      */
-    RTCPAPPPacket(uint8_t *data, size_t datalen);
+    RTCPAPPPacket(uint8_t *data, std::size_t datalen);
     ~RTCPAPPPacket()
     {
     }
@@ -77,10 +77,10 @@ public:
     uint8_t *GetAPPData();
 
     /** Returns the length of the actual data. */
-    size_t GetAPPDataLength() const;
+    std::size_t GetAPPDataLength() const;
 private:
     RTPEndian m_endian;
-    size_t appdatalen;
+    std::size_t appdatalen;
 };
 
 inline uint8_t RTCPAPPPacket::GetSubType() const
@@ -117,7 +117,7 @@ inline uint8_t *RTCPAPPPacket::GetAPPData()
     return (data + sizeof(RTCPCommonHeader) + sizeof(uint32_t) * 2);
 }
 
-inline size_t RTCPAPPPacket::GetAPPDataLength() const
+inline std::size_t RTCPAPPPacket::GetAPPDataLength() const
 {
     if (!knownformat)
         return 0;

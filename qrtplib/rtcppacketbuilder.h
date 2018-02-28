@@ -76,7 +76,7 @@ public:
      *  The timestamp unit is defined as a time interval divided by the timestamp interval corresponding to
      *  that interval: for 8000 Hz audio this would be 1/8000.
      */
-    int Init(size_t maxpacksize, double timestampunit, const void *cname, size_t cnamelen);
+    int Init(std::size_t maxpacksize, double timestampunit, const void *cname, std::size_t cnamelen);
 
     /** Cleans up the builder. */
     void Destroy();
@@ -97,7 +97,7 @@ public:
     }
 
     /** Sets the maximum size allowed size of an RTCP compound packet to \c maxpacksize. */
-    int SetMaximumPacketSize(size_t maxpacksize)
+    int SetMaximumPacketSize(std::size_t maxpacksize)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -129,7 +129,7 @@ public:
      *  \c useSRifpossible is set to \c true, the RTCP compound packet will start with a sender report if
      *  allowed. Otherwise, a receiver report is used.
      */
-    int BuildBYEPacket(RTCPCompoundPacket **pack, const void *reason, size_t reasonlength, bool useSRifpossible = true);
+    int BuildBYEPacket(RTCPCompoundPacket **pack, const void *reason, std::size_t reasonlength, bool useSRifpossible = true);
 
     /** Sets the RTCP interval for the SDES name item.
      *  After all possible sources in the source table have been processed, the class will check if other
@@ -210,7 +210,7 @@ public:
     }
 
     /** Sets the SDES name item for the local participant to the value \c s with length \c len. */
-    int SetLocalName(const void *s, size_t len)
+    int SetLocalName(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -218,7 +218,7 @@ public:
     }
 
     /** Sets the SDES e-mail item for the local participant to the value \c s with length \c len. */
-    int SetLocalEMail(const void *s, size_t len)
+    int SetLocalEMail(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -226,7 +226,7 @@ public:
     }
 
     /** Sets the SDES location item for the local participant to the value \c s with length \c len. */
-    int SetLocalLocation(const void *s, size_t len)
+    int SetLocalLocation(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -234,7 +234,7 @@ public:
     }
 
     /** Sets the SDES phone item for the local participant to the value \c s with length \c len. */
-    int SetLocalPhone(const void *s, size_t len)
+    int SetLocalPhone(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -242,7 +242,7 @@ public:
     }
 
     /** Sets the SDES tool item for the local participant to the value \c s with length \c len. */
-    int SetLocalTool(const void *s, size_t len)
+    int SetLocalTool(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -250,7 +250,7 @@ public:
     }
 
     /** Sets the SDES note item for the local participant to the value \c s with length \c len. */
-    int SetLocalNote(const void *s, size_t len)
+    int SetLocalNote(const void *s, std::size_t len)
     {
         if (!init)
             return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
@@ -258,7 +258,7 @@ public:
     }
 
     /** Returns the own CNAME item with length \c len */
-    uint8_t *GetLocalCNAME(size_t *len) const
+    uint8_t *GetLocalCNAME(std::size_t *len) const
     {
         if (!init)
             return 0;
@@ -274,7 +274,7 @@ private:
     RTPPacketBuilder &rtppacketbuilder;
 
     bool init;
-    size_t maxpacketsize;
+    std::size_t maxpacketsize;
     double timestampunit;
     bool firstpacket;
     RTPTime prevbuildtime, transmissiondelay;

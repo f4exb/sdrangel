@@ -57,13 +57,13 @@
 namespace qrtplib
 {
 
-inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsocks, RTPTime timeout)
+inline int RTPSelect(const SocketType *sockets, int8_t *readflags, std::size_t numsocks, RTPTime timeout)
 {
     using namespace std;
 
     vector<struct pollfd> fds(numsocks);
 
-    for (size_t i = 0; i < numsocks; i++)
+    for (std::size_t i = 0; i < numsocks; i++)
     {
         fds[i].fd = sockets[i];
         fds[i].events = POLLIN;
@@ -98,7 +98,7 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 
     if (status > 0)
     {
-        for (size_t i = 0; i < numsocks; i++)
+        for (std::size_t i = 0; i < numsocks; i++)
         {
             if (fds[i].revents)
                 readflags[i] = 1;
@@ -131,7 +131,7 @@ namespace qrtplib
      *  indefinitely if set to a negative value. The function returns the number
      *  of sockets that have data incoming.
      */
-    inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsocks, RTPTime timeout)
+    inline int RTPSelect(const SocketType *sockets, int8_t *readflags, std::size_t numsocks, RTPTime timeout)
     {
         struct timeval tv;
         struct timeval *pTv = 0;
@@ -145,7 +145,7 @@ namespace qrtplib
 
         fd_set fdset;
         FD_ZERO(&fdset);
-        for (size_t i = 0; i < numsocks; i++)
+        for (std::size_t i = 0; i < numsocks; i++)
         {
 #ifndef RTP_SOCKETTYPE_WINSOCK
             const int setsize = FD_SETSIZE;
@@ -174,7 +174,7 @@ namespace qrtplib
 
         if (status > 0) // some descriptors were set, check them
         {
-            for (size_t i = 0; i < numsocks; i++)
+            for (std::size_t i = 0; i < numsocks; i++)
             {
                 if (FD_ISSET(sockets[i], &fdset))
                 readflags[i] = 1;

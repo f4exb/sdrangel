@@ -69,7 +69,7 @@ private:
     void OnRTPPacket(RTPPacket *pack, const RTPTime &receivetime, const RTPAddress *senderaddress);
     void OnRTCPCompoundPacket(RTCPCompoundPacket *pack, const RTPTime &receivetime, const RTPAddress *senderaddress);
     void OnSSRCCollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, bool isrtp);
-    void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, size_t cnamelength);
+    void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, std::size_t cnamelength);
     void OnNewSource(RTPSourceData *srcdat);
     void OnRemoveSource(RTPSourceData *srcdat);
     void OnTimeout(RTPSourceData *srcdat);
@@ -82,9 +82,9 @@ private:
     void OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled);
     void OnRTCPSenderReport(RTPSourceData *srcdat);
     void OnRTCPReceiverReport(RTPSourceData *srcdat);
-    void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, size_t itemlength);
+    void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, std::size_t itemlength);
 #ifdef RTP_SUPPORT_SDESPRIV
-    void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen);
+    void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, std::size_t prefixlen, const void *valuedata, std::size_t valuelen);
 #endif // RTP_SUPPORT_SDESPRIV
 
     RTPSession &rtpsession;

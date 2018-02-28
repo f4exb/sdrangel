@@ -220,7 +220,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 
     double timestampunit = sessparams.GetOwnTimestampUnit();
     uint8_t buf[1024];
-    size_t buflen = 1024;
+    std::size_t buflen = 1024;
     std::string forcedcname = sessparams.GetCNAME();
 
     if (forcedcname.length() == 0)
@@ -329,7 +329,7 @@ void RTPSession::Destroy()
     created = false;
 }
 
-void RTPSession::BYEDestroy(const RTPTime &maxwaittime, const void *reason, size_t reasonlength)
+void RTPSession::BYEDestroy(const RTPTime &maxwaittime, const void *reason, std::size_t reasonlength)
 {
     if (!created)
         return;
@@ -474,7 +474,7 @@ void RTPSession::LeaveAllMulticastGroups()
     rtptrans->LeaveAllMulticastGroups();
 }
 
-int RTPSession::SendPacket(const void *data, size_t len)
+int RTPSession::SendPacket(const void *data, std::size_t len)
 {
     int status;
 
@@ -503,7 +503,7 @@ int RTPSession::SendPacket(const void *data, size_t len)
     return 0;
 }
 
-int RTPSession::SendPacket(const void *data, size_t len, uint8_t pt, bool mark, uint32_t timestampinc)
+int RTPSession::SendPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc)
 {
     int status;
 
@@ -532,7 +532,7 @@ int RTPSession::SendPacket(const void *data, size_t len, uint8_t pt, bool mark, 
     return 0;
 }
 
-int RTPSession::SendPacketEx(const void *data, size_t len, uint16_t hdrextID, const void *hdrextdata, size_t numhdrextwords)
+int RTPSession::SendPacketEx(const void *data, std::size_t len, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
 {
     int status;
 
@@ -561,7 +561,7 @@ int RTPSession::SendPacketEx(const void *data, size_t len, uint16_t hdrextID, co
     return 0;
 }
 
-int RTPSession::SendPacketEx(const void *data, size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, size_t numhdrextwords)
+int RTPSession::SendPacketEx(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
 {
     int status;
 
@@ -592,7 +592,7 @@ int RTPSession::SendPacketEx(const void *data, size_t len, uint8_t pt, bool mark
 
 #ifdef RTP_SUPPORT_SENDAPP
 
-int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const void *appdata, size_t appdatalen)
+int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const void *appdata, std::size_t appdatalen)
 {
     int status;
 
@@ -619,7 +619,7 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
         return status;
 
     BUILDER_LOCK
-    size_t owncnamelen = 0;
+    std::size_t owncnamelen = 0;
     uint8_t *owncname = rtcpbuilder.GetLocalCNAME(&owncnamelen);
 
     if ((status = pb.AddSDESNormalItem(RTCPSDESPacket::CNAME, owncname, owncnamelen)) < 0)
@@ -650,7 +650,7 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 
 #endif // RTP_SUPPORT_SENDAPP
 
-int RTPSession::SendRawData(const void *data, size_t len, bool usertpchannel)
+int RTPSession::SendRawData(const void *data, std::size_t len, bool usertpchannel)
 {
     if (!created)
         return ERR_RTP_SESSION_NOTCREATED;
@@ -940,7 +940,7 @@ void RTPSession::ClearAcceptList()
     rtptrans->ClearAcceptList();
 }
 
-int RTPSession::SetMaximumPacketSize(size_t s)
+int RTPSession::SetMaximumPacketSize(std::size_t s)
 {
     if (!created)
         return ERR_RTP_SESSION_NOTCREATED;
@@ -1059,7 +1059,7 @@ rtcpbuilder.SetNoteInterval(count);
 BUILDER_UNLOCK
 }
 
-int RTPSession::SetLocalName(const void *s, size_t len)
+int RTPSession::SetLocalName(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1071,7 +1071,7 @@ BUILDER_UNLOCK
 return status;
 }
 
-int RTPSession::SetLocalEMail(const void *s, size_t len)
+int RTPSession::SetLocalEMail(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1083,7 +1083,7 @@ BUILDER_UNLOCK
 return status;
 }
 
-int RTPSession::SetLocalLocation(const void *s, size_t len)
+int RTPSession::SetLocalLocation(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1095,7 +1095,7 @@ BUILDER_UNLOCK
 return status;
 }
 
-int RTPSession::SetLocalPhone(const void *s, size_t len)
+int RTPSession::SetLocalPhone(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1107,7 +1107,7 @@ BUILDER_UNLOCK
 return status;
 }
 
-int RTPSession::SetLocalTool(const void *s, size_t len)
+int RTPSession::SetLocalTool(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1119,7 +1119,7 @@ BUILDER_UNLOCK
 return status;
 }
 
-int RTPSession::SetLocalNote(const void *s, size_t len)
+int RTPSession::SetLocalNote(const void *s, std::size_t len)
 {
 if (!created)
 return ERR_RTP_SESSION_NOTCREATED;
@@ -1321,7 +1321,7 @@ SOURCES_UNLOCK
 return 0;
 }
 
-int RTPSession::CreateCNAME(uint8_t *buffer, size_t *bufferlength, bool resolve)
+int RTPSession::CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool resolve)
 {
 #ifndef WIN32
 bool gotlogin = true;
@@ -1370,12 +1370,12 @@ RTP_STRNCPY((char *)buffer,"unknown",*bufferlength);
 #endif // WIN32
 buffer[*bufferlength - 1] = 0;
 
-size_t offset = strlen((const char *) buffer);
+std::size_t offset = strlen((const char *) buffer);
 if (offset < (*bufferlength - 1))
 buffer[offset] = (uint8_t) '@';
 offset++;
 
-size_t buflen2 = *bufferlength - offset;
+std::size_t buflen2 = *bufferlength - offset;
 int status;
 
 if (resolve)
@@ -1418,13 +1418,13 @@ deletertprnd = false;
 return rnew;
 }
 
-int RTPSession::SendRTPData(const void *data, size_t len)
+int RTPSession::SendRTPData(const void *data, std::size_t len)
 {
 if (!m_changeOutgoingData)
 return rtptrans->SendRTPData(data, len);
 
 void *pSendData = 0;
-size_t sendLen = 0;
+std::size_t sendLen = 0;
 int status = 0;
 
 status = OnChangeRTPOrRTCPData(data, len, true, &pSendData, &sendLen);
@@ -1440,13 +1440,13 @@ OnSentRTPOrRTCPData(pSendData, sendLen, true);
 return status;
 }
 
-int RTPSession::SendRTCPData(const void *data, size_t len)
+int RTPSession::SendRTCPData(const void *data, std::size_t len)
 {
 if (!m_changeOutgoingData)
 return rtptrans->SendRTCPData(data, len);
 
 void *pSendData = 0;
-size_t sendLen = 0;
+std::size_t sendLen = 0;
 int status = 0;
 
 status = OnChangeRTPOrRTCPData(data, len, false, &pSendData, &sendLen);

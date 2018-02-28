@@ -41,6 +41,7 @@
 #include "rtpconfig.h"
 #include "rtptimeutilities.h"
 #include "rtprandom.h"
+#include <cstddef>
 
 namespace qrtplib
 {
@@ -148,13 +149,13 @@ public:
     }
 
     /** Sets the header overhead from underlying protocols (for example UDP and IP) to \c numbytes. */
-    void SetHeaderOverhead(size_t numbytes)
+    void SetHeaderOverhead(std::size_t numbytes)
     {
         headeroverhead = numbytes;
     }
 
     /** Returns the currently used header overhead. */
-    size_t GetHeaderOverhead() const
+    std::size_t GetHeaderOverhead() const
     {
         return headeroverhead;
     }
@@ -171,7 +172,7 @@ public:
     /** Asks the scheduler to schedule an RTCP compound packet containing a BYE packetl; the compound packet
      *  has size \c packetsize.
      */
-    void ScheduleBYEPacket(size_t packetsize);
+    void ScheduleBYEPacket(std::size_t packetsize);
 
     /**	Returns the delay after which an RTCP compound will possibly have to be sent.
      *  Returns the delay after which an RTCP compound will possibly have to be sent. The IsTime member function
@@ -199,8 +200,8 @@ private:
 
     RTPSources &sources;
     RTCPSchedulerParams schedparams;
-    size_t headeroverhead;
-    size_t avgrtcppacksize;
+    std::size_t headeroverhead;
+    std::size_t avgrtcppacksize;
     bool hassentrtcp;
     bool firstcall;
     RTPTime nextrtcptime;
@@ -210,7 +211,7 @@ private:
     // for BYE packet scheduling
     bool byescheduled;
     int byemembers, pbyemembers;
-    size_t avgbyepacketsize;
+    std::size_t avgbyepacketsize;
     bool sendbyenow;
 
     RTPRandom &rtprand;

@@ -58,7 +58,7 @@ public:
      *  is referenced inside the class (no copy of the data is made) one must make sure that the memory it
      *  points to is valid as long as the class instance exists.
      */
-    RTCPSRPacket(uint8_t *data, size_t datalength);
+    RTCPSRPacket(uint8_t *data, std::size_t datalength);
     ~RTCPSRPacket()
     {
     }

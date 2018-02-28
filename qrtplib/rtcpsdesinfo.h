@@ -65,43 +65,43 @@ public:
     void Clear();
 
     /** Sets the SDES CNAME item to \c s with length \c l. */
-    int SetCNAME(const uint8_t *s, size_t l)
+    int SetCNAME(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_CNAME - 1, s, l);
     }
 
     /** Sets the SDES name item to \c s with length \c l. */
-    int SetName(const uint8_t *s, size_t l)
+    int SetName(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_NAME - 1, s, l);
     }
 
     /** Sets the SDES e-mail item to \c s with length \c l. */
-    int SetEMail(const uint8_t *s, size_t l)
+    int SetEMail(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_EMAIL - 1, s, l);
     }
 
     /** Sets the SDES phone item to \c s with length \c l. */
-    int SetPhone(const uint8_t *s, size_t l)
+    int SetPhone(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_PHONE - 1, s, l);
     }
 
     /** Sets the SDES location item to \c s with length \c l. */
-    int SetLocation(const uint8_t *s, size_t l)
+    int SetLocation(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_LOCATION - 1, s, l);
     }
 
     /** Sets the SDES tool item to \c s with length \c l. */
-    int SetTool(const uint8_t *s, size_t l)
+    int SetTool(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_TOOL - 1, s, l);
     }
 
     /** Sets the SDES note item to \c s with length \c l. */
-    int SetNote(const uint8_t *s, size_t l)
+    int SetNote(const uint8_t *s, std::size_t l)
     {
         return SetNonPrivateItem(RTCP_SDES_ID_NOTE - 1, s, l);
     }
@@ -111,50 +111,50 @@ public:
      *  the value string specified by \c value with length \c valuelen (if the maximum allowed
      *  number of prefixes was reached, the error code \c ERR_RTP_SDES_MAXPRIVITEMS is returned.
      */
-    int SetPrivateValue(const uint8_t *prefix, size_t prefixlen, const uint8_t *value, size_t valuelen);
+    int SetPrivateValue(const uint8_t *prefix, std::size_t prefixlen, const uint8_t *value, std::size_t valuelen);
 
     /** Deletes the entry for the prefix specified by \c s with length \c len. */
-    int DeletePrivatePrefix(const uint8_t *s, size_t len);
+    int DeletePrivatePrefix(const uint8_t *s, std::size_t len);
 #endif // RTP_SUPPORT_SDESPRIV
 
     /** Returns the SDES CNAME item and stores its length in \c len. */
-    uint8_t *GetCNAME(size_t *len) const
+    uint8_t *GetCNAME(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_CNAME - 1, len);
     }
 
     /** Returns the SDES name item and stores its length in \c len. */
-    uint8_t *GetName(size_t *len) const
+    uint8_t *GetName(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_NAME - 1, len);
     }
 
     /** Returns the SDES e-mail item and stores its length in \c len. */
-    uint8_t *GetEMail(size_t *len) const
+    uint8_t *GetEMail(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_EMAIL - 1, len);
     }
 
     /** Returns the SDES phone item and stores its length in \c len. */
-    uint8_t *GetPhone(size_t *len) const
+    uint8_t *GetPhone(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_PHONE - 1, len);
     }
 
     /** Returns the SDES location item and stores its length in \c len. */
-    uint8_t *GetLocation(size_t *len) const
+    uint8_t *GetLocation(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_LOCATION - 1, len);
     }
 
     /** Returns the SDES tool item and stores its length in \c len. */
-    uint8_t *GetTool(size_t *len) const
+    uint8_t *GetTool(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_TOOL - 1, len);
     }
 
     /** Returns the SDES note item and stores its length in \c len. */
-    uint8_t *GetNote(size_t *len) const
+    uint8_t *GetNote(std::size_t *len) const
     {
         return GetNonPrivateItem(RTCP_SDES_ID_NOTE - 1, len);
     }
@@ -169,7 +169,7 @@ public:
      *  then stored in \c value and \c valuelen. Otherwise,
      *  it returns \c false.
      */
-    bool GetNextPrivateValue(uint8_t **prefix, size_t *prefixlen, uint8_t **value, size_t *valuelen);
+    bool GetNextPrivateValue(uint8_t **prefix, std::size_t *prefixlen, uint8_t **value, std::size_t *valuelen);
 
     /** Returns SDES priv item information.
      *  Looks for the entry which corresponds to the SDES private
@@ -178,16 +178,16 @@ public:
      *  value and its length in \c value and \c valuelen
      *  respectively.
      */
-    bool GetPrivateValue(const uint8_t *prefix, size_t prefixlen, uint8_t **value, size_t *valuelen) const;
+    bool GetPrivateValue(const uint8_t *prefix, std::size_t prefixlen, uint8_t **value, std::size_t *valuelen) const;
 #endif // RTP_SUPPORT_SDESPRIV
 private:
-    int SetNonPrivateItem(int itemno, const uint8_t *s, size_t l)
+    int SetNonPrivateItem(int itemno, const uint8_t *s, std::size_t l)
     {
         if (l > RTCP_SDES_MAXITEMLENGTH)
             return ERR_RTP_SDES_LENGTHTOOBIG;
         return nonprivateitems[itemno].SetInfo(s, l);
     }
-    uint8_t *GetNonPrivateItem(int itemno, size_t *len) const
+    uint8_t *GetNonPrivateItem(int itemno, std::size_t *len) const
     {
         return nonprivateitems[itemno].GetInfo(len);
     }
@@ -205,17 +205,17 @@ private:
             if (str)
                 delete[] str;
         }
-        uint8_t *GetInfo(size_t *len) const
+        uint8_t *GetInfo(std::size_t *len) const
         {
             *len = length;
             return str;
         }
-        int SetInfo(const uint8_t *s, size_t len)
+        int SetInfo(const uint8_t *s, std::size_t len)
         {
             return SetString(&str, &length, s, len);
         }
     protected:
-        int SetString(uint8_t **dest, size_t *destlen, const uint8_t *s, size_t len)
+        int SetString(uint8_t **dest, std::size_t *destlen, const uint8_t *s, std::size_t len)
         {
             if (len <= 0)
             {
@@ -240,7 +240,7 @@ private:
         }
     private:
         uint8_t *str;
-        size_t length;
+        std::size_t length;
     };
 
     SDESItem nonprivateitems[RTCP_SDES_NUMITEMS_NONPRIVATE];
@@ -259,18 +259,18 @@ private:
             if (prefix)
                 delete[] prefix;
         }
-        uint8_t *GetPrefix(size_t *len) const
+        uint8_t *GetPrefix(std::size_t *len) const
         {
             *len = prefixlen;
             return prefix;
         }
-        int SetPrefix(const uint8_t *s, size_t len)
+        int SetPrefix(const uint8_t *s, std::size_t len)
         {
             return SetString(&prefix, &prefixlen, s, len);
         }
     private:
         uint8_t *prefix;
-        size_t prefixlen;
+        std::size_t prefixlen;
     };
 
     std::list<SDESPrivateItem *> privitems;

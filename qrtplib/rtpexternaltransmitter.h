@@ -67,10 +67,10 @@ public:
     }
 
     /** This member function will be called when RTP data needs to be transmitted. */
-    virtual bool SendRTP(const void *data, size_t len) = 0;
+    virtual bool SendRTP(const void *data, std::size_t len) = 0;
 
     /** This member function will be called when an RTCP packet needs to be transmitted. */
-    virtual bool SendRTCP(const void *data, size_t len) = 0;
+    virtual bool SendRTCP(const void *data, std::size_t len) = 0;
 
     /** Used to identify if an RTPAddress instance originated from this sender (to be able to detect own packets). */
     virtual bool ComesFromThisSender(const RTPAddress *a) = 0;
@@ -95,13 +95,13 @@ public:
     }
 
     /** This function can be called to insert an RTP packet into the transmission component. */
-    void InjectRTP(const void *data, size_t len, const RTPAddress &a);
+    void InjectRTP(const void *data, std::size_t len, const RTPAddress &a);
 
     /** This function can be called to insert an RTCP packet into the transmission component. */
-    void InjectRTCP(const void *data, size_t len, const RTPAddress &a);
+    void InjectRTCP(const void *data, std::size_t len, const RTPAddress &a);
 
     /** Use this function to inject an RTP or RTCP packet and the transmitter will try to figure out which type of packet it is. */
-    void InjectRTPorRTCP(const void *data, size_t len, const RTPAddress &a);
+    void InjectRTPorRTCP(const void *data, std::size_t len, const RTPAddress &a);
 private:
     RTPExternalTransmitter *transmitter;
 };
@@ -167,14 +167,14 @@ public:
     ~RTPExternalTransmitter();
 
     int Init(bool treadsafe);
-    int Create(size_t maxpacksize, const RTPTransmissionParams *transparams);
+    int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
     void Destroy();
     RTPTransmissionInfo *GetTransmissionInfo();
     void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
-    int GetLocalHostName(uint8_t *buffer, size_t *bufferlength);
+    int GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength);
     bool ComesFromThisTransmitter(const RTPAddress *addr);
-    size_t GetHeaderOverhead()
+    std::size_t GetHeaderOverhead()
     {
         return headersize;
     }
@@ -183,8 +183,8 @@ public:
     int WaitForIncomingData(const RTPTime &delay, bool *dataavailable = 0);
     int AbortWait();
 
-    int SendRTPData(const void *data, size_t len);
-    int SendRTCPData(const void *data, size_t len);
+    int SendRTPData(const void *data, std::size_t len);
+    int SendRTCPData(const void *data, std::size_t len);
 
     int AddDestination(const RTPAddress &addr);
     int DeleteDestination(const RTPAddress &addr);
@@ -202,14 +202,14 @@ public:
     int AddToAcceptList(const RTPAddress &addr);
     int DeleteFromAcceptList(const RTPAddress &addr);
     void ClearAcceptList();
-    int SetMaximumPacketSize(size_t s);
+    int SetMaximumPacketSize(std::size_t s);
 
     bool NewDataAvailable();
     RTPRawPacket *GetNextPacket();
 
-    void InjectRTP(const void *data, size_t len, const RTPAddress &a);
-    void InjectRTCP(const void *data, size_t len, const RTPAddress &a);
-    void InjectRTPorRTCP(const void *data, size_t len, const RTPAddress &a);
+    void InjectRTP(const void *data, std::size_t len, const RTPAddress &a);
+    void InjectRTCP(const void *data, std::size_t len, const RTPAddress &a);
+    void InjectRTPorRTCP(const void *data, std::size_t len, const RTPAddress &a);
 private:
     void FlushPackets();
 
@@ -222,26 +222,26 @@ private:
     std::list<RTPRawPacket*> rawpacketlist;
 
     uint8_t *localhostname;
-    size_t localhostnamelength;
+    std::size_t localhostnamelength;
 
-    size_t maxpacksize;
+    std::size_t maxpacksize;
     int headersize;
 
     RTPAbortDescriptors m_abortDesc;
     int m_abortCount;
 };
 
-inline void RTPExternalPacketInjecter::InjectRTP(const void *data, size_t len, const RTPAddress &a)
+inline void RTPExternalPacketInjecter::InjectRTP(const void *data, std::size_t len, const RTPAddress &a)
 {
     transmitter->InjectRTP(data, len, a);
 }
 
-inline void RTPExternalPacketInjecter::InjectRTCP(const void *data, size_t len, const RTPAddress &a)
+inline void RTPExternalPacketInjecter::InjectRTCP(const void *data, std::size_t len, const RTPAddress &a)
 {
     transmitter->InjectRTCP(data, len, a);
 }
 
-inline void RTPExternalPacketInjecter::InjectRTPorRTCP(const void *data, size_t len, const RTPAddress &a)
+inline void RTPExternalPacketInjecter::InjectRTPorRTCP(const void *data, std::size_t len, const RTPAddress &a)
 {
     transmitter->InjectRTPorRTCP(data, len, a);
 }

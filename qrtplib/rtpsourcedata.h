@@ -405,7 +405,7 @@ public:
      *  Returns the reason for leaving contained in the BYE packet of this participant. The length of
      *  the reason is stored in \c len.
      */
-    uint8_t *GetBYEReason(size_t *len) const
+    uint8_t *GetBYEReason(std::size_t *len) const
     {
         *len = byereasonlen;
         return byereason;
@@ -679,43 +679,43 @@ public:
     }
 
     /** Returns a pointer to the SDES CNAME item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetCNAME(size_t *len) const
+    uint8_t *SDES_GetCNAME(std::size_t *len) const
     {
         return SDESinf.GetCNAME(len);
     }
 
     /** Returns a pointer to the SDES name item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetName(size_t *len) const
+    uint8_t *SDES_GetName(std::size_t *len) const
     {
         return SDESinf.GetName(len);
     }
 
     /** Returns a pointer to the SDES e-mail item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetEMail(size_t *len) const
+    uint8_t *SDES_GetEMail(std::size_t *len) const
     {
         return SDESinf.GetEMail(len);
     }
 
     /** Returns a pointer to the SDES phone item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetPhone(size_t *len) const
+    uint8_t *SDES_GetPhone(std::size_t *len) const
     {
         return SDESinf.GetPhone(len);
     }
 
     /** Returns a pointer to the SDES location item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetLocation(size_t *len) const
+    uint8_t *SDES_GetLocation(std::size_t *len) const
     {
         return SDESinf.GetLocation(len);
     }
 
     /** Returns a pointer to the SDES tool item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetTool(size_t *len) const
+    uint8_t *SDES_GetTool(std::size_t *len) const
     {
         return SDESinf.GetTool(len);
     }
 
     /** Returns a pointer to the SDES note item of this participant and stores its length in \c len. */
-    uint8_t *SDES_GetNote(size_t *len) const
+    uint8_t *SDES_GetNote(std::size_t *len) const
     {
         return SDESinf.GetNote(len);
     }
@@ -730,7 +730,7 @@ public:
     /** If available, returns \c true and stores the next SDES private item prefix in \c prefix and its length in
      *  \c prefixlen; the associated value and its length are then stored in \c value and \c valuelen.
      */
-    bool SDES_GetNextPrivateValue(uint8_t **prefix, size_t *prefixlen, uint8_t **value, size_t *valuelen)
+    bool SDES_GetNextPrivateValue(uint8_t **prefix, std::size_t *prefixlen, uint8_t **value, std::size_t *valuelen)
     {
         return SDESinf.GetNextPrivateValue(prefix, prefixlen, value, valuelen);
     }
@@ -739,7 +739,7 @@ public:
      *  \c prefixlen; if found, the function returns \c true and stores the associated value and
      *  its length in \c value and \c valuelen respectively.
      */
-    bool SDES_GetPrivateValue(uint8_t *prefix, size_t prefixlen, uint8_t **value, size_t *valuelen) const
+    bool SDES_GetPrivateValue(uint8_t *prefix, std::size_t prefixlen, uint8_t **value, std::size_t *valuelen) const
     {
         return SDESinf.GetPrivateValue(prefix, prefixlen, value, valuelen);
     }
@@ -767,7 +767,7 @@ protected:
 
     RTPTime byetime;
     uint8_t *byereason;
-    size_t byereasonlen;
+    std::size_t byereasonlen;
 };
 
 inline RTPPacket *RTPSourceData::GetNextPacket()

@@ -69,7 +69,7 @@ int RTPExternalTransmitter::Init(bool tsafe)
     return 0;
 }
 
-int RTPExternalTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionParams *transparams)
+int RTPExternalTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissionParams *transparams)
 {
     const RTPExternalTransmissionParams *params;
     int status;
@@ -163,7 +163,7 @@ void RTPExternalTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
     delete i;
 }
 
-int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer, size_t *bufferlength)
+int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength)
 {
     if (!init)
         return ERR_RTP_EXTERNALTRANS_NOTINIT;
@@ -297,7 +297,7 @@ int RTPExternalTransmitter::AbortWait()
     return 0;
 }
 
-int RTPExternalTransmitter::SendRTPData(const void *data, size_t len)
+int RTPExternalTransmitter::SendRTPData(const void *data, std::size_t len)
 {
     if (!init)
         return ERR_RTP_EXTERNALTRANS_NOTINIT;
@@ -322,7 +322,7 @@ int RTPExternalTransmitter::SendRTPData(const void *data, size_t len)
     return 0;
 }
 
-int RTPExternalTransmitter::SendRTCPData(const void *data, size_t len)
+int RTPExternalTransmitter::SendRTCPData(const void *data, std::size_t len)
 {
     if (!init)
         return ERR_RTP_EXTERNALTRANS_NOTINIT;
@@ -424,7 +424,7 @@ void RTPExternalTransmitter::ClearAcceptList()
 {
 }
 
-int RTPExternalTransmitter::SetMaximumPacketSize(size_t s)
+int RTPExternalTransmitter::SetMaximumPacketSize(std::size_t s)
 {
     if (!init)
         return ERR_RTP_EXTERNALTRANS_NOTINIT;
@@ -490,7 +490,7 @@ void RTPExternalTransmitter::FlushPackets()
     rawpacketlist.clear();
 }
 
-void RTPExternalTransmitter::InjectRTP(const void *data, size_t len, const RTPAddress &a)
+void RTPExternalTransmitter::InjectRTP(const void *data, std::size_t len, const RTPAddress &a)
 {
     if (!init)
         return;
@@ -534,7 +534,7 @@ void RTPExternalTransmitter::InjectRTP(const void *data, size_t len, const RTPAd
 
 }
 
-void RTPExternalTransmitter::InjectRTCP(const void *data, size_t len, const RTPAddress &a)
+void RTPExternalTransmitter::InjectRTCP(const void *data, std::size_t len, const RTPAddress &a)
 {
     if (!init)
         return;
@@ -578,7 +578,7 @@ void RTPExternalTransmitter::InjectRTCP(const void *data, size_t len, const RTPA
 
 }
 
-void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, size_t len, const RTPAddress &a)
+void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, std::size_t len, const RTPAddress &a)
 {
     if (!init)
         return;

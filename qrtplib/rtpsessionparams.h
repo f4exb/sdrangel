@@ -72,13 +72,13 @@ public:
     }
 
     /** Sets the maximum allowed packet size for the session. */
-    void SetMaximumPacketSize(size_t max)
+    void SetMaximumPacketSize(std::size_t max)
     {
         maxpacksize = max;
     }
 
     /** Returns the maximum allowed packet size (default is 1400 bytes). */
-    size_t GetMaximumPacketSize() const
+    std::size_t GetMaximumPacketSize() const
     {
         return maxpacksize;
     }
@@ -340,7 +340,7 @@ public:
 private:
     bool acceptown;
     bool usepollthread;
-    size_t maxpacksize;
+    std::size_t maxpacksize;
     double owntsunit;
     RTPTransmitter::ReceiveMode receivemode;
     bool resolvehostname;

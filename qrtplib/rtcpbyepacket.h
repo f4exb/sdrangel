@@ -57,7 +57,7 @@ public:
      *  is referenced inside the class (no copy of the data is made) one must make sure that the memory it
      *  points to is valid as long as the class instance exists.
      */
-    RTCPBYEPacket(uint8_t *data, size_t datalen);
+    RTCPBYEPacket(uint8_t *data, std::size_t datalen);
     ~RTCPBYEPacket()
     {
     }
@@ -74,14 +74,14 @@ public:
     bool HasReasonForLeaving() const;
 
     /** Returns the length of the string which describes why the source(s) left. */
-    size_t GetReasonLength() const;
+    std::size_t GetReasonLength() const;
 
     /** Returns the actual reason for leaving data. */
     uint8_t *GetReasonData();
 
 private:
     RTPEndian m_endian;
-    size_t reasonoffset;
+    std::size_t reasonoffset;
 };
 
 inline int RTCPBYEPacket::GetSSRCCount() const
@@ -110,14 +110,14 @@ inline bool RTCPBYEPacket::HasReasonForLeaving() const
     return true;
 }
 
-inline size_t RTCPBYEPacket::GetReasonLength() const
+inline std::size_t RTCPBYEPacket::GetReasonLength() const
 {
     if (!knownformat)
         return 0;
     if (reasonoffset == 0)
         return 0;
     uint8_t *reasonlen = (data + reasonoffset);
-    return (size_t)(*reasonlen);
+    return (std::size_t)(*reasonlen);
 }
 
 inline uint8_t *RTCPBYEPacket::GetReasonData()

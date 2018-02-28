@@ -57,7 +57,7 @@ public:
      *  The flag which indicates whether this data is RTP or RTCP data is set to \c rtp. A memory
      *  manager can be installed as well.
      */
-    RTPRawPacket(uint8_t *data, size_t datalen, RTPAddress *address, RTPTime &recvtime, bool rtp);
+    RTPRawPacket(uint8_t *data, std::size_t datalen, RTPAddress *address, RTPTime &recvtime, bool rtp);
     ~RTPRawPacket();
 
     /** Returns the pointer to the data which is contained in this packet. */
@@ -67,7 +67,7 @@ public:
     }
 
     /** Returns the length of the packet described by this instance. */
-    size_t GetDataLength() const
+    std::size_t GetDataLength() const
     {
         return packetdatalength;
     }
@@ -110,7 +110,7 @@ public:
 
     /** Deallocates the previously stored data and replaces it with the data that's
      *  specified, can be useful when e.g. decrypting data in RTPSession::OnChangeIncomingData */
-    void SetData(uint8_t *data, size_t datalen);
+    void SetData(uint8_t *data, std::size_t datalen);
 
     /** Deallocates the currently stored RTPAddress instance and replaces it
      *  with the one that's specified (you probably don't need this function). */
@@ -119,13 +119,13 @@ private:
     void DeleteData();
 
     uint8_t *packetdata;
-    size_t packetdatalength;
+    std::size_t packetdatalength;
     RTPTime receivetime;
     RTPAddress *senderaddress;
     bool isrtp;
 };
 
-inline RTPRawPacket::RTPRawPacket(uint8_t *data, size_t datalen, RTPAddress *address, RTPTime &recvtime, bool rtp) :
+inline RTPRawPacket::RTPRawPacket(uint8_t *data, std::size_t datalen, RTPAddress *address, RTPTime &recvtime, bool rtp) :
         receivetime(recvtime)
 {
     packetdata = data;
@@ -155,7 +155,7 @@ inline uint8_t *RTPRawPacket::AllocateBytes(int recvlen) const
     return new uint8_t[recvlen];
 }
 
-inline void RTPRawPacket::SetData(uint8_t *data, size_t datalen)
+inline void RTPRawPacket::SetData(uint8_t *data, std::size_t datalen)
 {
     if (packetdata)
         delete[] packetdata;

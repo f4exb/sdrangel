@@ -70,11 +70,11 @@ public:
     {
         stats.SetLastMessageTime(receivetime);
     }
-    int ProcessSDESItem(uint8_t sdesid, const uint8_t *data, size_t itemlen, const RTPTime &receivetime, bool *cnamecollis);
+    int ProcessSDESItem(uint8_t sdesid, const uint8_t *data, std::size_t itemlen, const RTPTime &receivetime, bool *cnamecollis);
 #ifdef RTP_SUPPORT_SDESPRIV
-    int ProcessPrivateSDESItem(const uint8_t *prefix, size_t prefixlen, const uint8_t *value, size_t valuelen, const RTPTime &receivetime);
+    int ProcessPrivateSDESItem(const uint8_t *prefix, std::size_t prefixlen, const uint8_t *value, std::size_t valuelen, const RTPTime &receivetime);
 #endif // RTP_SUPPORT_SDESPRIV
-    int ProcessBYEPacket(const uint8_t *reason, size_t reasonlen, const RTPTime &receivetime);
+    int ProcessBYEPacket(const uint8_t *reason, std::size_t reasonlen, const RTPTime &receivetime);
 
     int SetRTPDataAddress(const RTPAddress *a);
     int SetRTCPDataAddress(const RTPAddress *a);

@@ -137,7 +137,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
         SocketType sock = socket(PF_INET, SOCK_DGRAM, 0);
         if (sock == RTPSOCKERR)
         {
-            for (size_t i = 0; i < toClose.size(); i++)
+            for (std::size_t i = 0; i < toClose.size(); i++)
                 RTPCLOSE(toClose[i]);
             return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
         }
@@ -153,7 +153,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
         if (bind(sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) != 0)
         {
             RTPCLOSE(sock);
-            for (size_t i = 0; i < toClose.size(); i++)
+            for (std::size_t i = 0; i < toClose.size(); i++)
                 RTPCLOSE(toClose[i]);
             return ERR_RTP_UDPV4TRANS_CANTGETVALIDSOCKET;
         }
@@ -163,7 +163,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
         if (status < 0)
         {
             RTPCLOSE(sock);
-            for (size_t i = 0; i < toClose.size(); i++)
+            for (std::size_t i = 0; i < toClose.size(); i++)
                 RTPCLOSE(toClose[i]);
             return status;
         }
@@ -176,7 +176,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
                 *pRtcpSock = sock;
                 *pRtpPort = basePort;
                 *pRtcpPort = basePort;
-                for (size_t i = 0; i < toClose.size(); i++)
+                for (std::size_t i = 0; i < toClose.size(); i++)
                     RTPCLOSE(toClose[i]);
 
                 return 0;
@@ -190,7 +190,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
             if (sock2 == RTPSOCKERR)
             {
                 RTPCLOSE(sock);
-                for (size_t i = 0; i < toClose.size(); i++)
+                for (std::size_t i = 0; i < toClose.size(); i++)
                     RTPCLOSE(toClose[i]);
                 return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
             }
@@ -237,7 +237,7 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
                         *pRtcpPort = basePort;
                     }
 
-                    for (size_t i = 0; i < toClose.size(); i++)
+                    for (std::size_t i = 0; i < toClose.size(); i++)
                         RTPCLOSE(toClose[i]);
 
                     return 0;
@@ -249,13 +249,13 @@ int RTPUDPv4TransmitterNoBind::GetAutoSockets(uint32_t bindIP, bool allowOdd, bo
         }
     }
 
-    for (size_t i = 0; i < toClose.size(); i++)
+    for (std::size_t i = 0; i < toClose.size(); i++)
         RTPCLOSE(toClose[i]);
 
     return ERR_RTP_UDPV4TRANS_TOOMANYATTEMPTSCHOOSINGSOCKET;
 }
 
-int RTPUDPv4TransmitterNoBind::Create(size_t maximumpacketsize, const RTPTransmissionParams *transparams)
+int RTPUDPv4TransmitterNoBind::Create(std::size_t maximumpacketsize, const RTPTransmissionParams *transparams)
 {
     const RTPUDPv4TransmissionNoBindParams *params, defaultparams;
 //	struct sockaddr_in addr;
@@ -557,7 +557,7 @@ void RTPUDPv4TransmitterNoBind::DeleteTransmissionInfo(RTPTransmissionInfo *i)
     delete i;
 }
 
-int RTPUDPv4TransmitterNoBind::GetLocalHostName(uint8_t *buffer, size_t *bufferlength)
+int RTPUDPv4TransmitterNoBind::GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength)
 {
     if (!init)
         return ERR_RTP_UDPV4TRANS_NOTINIT;
@@ -833,7 +833,7 @@ int RTPUDPv4TransmitterNoBind::AbortWait()
     return 0;
 }
 
-int RTPUDPv4TransmitterNoBind::SendRTPData(const void *data, size_t len)
+int RTPUDPv4TransmitterNoBind::SendRTPData(const void *data, std::size_t len)
 {
     if (!init)
         return ERR_RTP_UDPV4TRANS_NOTINIT;
@@ -859,7 +859,7 @@ int RTPUDPv4TransmitterNoBind::SendRTPData(const void *data, size_t len)
     return 0;
 }
 
-int RTPUDPv4TransmitterNoBind::SendRTCPData(const void *data, size_t len)
+int RTPUDPv4TransmitterNoBind::SendRTCPData(const void *data, std::size_t len)
 {
     if (!init)
         return ERR_RTP_UDPV4TRANS_NOTINIT;
@@ -1250,7 +1250,7 @@ void RTPUDPv4TransmitterNoBind::ClearAcceptList()
 
 }
 
-int RTPUDPv4TransmitterNoBind::SetMaximumPacketSize(size_t s)
+int RTPUDPv4TransmitterNoBind::SetMaximumPacketSize(std::size_t s)
 {
     if (!init)
         return ERR_RTP_UDPV4TRANS_NOTINIT;
@@ -1354,7 +1354,7 @@ int RTPUDPv4TransmitterNoBind::PollSocket(bool rtp)
     SOCKET sock;
     unsigned long len;
 #else
-    size_t len;
+    std::size_t len;
     int sock;
 #endif // RTP_SOCKETTYPE_WINSOCK
     struct sockaddr_in srcaddr;
@@ -1427,7 +1427,7 @@ int RTPUDPv4TransmitterNoBind::PollSocket(bool rtp)
                     {
                         isrtp = true;
 
-                        if ((size_t) recvlen > sizeof(RTCPCommonHeader))
+                        if ((std::size_t) recvlen > sizeof(RTCPCommonHeader))
                         {
                             RTCPCommonHeader *rtcpheader = (RTCPCommonHeader *) datacopy;
                             uint8_t packettype = rtcpheader->packettype;

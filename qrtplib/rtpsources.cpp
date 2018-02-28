@@ -686,7 +686,7 @@ int RTPSources::ProcessRTCPReportBlock(uint32_t ssrc, uint8_t fractionlost, int3
     return 0;
 }
 
-int RTPSources::ProcessSDESNormalItem(uint32_t ssrc, RTCPSDESPacket::ItemType t, size_t itemlength, const void *itemdata, const RTPTime &receivetime,
+int RTPSources::ProcessSDESNormalItem(uint32_t ssrc, RTCPSDESPacket::ItemType t, std::size_t itemlength, const void *itemdata, const RTPTime &receivetime,
         const RTPAddress *senderaddress)
 {
     RTPInternalSourceData *srcdat;
@@ -746,7 +746,7 @@ int RTPSources::ProcessSDESNormalItem(uint32_t ssrc, RTCPSDESPacket::ItemType t,
 }
 
 #ifdef RTP_SUPPORT_SDESPRIV
-int RTPSources::ProcessSDESPrivateItem(uint32_t ssrc, size_t prefixlen, const void *prefixdata, size_t valuelen, const void *valuedata, const RTPTime &receivetime,
+int RTPSources::ProcessSDESPrivateItem(uint32_t ssrc, std::size_t prefixlen, const void *prefixdata, std::size_t valuelen, const void *valuedata, const RTPTime &receivetime,
         const RTPAddress *senderaddress)
 {
     RTPInternalSourceData *srcdat;
@@ -771,7 +771,7 @@ int RTPSources::ProcessSDESPrivateItem(uint32_t ssrc, size_t prefixlen, const vo
 }
 #endif //RTP_SUPPORT_SDESPRIV
 
-int RTPSources::ProcessBYE(uint32_t ssrc, size_t reasonlength, const void *reasondata, const RTPTime &receivetime, const RTPAddress *senderaddress)
+int RTPSources::ProcessBYE(uint32_t ssrc, std::size_t reasonlength, const void *reasondata, const RTPTime &receivetime, const RTPAddress *senderaddress)
 {
     RTPInternalSourceData *srcdat;
     bool created;
@@ -1027,7 +1027,7 @@ void RTPSources::NoteTimeout(const RTPTime &curtime, const RTPTime &timeoutdelay
     while (sourcelist.HasCurrentElement())
     {
         RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
-        size_t notelen;
+        std::size_t notelen;
 
         srcdat->SDES_GetNote(&notelen);
         if (notelen != 0) // Note has been set
@@ -1076,7 +1076,7 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime, const RTPTime &sendert
         bool deleted, issender, isactive;
         bool byetimeout, normaltimeout, notetimeout;
 
-        size_t notelen;
+        std::size_t notelen;
 
         issender = srcdat->IsSender();
         isactive = srcdat->IsActive();

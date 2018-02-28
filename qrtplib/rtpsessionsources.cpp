@@ -56,7 +56,7 @@ void RTPSessionSources::OnSSRCCollision(RTPSourceData *srcdat, const RTPAddress 
     rtpsession.OnSSRCCollision(srcdat, senderaddress, isrtp);
 }
 
-void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, size_t cnamelength)
+void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, std::size_t cnamelength)
 {
     rtpsession.OnCNAMECollision(srcdat, senderaddress, cname, cnamelength);
 }
@@ -123,13 +123,13 @@ void RTPSessionSources::OnRTCPReceiverReport(RTPSourceData *srcdat)
     rtpsession.OnRTCPReceiverReport(srcdat);
 }
 
-void RTPSessionSources::OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, size_t itemlength)
+void RTPSessionSources::OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, std::size_t itemlength)
 {
     rtpsession.OnRTCPSDESItem(srcdat, t, itemdata, itemlength);
 }
 
 #ifdef RTP_SUPPORT_SDESPRIV
-void RTPSessionSources::OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen)
+void RTPSessionSources::OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, std::size_t prefixlen, const void *valuedata, std::size_t valuelen)
 {
     rtpsession.OnRTCPSDESPrivateItem(srcdat, prefixdata, prefixlen, valuedata, valuelen);
 }

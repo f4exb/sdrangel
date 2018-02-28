@@ -153,14 +153,14 @@ public:
      *  received at time \c receivetime from address \c senderaddress. The \c senderaddress parameter must
      *  be NULL if the packet was sent by the local participant.
      */
-    int ProcessSDESNormalItem(uint32_t ssrc, RTCPSDESPacket::ItemType t, size_t itemlength, const void *itemdata, const RTPTime &receivetime, const RTPAddress *senderaddress);
+    int ProcessSDESNormalItem(uint32_t ssrc, RTCPSDESPacket::ItemType t, std::size_t itemlength, const void *itemdata, const RTPTime &receivetime, const RTPAddress *senderaddress);
 #ifdef RTP_SUPPORT_SDESPRIV
     /** Processes the SDES private item from source \c ssrc into the source table.
      *  Processes the SDES private item from source \c ssrc into the source table. The information was
      *  received at time \c receivetime from address \c senderaddress. The \c senderaddress
      *  parameter must be NULL if the packet was sent by the local participant.
      */
-    int ProcessSDESPrivateItem(uint32_t ssrc, size_t prefixlen, const void *prefixdata, size_t valuelen, const void *valuedata, const RTPTime &receivetime,
+    int ProcessSDESPrivateItem(uint32_t ssrc, std::size_t prefixlen, const void *prefixdata, std::size_t valuelen, const void *valuedata, const RTPTime &receivetime,
             const RTPAddress *senderaddress);
 #endif //RTP_SUPPORT_SDESPRIV
     /** Processes the BYE message for SSRC \c ssrc.
@@ -168,7 +168,7 @@ public:
      *  address \c senderaddress. The \c senderaddress parameter must be NULL if the packet was sent by the
      *  local participant.
      */
-    int ProcessBYE(uint32_t ssrc, size_t reasonlength, const void *reasondata, const RTPTime &receivetime, const RTPAddress *senderaddress);
+    int ProcessBYE(uint32_t ssrc, std::size_t reasonlength, const void *reasondata, const RTPTime &receivetime, const RTPAddress *senderaddress);
 
     /** If we heard from source \c ssrc, but no actual data was added to the source table (for example, if
      *  no report block was meant for us), this function can e used to indicate that something was received from
@@ -302,7 +302,7 @@ protected:
     virtual void OnSSRCCollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, bool isrtp);
 
     /** Is called when another CNAME was received than the one already present for source \c srcdat. */
-    virtual void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, size_t cnamelength);
+    virtual void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, std::size_t cnamelength);
 
     /** Is called when a new entry \c srcdat is added to the source table. */
     virtual void OnNewSource(RTPSourceData *srcdat);
@@ -326,10 +326,10 @@ protected:
     virtual void OnRTCPReceiverReport(RTPSourceData *srcdat);
 
     /** Is called when a specific SDES item was received for this source. */
-    virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, size_t itemlength);
+    virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, std::size_t itemlength);
 #ifdef RTP_SUPPORT_SDESPRIV
     /** Is called when a specific SDES item of 'private' type was received for this source. */
-    virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen);
+    virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, std::size_t prefixlen, const void *valuedata, std::size_t valuelen);
 #endif // RTP_SUPPORT_SDESPRIV
 
     /** Is called when an RTCP APP packet \c apppacket has been received at time \c receivetime
@@ -378,7 +378,7 @@ inline void RTPSources::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime
 inline void RTPSources::OnSSRCCollision(RTPSourceData *, const RTPAddress *, bool)
 {
 }
-inline void RTPSources::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, size_t)
+inline void RTPSources::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, std::size_t)
 {
 }
 inline void RTPSources::OnNewSource(RTPSourceData *)
@@ -402,11 +402,11 @@ inline void RTPSources::OnRTCPSenderReport(RTPSourceData *)
 inline void RTPSources::OnRTCPReceiverReport(RTPSourceData *)
 {
 }
-inline void RTPSources::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType, const void *, size_t)
+inline void RTPSources::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType, const void *, std::size_t)
 {
 }
 #ifdef RTP_SUPPORT_SDESPRIV
-inline void RTPSources::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, size_t, const void *, size_t)
+inline void RTPSources::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, std::size_t, const void *, std::size_t)
 {
 }
 #endif // RTP_SUPPORT_SDESPRIV

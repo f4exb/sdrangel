@@ -112,7 +112,7 @@ public:
      *  send the BYE packet. If this time expires, the session will be left without sending a BYE packet.
      *  The BYE packet will contain as reason for leaving \c reason with length \c reasonlength.
      */
-    void BYEDestroy(const RTPTime &maxwaittime, const void *reason, size_t reasonlength);
+    void BYEDestroy(const RTPTime &maxwaittime, const void *reason, std::size_t reasonlength);
 
     /** Returns whether the session has been created or not. */
     bool IsActive();
@@ -146,13 +146,13 @@ public:
      *  The used payload type, marker and timestamp increment will be those that have been set
      *  using the \c SetDefault member functions.
      */
-    int SendPacket(const void *data, size_t len);
+    int SendPacket(const void *data, std::size_t len);
 
     /** Sends the RTP packet with payload \c data which has length \c len.
      *  It will use payload type \c pt, marker \c mark and after the packet has been built, the
      *  timestamp will be incremented by \c timestampinc.
      */
-    int SendPacket(const void *data, size_t len, uint8_t pt, bool mark, uint32_t timestampinc);
+    int SendPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc);
 
     /** Sends the RTP packet with payload \c data which has length \c len.
      *  The packet will contain a header extension with identifier \c hdrextID and containing data
@@ -160,7 +160,7 @@ public:
      *  number of 32-bit words. The used payload type, marker and timestamp increment will be those that
      *  have been set using the \c SetDefault member functions.
      */
-    int SendPacketEx(const void *data, size_t len, uint16_t hdrextID, const void *hdrextdata, size_t numhdrextwords);
+    int SendPacketEx(const void *data, std::size_t len, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords);
 
     /** Sends the RTP packet with payload \c data which has length \c len.
      *  It will use payload type \c pt, marker \c mark and after the packet has been built, the
@@ -168,7 +168,7 @@ public:
      *  extension with identifier \c hdrextID and containing data \c hdrextdata. The length
      *  of this data is given by \c numhdrextwords and is specified in a number of 32-bit words.
      */
-    int SendPacketEx(const void *data, size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, size_t numhdrextwords);
+    int SendPacketEx(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords);
 #ifdef RTP_SUPPORT_SENDAPP
     /** If sending of RTCP APP packets was enabled at compile time, this function creates a compound packet
      *  containing an RTCP APP packet and sends it immediately.
@@ -177,13 +177,13 @@ public:
      *  of bytes in the RTCP compound packet. Note that this immediate sending is not compliant with the RTP
      *  specification, so use with care.
      */
-    int SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const void *appdata, size_t appdatalen);
+    int SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const void *appdata, std::size_t appdatalen);
 #endif // RTP_SUPPORT_SENDAPP
 
     /** With this function raw data can be sent directly over the RTP or
      *  RTCP channel (if they are different); the data is **not** passed through the
      *  RTPSession::OnChangeRTPOrRTCPData function. */
-    int SendRawData(const void *data, size_t len, bool usertpchannel);
+    int SendRawData(const void *data, std::size_t len, bool usertpchannel);
 
     /** Sets the default payload type for RTP packets to \c pt. */
     int SetDefaultPayloadType(uint8_t pt);
@@ -353,7 +353,7 @@ public:
     void ClearAcceptList();
 
     /** Sets the maximum allowed packet size to \c s. */
-    int SetMaximumPacketSize(size_t s);
+    int SetMaximumPacketSize(std::size_t s);
 
     /** Sets the session bandwidth to \c bw, which is specified in bytes per second. */
     int SetSessionBandwidth(double bw);
@@ -415,22 +415,22 @@ public:
     void SetNoteInterval(int count);
 
     /** Sets the SDES name item for the local participant to the value \c s with length \c len. */
-    int SetLocalName(const void *s, size_t len);
+    int SetLocalName(const void *s, std::size_t len);
 
     /** Sets the SDES e-mail item for the local participant to the value \c s with length \c len. */
-    int SetLocalEMail(const void *s, size_t len);
+    int SetLocalEMail(const void *s, std::size_t len);
 
     /** Sets the SDES location item for the local participant to the value \c s with length \c len. */
-    int SetLocalLocation(const void *s, size_t len);
+    int SetLocalLocation(const void *s, std::size_t len);
 
     /** Sets the SDES phone item for the local participant to the value \c s with length \c len. */
-    int SetLocalPhone(const void *s, size_t len);
+    int SetLocalPhone(const void *s, std::size_t len);
 
     /** Sets the SDES tool item for the local participant to the value \c s with length \c len. */
-    int SetLocalTool(const void *s, size_t len);
+    int SetLocalTool(const void *s, std::size_t len);
 
     /** Sets the SDES note item for the local participant to the value \c s with length \c len. */
-    int SetLocalNote(const void *s, size_t len);
+    int SetLocalNote(const void *s, std::size_t len);
 
 protected:
     /** Allocate a user defined transmitter.
@@ -461,7 +461,7 @@ protected:
     virtual void OnSSRCCollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, bool isrtp);
 
     /** Is called when another CNAME was received than the one already present for source \c srcdat. */
-    virtual void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, size_t cnamelength);
+    virtual void OnCNAMECollision(RTPSourceData *srcdat, const RTPAddress *senderaddress, const uint8_t *cname, std::size_t cnamelength);
 
     /** Is called when a new entry \c srcdat is added to the source table. */
     virtual void OnNewSource(RTPSourceData *srcdat);
@@ -496,10 +496,10 @@ protected:
     virtual void OnRTCPReceiverReport(RTPSourceData *srcdat);
 
     /** Is called when a specific SDES item was received for this source. */
-    virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, size_t itemlength);
+    virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t, const void *itemdata, std::size_t itemlength);
 #ifdef RTP_SUPPORT_SDESPRIV
     /** Is called when a specific SDES item of 'private' type was received for this source. */
-    virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen);
+    virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, std::size_t prefixlen, const void *valuedata, std::size_t valuelen);
 #endif // RTP_SUPPORT_SDESPRIV
 
     /** Is called when a BYE packet has been processed for source \c srcdat. */
@@ -531,12 +531,12 @@ protected:
      *  yourself, a good way may be to do this in RTPSession::OnSentRTPOrRTCPData. If `senddata` is
      *  set to 0, no packet will be sent out. This also provides a way to turn off sending RTCP
      *  packets if desired. */
-    virtual int OnChangeRTPOrRTCPData(const void *origdata, size_t origlen, bool isrtp, void **senddata, size_t *sendlen);
+    virtual int OnChangeRTPOrRTCPData(const void *origdata, std::size_t origlen, bool isrtp, void **senddata, std::size_t *sendlen);
 
     /** This function is called when an RTP or RTCP packet was sent, it can be helpful
      *  when data was allocated in RTPSession::OnChangeRTPOrRTCPData to deallocate it
      *  here. */
-    virtual void OnSentRTPOrRTCPData(void *senddata, size_t sendlen, bool isrtp);
+    virtual void OnSentRTPOrRTCPData(void *senddata, std::size_t sendlen, bool isrtp);
 
     /** By overriding this function, the raw incoming data can be inspected
      *  and modified (e.g. for encryption).
@@ -559,12 +559,12 @@ protected:
     virtual void OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled);
 private:
     int InternalCreate(const RTPSessionParams &sessparams);
-    int CreateCNAME(uint8_t *buffer, size_t *bufferlength, bool resolve);
+    int CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool resolve);
     int ProcessPolledData();
     int ProcessRTCPCompoundPacket(RTCPCompoundPacket &rtcpcomppack, RTPRawPacket *pack);
     RTPRandom *GetRandomNumberGenerator(RTPRandom *r);
-    int SendRTPData(const void *data, size_t len);
-    int SendRTCPData(const void *data, size_t len);
+    int SendRTPData(const void *data, std::size_t len);
+    int SendRTCPData(const void *data, std::size_t len);
 
     RTPRandom *rtprnd;
     bool deletertprnd;
@@ -575,7 +575,7 @@ private:
     bool usingpollthread, needthreadsafety;
     bool acceptownpackets;
     bool useSR_BYEifpossible;
-    size_t maxpacksize;
+    std::size_t maxpacksize;
     double sessionbandwidth;
     double controlfragment;
     double sendermultiplier;
@@ -612,7 +612,7 @@ inline void RTPSession::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime
 inline void RTPSession::OnSSRCCollision(RTPSourceData *, const RTPAddress *, bool)
 {
 }
-inline void RTPSession::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, size_t)
+inline void RTPSession::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, std::size_t)
 {
 }
 inline void RTPSession::OnNewSource(RTPSourceData *)
@@ -645,12 +645,12 @@ inline void RTPSession::OnRTCPSenderReport(RTPSourceData *)
 inline void RTPSession::OnRTCPReceiverReport(RTPSourceData *)
 {
 }
-inline void RTPSession::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType, const void *, size_t)
+inline void RTPSession::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType, const void *, std::size_t)
 {
 }
 
 #ifdef RTP_SUPPORT_SDESPRIV
-inline void RTPSession::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, size_t, const void *, size_t)
+inline void RTPSession::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, std::size_t, const void *, std::size_t)
 {
 }
 #endif // RTP_SUPPORT_SDESPRIV
@@ -662,11 +662,11 @@ inline void RTPSession::OnSendRTCPCompoundPacket(RTCPCompoundPacket *)
 {
 }
 
-inline int RTPSession::OnChangeRTPOrRTCPData(const void *, size_t, bool, void **, size_t *)
+inline int RTPSession::OnChangeRTPOrRTCPData(const void *, std::size_t, bool, void **, std::size_t *)
 {
     return ERR_RTP_RTPSESSION_CHANGEREQUESTEDBUTNOTIMPLEMENTED;
 }
-inline void RTPSession::OnSentRTPOrRTCPData(void *, size_t, bool)
+inline void RTPSession::OnSentRTPOrRTCPData(void *, std::size_t, bool)
 {
 }
 inline bool RTPSession::OnChangeIncomingData(RTPRawPacket *)

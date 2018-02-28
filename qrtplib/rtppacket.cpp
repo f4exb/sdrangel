@@ -67,8 +67,8 @@ RTPPacket::RTPPacket(RTPRawPacket &rawpack) :
     error = ParseRawPacket(rawpack);
 }
 
-RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, size_t maxpacksize) :
+RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, std::size_t maxpacksize) :
         receivetime(0, 0)
 {
     Clear();
@@ -76,8 +76,8 @@ RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloa
             0, maxpacksize);
 }
 
-RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, size_t buffersize) :
+RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t buffersize) :
         receivetime(0, 0)
 {
     Clear();
@@ -93,7 +93,7 @@ RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, size_t payloa
 int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 {
     uint8_t *packetbytes;
-    size_t packetlen;
+    std::size_t packetlen;
     uint8_t payloadtype;
     RTPHeader *rtpheader;
     bool marker;
@@ -209,8 +209,8 @@ uint32_t RTPPacket::GetCSRC(int num) const
     return csrcval_hbo;
 }
 
-int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, size_t maxsize)
+int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
+        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t maxsize)
 {
     if (numcsrcs > RTP_MAXCSRCS)
         return ERR_RTP_PACKET_TOOMANYCSRCS;
@@ -221,11 +221,11 @@ int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, size_t 
         return ERR_RTP_PACKET_BADPAYLOADTYPE;
 
     packetlength = sizeof(RTPHeader);
-    packetlength += sizeof(uint32_t) * ((size_t) numcsrcs);
+    packetlength += sizeof(uint32_t) * ((std::size_t) numcsrcs);
     if (gotextension)
     {
         packetlength += sizeof(RTPExtensionHeader);
-        packetlength += sizeof(uint32_t) * ((size_t) extensionlen_numwords);
+        packetlength += sizeof(uint32_t) * ((std::size_t) extensionlen_numwords);
     }
     packetlength += payloadlen;
 
@@ -264,7 +264,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, size_t 
     RTPPacket::ssrc = ssrc;
     RTPPacket::payloadlength = payloadlen;
     RTPPacket::extid = extensionid;
-    RTPPacket::extensionlength = ((size_t) extensionlen_numwords) * sizeof(uint32_t);
+    RTPPacket::extensionlength = ((std::size_t) extensionlen_numwords) * sizeof(uint32_t);
 
     rtphdr = (RTPHeader *) packet;
     rtphdr->version = RTP_VERSION;
@@ -290,7 +290,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, size_t 
     for (i = 0; i < numcsrcs; i++, curcsrc++)
         *curcsrc = qToBigEndian(csrcs[i]);
 
-    payload = packet + sizeof(RTPHeader) + ((size_t) numcsrcs) * sizeof(uint32_t);
+    payload = packet + sizeof(RTPHeader) + ((std::size_t) numcsrcs) * sizeof(uint32_t);
     if (gotextension)
     {
         RTPExtensionHeader *rtpexthdr = (RTPExtensionHeader *) payload;
