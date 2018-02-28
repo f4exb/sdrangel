@@ -21,8 +21,8 @@ set (qrtplib_HEADERS
 	rtperrors.h
 	rtphashtable.h
 	rtpinternalsourcedata.h
-	rtpipv4address.h
-	rtpipv4destination.h
+#	rtpipv4address.h
+#	rtpipv4destination.h
 	rtpkeyhashtable.h
 	rtplibraryversion.h
 	rtppacket.h
@@ -42,14 +42,14 @@ set (qrtplib_HEADERS
 	rtptransmitter.h
 	rtptypes_win.h
 	rtptypes.h
-	rtpudpv4transmitter.h
-    rtpudpv4transmitternobind.h
-	rtpexternaltransmitter.h
+#	rtpudpv4transmitter.h
+#   rtpudpv4transmitternobind.h
+#	rtpexternaltransmitter.h
 	rtpsocketutil.h
 	rtpabortdescriptors.h
 	rtpselect.h
-	rtptcpaddress.h
-	rtptcptransmitter.h
+#	rtptcpaddress.h
+#	rtptcptransmitter.h
 	)
 
 set(qrtplib_SOURCES
@@ -66,8 +66,8 @@ set(qrtplib_SOURCES
 	rtpcollisionlist.cpp
 	rtperrors.cpp
 	rtpinternalsourcedata.cpp
-	rtpipv4address.cpp
-	rtpipv4destination.cpp
+#	rtpipv4address.cpp
+#	rtpipv4destination.cpp
 	rtplibraryversion.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
@@ -81,12 +81,12 @@ set(qrtplib_SOURCES
 	rtpsourcedata.cpp
 	rtpsources.cpp
 	rtptimeutilities.cpp
-	rtpudpv4transmitter.cpp
-    rtpudpv4transmitternobind.cpp
-	rtpexternaltransmitter.cpp
+#	rtpudpv4transmitter.cpp
+#   rtpudpv4transmitternobind.cpp
+#	rtpexternaltransmitter.cpp
 	rtpabortdescriptors.cpp
-	rtptcpaddress.cpp
-	rtptcptransmitter.cpp
+#	rtptcpaddress.cpp
+#	rtptcptransmitter.cpp
 	)
 
 include_directories(
