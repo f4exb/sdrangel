@@ -297,10 +297,10 @@ inline RTPUDPv4TransmissionNoBindParams::RTPUDPv4TransmissionNoBindParams() :
 class RTPUDPv4TransmissionNoBindInfo: public RTPTransmissionInfo
 {
 public:
-    RTPUDPv4TransmissionNoBindInfo(std::list<uint32_t> iplist, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
+    RTPUDPv4TransmissionNoBindInfo(const QHostAddress& ip, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
             RTPTransmissionInfo(RTPTransmitter::IPv4UDPProto)
     {
-        localIPlist = iplist;
+        localIP = ip;
         rtpsocket = rtpsock;
         rtcpsocket = rtcpsock;
         m_rtpPort = rtpport;
@@ -312,9 +312,9 @@ public:
     }
 
     /** Returns the list of IPv4 addresses the transmitter considers to be the local IP addresses. */
-    std::list<uint32_t> GetLocalIPList() const
+    QHostAddress GetLocalIP() const
     {
-        return localIPlist;
+        return localIP;
     }
 
     /** Returns the socket descriptor used for receiving and transmitting RTP packets. */
@@ -341,7 +341,7 @@ public:
         return m_rtcpPort;
     }
 private:
-    std::list<uint32_t> localIPlist;
+    QHostAddress localIP;
     SocketType rtpsocket, rtcpsocket;
     uint16_t m_rtpPort, m_rtcpPort;
 };

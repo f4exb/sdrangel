@@ -325,7 +325,6 @@ public:
     RTPTransmissionInfo *GetTransmissionInfo();
     void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
-    int GetLocalHostName(uint8_t *buffer, std::size_t *bufferlength);
     bool ComesFromThisTransmitter(const RTPAddress *addr);
     std::size_t GetHeaderOverhead()
     {
@@ -357,8 +356,8 @@ public:
     void ClearAcceptList();
     int SetMaximumPacketSize(std::size_t s);
 
-    bool NewDataAvailable();
-    RTPRawPacket *GetNextPacket();
+    bool NewDataAvailable(); // TODO: emit signal instead
+    RTPRawPacket *GetNextPacket(); // TODO: use a queue
 
 private:
     int CreateLocalIPList();
@@ -376,9 +375,8 @@ private:
     bool m_waitingfordata;
     QUdpSocket *m_rtpsock, *m_rtcpsock;
     QHostAddress m_mcastifaceIP;
-    std::list<QHostAddress> m_localIPs;
+    QHostAddress m_localIP;
     uint16_t m_rtpPort, m_rtcpPort;
-    uint8_t m_multicastTTL;
     RTPTransmitter::ReceiveMode m_receivemode;
 
     uint8_t *m_localhostname;
