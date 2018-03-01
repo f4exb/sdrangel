@@ -7,6 +7,7 @@
 #include "leansdr/convolutional.h"
 #include "leansdr/sdr.h"
 #include "leansdr/rs.h"
+#include "leansdr/incrementalarray.h"
 
 namespace leansdr
 {
@@ -1459,6 +1460,7 @@ private:
         dvb_dec_interface *dec;
         TCS *map;  // [nsymbols]
     }*syncs;  // [nsyncs]
+    IncrementalArray<TPM> m_totaldiscr;
     int current_sync;
     static const int chunk_size = 128;
     int resync_phase;
@@ -1512,6 +1514,7 @@ public:
         // polarity inversion.  We could reduce nsyncs.
 
         syncs = new sync[nsyncs];
+        m_totaldiscr.allocate(nsyncs);
 
         for (int s = 0; s < nsyncs; ++s)
         {
@@ -1636,7 +1639,8 @@ public:
         while ((long) in.readable() >= nshifts * chunk_size + (nshifts - 1)
                 && ((long) out.writable() * 8) >= fec->bits_in * chunk_size)
         {
-            TPM totaldiscr[nsyncs];
+            //TPM totaldiscr[nsyncs];
+            TPM *totaldiscr = m_totaldiscr.m_array;
             for (int s = 0; s < nsyncs; ++s)
                 totaldiscr[s] = 0;
 

@@ -3,6 +3,7 @@
 
 #include "leansdr/math.h"
 #include "leansdr/dsp.h"
+#include "leansdr/incrementalarray.h"
 
 namespace leansdr
 {
@@ -50,6 +51,8 @@ struct auto_notch: runnable
             __slots[s].i = -1;
             __slots[s].expj = new complex<float> [fft.n];
         }
+        m_data.allocate(fft.n);
+        m_amp.allocate(fft.n);
     }
 
     void run()
@@ -71,7 +74,8 @@ struct auto_notch: runnable
     void detect()
     {
         complex<T> *pin = in.rd();
-        complex<float> data[fft.n];
+        //complex<float> data[fft.n];
+        complex<float> *data = m_data.m_array;
         float m0 = 0, m2 = 0;
 
         for (unsigned int i = 0; i < fft.n; ++i)
@@ -95,7 +99,8 @@ struct auto_notch: runnable
         }
 
         fft.inplace(data, true);
-        float amp[fft.n];
+        //float amp[fft.n];
+        float *amp = m_amp.m_array;
 
         for (unsigned int i = 0; i < fft.n; ++i) {
             amp[i] = hypotf(data[i].re, data[i].im);
@@ -179,6 +184,8 @@ private:
     int phase;
     float gain;
     T agc_rms_setpoint;
+    IncrementalArray<complex<float> > m_data;
+    IncrementalArray<float> m_amp;
 };
 
 // SIGNAL STRENGTH ESTIMATOR
@@ -1537,12 +1544,16 @@ struct cnr_fft: runnable
         if (bandwidth > 0.25) {
             fail("cnr_fft::cnr_fft", "CNR estimator requires Fsampling > 4x Fsignal");
         }
+        m_data.allocate(fft.n);
+        m_power.allocate(fft.n);
     }
 
     float bandwidth;
     float *freq_tap, tap_multiplier;
     int decimation;
     float kavg;
+    IncrementalArray<complex<T> > m_data;
+    IncrementalArray<T> m_power;
 
     void run()
     {
@@ -1564,10 +1575,12 @@ private:
     {
         float center_freq = freq_tap ? *freq_tap * tap_multiplier : 0;
         int icf = floor(center_freq * fft.n + 0.5);
-        complex<T> data[fft.n];
+        //complex<T> data[fft.n];
+        complex<T> *data = m_data.m_array;
         memcpy(data, in.rd(), fft.n * sizeof(data[0]));
         fft.inplace(data, true);
-        T power[fft.n];
+        //T power[fft.n];
+        T *power = m_power.m_array;
         for (unsigned int i = 0; i < fft.n; ++i)
             power[i] = data[i].re * data[i].re + data[i].im * data[i].im;
         if (!avgpower)
