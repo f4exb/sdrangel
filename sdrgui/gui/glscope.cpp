@@ -287,8 +287,9 @@ void GLScope::paintGL()
 	if(!m_mutex.tryLock(2))
 		return;
 
-	if(m_configChanged)
+	if(m_configChanged)	{
 		applyConfig();
+	}
 
 	handleMode();
 
@@ -327,7 +328,8 @@ void GLScope::paintGL()
 		tickList = &m_y1Scale.getTickList();
 
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_q3TickY1.m_array;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
@@ -357,7 +359,8 @@ void GLScope::paintGL()
 			// Vertical X1
 			tickList = &m_x1Scale.getTickList();
 
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_q3TickX1.m_array;
 			int effectiveTicks = 0;
 			for(int i= 0; i < tickList->count(); i++) {
 				tick = &(*tickList)[i];
@@ -451,6 +454,7 @@ void GLScope::paintGL()
 		if(m_displayTrace->size() > 0)
 		{
 			{
+
 				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 				if(end - start < 2)
@@ -458,7 +462,9 @@ void GLScope::paintGL()
 				float posLimit = 1.0 / m_amp1;
 				float negLimit = -1.0 / m_amp1;
 
-				GLfloat q3[2*(end -start)];
+				//GLfloat q3[2*(end -start)];
+				m_q3Trace.allocate(2*(end - start));
+				GLfloat *q3 = m_q3Trace.m_array;
 
 				for (int i = start; i < end; i++)
 				{
@@ -525,6 +531,7 @@ void GLScope::paintGL()
 			if (m_displayTrace->size() > 0)
 			{
 				{
+
 					int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 					int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 
@@ -532,10 +539,13 @@ void GLScope::paintGL()
 						start--;
 					}
 
+
 					float posLimit = 1.0 / m_amp2;
 					float negLimit = -1.0 / m_amp2;
 
-					GLfloat q3[2*(end - start)];
+					//GLfloat q3[2*(end - start)];
+					m_q3Trace.allocate(2*(end - start));
+					GLfloat *q3 = m_q3Trace.m_array;
 
 					for(int i = start; i < end; i++)
 					{
@@ -573,7 +583,8 @@ void GLScope::paintGL()
 			// Horizontal Y2
 			tickList = &m_y2Scale.getTickList();
 			{
-				GLfloat q3[4*tickList->count()];
+				//GLfloat q3[4*tickList->count()];
+				GLfloat *q3 = m_q3TickY2.m_array;
 				int effectiveTicks = 0;
 				for(int i= 0; i < tickList->count(); i++) {
 					tick = &(*tickList)[i];
@@ -637,7 +648,8 @@ void GLScope::paintGL()
 		// Horizontal Y2
 		tickList = &m_y2Scale.getTickList();
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_q3TickY2.m_array;
 			int effectiveTicks = 0;
 			for(int i= 0; i < tickList->count(); i++) {
 				tick = &(*tickList)[i];
@@ -660,7 +672,8 @@ void GLScope::paintGL()
 		// Vertical X2
 		tickList = &m_x2Scale.getTickList();
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_q3TickX2.m_array;
 			int effectiveTicks = 0;
 			for(int i= 0; i < tickList->count(); i++) {
 				tick = &(*tickList)[i];
@@ -750,14 +763,19 @@ void GLScope::paintGL()
 		{
 			if (m_mode == ModeIQPolar)
 			{
+
 				int start = (m_timeOfsProMill/1000.0) * m_displayTrace->size();
 				int end = std::min(start + m_displayTrace->size()/m_timeBase, m_displayTrace->size());
 
 				if (end - start < 2) {
 					start--;
 				}
-				{
-					GLfloat q3[2*(end - start)];
+
+
+			    {
+					//GLfloat q3[2*(end - start)];
+                    m_q3Trace.allocate(2*(end - start));
+					GLfloat *q3 = m_q3Trace.m_array;
 
 					for(int i = start; i < end; i++)
 					{
@@ -802,10 +820,13 @@ void GLScope::paintGL()
 						start--;
 					}
 
+
 					float posLimit = 1.0 / m_amp2;
 					float negLimit = -1.0 / m_amp2;
 
-					GLfloat q3[2*(end - start)];
+					//GLfloat q3[2*(end - start)];
+					m_q3Trace.allocate(2*(end - start));
+					GLfloat *q3 = m_q3Trace.m_array;
 
 					for(int i = start; i < end; i++) {
 						float v = (*m_displayTrace)[i].imag();
@@ -2122,6 +2143,16 @@ void GLScope::applyConfig()
 
 		} // X2 scale
 	} // Secondary display only
+
+    m_q3TickY1.allocate(4*m_y1Scale.getTickList().count());
+    m_q3TickY2.allocate(4*m_y2Scale.getTickList().count());
+    m_q3TickX1.allocate(4*m_x1Scale.getTickList().count());
+    m_q3TickX2.allocate(4*m_x1Scale.getTickList().count());
+}
+
+void GLScope::applyTraceConfig(uint32_t size)
+{
+    m_q3Trace.allocate(2*size);
 }
 
 void GLScope::tick()

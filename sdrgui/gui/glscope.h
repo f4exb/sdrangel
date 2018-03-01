@@ -34,6 +34,7 @@
 #include "gui/glshadertextured.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
+#include "util/incrementalarray.h"
 
 class ScopeVis;
 class QPainter;
@@ -167,6 +168,12 @@ private:
 	GLShaderTextured m_glShaderBottom2Scale;
 	GLShaderTextured m_glShaderPowerOverlay;
 
+    IncrementalArray<GLfloat> m_q3Trace;
+    IncrementalArray<GLfloat> m_q3TickY1;
+    IncrementalArray<GLfloat> m_q3TickY2;
+    IncrementalArray<GLfloat> m_q3TickX1;
+    IncrementalArray<GLfloat> m_q3TickX2;
+
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
@@ -175,6 +182,7 @@ private:
 
 	void handleMode();
 	void applyConfig();
+	void applyTraceConfig(uint32_t size);
 	void drawPowerOverlay();
 
 protected slots:
