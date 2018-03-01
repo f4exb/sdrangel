@@ -21,8 +21,9 @@
 #include <QString>
 #include <QByteArray>
 
-struct CWKeyerSettings
+class CWKeyerSettings
 {
+public:
     typedef enum
     {
         CWNone,
