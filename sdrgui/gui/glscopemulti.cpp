@@ -213,7 +213,8 @@ void GLScopeMulti::paintGL()
         {
             tickList = &m_y1Scale.getTickList();
 
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickY1.m_array;
             int effectiveTicks = 0;
 
             for (int i= 0; i < tickList->count(); i++)
@@ -243,7 +244,8 @@ void GLScopeMulti::paintGL()
         {
             tickList = &m_x1Scale.getTickList();
 
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickX1.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -386,7 +388,8 @@ void GLScopeMulti::paintGL()
         {
             tickList = &m_y2Scale.getTickList();
 
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickY2.m_array;
             int effectiveTicks = 0;
 
             for (int i= 0; i < tickList->count(); i++)
@@ -416,7 +419,8 @@ void GLScopeMulti::paintGL()
         {
             tickList = &m_x2Scale.getTickList();
 
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickX2.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -566,7 +570,8 @@ void GLScopeMulti::paintGL()
         // Horizontal Y1
         tickList = &m_y1Scale.getTickList();
         {
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickY1.m_array;
             int effectiveTicks = 0;
 
             for (int i= 0; i < tickList->count(); i++)
@@ -594,7 +599,8 @@ void GLScopeMulti::paintGL()
         // Vertical X1
         tickList = &m_x1Scale.getTickList();
         {
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickX1.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -655,7 +661,8 @@ void GLScopeMulti::paintGL()
         // Horizontal Y2
         tickList = &m_y2Scale.getTickList();
         {
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickY2.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -782,7 +789,8 @@ void GLScopeMulti::paintGL()
         // Horizontal Y2
         tickList = &m_y2Scale.getTickList();
         {
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickY2.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -805,7 +813,8 @@ void GLScopeMulti::paintGL()
         // Vertical X2
         tickList = &m_x2Scale.getTickList();
         {
-            GLfloat q3[4*tickList->count()];
+            //GLfloat q3[4*tickList->count()];
+            GLfloat *q3 = m_q3TickX2.m_array;
             int effectiveTicks = 0;
             for(int i= 0; i < tickList->count(); i++) {
                 tick = &(*tickList)[i];
@@ -871,7 +880,8 @@ void GLScopeMulti::paintGL()
             if(end - start < 2)
                 start--;
 
-            GLfloat q3[2*(end - start)];
+            //GLfloat q3[2*(end - start)];
+            GLfloat *q3 = m_q3Polar.m_array;
             const float *trace0 = (*m_traces)[0];
             memcpy(q3, &(trace0[2*start+1]), (2*(end - start) - 1)*sizeof(float)); // copy X values
 
@@ -1018,6 +1028,19 @@ void GLScopeMulti::applyConfig()
     {
         setPolarDisplays();
     }
+
+    m_q3TickY1.allocate(4*m_y1Scale.getTickList().count());
+    m_q3TickY2.allocate(4*m_y2Scale.getTickList().count());
+    m_q3TickX1.allocate(4*m_x1Scale.getTickList().count());
+    m_q3TickX2.allocate(4*m_x1Scale.getTickList().count());
+
+    int start = (m_timeOfsProMill/1000.0) * m_traceSize;
+    int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
+
+    if(end - start < 2)
+        start--;
+
+    m_q3Polar.allocate(2*(end - start));
 }
 
 void GLScopeMulti::setUniqueDisplays()
