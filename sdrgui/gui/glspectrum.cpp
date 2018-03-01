@@ -813,7 +813,7 @@ void GLSpectrum::paintGL()
 		}
 		{
 			//GLfloat q3[2*m_fftSize];
-		    GLfloat *q3 = m_shaderArrays.m_q3FFT;
+		    GLfloat *q3 = m_q3FFT.m_array;
 			Real bottom = -m_powerRange;
 
 			for(int i = 0; i < m_fftSize; i++) {
@@ -837,7 +837,7 @@ void GLSpectrum::paintGL()
 		{
 			Real bottom = -m_powerRange;
 			//GLfloat q3[2*m_fftSize];
-			GLfloat *q3 = m_shaderArrays.m_q3FFT;
+			GLfloat *q3 = m_q3FFT.m_array;
 
 			for(int i = 0; i < m_fftSize; i++) {
 				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
@@ -863,7 +863,7 @@ void GLSpectrum::paintGL()
 
 		{
 			//GLfloat q3[4*tickList->count()];
-			GLfloat *q3 = m_shaderArrays.m_q3TickTime;
+			GLfloat *q3 = m_q3TickTime.m_array;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
@@ -891,7 +891,7 @@ void GLSpectrum::paintGL()
 
 		{
 			//GLfloat q3[4*tickList->count()];
-			GLfloat *q3 = m_shaderArrays.m_q3TickFrequency;
+			GLfloat *q3 = m_q3TickFrequency.m_array;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
@@ -925,7 +925,7 @@ void GLSpectrum::paintGL()
 
 		{
 			//GLfloat q3[4*tickList->count()];
-		    GLfloat *q3 = m_shaderArrays.m_q3TickPower;
+		    GLfloat *q3 = m_q3TickPower.m_array;
 			int effectiveTicks = 0;
 
 			for(int i= 0; i < tickList->count(); i++)
@@ -953,7 +953,7 @@ void GLSpectrum::paintGL()
 
 		{
 			//GLfloat q3[4*tickList->count()];
-			GLfloat *q3 = m_shaderArrays.m_q3TickFrequency;
+			GLfloat *q3 = m_q3TickFrequency.m_array;
 			int effectiveTicks = 0;
 
 			for(int i= 0; i < tickList->count(); i++)
@@ -1579,7 +1579,7 @@ void GLSpectrum::applyChanges()
 		m_histogramHoldoff = new quint8[100 * m_fftSize];
 		memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
 
-		m_shaderArrays.allocFFT(2*m_fftSize);
+		m_q3FFT.allocate(2*m_fftSize);
 	}
 
 	if(fftSizeChanged || windowSizeChanged)
@@ -1588,9 +1588,9 @@ void GLSpectrum::applyChanges()
 		m_waterfallTexturePos = 0;
 	}
 
-	m_shaderArrays.allocTickTime(4*m_timeScale.getTickList().count());
-    m_shaderArrays.allocTickFrequency(4*m_frequencyScale.getTickList().count());
-    m_shaderArrays.allocTickPower(4*m_powerScale.getTickList().count());
+	m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
+    m_q3TickFrequency.allocate(4*m_frequencyScale.getTickList().count());
+    m_q3TickPower.allocate(4*m_powerScale.getTickList().count());
 }
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
