@@ -2147,7 +2147,7 @@ void GLScope::applyConfig()
     m_q3TickY1.allocate(4*m_y1Scale.getTickList().count());
     m_q3TickY2.allocate(4*m_y2Scale.getTickList().count());
     m_q3TickX1.allocate(4*m_x1Scale.getTickList().count());
-    m_q3TickX2.allocate(4*m_x1Scale.getTickList().count());
+    m_q3TickX2.allocate(4*m_x2Scale.getTickList().count());
 }
 
 void GLScope::applyTraceConfig(uint32_t size)
