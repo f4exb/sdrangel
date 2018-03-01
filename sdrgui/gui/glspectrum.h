@@ -72,6 +72,82 @@ public:
 	void connectTimer(const QTimer& timer);
 
 private:
+	struct ShaderArrays
+	{
+	    GLfloat *m_q3TickTime;
+	    GLfloat *m_q3TickFrequency;
+	    GLfloat *m_q3TickPower;
+	    GLfloat *m_q3FFT;
+
+	    uint32_t m_q3TickTimeSize;
+	    uint32_t m_q3TickTimeFrequencySize;
+	    uint32_t m_q3TickPowerSize;
+	    uint32_t m_q3FFTSize;
+
+	    ShaderArrays() :
+	        m_q3TickTime(0),
+	        m_q3TickFrequency(0),
+	        m_q3TickPower(0),
+	        m_q3FFT(0),
+	        m_q3TickTimeSize(0),
+	        m_q3TickTimeFrequencySize(0),
+	        m_q3TickPowerSize(0),
+	        m_q3FFTSize(0)
+	    {}
+
+	    ~ShaderArrays()
+	    {
+	        if (m_q3TickTime) { delete[] m_q3TickTime; }
+	        if (m_q3TickFrequency) { delete[] m_q3TickFrequency; }
+	        if (m_q3TickPower) { delete[] m_q3TickPower; }
+	        if (m_q3FFT) { delete[] m_q3FFT; }
+	    }
+
+	    void allocTickTime(uint32_t size)
+	    {
+	        if (size <= m_q3TickTimeSize) {
+	            return;
+	        }
+
+	        if (m_q3TickTime) { delete[] m_q3TickTime; }
+	        m_q3TickTime = new GLfloat[size];
+	        m_q3TickTimeSize = size;
+	    }
+
+        void allocTickFrequency(uint32_t size)
+        {
+            if (size <= m_q3TickTimeFrequencySize) {
+                return;
+            }
+
+            if (m_q3TickFrequency) { delete[] m_q3TickFrequency; }
+            m_q3TickFrequency = new GLfloat[size];
+            m_q3TickTimeFrequencySize = size;
+        }
+
+        void allocTickPower(uint32_t size)
+        {
+            if (size <= m_q3TickPowerSize) {
+                return;
+            }
+
+            if (m_q3TickPower) { delete[] m_q3TickPower; }
+            m_q3TickPower = new GLfloat[size];
+            m_q3TickPowerSize = size;
+        }
+
+        void allocFFT(uint32_t size)
+        {
+            if (size <= m_q3FFTSize) {
+                return;
+            }
+
+            if (m_q3FFT) { delete[] m_q3FFT; }
+            m_q3FFT = new GLfloat[size];
+            m_q3FFTSize = size;
+        }
+	};
+
 	struct ChannelMarkerState {
 		ChannelMarker* m_channelMarker;
 		QMatrix4x4 m_glMatrixWaterfall;
@@ -164,6 +240,7 @@ private:
 	GLShaderTextured m_glShaderHistogram;
 	int m_matrixLoc;
 	int m_colorLoc;
+	ShaderArrays m_shaderArrays;
 
 	static const int m_waterfallBufferHeight = 256;
 

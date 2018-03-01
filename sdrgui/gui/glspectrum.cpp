@@ -812,7 +812,8 @@ void GLSpectrum::paintGL()
 			m_maxHold[i] = (j * m_powerRange) / 99.0 + m_referenceLevel;
 		}
 		{
-			GLfloat q3[2*m_fftSize];
+			//GLfloat q3[2*m_fftSize];
+		    GLfloat *q3 = m_shaderArrays.m_q3FFT;
 			Real bottom = -m_powerRange;
 
 			for(int i = 0; i < m_fftSize; i++) {
@@ -835,7 +836,8 @@ void GLSpectrum::paintGL()
 	{
 		{
 			Real bottom = -m_powerRange;
-			GLfloat q3[2*m_fftSize];
+			//GLfloat q3[2*m_fftSize];
+			GLfloat *q3 = m_shaderArrays.m_q3FFT;
 
 			for(int i = 0; i < m_fftSize; i++) {
 				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
@@ -860,7 +862,8 @@ void GLSpectrum::paintGL()
 		tickList = &m_timeScale.getTickList();
 
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_shaderArrays.m_q3TickTime;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
@@ -887,7 +890,8 @@ void GLSpectrum::paintGL()
 		tickList = &m_frequencyScale.getTickList();
 
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_shaderArrays.m_q3TickFrequency;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
@@ -920,7 +924,8 @@ void GLSpectrum::paintGL()
 		tickList = &m_powerScale.getTickList();
 
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+		    GLfloat *q3 = m_shaderArrays.m_q3TickPower;
 			int effectiveTicks = 0;
 
 			for(int i= 0; i < tickList->count(); i++)
@@ -947,7 +952,8 @@ void GLSpectrum::paintGL()
 		tickList = &m_frequencyScale.getTickList();
 
 		{
-			GLfloat q3[4*tickList->count()];
+			//GLfloat q3[4*tickList->count()];
+			GLfloat *q3 = m_shaderArrays.m_q3TickFrequency;
 			int effectiveTicks = 0;
 
 			for(int i= 0; i < tickList->count(); i++)
@@ -1572,6 +1578,8 @@ void GLSpectrum::applyChanges()
 		memset(m_histogram, 0x00, 100 * m_fftSize);
 		m_histogramHoldoff = new quint8[100 * m_fftSize];
 		memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
+
+		m_shaderArrays.allocFFT(2*m_fftSize);
 	}
 
 	if(fftSizeChanged || windowSizeChanged)
@@ -1579,6 +1587,10 @@ void GLSpectrum::applyChanges()
 		m_waterfallTextureHeight = waterfallHeight;
 		m_waterfallTexturePos = 0;
 	}
+
+	m_shaderArrays.allocTickTime(4*m_timeScale.getTickList().count());
+    m_shaderArrays.allocTickFrequency(4*m_frequencyScale.getTickList().count());
+    m_shaderArrays.allocTickPower(4*m_powerScale.getTickList().count());
 }
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
