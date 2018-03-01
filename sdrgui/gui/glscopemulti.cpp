@@ -1032,7 +1032,7 @@ void GLScopeMulti::applyConfig()
     m_q3TickY1.allocate(4*m_y1Scale.getTickList().count());
     m_q3TickY2.allocate(4*m_y2Scale.getTickList().count());
     m_q3TickX1.allocate(4*m_x1Scale.getTickList().count());
-    m_q3TickX2.allocate(4*m_x1Scale.getTickList().count());
+    m_q3TickX2.allocate(4*m_x2Scale.getTickList().count());
 
     int start = (m_timeOfsProMill/1000.0) * m_traceSize;
     int end = std::min(start + m_traceSize/m_timeBase, m_traceSize);
