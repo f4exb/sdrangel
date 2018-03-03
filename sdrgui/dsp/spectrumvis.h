@@ -14,7 +14,7 @@ class MessageQueue;
 class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
-	class SDRANGEL_API MsgConfigureSpectrumVis : public Message {
+	class MsgConfigureSpectrumVis : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:

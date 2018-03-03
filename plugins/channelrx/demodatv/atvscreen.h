@@ -39,7 +39,7 @@ class QPainter;
 
 
 
-class SDRANGEL_API ATVScreen: public QGLWidget, public ATVScreenInterface
+class ATVScreen: public QGLWidget, public ATVScreenInterface
 {
 	Q_OBJECT
 

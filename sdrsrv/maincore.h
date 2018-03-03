@@ -47,7 +47,7 @@ namespace qtwebapp {
     class LoggerWithFile;
 }
 
-class SDRANGEL_API MainCore : public QObject {
+class MainCore : public QObject {
     Q_OBJECT
 
 public:

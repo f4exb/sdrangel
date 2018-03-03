@@ -48,7 +48,7 @@ protected:
 	bool writeTag(Type type, quint32 id, quint32 length);
 };
 
-class SDRANGEL_API SimpleDeserializer {
+class SDRBASE_API SimpleDeserializer {
 public:
 	SimpleDeserializer(const QByteArray& data);
 

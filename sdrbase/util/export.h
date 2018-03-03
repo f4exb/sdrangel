@@ -42,8 +42,6 @@
 #  define SDRBASE_API
 #endif
 
-#define SDRANGEL_API SDRBASE_API /* to be compatible with current situation TODO: remove */
-
 /* the 'SDRGUI_API' controls the import/export of 'sdrgui' symbols
  */
 #if !defined(sdrangel_STATIC)

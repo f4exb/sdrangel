@@ -24,7 +24,7 @@
 #include "util/export.h"
 
 template<typename AccuType, uint32_t HBFilterOrder>
-class SDRANGEL_API IntHalfbandFilter {
+class SDRBASE_API IntHalfbandFilter {
 public:
 	IntHalfbandFilter() :
 	    m_ptr(0),

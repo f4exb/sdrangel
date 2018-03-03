@@ -35,7 +35,7 @@
 
 class QPainter;
 
-class SDRANGEL_API DATVScreen: public QGLWidget
+class DATVScreen: public QGLWidget
 {
 	Q_OBJECT
 

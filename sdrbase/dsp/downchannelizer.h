@@ -40,7 +40,7 @@ class MessageQueue;
 class SDRBASE_API DownChannelizer : public BasebandSampleSink {
 	Q_OBJECT
 public:
-	class SDRANGEL_API MsgChannelizerNotification : public Message {
+	class MsgChannelizerNotification : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
