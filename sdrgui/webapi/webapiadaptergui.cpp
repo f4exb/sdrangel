@@ -103,7 +103,7 @@ int WebAPIAdapterGUI::instanceSummary(
 }
 
 int WebAPIAdapterGUI::instanceDelete(
-        SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+        SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
         SWGSDRangel::SWGErrorResponse& error)
 {
     *error.getMessage() = QString("Not supported in GUI instance");

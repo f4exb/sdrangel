@@ -204,7 +204,7 @@ if (SANITIZE_ADDRESS)
     set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 
 ##############################################################################
 # base libraries

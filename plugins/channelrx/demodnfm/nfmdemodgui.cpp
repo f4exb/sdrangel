@@ -7,7 +7,6 @@
 #include <QDebug>
 
 #include "ui_nfmdemodgui.h"
-#include "dsp/nullsink.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
