@@ -8,7 +8,7 @@
 
 class Message;
 
-class SDRANGEL_API SpectrumScopeComboVis : public BasebandSampleSink {
+class SDRGUI_API SpectrumScopeComboVis : public BasebandSampleSink {
 public:
 
 	SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);

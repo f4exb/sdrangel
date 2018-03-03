@@ -46,12 +46,14 @@
 #include "rtpsources.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTPAddress;
 
-class RTCPSenderReportInfo
+class QRTPLIB_API RTCPSenderReportInfo
 {
 public:
     RTCPSenderReportInfo() :

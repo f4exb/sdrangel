@@ -33,7 +33,7 @@ class Preset;
 class DeviceSourceAPI;
 class ChannelSourceAPI;
 
-class SDRANGEL_API DeviceSinkAPI : public QObject {
+class SDRBASE_API DeviceSinkAPI : public QObject {
     Q_OBJECT
 
 public:

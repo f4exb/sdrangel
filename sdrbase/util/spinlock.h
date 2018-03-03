@@ -3,7 +3,9 @@
 
 #include <QAtomicInt>
 
-class Spinlock {
+#include "util/export.h"
+
+class SDRBASE_API Spinlock {
 public:
 	void lock()
 	{

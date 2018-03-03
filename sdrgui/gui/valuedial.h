@@ -20,7 +20,7 @@
 #include "gui/colormapper.h"
 #include "util/export.h"
 
-class SDRANGEL_API ValueDial : public QWidget {
+class SDRGUI_API ValueDial : public QWidget {
 	Q_OBJECT
 
 public:

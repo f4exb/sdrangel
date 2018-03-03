@@ -19,9 +19,11 @@
 
 #include <QObject>
 
+#include "util/export.h"
+
 class QKeyEvent;
 
-class CommandKeyReceiver : public QObject
+class SDRGUI_API CommandKeyReceiver : public QObject
 {
     Q_OBJECT
 public:

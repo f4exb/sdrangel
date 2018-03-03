@@ -6,7 +6,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGEL_API SimpleSerializer {
+class SDRBASE_API SimpleSerializer {
 public:
 	SimpleSerializer(quint32 version);
 

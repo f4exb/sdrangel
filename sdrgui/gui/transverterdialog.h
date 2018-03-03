@@ -23,11 +23,13 @@
 
 #include <QDialog>
 
+#include "util/export.h"
+
 namespace Ui {
     class TransverterDialog;
 }
 
-class TransverterDialog : public QDialog {
+class SDRGUI_API TransverterDialog : public QDialog {
     Q_OBJECT
 
 public:

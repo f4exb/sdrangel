@@ -43,6 +43,8 @@
 #include "rtptypes.h"
 #include "rtpsocketutil.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 /** Represents a TCP 'address' and port.
@@ -50,7 +52,7 @@ namespace qrtplib
  *  should be used to send/receive data, and to know on which socket incoming data
  *  was received.
  */
-class RTPTCPAddress: public RTPAddress
+class QRTPLIB_API RTPTCPAddress: public RTPAddress
 {
 public:
     /** Creates an instance with which you can use a specific socket

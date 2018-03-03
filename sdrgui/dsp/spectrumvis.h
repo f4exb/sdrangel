@@ -11,7 +11,7 @@
 class GLSpectrum;
 class MessageQueue;
 
-class SDRANGEL_API SpectrumVis : public BasebandSampleSink {
+class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
 	class SDRANGEL_API MsgConfigureSpectrumVis : public Message {

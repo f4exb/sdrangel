@@ -42,13 +42,15 @@
 #include <string>
 #include <stdio.h>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /**
  * Used to provide information about the version of the library.
  */
-class RTPLibraryVersion
+class QRTPLIB_API RTPLibraryVersion
 {
 public:
     /** Returns an instance of RTPLibraryVersion describing the version of the library. */

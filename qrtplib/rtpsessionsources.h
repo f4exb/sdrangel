@@ -41,12 +41,14 @@
 #include "rtpconfig.h"
 #include "rtpsources.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTPSession;
 
-class RTPSessionSources: public RTPSources
+class QRTPLIB_API RTPSessionSources: public RTPSources
 {
 public:
     RTPSessionSources(RTPSession &sess) :

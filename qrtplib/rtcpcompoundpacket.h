@@ -43,6 +43,8 @@
 #include "rtpendian.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -50,7 +52,7 @@ class RTPRawPacket;
 class RTCPPacket;
 
 /** Represents an RTCP compound packet. */
-class RTCPCompoundPacket
+class QRTPLIB_API RTCPCompoundPacket
 {
 public:
     /** Creates an RTCPCompoundPacket instance from the data in \c rawpack, installing a memory manager if specified. */

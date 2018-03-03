@@ -44,10 +44,12 @@
 #include "rtptimeutilities.h"
 #include "rtpsources.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
-class RTPInternalSourceData: public RTPSourceData
+class QRTPLIB_API RTPInternalSourceData: public RTPSourceData
 {
 public:
     RTPInternalSourceData(uint32_t ssrc);

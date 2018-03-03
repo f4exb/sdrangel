@@ -17,8 +17,9 @@
 #ifndef DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
 #define DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
 
+#include "util/export.h"
 
-class DeviceBladeRFBandwidths {
+class DEVICES_API DeviceBladeRFBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
     static unsigned int getBandwidthIndex(unsigned int bandwidth);

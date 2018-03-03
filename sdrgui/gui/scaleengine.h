@@ -24,7 +24,7 @@
 #include "physicalunit.h"
 #include "util/export.h"
 
-class SDRANGEL_API ScaleEngine {
+class SDRGUI_API ScaleEngine {
 public:
 	struct Tick {
 		float pos;

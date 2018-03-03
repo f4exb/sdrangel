@@ -19,7 +19,9 @@
 
 #include "deviceperseusscan.h"
 
-class DevicePerseus
+#include "util/export.h"
+
+class DEVICES_API DevicePerseus
 {
 public:
     static DevicePerseus& instance();

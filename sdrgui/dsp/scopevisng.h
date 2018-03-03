@@ -38,7 +38,7 @@
 
 class GLScopeNG;
 
-class SDRANGEL_API ScopeVisNG : public BasebandSampleSink {
+class SDRGUI_API ScopeVisNG : public BasebandSampleSink {
 
 public:
     enum ProjectionType

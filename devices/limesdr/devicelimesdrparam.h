@@ -19,6 +19,8 @@
 
 #include "lime/LimeSuite.h"
 
+#include "util/export.h"
+
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by
  * the DeviceSinkAPI or DeviceSourceAPI).
@@ -26,7 +28,7 @@
  * There is only one copy that is constructed by the first participant and destroyed by the last.
  * A participant knows it is the first or last by checking the lists of buddies (Rx + Tx).
  */
-struct DeviceLimeSDRParams
+struct DEVICES_API DeviceLimeSDRParams
 {
     lms_device_t *m_dev;         //!< device handle
     uint32_t     m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)

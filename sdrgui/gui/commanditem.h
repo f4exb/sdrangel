@@ -16,7 +16,9 @@
 
 #include <QTreeWidgetItem>
 
-class CommandItem : public QTreeWidgetItem {
+#include "util/export.h"
+
+class SDRGUI_API CommandItem : public QTreeWidgetItem {
 public:
     CommandItem(QTreeWidgetItem* parent, const QStringList& strings, const QString& description, int type);
 	bool operator<(const QTreeWidgetItem& other) const;

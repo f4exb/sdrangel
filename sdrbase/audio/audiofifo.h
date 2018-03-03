@@ -26,7 +26,7 @@
 #include "util/export.h"
 #include "util/udpsink.h"
 
-class SDRANGEL_API AudioFifo : public QObject {
+class SDRBASE_API AudioFifo : public QObject {
 	Q_OBJECT
 public:
 	AudioFifo();

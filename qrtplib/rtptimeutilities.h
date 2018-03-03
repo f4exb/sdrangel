@@ -46,6 +46,8 @@
 #include <errno.h>
 #endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
 
+#include "util/export.h"
+
 #define RTP_NTPTIMEOFFSET									2208988800UL
 
 #ifdef RTP_HAVE_VSUINT64SUFFIX
@@ -63,7 +65,7 @@ namespace qrtplib
  * This is a simple wrapper for the most significant word (MSW) and least
  * significant word (LSW) of an NTP timestamp.
  */
-class RTPNTPTime
+class QRTPLIB_API RTPNTPTime
 {
 public:
     /** This constructor creates and instance with MSW \c m and LSW \c l. */
@@ -92,7 +94,7 @@ private:
  *  This class is used to specify wallclock time, delay intervals etc.
  *  It stores a number of seconds and a number of microseconds.
  */
-class RTPTime
+class QRTPLIB_API RTPTime
 {
 public:
     /** Returns an RTPTime instance representing the current wallclock time.
@@ -392,7 +394,7 @@ inline bool RTPTime::operator>=(const RTPTime &t) const
     return m_t >= t.m_t;
 }
 
-class RTPTimeInitializerObject
+class QRTPLIB_API RTPTimeInitializerObject
 {
 public:
     RTPTimeInitializerObject();
@@ -404,7 +406,7 @@ private:
     int dummy;
 };
 
-extern RTPTimeInitializerObject timeinit;
+extern QRTPLIB_API RTPTimeInitializerObject timeinit;
 
 } // end namespace
 

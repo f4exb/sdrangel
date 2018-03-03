@@ -24,11 +24,13 @@
 #include <QDialog>
 #include <vector>
 
+#include "util/export.h"
+
 namespace Ui {
     class SamplingDeviceDialog;
 }
 
-class SamplingDeviceDialog : public QDialog {
+class SDRGUI_API SamplingDeviceDialog : public QDialog {
     Q_OBJECT
 
 public:

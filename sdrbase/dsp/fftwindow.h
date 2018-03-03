@@ -27,7 +27,7 @@
 #undef M_PI
 #define M_PI		3.14159265358979323846
 
-class SDRANGEL_API FFTWindow {
+class SDRBASE_API FFTWindow {
 public:
 	enum Function {
 		Bartlett,

@@ -10,8 +10,9 @@
 
 #include "movingaverage.h"
 #include "util/movingaverage.h"
+#include "util/export.h"
 
-class AGC
+class SDRBASE_API AGC
 {
 public:
 	AGC(int historySize, double R);
@@ -32,7 +33,7 @@ protected:
 };
 
 
-class MagAGC : public AGC
+class SDRBASE_API MagAGC : public AGC
 {
 public:
 	MagAGC(int historySize, double R, double threshold);

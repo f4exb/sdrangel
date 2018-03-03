@@ -45,11 +45,13 @@
 #include <string.h>
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** The class RTCPSDESInfo is a container for RTCP SDES information. */
-class RTCPSDESInfo
+class QRTPLIB_API RTCPSDESInfo
 {
 public:
     /** Constructs an instance, optionally installing a memory manager. */

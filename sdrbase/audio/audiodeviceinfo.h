@@ -24,7 +24,7 @@
 
 #include "util/export.h"
 
-class SDRANGEL_API AudioDeviceInfo {
+class SDRBASE_API AudioDeviceInfo {
 public:
 	AudioDeviceInfo();
 

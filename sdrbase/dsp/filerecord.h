@@ -11,7 +11,7 @@
 
 class Message;
 
-class SDRANGEL_API FileRecord : public BasebandSampleSink {
+class SDRBASE_API FileRecord : public BasebandSampleSink {
 public:
 
     struct Header

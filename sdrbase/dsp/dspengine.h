@@ -32,7 +32,7 @@
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 
-class SDRANGEL_API DSPEngine : public QObject {
+class SDRBASE_API DSPEngine : public QObject {
 	Q_OBJECT
 public:
 	DSPEngine();

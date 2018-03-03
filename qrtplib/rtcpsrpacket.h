@@ -44,13 +44,15 @@
 #include "rtpstructs.h"
 #include "rtpendian.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTCPCompoundPacket;
 
 /** Describes an RTCP sender report packet. */
-class RTCPSRPacket: public RTCPPacket
+class QRTPLIB_API RTCPSRPacket: public RTCPPacket
 {
 public:
     /** Creates an instance based on the data in \c data with length \c datalen.

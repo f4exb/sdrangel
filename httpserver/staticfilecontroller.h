@@ -13,6 +13,8 @@
 #include "httpresponse.h"
 #include "httprequesthandler.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -44,7 +46,7 @@ namespace qtwebapp {
 
 class HttpDocrootSettings;
 
-class DECLSPEC StaticFileController : public HttpRequestHandler  {
+class HTTPSERVER_API StaticFileController : public HttpRequestHandler  {
     Q_OBJECT
     Q_DISABLE_COPY(StaticFileController)
 public:

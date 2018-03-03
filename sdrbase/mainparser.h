@@ -21,7 +21,9 @@
 #include <QCommandLineParser>
 #include <stdint.h>
 
-class MainParser
+#include "util/export.h"
+
+class SDRBASE_API MainParser
 {
 public:
     MainParser();

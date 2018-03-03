@@ -18,8 +18,9 @@
 #define DEVICES_HACKRF_DEVICEHACKRFSHARED_H_
 
 #include "util/message.h"
+#include "util/export.h"
 
-class DeviceHackRFShared
+class DEVICES_API DeviceHackRFShared
 {
 public:
     class MsgConfigureFrequencyDelta : public Message

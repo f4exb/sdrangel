@@ -19,7 +19,9 @@
 
 #include "lime/LimeSuite.h"
 
-class DeviceLimeSDR
+#include "util/export.h"
+
+class DEVICES_API DeviceLimeSDR
 {
 public:
     enum PathRxRFE

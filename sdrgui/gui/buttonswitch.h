@@ -3,7 +3,9 @@
 
 #include <QToolButton>
 
-class ButtonSwitch : public QToolButton {
+#include "util/export.h"
+
+class SDRGUI_API ButtonSwitch : public QToolButton {
 	Q_OBJECT
 
 public:

@@ -42,6 +42,8 @@
 #include "rtpaddress.h"
 #include "rtptypes.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -51,7 +53,7 @@ namespace qrtplib
  *  number is ignored. When an instance is used in one of the accept or ignore functions of the
  *  transmitter, a zero port number represents all ports for the specified IP address.
  */
-class RTPIPv4Address: public RTPAddress
+class QRTPLIB_API RTPIPv4Address: public RTPAddress
 {
 public:
     /** Creates an instance with IP address \c ip and port number \c port (both

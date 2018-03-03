@@ -33,7 +33,7 @@ class DeviceSampleSource;
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 
-class SDRANGEL_API DSPDeviceSourceEngine : public QThread {
+class SDRBASE_API DSPDeviceSourceEngine : public QThread {
 	Q_OBJECT
 
 public:

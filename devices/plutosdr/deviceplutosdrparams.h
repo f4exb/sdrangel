@@ -19,7 +19,9 @@
 
 #include <string>
 
-class DevicePlutoSDRBox;
+#include "util/export.h"
+
+class DEVICES_API DevicePlutoSDRBox;
 
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by

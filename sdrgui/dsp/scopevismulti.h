@@ -37,7 +37,7 @@
 
 class GLScopeMulti;
 
-class SDRANGEL_API ScopeVisMulti : public QObject {
+class SDRGUI_API ScopeVisMulti : public QObject {
     Q_OBJECT
 public:
     enum ProjectionType

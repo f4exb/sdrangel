@@ -24,11 +24,13 @@
 #include <string>
 #include <list>
 
+#include "util/export.h"
+
 class QThread;
 class DVSerialWorker;
 class AudioFifo;
 
-class DVSerialEngine : public QObject
+class SDRBASE_API DVSerialEngine : public QObject
 {
     Q_OBJECT
 public:

@@ -4,7 +4,9 @@
 #include <QtPlugin>
 #include <QString>
 
-struct PluginDescriptor {
+#include "util/export.h"
+
+struct SDRBASE_API PluginDescriptor {
 	// general plugin description
 	const QString displayedName;
 	const QString version;
@@ -27,7 +29,7 @@ class BasebandSampleSource;
 class ChannelSinkAPI;
 class ChannelSourceAPI;
 
-class PluginInterface {
+class SDRBASE_API PluginInterface {
 public:
 	struct SamplingDevice
 	{

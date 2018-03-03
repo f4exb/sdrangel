@@ -41,13 +41,15 @@
 #include "rtpconfig.h"
 #include "rtprandom.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** A random number generator which tries to use the \c rand_s function on the
  *  Win32 platform.
  */
-class RTPRandomRandS: public RTPRandom
+class QRTPLIB_API RTPRandomRandS: public RTPRandom
 {
 public:
     RTPRandomRandS();

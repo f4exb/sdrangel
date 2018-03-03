@@ -7,13 +7,14 @@
 
 #include <complex>
 #include "gfft.h"
+#include "util/export.h"
 
 #undef M_PI
 #define M_PI 3.14159265358979323846
 
 //----------------------------------------------------------------------
 
-class fftfilt {
+class SDRBASE_API fftfilt {
 enum {NONE, BLACKMAN, HAMMING, HANNING};
 
 public:
@@ -66,7 +67,7 @@ protected:
 
 
 /* Sliding FFT filter from Fldigi */
-class sfft {
+class SDRBASE_API sfft {
 #define K1 0.99999
 public:
 	typedef std::complex<float> cmplx;

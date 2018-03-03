@@ -58,8 +58,9 @@
  */
 
 #include "iirfilter.h"
+#include "util/export.h"
 
-class MBEAudioInterpolatorFilter
+class SDRBASE_API MBEAudioInterpolatorFilter
 {
 public:
     MBEAudioInterpolatorFilter();

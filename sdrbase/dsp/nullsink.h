@@ -6,7 +6,7 @@
 
 class Message;
 
-class SDRANGEL_API NullSink : public BasebandSampleSink {
+class SDRBASE_API NullSink : public BasebandSampleSink {
 public:
 
 	NullSink();

@@ -17,7 +17,9 @@
 #ifndef DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 #define DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 
-class HackRFBandwidths {
+#include "util/export.h"
+
+class DEVICES_API HackRFBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
     static unsigned int getBandwidthIndex(unsigned int bandwidth);

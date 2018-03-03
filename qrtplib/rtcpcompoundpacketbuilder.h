@@ -46,6 +46,8 @@
 #include "rtpendian.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -55,7 +57,7 @@ namespace qrtplib
  *  been built successfully. The member functions described below return \c ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT
  *  if the action would cause the maximum allowed size to be exceeded.
  */
-class RTCPCompoundPacketBuilder: public RTCPCompoundPacket
+class QRTPLIB_API RTCPCompoundPacketBuilder: public RTCPCompoundPacket
 {
 public:
     /** Constructs an RTCPCompoundPacketBuilder instance, optionally installing a memory manager. */

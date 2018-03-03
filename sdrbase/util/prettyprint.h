@@ -19,7 +19,9 @@
 
 #include <QString>
 
-class EscapeColors
+#include "util/export.h"
+
+class SDRBASE_API EscapeColors
 {
 public:
 	static const QString red;

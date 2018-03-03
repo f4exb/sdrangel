@@ -19,7 +19,9 @@
 
 #include <libbladeRF.h>
 
-class DeviceBladeRF
+#include "util/export.h"
+
+class DEVICES_API DeviceBladeRF
 {
 public:
     static bool open_bladerf(struct bladerf **dev, const char *serial);

@@ -18,8 +18,9 @@
 #define INCLUDE_UTIL_DB_H_
 
 #include "dsp/dsptypes.h"
+#include "util/export.h"
 
-class CalcDb
+class SDRBASE_API CalcDb
 {
 public:
 	static double dbPower(double magsq, double floor = 1e-12);

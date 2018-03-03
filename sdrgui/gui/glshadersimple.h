@@ -21,11 +21,13 @@
 #include <QString>
 #include <QOpenGLFunctions>
 
+#include "util/export.h"
+
 class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QVector4D;
 
-class GLShaderSimple
+class SDRGUI_API GLShaderSimple
 {
 public:
 	GLShaderSimple();

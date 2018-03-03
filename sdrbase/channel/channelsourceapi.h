@@ -29,7 +29,7 @@ namespace SWGSDRangel
     class SWGChannelSettings;
 }
 
-class SDRANGEL_API ChannelSourceAPI {
+class SDRBASE_API ChannelSourceAPI {
 public:
     ChannelSourceAPI(const QString& name);
     virtual ~ChannelSourceAPI() {}

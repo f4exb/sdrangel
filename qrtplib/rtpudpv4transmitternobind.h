@@ -47,6 +47,8 @@
 #include "rtpabortdescriptors.h"
 #include <list>
 
+#include "util/export.h"
+
 #define RTPUDPV4TRANSNOBIND_HASHSIZE							8317
 #define RTPUDPV4TRANSNOBIND_DEFAULTPORTBASE						5000
 
@@ -59,7 +61,7 @@ namespace qrtplib
 {
 
 /** Parameters for the UDP over IPv4 transmitter that does not automatically bind sockets */
-class RTPUDPv4TransmissionNoBindParams: public RTPTransmissionParams
+class QRTPLIB_API RTPUDPv4TransmissionNoBindParams: public RTPTransmissionParams
 {
 public:
     RTPUDPv4TransmissionNoBindParams();
@@ -294,7 +296,7 @@ inline RTPUDPv4TransmissionNoBindParams::RTPUDPv4TransmissionNoBindParams() :
 }
 
 /** Additional information about the UDP over IPv4 transmitter that does not automatically bind sockets. */
-class RTPUDPv4TransmissionNoBindInfo: public RTPTransmissionInfo
+class QRTPLIB_API RTPUDPv4TransmissionNoBindInfo: public RTPTransmissionInfo
 {
 public:
     RTPUDPv4TransmissionNoBindInfo(const QHostAddress& ip, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
@@ -375,7 +377,7 @@ public:
  *  This flavor of a RTPUDPv4Transmitter class does not automatically bind sockets. Use the
  *  BindSockets method to do so.
  */
-class RTPUDPv4TransmitterNoBind: public RTPTransmitter
+class QRTPLIB_API RTPUDPv4TransmitterNoBind: public RTPTransmitter
 {
 public:
     RTPUDPv4TransmitterNoBind();

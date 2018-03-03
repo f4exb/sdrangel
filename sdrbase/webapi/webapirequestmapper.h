@@ -27,13 +27,15 @@
 #include "staticfilecontroller.h"
 #include "webapiadapterinterface.h"
 
+#include "util/export.h"
+
 namespace SWGSDRangel
 {
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
 }
 
-class WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
+class SDRBASE_API WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
     Q_OBJECT
 public:
     WebAPIRequestMapper(QObject* parent=0);

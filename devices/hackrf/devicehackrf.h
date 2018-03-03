@@ -19,7 +19,9 @@
 
 #include "libhackrf/hackrf.h"
 
-class DeviceHackRF
+#include "util/export.h"
+
+class DEVICES_API DeviceHackRF
 {
 public:
     static DeviceHackRF& instance();

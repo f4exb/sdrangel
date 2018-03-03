@@ -41,6 +41,8 @@
 #include "rtpconfig.h"
 #include "rtpsocketutil.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -61,7 +63,7 @@ namespace qrtplib
  * uses a single poll thread for several RTPSession and RTPTransmitter instances.
  * This idea is further illustrated in `example8.cpp`.
  */
-class RTPAbortDescriptors
+class QRTPLIB_API RTPAbortDescriptors
 {
 public:
     RTPAbortDescriptors();

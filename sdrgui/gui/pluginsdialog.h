@@ -3,12 +3,13 @@
 
 #include <QDialog>
 #include "plugin/pluginmanager.h"
+#include "util/export.h"
 
 namespace Ui {
 	class PluginsDialog;
 }
 
-class PluginsDialog : public QDialog {
+class SDRGUI_API PluginsDialog : public QDialog {
 	Q_OBJECT
 
 public:

@@ -30,7 +30,7 @@ namespace SWGSDRangel
     class SWGChannelSettings;
 }
 
-class SDRANGEL_API ChannelSinkAPI {
+class SDRBASE_API ChannelSinkAPI {
 public:
     ChannelSinkAPI(const QString& name);
     virtual ~ChannelSinkAPI() {}

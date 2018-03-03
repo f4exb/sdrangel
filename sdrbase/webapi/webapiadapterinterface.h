@@ -24,6 +24,8 @@
 
 #include "SWGErrorResponse.h"
 
+#include "util/export.h"
+
 namespace SWGSDRangel
 {
     class SWGInstanceSummaryResponse;
@@ -48,7 +50,7 @@ namespace SWGSDRangel
     class SWGSuccessResponse;
 }
 
-class WebAPIAdapterInterface
+class SDRBASE_API WebAPIAdapterInterface
 {
 public:
     virtual ~WebAPIAdapterInterface() {}

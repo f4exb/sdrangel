@@ -22,10 +22,11 @@
 #include <QtGlobal>
 
 #include "webapi/webapiadapterinterface.h"
+#include "util/export.h"
 
 class MainWindow;
 
-class WebAPIAdapterGUI: public WebAPIAdapterInterface
+class SDRGUI_API WebAPIAdapterGUI: public WebAPIAdapterInterface
 {
 public:
     WebAPIAdapterGUI(MainWindow& mainWindow);

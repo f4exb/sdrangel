@@ -18,8 +18,9 @@
 #define DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
 
 #include "util/message.h"
+#include "util/export.h"
 
-class DeviceBladeRFShared
+class DEVICES_API DeviceBladeRFShared
 {
 public:
     static const float  m_sampleFifoLengthInSeconds;

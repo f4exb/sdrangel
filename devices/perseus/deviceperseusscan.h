@@ -23,8 +23,9 @@
 #include <map>
 #include <QString>
 
+#include "util/export.h"
 
-class DevicePerseusScan
+class DEVICES_API DevicePerseusScan
 {
 public:
     struct DeviceScan

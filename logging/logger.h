@@ -15,6 +15,8 @@
 #include "logglobal.h"
 #include "logmessage.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -47,7 +49,7 @@ namespace qtwebapp {
   because logging to the console is less useful.
 */
 
-class DECLSPEC Logger : public QObject {
+class LOGGING_API Logger : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(Logger)
 public:

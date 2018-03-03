@@ -42,11 +42,13 @@
 #include "rtprandom.h"
 #include <stdio.h>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** A random number generator which uses bytes delivered by the /dev/urandom device. */
-class RTPRandomURandom: public RTPRandom
+class QRTPLIB_API RTPRandomURandom: public RTPRandom
 {
 public:
     RTPRandomURandom();

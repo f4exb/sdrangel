@@ -44,13 +44,15 @@
 #include "rtpdefines.h"
 #include "rtpendian.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTCPCompoundPacket;
 
 /** Describes an RTCP source description packet. */
-class RTCPSDESPacket: public RTCPPacket
+class QRTPLIB_API RTCPSDESPacket: public RTCPPacket
 {
 public:
     /** Identifies the type of an SDES item. */

@@ -46,11 +46,13 @@
 #include <list>
 #include <vector>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** Parameters for the TCP transmitter. */
-class RTPTCPTransmissionParams: public RTPTransmissionParams
+class QRTPLIB_API RTPTCPTransmissionParams: public RTPTransmissionParams
 {
 public:
     RTPTCPTransmissionParams();

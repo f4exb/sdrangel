@@ -15,7 +15,7 @@ namespace Ui {
 class MessageQueue;
 class GLScope;
 
-class SDRANGEL_API GLScopeGUI : public QWidget, public Serializable {
+class SDRGUI_API GLScopeGUI : public QWidget, public Serializable {
 	Q_OBJECT
 
 public:

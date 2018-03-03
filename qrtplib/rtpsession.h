@@ -50,6 +50,8 @@
 #include "rtcpcompoundpacketbuilder.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -72,7 +74,7 @@ class RTCPAPPPacket;
  *  \note The RTPSession class is not meant to be thread safe. The user should use some kind of locking
  *        mechanism to prevent different threads from using the same RTPSession instance.
  */
-class RTPSession
+class QRTPLIB_API RTPSession
 {
 public:
     /** Constructs an RTPSession instance, optionally using a specific instance of a random

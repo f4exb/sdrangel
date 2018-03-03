@@ -18,10 +18,11 @@
 #define SDRBASE_DSP_DECIMATORSF_H_
 
 #include "dsp/inthalfbandfilterdbf.h"
+#include "util/export.h"
 
 #define DECIMATORSF_HB_FILTER_ORDER 64
 
-class DecimatorsF
+class SDRBASE_API DecimatorsF
 {
 public:
     void decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);

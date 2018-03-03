@@ -5,10 +5,11 @@
 #include "preferences.h"
 #include "preset.h"
 #include "audio/audiodeviceinfo.h"
+#include "util/export.h"
 
 class Command;
 
-class MainSettings {
+class SDRBASE_API MainSettings {
 public:
 	MainSettings();
 	~MainSettings();

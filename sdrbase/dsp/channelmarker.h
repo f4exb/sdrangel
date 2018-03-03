@@ -8,7 +8,7 @@
 #include "settings/serializable.h"
 #include "util/export.h"
 
-class SDRANGEL_API ChannelMarker : public QObject, public Serializable {
+class SDRBASE_API ChannelMarker : public QObject, public Serializable {
 	Q_OBJECT
 
 public:

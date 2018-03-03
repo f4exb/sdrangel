@@ -43,12 +43,14 @@
 #include "rtcpsdespacket.h"
 #include "rtptypes.h"
 
+#include "util/export.h"
+
 #define RTPSOURCES_HASHSIZE							8317
 
 namespace qrtplib
 {
 
-class RTPSources_GetHashIndex
+class QRTPLIB_API RTPSources_GetHashIndex
 {
 public:
     static int GetIndex(const uint32_t &ssrc)
@@ -73,7 +75,7 @@ class RTPSourceData;
  *  is used to identify packets from our own session. The class also provides some overridable functions
  *  which can be used to catch certain events (new SSRC, SSRC collision, ...).
  */
-class RTPSources
+class QRTPLIB_API RTPSources
 {
 public:
     /** Type of probation to use for new sources. */

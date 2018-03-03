@@ -15,6 +15,8 @@
 #include "logger.h"
 #include "fileloggersettings.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -49,7 +51,7 @@ namespace qtwebapp {
   @see Logger for a descrition of the buffer.
 */
 
-class DECLSPEC FileLogger : public Logger {
+class LOGGING_API FileLogger : public Logger {
     Q_OBJECT
     Q_DISABLE_COPY(FileLogger)
 public:

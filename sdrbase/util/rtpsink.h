@@ -31,7 +31,9 @@
 #include "rtperrors.h"
 #include "rtplibraryversion.h"
 
-class RTPSinkMemoryManager : public jrtplib::RTPMemoryManager
+#include "util/export.h"
+
+class SDRBASE_API RTPSinkMemoryManager : public jrtplib::RTPMemoryManager
 {
 public:
     RTPSinkMemoryManager()

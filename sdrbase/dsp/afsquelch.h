@@ -19,11 +19,12 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/movingaverage.h"
+#include "util/export.h"
 
 /** AFSquelch: AF squelch class based on the Modified Goertzel
  * algorithm.
  */
-class AFSquelch {
+class SDRBASE_API AFSquelch {
 public:
     // allows user defined tone pair
 	AFSquelch(unsigned int nbTones,

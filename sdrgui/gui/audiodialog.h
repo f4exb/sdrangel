@@ -3,13 +3,15 @@
 
 #include <QDialog>
 
+#include "util/export.h"
+
 class AudioDeviceInfo;
 
 namespace Ui {
 	class AudioDialog;
 }
 
-class AudioDialog : public QDialog {
+class SDRGUI_API AudioDialog : public QDialog {
 	Q_OBJECT
 
 public:

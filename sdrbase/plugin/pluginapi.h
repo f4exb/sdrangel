@@ -13,7 +13,7 @@ class PluginManager;
 class MessageQueue;
 class PluginInstanceGUI;
 
-class SDRANGEL_API PluginAPI : public QObject {
+class SDRBASE_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:

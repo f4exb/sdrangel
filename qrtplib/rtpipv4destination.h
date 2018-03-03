@@ -49,10 +49,12 @@
 #include <string.h>
 #include <string>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
-class RTPIPv4Destination
+class QRTPLIB_API RTPIPv4Destination
 {
 public:
     RTPIPv4Destination()

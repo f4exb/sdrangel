@@ -3,8 +3,9 @@
 
 #include "dsp/fftengine.h"
 #include "dsp/kissfft.h"
+#include "util/export.h"
 
-class KissEngine : public FFTEngine {
+class SDRBASE_API KissEngine : public FFTEngine {
 public:
 	void configure(int n, bool inverse);
 	void transform();

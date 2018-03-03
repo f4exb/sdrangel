@@ -33,7 +33,7 @@ class PluginManager;
 class DeviceSourceAPI;
 class DeviceSinkAPI;
 
-class SDRANGEL_API SamplingDeviceControl : public QWidget {
+class SDRGUI_API SamplingDeviceControl : public QWidget {
     Q_OBJECT
 
 public:

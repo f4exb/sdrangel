@@ -66,7 +66,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-class SDRANGEL_API MainWindow : public QMainWindow {
+class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:

@@ -43,13 +43,15 @@
 #include "rtptimeutilities.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTPAddress;
 
 /** This class represents a list of addresses from which SSRC collisions were detected. */
-class RTPCollisionList
+class QRTPLIB_API RTPCollisionList
 {
 public:
     /** Constructs an instance, optionally installing a memory manager. */

@@ -33,7 +33,7 @@
 
 class MessageQueue;
 
-class SDRANGEL_API UpChannelizer : public BasebandSampleSource {
+class SDRBASE_API UpChannelizer : public BasebandSampleSource {
     Q_OBJECT
 public:
     class SDRANGEL_API MsgChannelizerNotification : public Message {

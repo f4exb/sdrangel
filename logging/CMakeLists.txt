@@ -19,6 +19,7 @@ set(httpserver_HEADERS
 
 include_directories(
 	.
+    ${CMAKE_SOURCE_DIR}/sdrbase 
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 

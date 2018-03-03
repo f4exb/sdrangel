@@ -31,7 +31,7 @@ class MessageQueue;
 class CWKeyer;
 class CWKeyerSettings;
 
-class SDRANGEL_API CWKeyerGUI : public QWidget, public Serializable {
+class SDRGUI_API CWKeyerGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:

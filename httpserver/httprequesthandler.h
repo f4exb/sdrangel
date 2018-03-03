@@ -10,6 +10,8 @@
 #include "httprequest.h"
 #include "httpresponse.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -24,7 +26,7 @@ namespace qtwebapp {
    @see StaticFileController which delivers static local files.
 */
 
-class DECLSPEC HttpRequestHandler : public QObject {
+class HTTPSERVER_API HttpRequestHandler : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(HttpRequestHandler)
 public:

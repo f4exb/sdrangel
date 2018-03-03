@@ -16,6 +16,8 @@
 #include "httprequest.h"
 #include "httpsessionssettings.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -33,7 +35,7 @@ namespace qtwebapp {
   </pre></code>
 */
 
-class DECLSPEC HttpSessionStore : public QObject {
+class HTTPSERVER_API HttpSessionStore : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(HttpSessionStore)
 public:

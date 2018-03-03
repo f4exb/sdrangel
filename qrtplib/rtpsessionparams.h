@@ -44,6 +44,8 @@
 #include "rtptimeutilities.h"
 #include "rtpsources.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -51,7 +53,7 @@ namespace qrtplib
  *  Describes the parameters for to be used by an RTPSession instance. Note that the own timestamp
  *  unit must be set to a valid number, otherwise the session can't be created.
  */
-class RTPSessionParams
+class QRTPLIB_API RTPSessionParams
 {
 public:
     RTPSessionParams();

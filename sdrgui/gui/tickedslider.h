@@ -22,7 +22,9 @@
 #include <QSlider>
 #include <QColor>
 
-class TickedSlider : public QSlider
+#include "util/export.h"
+
+class SDRGUI_API TickedSlider : public QSlider
 {
 public:
     TickedSlider(QWidget* parent = 0);

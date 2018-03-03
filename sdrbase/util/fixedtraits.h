@@ -20,13 +20,15 @@
 
 #include <stdint.h>
 
+#include "util/export.h"
+
 template<uint32_t IntBits>
 class FixedTraits
 {
 };
 
 template<>
-struct FixedTraits<28>
+struct SDRBASE_API FixedTraits<28>
 {
     static const uint32_t fixed_resolution_shift = 28; //!< 1.0 representation. 28 is the highest power of two that can represent 9.99999... safely on 64 bits internally
     static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
@@ -42,7 +44,7 @@ struct FixedTraits<28>
 };
 
 template<>
-struct FixedTraits<16>
+struct SDRBASE_API FixedTraits<16>
 {
     static const uint32_t fixed_resolution_shift = 16;
     static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
@@ -58,7 +60,7 @@ struct FixedTraits<16>
 };
 
 template<>
-struct FixedTraits<23>
+struct SDRBASE_API FixedTraits<23>
 {
     static const uint32_t fixed_resolution_shift = 23;
     static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;
@@ -74,7 +76,7 @@ struct FixedTraits<23>
 };
 
 template<>
-struct FixedTraits<24>
+struct SDRBASE_API FixedTraits<24>
 {
     static const uint32_t fixed_resolution_shift = 24;
     static const int64_t  fixed_resolution       = 1LL << fixed_resolution_shift;

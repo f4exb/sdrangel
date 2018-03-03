@@ -33,7 +33,7 @@ namespace Ui {
 class MessageQueue;
 class GLScopeMulti;
 
-class SDRANGEL_API GLScopeMultiGUI : public QWidget {
+class SDRGUI_API GLScopeMultiGUI : public QWidget {
     Q_OBJECT
 
 public:

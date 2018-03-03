@@ -26,7 +26,7 @@
 
 class Message;
 
-class SDRANGEL_API BasebandSampleSource : public QObject {
+class SDRBASE_API BasebandSampleSource : public QObject {
 	Q_OBJECT
 public:
 	BasebandSampleSource();

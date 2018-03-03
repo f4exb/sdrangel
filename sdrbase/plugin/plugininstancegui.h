@@ -10,7 +10,7 @@
 class Message;
 class MessageQueue;
 
-class SDRANGEL_API PluginInstanceGUI {
+class SDRBASE_API PluginInstanceGUI {
 public:
 	PluginInstanceGUI() { };
 	virtual ~PluginInstanceGUI() { };

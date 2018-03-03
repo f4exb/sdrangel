@@ -17,29 +17,91 @@
 #ifndef __SDRANGEL_EXPORT_H
 #define __SDRANGEL_EXPORT_H
 
-#if defined __GNUC__
-#  if __GNUC__ >= 4
-#    define __SDR_EXPORT   __attribute__((visibility("default")))
-#    define __SDR_IMPORT   __attribute__((visibility("default")))
-#  else
-#    define __SDR_EXPORT
-#    define __SDR_IMPORT
-#  endif
-#elif _MSC_VER
-#  define __SDR_EXPORT     __declspec(dllexport)
-#  define __SDR_IMPORT     __declspec(dllimport)
+#if defined (__GNUC__) && (__GNUC__ >= 4)
+#  define __SDR_EXPORT   __attribute__((visibility("default")))
+#  define __SDR_IMPORT   __attribute__((visibility("default")))
+
+#elif defined (_MSC_VER)
+#  define __SDR_EXPORT   __declspec(dllexport)
+#  define __SDR_IMPORT   __declspec(dllimport)
+
 #else
 #  define __SDR_EXPORT
 #  define __SDR_IMPORT
 #endif
 
-#ifndef sdrangel_STATIC
-#	ifdef sdrangel_EXPORTS
-#	define SDRANGEL_API __SDR_EXPORT
-#	else
-#	define SDRANGEL_API __SDR_IMPORT
-#	endif
+/* The 'SDRBASE_API' controls the import/export of 'sdrbase' symbols and classes.
+ */
+#if !defined(sdrangel_STATIC)
+#  if defined sdrangel_EXPORTS || defined sdrbase_EXPORTS
+#    define SDRBASE_API __SDR_EXPORT
+#  else
+#    define SDRBASE_API __SDR_IMPORT
+#  endif
 #else
-#define SDRANGEL_API
+#  define SDRBASE_API
 #endif
+
+#define SDRANGEL_API SDRBASE_API /* to be compatible with current situation TODO: remove */
+
+/* the 'SDRGUI_API' controls the import/export of 'sdrgui' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef sdrgui_EXPORTS
+#    define SDRGUI_API __SDR_EXPORT
+#  else
+#    define SDRGUI_API __SDR_IMPORT
+#  endif
+#else
+#   define SDRGUI_API
+#endif
+
+/* the 'DEVICES_API' controls the import/export of 'devices' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef devices_EXPORTS
+#    define DEVICES_API __SDR_EXPORT
+#  else
+#    define DEVICES_API __SDR_IMPORT
+#  endif
+#else
+#  define DEVICES_API
+#endif
+
+/* the 'HTTPSERVER_API' controls the import/export of 'httpserver' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef httpserver_EXPORTS
+#    define HTTPSERVER_API __SDR_EXPORT
+#  else
+#    define HTTPSERVER_API __SDR_IMPORT
+#  endif
+#else
+#  define HTTPSERVER_API
+#endif
+
+/* the 'LOGGING_API' controls the import/export of 'logging' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef logging_EXPORTS
+#    define LOGGING_API __SDR_EXPORT
+#  else
+#    define LOGGING_API __SDR_IMPORT
+#  endif
+#else
+#  define LOGGING_API
+#endif
+
+/* the 'QRTPLIB_API' controls the import/export of 'qrtplib' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef qrtplib_EXPORTS
+#    define QRTPLIB_API __SDR_EXPORT
+#  else
+#    define QRTPLIB_API __SDR_IMPORT
+#  endif
+#else
+#  define QRTPLIB_API
+#endif
+
 #endif /* __SDRANGEL_EXPORT_H */

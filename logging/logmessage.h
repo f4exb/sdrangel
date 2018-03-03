@@ -11,6 +11,8 @@
 #include <QHash>
 #include "logglobal.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -33,7 +35,7 @@ namespace qtwebapp {
   - {line}      Line number where the message was generated
 */
 
-class DECLSPEC LogMessage
+class LOGGING_API LogMessage
 {
     Q_DISABLE_COPY(LogMessage)
 public:

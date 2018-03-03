@@ -25,7 +25,7 @@
 
 class Message;
 
-class SDRANGEL_API MessageQueue : public QObject {
+class SDRBASE_API MessageQueue : public QObject {
 	Q_OBJECT
 
 public:

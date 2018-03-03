@@ -20,12 +20,13 @@
 
 #include <QDialog>
 #include "settings/mainsettings.h"
+#include "util/export.h"
 
 namespace Ui {
     class LoggingDialog;
 }
 
-class LoggingDialog : public QDialog {
+class SDRGUI_API LoggingDialog : public QDialog {
     Q_OBJECT
 public:
     explicit LoggingDialog(MainSettings& mainSettings, QWidget* parent = 0);

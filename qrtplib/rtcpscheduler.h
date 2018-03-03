@@ -43,6 +43,8 @@
 #include "rtprandom.h"
 #include <cstddef>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -51,7 +53,7 @@ class RTPPacket;
 class RTPSources;
 
 /** Describes parameters used by the RTCPScheduler class. */
-class RTCPSchedulerParams
+class QRTPLIB_API RTCPSchedulerParams
 {
 public:
     RTCPSchedulerParams();

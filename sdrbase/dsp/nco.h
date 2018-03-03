@@ -21,7 +21,7 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-class SDRANGEL_API NCO {
+class SDRBASE_API NCO {
 private:
 	enum {
 		TableSize = (1 << 12),

@@ -35,7 +35,7 @@
 
 class QPainter;
 
-class SDRANGEL_API GLScopeNG: public QGLWidget {
+class SDRGUI_API GLScopeNG: public QGLWidget {
     Q_OBJECT
 
 public:

@@ -14,7 +14,7 @@ class MessageQueue;
 class SpectrumVis;
 class GLSpectrum;
 
-class SDRANGEL_API GLSpectrumGUI : public QWidget, public Serializable {
+class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
 
 public:

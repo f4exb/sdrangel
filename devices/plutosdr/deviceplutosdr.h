@@ -22,7 +22,9 @@
 #include "deviceplutosdrscan.h"
 #include "deviceplutosdrbox.h"
 
-class DevicePlutoSDR
+#include "util/export.h"
+
+class DEVICES_API DevicePlutoSDR
 {
 public:
     static DevicePlutoSDR& instance();

@@ -25,7 +25,7 @@
 template<typename T> class UDPSink;
 class RTPSink;
 
-class SDRANGEL_API AudioNetSink {
+class SDRBASE_API AudioNetSink {
 public:
     typedef enum
     {

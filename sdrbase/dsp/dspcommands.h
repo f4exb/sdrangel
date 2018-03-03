@@ -31,42 +31,31 @@ class BasebandSampleSource;
 class ThreadedBasebandSampleSource;
 class AudioFifo;
 
-class SDRANGEL_API DSPAcquisitionInit : public Message {
+class SDRBASE_API DSPAcquisitionInit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPAcquisitionStart : public Message {
+class SDRBASE_API DSPAcquisitionStart : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPAcquisitionStop : public Message {
+class SDRBASE_API DSPAcquisitionStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPGenerationInit : public Message {
+class SDRBASE_API DSPGenerationInit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPGenerationStart : public Message {
+class SDRBASE_API DSPGenerationStart : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPGenerationStop : public Message {
+class SDRBASE_API DSPGenerationStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
-class SDRANGEL_API DSPGetSourceDeviceDescription : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	void setDeviceDescription(const QString& text) { m_deviceDescription = text; }
-	const QString& getDeviceDescription() const { return m_deviceDescription; }
-
-private:
-	QString m_deviceDescription;
-};
-
-class SDRANGEL_API DSPGetSinkDeviceDescription : public Message {
+class SDRBASE_API DSPGetSourceDeviceDescription : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -77,7 +66,18 @@ private:
 	QString m_deviceDescription;
 };
 
-class SDRANGEL_API DSPGetErrorMessage : public Message {
+class SDRBASE_API DSPGetSinkDeviceDescription : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	void setDeviceDescription(const QString& text) { m_deviceDescription = text; }
+	const QString& getDeviceDescription() const { return m_deviceDescription; }
+
+private:
+	QString m_deviceDescription;
+};
+
+class SDRBASE_API DSPGetErrorMessage : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -88,7 +88,7 @@ private:
 	QString m_errorMessage;
 };
 
-class SDRANGEL_API DSPSetSource : public Message {
+class SDRBASE_API DSPSetSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -100,7 +100,7 @@ private:
 	DeviceSampleSource* m_sampleSource;
 };
 
-class SDRANGEL_API DSPSetSink : public Message {
+class SDRBASE_API DSPSetSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -112,7 +112,7 @@ private:
 	DeviceSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPAddBasebandSampleSink : public Message {
+class SDRBASE_API DSPAddBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -124,7 +124,7 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPAddSpectrumSink : public Message {
+class SDRBASE_API DSPAddSpectrumSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -136,7 +136,7 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPAddBasebandSampleSource : public Message {
+class SDRBASE_API DSPAddBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -148,7 +148,7 @@ private:
 	BasebandSampleSource* m_sampleSource;
 };
 
-class SDRANGEL_API DSPRemoveBasebandSampleSink : public Message {
+class SDRBASE_API DSPRemoveBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -160,7 +160,7 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPRemoveSpectrumSink : public Message {
+class SDRBASE_API DSPRemoveSpectrumSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -172,7 +172,7 @@ private:
 	BasebandSampleSink* m_sampleSink;
 };
 
-class SDRANGEL_API DSPRemoveBasebandSampleSource : public Message {
+class SDRBASE_API DSPRemoveBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -184,7 +184,7 @@ private:
 	BasebandSampleSource* m_sampleSource;
 };
 
-class SDRANGEL_API DSPAddThreadedBasebandSampleSink : public Message {
+class SDRBASE_API DSPAddThreadedBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -196,7 +196,7 @@ private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGEL_API DSPAddThreadedBasebandSampleSource : public Message {
+class SDRBASE_API DSPAddThreadedBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -208,7 +208,7 @@ private:
 	ThreadedBasebandSampleSource* m_threadedSampleSource;
 };
 
-class SDRANGEL_API DSPRemoveThreadedBasebandSampleSink : public Message {
+class SDRBASE_API DSPRemoveThreadedBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -220,7 +220,7 @@ private:
 	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
-class SDRANGEL_API DSPRemoveThreadedBasebandSampleSource : public Message {
+class SDRBASE_API DSPRemoveThreadedBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -232,7 +232,7 @@ private:
 	ThreadedBasebandSampleSource* m_threadedSampleSource;
 };
 
-class SDRANGEL_API DSPAddAudioSink : public Message {
+class SDRBASE_API DSPAddAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -244,7 +244,7 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRANGEL_API DSPRemoveAudioSink : public Message {
+class SDRBASE_API DSPRemoveAudioSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -256,7 +256,7 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRANGEL_API DSPConfigureSpectrumVis : public Message {
+class SDRBASE_API DSPConfigureSpectrumVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -277,7 +277,7 @@ private:
 	FFTWindow::Function m_window;
 };
 
-class SDRANGEL_API DSPConfigureCorrection : public Message {
+class SDRBASE_API DSPConfigureCorrection : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -296,7 +296,7 @@ private:
 
 };
 
-class SDRANGEL_API DSPEngineReport : public Message {
+class SDRBASE_API DSPEngineReport : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -314,7 +314,7 @@ private:
 	quint64 m_centerFrequency;
 };
 
-class SDRANGEL_API DSPConfigureScopeVis : public Message {
+class SDRBASE_API DSPConfigureScopeVis : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -335,7 +335,7 @@ private:
 	Real m_triggerLevelLow;
 };
 
-class SDRANGEL_API DSPSignalNotification : public Message {
+class SDRBASE_API DSPSignalNotification : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
@@ -353,7 +353,7 @@ private:
 	qint64 m_centerFrequency;
 };
 
-class SDRANGEL_API DSPConfigureChannelizer : public Message {
+class SDRBASE_API DSPConfigureChannelizer : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:

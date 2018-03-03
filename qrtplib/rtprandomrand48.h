@@ -42,11 +42,13 @@
 #include "rtprandom.h"
 #include <stdio.h>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** A random number generator using the algorithm of the rand48 set of functions. */
-class RTPRandomRand48: public RTPRandom
+class QRTPLIB_API RTPRandomRand48: public RTPRandom
 {
 public:
     RTPRandomRand48();

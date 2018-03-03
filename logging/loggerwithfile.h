@@ -12,6 +12,8 @@
 #include "logger.h"
 #include "filelogger.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -20,7 +22,7 @@ namespace qtwebapp {
   @see Logger for a description of the console loger.
 */
 
-class DECLSPEC LoggerWithFile : public Logger {
+class LOGGING_API LoggerWithFile : public Logger {
     Q_OBJECT
     Q_DISABLE_COPY(LoggerWithFile)
 

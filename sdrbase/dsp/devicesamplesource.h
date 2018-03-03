@@ -32,7 +32,7 @@ namespace SWGSDRangel
     class SWGDeviceState;
 }
 
-class SDRANGEL_API DeviceSampleSource : public QObject {
+class SDRBASE_API DeviceSampleSource : public QObject {
 	Q_OBJECT
 public:
 	DeviceSampleSource();

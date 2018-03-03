@@ -15,6 +15,8 @@
 #include "httprequesthandler.h"
 #include "httplistenersettings.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -42,7 +44,7 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
-class DECLSPEC HttpListener : public QTcpServer {
+class HTTPSERVER_API HttpListener : public QTcpServer {
     Q_OBJECT
     Q_DISABLE_COPY(HttpListener)
 public:

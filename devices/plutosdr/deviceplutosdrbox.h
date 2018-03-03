@@ -22,7 +22,9 @@
 #include <sys/types.h>
 #include "deviceplutosdrscan.h"
 
-class DevicePlutoSDRBox
+#include "util/export.h"
+
+class DEVICES_API DevicePlutoSDRBox
 {
 public:
     typedef enum

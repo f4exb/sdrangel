@@ -44,6 +44,8 @@
 #include "rtcpsdesinfo.h"
 #include "rtptimeutilities.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -59,7 +61,7 @@ class RTCPCompoundPacketBuilder;
  *  an RTPSources instance to automatically generate the next compound packet which should be sent. It also
  *  provides functions to determine when SDES items other than the CNAME item should be sent.
  */
-class RTCPPacketBuilder
+class QRTPLIB_API RTCPPacketBuilder
 {
 public:
     /** Creates an RTCPPacketBuilder instance.

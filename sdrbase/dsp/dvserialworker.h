@@ -29,12 +29,13 @@
 #include "util/message.h"
 #include "util/syncmessenger.h"
 #include "util/messagequeue.h"
+#include "util/export.h"
 #include "dsp/filtermbe.h"
 #include "dsp/dsptypes.h"
 
 class AudioFifo;
 
-class DVSerialWorker : public QObject {
+class SDRBASE_API DVSerialWorker : public QObject {
     Q_OBJECT
 public:
     class MsgTest : public Message

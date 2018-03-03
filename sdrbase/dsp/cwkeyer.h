@@ -28,7 +28,7 @@
 /**
  * Ancillary class to smooth out CW transitions with a sine shape
  */
-class CWSmoother
+class SDRBASE_API CWSmoother
 {
 public:
     CWSmoother();
@@ -46,7 +46,7 @@ private:
     float *m_fadeOutSamples;
 };
 
-class SDRANGEL_API CWKeyer : public QObject {
+class SDRBASE_API CWKeyer : public QObject {
     Q_OBJECT
 
 public:

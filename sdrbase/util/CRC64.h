@@ -19,7 +19,9 @@
 
 #include <stdint.h>
 
-class CRC64
+#include "util/export.h"
+
+class SDRBASE_API CRC64
 {
 public:
     CRC64();

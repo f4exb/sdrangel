@@ -20,6 +20,8 @@
 #include <QDialog>
 #include <QProcess>
 
+#include "util/export.h"
+
 namespace Ui {
     class CommandOutputDialog;
 }

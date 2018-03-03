@@ -53,7 +53,9 @@
 #ifndef _WFIR_H_
 #define _WFIR_H_
 
-class WFIR
+#include "util/export.h"
+
+class SDRBASE_API WFIR
 {
 public:
     enum TPassTypeName

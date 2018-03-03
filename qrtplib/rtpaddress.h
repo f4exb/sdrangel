@@ -43,11 +43,13 @@
 #include <stdint.h>
 #include <QHostAddress>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 /** This class is an abstract class which is used to specify destinations, multicast groups etc. */
-class RTPAddress
+class QRTPLIB_API RTPAddress
 {
 public:
     /** Returns the type of address the actual implementation represents. */

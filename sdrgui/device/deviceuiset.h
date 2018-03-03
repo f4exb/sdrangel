@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <QByteArray>
 
+#include "util/export.h"
+
 class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
@@ -32,7 +34,7 @@ class DeviceSinkAPI;
 class ChannelMarker;
 class PluginAPI;
 
-class DeviceUISet
+class SDRGUI_API DeviceUISet
 {
 public:
     SpectrumVis *m_spectrumVis;

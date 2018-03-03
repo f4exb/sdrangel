@@ -19,7 +19,7 @@ class MessageQueue;
 class DeviceSourceAPI;
 class DeviceSinkAPI;
 
-class SDRANGEL_API PluginManager : public QObject {
+class SDRBASE_API PluginManager : public QObject {
 	Q_OBJECT
 
 public:

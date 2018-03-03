@@ -43,6 +43,8 @@
 #include "rtpabortdescriptors.h"
 #include <list>
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
@@ -56,7 +58,7 @@ class RTPExternalTransmitter;
  *  so that the transmitter will call the \c SendRTP, \c SendRTCP and \c ComesFromThisSender
  *  methods of this instance when needed.
  */
-class RTPExternalSender
+class QRTPLIB_API RTPExternalSender
 {
 public:
     RTPExternalSender()

@@ -20,11 +20,12 @@
 #include <cstddef>
 #include "devicelimesdrparam.h"
 #include "util/message.h"
+#include "util/export.h"
 
 /**
  * Structure shared by a buddy with other buddies
  */
-class DeviceLimeSDRShared
+class DEVICES_API DeviceLimeSDRShared
 {
 public:
     class MsgReportBuddyChange : public Message {

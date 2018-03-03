@@ -39,7 +39,7 @@
 class ScopeVis;
 class QPainter;
 
-class SDRANGEL_API GLScope: public QGLWidget {
+class SDRGUI_API GLScope: public QGLWidget {
 	Q_OBJECT
 
 public:

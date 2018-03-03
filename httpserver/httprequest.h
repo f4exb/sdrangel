@@ -17,6 +17,8 @@
 #include "httpglobal.h"
 #include "httplistenersettings.h"
 
+#include "util/export.h"
+
 namespace qtwebapp {
 
 /**
@@ -36,7 +38,7 @@ namespace qtwebapp {
   The body is always a little larger than the file itself.
 */
 
-class DECLSPEC HttpRequest {
+class HTTPSERVER_API HttpRequest {
     Q_DISABLE_COPY(HttpRequest)
     friend class HttpSessionStore;
 

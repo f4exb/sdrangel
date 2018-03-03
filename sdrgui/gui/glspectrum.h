@@ -37,7 +37,7 @@
 
 class QOpenGLShaderProgram;
 
-class SDRANGEL_API GLSpectrum : public QGLWidget {
+class SDRGUI_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
 
 public:

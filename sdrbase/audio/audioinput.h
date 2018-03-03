@@ -29,7 +29,7 @@ class AudioFifo;
 class AudioOutputPipe;
 
 
-class SDRANGEL_API AudioInput : public QIODevice {
+class SDRBASE_API AudioInput : public QIODevice {
 public:
 	AudioInput();
 	virtual ~AudioInput();

@@ -47,6 +47,8 @@
 #include "rtpabortdescriptors.h"
 #include <list>
 
+#include "util/export.h"
+
 #define RTPUDPV4TRANS_HASHSIZE									8317
 #define RTPUDPV4TRANS_DEFAULTPORTBASE								5000
 
@@ -59,7 +61,7 @@ namespace qrtplib
 {
 
 /** Parameters for the UDP over IPv4 transmitter. */
-class RTPUDPv4TransmissionParams: public RTPTransmissionParams
+class QRTPLIB_API RTPUDPv4TransmissionParams: public RTPTransmissionParams
 {
 public:
     RTPUDPv4TransmissionParams();
@@ -294,7 +296,7 @@ inline RTPUDPv4TransmissionParams::RTPUDPv4TransmissionParams() :
 }
 
 /** Additional information about the UDP over IPv4 transmitter. */
-class RTPUDPv4TransmissionInfo: public RTPTransmissionInfo
+class QRTPLIB_API RTPUDPv4TransmissionInfo: public RTPTransmissionInfo
 {
 public:
     RTPUDPv4TransmissionInfo(std::list<uint32_t> iplist, SocketType rtpsock, SocketType rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
@@ -373,7 +375,7 @@ public:
  *  argument require an argument of RTPIPv4Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv4TransmissionInfo.
  */
-class RTPUDPv4Transmitter: public RTPTransmitter
+class QRTPLIB_API RTPUDPv4Transmitter: public RTPTransmitter
 {
 public:
     RTPUDPv4Transmitter();

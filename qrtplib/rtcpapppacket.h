@@ -43,13 +43,15 @@
 #include "rtpstructs.h"
 #include "rtpendian.h"
 
+#include "util/export.h"
+
 namespace qrtplib
 {
 
 class RTCPCompoundPacket;
 
 /** Describes an RTCP APP packet. */
-class RTCPAPPPacket: public RTCPPacket
+class QRTPLIB_API RTCPAPPPacket: public RTCPPacket
 {
 public:
     /** Creates an instance based on the data in \c data with length \c datalen.

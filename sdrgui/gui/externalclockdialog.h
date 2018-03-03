@@ -23,11 +23,13 @@
 
 #include <QDialog>
 
+#include "util/export.h"
+
 namespace Ui {
     class ExternalClockDialog;
 }
 
-class ExternalClockDialog : public QDialog {
+class SDRGUI_API ExternalClockDialog : public QDialog {
     Q_OBJECT
 
 public:

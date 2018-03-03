@@ -17,9 +17,10 @@
 
 #include <vector>
 #include "dsp/dsptypes.h"
+#include "util/export.h"
 
 /** Phase-locked loop mainly for broadcadt FM stereo pilot. */
-class PhaseLock
+class SDRBASE_API PhaseLock
 {
 public:
 

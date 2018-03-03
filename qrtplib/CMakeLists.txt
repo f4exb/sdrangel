@@ -92,6 +92,7 @@ set(qrtplib_SOURCES
 
 include_directories(
     .
+    ${CMAKE_SOURCE_DIR}/sdrbase 
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
