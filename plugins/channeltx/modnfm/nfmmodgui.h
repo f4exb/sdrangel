@@ -72,7 +72,7 @@ private:
     int m_samplesCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    NFMMod::NFMModInputAF m_modAFInput;
+    NFMModSettings::NFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
     explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);

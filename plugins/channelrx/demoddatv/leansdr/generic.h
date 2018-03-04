@@ -329,7 +329,7 @@ private:
 template<typename Tin, typename Tout>
 struct serializer: runnable
 {
-    serializer(scheduler *sch, pipebuf<Tin> &_in, pipebuf<Tout> &_out) :
+    serializer(scheduler *sch __attribute__((unused)), pipebuf<Tin> &_in, pipebuf<Tout> &_out) :
             nin(max((size_t) 1, sizeof(Tin) / sizeof(Tout))), nout(max((size_t) 1, sizeof(Tout) / sizeof(Tin))), in(_in), out(_out, nout)
     {
         if (nin * sizeof(Tin) != nout * sizeof(Tout))

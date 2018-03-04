@@ -36,10 +36,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDVSerialDevice* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGDVSerialDevice* fromJson(QString &jsonString) override;
 
     QString* getDeviceName();
     void setDeviceName(QString* device_name);

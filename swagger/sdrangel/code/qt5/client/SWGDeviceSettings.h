@@ -42,10 +42,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSettings* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGDeviceSettings* fromJson(QString &jsonString) override;
 
     QString* getDeviceHwType();
     void setDeviceHwType(QString* device_hw_type);

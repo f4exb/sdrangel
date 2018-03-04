@@ -1033,8 +1033,6 @@ private:
     uint32_t m_timeBase;                           //!< Trace display time divisor
     uint32_t m_timeOfsProMill;                     //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
-    int m_traceFill;                               //!< Count of samples accumulated into trace
-    int m_zTraceIndex;                             //!< Index of the trace used for Z input (luminance or false colors)
     SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
     int m_sampleRate;
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed

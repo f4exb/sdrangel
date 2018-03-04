@@ -36,10 +36,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGNFMDemodSettings* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGNFMDemodSettings* fromJson(QString &jsonString) override;
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);

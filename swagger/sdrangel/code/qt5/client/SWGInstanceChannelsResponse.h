@@ -37,10 +37,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGInstanceChannelsResponse* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGInstanceChannelsResponse* fromJson(QString &jsonString) override;
 
     qint32 getChannelcount();
     void setChannelcount(qint32 channelcount);

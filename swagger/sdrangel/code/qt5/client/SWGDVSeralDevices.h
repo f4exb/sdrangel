@@ -37,10 +37,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDVSeralDevices* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGDVSeralDevices* fromJson(QString &jsonString) override;
 
     qint32 getNbDevices();
     void setNbDevices(qint32 nb_devices);

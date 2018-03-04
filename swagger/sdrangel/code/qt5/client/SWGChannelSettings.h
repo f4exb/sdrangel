@@ -38,10 +38,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGChannelSettings* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGChannelSettings* fromJson(QString &jsonString) override;
 
     QString* getChannelType();
     void setChannelType(QString* channel_type);

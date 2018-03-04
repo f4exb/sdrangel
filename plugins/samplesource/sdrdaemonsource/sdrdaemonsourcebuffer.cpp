@@ -28,7 +28,7 @@
 const int SDRdaemonSourceBuffer::m_sampleSize = 2;
 const int SDRdaemonSourceBuffer::m_iqSampleSize = 2 * m_sampleSize;
 
-SDRdaemonSourceBuffer::SDRdaemonSourceBuffer(uint32_t throttlems) :
+SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
         m_decoderIndexHead(nbDecoderSlots/2),
         m_frameHead(0),
         m_curNbBlocks(0),
@@ -39,7 +39,6 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer(uint32_t throttlems) :
         m_maxNbRecovery(0),
         m_framesDecoded(true),
         m_readIndex(0),
-        m_throttlemsNominal(throttlems),
         m_readBuffer(0),
         m_readSize(0),
         m_bufferLenSec(0.0f),

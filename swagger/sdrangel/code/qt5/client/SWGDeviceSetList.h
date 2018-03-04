@@ -37,10 +37,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSetList* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGDeviceSetList* fromJson(QString &jsonString) override;
 
     qint32 getDevicesetcount();
     void setDevicesetcount(qint32 devicesetcount);

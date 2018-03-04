@@ -36,10 +36,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGLoggingInfo* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGLoggingInfo* fromJson(QString &jsonString) override;
 
     QString* getConsoleLevel();
     void setConsoleLevel(QString* console_level);

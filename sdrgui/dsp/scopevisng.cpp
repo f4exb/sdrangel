@@ -51,8 +51,6 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     m_timeBase(1),
     m_timeOfsProMill(0),
     m_traceStart(true),
-    m_traceFill(0),
-    m_zTraceIndex(-1),
     m_sampleRate(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),

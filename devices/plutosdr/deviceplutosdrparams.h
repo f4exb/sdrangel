@@ -30,7 +30,7 @@ class DEVICES_API DevicePlutoSDRBox;
  * There is only one copy that is constructed by the first participant and destroyed by the last.
  * A participant knows it is the first or last by checking the lists of buddies (Rx + Tx).
  */
-struct DevicePlutoSDRParams
+class DevicePlutoSDRParams
 {
 public:
     DevicePlutoSDRParams();

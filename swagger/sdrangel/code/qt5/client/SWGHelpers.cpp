@@ -447,7 +447,7 @@ toJsonArray(QList<void*>* value, QJsonObject* output, QString innerName, QString
     if(innerType.startsWith("SWG")){
         for(void* obj : *value) {
             SWGObject *SWGobject = reinterpret_cast<SWGObject *>(obj);
-            if(SWGobject != nullptr) 
+            if(SWGobject != nullptr)
             {
                 QJsonObject* o = SWGobject->asJsonObject();
                 outputarray.append(*o);

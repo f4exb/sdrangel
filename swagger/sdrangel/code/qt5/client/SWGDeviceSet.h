@@ -38,10 +38,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGDeviceSet* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGDeviceSet* fromJson(QString &jsonString) override;
 
     SWGSamplingDevice* getSamplingDevice();
     void setSamplingDevice(SWGSamplingDevice* sampling_device);

@@ -52,9 +52,7 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
 	m_SDRdaemonUDPHandler(0),
 	m_deviceDescription(),
-	m_startingTimeStamp(0),
-    m_autoFollowRate(false),
-    m_autoCorrBuffer(false)
+	m_startingTimeStamp(0)
 {
     m_sender = nn_socket(AF_SP, NN_PAIR);
     assert(m_sender != -1);

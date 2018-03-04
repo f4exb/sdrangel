@@ -255,7 +255,7 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
 {
-    if ((index == (int) UDPSinkSettings::FormatNFM)) {
+    if (index == (int) UDPSinkSettings::FormatNFM) {
         ui->fmDeviation->setEnabled(true);
     } else {
         ui->fmDeviation->setEnabled(false);

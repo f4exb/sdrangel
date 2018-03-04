@@ -50,7 +50,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         m_squelchGate(0),
         m_squelchLevel(1e-4),
         m_squelchOpen(false),
-        m_fmExcursion(24),
         m_audioFifo1(48000),
         m_audioFifo2(48000),
         m_scope(0),

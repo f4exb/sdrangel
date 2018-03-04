@@ -35,10 +35,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGHackRFInputSettings* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGHackRFInputSettings* fromJson(QString &jsonString) override;
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);

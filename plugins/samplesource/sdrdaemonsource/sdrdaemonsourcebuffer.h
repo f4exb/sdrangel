@@ -83,7 +83,7 @@ public:
     };
 #pragma pack(pop)
 
-	SDRdaemonSourceBuffer(uint32_t throttlems);
+	SDRdaemonSourceBuffer();
 	~SDRdaemonSourceBuffer();
 
 	// R/W operations
@@ -207,7 +207,6 @@ private:
     uint32_t             m_tvOut_usec;           //!< Estimated returned samples timestamp (microseconds)
     int                  m_readNbBytes;          //!< Nominal number of bytes per read (50ms)
 
-	uint32_t m_throttlemsNominal;  //!< Initial throttle in ms
     uint8_t* m_readBuffer;         //!< Read buffer to hold samples when looping back to beginning of raw buffer
     int      m_readSize;           //!< Read buffer size
 

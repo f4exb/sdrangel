@@ -179,10 +179,10 @@ void NFMMod::pullAF(Real& sample)
 {
     switch (m_settings.m_modAFInput)
     {
-    case NFMModInputTone:
+    case NFMModSettings::NFMModInputTone:
         sample = m_toneNco.next();
         break;
-    case NFMModInputFile:
+    case NFMModSettings::NFMModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
@@ -211,10 +211,10 @@ void NFMMod::pullAF(Real& sample)
             sample = 0.0f;
         }
         break;
-    case NFMModInputAudio:
+    case NFMModSettings::NFMModInputAudio:
         sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
         break;
-    case NFMModInputCWTone:
+    case NFMModSettings::NFMModInputCWTone:
         Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -235,7 +235,7 @@ void NFMMod::pullAF(Real& sample)
             }
         }
         break;
-    case NFMModInputNone:
+    case NFMModSettings::NFMModInputNone:
     default:
         sample = 0.0f;
         break;

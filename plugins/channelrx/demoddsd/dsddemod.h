@@ -181,8 +181,6 @@ private:
     double m_magsqPeak;
     int  m_magsqCount;
 
-	Real m_fmExcursion;
-
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

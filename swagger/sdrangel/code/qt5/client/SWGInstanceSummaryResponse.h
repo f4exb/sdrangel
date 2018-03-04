@@ -38,10 +38,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGInstanceSummaryResponse* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGInstanceSummaryResponse* fromJson(QString &jsonString) override;
 
     QString* getVersion();
     void setVersion(QString* version);

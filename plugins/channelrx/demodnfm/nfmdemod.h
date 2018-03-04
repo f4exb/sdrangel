@@ -191,7 +191,6 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
-	bool m_audioMute;
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;
@@ -201,16 +200,9 @@ private:
 	double m_magsqPeak;
     int  m_magsqCount;
 
-	Real m_lastArgument;
-	//Complex m_m1Sample;
-	//Complex m_m2Sample;
 	MovingAverageUtil<Real, double, 32> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
-	Real m_agcFloor; // AGC will not go below this level
-
-	Real m_fmExcursion;
-	//Real m_fmScaling;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

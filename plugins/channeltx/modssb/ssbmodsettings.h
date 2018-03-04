@@ -21,7 +21,7 @@
 #include <QString>
 #include <stdint.h>
 
-struct Serializable;
+class Serializable;
 
 struct SSBModSettings
 {

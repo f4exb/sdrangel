@@ -55,7 +55,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_sampleCount(0),
         m_squelchCount(0),
         m_squelchGate(2),
-        m_audioMute(false),
         m_squelchLevel(-990),
         m_squelchOpen(false),
         m_afSquelchOpen(false),
@@ -64,7 +63,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_afSquelch(2, afSqTones),
-        m_fmExcursion(2400),
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {

@@ -22,7 +22,9 @@ set(bfm_HEADERS
 	rdstmc.h
 )
 
-set_source_files_properties(rdstmc.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set_source_files_properties(rdstmc.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+endif()
 
 set(bfm_FORMS
 	bfmdemodgui.ui

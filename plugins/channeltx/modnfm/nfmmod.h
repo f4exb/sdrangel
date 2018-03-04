@@ -91,15 +91,6 @@ public:
         { }
     };
 
-    typedef enum
-    {
-        NFMModInputNone,
-        NFMModInputTone,
-        NFMModInputFile,
-        NFMModInputAudio,
-        NFMModInputCWTone
-    } NFMModInputAF;
-
     class MsgConfigureFileSourceName : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -296,7 +287,7 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    NFMModInputAF m_afInput;
+    NFMModSettings::NFMModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;

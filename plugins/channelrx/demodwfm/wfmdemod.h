@@ -149,7 +149,6 @@ private:
     double m_magsqPeak;
     int  m_magsqCount;
 
-	Real m_lastArgument;
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	Real m_fmExcursion;
 

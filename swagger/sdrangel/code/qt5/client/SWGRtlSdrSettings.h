@@ -35,10 +35,10 @@ public:
     void init();
     void cleanup();
 
-    QString asJson ();
-    QJsonObject* asJsonObject();
-    void fromJsonObject(QJsonObject &json);
-    SWGRtlSdrSettings* fromJson(QString &jsonString);
+    virtual QString asJson () override;
+    virtual QJsonObject* asJsonObject() override;
+    virtual void fromJsonObject(QJsonObject &json) override;
+    virtual SWGRtlSdrSettings* fromJson(QString &jsonString) override;
 
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);

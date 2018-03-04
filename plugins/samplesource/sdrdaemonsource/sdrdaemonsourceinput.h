@@ -297,8 +297,6 @@ private:
 	int m_sender;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
-    bool m_autoFollowRate;
-    bool m_autoCorrBuffer;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     void applySettings(const SDRdaemonSourceSettings& settings, bool force = false);

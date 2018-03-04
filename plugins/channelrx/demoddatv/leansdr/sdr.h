@@ -325,7 +325,6 @@ private:
             float gain = estimated ? out_rms / sqrtf(estimated) : 0;
             pin = in.rd();
             complex<T> *pout = out.wr();
-            float bwcomp = 1 - bw;
             for (; pin < pend; ++pin, ++pout)
             {
                 pout->re = pin->re * gain;
