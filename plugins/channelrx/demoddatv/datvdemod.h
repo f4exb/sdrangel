@@ -66,13 +66,11 @@ class DownChannelizer;
 #include "datvideostream.h"
 #include "datvideorender.h"
 
-using namespace leansdr;
-
 enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
 enum dvb_version { DVB_S, DVB_S2 };
 enum dvb_sampler { SAMP_NEAREST, SAMP_LINEAR, SAMP_RRC };
 
-inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return max(d, 1); }
+inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
 
 struct config
 {
@@ -86,8 +84,8 @@ struct config
   bool cnr;            // Measure CNR
   unsigned int decim;  // Decimation, 0=auto
   float Fm;            // QPSK symbol rate (Hz)
-  cstln_lut<256>::predef constellation;
-  code_rate fec;
+  leansdr::cstln_lut<256>::predef constellation;
+  leansdr::code_rate fec;
   float Ftune;         // Bias frequency for the QPSK demodulator (Hz)
   bool allow_drift;
   bool fastlock;
@@ -108,12 +106,12 @@ struct config
       buf_factor(4),
       Fs(2.4e6),
       Fderot(0),
-      anf(1),
+      anf(0),
       cnr(false),
       decim(0),
       Fm(2e6),
-      constellation(cstln_lut<256>::QPSK),
-      fec(FEC12),
+      constellation(leansdr::cstln_lut<256>::QPSK),
+      fec(leansdr::FEC12),
       Ftune(0),
       allow_drift(false),
       fastlock(true),
@@ -139,7 +137,7 @@ struct DATVConfig
     int intCenterFrequency;
     dvb_version enmStandard;
     DATVModulation enmModulation;
-    code_rate enmFEC;
+    leansdr::code_rate enmFEC;
     int intSampleRate;
     int intSymbolRate;
     int intNotchFilters;
@@ -157,7 +155,7 @@ struct DATVConfig
         intCenterFrequency(0),
         enmStandard(DVB_S),
         enmModulation(BPSK),
-        enmFEC(FEC12),
+        enmFEC(leansdr::FEC12),
         intSampleRate(1024000),
         intSymbolRate(250000),
         intNotchFilters(1),
@@ -196,7 +194,7 @@ public:
         int intCenterFrequency,
         dvb_version enmStandard,
         DATVModulation enmModulation,
-        code_rate enmFEC,
+        leansdr::code_rate enmFEC,
         int intSymbolRate,
         int intNotchFilters,
         bool blnAllowDrift,
@@ -223,7 +221,7 @@ public:
         int intCenterFrequency,
         dvb_version enmStandard,
         DATVModulation enmModulation,
-        code_rate enmFEC,
+        leansdr::code_rate enmFEC,
         int intSampleRate,
         int intSymbolRate,
         int intNotchFilters,
@@ -278,7 +276,7 @@ private:
                 int intCenterFrequency,
                 dvb_version enmStandard,
                 DATVModulation enmModulation,
-                code_rate enmFEC,
+                leansdr::code_rate enmFEC,
                 int intSymbolRate,
                 int intNotchFilters,
                 bool blnAllowDrift,
@@ -300,7 +298,7 @@ private:
                     int intCenterFrequency,
                     dvb_version enmStandard,
                     DATVModulation enmModulation,
-                    code_rate enmFEC,
+                    leansdr::code_rate enmFEC,
                     int intSymbolRate,
                     int intNotchFilters,
                     bool blnAllowDrift,
@@ -343,7 +341,7 @@ private:
 
     //************** LEANDBV Scheduler ***************
 
-    scheduler * m_objScheduler;
+    leansdr::scheduler * m_objScheduler;
     struct config m_objCfg;
 
     bool m_blnDVBInitialized;
@@ -352,90 +350,90 @@ private:
     //LeanSDR Pipe Buffer
     // INPUT
 
-    pipebuf<cf32> *p_rawiq;
-    pipewriter<cf32> *p_rawiq_writer;
-    pipebuf<cf32> *p_preprocessed;
+    leansdr::pipebuf<leansdr::cf32> *p_rawiq;
+    leansdr::pipewriter<leansdr::cf32> *p_rawiq_writer;
+    leansdr::pipebuf<leansdr::cf32> *p_preprocessed;
 
     // NOTCH FILTER
-    auto_notch<f32> *r_auto_notch;
-    pipebuf<cf32> *p_autonotched;
+    leansdr::auto_notch<leansdr::f32> *r_auto_notch;
+    leansdr::pipebuf<leansdr::cf32> *p_autonotched;
 
     // FREQUENCY CORRECTION : DEROTATOR
-    pipebuf<cf32> *p_derot;
-    rotator<f32> *r_derot;
+    leansdr::pipebuf<leansdr::cf32> *p_derot;
+    leansdr::rotator<leansdr::f32> *r_derot;
 
     // CNR ESTIMATION
-    pipebuf<f32> *p_cnr;
-    cnr_fft<f32> *r_cnr;
+    leansdr::pipebuf<leansdr::f32> *p_cnr;
+    leansdr::cnr_fft<leansdr::f32> *r_cnr;
 
     //FILTERING
-    fir_filter<cf32,float> *r_resample;
-    pipebuf<cf32> *p_resampled;
+    leansdr::fir_filter<leansdr::cf32,float> *r_resample;
+    leansdr::pipebuf<leansdr::cf32> *p_resampled;
     float *coeffs;
     int ncoeffs;
 
     // OUTPUT PREPROCESSED DATA
-    sampler_interface<f32> *sampler;
+    leansdr::sampler_interface<leansdr::f32> *sampler;
     float *coeffs_sampler;
     int ncoeffs_sampler;
 
-    pipebuf<softsymbol> *p_symbols;
-    pipebuf<f32> *p_freq;
-    pipebuf<f32> *p_ss;
-    pipebuf<f32> *p_mer;
-    pipebuf<cf32> *p_sampled;
+    leansdr::pipebuf<leansdr::softsymbol> *p_symbols;
+    leansdr::pipebuf<leansdr::f32> *p_freq;
+    leansdr::pipebuf<leansdr::f32> *p_ss;
+    leansdr::pipebuf<leansdr::f32> *p_mer;
+    leansdr::pipebuf<leansdr::cf32> *p_sampled;
 
     //DECIMATION
-    pipebuf<cf32> *p_decimated;
-    decimator<cf32> *p_decim;
+    leansdr::pipebuf<leansdr::cf32> *p_decimated;
+    leansdr::decimator<leansdr::cf32> *p_decim;
 
     //PROCESSED DATA MONITORING
-    file_writer<cf32> *r_ppout;
+    leansdr::file_writer<leansdr::cf32> *r_ppout;
 
     //GENERIC CONSTELLATION RECEIVER
-    cstln_receiver<f32> *m_objDemodulator;
+    leansdr::cstln_receiver<leansdr::f32> *m_objDemodulator;
 
     // DECONVOLUTION AND SYNCHRONIZATION
-    pipebuf<u8> *p_bytes;
-    deconvol_sync_simple *r_deconv;
-    viterbi_sync *r;
-    pipebuf<u8> *p_descrambled;
-    pipebuf<u8> *p_frames;
+    leansdr::pipebuf<leansdr::u8> *p_bytes;
+    leansdr::deconvol_sync_simple *r_deconv;
+    leansdr::viterbi_sync *r;
+    leansdr::pipebuf<leansdr::u8> *p_descrambled;
+    leansdr::pipebuf<leansdr::u8> *p_frames;
 
-    etr192_descrambler * r_etr192_descrambler;
-    hdlc_sync *r_sync;
+    leansdr::etr192_descrambler * r_etr192_descrambler;
+    leansdr::hdlc_sync *r_sync;
 
-    pipebuf<u8> *p_mpegbytes;
-    pipebuf<int> *p_lock;
-    pipebuf<u32> *p_locktime;
-    mpeg_sync<u8,0> *r_sync_mpeg;
+    leansdr::pipebuf<leansdr::u8> *p_mpegbytes;
+    leansdr::pipebuf<int> *p_lock;
+    leansdr::pipebuf<leansdr::u32> *p_locktime;
+    leansdr::mpeg_sync<leansdr::u8, 0> *r_sync_mpeg;
 
 
     // DEINTERLEAVING
-    pipebuf< rspacket<u8> > *p_rspackets;
-    deinterleaver<u8> *r_deinter;
+    leansdr::pipebuf<leansdr::rspacket<leansdr::u8> > *p_rspackets;
+    leansdr::deinterleaver<leansdr::u8> *r_deinter;
 
     // REED-SOLOMON
-    pipebuf<int> *p_vbitcount;
-    pipebuf<int> *p_verrcount;
-    pipebuf<tspacket> *p_rtspackets;
-    rs_decoder<u8,0> *r_rsdec;
+    leansdr::pipebuf<int> *p_vbitcount;
+    leansdr::pipebuf<int> *p_verrcount;
+    leansdr::pipebuf<leansdr::tspacket> *p_rtspackets;
+    leansdr::rs_decoder<leansdr::u8, 0> *r_rsdec;
 
     // BER ESTIMATION
-    pipebuf<float> *p_vber;
-    rate_estimator<float> *r_vber;
+    leansdr::pipebuf<float> *p_vber;
+    leansdr::rate_estimator<float> *r_vber;
 
     // DERANDOMIZATION
-    pipebuf<tspacket> *p_tspackets;
-    derandomizer *r_derand;
+    leansdr::pipebuf<leansdr::tspacket> *p_tspackets;
+    leansdr::derandomizer *r_derand;
 
 
     //OUTPUT
-    file_writer<tspacket> *r_stdout;
-    datvvideoplayer<tspacket> *r_videoplayer;
+    leansdr::file_writer<leansdr::tspacket> *r_stdout;
+    leansdr::datvvideoplayer<leansdr::tspacket> *r_videoplayer;
 
     //CONSTELLATION
-    datvconstellation<f32> *r_scope_symbols;
+    leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
 
     DeviceSourceAPI* m_deviceAPI;
 

@@ -87,7 +87,7 @@ void DATVDemodGUI::resetToDefaults()
     ui->cmbFilter->setCurrentIndex(0);
     displayRRCParameters(false);
 
-    ui->spiNotchFilters->setValue(1);
+    ui->spiNotchFilters->setValue(0);
     ui->prgSynchro->setValue(0);
 
     ui->lblStatus->setText("");
@@ -191,7 +191,7 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
         d.readS32(11, &tmp, 0);
         ui->cmbStandard->setCurrentIndex(tmp);
 
-        d.readS32(12, &tmp, 1);
+        d.readS32(12, &tmp, 0);
         ui->spiNotchFilters->setValue(tmp);
 
         d.readS32(13, &tmp, 1024000);
@@ -320,7 +320,7 @@ void DATVDemodGUI::applySettings()
 
     DATVModulation enmSelectedModulation;
     dvb_version enmVersion;
-    code_rate enmFEC;
+    leansdr::code_rate enmFEC;
     dvb_sampler enmSampler;
 
     if (m_blnDoApplySettings)
@@ -403,41 +403,41 @@ void DATVDemodGUI::applySettings()
 
         strFEC = ui->cmbFEC->currentText();
 
-        if(strFEC=="1/2")
+        if(strFEC == "1/2")
         {
-            enmFEC=FEC12;
+            enmFEC = leansdr::FEC12;
         }
-        else if(strFEC=="2/3")
+        else if(strFEC == "2/3")
         {
-            enmFEC=FEC23;
+            enmFEC = leansdr::FEC23;
         }
-        else if(strFEC=="3/4")
+        else if(strFEC == "3/4")
         {
-            enmFEC=FEC34;
+            enmFEC = leansdr::FEC34;
         }
-        else if(strFEC=="5/6")
+        else if(strFEC == "5/6")
         {
-            enmFEC=FEC56;
+            enmFEC = leansdr::FEC56;
         }
-        else if(strFEC=="7/8")
+        else if(strFEC == "7/8")
         {
-            enmFEC=FEC78;
+            enmFEC = leansdr::FEC78;
         }
-        else if(strFEC=="4/5")
+        else if(strFEC == "4/5")
         {
-            enmFEC=FEC45;
+            enmFEC = leansdr::FEC45;
         }
-        else if(strFEC=="8/9")
+        else if(strFEC == "8/9")
         {
-            enmFEC=FEC89;
+            enmFEC = leansdr::FEC89;
         }
-        else if(strFEC=="9/10")
+        else if(strFEC == "9/10")
         {
-            enmFEC=FEC910;
+            enmFEC = leansdr::FEC910;
         }
         else
         {
-            enmFEC=FEC12;
+            enmFEC = leansdr::FEC12;
         }
 
         if (ui->cmbFilter->currentIndex()==0)

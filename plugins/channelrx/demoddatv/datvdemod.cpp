@@ -182,7 +182,7 @@ void DATVDemod::configure(MessageQueue* objMessageQueue,
                           int intCenterFrequency,
                           dvb_version enmStandard,
                           DATVModulation enmModulation,
-                          code_rate enmFEC,
+                          leansdr::code_rate enmFEC,
                           int intSymbolRate,
                           int intNotchFilters,
                           bool blnAllowDrift,
@@ -202,7 +202,7 @@ void DATVDemod::InitDATVParameters(int intMsps,
                                    int intCenterFrequency,
                                    dvb_version enmStandard,
                                    DATVModulation enmModulation,
-                                   code_rate enmFEC,
+                                   leansdr::code_rate enmFEC,
                                    int intSampleRate,
                                    int intSymbolRate,
                                    int intNotchFilters,
@@ -472,43 +472,43 @@ void DATVDemod::InitDATVFramework()
     switch(m_objRunning.enmModulation)
     {
         case BPSK:
-           m_objCfg.constellation = cstln_lut<256>::BPSK;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::BPSK;
         break;
 
         case QPSK:
-            m_objCfg.constellation = cstln_lut<256>::QPSK;
+            m_objCfg.constellation = leansdr::cstln_lut<256>::QPSK;
         break;
 
         case PSK8:
-            m_objCfg.constellation = cstln_lut<256>::PSK8;
+            m_objCfg.constellation = leansdr::cstln_lut<256>::PSK8;
         break;
 
         case APSK16:
-            m_objCfg.constellation = cstln_lut<256>::APSK16;
+            m_objCfg.constellation = leansdr::cstln_lut<256>::APSK16;
         break;
 
         case APSK32:
-           m_objCfg.constellation = cstln_lut<256>::APSK32;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::APSK32;
         break;
 
         case APSK64E:
-           m_objCfg.constellation = cstln_lut<256>::APSK64E;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::APSK64E;
         break;
 
         case QAM16:
-           m_objCfg.constellation = cstln_lut<256>::QAM16;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM16;
         break;
 
         case QAM64:
-           m_objCfg.constellation = cstln_lut<256>::QAM64;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM64;
         break;
 
         case QAM256:
-           m_objCfg.constellation = cstln_lut<256>::QAM256;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM256;
         break;
 
         default:
-           m_objCfg.constellation = cstln_lut<256>::BPSK;
+           m_objCfg.constellation = leansdr::cstln_lut<256>::BPSK;
         break;
     }
 
@@ -550,19 +550,19 @@ void DATVDemod::InitDATVFramework()
 
     m_lngExpectedReadIQ  = BUF_BASEBAND;
 
-    m_objScheduler = new scheduler();
+    m_objScheduler = new leansdr::scheduler();
 
     //***************
-    p_rawiq = new pipebuf<cf32>(m_objScheduler, "rawiq", BUF_BASEBAND);
-    p_rawiq_writer = new pipewriter<cf32>(*p_rawiq);
+    p_rawiq = new leansdr::pipebuf<leansdr::cf32>(m_objScheduler, "rawiq", BUF_BASEBAND);
+    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
     p_preprocessed = p_rawiq;
 
     // NOTCH FILTER
 
     if ( m_objCfg.anf>0 )
     {
-        p_autonotched = new pipebuf<cf32>(m_objScheduler, "autonotched", BUF_BASEBAND);
-        r_auto_notch = new auto_notch<f32>(m_objScheduler, *p_preprocessed, *p_autonotched, m_objCfg.anf, 0);
+        p_autonotched = new leansdr::pipebuf<leansdr::cf32>(m_objScheduler, "autonotched", BUF_BASEBAND);
+        r_auto_notch = new leansdr::auto_notch<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_autonotched, m_objCfg.anf, 0);
         p_preprocessed = p_autonotched;
     }
 
@@ -573,11 +573,11 @@ void DATVDemod::InitDATVFramework()
 
     // CNR ESTIMATION
 
-    p_cnr = new pipebuf<f32>(m_objScheduler, "cnr", BUF_SLOW);
+    p_cnr = new leansdr::pipebuf<leansdr::f32>(m_objScheduler, "cnr", BUF_SLOW);
 
     if ( m_objCfg.cnr==true )
     {
-        r_cnr = new cnr_fft<f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
+        r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
         r_cnr->decimation = decimation(m_objCfg.Fs, 1);  // 1 Hz
     }
 
@@ -598,20 +598,20 @@ void DATVDemod::InitDATVFramework()
 
     // Generic constellation receiver
 
-    p_symbols = new pipebuf<softsymbol>(m_objScheduler, "PSK soft-symbols", BUF_SYMBOLS);
-    p_freq = new pipebuf<f32> (m_objScheduler, "freq", BUF_SLOW);
-    p_ss = new pipebuf<f32> (m_objScheduler, "SS", BUF_SLOW);
-    p_mer = new pipebuf<f32> (m_objScheduler, "MER", BUF_SLOW);
-    p_sampled = new pipebuf<cf32> (m_objScheduler, "PSK symbols", BUF_BASEBAND);
+    p_symbols = new leansdr::pipebuf<leansdr::softsymbol>(m_objScheduler, "PSK soft-symbols", BUF_SYMBOLS);
+    p_freq = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "freq", BUF_SLOW);
+    p_ss = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "SS", BUF_SLOW);
+    p_mer = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "MER", BUF_SLOW);
+    p_sampled = new leansdr::pipebuf<leansdr::cf32> (m_objScheduler, "PSK symbols", BUF_BASEBAND);
 
     switch ( m_objCfg.sampler )
     {
         case SAMP_NEAREST:
-          sampler = new nearest_sampler<float>();
+          sampler = new leansdr::nearest_sampler<float>();
           break;
 
         case SAMP_LINEAR:
-          sampler = new linear_sampler<float>();
+          sampler = new leansdr::linear_sampler<float>();
           break;
 
         case SAMP_RRC:
@@ -621,15 +621,15 @@ void DATVDemod::InitDATVFramework()
           if ( m_objCfg.rrc_steps == 0 )
           {
             // At least 64 discrete sampling points between symbols
-            m_objCfg.rrc_steps = max(1, (int)(64*m_objCfg.Fm / m_objCfg.Fs));
+            m_objCfg.rrc_steps = std::max(1, (int)(64*m_objCfg.Fm / m_objCfg.Fs));
           }
 
           float Frrc = m_objCfg.Fs * m_objCfg.rrc_steps;  // Sample freq of the RRC filter
           float transition = (m_objCfg.Fm/2) * m_objCfg.rolloff;
           int order = m_objCfg.rrc_rej * Frrc / (22*transition);
-          ncoeffs_sampler = filtergen::root_raised_cosine(order, m_objCfg.Fm/Frrc, m_objCfg.rolloff, &coeffs_sampler);
+          ncoeffs_sampler = leansdr::filtergen::root_raised_cosine(order, m_objCfg.Fm/Frrc, m_objCfg.rolloff, &coeffs_sampler);
 
-          sampler = new fir_sampler<float,float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
+          sampler = new leansdr::fir_sampler<float,float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
           break;
         }
 
@@ -638,11 +638,11 @@ void DATVDemod::InitDATVFramework()
           return;
     }
 
-    m_objDemodulator = new cstln_receiver<f32>(m_objScheduler, sampler, *p_preprocessed, *p_symbols, p_freq, p_ss, p_mer, p_sampled);
+    m_objDemodulator = new leansdr::cstln_receiver<leansdr::f32>(m_objScheduler, sampler, *p_preprocessed, *p_symbols, p_freq, p_ss, p_mer, p_sampled);
 
     if ( m_objCfg.standard == DVB_S )
     {
-      if ( m_objCfg.constellation != cstln_lut<256>::QPSK && m_objCfg.constellation != cstln_lut<256>::BPSK )
+      if ( m_objCfg.constellation != leansdr::cstln_lut<256>::QPSK && m_objCfg.constellation != leansdr::cstln_lut<256>::BPSK )
       {
         fprintf(stderr, "Warning: non-standard constellation for DVB-S\n");
       }
@@ -696,13 +696,13 @@ void DATVDemod::InitDATVFramework()
 
     m_objRegisteredDATVScreen->resizeDATVScreen(256,256);
 
-    r_scope_symbols = new datvconstellation<f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
+    r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
     r_scope_symbols->decimation = 1;
     r_scope_symbols->cstln = &m_objDemodulator->cstln;
 
     // DECONVOLUTION AND SYNCHRONIZATION
 
-    p_bytes = new pipebuf<u8>(m_objScheduler, "bytes", BUF_BYTES);
+    p_bytes = new leansdr::pipebuf<leansdr::u8>(m_objScheduler, "bytes", BUF_BYTES);
 
     r_deconv = NULL;
 
@@ -710,13 +710,13 @@ void DATVDemod::InitDATVFramework()
 
     if ( m_objCfg.viterbi )
     {
-      if ( m_objCfg.fec==FEC23 && (m_objDemodulator->cstln->nsymbols==4 || m_objDemodulator->cstln->nsymbols==64) )
+      if ( m_objCfg.fec == leansdr::FEC23 && (m_objDemodulator->cstln->nsymbols == 4 || m_objDemodulator->cstln->nsymbols == 64) )
       {
-        m_objCfg.fec = FEC46;
+        m_objCfg.fec = leansdr::FEC46;
       }
 
       //To uncomment -> Linking Problem : undefined symbol: _ZN7leansdr21viterbi_dec_interfaceIhhiiE6updateEPiS2_
-      r = new viterbi_sync(m_objScheduler, (*p_symbols), (*p_bytes), m_objDemodulator->cstln, m_objCfg.fec);
+      r = new leansdr::viterbi_sync(m_objScheduler, (*p_symbols), (*p_bytes), m_objDemodulator->cstln, m_objCfg.fec);
 
       if ( m_objCfg.fastlock )
       {
@@ -731,25 +731,25 @@ void DATVDemod::InitDATVFramework()
 
     //******* -> if ( m_objCfg.hdlc )
 
-    p_mpegbytes = new pipebuf<u8> (m_objScheduler, "mpegbytes", BUF_MPEGBYTES);
-    p_lock = new pipebuf<int> (m_objScheduler, "lock", BUF_SLOW);
-    p_locktime = new pipebuf<u32> (m_objScheduler, "locktime", BUF_PACKETS);
+    p_mpegbytes = new leansdr::pipebuf<leansdr::u8> (m_objScheduler, "mpegbytes", BUF_MPEGBYTES);
+    p_lock = new leansdr::pipebuf<int> (m_objScheduler, "lock", BUF_SLOW);
+    p_locktime = new leansdr::pipebuf<leansdr::u32> (m_objScheduler, "locktime", BUF_PACKETS);
 
-    r_sync_mpeg = new mpeg_sync<u8,0>(m_objScheduler, *p_bytes, *p_mpegbytes, r_deconv, p_lock, p_locktime);
+    r_sync_mpeg = new leansdr::mpeg_sync<leansdr::u8, 0>(m_objScheduler, *p_bytes, *p_mpegbytes, r_deconv, p_lock, p_locktime);
     r_sync_mpeg->fastlock = m_objCfg.fastlock;
 
     // DEINTERLEAVING
 
-    p_rspackets = new pipebuf< rspacket<u8> >(m_objScheduler, "RS-enc packets", BUF_PACKETS);
-    r_deinter = new deinterleaver<u8>(m_objScheduler, *p_mpegbytes, *p_rspackets);
+    p_rspackets = new leansdr::pipebuf< leansdr::rspacket<leansdr::u8> >(m_objScheduler, "RS-enc packets", BUF_PACKETS);
+    r_deinter = new leansdr::deinterleaver<leansdr::u8>(m_objScheduler, *p_mpegbytes, *p_rspackets);
 
 
     // REED-SOLOMON
 
-    p_vbitcount = new pipebuf<int>(m_objScheduler, "Bits processed", BUF_PACKETS);
-    p_verrcount = new pipebuf<int>(m_objScheduler, "Bits corrected", BUF_PACKETS);
-    p_rtspackets = new pipebuf<tspacket>(m_objScheduler, "rand TS packets", BUF_PACKETS);
-    r_rsdec = new rs_decoder<u8,0> (m_objScheduler, *p_rspackets, *p_rtspackets, p_vbitcount, p_verrcount);
+    p_vbitcount = new leansdr::pipebuf<int>(m_objScheduler, "Bits processed", BUF_PACKETS);
+    p_verrcount = new leansdr::pipebuf<int>(m_objScheduler, "Bits corrected", BUF_PACKETS);
+    p_rtspackets = new leansdr::pipebuf<leansdr::tspacket>(m_objScheduler, "rand TS packets", BUF_PACKETS);
+    r_rsdec = new leansdr::rs_decoder<leansdr::u8, 0> (m_objScheduler, *p_rspackets, *p_rtspackets, p_vbitcount, p_verrcount);
 
 
     // BER ESTIMATION
@@ -768,12 +768,12 @@ void DATVDemod::InitDATVFramework()
 
     // DERANDOMIZATION
 
-    p_tspackets = new pipebuf<tspacket>(m_objScheduler, "TS packets", BUF_PACKETS);
-    r_derand = new derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
+    p_tspackets = new leansdr::pipebuf<leansdr::tspacket>(m_objScheduler, "TS packets", BUF_PACKETS);
+    r_derand = new leansdr::derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
 
 
     // OUTPUT
-    r_videoplayer = new datvvideoplayer<tspacket>(m_objScheduler, *p_tspackets,m_objVideoStream);
+    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets,m_objVideoStream);
 
     m_blnDVBInitialized=true;
 }
@@ -783,7 +783,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
     qint16 * ptrBufferToRelease=NULL;
     float fltI;
     float fltQ;
-    cf32 objIQ;
+    leansdr::cf32 objIQ;
     //Complex objC;
     fftfilt::cmplx *objRF;
     int intRFOut;
@@ -866,7 +866,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
                     m_lngReadIQ=0;
                     delete p_rawiq_writer;
-                    p_rawiq_writer = new pipewriter<cf32>(*p_rawiq);
+                    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
                 }
             }
 
