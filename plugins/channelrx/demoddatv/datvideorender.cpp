@@ -561,8 +561,9 @@ bool DATVideoRender::CloseStream(QIODevice *objDevice)
     //Only once execution
     m_blnRunning=true;
 
-    avformat_close_input(&m_objFormatCtx);
-    m_objFormatCtx=NULL;
+    // maybe done in the avcodec_close
+//    avformat_close_input(&m_objFormatCtx);
+//    m_objFormatCtx=NULL;
 
     if(m_objDecoderCtx)
     {
