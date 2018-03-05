@@ -116,17 +116,11 @@ double RTPRandomURandom::GetRandomDouble()
         return 0;
     }
 
-#ifdef RTP_HAVE_VSUINT64SUFFIX
-    value &= 0x7fffffffffffffffui64;
-#else
     value &= 0x7fffffffffffffffULL;
-#endif // RTP_HAVE_VSUINT64SUFFIX
-
     int64_t value2 = (int64_t) value;
     double x = RTPRANDOM_2POWMIN63 * (double) value2;
 
     return x;
-
 }
 
 } // end namespace
