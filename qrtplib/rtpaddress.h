@@ -82,6 +82,9 @@ public:
      */
     bool IsFromSameHost(const RTPAddress *addr) const;
 
+    /** Equality */
+    bool operator==(const RTPAddress& otherAddress);
+
     /** Get host address */
     const QHostAddress& getAddress() const
     {

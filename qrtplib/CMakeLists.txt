@@ -42,6 +42,7 @@ set (qrtplib_HEADERS
 	rtptransmitter.h
 	rtptypes_win.h
 	rtptypes.h
+	rtpudpransmitter.h
 #	rtpudpv4transmitter.h
 #   rtpudpv4transmitternobind.h
 #	rtpexternaltransmitter.h
@@ -82,6 +83,7 @@ set(qrtplib_SOURCES
 	rtpsourcedata.cpp
 	rtpsources.cpp
 	rtptimeutilities.cpp
+	rtpudptransmitter.cpp
 #	rtpudpv4transmitter.cpp
 #   rtpudpv4transmitternobind.cpp
 #	rtpexternaltransmitter.cpp

@@ -58,12 +58,8 @@ public:
     /** Creates an RTCPCompoundPacket instance from the data in \c rawpack, installing a memory manager if specified. */
     RTCPCompoundPacket(RTPRawPacket &rawpack);
 
-    /** Creates an RTCPCompoundPacket instance from the data in \c packet}, with size \c len.
-     *  Creates an RTCPCompoundPacket instance from the data in \c packet}, with size \c len. The \c deletedata
-     *  flag specifies if the data in \c packet should be deleted when the compound packet is destroyed. If
-     *  specified, a memory manager will be installed.
-     */
-    RTCPCompoundPacket(uint8_t *packet, std::size_t len, bool deletedata = true);
+    /** Creates an RTCPCompoundPacket instance from the data in \c packet}, with size \c len. */
+    RTCPCompoundPacket(uint8_t *packet, std::size_t len);
 protected:
     RTCPCompoundPacket(); // this is for the compoundpacket builder
 public:
@@ -118,7 +114,6 @@ protected:
 
     uint8_t *compoundpacket;
     std::size_t compoundpacketlength;
-    bool deletepacket;
 
     std::list<RTCPPacket *> rtcppacklist;
     std::list<RTCPPacket *>::const_iterator rtcppackit;

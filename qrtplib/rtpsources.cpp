@@ -191,7 +191,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
             bool stored = false;
             bool ownpacket = false;
             int i;
-            const RTPAddress *senderaddress = rawpack->GetSenderAddress();
+            const RTPAddress& senderaddress = rawpack->GetSenderAddress();
 
             for (i = 0; !ownpacket && i < numtrans; i++)
             {
@@ -217,7 +217,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
             }
             else
             {
-                if ((status = ProcessRTPPacket(rtppack, rawpack->GetReceiveTime(), senderaddress, &stored)) < 0)
+                if ((status = ProcessRTPPacket(rtppack, rawpack->GetReceiveTime(), &senderaddress, &stored)) < 0)
                 {
                     if (!stored)
                         delete rtppack;
@@ -245,7 +245,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
         {
             bool ownpacket = false;
             int i;
-            const RTPAddress *senderaddress = rawpack->GetSenderAddress();
+            const RTPAddress& senderaddress = rawpack->GetSenderAddress();
 
             for (i = 0; !ownpacket && i < numtrans; i++)
             {
@@ -266,7 +266,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
             }
             else // not our own packet
             {
-                status = ProcessRTCPCompoundPacket(&rtcpcomppack, rawpack->GetReceiveTime(), rawpack->GetSenderAddress());
+                status = ProcessRTCPCompoundPacket(&rtcpcomppack, rawpack->GetReceiveTime(), &rawpack->GetSenderAddress());
                 if (status < 0)
                     return status;
             }

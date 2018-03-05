@@ -140,9 +140,6 @@ public:
     /** Leaves the multicast group specified by \c addr. */
     int LeaveMulticastGroup(const RTPAddress &addr);
 
-    /** Leaves all multicast groups. */
-    void LeaveAllMulticastGroups();
-
     /** Sends the RTP packet with payload \c data which has length \c len.
      *  Sends the RTP packet with payload \c data which has length \c len.
      *  The used payload type, marker and timestamp increment will be those that have been set
@@ -232,23 +229,6 @@ public:
 
     /** Frees the memory used by the transmission information \c inf. */
     void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
-
-    /** If you're not using the poll thread, this function must be called regularly to process incoming data
-     *  and to send RTCP data when necessary.
-     */
-    int Poll();
-
-    /** Waits at most a time \c delay until incoming data has been detected.
-     *  Waits at most a time \c delay until incoming data has been detected. Only works when you're not
-     *  using the poll thread. If \c dataavailable is not \c NULL, it should be set to \c true if data
-     *  was actually read and to \c false otherwise.
-     */
-    int WaitForIncomingData(const RTPTime &delay, bool *dataavailable = 0);
-
-    /** If the previous function has been called, this one aborts the waiting (only works when you're not
-     *  using the poll thread).
-     */
-    int AbortWait();
 
     /** Returns the time interval after which an RTCP compound packet may have to be sent (only works when
      *  you're not using the poll thread.
@@ -574,7 +554,7 @@ private:
     RTPTransmitter *rtptrans;
     bool created;
     bool deletetransmitter;
-    bool usingpollthread, needthreadsafety;
+    bool usingpollthread;
     bool acceptownpackets;
     bool useSR_BYEifpossible;
     std::size_t maxpacksize;

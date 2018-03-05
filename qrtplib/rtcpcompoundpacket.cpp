@@ -61,30 +61,30 @@ RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack)
     std::size_t datalen = rawpack.GetDataLength();
 
     error = ParseData(data, datalen);
-    if (error < 0)
+
+    if (error < 0) {
         return;
+    }
 
     compoundpacket = rawpack.GetData();
     compoundpacketlength = rawpack.GetDataLength();
-    deletepacket = true;
-
-    rawpack.ZeroData();
 
     rtcppackit = rtcppacklist.begin();
 }
 
-RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, std::size_t packetlen, bool deletedata)
+RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, std::size_t packetlen)
 {
     compoundpacket = 0;
     compoundpacketlength = 0;
 
     error = ParseData(packet, packetlen);
-    if (error < 0)
+
+    if (error < 0) {
         return;
+    }
 
     compoundpacket = packet;
     compoundpacketlength = packetlen;
-    deletepacket = deletedata;
 
     rtcppackit = rtcppacklist.begin();
 }
@@ -94,7 +94,6 @@ RTCPCompoundPacket::RTCPCompoundPacket()
     compoundpacket = 0;
     compoundpacketlength = 0;
     error = 0;
-    deletepacket = true;
 }
 
 int RTCPCompoundPacket::ParseData(uint8_t *data, std::size_t datalen)
@@ -195,16 +194,16 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, std::size_t datalen)
 RTCPCompoundPacket::~RTCPCompoundPacket()
 {
     ClearPacketList();
-    if (compoundpacket && deletepacket)
-        delete[] compoundpacket;
 }
 
 void RTCPCompoundPacket::ClearPacketList()
 {
     std::list<RTCPPacket *>::const_iterator it;
 
-    for (it = rtcppacklist.begin(); it != rtcppacklist.end(); it++)
+    for (it = rtcppacklist.begin(); it != rtcppacklist.end(); it++) {
         delete *it;
+    }
+
     rtcppacklist.clear();
     rtcppackit = rtcppacklist.begin();
 }

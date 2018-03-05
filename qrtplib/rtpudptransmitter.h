@@ -34,11 +34,16 @@
 #define QRTPLIB_RTPUDPTRANSMITTER_H_
 
 #include "rtptransmitter.h"
+#include "util/export.h"
+
+#include <QObject>
 #include <QHostAddress>
+#include <QNetworkInterface>
+#include <QQueue>
+#include <QMutex>
+
 #include <stdint.h>
 #include <list>
-
-#include "util/export.h"
 
 #define RTPUDPV4TRANS_HASHSIZE                                  8317
 #define RTPUDPV4TRANS_DEFAULTPORTBASE                           5000
@@ -64,8 +69,8 @@ public:
     }
 
     /** Sets the multicast interface IP address. */
-    void SetMulticastInterfaceIP(const QHostAddress& mcastGroupAddress) {
-        m_mcastGroupAddress = mcastGroupAddress;
+    void SetMulticastInterface(const QNetworkInterface& mcastInterface) {
+        m_mcastInterface = mcastInterface;
     }
 
     /** Sets the RTP portbase to \c pbase, which has to be an even number
@@ -76,21 +81,6 @@ public:
         m_portbase = pbase;
     }
 
-    /** Passes a list of IP addresses which will be used as the local IP addresses. */
-    void SetLocalIPList(const std::list<QHostAddress>& iplist)
-    {
-        m_localIPs = iplist;
-    }
-
-    /** Clears the list of local IP addresses.
-     *  Clears the list of local IP addresses. An empty list will make the transmission
-     *  component itself determine the local IP addresses.
-     */
-    void ClearLocalIPList()
-    {
-        m_localIPs.clear();
-    }
-
     /** Returns the IP address which will be used to bind the sockets. */
     QHostAddress GetBindIP() const
     {
@@ -98,21 +88,15 @@ public:
     }
 
     /** Returns the multicast interface IP address. */
-    QHostAddress GetMulticastInterfaceIP() const
+    QNetworkInterface GetMulticastInterface() const
     {
-        return m_mcastGroupAddress;
+        return m_mcastInterface;
     }
 
     /** Returns the RTP portbase which will be used (default is 5000). */
     uint16_t GetPortbase() const
     {
         return m_portbase;
-    }
-
-    /** Returns the list of local IP addresses. */
-    const std::list<QHostAddress> &GetLocalIPList() const
-    {
-        return m_localIPs;
     }
 
     /** Sets the RTP socket's send buffer size. */
@@ -225,9 +209,8 @@ public:
 
 private:
     QHostAddress m_bindAddress;
-    QHostAddress m_mcastGroupAddress;
+    QNetworkInterface m_mcastInterface;
     uint16_t m_portbase;
-    std::list<QHostAddress> m_localIPs;
     int m_rtpsendbufsz, m_rtprecvbufsz;
     int m_rtcpsendbufsz, m_rtcprecvbufsz;
     bool m_rtcpmux;
@@ -258,10 +241,15 @@ inline RTPUDPTransmissionParams::RTPUDPTransmissionParams() :
 class QRTPLIB_API RTPUDPTransmissionInfo: public RTPTransmissionInfo
 {
 public:
-    RTPUDPTransmissionInfo(const std::list<QHostAddress>& iplist, QUdpSocket *rtpsock, QUdpSocket *rtcpsock, uint16_t rtpport, uint16_t rtcpport) :
-            RTPTransmissionInfo(RTPTransmitter::IPv4UDPProto)
+    RTPUDPTransmissionInfo(
+            QHostAddress localIP,
+            QUdpSocket *rtpsock,
+            QUdpSocket *rtcpsock,
+            uint16_t rtpport,
+            uint16_t rtcpport) :
+        RTPTransmissionInfo(RTPTransmitter::IPv4UDPProto)
     {
-        m_localIPlist = iplist;
+        m_localIP = localIP;
         m_rtpsocket = rtpsock;
         m_rtcpsocket = rtcpsock;
         m_rtpPort = rtpport;
@@ -270,12 +258,6 @@ public:
 
     ~RTPUDPTransmissionInfo()
     {
-    }
-
-    /** Returns the list of IPv4 addresses the transmitter considers to be the local IP addresses. */
-    std::list<uint32_t> GetLocalIPList() const
-    {
-        return m_localIPlist;
     }
 
     /** Returns the socket descriptor used for receiving and transmitting RTP packets. */
@@ -302,7 +284,7 @@ public:
         return m_rtcpPort;
     }
 private:
-    std::list<QHostAddress> m_localIPlist;
+    QHostAddress m_localIP;
     QUdpSocket *m_rtpsocket, *m_rtcpsocket;
     uint16_t m_rtpPort, m_rtcpPort;
 };
@@ -315,81 +297,79 @@ private:
  *  are described by the class RTPUDPTransmissionParams. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPTransmissionInfo.
  */
-class QRTPLIB_API RTPUDPTransmitter: public RTPTransmitter
+class QRTPLIB_API RTPUDPTransmitter: public QObject, public RTPTransmitter
 {
+    Q_OBJECT
 public:
     RTPUDPTransmitter();
-    ~RTPUDPTransmitter();
+    virtual ~RTPUDPTransmitter();
 
-    int Init();
-    int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
-    void Destroy();
-    RTPTransmissionInfo *GetTransmissionInfo();
-    void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
+    virtual int Init();
+    virtual int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
+    virtual int BindSockets();
+    virtual void Destroy();
+    virtual RTPTransmissionInfo *GetTransmissionInfo();
+    virtual void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
-    bool ComesFromThisTransmitter(const RTPAddress *addr);
-    std::size_t GetHeaderOverhead()
+    virtual bool ComesFromThisTransmitter(const RTPAddress& addr);
+    virtual std::size_t GetHeaderOverhead()
     {
         return RTPUDPTRANS_HEADERSIZE;
     }
 
-    int Poll();
-    int WaitForIncomingData(const RTPTime &delay, bool *dataavailable = 0);
-    int AbortWait();
+    virtual int SendRTPData(const void *data, std::size_t len);
+    virtual int SendRTCPData(const void *data, std::size_t len);
 
-    int SendRTPData(const void *data, std::size_t len);
-    int SendRTCPData(const void *data, std::size_t len);
+    virtual int AddDestination(const RTPAddress &addr);
+    virtual int DeleteDestination(const RTPAddress &addr);
+    virtual void ClearDestinations();
 
-    int AddDestination(const RTPAddress &addr);
-    int DeleteDestination(const RTPAddress &addr);
-    void ClearDestinations();
+    virtual bool SupportsMulticasting();
+    virtual int JoinMulticastGroup(const RTPAddress &addr);
+    virtual int LeaveMulticastGroup(const RTPAddress &addr);
 
-    bool SupportsMulticasting();
-    int JoinMulticastGroup(const RTPAddress &addr);
-    int LeaveMulticastGroup(const RTPAddress &addr);
-    void LeaveAllMulticastGroups();
+    virtual int SetReceiveMode(RTPTransmitter::ReceiveMode m);
+    virtual int AddToIgnoreList(const RTPAddress &addr);
+    virtual int DeleteFromIgnoreList(const RTPAddress &addr);
+    virtual void ClearIgnoreList();
+    virtual int AddToAcceptList(const RTPAddress &addr);
+    virtual int DeleteFromAcceptList(const RTPAddress &addr);
+    virtual void ClearAcceptList();
+    virtual int SetMaximumPacketSize(std::size_t s);
 
-    int SetReceiveMode(RTPTransmitter::ReceiveMode m);
-    int AddToIgnoreList(const RTPAddress &addr);
-    int DeleteFromIgnoreList(const RTPAddress &addr);
-    void ClearIgnoreList();
-    int AddToAcceptList(const RTPAddress &addr);
-    int DeleteFromAcceptList(const RTPAddress &addr);
-    void ClearAcceptList();
-    int SetMaximumPacketSize(std::size_t s);
-
-    bool NewDataAvailable(); // TODO: emit signal instead
-    RTPRawPacket *GetNextPacket(); // TODO: use a queue
+    virtual RTPRawPacket *GetNextPacket();
 
 private:
-    int CreateLocalIPList();
-    bool GetLocalIPList_Interfaces();
-    void GetLocalIPList_DNS();
-    void AddLoopbackAddress();
-    void FlushPackets();
-    int ProcessAddAcceptIgnoreEntry(uint32_t ip, uint16_t port);
-    int ProcessDeleteAcceptIgnoreEntry(uint32_t ip, uint16_t port);
-    bool ShouldAcceptData(uint32_t srcip, uint16_t srcport);
-    void ClearAcceptIgnoreInfo();
-
     bool m_init;
     bool m_created;
     bool m_waitingfordata;
     QUdpSocket *m_rtpsock, *m_rtcpsock;
-    QHostAddress m_mcastifaceIP;
-    QHostAddress m_localIP;
+    QHostAddress m_localIP; //!< from parameters bind IP
+    QNetworkInterface m_multicastInterface; //!< from parameters multicast interface
     uint16_t m_rtpPort, m_rtcpPort;
     RTPTransmitter::ReceiveMode m_receivemode;
 
-    uint8_t *m_localhostname;
-    std::size_t m_localhostnamelength;
-
-    std::list<RTPRawPacket*> m_rawpacketlist;
-
-    bool m_supportsmulticasting;
     std::size_t m_maxpacksize;
+    static const std::size_t m_absoluteMaxPackSize = 65535;
+    char m_rtpBuffer[m_absoluteMaxPackSize];
+    char m_rtcpBuffer[m_absoluteMaxPackSize];
+
+    std::list<RTPAddress> m_destinations;
+    std::list<RTPAddress> m_acceptList;
+    std::list<RTPAddress> m_ignoreList;
+    QQueue<RTPRawPacket*> m_rawPacketQueue;
+    QMutex m_rawPacketQueueLock;
 
     bool m_closesocketswhendone;
+
+    bool ShouldAcceptData(const RTPAddress& address);
+
+private slots:
+    void readRTPPendingDatagrams();
+    void readRTCPPendingDatagrams();
+
+signals:
+    void NewDataAvailable();
 };
 
 

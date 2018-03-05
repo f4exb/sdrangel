@@ -77,4 +77,9 @@ bool RTPAddress::IsFromSameHost(const RTPAddress *addr) const
     return addr->address == address;
 }
 
+bool RTPAddress::operator==(const RTPAddress& otherAddress)
+{
+    return IsSameAddress(&otherAddress);
+}
+
 } // namespace

@@ -67,18 +67,59 @@ RTPPacket::RTPPacket(RTPRawPacket &rawpack) :
     error = ParseRawPacket(rawpack);
 }
 
-RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, std::size_t maxpacksize) :
-        receivetime(0, 0)
+RTPPacket::RTPPacket(
+        uint8_t payloadtype,
+        const void *payloaddata,
+        std::size_t payloadlen,
+        uint16_t seqnr,
+        uint32_t timestamp,
+        uint32_t ssrc,
+        bool gotmarker,
+        uint8_t numcsrcs,
+        const uint32_t *csrcs,
+        bool gotextension,
+        uint16_t extensionid,
+        uint16_t extensionlen_numwords,
+        const void *extensiondata,
+        std::size_t maxpacksize) :
+    receivetime(0, 0)
 {
     Clear();
-    error = BuildPacket(payloadtype, payloaddata, payloadlen, seqnr, timestamp, ssrc, gotmarker, numcsrcs, csrcs, gotextension, extensionid, extensionlen_numwords, extensiondata,
-            0, maxpacksize);
+    error = BuildPacket(
+                payloadtype,
+                payloaddata,
+                payloadlen,
+                seqnr,
+                timestamp,
+                ssrc,
+                gotmarker,
+                numcsrcs,
+                csrcs,
+                gotextension,
+                extensionid,
+                extensionlen_numwords,
+                extensiondata,
+                0,
+                maxpacksize);
 }
 
-RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t buffersize) :
-        receivetime(0, 0)
+RTPPacket::RTPPacket(
+        uint8_t payloadtype,
+        const void *payloaddata,
+        std::size_t payloadlen,
+        uint16_t seqnr,
+        uint32_t timestamp,
+        uint32_t ssrc,
+        bool gotmarker,
+        uint8_t numcsrcs,
+        const uint32_t *csrcs,
+        bool gotextension,
+        uint16_t extensionid,
+        uint16_t extensionlen_numwords,
+        const void *extensiondata,
+        void *buffer,
+        std::size_t buffersize) :
+    receivetime(0, 0)
 {
     Clear();
     if (buffer == 0)
@@ -86,8 +127,22 @@ RTPPacket::RTPPacket(uint8_t payloadtype, const void *payloaddata, std::size_t p
     else if (buffersize <= 0)
         error = ERR_RTP_PACKET_ILLEGALBUFFERSIZE;
     else
-        error = BuildPacket(payloadtype, payloaddata, payloadlen, seqnr, timestamp, ssrc, gotmarker, numcsrcs, csrcs, gotextension, extensionid, extensionlen_numwords,
-                extensiondata, buffer, buffersize);
+        error = BuildPacket(
+                    payloadtype,
+                    payloaddata,
+                    payloadlen,
+                    seqnr,
+                    timestamp,
+                    ssrc,
+                    gotmarker,
+                    numcsrcs,
+                    csrcs,
+                    gotextension,
+                    extensionid,
+                    extensionlen_numwords,
+                    extensiondata,
+                    buffer,
+                    buffersize);
 }
 
 int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
@@ -188,9 +243,6 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
     RTPPacket::packetlength = packetlen;
     RTPPacket::payloadlength = payloadlength;
 
-    // We'll zero the data of the raw packet, since we're using it here now!
-    rawpack.ZeroData();
-
     return 0;
 }
 
@@ -209,8 +261,22 @@ uint32_t RTPPacket::GetCSRC(int num) const
     return csrcval_hbo;
 }
 
-int RTPPacket::BuildPacket(uint8_t payloadtype, const void *payloaddata, std::size_t payloadlen, uint16_t seqnr, uint32_t timestamp, uint32_t ssrc, bool gotmarker, uint8_t numcsrcs,
-        const uint32_t *csrcs, bool gotextension, uint16_t extensionid, uint16_t extensionlen_numwords, const void *extensiondata, void *buffer, std::size_t maxsize)
+int RTPPacket::BuildPacket(
+        uint8_t payloadtype,
+        const void *payloaddata,
+        std::size_t payloadlen,
+        uint16_t seqnr,
+        uint32_t timestamp,
+        uint32_t ssrc,
+        bool gotmarker,
+        uint8_t numcsrcs,
+        const uint32_t *csrcs,
+        bool gotextension,
+        uint16_t extensionid,
+        uint16_t extensionlen_numwords,
+        const void *extensiondata,
+        void *buffer,
+        std::size_t maxsize)
 {
     if (numcsrcs > RTP_MAXCSRCS)
         return ERR_RTP_PACKET_TOOMANYCSRCS;

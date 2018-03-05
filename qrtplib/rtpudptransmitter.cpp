@@ -32,13 +32,17 @@
 
 #include "rtpudptransmitter.h"
 #include "rtperrors.h"
+#include "rtpaddress.h"
+#include "rtpstructs.h"
+#include "rtprawpacket.h"
 
-#define RTPUDPTRANS_MAXPACKSIZE 65535
+#include <QUdpSocket>
 
 namespace qrtplib
 {
 
-RTPUDPTransmitter::RTPUDPTransmitter()
+RTPUDPTransmitter::RTPUDPTransmitter() :
+    m_rawPacketQueueLock(QMutex::Recursive)
 {
     m_created = false;
     m_init = false;
@@ -48,9 +52,7 @@ RTPUDPTransmitter::RTPUDPTransmitter()
     m_closesocketswhendone = false;
     m_rtcpPort = 0;
     m_rtpPort = 0;
-    m_supportsmulticasting = false;
     m_receivemode = RTPTransmitter::AcceptAll;
-    m_localhostname = 0;
 }
 
 RTPUDPTransmitter::~RTPUDPTransmitter()
@@ -71,11 +73,9 @@ int RTPUDPTransmitter::Init()
 int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissionParams *transparams)
 {
     const RTPUDPTransmissionParams *params, defaultparams;
-    struct sockaddr_in addr;
     qint64 size;
-    int status;
 
-    if (maximumpacketsize > RTPUDPTRANS_MAXPACKSIZE) {
+    if (maximumpacketsize > m_absoluteMaxPackSize) {
         return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
     }
 
@@ -98,7 +98,7 @@ int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissi
         {
             return ERR_RTP_UDPV4TRANS_ILLEGALPARAMETERS;
         }
-        params = (const RTPUDPv4TransmissionParams *) transparams;
+        params = (const RTPUDPTransmissionParams *) transparams;
     }
 
     // Determine the port numbers
@@ -155,14 +155,31 @@ int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissi
     }
 
     m_maxpacksize = maximumpacketsize;
-    m_mcastifaceIP = params->GetMulticastInterfaceIP();
+    m_multicastInterface = params->GetMulticastInterface();
     m_receivemode = RTPTransmitter::AcceptAll;
-
-    m_localhostname = 0;
-    m_localhostnamelength = 0;
 
     m_waitingfordata = false;
     m_created = true;
+
+    return 0;
+}
+
+int RTPUDPTransmitter::BindSockets()
+{
+    if (!m_rtpsock->bind(m_localIP, m_rtpPort)) {
+        return ERR_RTP_UDPV4TRANS_CANTBINDRTPSOCKET;
+    }
+
+    connect(m_rtpsock, SIGNAL(readyRead()), this, SLOT(readRTPPendingDatagrams()));
+
+    if (m_rtpsock != m_rtcpsock)
+    {
+        if (!m_rtcpsock->bind(m_localIP, m_rtcpPort)) {
+            return ERR_RTP_UDPV4TRANS_CANTBINDRTCPSOCKET;
+        }
+
+        connect(m_rtcpsock, SIGNAL(readyRead()), this, SLOT(readRTCPPendingDatagrams()));
+    }
 
     return 0;
 }
@@ -177,16 +194,6 @@ void RTPUDPTransmitter::Destroy()
     {
         return;
     }
-
-    if (m_localhostname)
-    {
-        delete[] m_localhostname;
-        m_localhostname = 0;
-        m_localhostnamelength = 0;
-    }
-
-    FlushPackets();
-    ClearAcceptIgnoreInfo();
 
     if (m_closesocketswhendone)
     {
@@ -206,8 +213,7 @@ RTPTransmissionInfo *RTPUDPTransmitter::GetTransmissionInfo()
         return 0;
     }
 
-    RTPTransmissionInfo *tinf = new RTPUDPv4TransmissionNoBindInfo(
-            m_localIP, m_rtpsock, m_rtcpsock, m_rtpPort, m_rtcpPort);
+    RTPTransmissionInfo *tinf = new RTPUDPTransmissionInfo(m_localIP, m_rtpsock, m_rtcpsock, m_rtpPort, m_rtcpPort);
 
     return tinf;
 }
@@ -221,13 +227,326 @@ void RTPUDPTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *inf)
     delete inf;
 }
 
-bool RTPUDPTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
+bool RTPUDPTransmitter::ComesFromThisTransmitter(const RTPAddress& addr)
 {
-    if (addr->getAddress() != m_localIP) {
+    if (addr.getAddress() != m_localIP) {
         return false;
     }
 
-    return (addr->getPort() == m_rtpPort) && (addr->getRtcpsendport() == m_rtcpPort);
+    return (addr.getPort() == m_rtpPort) && (addr.getRtcpsendport() == m_rtcpPort);
+}
+
+int RTPUDPTransmitter::SendRTPData(const void *data, std::size_t len)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (len > m_maxpacksize)
+    {
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
+
+    std::list<RTPAddress>::const_iterator it = m_destinations.begin();
+
+    for (; it != m_destinations.end(); ++it)
+    {
+        m_rtpsock->writeDatagram((const char*) data, (qint64) len, it->getAddress(), it->getPort());
+    }
+
+    return 0;
+}
+
+int RTPUDPTransmitter::SendRTCPData(const void *data, std::size_t len)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (len > m_maxpacksize) {
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
+
+    std::list<RTPAddress>::const_iterator it = m_destinations.begin();
+
+    for (; it != m_destinations.end(); ++it)
+    {
+        m_rtcpsock->writeDatagram((const char*) data, (qint64) len, it->getAddress(), it->getRtcpsendport());
+    }
+
+    return 0;
+}
+
+int RTPUDPTransmitter::AddDestination(const RTPAddress &addr)
+{
+    m_destinations.push_back(addr);
+    return 0;
+}
+
+int RTPUDPTransmitter::DeleteDestination(const RTPAddress &addr)
+{
+    m_destinations.remove(addr);
+    return 0;
+}
+
+void RTPUDPTransmitter::ClearDestinations()
+{
+    m_destinations.clear();
+}
+
+bool RTPUDPTransmitter::SupportsMulticasting()
+{
+    QNetworkInterface::InterfaceFlags flags = m_multicastInterface.flags();
+    QAbstractSocket::SocketState rtpSocketState = m_rtpsock->state();
+    QAbstractSocket::SocketState rtcpSocketState = m_rtcpsock->state();
+    return m_multicastInterface.isValid()
+            && (rtpSocketState & QAbstractSocket::BoundState)
+            && (rtcpSocketState & QAbstractSocket::BoundState)
+            && (flags & QNetworkInterface::CanMulticast)
+            && (flags & QNetworkInterface::IsRunning)
+            && !(flags & QNetworkInterface::IsLoopBack);
+}
+
+int RTPUDPTransmitter::JoinMulticastGroup(const RTPAddress &addr)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (!SupportsMulticasting()) {
+        return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+    }
+
+    if (m_rtpsock->joinMulticastGroup(addr.getAddress(), m_multicastInterface))
+    {
+        if (m_rtpsock != m_rtcpsock)
+        {
+            if (!m_rtcpsock->joinMulticastGroup(addr.getAddress(), m_multicastInterface)) {
+                return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+            }
+        }
+    }
+    else
+    {
+        return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+    }
+
+    return 0;
+}
+
+int RTPUDPTransmitter::LeaveMulticastGroup(const RTPAddress &addr)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (!SupportsMulticasting()) {
+        return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+    }
+
+    m_rtpsock->leaveMulticastGroup(addr.getAddress());
+
+    if (m_rtpsock != m_rtcpsock)
+    {
+        m_rtcpsock->leaveMulticastGroup(addr.getAddress());
+    }
+
+    return 0;
+}
+
+int RTPUDPTransmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (m != m_receivemode) {
+        m_receivemode = m;
+    }
+
+    return 0;
+}
+
+int RTPUDPTransmitter::AddToIgnoreList(const RTPAddress &addr)
+{
+    m_ignoreList.push_back(addr);
+    return 0;
+}
+
+int RTPUDPTransmitter::DeleteFromIgnoreList(const RTPAddress &addr)
+{
+    m_ignoreList.remove(addr);
+    return 0;
+}
+
+void RTPUDPTransmitter::ClearIgnoreList()
+{
+    m_ignoreList.clear();
+}
+
+int RTPUDPTransmitter::AddToAcceptList(const RTPAddress &addr)
+{
+    m_acceptList.push_back(addr);
+    return 0;
+}
+
+int RTPUDPTransmitter::DeleteFromAcceptList(const RTPAddress &addr)
+{
+    m_acceptList.remove(addr);
+    return 0;
+}
+
+void RTPUDPTransmitter::ClearAcceptList()
+{
+    m_acceptList.clear();
+}
+
+int RTPUDPTransmitter::SetMaximumPacketSize(std::size_t s)
+{
+    if (!m_init) {
+        return ERR_RTP_UDPV4TRANS_NOTINIT;
+    }
+
+    if (!m_created) {
+        return ERR_RTP_UDPV4TRANS_NOTCREATED;
+    }
+
+    if (s > m_absoluteMaxPackSize) {
+        return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+    }
+
+    m_maxpacksize = s;
+    return 0;
+}
+
+RTPRawPacket *RTPUDPTransmitter::GetNextPacket()
+{
+    QMutexLocker locker(&m_rawPacketQueueLock);
+
+    if (m_rawPacketQueue.isEmpty()) {
+        return 0;
+    } else {
+        return m_rawPacketQueue.takeFirst();
+    }
+}
+
+void RTPUDPTransmitter::readRTPPendingDatagrams()
+{
+    while (m_rtpsock->hasPendingDatagrams())
+    {
+        RTPTime curtime = RTPTime::CurrentTime();
+        QHostAddress remoteAddress;
+        quint16 remotePort;
+        qint64 pendingDataSize = m_rtpsock->pendingDatagramSize();
+        qint64 bytesRead = m_rtpsock->readDatagram(m_rtpBuffer, pendingDataSize, &remoteAddress, &remotePort);
+        qDebug("RTPUDPTransmitter::readRTPPendingDatagrams: %lld bytes read from %s:%d",
+                bytesRead,
+                qPrintable(remoteAddress.toString()),
+                remotePort);
+
+        RTPAddress rtpAddress;
+        rtpAddress.setAddress(remoteAddress);
+        rtpAddress.setPort(remotePort);
+
+        if (ShouldAcceptData(rtpAddress))
+        {
+            bool isrtp = true;
+
+            if (m_rtpsock == m_rtcpsock) // check payload type when multiplexing
+            {
+                if ((std::size_t) bytesRead > sizeof(RTCPCommonHeader))
+                {
+                    RTCPCommonHeader *rtcpheader = (RTCPCommonHeader *) m_rtpBuffer;
+                    uint8_t packettype = rtcpheader->packettype;
+
+                    if (packettype >= 200 && packettype <= 204) {
+                        isrtp = false;
+                    }
+                }
+            }
+
+            RTPRawPacket *pack = new RTPRawPacket((uint8_t *) m_rtpBuffer, bytesRead, rtpAddress, curtime, isrtp);
+
+            m_rawPacketQueueLock.lock();
+            m_rawPacketQueue.append(pack);
+            m_rawPacketQueueLock.unlock();
+
+            emit NewDataAvailable();
+        }
+    }
+}
+
+void RTPUDPTransmitter::readRTCPPendingDatagrams()
+{
+    while (m_rtcpsock->hasPendingDatagrams())
+    {
+        RTPTime curtime = RTPTime::CurrentTime();
+        QHostAddress remoteAddress;
+        quint16 remotePort;
+        qint64 pendingDataSize = m_rtcpsock->pendingDatagramSize();
+        qint64 bytesRead = m_rtcpsock->readDatagram(m_rtcpBuffer, pendingDataSize, &remoteAddress, &remotePort);
+        qDebug("RTPUDPTransmitter::readRTCPPendingDatagrams: %lld bytes read from %s:%d",
+                bytesRead,
+                qPrintable(remoteAddress.toString()),
+                remotePort);
+
+        RTPAddress rtpAddress;
+        rtpAddress.setAddress(remoteAddress);
+        rtpAddress.setPort(remotePort);
+
+        if (ShouldAcceptData(rtpAddress))
+        {
+            RTPRawPacket *pack = new RTPRawPacket((uint8_t *) m_rtcpBuffer, bytesRead, rtpAddress, curtime, false);
+
+            m_rawPacketQueueLock.lock();
+            m_rawPacketQueue.append(pack);
+            m_rawPacketQueueLock.unlock();
+
+            emit NewDataAvailable();
+        }
+    }
+}
+
+bool RTPUDPTransmitter::ShouldAcceptData(const RTPAddress& rtpAddress)
+{
+    if (m_receivemode == RTPTransmitter::AcceptAll)
+    {
+        return true;
+    }
+    else if (m_receivemode == RTPTransmitter::AcceptSome)
+    {
+        std::list<RTPAddress>::iterator findIt = std::find(m_acceptList.begin(), m_acceptList.end(), rtpAddress);
+        return findIt != m_acceptList.end();
+    }
+    else if (m_receivemode == RTPTransmitter::IgnoreSome)
+    {
+        std::list<RTPAddress>::iterator findIt = std::find(m_ignoreList.begin(), m_ignoreList.end(), rtpAddress);
+        return findIt == m_ignoreList.end();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 } // namespace
