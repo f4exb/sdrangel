@@ -52,6 +52,17 @@ namespace qrtplib
 class QRTPLIB_API RTPAddress
 {
 public:
+    /** Default constructor. Address and port set via setters */
+    RTPAddress() : port(0), rtcpsendport(0)
+    {}
+
+    /** Constructor with address and port */
+    RTPAddress(const QHostAddress& address, uint16_t port) :
+        address(address),
+        port(port),
+        rtcpsendport(0)
+    {}
+
     /** Returns the type of address the actual implementation represents. */
     QAbstractSocket::NetworkLayerProtocol GetAddressType() const
     {
