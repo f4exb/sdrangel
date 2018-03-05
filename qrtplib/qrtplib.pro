@@ -40,10 +40,7 @@ HEADERS += $$PWD/rtcpapppacket.h \
     $$PWD/rtpdefines.h \
     $$PWD/rtpendian.h \
     $$PWD/rtperrors.h \
-    $$PWD/rtphashtable.h \
     $$PWD/rtpinternalsourcedata.h \
-    $$PWD/rtpkeyhashtable.h \
-    $$PWD/rtplibraryversion.h \
     $$PWD/rtppacket.h \
     $$PWD/rtppacketbuilder.h \
     $$PWD/rtprandom.h \
@@ -80,7 +77,6 @@ SOURCES += $$PWD/rtcpapppacket.cpp \
     $$PWD/rtpcollisionlist.cpp \
     $$PWD/rtperrors.cpp \
     $$PWD/rtpinternalsourcedata.cpp \
-    $$PWD/rtplibraryversion.cpp \
     $$PWD/rtppacket.cpp \
     $$PWD/rtppacketbuilder.cpp \
     $$PWD/rtprandom.cpp \

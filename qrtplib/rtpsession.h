@@ -39,7 +39,6 @@
 #define RTPSESSION_H
 
 #include "rtpconfig.h"
-#include "rtplibraryversion.h"
 #include "rtppacketbuilder.h"
 #include "rtpsessionsources.h"
 #include "rtptransmitter.h"
