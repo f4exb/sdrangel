@@ -48,12 +48,11 @@
 #include "rtcpcompoundpacket.h"
 #endif // RTP_SUPPORT_SENDAPP
 #include "rtpinternalutils.h"
-#ifndef WIN32
+
 #include <unistd.h>
 #include <stdlib.h>
-#else
-#include <winbase.h>
-#endif // WIN32
+
+#include <QHostInfo>
 
 
 namespace qrtplib
@@ -1145,51 +1144,6 @@ int RTPSession::ProcessPolledData()
 
 int RTPSession::CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool resolve __attribute__((unused)))
 {
-#ifndef WIN32
-    bool gotlogin = true;
-#ifdef RTP_SUPPORT_GETLOGINR
-    buffer[0] = 0;
-    if (getlogin_r((char *) buffer, *bufferlength) != 0)
-        gotlogin = false;
-    else
-    {
-        if (buffer[0] == 0)
-            gotlogin = false;
-    }
-
-    if (!gotlogin) // try regular getlogin
-    {
-        char *loginname = getlogin();
-        if (loginname == 0)
-            gotlogin = false;
-        else
-            strncpy((char *) buffer, loginname, *bufferlength);
-    }
-#else
-    char *loginname = getlogin();
-    if (loginname == 0)
-    gotlogin = false;
-    else
-    strncpy((char *)buffer,loginname,*bufferlength);
-#endif // RTP_SUPPORT_GETLOGINR
-    if (!gotlogin)
-    {
-        char *logname = getenv("LOGNAME");
-        if (logname == 0)
-            return ERR_RTP_SESSION_CANTGETLOGINNAME;
-        strncpy((char *) buffer, logname, *bufferlength);
-    }
-#else // Win32 version
-
-#ifndef _WIN32_WCE
-    DWORD len = *bufferlength;
-    if (!GetUserName((LPTSTR)buffer,&len))
-    strncpy((char *)buffer,"unknown",*bufferlength);
-#else
-    strncpy((char *)buffer,"unknown",*bufferlength);
-#endif // _WIN32_WCE
-
-#endif // WIN32
     buffer[*bufferlength - 1] = 0;
 
     std::size_t offset = strlen((const char *) buffer);
@@ -1199,16 +1153,15 @@ int RTPSession::CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool res
 
     std::size_t buflen2 = *bufferlength - offset;
 
-    char hostname[1024];
+    QString hostnameStr = QHostInfo::localHostName();
+    int hostnameSize = hostnameStr.size();
 
-    strncpy(hostname, "localhost", 1024); // just in case gethostname fails
+    strncpy((char * )(buffer + offset), hostnameStr.toStdString().c_str(), buflen2);
+    *bufferlength = offset + hostnameSize;
 
-    gethostname(hostname, 1024);
-    strncpy((char * )(buffer + offset), hostname, buflen2);
-
-        *bufferlength = offset + strlen(hostname);
     if (*bufferlength > RTCP_SDES_MAXITEMLENGTH)
         *bufferlength = RTCP_SDES_MAXITEMLENGTH;
+
     return 0;
 }
 

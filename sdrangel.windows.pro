@@ -11,6 +11,7 @@ CONFIG += ordered
 SUBDIRS = serialdv
 SUBDIRS += httpserver
 SUBDIRS += logging
+SUBDIRS += qrtplib
 SUBDIRS += swagger
 SUBDIRS += sdrbase
 SUBDIRS += sdrgui

@@ -10,6 +10,8 @@ TEMPLATE = lib
 TARGET = httpserver
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../sdrbase
+
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(Release):build_subdir = release
