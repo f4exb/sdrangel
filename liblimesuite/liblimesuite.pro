@@ -17,8 +17,8 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
+CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
+CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
 
 CONFIG(MINGW32):INCLUDEPATH += "..\libsqlite3\src"
 CONFIG(MINGW64):INCLUDEPATH += "..\libsqlite3\src"
