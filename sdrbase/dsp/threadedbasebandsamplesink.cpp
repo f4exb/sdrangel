@@ -77,9 +77,8 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 	m_basebandSampleSink->moveToThread(m_thread);
 	m_threadedBasebandSampleSinkFifo->moveToThread(m_thread);
 	BasebandSampleSink::MsgThreadedSink *msg = BasebandSampleSink::MsgThreadedSink::create(m_thread); // inform of the new thread
-	if (!m_basebandSampleSink->handleMessage(*msg)) {
-	    delete msg;
-	}
+	m_basebandSampleSink->handleMessage(*msg);
+	delete msg;
 	//m_sampleFifo.moveToThread(m_thread);
 	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
 	//m_sampleFifo.setSize(262144);
