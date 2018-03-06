@@ -65,6 +65,7 @@ set(sdrbase_SOURCES
     util/message.cpp
     util/messagequeue.cpp
     util/prettyprint.cpp
+    util/rtpsink.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
     util/simpleserializer.cpp
@@ -173,6 +174,7 @@ set(sdrbase_HEADERS
     util/messagequeue.h
     util/movingaverage.h
     util/prettyprint.h
+    util/rtpsink.h
     util/syncmessenger.h
     util/samplesourceserializer.h
     util/simpleserializer.h
@@ -214,19 +216,6 @@ else(FFTW3F_FOUND)
     )
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
-
-if (JRTPLIB_FOUND)
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        util/rtpsink.h
-    )
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        util/rtpsink.cpp
-    )
-    add_definitions(-DHAS_JRTPLIB)
-    include_directories(${JRTPLIB_INCLUDE_DIR})
-endif(JRTPLIB_FOUND)
 
 if (LIBSERIALDV_FOUND)
     set(sdrbase_SOURCES
@@ -270,22 +259,20 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     .
     ${CMAKE_SOURCE_DIR}/httpserver
+    ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
     httpserver
+    qrtplib
     swagger
 )
 
 if(FFTW3F_FOUND)
     target_link_libraries(sdrbase ${FFTW3F_LIBRARIES})
 endif(FFTW3F_FOUND)
-
-if (JRTPLIB_FOUND)
-    target_link_libraries(sdrbase ${JRTPLIB_LIBRARIES})
-endif(JRTPLIB_FOUND)
 
 if(LIBSERIALDV_FOUND)
     target_link_libraries(sdrbase ${LIBSERIALDV_LIBRARY})

@@ -66,6 +66,7 @@ public:
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly); //!< Feed sink with samples
 
 	QString getSampleSinkObjectName() const;
+    const QThread *getThread() const { return m_thread; }
 
 protected:
 

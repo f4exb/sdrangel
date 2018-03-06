@@ -49,7 +49,6 @@ RTPUDPTransmitter::RTPUDPTransmitter() :
     m_rtcpsock = 0;
     m_rtpsock = 0;
     m_waitingfordata = false;
-    m_closesocketswhendone = false;
     m_rtcpPort = 0;
     m_rtpPort = 0;
     m_receivemode = RTPTransmitter::AcceptAll;
@@ -123,35 +122,26 @@ int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissi
         }
     }
 
-    if (params->GetUseExistingSockets(&m_rtpsock, &m_rtcpsock))
+    m_rtpsock = new QUdpSocket();
+
+    // If we're multiplexing, we're just going to set the RTCP socket to equal the RTP socket
+    if (params->GetRTCPMultiplexing())
     {
-        m_closesocketswhendone = false;
+        m_rtcpsock = m_rtpsock;
+        m_rtcpPort = m_rtpPort;
+    } else {
+        m_rtcpsock = new QUdpSocket();
     }
-    else
+
+    // set socket buffer sizes
+
+    size = params->GetRTPReceiveBufferSize();
+    m_rtpsock->setReadBufferSize(size);
+
+    if (m_rtpsock != m_rtcpsock)
     {
-        m_rtpsock = new QUdpSocket();
-
-        // If we're multiplexing, we're just going to set the RTCP socket to equal the RTP socket
-        if (params->GetRTCPMultiplexing())
-        {
-            m_rtcpsock = m_rtpsock;
-            m_rtcpPort = m_rtpPort;
-        } else {
-            m_rtcpsock = new QUdpSocket();
-        }
-
-        m_closesocketswhendone = true;
-
-        // set socket buffer sizes
-
-        size = params->GetRTPReceiveBufferSize();
-        m_rtpsock->setReadBufferSize(size);
-
-        if (m_rtpsock != m_rtcpsock)
-        {
-            size = params->GetRTCPReceiveBufferSize();
-            m_rtcpsock->setReadBufferSize(size);
-        }
+        size = params->GetRTCPReceiveBufferSize();
+        m_rtcpsock->setReadBufferSize(size);
     }
 
     m_maxpacksize = maximumpacketsize;
@@ -195,14 +185,11 @@ void RTPUDPTransmitter::Destroy()
         return;
     }
 
-    if (m_closesocketswhendone)
-    {
-        if (m_rtpsock != m_rtcpsock) {
-            delete m_rtcpsock;
-        }
-
-        delete m_rtpsock;
+    if (m_rtpsock != m_rtcpsock) {
+        delete m_rtcpsock;
     }
+
+    delete m_rtpsock;
 
     m_created = false;
 }

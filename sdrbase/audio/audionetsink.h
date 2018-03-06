@@ -24,6 +24,7 @@
 
 template<typename T> class UDPSink;
 class RTPSink;
+class QThread;
 
 class SDRBASE_API AudioNetSink {
 public:
@@ -45,6 +46,8 @@ public:
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);
+
+    void moveToThread(QThread *thread);
 
     static const int m_udpBlockSize;
 

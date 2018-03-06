@@ -77,7 +77,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-	m_audioNetSink = new AudioNetSink(this);
+	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     m_channelizer = new DownChannelizer(this);
@@ -373,6 +373,14 @@ bool NFMDemod::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
+	}
+	else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
+	{
+	    BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
+	    const QThread *thread = cfg.getThread();
+	    qDebug("NFMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
+	    m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
+	    return true;
 	}
 	else if (DSPSignalNotification::match(cmd))
 	{

@@ -71,6 +71,11 @@ public:
 		delete m_socket;
 	}
 
+	void moveToThread(QThread *thread)
+	{
+	    m_socket->moveToThread(thread);
+	}
+
 	void setAddress(QString& address) { m_address.setAddress(address); }
 	void setPort(unsigned int port) { m_port = port; }
 

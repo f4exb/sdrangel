@@ -144,6 +144,10 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
+    {
+        return m_sampleSink->handleMessage(cmd); // this message is passed to the demod
+    }
 	else
 	{
 	    return false;

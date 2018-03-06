@@ -142,16 +142,6 @@ public:
         m_forcedrtcpport = rtcpport;
     }
 
-    /** Use sockets that have already been created, no checks on port numbers
-     *  will be done, and no buffer sizes will be set; you'll need to close
-     *  the sockets yourself when done, it will **not** be done automatically. */
-    void SetUseExistingSockets(QUdpSocket *rtpsocket, QUdpSocket *rtcpsocket)
-    {
-        m_rtpsock = rtpsocket;
-        m_rtcpsock = rtcpsocket;
-        m_useexistingsockets = true;
-    }
-
     /** Returns the RTP socket's send buffer size. */
     int GetRTPSendBufferSize() const
     {
@@ -194,19 +184,6 @@ public:
         return m_forcedrtcpport;
     }
 
-    /** Returns true and fills in sockets if existing sockets were set
-     *  using RTPUDPv4TransmissionParams::SetUseExistingSockets. */
-    bool GetUseExistingSockets(QUdpSocket **rtpsocket, QUdpSocket **rtcpsocket) const
-    {
-        if (!m_useexistingsockets) {
-            return false;
-        }
-
-        *rtpsocket = m_rtpsock;
-        *rtcpsocket = m_rtcpsock;
-        return true;
-    }
-
 private:
     QHostAddress m_bindAddress;
     QNetworkInterface m_mcastInterface;
@@ -218,7 +195,6 @@ private:
     uint16_t m_forcedrtcpport;
 
     QUdpSocket *m_rtpsock, *m_rtcpsock;
-    bool m_useexistingsockets;
 };
 
 inline RTPUDPTransmissionParams::RTPUDPTransmissionParams() :
@@ -232,7 +208,6 @@ inline RTPUDPTransmissionParams::RTPUDPTransmissionParams() :
     m_rtcpmux = false;
     m_allowoddportbase = false;
     m_forcedrtcpport = 0;
-    m_useexistingsockets = false;
     m_rtpsock = 0;
     m_rtcpsock = 0;
 }
@@ -359,8 +334,6 @@ private:
     std::list<RTPAddress> m_ignoreList;
     QQueue<RTPRawPacket*> m_rawPacketQueue;
     QMutex m_rawPacketQueueLock;
-
-    bool m_closesocketswhendone;
 
     bool ShouldAcceptData(const RTPAddress& address);
 
