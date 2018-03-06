@@ -58,7 +58,8 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-    m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
+    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -72,11 +73,16 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 AMDemod::~AMDemod()
 {
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
-    delete m_udpBufferAudio;
+    delete m_audioNetSink;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+}
+
+bool AMDemod::isAudioNetSinkRTPCapable() const
+{
+    return m_audioNetSink && m_audioNetSink->isRTPCapable();
 }
 
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -226,6 +232,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioMute: " << settings.m_audioMute
             << " m_bandpassEnable: " << settings.m_bandpassEnable
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
+            << " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;
@@ -250,8 +257,27 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
     if ((m_settings.m_udpAddress != settings.m_udpAddress)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
-        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
-        m_udpBufferAudio->setPort(settings.m_udpPort);
+        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
+    }
+
+    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
+    {
+        if (settings.m_copyAudioUseRTP)
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
+                qDebug("NFMDemod::applySettings: set audio sink to RTP mode");
+            } else {
+                qWarning("NFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
+            }
+        }
+        else
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
+                qDebug("NFMDemod::applySettings: set audio sink to UDP mode");
+            } else {
+                qWarning("NFMDemod::applySettings: failed to set audio sink to UDP mode");
+            }
+        }
     }
 
     m_settings = settings;

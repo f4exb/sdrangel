@@ -30,6 +30,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "amdemodsettings.h"
+#include "audio/audionetsink.h"
 
 class DeviceSourceAPI;
 class DownChannelizer;
@@ -113,6 +114,8 @@ public:
         m_magsqCount = 0;
 	}
 
+    bool isAudioNetSinkRTPCapable() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -151,7 +154,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
-    UDPSink<qint16> *m_udpBufferAudio;
+    AudioNetSink *m_audioNetSink;
 
     static const int m_udpBlockSize;
 
@@ -207,14 +210,18 @@ private:
 
             Real attack = (m_squelchCount - 0.05f * m_settings.m_audioSampleRate) / (0.05f * m_settings.m_audioSampleRate);
             sample = demod * attack * 2048 * m_settings.m_volume;
-            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * SDR_RX_SCALEF);
+            if (m_settings.m_copyAudioToUDP) {
+                m_audioNetSink->write(demod * attack * 32768.0f);
+            }
 
             m_squelchOpen = true;
         }
         else
         {
             sample = 0;
-            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(0);
+            if (m_settings.m_copyAudioToUDP) {
+                m_audioNetSink->write(0);
+            }
             m_squelchOpen = false;
         }
 
