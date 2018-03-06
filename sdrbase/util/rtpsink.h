@@ -55,6 +55,10 @@ public:
     void write(const uint8_t *sampleByte);
     void write(const uint8_t *sampleByte, int nbSamples);
 
+    void moveToThread(QThread *thread) {
+        m_rtpTransmitter.moveToThread(thread);
+    }
+
 protected:
     /** Reverse endianess in destination buffer */
     static void writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse);

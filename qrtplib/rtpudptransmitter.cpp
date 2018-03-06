@@ -174,6 +174,17 @@ int RTPUDPTransmitter::BindSockets()
     return 0;
 }
 
+void RTPUDPTransmitter::moveToThread(QThread *thread)
+{
+    if (m_rtpsock) {
+        m_rtpsock->moveToThread(thread);
+    }
+
+    if (m_rtpsock != m_rtcpsock) {
+        m_rtcpsock->moveToThread(thread);
+    }
+}
+
 void RTPUDPTransmitter::Destroy()
 {
     if (!m_init) {

@@ -135,5 +135,9 @@ void AudioNetSink::moveToThread(QThread *thread)
     if (m_udpBufferAudioStereo) {
         m_udpBufferAudioMono->moveToThread(thread);
     }
+
+    if (m_rtpBufferAudio) {
+        m_rtpBufferAudio->moveToThread(thread);
+    }
 }
 

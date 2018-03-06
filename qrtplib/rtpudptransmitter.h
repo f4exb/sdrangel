@@ -282,6 +282,7 @@ public:
     virtual int Init();
     virtual int Create(std::size_t maxpacksize, const RTPTransmissionParams *transparams);
     virtual int BindSockets();
+    void moveToThread(QThread *thread);
     virtual void Destroy();
     virtual RTPTransmissionInfo *GetTransmissionInfo();
     virtual void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
@@ -313,6 +314,7 @@ public:
     virtual int SetMaximumPacketSize(std::size_t s);
 
     virtual RTPRawPacket *GetNextPacket();
+
 
 private:
     bool m_init;
