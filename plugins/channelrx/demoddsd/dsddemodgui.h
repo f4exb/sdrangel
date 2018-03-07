@@ -128,6 +128,7 @@ private slots:
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
     void on_udpOutput_toggled(bool checked);
+    void on_useRTP_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

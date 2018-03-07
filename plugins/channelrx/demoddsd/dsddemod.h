@@ -125,6 +125,8 @@ public:
         m_magsqCount = 0;
     }
 
+    bool isAudioNetSinkRTPCapable() const { return false; }
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 

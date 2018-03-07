@@ -219,6 +219,12 @@ void DSDDemodGUI::on_udpOutput_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_useRTP_toggled(bool checked)
+{
+    m_settings.m_copyAudioUseRTP = checked;
+    applySettings();
+}
+
 void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -384,6 +390,10 @@ void DSDDemodGUI::displaySettings()
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->udpOutput->setChecked(m_settings.m_copyAudioToUDP);
     ui->symbolPLLLock->setChecked(m_settings.m_pllLock);
+
+    if (m_dsdDemod->isAudioNetSinkRTPCapable()) {
+        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
+    }
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
 
