@@ -187,6 +187,14 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
+    {
+        BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
+        const QThread *thread = cfg.getThread();
+        qDebug("AMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
+        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         return true;

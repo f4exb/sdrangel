@@ -18,9 +18,11 @@
 #ifndef SDRBASE_AUDIO_AUDIONETSINK_H_
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
-#include <QObject>
 #include "dsp/dsptypes.h"
 #include "util/export.h"
+
+#include <stdint.h>
+#include <QObject>
 
 template<typename T> class UDPSink;
 class RTPSink;

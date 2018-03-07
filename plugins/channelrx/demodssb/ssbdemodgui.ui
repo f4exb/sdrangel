@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>413</width>
     <height>190</height>
    </rect>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>398</width>
+     <width>410</width>
      <height>171</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>398</width>
+     <width>410</width>
      <height>0</height>
     </size>
    </property>
@@ -870,6 +870,16 @@
         </property>
         <property name="text">
          <string>U</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="useRTP">
+        <property name="toolTip">
+         <string>Use RTP protocol for audio copy to UDP</string>
+        </property>
+        <property name="text">
+         <string>R</string>
         </property>
        </widget>
       </item>

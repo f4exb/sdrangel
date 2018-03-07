@@ -34,6 +34,7 @@ struct SSBDemodSettings
     bool m_dsb;
     bool m_audioMute;
     bool m_copyAudioToUDP;
+    bool m_copyAudioUseRTP;
     bool m_agc;
     bool m_agcClamping;
     int  m_agcTimeLog2;

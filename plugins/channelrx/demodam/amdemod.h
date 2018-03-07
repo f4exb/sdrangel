@@ -28,9 +28,9 @@
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
+#include "audio/audionetsink.h"
 #include "util/message.h"
 #include "amdemodsettings.h"
-#include "audio/audionetsink.h"
 
 class DeviceSourceAPI;
 class DownChannelizer;

@@ -38,6 +38,7 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+class AudioNetSink;
 
 class SSBDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
@@ -132,6 +133,8 @@ public:
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
+
+    bool isAudioNetSinkRTPCapable() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -274,7 +277,7 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
-	UDPSink<qint16> *m_udpBufferAudio;
+    AudioNetSink *m_audioNetSink;
 	static const int m_udpBlockSize;
 
 	QMutex m_settingsMutex;

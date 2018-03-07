@@ -45,6 +45,7 @@ void SSBDemodSettings::resetToDefaults()
     m_agc = false;
     m_agcClamping = false;
     m_copyAudioToUDP = false;
+    m_copyAudioUseRTP = false;
     m_agcPowerThreshold = -40;
     m_agcThresholdGate = 4;
     m_agcTimeLog2 = 7;
@@ -83,6 +84,7 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeS32(14, m_agcThresholdGate);
     s.writeBool(15, m_agcClamping);
     s.writeString(16, m_title);
+    s.writeBool(17, m_copyAudioUseRTP);
 
     return s.final();
 }
@@ -127,6 +129,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(14, &m_agcThresholdGate, 4);
         d.readBool(15, &m_agcClamping, false);
         d.readString(16, &m_title, "SSB Demodulator");
+        d.readBool(17, &m_copyAudioUseRTP, false);
 
         return true;
     }
