@@ -24,15 +24,9 @@ const int AudioNetSink::m_udpBlockSize = 512;
 AudioNetSink::AudioNetSink(QObject *parent, bool stereo) :
     m_type(SinkUDP),
     m_udpBufferAudioMono(0),
-    m_udpBufferAudioStereo(0),
     m_rtpBufferAudio(0)
 {
-    if (stereo) {
-        m_udpBufferAudioStereo = new UDPSink<AudioSample>(parent, m_udpBlockSize);
-    } else {
-        m_udpBufferAudioMono = new UDPSink<int16_t>(parent, m_udpBlockSize);
-    }
-
+    m_udpBufferAudioMono = new UDPSink<int16_t>(parent, m_udpBlockSize);
     m_rtpBufferAudio = new RTPSink("127.0.0.1", 9999, stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
 }
 
@@ -40,10 +34,6 @@ AudioNetSink::~AudioNetSink()
 {
     if (m_udpBufferAudioMono) {
         delete m_udpBufferAudioMono;
-    }
-
-    if (m_udpBufferAudioStereo) {
-        delete m_udpBufferAudioStereo;
     }
     if (m_rtpBufferAudio) {
         delete m_rtpBufferAudio;
@@ -78,9 +68,6 @@ void AudioNetSink::setDestination(const QString& address, uint16_t port)
     if (m_udpBufferAudioMono) {
         m_udpBufferAudioMono->setDestination(address, port);
     }
-    if (m_udpBufferAudioStereo) {
-        m_udpBufferAudioStereo->setDestination(address, port);
-    }
     if (m_rtpBufferAudio) {
         m_rtpBufferAudio->setDestination(address, port);
     }
@@ -102,25 +89,8 @@ void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
 
 void AudioNetSink::write(qint16 sample)
 {
-    if (m_udpBufferAudioMono == 0) {
-        return;
-    }
-
     if (m_type == SinkUDP) {
         m_udpBufferAudioMono->write(sample);
-    } else if (m_type == SinkRTP) {
-        m_rtpBufferAudio->write((uint8_t *) &sample);
-    }
-}
-
-void AudioNetSink::write(const AudioSample& sample)
-{
-    if (m_udpBufferAudioStereo == 0) {
-        return;
-    }
-
-    if (m_type == SinkUDP) {
-        m_udpBufferAudioStereo->write(sample);
     } else if (m_type == SinkRTP) {
         m_rtpBufferAudio->write((uint8_t *) &sample);
     }
@@ -129,10 +99,6 @@ void AudioNetSink::write(const AudioSample& sample)
 void AudioNetSink::moveToThread(QThread *thread)
 {
     if (m_udpBufferAudioMono) {
-        m_udpBufferAudioMono->moveToThread(thread);
-    }
-
-    if (m_udpBufferAudioStereo) {
         m_udpBufferAudioMono->moveToThread(thread);
     }
 

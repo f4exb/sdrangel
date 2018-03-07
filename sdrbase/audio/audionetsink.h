@@ -44,7 +44,6 @@ public:
     void deleteDestination(const QString& address, uint16_t port);
 
     void write(qint16 sample);
-    void write(const AudioSample& sample);
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);
@@ -56,7 +55,6 @@ public:
 protected:
     SinkType m_type;
     UDPSink<qint16> *m_udpBufferAudioMono;
-    UDPSink<AudioSample> *m_udpBufferAudioStereo;
     RTPSink *m_rtpBufferAudio;
 };
 
