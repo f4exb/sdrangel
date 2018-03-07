@@ -33,6 +33,8 @@
 
 #include "util/export.h"
 
+class QUdpSocket;
+
 class RTPSink
 {
 public:
@@ -42,7 +44,7 @@ public:
         PayloadL16Stereo,
     } PayloadType;
 
-    RTPSink(const QString& address, uint16_t port, PayloadType payloadType = PayloadL16Mono);
+    RTPSink(QUdpSocket *udpSocket, bool stereo);
     ~RTPSink();
 
     bool isValid() const { return m_valid; }
@@ -54,10 +56,6 @@ public:
 
     void write(const uint8_t *sampleByte);
     void write(const uint8_t *sampleByte, int nbSamples);
-
-    void moveToThread(QThread *thread) {
-        m_rtpTransmitter.moveToThread(thread);
-    }
 
 protected:
     /** Reverse endianess in destination buffer */

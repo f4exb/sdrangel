@@ -19,19 +19,20 @@
 #include "dsp/dsptypes.h"
 #include <algorithm>
 
-RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType) :
-    m_payloadType(payloadType),
+RTPSink::RTPSink(QUdpSocket *udpSocket, bool stereo) :
+    m_payloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono),
     m_sampleRate(48000),
     m_sampleBytes(0),
     m_packetSamples(0),
     m_bufferSize(0),
     m_sampleBufferIndex(0),
     m_byteBuffer(0),
-    m_destport(port),
+    m_destport(9998),
     m_mutex(QMutex::Recursive)
 {
 	m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
     m_rtpTransmissionParams.SetRTCPMultiplexing(true); // do not allocate another socket for RTCP
+    m_rtpTransmissionParams.SetUseExistingSockets(udpSocket, udpSocket);
 
     int status = m_rtpTransmitter.Init();
     if (status < 0) {
@@ -52,14 +53,12 @@ RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType)
         qDebug("RTPSink::RTPSink: created session: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    setPayloadType(payloadType);
+    setPayloadType(m_payloadType);
     m_valid = true;
 
     uint32_t endianTest32 = 1;
     uint8_t *ptr = (uint8_t*) &endianTest32;
     m_endianReverse = (*ptr == 1);
-
-    m_destip.setAddress(address);
 }
 
 RTPSink::~RTPSink()

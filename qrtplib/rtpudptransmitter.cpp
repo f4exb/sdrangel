@@ -48,6 +48,7 @@ RTPUDPTransmitter::RTPUDPTransmitter() :
     m_init = false;
     m_rtcpsock = 0;
     m_rtpsock = 0;
+    m_deletesocketswhendone = false;
     m_waitingfordata = false;
     m_rtcpPort = 0;
     m_rtpPort = 0;
@@ -122,15 +123,24 @@ int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissi
         }
     }
 
-    m_rtpsock = new QUdpSocket();
-
-    // If we're multiplexing, we're just going to set the RTCP socket to equal the RTP socket
-    if (params->GetRTCPMultiplexing())
+    if (params->GetUseExistingSockets(&m_rtpsock, &m_rtcpsock))
     {
-        m_rtcpsock = m_rtpsock;
-        m_rtcpPort = m_rtpPort;
-    } else {
-        m_rtcpsock = new QUdpSocket();
+        m_deletesocketswhendone = false;
+    }
+    else
+    {
+        m_deletesocketswhendone = true;
+
+        m_rtpsock = new QUdpSocket();
+
+        // If we're multiplexing, we're just going to set the RTCP socket to equal the RTP socket
+        if (params->GetRTCPMultiplexing())
+        {
+            m_rtcpsock = m_rtpsock;
+            m_rtcpPort = m_rtpPort;
+        } else {
+            m_rtcpsock = new QUdpSocket();
+        }
     }
 
     // set socket buffer sizes
@@ -174,17 +184,6 @@ int RTPUDPTransmitter::BindSockets()
     return 0;
 }
 
-void RTPUDPTransmitter::moveToThread(QThread *thread)
-{
-    if (m_rtpsock) {
-        m_rtpsock->moveToThread(thread);
-    }
-
-    if (m_rtpsock != m_rtcpsock) {
-        m_rtcpsock->moveToThread(thread);
-    }
-}
-
 void RTPUDPTransmitter::Destroy()
 {
     if (!m_init) {
@@ -196,11 +195,14 @@ void RTPUDPTransmitter::Destroy()
         return;
     }
 
-    if (m_rtpsock != m_rtcpsock) {
-        delete m_rtcpsock;
-    }
+    if (m_deletesocketswhendone)
+    {
+        if (m_rtpsock != m_rtcpsock) {
+            delete m_rtcpsock;
+        }
 
-    delete m_rtpsock;
+        delete m_rtpsock;
+    }
 
     m_created = false;
 }

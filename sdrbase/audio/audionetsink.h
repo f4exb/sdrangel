@@ -21,10 +21,11 @@
 #include "dsp/dsptypes.h"
 #include "util/export.h"
 
-#include <stdint.h>
 #include <QObject>
+#include <QHostAddress>
+#include <stdint.h>
 
-template<typename T> class UDPSink;
+class QUdpSocket;
 class RTPSink;
 class QThread;
 
@@ -45,7 +46,7 @@ public:
 
     void write(qint16 sample);
 
-    bool isRTPCapable() const { return false; }
+    bool isRTPCapable() const;
     bool selectType(SinkType type);
 
     void moveToThread(QThread *thread);
@@ -54,8 +55,12 @@ public:
 
 protected:
     SinkType m_type;
-    UDPSink<qint16> *m_udpBufferAudioMono;
+    QUdpSocket *m_udpSocket;
     RTPSink *m_rtpBufferAudio;
+    char m_data[65536];
+    unsigned int m_bufferIndex;
+    QHostAddress m_address;
+    unsigned int m_port;
 };
 
 
