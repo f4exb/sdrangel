@@ -45,7 +45,7 @@ public:
 
     void write(qint16 sample);
 
-    bool isRTPCapable() const;
+    bool isRTPCapable() const { return false; }
     bool selectType(SinkType type);
 
     void moveToThread(QThread *thread);

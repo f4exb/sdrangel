@@ -27,7 +27,7 @@ AudioNetSink::AudioNetSink(QObject *parent, bool stereo) :
     m_rtpBufferAudio(0)
 {
     m_udpBufferAudioMono = new UDPSink<int16_t>(parent, m_udpBlockSize);
-    m_rtpBufferAudio = new RTPSink("127.0.0.1", 9999, stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
+    //m_rtpBufferAudio = new RTPSink("127.0.0.1", 9999, stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
 }
 
 AudioNetSink::~AudioNetSink()
@@ -40,10 +40,10 @@ AudioNetSink::~AudioNetSink()
     }
 }
 
-bool AudioNetSink::isRTPCapable() const
-{
-        return m_rtpBufferAudio->isValid();
-}
+//bool AudioNetSink::isRTPCapable() const
+//{
+//        return m_rtpBufferAudio->isValid();
+//}
 
 bool AudioNetSink::selectType(SinkType type)
 {
