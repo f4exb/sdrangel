@@ -60,7 +60,6 @@ find_package(OpenGL REQUIRED)
 find_package(PkgConfig)
 find_package(Boost REQUIRED)
 find_package(FFTW3F)
-find_package(JRTPLib)
 
 if (NOT BUILD_DEBIAN)
     find_package(LibDSDcc)

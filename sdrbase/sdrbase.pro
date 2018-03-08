@@ -11,6 +11,7 @@ TEMPLATE = lib
 TARGET = sdrbase
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../httpserver
+INCLUDEPATH += ../qrtplib
 INCLUDEPATH += ../swagger/sdrangel/code/qt5/client
 
 DEFINES += USE_KISSFFT=1
@@ -104,6 +105,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/message.cpp\
         util/messagequeue.cpp\
         util/prettyprint.cpp\
+        util/rtpsink.cpp\
         util/syncmessenger.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
@@ -194,6 +196,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         util/message.h\
         util/messagequeue.h\
         util/prettyprint.h\
+        util/rtpsink.h\
         util/syncmessenger.h\
         util/samplesourceserializer.h\
         util/simpleserializer.h\
@@ -205,6 +208,7 @@ HEADERS  += audio/audiodeviceinfo.h\
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
+LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger
 
 RCC_BINARY_SOURCES += resources/res.qrc
