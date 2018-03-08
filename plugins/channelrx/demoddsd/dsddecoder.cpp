@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../../channelrx/demoddsd/dsddecoder.h"
+#include "dsddecoder.h"
 
 #include <QtGlobal>
 #include "audio/audiofifo.h"

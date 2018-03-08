@@ -8,6 +8,7 @@ sdrangelove.supp
 .cproject
 .project
 .pydevproject
+.vscode/
 .settings/
 *.cs
 *.pro.user
