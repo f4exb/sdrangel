@@ -89,6 +89,11 @@ void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
     }
 }
 
+void AudioNetSink::setStereo(bool stereo)
+{
+    m_rtpBufferAudio->setPayloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Stereo);
+}
+
 void AudioNetSink::write(qint16 sample)
 {
     if (m_type == SinkUDP)
@@ -108,6 +113,36 @@ void AudioNetSink::write(qint16 sample)
     else if (m_type == SinkRTP)
     {
         m_rtpBufferAudio->write((uint8_t *) &sample);
+    }
+}
+
+void AudioNetSink::write(AudioSample* samples, uint32_t numSamples)
+{
+    if (m_type == SinkUDP)
+    {
+        int samplesIndex = 0;
+
+        if (m_bufferIndex + numSamples*sizeof(AudioSample) >= m_udpBlockSize) // fill remainder of buffer and send it
+        {
+            memcpy(&m_data[m_bufferIndex], &samples[samplesIndex], m_udpBlockSize - m_bufferIndex); // fill remainder of buffer
+            m_udpSocket->writeDatagram((const char*)m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
+            m_bufferIndex = 0;
+            samplesIndex += (m_udpBlockSize - m_bufferIndex) / sizeof(AudioSample);
+            numSamples -= (m_udpBlockSize - m_bufferIndex) / sizeof(AudioSample);
+        }
+
+        while (numSamples > m_udpBlockSize/sizeof(AudioSample)) // send directly from input without buffering
+        {
+            m_udpSocket->writeDatagram((const char*)&samples[samplesIndex], (qint64 ) m_udpBlockSize, m_address, m_port);
+            samplesIndex += m_udpBlockSize/sizeof(AudioSample);
+            numSamples -= m_udpBlockSize/sizeof(AudioSample);
+        }
+
+        memcpy(&m_data[m_bufferIndex], &samples[samplesIndex], numSamples*sizeof(AudioSample));
+    }
+    else if (m_type == SinkRTP)
+    {
+        m_rtpBufferAudio->write((uint8_t *) samples, numSamples*sizeof(AudioSample));
     }
 }
 

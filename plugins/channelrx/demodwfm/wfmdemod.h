@@ -31,6 +31,7 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/udpsink.h"
 
 #include "wfmdemodsettings.h"
 

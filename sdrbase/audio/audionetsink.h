@@ -43,8 +43,10 @@ public:
     void setDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
+    void setStereo(bool stereo);
 
     void write(qint16 sample);
+    void write(AudioSample* samples, uint32_t numSamples);
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);

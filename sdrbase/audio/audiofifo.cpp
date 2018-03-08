@@ -19,13 +19,15 @@
 #include <QTime>
 #include "dsp/dsptypes.h"
 #include "audio/audiofifo.h"
+#include "audio/audionetsink.h"
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 AudioFifo::AudioFifo() :
 	m_fifo(0),
 	m_sampleSize(sizeof(AudioSample)),
-	m_udpSink(0),
+	//m_udpSink(0),
+	m_audioNetSink(0),
 	m_copyToUDP(false)
 {
 	m_size = 0;
@@ -37,7 +39,8 @@ AudioFifo::AudioFifo() :
 AudioFifo::AudioFifo(uint32_t numSamples) :
 	m_fifo(0),
     m_sampleSize(sizeof(AudioSample)),
-    m_udpSink(0),
+    //m_udpSink(0),
+    m_audioNetSink(0),
     m_copyToUDP(false)
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -75,9 +78,10 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples, int timeout_ms)
 	uint32_t remaining;
 	uint32_t copyLen;
 
-	if (m_copyToUDP && m_udpSink)
+	if (m_copyToUDP && m_audioNetSink)
 	{
-	    m_udpSink->write((AudioSample *) data, numSamples);
+	    //m_udpSink->write((AudioSample *) data, numSamples);
+	    m_audioNetSink->write((AudioSample *) data, numSamples);
 	}
 
 	if(m_fifo == 0)

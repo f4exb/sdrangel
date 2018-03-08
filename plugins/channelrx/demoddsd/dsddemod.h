@@ -199,7 +199,8 @@ private:
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;
-    UDPSink<AudioSample> *m_udpBufferAudio;
+    //UDPSink<AudioSample> *m_udpBufferAudio;
+    AudioNetSink *m_audioNetSink;
 
     static const int m_udpBlockSize;
 
