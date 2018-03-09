@@ -27,6 +27,7 @@ add_library(sdrsrv SHARED
 
 include_directories(
     .
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/httpserver

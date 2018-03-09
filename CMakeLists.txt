@@ -221,6 +221,7 @@ add_subdirectory(swagger)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/sdrgui
     ${CMAKE_SOURCE_DIR}/logging

@@ -168,7 +168,7 @@ set(sdrbase_HEADERS
     util/CRC64.h
     util/db.h
     util/doublebuffer.h
-    util/export.h
+    #util/export.h
     util/fixedtraits.h
     util/message.h
     util/messagequeue.h
@@ -258,6 +258,7 @@ add_library(sdrbase SHARED
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     .
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
