@@ -176,7 +176,7 @@ target_link_libraries(sdrgui
     logging
 )
 
-set_target_properties(sdrgui PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
+set_target_properties(sdrgui PROPERTIES DEFINE_SYMBOL "sdrgui_EXPORTS")
 target_compile_features(sdrgui PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
 qt5_use_modules(sdrgui Core Widgets OpenGL Multimedia)

@@ -33,7 +33,7 @@
 /* The 'SDRBASE_API' controls the import/export of 'sdrbase' symbols and classes.
  */
 #if !defined(sdrangel_STATIC)
-#  if defined sdrangel_EXPORTS || defined sdrbase_EXPORTS
+#  if defined sdrbase_EXPORTS
 #    define SDRBASE_API __SDR_EXPORT
 #  else
 #    define SDRBASE_API __SDR_IMPORT
