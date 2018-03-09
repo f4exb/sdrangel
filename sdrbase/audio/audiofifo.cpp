@@ -78,12 +78,6 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples, int timeout_ms)
 	uint32_t remaining;
 	uint32_t copyLen;
 
-	if (m_copyToUDP && m_audioNetSink)
-	{
-	    //m_udpSink->write((AudioSample *) data, numSamples);
-	    m_audioNetSink->write((AudioSample *) data, numSamples);
-	}
-
 	if(m_fifo == 0)
 	{
 		return 0;
@@ -223,6 +217,17 @@ uint AudioFifo::read(quint8* data, uint32_t numSamples, int timeout_ms)
 		copyLen = MIN(remaining, m_fill);
 		copyLen = MIN(copyLen, m_size - m_head);
 		memcpy(data, m_fifo + (m_head * m_sampleSize), copyLen * m_sampleSize);
+
+	    if (m_copyToUDP && m_audioNetSink)
+	    {
+	        for (quint8 *p = data; p < data + copyLen* m_sampleSize;)
+	        {
+	            AudioSample *a = (AudioSample *) p;
+	            m_audioNetSink->write((a->l + a->r)/2);
+	            p += m_sampleSize;
+	        }
+	    }
+
 		m_head += copyLen;
 		m_head %= m_size;
 		m_fill -= copyLen;
