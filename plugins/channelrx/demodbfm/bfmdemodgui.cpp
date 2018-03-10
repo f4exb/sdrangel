@@ -207,6 +207,12 @@ void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy)
     applySettings();
 }
 
+void BFMDemodGUI::on_useRTP_toggled(bool checked)
+{
+    m_settings.m_copyAudioUseRTP = checked;
+    applySettings();
+}
+
 void BFMDemodGUI::on_showPilot_clicked()
 {
     m_settings.m_showPilot = ui->showPilot->isChecked();
@@ -375,6 +381,10 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
+    if (!m_bfmDemod->isAudioNetSinkRTPCapable()) {
+        ui->useRTP->hide();
+    }
+
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
@@ -455,6 +465,10 @@ void BFMDemodGUI::displaySettings()
     ui->showPilot->setChecked(m_settings.m_showPilot);
     ui->rds->setChecked(m_settings.m_rdsActive);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
+
+    if (m_bfmDemod->isAudioNetSinkRTPCapable()) {
+        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
+    }
 
     blockApplySettings(false);
 }

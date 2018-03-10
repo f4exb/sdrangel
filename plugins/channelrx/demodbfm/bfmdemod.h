@@ -33,7 +33,6 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/udpsink.h"
 
 #include "rdsparser.h"
 #include "rdsdecoder.h"
@@ -43,6 +42,7 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+class AudioNetSink;
 
 class BFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
@@ -152,6 +152,7 @@ public:
         m_magsqCount = 0;
     }
 
+    bool isAudioNetSinkRTPCapable() const { return false; }
     RDSParser& getRDSParser() { return m_rdsParser; }
 
     static const QString m_channelIdURI;
@@ -221,7 +222,7 @@ private:
 	static const int default_excursion = 750000; // +/- 75 kHz
 
 	PhaseDiscriminators m_phaseDiscri;
-    UDPSink<AudioSample> *m_udpBufferAudio;
+	AudioNetSink *m_audioNetSink;
 
     static const int m_udpBlockSize;
 

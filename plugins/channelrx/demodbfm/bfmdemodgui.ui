@@ -321,6 +321,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="useRTP">
+        <property name="toolTip">
+         <string>Use RTP protocol for audio copy to UDP</string>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
