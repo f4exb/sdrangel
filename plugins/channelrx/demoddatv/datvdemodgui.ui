@@ -165,6 +165,19 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QLabel" name="channePowerText">
+        <property name="toolTip">
+         <string>Channel power (dB)</string>
+        </property>
+        <property name="text">
+         <string>-100.0 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

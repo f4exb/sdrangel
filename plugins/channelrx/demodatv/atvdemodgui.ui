@@ -265,7 +265,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Channel power</string>
+         <string>Channel power (dB)</string>
         </property>
         <property name="text">
          <string>-100.0 dB</string>

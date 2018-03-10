@@ -120,6 +120,8 @@ private:
     bool m_blnDoApplySettings;
     bool m_blnButtonPlayClicked;
 
+    MovingAverageUtil<double, double, 4> m_objMagSqAverage;
+
     explicit DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
     virtual ~DATVDemodGUI();
 

@@ -787,6 +787,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
     //Complex objC;
     fftfilt::cmplx *objRF;
     int intRFOut;
+    double magSq;
 
     //********** Bis repetita : Let's rock and roll buddy ! **********
 
@@ -849,6 +850,8 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
         {
             objIQ.re = objRF->real();
             objIQ.im = objRF->imag();
+            magSq = objIQ.re*objIQ.re + objIQ.im*objIQ.im;
+            m_objMagSqAverage(magSq);
 
             objRF ++;
 

@@ -61,6 +61,7 @@ class DownChannelizer;
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/movingaverage.h"
 #include <QBuffer>
 
 #include "datvideostream.h"
@@ -236,6 +237,7 @@ public:
     void CleanUpDATVFramework(bool blnRelease);
     int GetSampleRate();
     void InitDATVFramework();
+    double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -458,6 +460,7 @@ private:
     //QElapsedTimer m_objTimer;
 
     DATVConfig m_objRunning;
+    MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     QMutex m_objSettingsMutex;
 

@@ -503,6 +503,13 @@ void DATVDemodGUI::enterEvent(QEvent*)
 
 void DATVDemodGUI::tick()
 {
+    if (m_objDATVDemod)
+    {
+        m_objMagSqAverage(m_objDATVDemod->getMagSq());
+        double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
+        ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
+    }
+
     if((m_intLastDecodedData-m_intPreviousDecodedData)>=0)
     {
         m_intLastSpeed = 8*(m_intLastDecodedData-m_intPreviousDecodedData);
