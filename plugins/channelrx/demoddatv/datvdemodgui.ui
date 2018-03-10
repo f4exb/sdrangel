@@ -118,7 +118,7 @@
          </widget>
         </item>
         <item>
-         <widget class="ValueDial" name="rfBandwidth" native="true">
+         <widget class="ValueDialZ" name="rfBandwidth" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
             <horstretch>0</horstretch>
@@ -138,11 +138,8 @@
             <italic>false</italic>
            </font>
           </property>
-          <property name="cursor">
-           <cursorShape>PointingHandCursor</cursorShape>
-          </property>
           <property name="toolTip">
-           <string>RF bandwidth</string>
+           <string>RF Bandwidth</string>
           </property>
          </widget>
         </item>
@@ -967,12 +964,6 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -92,7 +92,7 @@ void DATVDemodGUI::resetToDefaults()
 
     ui->lblStatus->setText("");
 
-    ui->spiBandwidth->setValue(512000);
+    ui->rfBandwidth->setValue(512000);
     ui->spiSymbolRate->setValue(250000);
     ui->spiRollOff->setValue(35);
     ui->spiExcursion->setValue(10);
@@ -122,7 +122,7 @@ QByteArray DATVDemodGUI::serialize() const
     s.writeS32(11, ui->cmbStandard->currentIndex());
 
     s.writeS32(12, ui->spiNotchFilters->value());
-    s.writeS32(13, ui->spiBandwidth->value());
+    s.writeS64(13, ui->rfBandwidth->getValue());
     s.writeS32(14, ui->spiSymbolRate->value());
     s.writeS32(15, ui->spiExcursion->value());
 
@@ -143,6 +143,7 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
     {
         QByteArray bytetmp;
         uint32_t u32tmp;
+        qint64 i64tmp;
         int tmp;
         bool booltmp;
 
@@ -194,8 +195,8 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
         d.readS32(12, &tmp, 0);
         ui->spiNotchFilters->setValue(tmp);
 
-        d.readS32(13, &tmp, 1024000);
-        ui->spiBandwidth->setValue(tmp);
+        d.readS64(13, &i64tmp, 5120000);
+        ui->rfBandwidth->setValue(i64tmp);
 
         d.readS32(14, &tmp, 250000);
         ui->spiSymbolRate->setValue(tmp);
@@ -224,6 +225,8 @@ bool DATVDemodGUI::handleMessage(const Message& objMessage __attribute__((unused
 
 void DATVDemodGUI::channelMarkerChangedByCursor()
 {
+    ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
+
     if(m_intCenterFrequency!=m_objChannelMarker.getCenterFrequency())
     {
         m_intCenterFrequency=m_objChannelMarker.getCenterFrequency();
@@ -282,7 +285,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
     ui->rfBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
-    ui->rfBandwidth->setValueRange(7, 0, 9999999);
+    ui->rfBandwidth->setValueRange(true, 7, 0, 9999999);
 
     m_objChannelMarker.blockSignals(true);
     m_objChannelMarker.setColor(Qt::magenta);
@@ -331,11 +334,12 @@ void DATVDemodGUI::applySettings()
 
     if (m_blnDoApplySettings)
     {
+        //Bandwidth and center frequency
+        m_objChannelMarker.setCenterFrequency(ui->deltaFrequency->getValueNew());
+        m_objChannelMarker.setBandwidth(ui->rfBandwidth->getValueNew());
+
         DATVDemod::MsgConfigureChannelizer *msgChan = DATVDemod::MsgConfigureChannelizer::create(m_objChannelMarker.getCenterFrequency());
         m_objDATVDemod->getInputMessageQueue()->push(msgChan);
-
-        //Bandwidth and  center frequency
-        m_objChannelMarker.setBandwidth(ui->spiBandwidth->value());
 
         setTitleColor(m_objChannelMarker.getColor());
 
@@ -478,10 +482,8 @@ void DATVDemodGUI::applySettings()
             ui->spiExcursion->value());
 
         qDebug() << "DATVDemodGUI::applySettings:"
-                << " .inputSampleRate: " << 0  /*m_objChannelizer->getInputSampleRate()*/
-                << " m_objDATVDemod.sampleRate: " << m_objDATVDemod->GetSampleRate();
-
-
+                << " m_objDATVDemod->getCenterFrequency: " << m_objDATVDemod->getCenterFrequency()
+                << " m_objDATVDemod->GetSampleRate: " << m_objDATVDemod->GetSampleRate();
     }
 }
 
@@ -715,6 +717,15 @@ void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1 __attribute__((unused))
     applySettings();
 }
 
+void DATVDemodGUI::on_deltaFrequency_changed(qint64 value __attribute__((unused)))
+{
+    applySettings();
+}
+
+void DATVDemodGUI::on_rfBandwidth_changed(qint64 value __attribute__((unused)))
+{
+    applySettings();
+}
 
 void DATVDemodGUI::on_chkFastlock_clicked()
 {
@@ -730,13 +741,13 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
 
         if(objMetaData->OK_TransportStream==true)
         {
-            strMetaData.sprintf("PID: %d - Width: %d - Height: %d\r\n%s%s\r\nCodec: %s\r\n",objMetaData->PID
-                                                                                  ,objMetaData->Width
-                                                                                  ,objMetaData->Height
-                                                                                  ,objMetaData->Program.toStdString().c_str()
-                                                                                  ,objMetaData->Stream.toStdString().c_str()
-                                                                                  ,objMetaData->CodecDescription.toStdString().c_str());
-
+            strMetaData.sprintf("PID: %d - Width: %d - Height: %d\r\n%s%s\r\nCodec: %s\r\n",
+                    objMetaData->PID,
+                    objMetaData->Width,
+                    objMetaData->Height,
+                    objMetaData->Program.toStdString().c_str(),
+                    objMetaData->Stream.toStdString().c_str(),
+                    objMetaData->CodecDescription.toStdString().c_str());
         }
         ui->textEdit->setText(strMetaData);
 

@@ -81,32 +81,22 @@ private slots:
     void on_cmbFEC_currentIndexChanged(const QString &arg1);
     void on_chkViterbi_clicked();
     void on_chkHardMetric_clicked();
-
     void on_pushButton_2_clicked();
-
     void on_spiSymbolRate_valueChanged(int arg1);
-
     void on_spiNotchFilters_valueChanged(int arg1);
-
     void on_chkAllowDrift_clicked();
-
     void on_pushButton_3_clicked();
-
     void on_pushButton_4_clicked();
-
     void on_mouseEvent(QMouseEvent* obj);
     void on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived);
     void on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData);
-
     void on_spiBandwidth_valueChanged(int arg1);
-
     void on_chkFastlock_clicked();
-
     void on_cmbFilter_currentIndexChanged(int index);
-
     void on_spiRollOff_valueChanged(int arg1);
-
     void on_spiExcursion_valueChanged(int arg1);
+    void on_deltaFrequency_changed(qint64 value);
+    void on_rfBandwidth_changed(qint64 value);
 
 private:
     Ui::DATVDemodGUI* ui;

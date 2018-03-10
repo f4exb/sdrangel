@@ -101,7 +101,7 @@ DATVDemod::~DATVDemod()
 void DATVDemod::channelSampleRateChanged()
 {
     qDebug() << "DATVDemod::channelSampleRateChanged:"
-             << " intMsps: " << m_channelizer->getInputSampleRate();
+             << " sample rate: " << m_channelizer->getInputSampleRate();
 
     if(m_objRunning.intMsps!=m_channelizer->getInputSampleRate())
     {
@@ -444,18 +444,18 @@ void DATVDemod::InitDATVFramework()
     CleanUpDATVFramework(false);
 
     qDebug()  << "DATVDemod::InitDATVParameters:"
-                <<  " - Msps: " << m_objRunning.intMsps
-                <<  " - Sample Rate: " << m_objRunning.intSampleRate
-                <<  " - Symbol Rate: " << m_objRunning.intSymbolRate
-                <<  " - Modulation: " << m_objRunning.enmModulation
-                <<  " - Notch Filters: " << m_objRunning.intNotchFilters
-                <<  " - Allow Drift: " << m_objRunning.blnAllowDrift
-                <<  " - Fast Lock: " << m_objRunning.blnFastLock
-                <<  " - Filter: " << m_objRunning.enmFilter
-                <<  " - HARD METRIC: " << m_objRunning.blnHardMetric
-                <<  " - RollOff: " << m_objRunning.fltRollOff
-                <<  " - Viterbi: " << m_objRunning.blnViterbi
-                <<  " - Excursion: " << m_objRunning.intExcursion;
+                <<  " Msps: " << m_objRunning.intMsps
+                <<  " Sample Rate: " << m_objRunning.intSampleRate
+                <<  " Symbol Rate: " << m_objRunning.intSymbolRate
+                <<  " Modulation: " << m_objRunning.enmModulation
+                <<  " Notch Filters: " << m_objRunning.intNotchFilters
+                <<  " Allow Drift: " << m_objRunning.blnAllowDrift
+                <<  " Fast Lock: " << m_objRunning.blnFastLock
+                <<  " Filter: " << m_objRunning.enmFilter
+                <<  " HARD METRIC: " << m_objRunning.blnHardMetric
+                <<  " RollOff: " << m_objRunning.fltRollOff
+                <<  " Viterbi: " << m_objRunning.blnViterbi
+                <<  " Excursion: " << m_objRunning.intExcursion;
 
     m_objCfg.standard = m_objRunning.enmStandard;
 
@@ -935,8 +935,22 @@ bool DATVDemod::handleMessage(const Message& cmd)
             m_objRunning.intCenterFrequency = objCfg.m_objMsgConfig.intCenterFrequency;
             m_objRunning.intExcursion = objCfg.m_objMsgConfig.intExcursion;
 
-            qDebug() << "ATVDemod::handleMessage: MsgConfigureDATVDemod: sampleRate: " << m_objRunning.intMsps
-                    << " sampleRate: " << m_objRunning.intSampleRate;
+            qDebug() << "ATVDemod::handleMessage: MsgConfigureDATVDemod:"
+                    << " blnAllowDrift: " << objCfg.m_objMsgConfig.blnAllowDrift
+                    << " intRFBandwidth: " << objCfg.m_objMsgConfig.intRFBandwidth
+                    << " intCenterFrequency: " << objCfg.m_objMsgConfig.intCenterFrequency
+                    << " blnFastLock: " << objCfg.m_objMsgConfig.blnFastLock
+                    << " enmFilter: " << objCfg.m_objMsgConfig.enmFilter
+                    << " fltRollOff: " << objCfg.m_objMsgConfig.fltRollOff
+                    << " blnViterbi: " << objCfg.m_objMsgConfig.blnViterbi
+                    << " enmFEC: " << objCfg.m_objMsgConfig.enmFEC
+                    << " enmModulation: " << objCfg.m_objMsgConfig.enmModulation
+                    << " enmStandard: " << objCfg.m_objMsgConfig.enmStandard
+                    << " intNotchFilters: " << objCfg.m_objMsgConfig.intNotchFilters
+                    << " intSymbolRate: " << objCfg.m_objMsgConfig.intSymbolRate
+                    << " intRFBandwidth: " << objCfg.m_objMsgConfig.intRFBandwidth
+                    << " intCenterFrequency: " << objCfg.m_objMsgConfig.intCenterFrequency
+                    << " intExcursion: " << objCfg.m_objMsgConfig.intExcursion;
 
             ApplySettings();
          }
