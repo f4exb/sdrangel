@@ -20,6 +20,7 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(MINGW32):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 CONFIG(MINGW64):LIBRTLSDRSRC = "D:\softs\librtlsdr"
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client

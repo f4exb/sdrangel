@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
 TARGET = sdrgui
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../exports
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += ../logging
 INCLUDEPATH += ../httpserver

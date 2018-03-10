@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
 TARGET = sdrbase
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../exports
 INCLUDEPATH += ../httpserver
 INCLUDEPATH += ../qrtplib
 INCLUDEPATH += ../swagger/sdrangel/code/qt5/client

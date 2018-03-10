@@ -10,7 +10,7 @@ TEMPLATE = lib
 TARGET = qrtplib
 
 INCLUDEPATH += $$PWD
-INCLUDEPATH += ../sdrbase
+INCLUDEPATH += ../exports
 
 QMAKE_CXXFLAGS += -std=c++11
 
@@ -59,8 +59,7 @@ HEADERS += $$PWD/rtcpapppacket.h \
     $$PWD/rtptypes_win.h \
     $$PWD/rtptypes.h \
     $$PWD/rtpudptransmitter.h \
-    $$PWD/rtpsocketutil.h \
-    $$PWD/rtpselect.h
+    $$PWD/rtpsocketutil.h
 
 
 SOURCES += $$PWD/rtcpapppacket.cpp \

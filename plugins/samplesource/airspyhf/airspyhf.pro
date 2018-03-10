@@ -14,6 +14,7 @@ TARGET = inputairspyhf
 CONFIG(MINGW32):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
 CONFIG(MINGW64):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client

@@ -21,6 +21,7 @@ CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
 CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client

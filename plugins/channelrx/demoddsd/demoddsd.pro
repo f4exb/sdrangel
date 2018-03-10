@@ -30,6 +30,7 @@ CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += $$LIBDSDCCSRC

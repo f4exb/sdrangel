@@ -10,7 +10,7 @@ TEMPLATE = lib
 TARGET = httpserver
 
 INCLUDEPATH += $$PWD
-INCLUDEPATH += ../sdrbase
+INCLUDEPATH += ../exports
 
 QMAKE_CXXFLAGS += -std=c++11
 

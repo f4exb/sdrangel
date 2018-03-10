@@ -10,6 +10,7 @@ QMAKE_CXXFLAGS += -std=c++11
 
 TEMPLATE = app
 TARGET = sdrangel
+INCLUDEPATH += $$PWD/../exports
 INCLUDEPATH += $$PWD/../sdrbase
 INCLUDEPATH += $$PWD/../sdrgui
 INCLUDEPATH += $$PWD/../logging
