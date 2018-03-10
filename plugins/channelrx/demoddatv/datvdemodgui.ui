@@ -454,19 +454,6 @@
         <string>Symbols/s</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>10</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Bandwidth</string>
-       </property>
-      </widget>
       <widget class="QCheckBox" name="chkAllowDrift">
        <property name="geometry">
         <rect>
@@ -541,7 +528,7 @@
         <string>Total number of bytes decoded</string>
        </property>
        <property name="text">
-        <string>-</string>
+        <string>Data: 0</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_2">
@@ -579,28 +566,6 @@
         <number>1000</number>
        </property>
       </widget>
-      <widget class="QSpinBox" name="spiBandwidth">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>10</y>
-         <width>81</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>RF filter bandwidth</string>
-       </property>
-       <property name="minimum">
-        <number>1000</number>
-       </property>
-       <property name="maximum">
-        <number>1024000000</number>
-       </property>
-       <property name="singleStep">
-        <number>1000</number>
-       </property>
-      </widget>
       <widget class="QLabel" name="lblRate">
        <property name="geometry">
         <rect>
@@ -614,7 +579,7 @@
         <string>Stream speed</string>
        </property>
        <property name="text">
-        <string>-</string>
+        <string>Speed: 0b/s</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_4">
@@ -668,7 +633,7 @@
         </rect>
        </property>
        <property name="toolTip">
-        <string>RRC filter roll off factor </string>
+        <string>RRC filter roll off factor (%)</string>
        </property>
        <property name="minimum">
         <number>1</number>
