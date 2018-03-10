@@ -152,6 +152,7 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
 
         d.readS32(1, &tmp, 0);
         m_objChannelMarker.setCenterFrequency(tmp);
+        ui->deltaFrequency->setValue(tmp);
 
         if (d.readU32(2, &u32tmp))
         {
