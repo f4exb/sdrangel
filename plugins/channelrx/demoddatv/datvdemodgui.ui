@@ -6,26 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
-    <height>640</height>
+    <width>530</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>512</width>
-    <height>640</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>512</width>
-    <height>640</height>
+    <width>530</width>
+    <height>442</height>
    </size>
   </property>
   <property name="font">
@@ -40,741 +34,914 @@
   <property name="windowTitle">
    <string>DATV Demodulator</string>
   </property>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>0</y>
-     <width>496</width>
-     <height>250</height>
+     <width>521</width>
+     <height>41</height>
     </rect>
    </property>
-   <property name="minimumSize">
-    <size>
-     <width>496</width>
-     <height>250</height>
-    </size>
+   <property name="windowTitle">
+    <string>RF Settings</string>
    </property>
-   <property name="maximumSize">
-    <size>
-     <width>496</width>
-     <height>250</height>
-    </size>
-   </property>
-   <property name="title">
-    <string>DATV Settings</string>
-   </property>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>20</y>
-      <width>222</width>
-      <height>222</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="screenTVLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
-     </property>
-     <item>
-      <widget class="DATVScreen" name="screenTV" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>220</width>
-         <height>220</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>220</width>
-         <height>220</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Signal constellation</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>20</y>
-      <width>261</width>
-      <height>221</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QComboBox" name="cmbStandard">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>81</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>DVB Standard</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>DVB-S</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="cmbModulation">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>80</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Modulation scheme</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>BPSK</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>QPSK</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>8PSK</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>16APSK</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>32APSK</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>64APSKe</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>16QAM</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>64QAM</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>256QAM</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="cmbFEC">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>80</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>FEC ratio</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>1/2</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>2/3</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>3/4</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>5/6</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>7/8</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QCheckBox" name="chkFastlock">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>101</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Fast signal decode</string>
-     </property>
-     <property name="text">
-      <string>FAST LOCK</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="chkViterbi">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>120</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Viterbi algorithm (CPU intensive)</string>
-     </property>
-     <property name="text">
-      <string>VITERBI</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="chkHardMetric">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Constellation hardening</string>
-     </property>
-     <property name="text">
-      <string>HARD METRIC</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>40</y>
-       <width>61</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Symbols/s</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>10</y>
-       <width>71</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Bandwidth</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="chkAllowDrift">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>100</y>
-       <width>111</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Small frequency drift compensation</string>
-     </property>
-     <property name="text">
-      <string>ALLOW DRIFT</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="spiNotchFilters">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>70</y>
-       <width>81</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Number of stray peaks to suppress</string>
-     </property>
-     <property name="maximum">
-      <number>32</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>70</y>
-       <width>71</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Notch filter</string>
-     </property>
-    </widget>
-    <widget class="QProgressBar" name="prgSynchro">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>200</y>
-       <width>181</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Video buffer fill</string>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="lblStatus">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>180</y>
-       <width>111</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Total number of bytes decoded</string>
-     </property>
-     <property name="text">
-      <string>-</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>120</y>
-       <width>21</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>R</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="spiSymbolRate">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>40</y>
-       <width>81</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Symbol rate</string>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>1024000000</number>
-     </property>
-     <property name="singleStep">
-      <number>1000</number>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="spiBandwidth">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>10</y>
-       <width>81</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>RF filter bandwidth</string>
-     </property>
-     <property name="minimum">
-      <number>1000</number>
-     </property>
-     <property name="maximum">
-      <number>1024000000</number>
-     </property>
-     <property name="singleStep">
-      <number>1000</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="lblRate">
-     <property name="geometry">
-      <rect>
-       <x>130</x>
-       <y>180</y>
-       <width>121</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Stream speed</string>
-     </property>
-     <property name="text">
-      <string>-</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>200</y>
-       <width>61</width>
-       <height>15</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Buffer:</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cmbFilter">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>91</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Filter</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>FIR LINEAR</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>FIR NEAREST</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>FIR RRC</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QSpinBox" name="spiRollOff">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>150</y>
-       <width>41</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>RRC filter roll off factor </string>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>99</number>
-     </property>
-     <property name="value">
-      <number>35</number>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>106</x>
-       <y>150</y>
-       <width>28</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>R.off</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>150</y>
-       <width>28</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Exc</string>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="spiExcursion">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>150</y>
-       <width>41</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Filter excursion (dB)</string>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>99</number>
-     </property>
-     <property name="value">
-      <number>10</number>
-     </property>
-    </widget>
-   </widget>
+   <layout class="QVBoxLayout" name="rfSettingsLayout">
+    <item>
+     <layout class="QHBoxLayout" name="rfSettings1Layout">
+      <item>
+       <layout class="QHBoxLayout" name="deltaFrequencyLayout">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="deltaFrequencyLabel">
+          <property name="text">
+           <string>dF</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDialZ" name="deltaFrequency" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>DejaVu Sans Mono</family>
+            <pointsize>12</pointsize>
+            <italic>false</italic>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>Channel center frequency shift</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="deltaFrequencyUnits">
+          <property name="text">
+           <string>Hz</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="rfBandwidthLayout">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="rfBandwidthLabel">
+          <property name="text">
+           <string>BW</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDial" name="rfBandwidth" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>DejaVu Sans Mono</family>
+            <pointsize>12</pointsize>
+            <italic>false</italic>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>RF bandwidth</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="rfBandwidthUnits">
+          <property name="text">
+           <string>Hz</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_2">
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>250</y>
-     <width>496</width>
-     <height>385</height>
+     <x>0</x>
+     <y>40</y>
+     <width>526</width>
+     <height>400</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>496</width>
-     <height>385</height>
+     <width>526</width>
+     <height>400</height>
     </size>
    </property>
-   <property name="maximumSize">
-    <size>
-     <width>496</width>
-     <height>385</height>
-    </size>
+   <property name="windowTitle">
+    <string>DATV</string>
    </property>
-   <property name="title">
-    <string>VIDEO Stream</string>
+   <property name="tabPosition">
+    <enum>QTabWidget::West</enum>
    </property>
-   <widget class="QTextEdit" name="textEdit">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>300</y>
-      <width>281</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Stream information</string>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-    <property name="acceptRichText">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_4">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>350</y>
-      <width>91</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Full screen video (click in the image to return)</string>
-    </property>
-    <property name="text">
-     <string>Full Screen</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_3">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>300</y>
-      <width>91</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Start/Stop video streaming</string>
-    </property>
-    <property name="text">
-     <string>  Video</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="formLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>20</y>
-      <width>488</width>
-      <height>272</height>
-     </rect>
-    </property>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="DATVideoRender" name="screenTV_2" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="datvTab">
+    <attribute name="title">
+     <string>DATV</string>
+    </attribute>
+    <widget class="QGroupBox" name="datvGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>496</width>
+       <height>250</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>496</width>
+       <height>250</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>496</width>
+       <height>250</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>DATV Settings</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>222</width>
+        <height>222</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="screenTVLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>480</width>
-         <height>270</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>355</width>
-         <height>270</height>
-        </size>
+       <item>
+        <widget class="DATVScreen" name="screenTV" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>220</width>
+           <height>220</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>220</width>
+           <height>220</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Signal constellation</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QFrame" name="frame">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>20</y>
+        <width>261</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QComboBox" name="cmbStandard">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
        </property>
        <property name="toolTip">
-        <string>Video</string>
+        <string>DVB Standard</string>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
+       <item>
+        <property name="text">
+         <string>DVB-S</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QComboBox" name="cmbModulation">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>80</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Modulation scheme</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>BPSK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QPSK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8PSK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16APSK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32APSK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64APSKe</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16QAM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64QAM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>256QAM</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QComboBox" name="cmbFEC">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>80</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>FEC ratio</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>1/2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2/3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>3/4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5/6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>7/8</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QCheckBox" name="chkFastlock">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>101</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Fast signal decode</string>
+       </property>
+       <property name="text">
+        <string>FAST LOCK</string>
        </property>
       </widget>
-     </item>
-    </layout>
+      <widget class="QCheckBox" name="chkViterbi">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>120</y>
+         <width>81</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Viterbi algorithm (CPU intensive)</string>
+       </property>
+       <property name="text">
+        <string>VITERBI</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkHardMetric">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Constellation hardening</string>
+       </property>
+       <property name="text">
+        <string>HARD METRIC</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>40</y>
+         <width>61</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Symbols/s</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>10</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Bandwidth</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chkAllowDrift">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>100</y>
+         <width>111</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Small frequency drift compensation</string>
+       </property>
+       <property name="text">
+        <string>ALLOW DRIFT</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spiNotchFilters">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>70</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Number of stray peaks to suppress</string>
+       </property>
+       <property name="maximum">
+        <number>32</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>70</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Notch filter</string>
+       </property>
+      </widget>
+      <widget class="QProgressBar" name="prgSynchro">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>200</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Video buffer fill</string>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lblStatus">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>111</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Total number of bytes decoded</string>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>120</y>
+         <width>21</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>R</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spiSymbolRate">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>40</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Symbol rate</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>1024000000</number>
+       </property>
+       <property name="singleStep">
+        <number>1000</number>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spiBandwidth">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>10</y>
+         <width>81</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>RF filter bandwidth</string>
+       </property>
+       <property name="minimum">
+        <number>1000</number>
+       </property>
+       <property name="maximum">
+        <number>1024000000</number>
+       </property>
+       <property name="singleStep">
+        <number>1000</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lblRate">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>180</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Stream speed</string>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>200</y>
+         <width>61</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Buffer:</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbFilter">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>91</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Filter</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>FIR LINEAR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FIR NEAREST</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FIR RRC</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QSpinBox" name="spiRollOff">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>150</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>RRC filter roll off factor </string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>99</number>
+       </property>
+       <property name="value">
+        <number>35</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>106</x>
+         <y>150</y>
+         <width>28</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>R.off</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>150</y>
+         <width>28</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Exc</string>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="spiExcursion">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>150</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Filter excursion (dB)</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>99</number>
+       </property>
+       <property name="value">
+        <number>10</number>
+       </property>
+      </widget>
+     </widget>
+    </widget>
    </widget>
-   <widget class="QCheckBox" name="chkTS">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>320</y>
-      <width>85</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Transport stream detected</string>
-    </property>
-    <property name="text">
-     <string>Transport</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="chkVS">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>340</y>
-      <width>85</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Video data detected</string>
-    </property>
-    <property name="text">
-     <string>Video </string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="chkDecoding">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>360</y>
-      <width>85</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Video being decoded</string>
-    </property>
-    <property name="text">
-     <string>Decoding</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="chkData">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>300</y>
-      <width>85</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Data being received</string>
-    </property>
-    <property name="text">
-     <string>Data</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
+   <widget class="QWidget" name="videoTab">
+    <attribute name="title">
+     <string>Video</string>
+    </attribute>
+    <widget class="QGroupBox" name="videoGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>496</width>
+       <height>385</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>496</width>
+       <height>385</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>496</width>
+       <height>385</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>VIDEO Stream</string>
+     </property>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>300</y>
+        <width>281</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Stream information</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="acceptRichText">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>350</y>
+        <width>91</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Full screen video (click in the image to return)</string>
+      </property>
+      <property name="text">
+       <string>Full Screen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>300</y>
+        <width>91</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Start/Stop video streaming</string>
+      </property>
+      <property name="text">
+       <string>  Video</string>
+      </property>
+     </widget>
+     <widget class="QWidget" name="formLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>488</width>
+        <height>272</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="DATVideoRender" name="screenTV_2" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>480</width>
+           <height>270</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>355</width>
+           <height>270</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Video</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QCheckBox" name="chkTS">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>320</y>
+        <width>85</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Transport stream detected</string>
+      </property>
+      <property name="text">
+       <string>Transport</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="chkVS">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>340</y>
+        <width>85</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Video data detected</string>
+      </property>
+      <property name="text">
+       <string>Video </string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="chkDecoding">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>360</y>
+        <width>85</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Video being decoded</string>
+      </property>
+      <property name="text">
+       <string>Decoding</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="chkData">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>300</y>
+        <width>85</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Data being received</string>
+      </property>
+      <property name="text">
+       <string>Data</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
  </widget>
@@ -794,6 +961,18 @@
    <class>DATVideoRender</class>
    <extends>QWidget</extends>
    <header>datvideorender.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
