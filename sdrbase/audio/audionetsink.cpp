@@ -142,7 +142,7 @@ void AudioNetSink::write(AudioSample* samples, uint32_t numSamples)
     }
     else if (m_type == SinkRTP)
     {
-        m_rtpBufferAudio->write((uint8_t *) samples, numSamples*sizeof(AudioSample));
+        m_rtpBufferAudio->write((uint8_t *) samples, numSamples*2); // 2 x 16 bit sample
     }
 }
 

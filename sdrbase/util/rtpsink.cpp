@@ -73,6 +73,7 @@ RTPSink::~RTPSink()
 
 void RTPSink::setPayloadType(PayloadType payloadType)
 {
+    uint32_t timestampinc;
     QMutexLocker locker(&m_mutex);
 
     qDebug("RTPSink::setPayloadType: %d", payloadType);
@@ -83,12 +84,14 @@ void RTPSink::setPayloadType(PayloadType payloadType)
         m_sampleRate = 48000;
         m_sampleBytes = sizeof(AudioSample);
         m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 100;
         break;
     case PayloadL16Mono:
     default:
         m_sampleRate = 48000;
         m_sampleBytes = sizeof(int16_t);
         m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 50;
         break;
     }
 
@@ -121,12 +124,12 @@ void RTPSink::setPayloadType(PayloadType payloadType)
         qDebug("RTPSink::setPayloadType: set default mark to false: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    status = m_rtpSession.SetDefaultTimestampIncrement(m_packetSamples);
+    status = m_rtpSession.SetDefaultTimestampIncrement(timestampinc);
 
     if (status < 0) {
         qCritical("RTPSink::setPayloadType: cannot set default timestamp increment: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
-        qDebug("RTPSink::setPayloadType: set default timestamp increment to %d: %s", m_packetSamples, qrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::setPayloadType: set default timestamp increment to %d: %s", timestampinc, qrtplib::RTPGetErrorString(status).c_str());
     }
 
     status = m_rtpSession.SetMaximumPacketSize(m_bufferSize+40);
