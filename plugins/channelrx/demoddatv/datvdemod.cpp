@@ -694,11 +694,14 @@ void DATVDemod::InitDATVFramework()
 
     //constellation
 
-    m_objRegisteredDATVScreen->resizeDATVScreen(256,256);
+    if (m_objRegisteredDATVScreen)
+    {
+        m_objRegisteredDATVScreen->resizeDATVScreen(256,256);
 
-    r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
-    r_scope_symbols->decimation = 1;
-    r_scope_symbols->cstln = &m_objDemodulator->cstln;
+        r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
+        r_scope_symbols->decimation = 1;
+        r_scope_symbols->cstln = &m_objDemodulator->cstln;
+    }
 
     // DECONVOLUTION AND SYNCHRONIZATION
 
