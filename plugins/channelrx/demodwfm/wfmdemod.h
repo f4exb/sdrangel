@@ -40,6 +40,7 @@
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class DeviceSourceAPI;
+class AudioNetSink;
 
 class WFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
@@ -119,6 +120,8 @@ public:
         m_magsqCount = 0;
     }
 
+    bool isAudioNetSinkRTPCapable() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -155,7 +158,7 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-    UDPSink<qint16> *m_udpBufferAudio;
+    AudioNetSink *m_audioNetSink;
 
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;

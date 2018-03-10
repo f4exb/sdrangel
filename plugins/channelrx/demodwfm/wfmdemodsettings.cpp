@@ -44,6 +44,7 @@ void WFMDemodSettings::resetToDefaults()
     m_audioMute = false;
     m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_copyAudioToUDP = false;
+    m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 0, 255).rgb();

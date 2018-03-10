@@ -25,6 +25,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
+#include "audio/audionetsink.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -59,7 +60,8 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->addAudioSink(&m_audioFifo);
-	m_udpBufferAudio = new UDPSink<qint16>(this, m_udpBlockSize, m_settings.m_udpPort);
+    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
+    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -78,13 +80,17 @@ WFMDemod::~WFMDemod()
 	}
 
 	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+    delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+}
 
-    delete m_udpBufferAudio;
+bool WFMDemod::isAudioNetSinkRTPCapable() const
+{
+    return m_audioNetSink && m_audioNetSink->isRTPCapable();
 }
 
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -148,7 +154,9 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
 
-				if (m_settings.m_copyAudioToUDP) { m_udpBufferAudio->write(sample); }
+				if (m_settings.m_copyAudioToUDP) {
+				    m_audioNetSink->write(sample);
+				}
 
 				++m_audioBufferFill;
 
@@ -230,6 +238,14 @@ bool WFMDemod::handleMessage(const Message& cmd)
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
+        return true;
+    }
+    else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
+    {
+        BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
+        const QThread *thread = cfg.getThread();
+        qDebug("WFMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
+        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -315,8 +331,27 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
     if ((m_settings.m_udpAddress != settings.m_udpAddress)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
-        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
-        m_udpBufferAudio->setPort(settings.m_udpPort);
+        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
+    }
+
+    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
+    {
+        if (settings.m_copyAudioUseRTP)
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
+                qDebug("WFMDemod::applySettings: set audio sink to RTP mode");
+            } else {
+                qWarning("WFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
+            }
+        }
+        else
+        {
+            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
+                qDebug("WFMDemod::applySettings: set audio sink to UDP mode");
+            } else {
+                qWarning("WFMDemod::applySettings: failed to set audio sink to UDP mode");
+            }
+        }
     }
 
     m_settings = settings;

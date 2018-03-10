@@ -385,6 +385,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="useRTP">
+        <property name="toolTip">
+         <string>Kiki koko kuku cacaboudin</string>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="text">
          <string/>
