@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GUI_GLSHADERARRAY_H_
-#define INCLUDE_GUI_GLSHADERARRAY_H_
+#ifndef INCLUDE_GUI_GLTVSHADERARRAY_H_
+#define INCLUDE_GUI_GLTVSHADERARRAY_H_
 
 #include <QString>
 #include <QOpenGLFunctions>
@@ -36,11 +36,11 @@ class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QVector4D;
 
-class GLShaderArray
+class GLShaderTVArray
 {
 public:
-    GLShaderArray();
-    ~GLShaderArray();
+    GLShaderTVArray(bool blnColor);
+    ~GLShaderTVArray();
 
     void InitializeGL(int intCols, int intRows);
     void ResizeContainer(int intCols, int intRows);
@@ -62,7 +62,7 @@ protected:
     static const QString m_strVertexShaderSourceArray;
     static const QString m_strFragmentShaderSourceColored;
 
-    QImage *m_objImage=NULL;   
+    QImage *m_objImage=NULL;
     QOpenGLTexture *m_objTexture=NULL;
 
     int m_intCols;
@@ -71,6 +71,7 @@ protected:
     QRgb * m_objCurrentRow;
 
     bool m_blnInitialized;
+    bool m_blnColor;
 };
 
-#endif /* INCLUDE_GUI_GLSHADERARRAY_H_ */
+#endif /* INCLUDE_GUI_GLTVSHADERARRAY_H_ */

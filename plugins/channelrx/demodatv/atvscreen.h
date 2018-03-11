@@ -28,7 +28,7 @@
 #include <QFont>
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
-#include "glshaderarray.h"
+#include "gui/glshadertvarray.h"
 #include "gui/glshadertextured.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
@@ -69,7 +69,7 @@ private:
     bool m_blnDataChanged;
     bool m_blnConfigChanged;
 
-    GLShaderArray m_objGLShaderArray;
+    GLShaderTVArray m_objGLShaderArray;
 
     unsigned char *m_chrLastData;
 

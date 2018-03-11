@@ -15,9 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "glshaderarray.h"
+#include <gui/glshadertvarray.h>
 
-const QString GLShaderArray::m_strVertexShaderSourceArray = QString(
+const QString GLShaderTVArray::m_strVertexShaderSourceArray = QString(
         "uniform highp mat4 uMatrix;\n"
                 "attribute highp vec4 vertex;\n"
                 "attribute highp vec2 texCoord;\n"
@@ -27,14 +27,14 @@ const QString GLShaderArray::m_strVertexShaderSourceArray = QString(
                 "    texCoordVar = texCoord;\n"
                 "}\n");
 
-const QString GLShaderArray::m_strFragmentShaderSourceColored = QString(
+const QString GLShaderTVArray::m_strFragmentShaderSourceColored = QString(
         "uniform lowp sampler2D uTexture;\n"
                 "varying mediump vec2 texCoordVar;\n"
                 "void main() {\n"
                 "    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
                 "}\n");
 
-GLShaderArray::GLShaderArray()
+GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
 {
     m_objProgram = 0;
     m_objImage = 0;
@@ -49,12 +49,12 @@ GLShaderArray::GLShaderArray()
     m_objMatrixLoc = 0;
 }
 
-GLShaderArray::~GLShaderArray()
+GLShaderTVArray::~GLShaderTVArray()
 {
     Cleanup();
 }
 
-void GLShaderArray::InitializeGL(int intCols, int intRows)
+void GLShaderTVArray::InitializeGL(int intCols, int intRows)
 {
     QMatrix4x4 objQMatrix;
 
@@ -124,7 +124,7 @@ void GLShaderArray::InitializeGL(int intCols, int intRows)
 
 }
 
-QRgb * GLShaderArray::GetRowBuffer(int intRow)
+QRgb * GLShaderTVArray::GetRowBuffer(int intRow)
 {
     if (!m_blnInitialized)
     {
@@ -144,7 +144,7 @@ QRgb * GLShaderArray::GetRowBuffer(int intRow)
     return (QRgb *) m_objImage->scanLine(intRow);
 }
 
-void GLShaderArray::RenderPixels(unsigned char *chrData)
+void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 {
     QOpenGLFunctions *ptrF;
     int intI;
@@ -166,6 +166,7 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
     { 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
 
     QRgb *ptrLine;
+    int intVal;
 
     if (!m_blnInitialized)
     {
@@ -185,11 +186,19 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
 
             for (intI = 0; intI < m_intCols; intI++)
             {
+                if (m_blnColor)
+                {
+                    *ptrLine = qRgb((int) (*(chrData+2)), (int) (*(chrData+1)), (int) (*chrData));
+                    chrData+=3;
+                }
+                else
+                {
+                    intVal = (int) (*chrData);
+                    *ptrLine = qRgb(intVal, intVal, intVal);
+                    chrData++;
+                }
 
-                *ptrLine = qRgb((int) (*(chrData+2)), (int) (*(chrData+1)), (int) (*chrData));
                 ptrLine++;
-
-                chrData+=3;
             }
         }
     }
@@ -225,7 +234,7 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
     m_objProgram->release();
 }
 
-void GLShaderArray::ResetPixels()
+void GLShaderTVArray::ResetPixels()
 {
     if (m_objImage != 0)
     {
@@ -233,7 +242,7 @@ void GLShaderArray::ResetPixels()
     }
 }
 
-void GLShaderArray::Cleanup()
+void GLShaderTVArray::Cleanup()
 {
     m_blnInitialized = false;
 
@@ -261,7 +270,7 @@ void GLShaderArray::Cleanup()
     }
 }
 
-bool GLShaderArray::SelectRow(int intLine)
+bool GLShaderTVArray::SelectRow(int intLine)
 {
     bool blnRslt = false;
 
@@ -281,7 +290,7 @@ bool GLShaderArray::SelectRow(int intLine)
     return blnRslt;
 }
 
-bool GLShaderArray::SetDataColor(int intCol, QRgb objColor)
+bool GLShaderTVArray::SetDataColor(int intCol, QRgb objColor)
 {
     bool blnRslt = false;
 

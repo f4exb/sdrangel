@@ -24,6 +24,7 @@ set(sdrgui_SOURCES
     gui/glscopemultigui.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
+    gui/glshadertvarray.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
     gui/indicator.cpp
@@ -77,6 +78,7 @@ set(sdrgui_HEADERS
     gui/glscopenggui.h
     gui/glscopemultigui.h
     gui/glshadersimple.h
+    gui/glshadertvarray.h
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h

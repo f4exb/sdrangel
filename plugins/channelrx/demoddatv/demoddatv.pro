@@ -31,15 +31,14 @@ CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 SOURCES += datvdemod.cpp\
 	datvdemodgui.cpp\
 	datvdemodplugin.cpp\
-        datvscreen.cpp \
-    glshaderarray.cpp \
+    datvscreen.cpp \
     datvideostream.cpp \
     datvideorender.cpp
 
 HEADERS += datvdemod.h\
 	datvdemodgui.h\
 	datvdemodplugin.h\
-        datvscreen.h \
+    datvscreen.h \
     leansdr/convolutional.h \
     leansdr/dsp.h \
     leansdr/dvb.h \
@@ -53,7 +52,6 @@ HEADERS += datvdemod.h\
     leansdr/sdr.h \
     leansdr/viterbi.h \
     datvconstellation.h \
-    glshaderarray.h \
     datvvideoplayer.h \
     datvideostream.h \
     datvideorender.h

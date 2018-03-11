@@ -5,7 +5,6 @@ set(datv_SOURCES
 	datvdemodgui.cpp
 	datvdemodplugin.cpp
 	datvscreen.cpp
-	glshaderarray.cpp
 	datvideostream.cpp
 	datvideorender.cpp
 )
@@ -15,7 +14,6 @@ set(datv_HEADERS
 	datvdemodgui.h
 	datvdemodplugin.h
 	datvscreen.h
-	glshaderarray.h
 	datvideostream.h
 	datvideorender.h
 )

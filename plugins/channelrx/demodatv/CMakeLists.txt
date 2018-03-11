@@ -6,7 +6,6 @@ set(atv_SOURCES
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
 	atvscreen.cpp
-	glshaderarray.cpp
 )
 
 set(atv_HEADERS
@@ -16,7 +15,6 @@ set(atv_HEADERS
 	atvdemodplugin.h
 	atvscreen.h
 	atvscreeninterface.h
-	glshaderarray.h
 )
 
 set(atv_FORMS

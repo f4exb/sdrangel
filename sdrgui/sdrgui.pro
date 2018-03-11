@@ -64,6 +64,7 @@ SOURCES += mainwindow.cpp\
         gui/glscopenggui.cpp\
         gui/glshadersimple.cpp\
         gui/glshadertextured.cpp\
+        gui/glshadertvarray.cpp\
         gui/glspectrum.cpp\
         gui/glspectrumgui.cpp\
         gui/indicator.cpp\
@@ -114,6 +115,7 @@ HEADERS  += mainwindow.h\
         gui/glscopenggui.h\
         gui/glshadersimple.h\
         gui/glshadertextured.h\
+        gui/glshadertvarray.h\
         gui/glspectrum.h\
         gui/glspectrumgui.h\
         gui/indicator.h\

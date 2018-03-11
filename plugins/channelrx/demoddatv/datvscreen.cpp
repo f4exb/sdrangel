@@ -28,7 +28,7 @@
 #include <QDebug>
 
 DATVScreen::DATVScreen(QWidget* parent) :
-        QGLWidget(parent), m_objMutex(QMutex::NonRecursive)
+        QGLWidget(parent), m_objMutex(QMutex::NonRecursive), m_objGLShaderArray(true)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
