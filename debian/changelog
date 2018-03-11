@@ -1,8 +1,9 @@
 sdrangel (3.13.0-1) unstable; urgency=medium
 
   * DATV (Digital Amateur TV) demodulator.
+  * Option to use RTP protocol for UDP audio for AM, NFM, SSB, WFM.
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 25 Feb 2018 12:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 11 Mar 2018 06:14:18 +0100
 
 sdrangel (3.12.0-1) unstable; urgency=medium
 
