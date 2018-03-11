@@ -23,5 +23,4 @@ endif()
 
 if (BUILD_DEBIAN)
     add_subdirectory(demoddsd)
-    add_subdirectory(demoddatv)
 endif (BUILD_DEBIAN)
