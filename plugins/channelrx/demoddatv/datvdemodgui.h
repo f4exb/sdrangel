@@ -20,14 +20,12 @@
 #define INCLUDE_DATVDEMODGUI_H
 
 #include "gui/rollupwidget.h"
-#include <plugin/plugininstancegui.h>
+#include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 
 #include "datvdemod.h"
 
-#include <QVideoWidget>
-#include <QMediaPlayer>
 #include <QTimer>
 
 

@@ -47,14 +47,11 @@ class DownChannelizer;
 #include "datvvideoplayer.h"
 
 #include "channel/channelsinkapi.h"
-#include <dsp/basebandsamplesink.h>
-#include <dsp/devicesamplesource.h>
-#include <dsp/dspcommands.h>
-#include <dsp/downchannelizer.h>
-#include <dsp/fftfilt.h>
-#include <QMutex>
-#include <QElapsedTimer>
-#include <vector>
+#include "dsp/basebandsamplesink.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/dspcommands.h"
+#include "dsp/downchannelizer.h"
+#include "dsp/fftfilt.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
@@ -62,10 +59,11 @@ class DownChannelizer;
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
-#include <QBuffer>
 
 #include "datvideostream.h"
 #include "datvideorender.h"
+
+#include <QMutex>
 
 enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
 enum dvb_version { DVB_S, DVB_S2 };
@@ -456,8 +454,6 @@ private:
     bool m_blnStartStopVideo;
 
     DATVModulation m_enmModulation;
-
-    //QElapsedTimer m_objTimer;
 
     DATVConfig m_objRunning;
     MovingAverageUtil<double, double, 32> m_objMagSqAverage;
