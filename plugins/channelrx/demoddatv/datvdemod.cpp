@@ -39,8 +39,8 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     ChannelSinkAPI(m_channelIdURI),
     m_blnNeedConfigUpdate(false),
     m_deviceAPI(deviceAPI),
-    m_objRegisteredDATVScreen(NULL),
-    m_objRegisteredVideoRender(NULL),
+    m_objRegisteredTVScreen(0),
+    m_objRegisteredVideoRender(0),
     m_objVideoStream(NULL),
     m_objRenderThread(NULL),
     m_blnRenderingVideo(false),
@@ -112,9 +112,9 @@ void DATVDemod::channelSampleRateChanged()
     }
 }
 
-bool DATVDemod::SetDATVScreen(DATVScreen *objScreen)
+bool DATVDemod::SetTVScreen(TVScreen *objScreen)
 {
-    m_objRegisteredDATVScreen = objScreen;
+    m_objRegisteredTVScreen = objScreen;
     return true;
 }
 
@@ -694,11 +694,11 @@ void DATVDemod::InitDATVFramework()
 
     //constellation
 
-    if (m_objRegisteredDATVScreen)
+    if (m_objRegisteredTVScreen)
     {
-        m_objRegisteredDATVScreen->resizeDATVScreen(256,256);
+        m_objRegisteredTVScreen->resizeTVScreen(256,256);
 
-        r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredDATVScreen);
+        r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredTVScreen);
         r_scope_symbols->decimation = 1;
         r_scope_symbols->cstln = &m_objDemodulator->cstln;
     }

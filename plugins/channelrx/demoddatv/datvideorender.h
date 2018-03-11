@@ -23,7 +23,7 @@
 #include <QIODevice>
 #include <QThread>
 
-#include "datvscreen.h"
+#include "gui/tvscreen.h"
 #include "datvideostream.h"
 
 extern "C"
@@ -85,7 +85,7 @@ struct DataTSMetaData2
     }
 };
 
-class DATVideoRender : public DATVScreen
+class DATVideoRender : public TVScreen
 {
     Q_OBJECT
 

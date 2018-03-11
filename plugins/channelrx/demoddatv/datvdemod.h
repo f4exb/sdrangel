@@ -209,7 +209,7 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    bool SetDATVScreen(DATVScreen *objScreen);
+    bool SetTVScreen(TVScreen *objScreen);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
 
     bool PlayVideo(bool blnStartStop);
@@ -441,7 +441,7 @@ private:
     DownChannelizer* m_channelizer;
 
     //*************** DATV PARAMETERS  ***************
-    DATVScreen * m_objRegisteredDATVScreen;
+    TVScreen * m_objRegisteredTVScreen;
     DATVideoRender * m_objRegisteredVideoRender;
     DATVideostream * m_objVideoStream;
     DATVideoRenderThread * m_objRenderThread;

@@ -22,7 +22,7 @@
 #include <sys/time.h>
 
 #include "leansdr/framework.h"
-#include "datvscreen.h"
+#include "gui/tvscreen.h"
 
 namespace leansdr
 {
@@ -35,11 +35,11 @@ template<typename T> struct datvconstellation: runnable
     unsigned long decimation;
     unsigned long pixels_per_frame;
     cstln_lut<256> **cstln;  // Optional ptr to optional constellation
-    DATVScreen *m_objDATVScreen;
+    TVScreen *m_objDATVScreen;
     pipereader<complex<T> > in;
     unsigned long phase;
 
-    datvconstellation(scheduler *sch, pipebuf<complex<T> > &_in, T _xymin, T _xymax, const char *_name = NULL, DATVScreen * objDATVScreen = NULL) :
+    datvconstellation(scheduler *sch, pipebuf<complex<T> > &_in, T _xymin, T _xymax, const char *_name = 0, TVScreen *objDATVScreen = 0) :
             runnable(sch, _name ? _name : _in.name),
             xymin(_xymin),
             xymax(_xymax),

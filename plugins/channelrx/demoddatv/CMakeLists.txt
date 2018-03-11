@@ -4,7 +4,6 @@ set(datv_SOURCES
 	datvdemod.cpp
 	datvdemodgui.cpp
 	datvdemodplugin.cpp
-	datvscreen.cpp
 	datvideostream.cpp
 	datvideorender.cpp
 )
@@ -13,7 +12,6 @@ set(datv_HEADERS
 	datvdemod.h
 	datvdemodgui.h
 	datvdemodplugin.h
-	datvscreen.h
 	datvideostream.h
 	datvideorender.h
 )

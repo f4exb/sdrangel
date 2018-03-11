@@ -248,7 +248,7 @@
         <enum>QLayout::SetMinimumSize</enum>
        </property>
        <item>
-        <widget class="DATVScreen" name="screenTV" native="true">
+        <widget class="TVScreen" name="screenTV" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -928,11 +928,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>DATVScreen</class>
-   <extends>QWidget</extends>
-   <header>datvscreen.h</header>
-  </customwidget>
-  <customwidget>
    <class>DATVideoRender</class>
    <extends>QWidget</extends>
    <header>datvideorender.h</header>
@@ -942,6 +937,12 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TVScreen</class>
+   <extends>QWidget</extends>
+   <header>gui/tvscreen.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

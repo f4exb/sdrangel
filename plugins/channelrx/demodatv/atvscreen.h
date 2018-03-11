@@ -28,8 +28,8 @@
 #include <QFont>
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
-#include "gui/glshadertvarray.h"
 #include "gui/glshadertextured.h"
+#include "gui/glshadertvarray.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
@@ -50,8 +50,17 @@ public:
 
 	virtual void resizeATVScreen(int intCols, int intRows);
 	virtual void renderImage(unsigned char * objData);
+    QRgb* getRowBuffer(int intRow);
+    void resetImage();
+
     virtual bool selectRow(int intLine);
     virtual bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
+
+    void connectTimer(const QTimer& timer);
+
+    //Valeurs par défaut
+    static const int ATV_COLS=192;
+    static const int ATV_ROWS=625;
 
 signals:
 	void traceSizeChanged(int);
@@ -71,20 +80,13 @@ private:
 
     GLShaderTVArray m_objGLShaderArray;
 
-    unsigned char *m_chrLastData;
-
-    //Valeurs par défaut
-    static const int ATV_COLS=192;
-    static const int ATV_ROWS=625;
-
     void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
 
 	void mousePressEvent(QMouseEvent*);
 
-    QRgb* getRowBuffer(int intRow);
-    void resetImage();
+	unsigned char *m_chrLastData;
 
 protected slots:
 	void cleanup();

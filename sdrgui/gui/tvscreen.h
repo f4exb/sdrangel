@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DATVSCREEN_H
-#define INCLUDE_DATVSCREEN_H
+#ifndef INCLUDE_TVSCREEN_H
+#define INCLUDE_TVSCREEN_H
 
 #include <QGLWidget>
 #include <QPen>
@@ -28,23 +28,23 @@
 #include <QFont>
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
-#include "gui/glshadertextured.h"
-#include "gui/glshadertvarray.h"
+#include "glshadertextured.h"
+#include "glshadertvarray.h"
 #include "util/export.h"
 #include "util/bitfieldindex.h"
 
 class QPainter;
 
-class DATVScreen: public QGLWidget
+class TVScreen: public QGLWidget
 {
 	Q_OBJECT
 
 public:
 
-    DATVScreen(QWidget* parent = NULL);
-    ~DATVScreen();
+	TVScreen(bool blnColor, QWidget* parent = 0);
+    ~TVScreen();
 
-    void resizeDATVScreen(int intCols, int intRows);
+    void resizeTVScreen(int intCols, int intRows);
     void renderImage(unsigned char * objData);
     QRgb* getRowBuffer(int intRow);
     void resetImage();
@@ -55,8 +55,8 @@ public:
     void connectTimer(const QTimer& timer);
 
     //Valeurs par défaut
-    static const int DATV_COLS=256;
-    static const int DATV_ROWS=256;
+    static const int TV_COLS=256;
+    static const int TV_ROWS=256;
 
 signals:
 	void traceSizeChanged(int);
@@ -82,11 +82,11 @@ private:
 
 	void mousePressEvent(QMouseEvent*);
 
-    unsigned char *m_chrLastData;
+	unsigned char *m_chrLastData;
 
 protected slots:
 	void cleanup();
 	void tick();
 };
 
-#endif // INCLUDE_DATVSCREEN_H
+#endif // INCLUDE_TVSCREEN_H

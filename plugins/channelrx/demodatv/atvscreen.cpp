@@ -171,6 +171,14 @@ void ATVScreen::tick()
     }
 }
 
+void ATVScreen::connectTimer(const QTimer& objTimer)
+{
+     qDebug() << "ATVScreen::connectTimer";
+     disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+     connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+     m_objTimer.stop();
+}
+
 void ATVScreen::cleanup()
 {
     if (m_blnGLContextInitialized)

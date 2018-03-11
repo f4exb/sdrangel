@@ -41,6 +41,7 @@ set(sdrgui_SOURCES
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
+    gui/tvscreen.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
     
@@ -96,7 +97,8 @@ set(sdrgui_HEADERS
     gui/scaleengine.h
     gui/tickedslider.h
     gui/transverterbutton.h
-    gui/transverterdialog.h    
+    gui/transverterdialog.h
+    gui/tvscreen.h    
     gui/valuedial.h
     gui/valuedialz.h
     

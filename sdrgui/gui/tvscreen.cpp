@@ -22,13 +22,13 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QSurface>
-#include "datvscreen.h"
+#include "tvscreen.h"
 
 #include <algorithm>
 #include <QDebug>
 
-DATVScreen::DATVScreen(QWidget* parent) :
-        QGLWidget(parent), m_objMutex(QMutex::NonRecursive), m_objGLShaderArray(true)
+TVScreen::TVScreen(bool blnColor, QWidget* parent) :
+        QGLWidget(parent), m_objMutex(QMutex::NonRecursive), m_objGLShaderArray(blnColor)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -40,17 +40,17 @@ DATVScreen::DATVScreen(QWidget* parent) :
     m_blnGLContextInitialized = false;
 
     //Par défaut
-    m_intAskedCols = DATV_COLS;
-    m_intAskedRows = DATV_ROWS;
+    m_intAskedCols = TV_COLS;
+    m_intAskedRows = TV_ROWS;
 
 }
 
-DATVScreen::~DATVScreen()
+TVScreen::~TVScreen()
 {
     cleanup();
 }
 
-QRgb* DATVScreen::getRowBuffer(int intRow)
+QRgb* TVScreen::getRowBuffer(int intRow)
 {
     if (!m_blnGLContextInitialized)
     {
@@ -60,25 +60,25 @@ QRgb* DATVScreen::getRowBuffer(int intRow)
     return m_objGLShaderArray.GetRowBuffer(intRow);
 }
 
-void DATVScreen::renderImage(unsigned char * objData)
+void TVScreen::renderImage(unsigned char * objData)
 {
     m_chrLastData = objData;
     m_blnDataChanged = true;
     //update();
 }
 
-void DATVScreen::resetImage()
+void TVScreen::resetImage()
 {
     m_objGLShaderArray.ResetPixels();
 }
 
-void DATVScreen::resizeDATVScreen(int intCols, int intRows)
+void TVScreen::resizeTVScreen(int intCols, int intRows)
 {
     m_intAskedCols = intCols;
     m_intAskedRows = intRows;
 }
 
-void DATVScreen::initializeGL()
+void TVScreen::initializeGL()
 {
     m_objMutex.lock();
 
@@ -128,21 +128,21 @@ void DATVScreen::initializeGL()
     }
 
     connect(objGlCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this,
-            &DATVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
+            &TVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
 
     m_blnGLContextInitialized = true;
 
     m_objMutex.unlock();
 }
 
-void DATVScreen::resizeGL(int intWidth, int intHeight)
+void TVScreen::resizeGL(int intWidth, int intHeight)
 {
     QOpenGLFunctions *ptrF = QOpenGLContext::currentContext()->functions();
     ptrF->glViewport(0, 0, intWidth, intHeight);
     m_blnConfigChanged = true;
 }
 
-void DATVScreen::paintGL()
+void TVScreen::paintGL()
 {
     if (!m_objMutex.tryLock(2))
         return;
@@ -161,18 +161,18 @@ void DATVScreen::paintGL()
     m_objMutex.unlock();
 }
 
-void DATVScreen::mousePressEvent(QMouseEvent* event __attribute__((unused)))
+void TVScreen::mousePressEvent(QMouseEvent* event __attribute__((unused)))
 {
 }
 
-void DATVScreen::tick()
+void TVScreen::tick()
 {
     if (m_blnDataChanged) {
         update();
     }
 }
 
-void DATVScreen::connectTimer(const QTimer& objTimer)
+void TVScreen::connectTimer(const QTimer& objTimer)
 {
      qDebug() << "DATVScreen::connectTimer";
      disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -180,7 +180,7 @@ void DATVScreen::connectTimer(const QTimer& objTimer)
      m_objTimer.stop();
 }
 
-void DATVScreen::cleanup()
+void TVScreen::cleanup()
 {
     if (m_blnGLContextInitialized)
     {
@@ -188,7 +188,7 @@ void DATVScreen::cleanup()
     }
 }
 
-bool DATVScreen::selectRow(int intLine)
+bool TVScreen::selectRow(int intLine)
 {
     if (m_blnGLContextInitialized)
     {
@@ -200,7 +200,7 @@ bool DATVScreen::selectRow(int intLine)
     }
 }
 
-bool DATVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
+bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
 {
     if (m_blnGLContextInitialized)
     {

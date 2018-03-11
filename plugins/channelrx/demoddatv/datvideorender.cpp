@@ -18,7 +18,7 @@
 #include "datvideorender.h"
 
 DATVideoRender::DATVideoRender(QWidget * parent):
-    DATVScreen(parent)
+    TVScreen(true, parent)
 {
     installEventFilter(this);
     m_blnIsFullScreen=false;
@@ -488,7 +488,7 @@ bool DATVideoRender::RenderStream()
 
                 //Rendering device setup
 
-                 resizeDATVScreen(m_objFrame->width,m_objFrame->height);
+                 resizeTVScreen(m_objFrame->width,m_objFrame->height);
                  update();
                  resetImage();
 

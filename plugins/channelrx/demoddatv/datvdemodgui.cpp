@@ -266,7 +266,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_objDATVDemod = (DATVDemod*) rxChannel;
     m_objDATVDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-    m_objDATVDemod->SetDATVScreen(ui->screenTV);
+    m_objDATVDemod->SetTVScreen(ui->screenTV);
 
     connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2),&DATVideostream::onDataPackets,this,&DATVDemodGUI::on_StreamDataAvailable);
 
