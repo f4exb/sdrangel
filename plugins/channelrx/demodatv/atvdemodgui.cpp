@@ -278,6 +278,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_inputSampleRate(48000)
 {
     ui->setupUi(this);
+    ui->screenTV->setColor(false);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

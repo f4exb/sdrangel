@@ -260,6 +260,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         m_blnDoApplySettings(true)
 {
     ui->setupUi(this);
+    ui->screenTV->setColor(true);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

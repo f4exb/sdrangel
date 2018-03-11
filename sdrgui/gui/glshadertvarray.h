@@ -42,6 +42,7 @@ public:
     GLShaderTVArray(bool blnColor);
     ~GLShaderTVArray();
 
+    void setColor(bool blnColor) { m_blnColor = blnColor; }
     void InitializeGL(int intCols, int intRows);
     void ResizeContainer(int intCols, int intRows);
     void Cleanup();

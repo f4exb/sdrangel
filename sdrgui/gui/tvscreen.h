@@ -44,6 +44,7 @@ public:
 	TVScreen(bool blnColor, QWidget* parent = 0);
     ~TVScreen();
 
+    void setColor(bool blnColor);
     void resizeTVScreen(int intCols, int intRows);
     void renderImage(unsigned char * objData);
     QRgb* getRowBuffer(int intRow);

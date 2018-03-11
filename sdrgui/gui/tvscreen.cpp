@@ -50,6 +50,11 @@ TVScreen::~TVScreen()
     cleanup();
 }
 
+void TVScreen::setColor(bool blnColor)
+{
+	m_objGLShaderArray.setColor(blnColor);
+}
+
 QRgb* TVScreen::getRowBuffer(int intRow)
 {
     if (!m_blnGLContextInitialized)
