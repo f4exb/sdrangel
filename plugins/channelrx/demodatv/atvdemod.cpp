@@ -42,7 +42,7 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_scopeSink(0),
-        m_registeredATVScreen(0),
+        m_registeredTVScreen(0),
         m_intNumberSamplePerTop(0),
         m_intImageIndex(0),
         m_intSynchroPoints(0),
@@ -103,9 +103,9 @@ ATVDemod::~ATVDemod()
     delete m_channelizer;
 }
 
-void ATVDemod::setATVScreen(ATVScreenInterface *objScreen)
+void ATVDemod::setTVScreen(TVScreen *objScreen)
 {
-    m_registeredATVScreen = objScreen;
+    m_registeredTVScreen = objScreen;
 }
 
 void ATVDemod::configure(
@@ -607,10 +607,10 @@ void ATVDemod::applySettings()
         m_configPrivate.m_intNumberSamplePerLine = (int) (m_config.m_fltLineDuration * m_config.m_intSampleRate);
         m_intNumberSamplePerTop = (int) (m_config.m_fltTopDuration * m_config.m_intSampleRate);
 
-        if (m_registeredATVScreen)
+        if (m_registeredTVScreen)
         {
-            m_registeredATVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
-            m_registeredATVScreen->resizeATVScreen(
+            //m_registeredTVScreen->setRenderImmediate(!(m_config.m_fltFramePerS > 25.0f));
+            m_registeredTVScreen->resizeTVScreen(
                     m_configPrivate.m_intNumberSamplePerLine - m_intNumberSamplePerLineSignals,
                     m_intNumberOfLines - m_intNumberOfBlackLines);
         }

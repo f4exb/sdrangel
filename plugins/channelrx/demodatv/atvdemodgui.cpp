@@ -285,7 +285,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setScopeSink(m_scopeVis);
-    m_atvDemod->setATVScreen(ui->screenTV);
+    m_atvDemod->setTVScreen(ui->screenTV);
 
     ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms

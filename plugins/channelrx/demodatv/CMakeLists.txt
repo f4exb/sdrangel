@@ -5,7 +5,6 @@ set(atv_SOURCES
 	atvdemodsettings.cpp
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
-	atvscreen.cpp
 )
 
 set(atv_HEADERS
@@ -13,8 +12,6 @@ set(atv_HEADERS
     atvdemodsettings.h
 	atvdemodgui.h
 	atvdemodplugin.h
-	atvscreen.h
-	atvscreeninterface.h
 )
 
 set(atv_FORMS
