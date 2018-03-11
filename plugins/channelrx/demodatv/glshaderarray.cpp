@@ -126,7 +126,7 @@ void GLShaderArray::InitializeGL(int intCols, int intRows)
 
 QRgb * GLShaderArray::GetRowBuffer(int intRow)
 {
-    if (m_blnInitialized == false)
+    if (!m_blnInitialized)
     {
         return 0;
     }
@@ -168,7 +168,7 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
     QRgb *ptrLine;
     int intVal;
 
-    if (m_blnInitialized == false)
+    if (!m_blnInitialized)
     {
         return;
     }

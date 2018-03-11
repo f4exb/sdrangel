@@ -223,7 +223,6 @@ void GLShaderArray::RenderPixels(unsigned char *chrData)
 
     m_objTexture->release();
     m_objProgram->release();
-
 }
 
 void GLShaderArray::ResetPixels()
@@ -294,7 +293,6 @@ bool GLShaderArray::SetDataColor(int intCol, QRgb objColor)
             blnRslt = true;
         }
     }
-
 
     return blnRslt;
 }
