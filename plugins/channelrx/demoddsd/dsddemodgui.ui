@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>686</width>
-    <height>397</height>
+    <height>414</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -926,25 +926,25 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="verticalWidget" native="true">
+  <widget class="QWidget" name="scopeWidget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>180</y>
-     <width>200</width>
-     <height>200</height>
+     <width>218</width>
+     <height>218</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>200</width>
-     <height>200</height>
+     <width>210</width>
+     <height>210</height>
     </size>
    </property>
    <property name="windowTitle">
     <string>Discriminator Scope</string>
    </property>
-   <layout class="QVBoxLayout" name="scopeContainer">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="margin">
      <number>2</number>
     </property>
