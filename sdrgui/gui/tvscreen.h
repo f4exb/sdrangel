@@ -46,12 +46,14 @@ public:
 
     void setColor(bool blnColor);
     void resizeTVScreen(int intCols, int intRows);
+    void getSize(int& intCols, int& intRows) const;
     void renderImage(unsigned char * objData);
     QRgb* getRowBuffer(int intRow);
     void resetImage();
 
     bool selectRow(int intLine);
     bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
+    void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
 
     void connectTimer(const QTimer& timer);
 
@@ -74,6 +76,7 @@ private:
     QMutex m_objMutex;
     bool m_blnDataChanged;
     bool m_blnConfigChanged;
+    bool m_blnRenderImmediate;
 
     GLShaderTVArray m_objGLShaderArray;
 

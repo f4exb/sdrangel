@@ -1,0 +1,64 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef SDRGUI_DSP_SCOPEVISXY_H_
+#define SDRGUI_DSP_SCOPEVISXY_H_
+
+#include "dsp/basebandsamplesink.h"
+#include "util/export.h"
+#include "util/message.h"
+
+#include <QColor>
+#include <vector>
+#include <complex>
+
+class TVScreen;
+
+class SDRGUI_API ScopeVisXY : public BasebandSampleSink {
+public:
+	ScopeVisXY(TVScreen *tvScreen);
+	virtual ~ScopeVisXY();
+
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
+
+	void setScale(float scale) { m_scale = scale; }
+	void setPixelsPerFrame(int pixelsPerFrame) { m_pixelsPerFrame = pixelsPerFrame; }
+	void setPlotRGB(const QRgb& plotRGB) { m_plotRGB = plotRGB; }
+	void setGridRGB(const QRgb& gridRGB) { m_gridRGB = gridRGB; }
+
+	void addGraticulePoint(const std::complex<float>& z);
+	void clearGraticule();
+
+private:
+	void drawGraticule();
+
+	TVScreen *m_tvScreen;
+	float m_scale;
+	int m_cols;
+	int m_rows;
+	int m_pixelsPerFrame;
+	int m_pixelCount;
+	QRgb m_plotRGB;
+	QRgb m_gridRGB;
+	std::vector<std::complex<float> > m_graticule;
+};
+
+
+#endif /* SDRGUI_DSP_SCOPEVISXY_H_ */

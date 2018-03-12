@@ -20,13 +20,11 @@
 #include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
-#include <QDockWidget>
-#include <QMainWindow>
-#include <QDebug>
 
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"
 #include "dsp/scopevis.h"
+#include "dsp/scopevisxy.h"
 #include "gui/glscope.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -37,6 +35,12 @@
 
 #include "dsddemodbaudrates.h"
 #include "dsddemod.h"
+
+#include <QDockWidget>
+#include <QMainWindow>
+#include <QDebug>
+
+#include <complex>
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -270,14 +274,32 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0)
 {
 	ui->setupUi(this);
+	ui->screenTV->setColor(true);
+	ui->screenTV->resizeTVScreen(200,200);
+	ui->screenTV->setRenderImmediate(true);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_scopeVis = new ScopeVis(SDR_RX_SCALEF, ui->glScope);
+	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
+	m_scopeVisXY->setScale(2.0);
+	m_scopeVisXY->setPixelsPerFrame(4001);
+	m_scopeVisXY->setPlotRGB(qRgb(0, 220, 250));
+	m_scopeVisXY->setGridRGB(qRgb(255, 255, 128));
+
+	for (float x = -0.84; x < 1.0; x += 0.56)
+	{
+		for (float y = -0.84; y < 1.0; y += 0.56)
+		{
+			m_scopeVisXY->addGraticulePoint(std::complex<float>(x, y));
+		}
+	}
+
 	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_dsdDemod->setScopeSink(m_scopeVis);
+	m_dsdDemod->setScopeXYSink(m_scopeVisXY);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->glScope->setSampleRate(48000);
@@ -329,6 +351,7 @@ DSDDemodGUI::~DSDDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_scopeVisXY;
 	delete m_scopeVis;
 	delete ui;
 }

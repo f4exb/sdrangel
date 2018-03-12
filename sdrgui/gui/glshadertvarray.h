@@ -45,6 +45,7 @@ public:
     void setColor(bool blnColor) { m_blnColor = blnColor; }
     void InitializeGL(int intCols, int intRows);
     void ResizeContainer(int intCols, int intRows);
+    void getSize(int& intCols, int& intRows) const { intCols = m_intCols, intRows = m_intRows; }
     void Cleanup();
     QRgb *GetRowBuffer(int intRow);
     void RenderPixels(unsigned char *chrData);

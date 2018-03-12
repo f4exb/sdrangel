@@ -33,6 +33,7 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ScopeVis;
+class ScopeVisXY;
 class DSDDemod;
 
 namespace Ui {
@@ -81,6 +82,7 @@ private:
 	SignalFormat m_signalFormat;
 
     ScopeVis* m_scopeVis;
+    ScopeVisXY* m_scopeVisXY;
 
 	DSDDemod* m_dsdDemod;
 	bool m_enableCosineFiltering;

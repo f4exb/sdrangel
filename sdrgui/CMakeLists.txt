@@ -48,6 +48,7 @@ set(sdrgui_SOURCES
     dsp/scopevis.cpp
     dsp/scopevisng.cpp
     dsp/scopevismulti.cpp
+    dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
     dsp/spectrumscopengcombovis.cpp
@@ -105,6 +106,7 @@ set(sdrgui_HEADERS
     dsp/scopevis.h
     dsp/scopevisng.h
     dsp/scopevismulti.h
+    dsp/scopevisxy.h    
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
     dsp/spectrumscopengcombovis.h

@@ -38,6 +38,7 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
     m_blnGLContextInitialized = false;
+    m_blnRenderImmediate = false;
 
     //Par défaut
     m_intAskedCols = TV_COLS;
@@ -69,7 +70,10 @@ void TVScreen::renderImage(unsigned char * objData)
 {
     m_chrLastData = objData;
     m_blnDataChanged = true;
-    //update();
+
+    if (m_blnRenderImmediate) {
+    	update();
+    }
 }
 
 void TVScreen::resetImage()
@@ -81,6 +85,11 @@ void TVScreen::resizeTVScreen(int intCols, int intRows)
 {
     m_intAskedCols = intCols;
     m_intAskedRows = intRows;
+}
+
+void TVScreen::getSize(int& intCols, int& intRows) const
+{
+	m_objGLShaderArray.getSize(intCols, intRows);
 }
 
 void TVScreen::initializeGL()
@@ -209,7 +218,7 @@ bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
 {
     if (m_blnGLContextInitialized)
     {
-        return m_objGLShaderArray.SetDataColor(intCol, qRgb(intRed, intGreen, intBlue));
+        return m_objGLShaderArray.SetDataColor(intCol, qRgb(intBlue, intGreen, intRed)); // FIXME: blue <> red inversion in shader
     }
     else
     {
