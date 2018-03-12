@@ -45,7 +45,6 @@ GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
     m_objCurrentRow = 0;
 
     m_objTextureLoc = 0;
-    m_objColorLoc = 0;
     m_objMatrixLoc = 0;
 }
 
@@ -100,7 +99,6 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
 
     m_objMatrixLoc = m_objProgram->uniformLocation("uMatrix");
     m_objTextureLoc = m_objProgram->uniformLocation("uTexture");
-    m_objColorLoc = m_objProgram->uniformLocation("uColour");
 
     if (m_objTexture != 0)
     {
@@ -113,6 +111,7 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
     m_objImage->fill(QColor(0, 0, 0));
 
     m_objTexture = new QOpenGLTexture(*m_objImage);
+    m_objTexture->setFormat(QOpenGLTexture::RGBA8_UNorm);
     m_objTexture->setMinificationFilter(QOpenGLTexture::Linear);
     m_objTexture->setMagnificationFilter(QOpenGLTexture::Linear);
     m_objTexture->setWrapMode(QOpenGLTexture::ClampToEdge);
@@ -210,6 +209,9 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     m_objProgram->setUniformValue(m_objMatrixLoc, objQMatrix);
     m_objProgram->setUniformValue(m_objTextureLoc, 0);
+    ptrF->glClear(GL_COLOR_BUFFER_BIT);
+	ptrF->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ptrF->glEnable(GL_BLEND);
 
     m_objTexture->bind();
 

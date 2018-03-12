@@ -119,6 +119,7 @@ private slots:
     void on_baudRate_currentIndexChanged(int index);
     void on_enableCosineFiltering_toggled(bool enable);
     void on_syncOrConstellation_toggled(bool checked);
+	void on_traceLength_valueChanged(int value);
     void on_slot1On_toggled(bool checked);
     void on_slot2On_toggled(bool checked);
     void on_tdmaStereoSplit_toggled(bool checked);

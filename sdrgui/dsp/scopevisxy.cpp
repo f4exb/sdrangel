@@ -52,14 +52,14 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 		col = col < 0 ? 0 : col >= m_cols ? m_cols-1 : col;
 
 		m_tvScreen->selectRow(row);
-		m_tvScreen->setDataColor(col, qRed(m_plotRGB), qGreen(m_plotRGB), qBlue(m_plotRGB));
+		m_tvScreen->setDataColor(col, qRed(m_plotRGB), qGreen(m_plotRGB), qBlue(m_plotRGB), 128); // FIXME: alpha does not work
 		m_pixelCount++;
 
 		if (m_pixelCount == m_pixelsPerFrame)
 		{
 			drawGraticule();
 			m_tvScreen->renderImage(0);
-			usleep(10000);
+			usleep(50000);
 			m_tvScreen->getSize(m_cols, m_rows);
 			m_tvScreen->resetImage();
 			m_pixelCount = 0;

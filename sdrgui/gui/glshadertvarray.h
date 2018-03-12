@@ -60,7 +60,7 @@ protected:
     QOpenGLShaderProgram *m_objProgram;
     int m_objMatrixLoc;
     int m_objTextureLoc;
-    int m_objColorLoc;
+    //int m_objColorLoc;
     static const QString m_strVertexShaderSourceArray;
     static const QString m_strFragmentShaderSourceColored;
 

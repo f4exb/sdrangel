@@ -225,3 +225,15 @@ bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
         return false;
     }
 }
+
+bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha)
+{
+    if (m_blnGLContextInitialized)
+    {
+        return m_objGLShaderArray.SetDataColor(intCol, qRgba(intBlue, intGreen, intRed, intAlpha)); // FIXME: blue <> red inversion in shader
+    }
+    else
+    {
+        return false;
+    }
+}

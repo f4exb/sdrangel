@@ -162,6 +162,13 @@ void DSDDemodGUI::on_syncOrConstellation_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_traceLength_valueChanged(int value)
+{
+    m_settings.m_traceLengthMutliplier = value;
+    ui->traceLengthText->setText(QString("%1").arg(m_settings.m_traceLengthMutliplier*50));
+    m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
+}
+
 void DSDDemodGUI::on_slot1On_toggled(bool checked)
 {
     m_settings.m_slot1On = checked;
@@ -412,6 +419,9 @@ void DSDDemodGUI::displaySettings()
     }
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
+    ui->traceLength->setValue(m_settings.m_traceLengthMutliplier);
+    ui->traceLengthText->setText(QString("%1").arg(m_settings.m_traceLengthMutliplier*50));
+    m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
 
     blockApplySettings(false);
 }

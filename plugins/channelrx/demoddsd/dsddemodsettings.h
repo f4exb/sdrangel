@@ -46,6 +46,7 @@ struct DSDDemodSettings
     quint32 m_rgbColor;
     QString m_title;
     bool m_highPassFilter;
+    int m_traceLengthMutliplier; // x 50ms
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;

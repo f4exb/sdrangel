@@ -52,7 +52,8 @@ public:
     void resetImage();
 
     bool selectRow(int intLine);
-    bool setDataColor(int intCol,int intRed, int intGreen, int intBlue);
+    bool setDataColor(int intCol, int intRed, int intGreen, int intBlue);
+    bool setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha);
     void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
 
     void connectTimer(const QTimer& timer);

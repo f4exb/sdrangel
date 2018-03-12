@@ -39,7 +39,11 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 	void setScale(float scale) { m_scale = scale; }
-	void setPixelsPerFrame(int pixelsPerFrame) { m_pixelsPerFrame = pixelsPerFrame; }
+	
+	void setPixelsPerFrame(int pixelsPerFrame) { 
+		m_pixelsPerFrame = pixelsPerFrame; 
+		m_pixelCount = 0; 
+	}
 	void setPlotRGB(const QRgb& plotRGB) { m_plotRGB = plotRGB; }
 	void setGridRGB(const QRgb& gridRGB) { m_gridRGB = gridRGB; }
 

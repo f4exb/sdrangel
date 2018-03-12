@@ -206,7 +206,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_settings.m_syncOrConstellation)
             {
-                Sample s(sample, m_dsdDecoder.getSymbolSyncSample() * m_scaleFromShort);
+                Sample s(sample, m_dsdDecoder.getSymbolSyncSample() * m_scaleFromShort * 0.84);
                 m_scopeSampleBuffer.push_back(s);
             }
             else
