@@ -117,7 +117,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 <h2>LimeSDR</h2>
 
-<p><b><p>&#9888; Source code only. Recent versions of Lime Suite library are crap so official support cannot be maintained. You can still compile the plugins from source and see for yourself</b></p>
+<p><b><p>&#9888; Source code only. Due to instability of recent versions of Lime Suite the "official" support cannot be maintained. You can still compile the plugins from source and see for yourself</b></p>
 
 [LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
 
