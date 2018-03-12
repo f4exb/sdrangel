@@ -81,7 +81,6 @@ private:
 	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
 	SignalFormat m_signalFormat;
 
-    ScopeVis* m_scopeVis;
     ScopeVisXY* m_scopeVisXY;
 
 	DSDDemod* m_dsdDemod;

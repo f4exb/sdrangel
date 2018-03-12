@@ -93,7 +93,6 @@ public:
     DSDDemod(DeviceSourceAPI *deviceAPI);
 	~DSDDemod();
 	virtual void destroy() { delete this; }
-	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
 	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_scopeXY = sampleSink; }
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
@@ -193,7 +192,6 @@ private:
 
 	AudioFifo m_audioFifo1;
     AudioFifo m_audioFifo2;
-	BasebandSampleSink* m_scope;
 	BasebandSampleSink* m_scopeXY;
 	bool m_scopeEnabled;
 

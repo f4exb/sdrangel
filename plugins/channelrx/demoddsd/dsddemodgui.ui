@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>686</width>
-    <height>841</height>
+    <height>397</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -931,14 +931,14 @@
     <rect>
      <x>10</x>
      <y>180</y>
-     <width>636</width>
-     <height>651</height>
+     <width>200</width>
+     <height>200</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>636</width>
-     <height>0</height>
+     <width>200</width>
+     <height>200</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -949,49 +949,20 @@
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="GLScope" name="glScope" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>432</width>
-          <height>200</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="TVScreen" name="screenTV" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
+     <widget class="TVScreen" name="screenTV" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -1012,18 +983,6 @@
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLScope</class>
-   <extends>QWidget</extends>
-   <header>gui/glscope.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLScopeGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glscopegui.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

@@ -53,7 +53,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         m_squelchOpen(false),
         m_audioFifo1(48000),
         m_audioFifo2(48000),
-        m_scope(0),
         m_scopeXY(0),
         m_scopeEnabled(true),
         m_dsdDecoder(),
@@ -309,12 +308,6 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 //	        m_dsdDecoder.resetAudio1();
 //	    }
 	}
-
-
-    if ((m_scope != 0) && (m_scopeEnabled))
-    {
-        m_scope->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), true); // true = real samples for what it's worth
-    }
 
     if ((m_scopeXY != 0) && (m_scopeEnabled))
     {

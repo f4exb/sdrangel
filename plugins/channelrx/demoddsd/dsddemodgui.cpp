@@ -282,7 +282,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_scopeVis = new ScopeVis(SDR_RX_SCALEF, ui->glScope);
 	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
 	m_scopeVisXY->setScale(2.0);
 	m_scopeVisXY->setPixelsPerFrame(4001);
@@ -298,14 +297,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	}
 
 	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
-	m_dsdDemod->setScopeSink(m_scopeVis);
 	m_dsdDemod->setScopeXYSink(m_scopeVisXY);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
-
-    ui->glScope->setSampleRate(48000);
-    m_scopeVis->setSampleRate(48000);
-
-	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -337,10 +330,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
-	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-
 	m_settings.setChannelMarker(&m_channelMarker);
-	m_settings.setScopeGUI(ui->scopeGUI);
 
 	updateMyPosition();
 	displaySettings();
@@ -352,7 +342,6 @@ DSDDemodGUI::~DSDDemodGUI()
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVisXY;
-	delete m_scopeVis;
 	delete ui;
 }
 
