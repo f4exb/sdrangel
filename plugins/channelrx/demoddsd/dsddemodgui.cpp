@@ -169,6 +169,20 @@ void DSDDemodGUI::on_traceLength_valueChanged(int value)
     m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
 }
 
+void DSDDemodGUI::on_traceStroke_valueChanged(int value)
+{
+    m_settings.m_traceStroke = value;
+    ui->traceStrokeText->setText(QString("%1").arg(m_settings.m_traceStroke));
+    m_scopeVisXY->setStroke(m_settings.m_traceStroke);
+}
+
+void DSDDemodGUI::on_traceDecay_valueChanged(int value)
+{
+    m_settings.m_traceDecay = value;
+    ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
+    m_scopeVisXY->setDecay(m_settings.m_traceDecay);
+}
+
 void DSDDemodGUI::on_slot1On_toggled(bool checked)
 {
     m_settings.m_slot1On = checked;
@@ -419,9 +433,18 @@ void DSDDemodGUI::displaySettings()
     }
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
+
     ui->traceLength->setValue(m_settings.m_traceLengthMutliplier);
     ui->traceLengthText->setText(QString("%1").arg(m_settings.m_traceLengthMutliplier*50));
     m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
+
+    ui->traceStroke->setValue(m_settings.m_traceStroke);
+    ui->traceStrokeText->setText(QString("%1").arg(m_settings.m_traceStroke));
+    m_scopeVisXY->setStroke(m_settings.m_traceStroke);
+
+    ui->traceDecay->setValue(m_settings.m_traceDecay);
+    ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
+    m_scopeVisXY->setDecay(m_settings.m_traceDecay);
 
     blockApplySettings(false);
 }

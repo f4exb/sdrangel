@@ -39,11 +39,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 	void setScale(float scale) { m_scale = scale; }
-	
-	void setPixelsPerFrame(int pixelsPerFrame) { 
-		m_pixelsPerFrame = pixelsPerFrame; 
-		m_pixelCount = 0; 
-	}
+	void setStroke(int stroke) { m_alphaTrace = stroke; }
+    void setDecay(int decay) { m_alphaReset = 255 - decay; }
+
+	void setPixelsPerFrame(int pixelsPerFrame);
 	void setPlotRGB(const QRgb& plotRGB) { m_plotRGB = plotRGB; }
 	void setGridRGB(const QRgb& gridRGB) { m_gridRGB = gridRGB; }
 
@@ -59,6 +58,8 @@ private:
 	int m_rows;
 	int m_pixelsPerFrame;
 	int m_pixelCount;
+	int m_alphaTrace;  //!< this is the stroke value [0:255]
+	int m_alphaReset;  //!< alpha channel of screen blanking (blackening) is 255 minus decay value [0:255]
 	QRgb m_plotRGB;
 	QRgb m_gridRGB;
 	std::vector<std::complex<float> > m_graticule;

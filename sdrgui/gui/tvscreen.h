@@ -42,7 +42,7 @@ class TVScreen: public QGLWidget
 public:
 
 	TVScreen(bool blnColor, QWidget* parent = 0);
-    ~TVScreen();
+    virtual ~TVScreen();
 
     void setColor(bool blnColor);
     void resizeTVScreen(int intCols, int intRows);
@@ -50,11 +50,14 @@ public:
     void renderImage(unsigned char * objData);
     QRgb* getRowBuffer(int intRow);
     void resetImage();
+    void resetImage(int alpha);
 
     bool selectRow(int intLine);
     bool setDataColor(int intCol, int intRed, int intGreen, int intBlue);
     bool setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha);
     void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
+    void setAlphaBlend(bool blnAlphaBlend) { m_objGLShaderArray.setAlphaBlend(blnAlphaBlend); }
+    void setAlphaReset() { m_objGLShaderArray.setAlphaReset(); }
 
     void connectTimer(const QTimer& timer);
 

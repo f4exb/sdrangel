@@ -62,16 +62,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -566,16 +557,7 @@
     <string>Digital</string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -692,7 +674,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>200</x>
+         <x>230</x>
          <y>10</y>
          <width>23</width>
          <height>22</height>
@@ -769,8 +751,8 @@
       <widget class="ButtonSwitch" name="enableCosineFiltering">
        <property name="geometry">
         <rect>
-         <x>80</x>
-         <y>40</y>
+         <x>200</x>
+         <y>10</y>
          <width>23</width>
          <height>22</height>
         </rect>
@@ -789,7 +771,7 @@
       <widget class="QLabel" name="inCarrierPosText">
        <property name="geometry">
         <rect>
-         <x>110</x>
+         <x>80</x>
          <y>40</y>
          <width>25</width>
          <height>28</height>
@@ -814,7 +796,7 @@
       <widget class="QLabel" name="inLevelText">
        <property name="geometry">
         <rect>
-         <x>150</x>
+         <x>110</x>
          <y>40</y>
          <width>25</width>
          <height>28</height>
@@ -865,7 +847,7 @@
         <rect>
          <x>50</x>
          <y>107</y>
-         <width>115</width>
+         <width>151</width>
          <height>16</height>
         </rect>
        </property>
@@ -901,7 +883,7 @@
       <widget class="QLabel" name="fmDeviationText">
        <property name="geometry">
         <rect>
-         <x>180</x>
+         <x>210</x>
          <y>100</y>
          <width>40</width>
          <height>29</height>
@@ -938,7 +920,7 @@
         <rect>
          <x>50</x>
          <y>137</y>
-         <width>115</width>
+         <width>151</width>
          <height>16</height>
         </rect>
        </property>
@@ -970,8 +952,8 @@
       <widget class="QToolButton" name="slot1On">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>70</y>
+         <x>170</x>
+         <y>40</y>
          <width>23</width>
          <height>22</height>
         </rect>
@@ -994,8 +976,8 @@
       <widget class="QToolButton" name="slot2On">
        <property name="geometry">
         <rect>
-         <x>170</x>
-         <y>70</y>
+         <x>200</x>
+         <y>40</y>
          <width>23</width>
          <height>22</height>
         </rect>
@@ -1018,8 +1000,8 @@
       <widget class="QToolButton" name="tdmaStereoSplit">
        <property name="geometry">
         <rect>
-         <x>200</x>
-         <y>70</y>
+         <x>230</x>
+         <y>40</y>
          <width>23</width>
          <height>22</height>
         </rect>
@@ -1058,7 +1040,7 @@
         <string>Display trace length (ms)</string>
        </property>
        <property name="minimum">
-        <number>1</number>
+        <number>6</number>
        </property>
        <property name="maximum">
         <number>30</number>
@@ -1067,7 +1049,7 @@
         <number>1</number>
        </property>
        <property name="value">
-        <number>5</number>
+        <number>6</number>
        </property>
       </widget>
       <widget class="QLabel" name="traceLengthText">
@@ -1092,7 +1074,7 @@
       <widget class="QLabel" name="demodGainText">
        <property name="geometry">
         <rect>
-         <x>180</x>
+         <x>210</x>
          <y>130</y>
          <width>40</width>
          <height>29</height>
@@ -1106,6 +1088,106 @@
        </property>
        <property name="text">
         <string>0.00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QDial" name="traceStroke">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>70</y>
+         <width>24</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Trace stroke [0..255]</string>
+       </property>
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>100</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="traceStrokeText">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>73</y>
+         <width>31</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Trace stroke value</string>
+       </property>
+       <property name="text">
+        <string>000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QDial" name="traceDecay">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>70</y>
+         <width>24</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Trace decay [0..255]</string>
+       </property>
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>200</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="traceDecayText">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>73</y>
+         <width>31</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Trace decay value</string>
+       </property>
+       <property name="text">
+        <string>000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

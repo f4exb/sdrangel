@@ -81,6 +81,11 @@ void TVScreen::resetImage()
     m_objGLShaderArray.ResetPixels();
 }
 
+void TVScreen::resetImage(int alpha)
+{
+    m_objGLShaderArray.ResetPixels(alpha);
+}
+
 void TVScreen::resizeTVScreen(int intCols, int intRows)
 {
     m_intAskedCols = intCols;

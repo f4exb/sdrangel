@@ -43,6 +43,8 @@ public:
     ~GLShaderTVArray();
 
     void setColor(bool blnColor) { m_blnColor = blnColor; }
+    void setAlphaBlend(bool blnAlphaBlend) { m_blnAlphaBlend = blnAlphaBlend; }
+    void setAlphaReset() { m_blnAlphaReset = true; }
     void InitializeGL(int intCols, int intRows);
     void ResizeContainer(int intCols, int intRows);
     void getSize(int& intCols, int& intRows) const { intCols = m_intCols, intRows = m_intRows; }
@@ -50,6 +52,7 @@ public:
     QRgb *GetRowBuffer(int intRow);
     void RenderPixels(unsigned char *chrData);
     void ResetPixels();
+    void ResetPixels(int alpha);
 
     bool SelectRow(int intLine);
     bool SetDataColor(int intCol,QRgb objColor);
@@ -74,6 +77,8 @@ protected:
 
     bool m_blnInitialized;
     bool m_blnColor;
+    bool m_blnAlphaBlend;
+    bool m_blnAlphaReset;
 };
 
 #endif /* INCLUDE_GUI_GLTVSHADERARRAY_H_ */

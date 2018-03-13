@@ -36,6 +36,8 @@ const QString GLShaderTVArray::m_strFragmentShaderSourceColored = QString(
 
 GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
 {
+	m_blnAlphaBlend = false;
+    m_blnAlphaReset = false;
     m_objProgram = 0;
     m_objImage = 0;
     m_objTexture = 0;
@@ -209,9 +211,18 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     m_objProgram->setUniformValue(m_objMatrixLoc, objQMatrix);
     m_objProgram->setUniformValue(m_objTextureLoc, 0);
-    ptrF->glClear(GL_COLOR_BUFFER_BIT);
-	ptrF->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    ptrF->glEnable(GL_BLEND);
+
+    if (m_blnAlphaReset) {
+        ptrF->glClear(GL_COLOR_BUFFER_BIT);
+        m_blnAlphaReset = false;
+    }
+
+    if (m_blnAlphaBlend) {
+        ptrF->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ptrF->glEnable(GL_BLEND);
+    } else {
+    	ptrF->glDisable(GL_BLEND);
+    }
 
     m_objTexture->bind();
 
@@ -241,6 +252,14 @@ void GLShaderTVArray::ResetPixels()
     if (m_objImage != 0)
     {
         m_objImage->fill(0);
+    }
+}
+
+void GLShaderTVArray::ResetPixels(int alpha)
+{
+    if (m_objImage != 0)
+    {
+        m_objImage->fill(qRgba(0, 0, 0, alpha));
     }
 }
 

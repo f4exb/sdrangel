@@ -53,7 +53,9 @@ void DSDDemodSettings::resetToDefaults()
     m_rgbColor = QColor(0, 255, 255).rgb();
     m_title = "DSD Demodulator";
     m_highPassFilter = false;
-    m_traceLengthMutliplier = 5; // 250 ms
+    m_traceLengthMutliplier = 6; // 300 ms
+    m_traceStroke = 100;
+    m_traceDecay = 200;
 }
 
 QByteArray DSDDemodSettings::serialize() const
@@ -87,6 +89,8 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeBool(19, m_highPassFilter);
     s.writeBool(20, m_copyAudioUseRTP);
     s.writeS32(21, m_traceLengthMutliplier);
+    s.writeS32(22, m_traceStroke);
+    s.writeS32(23, m_traceDecay);
 
     return s.final();
 }
@@ -142,7 +146,11 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readBool(19, &m_highPassFilter, false);
         d.readBool(20, &m_copyAudioUseRTP, false);
         d.readS32(21, &tmp, 5);
-        m_traceLengthMutliplier = tmp < 1 ? 1 : tmp > 30 ? 30 : tmp;
+        m_traceLengthMutliplier = tmp < 2 ? 2 : tmp > 30 ? 30 : tmp;
+        d.readS32(22, &tmp, 100);
+        m_traceStroke = tmp < 0 ? 0 : tmp > 255 ? 255 : tmp;
+        d.readS32(23, &tmp, 200);
+        m_traceDecay = tmp < 0 ? 0 : tmp > 255 ? 255 : tmp;
 
         return true;
     }

@@ -47,6 +47,8 @@ struct DSDDemodSettings
     QString m_title;
     bool m_highPassFilter;
     int m_traceLengthMutliplier; // x 50ms
+    int m_traceStroke; // [0..255]
+    int m_traceDecay; // [0..255]
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;
