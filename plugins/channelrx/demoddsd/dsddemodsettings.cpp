@@ -145,7 +145,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readString(18, &m_title, "DSD Demodulator");
         d.readBool(19, &m_highPassFilter, false);
         d.readBool(20, &m_copyAudioUseRTP, false);
-        d.readS32(21, &tmp, 5);
+        d.readS32(21, &tmp, 6);
         m_traceLengthMutliplier = tmp < 2 ? 2 : tmp > 30 ? 30 : tmp;
         d.readS32(22, &tmp, 100);
         m_traceStroke = tmp < 0 ? 0 : tmp > 255 ? 255 : tmp;
