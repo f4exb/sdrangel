@@ -93,18 +93,6 @@ bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
         return false;
     }
 
-    // FIXME: Temporary fix for rubbish values returned by recent version of Lime Sute
-    m_lpfRangeRx.step = 1.0;
-    m_lpfRangeTx.step = 1.0;
-    m_srRangeRx.step = 1.0;
-    m_srRangeTx.step = 1.0;
-    m_loRangeRx.max = 3800000000.0;
-    m_loRangeRx.min = 30000000.0;
-    m_loRangeRx.step = 1.0;
-    m_loRangeTx.max = 3800000000.0;
-    m_loRangeTx.min = 30000000.0;
-    m_loRangeTx.step = 1.0;
-
     return true;
 }
 
