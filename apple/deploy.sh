@@ -15,9 +15,12 @@ cp -v fcdhid/libfcdhid.dylib $APP_LIB
 cp -v fcdlib/libfcdlib.dylib $APP_LIB
 cp -v mbelib/libmbelib.dylib $APP_LIB
 cp -v sdrbase/libsdrbase.dylib $APP_LIB
-cp -v sdrbase/libsdrgui.dylib $APP_LIB
+cp -v sdrgui/libsdrgui.dylib $APP_LIB
 cp -v devices/libdevices.dylib $APP_LIB
-cp -v dsdcc/libdsdcc.dylib $APP_LIB
+cp -v cm256cc/libcm256cc.dylib $APP_LIB
+cp -v httpserver/libhttpserver.dylib $APP_LIB
+cp -v swagger/libswagger.dylib $APP_LIB
+cp -v logging/liblogging.dylib $APP_LIB
 
 for f in `find plugins/channelrx/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/channelrx/"; done
 for f in `find plugins/channeltx/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/channeltx/"; done
@@ -29,4 +32,8 @@ cp /opt/local/lib/libnanomsg.5.0.0.dylib .
 ln -s libdsdcc.dylib libdsdcc.1.dylib
 ln -s libdevices.dylib libdevices.1.dylib
 ln -s libsdrbase.dylib libsdrbase.1.dylib
+ln -s libsdrgui.dylib libsdrgui.1.dylib
 ln -s libmbelib.dylib libmbelib.1.dylib
+ln -s liblogging.dylib liblogging.1.dylib
+ln -s libhttpserver.dylib libhttpserver.1.dylib
+ln -s libswagger.dylib libswagger.1.dylib

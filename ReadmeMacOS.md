@@ -6,13 +6,14 @@
 - HackRF One
 
 We are only covering HackRF One, since is only the hardware I own.
+In the future we will test RTL based: NooElec NESDR Nano 3(RTL2832U & R820T2).
 
 ### Project dir structure:
-+ .
-+ build-sdrangel.macos-Desktop_Qt_5_6_2_clang_64bit-Release
-+ SDRangel/
+SDRangel-3.x:
+  + build-sdrangel.macos-Desktop_Qt_5_6_2_clang_64bit-Release
   + sdrangel
   + deps
+    + cm256cc
     + dsdcc
     + mbelib
     + nanomsg
@@ -26,6 +27,13 @@ sudo port install cmake hackrf-devel bladeRF rtl-sdr opencv
 ```
 
 Clone other libs to deps folder:
+
+##### cm256cc:
+```
+git clone https://github.com/f4exb/cm256cc.git
+
+```
+
 
 ##### mbelib:
 ```
