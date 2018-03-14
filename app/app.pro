@@ -19,6 +19,7 @@ CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 SOURCES += main.cpp
+
 LIBS += -L../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../logging/$${build_subdir} -llogging
