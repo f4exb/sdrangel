@@ -43,7 +43,8 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
     //Par défaut
     m_intAskedCols = TV_COLS;
     m_intAskedRows = TV_ROWS;
-
+    m_cols = TV_COLS;
+    m_rows = TV_ROWS;
 }
 
 TVScreen::~TVScreen()
@@ -88,13 +89,17 @@ void TVScreen::resetImage(int alpha)
 
 void TVScreen::resizeTVScreen(int intCols, int intRows)
 {
+    qDebug("TVScreen::resizeTVScreen: cols: %d, rows: %d", intCols, intRows);
     m_intAskedCols = intCols;
     m_intAskedRows = intRows;
+    m_cols = intCols;
+    m_rows = intRows;
 }
 
 void TVScreen::getSize(int& intCols, int& intRows) const
 {
-	m_objGLShaderArray.getSize(intCols, intRows);
+    intCols = m_cols;
+    intRows = m_rows;
 }
 
 void TVScreen::initializeGL()

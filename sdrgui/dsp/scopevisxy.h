@@ -47,6 +47,7 @@ public:
 	void setGridRGB(const QRgb& gridRGB) { m_gridRGB = gridRGB; }
 
 	void addGraticulePoint(const std::complex<float>& z);
+	void calculateGraticule(int rows, int cols);
 	void clearGraticule();
 
 private:
@@ -63,6 +64,8 @@ private:
 	QRgb m_plotRGB;
 	QRgb m_gridRGB;
 	std::vector<std::complex<float> > m_graticule;
+	std::vector<int> m_graticuleRows;
+	std::vector<int> m_graticuleCols;
 };
 
 

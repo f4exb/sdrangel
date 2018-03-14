@@ -71,14 +71,22 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 		if (m_pixelCount == m_pixelsPerFrame)
 		{
-			drawGraticule();
+            int rows, cols;
+            m_tvScreen->getSize(rows, cols);
+
+            if ((rows != m_rows) || (cols != m_cols))
+            {
+                calculateGraticule(rows, cols);
+                m_rows = rows;
+                m_cols = cols;
+            }
+
+            drawGraticule();
 			m_tvScreen->renderImage(0);
 			usleep(5000);
-			m_tvScreen->getSize(m_cols, m_rows);
 			m_tvScreen->resetImage(m_alphaReset);
 			m_pixelCount = 0;
 		}
-
 	}
 }
 
@@ -103,22 +111,37 @@ void ScopeVisXY::clearGraticule() {
 	m_graticule.clear();
 }
 
-void ScopeVisXY::drawGraticule()
+void ScopeVisXY::calculateGraticule(int rows, int cols)
 {
-	std::vector<std::complex<float> >::const_iterator grIt = m_graticule.begin();
+    m_graticuleRows.clear();
+    m_graticuleCols.clear();
 
-	for (; grIt != m_graticule.end(); ++grIt)
-	{
-		int y = m_rows * ((1.0 - grIt->imag()) / 2.0);
-		int x = m_cols * ((1.0 + grIt->real()) / 2.0);
+    std::vector<std::complex<float> >::const_iterator grIt = m_graticule.begin();
+
+    for (; grIt != m_graticule.end(); ++grIt)
+    {
+        int y = rows * ((1.0 - grIt->imag()) / 2.0);
+        int x = cols * ((1.0 + grIt->real()) / 2.0);
 
         for (int d = -4; d <= 4; ++d)
         {
-        	m_tvScreen->selectRow(y + d);
-        	m_tvScreen->setDataColor(x, qRed(m_gridRGB), qGreen(m_gridRGB), qBlue(m_gridRGB));
-        	m_tvScreen->selectRow(y);
-        	m_tvScreen->setDataColor(x + d, qRed(m_gridRGB), qGreen(m_gridRGB), qBlue(m_gridRGB));
+            m_graticuleRows.push_back(y+d);
+            m_graticuleCols.push_back(x);
+            m_graticuleRows.push_back(y);
+            m_graticuleCols.push_back(x+d);
         }
-	}
+    }
+}
+
+void ScopeVisXY::drawGraticule()
+{
+    std::vector<int>::const_iterator rowIt = m_graticuleRows.begin();
+    std::vector<int>::const_iterator colIt = m_graticuleCols.begin();
+
+    for(; (rowIt != m_graticuleRows.end()) && (colIt != m_graticuleCols.end()); ++rowIt, ++colIt)
+    {
+        m_tvScreen->selectRow(*rowIt);
+        m_tvScreen->setDataColor(*colIt, qRed(m_gridRGB), qGreen(m_gridRGB), qBlue(m_gridRGB));
+    }
 }
 

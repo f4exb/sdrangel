@@ -84,6 +84,9 @@ private:
 
     GLShaderTVArray m_objGLShaderArray;
 
+    int m_cols;
+    int m_rows;
+
     void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();

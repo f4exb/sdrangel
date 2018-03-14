@@ -46,8 +46,6 @@ public:
     void setAlphaBlend(bool blnAlphaBlend) { m_blnAlphaBlend = blnAlphaBlend; }
     void setAlphaReset() { m_blnAlphaReset = true; }
     void InitializeGL(int intCols, int intRows);
-    void ResizeContainer(int intCols, int intRows);
-    void getSize(int& intCols, int& intRows) const { intCols = m_intCols, intRows = m_intRows; }
     void Cleanup();
     QRgb *GetRowBuffer(int intRow);
     void RenderPixels(unsigned char *chrData);
