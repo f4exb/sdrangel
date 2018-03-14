@@ -70,6 +70,8 @@ private:
 
     void displaySettings();
     void setNCODisplay();
+    void setCenterFrequencyDisplay();
+    void setCenterFrequencySetting(uint64_t kHzValue);
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateDACRate();
@@ -79,7 +81,7 @@ private slots:
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
-    void on_ncoFrequency_changed(quint64 value);
+    void on_ncoFrequency_changed(qint64 value);
     void on_ncoEnable_toggled(bool checked);
     void on_ncoReset_clicked(bool checked);
     void on_sampleRate_changed(quint64 value);
