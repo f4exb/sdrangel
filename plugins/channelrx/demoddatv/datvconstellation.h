@@ -20,6 +20,7 @@
 #define DATVCONSTELLATION_H
 
 #include <sys/time.h>
+#include <vector>
 
 #include "leansdr/framework.h"
 #include "gui/tvscreen.h"
@@ -38,6 +39,8 @@ template<typename T> struct datvconstellation: runnable
     TVScreen *m_objDATVScreen;
     pipereader<complex<T> > in;
     unsigned long phase;
+    std::vector<int> cstln_rows;
+    std::vector<int> cstln_cols;
 
     datvconstellation(scheduler *sch, pipebuf<complex<T> > &_in, T _xymin, T _xymax, const char *_name = 0, TVScreen *objDATVScreen = 0) :
             runnable(sch, _name ? _name : _in.name),
@@ -45,7 +48,7 @@ template<typename T> struct datvconstellation: runnable
             xymax(_xymax),
             decimation(DEFAULT_GUI_DECIMATION),
             pixels_per_frame(1024),
-            cstln(NULL),
+            cstln(0),
             m_objDATVScreen(objDATVScreen),
             in(_in),
             phase(0)
@@ -66,9 +69,8 @@ template<typename T> struct datvconstellation: runnable
 
                 for (; p < pend; ++p)
                 {
-                    if (m_objDATVScreen != NULL)
+                    if (m_objDATVScreen != 0)
                     {
-
                         m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
                         m_objDATVScreen->setDataColor(256 - 256 * ((p->im - xymin) / (xymax - xymin)), 255, 0, 255);
                     }
@@ -79,23 +81,17 @@ template<typename T> struct datvconstellation: runnable
                 {
                     // Plot constellation points
 
-                    for (int i = 0; i < (*cstln)->nsymbols; ++i)
-                    {
-                        complex<signed char> *p = &(*cstln)->symbols[i];
-                        int x = 256 * (p->re - xymin) / (xymax - xymin);
-                        int y = 256 - 256 * (p->im - xymin) / (xymax - xymin);
+                    std::vector<int>::const_iterator row_it = cstln_rows.begin();
+                    std::vector<int>::const_iterator col_it = cstln_cols.begin();
 
-                        for (int d = -4; d <= 4; ++d)
-                        {
-                            m_objDATVScreen->selectRow(x + d);
-                            m_objDATVScreen->setDataColor(y, 5, 250, 250);
-                            m_objDATVScreen->selectRow(x);
-                            m_objDATVScreen->setDataColor(y + d, 5, 250, 250);
-                        }
+                    for (; (row_it != cstln_rows.end()) && (col_it != cstln_cols.end()); ++row_it, ++col_it)
+                    {
+                        m_objDATVScreen->selectRow(*row_it);
+                        m_objDATVScreen->setDataColor(*col_it, 250, 250, 5);
                     }
                 }
 
-                m_objDATVScreen->renderImage(NULL);
+                m_objDATVScreen->renderImage(0);
             }
 
             in.read(pixels_per_frame);
@@ -111,6 +107,30 @@ template<typename T> struct datvconstellation: runnable
     {
     }
 
+    void calculate_cstln_points()
+    {
+        if (!(*cstln)) {
+            return;
+        }
+
+        cstln_rows.clear();
+        cstln_cols.clear();
+
+        for (int i = 0; i < (*cstln)->nsymbols; ++i)
+        {
+            complex<signed char> *p = &(*cstln)->symbols[i];
+            int x = 256 * (p->re - xymin) / (xymax - xymin);
+            int y = 256 - 256 * (p->im - xymin) / (xymax - xymin);
+
+            for (int d = -4; d <= 4; ++d)
+            {
+                cstln_rows.push_back(x + d);
+                cstln_cols.push_back(y);
+                cstln_rows.push_back(x);
+                cstln_cols.push_back(y + d);
+            }
+        }
+    }
 };
 
 }

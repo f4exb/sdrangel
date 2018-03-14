@@ -701,6 +701,7 @@ void DATVDemod::InitDATVFramework()
         r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, NULL, m_objRegisteredTVScreen);
         r_scope_symbols->decimation = 1;
         r_scope_symbols->cstln = &m_objDemodulator->cstln;
+        r_scope_symbols->calculate_cstln_points();
     }
 
     // DECONVOLUTION AND SYNCHRONIZATION
