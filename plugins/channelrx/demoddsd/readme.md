@@ -52,138 +52,45 @@ For software built fron source if you choose to have `mbelib` support you will n
 
 ![DSD Demodulator plugin GUI](../../../doc/img/DSDdemod_plugin.png)
 
-<h3>1: Frequency shift from center frequency of reception</h3>
+<h3>A section: settings</h3>
+
+<h4>A.1: Frequency shift from center frequency of reception</h4>
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: Symbol (Baud) rate</h3>
-
-Here you can specify which symbol rate or Baud rate is expected. Choices are:
-
-  - `2.4k`: 2400 S/s used for dPMR and 4800 b/s NXDN
-  - `4.8k`: 4800 S/s used for 9600 b/s NXDN, DMR, D-Star and YSF.
-
-<h3>3: Type of frame detected</h3>
-
-This can be one of the following:
-
-  - `+DMRd`: non-inverted DMR data frame
-  - `+DMRv`: non-inverted DMR voice frame
-  - `+D-STAR`: non-inverted D-Star frame
-  - `-D-STAR`: inverted D-Star frame
-  - `+D-STAR_HD`: non-inverted D-Star header frame encountered
-  - `-D-STAR_HD`: inverted D-Star header frame encountered
-  - `+dPMR`: non-inverted dPMR non-packet frame
-  - `+NXDN`: non-inverted NXDN frame (detection only)
-  - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
-
-<h3>3a: Symbol PLL lock indicator</h3>
-
-Since dsdcc version 1.7.1 the synbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
-
-However with marginal signals the ringing filter alone and a few heuristics work better. This is why since DSDcc version 1.7.1 the PLL became optional.
-
-You can use this button to toggle between the two options:
-
-  - with the locker icon in locked position: PLL is engaged
-  - with the locker icon in unlocked position: PLL is bypassed
-
-When in lock position the button lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
-
-<h3>4: Symbol synchronization zero crossing hits in %</h3>
-
-This is the percentage per symbols for which a valid zero crossing has been detected. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
-
-With the PLL engaged the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
-
-<h3>5: Zero crossing shift</h3>
- 
-This is the current (at display polling time) zero crosing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
-
-  - `2400 S/s`: +/- 5 inclusive
-  - `4800 S/s`: +/- 2 inclusive
- 
-<h3>6: Matched filter toggle</h3>
- 
-Normally you would always want to have a matched filter however on some strong D-Star signals more synchronization points could be obtained without. When engaged the background of the button is lit in orange.
-
-<h3>7: Transition constellation or symbol synchronization signal toggle</h3>
-
-Using this button you can either:
-
-  - show the transitions constellation
-  - show a indicative signal about symbol synchronization
-    - when a zero crossing is detected the signal is set to estimated input discriminator signal maximum value
-    - when the symbol clock is 0 (start of symbol period) the signal is set to the estimated median point of the input discriminator signal
-
-<h3>8: Discriminator input signal median level in %</h3>
-
-This is the estimated median level (center) of the discriminator input signal in percentage of half the total range. When the signal is correctly aligned in the input range it should be 0
-
-<h3>9: Discriminator input signal level range in %</h3>
-
-This is the estimated discriminator input signal level range (max - min) in percentage of half the total range. For optimal decoding it should be maintained close to 100.
-
-<h3>10: Channel power</h3>
-
-Total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
-
-<h3>11: Channel bandwidth before discriminator</h3>
+<h4>A.2: Channel bandwidth before discriminator</h4>
 
 This is the bandwidth of the pre-discriminator filter
 
-<h3>12: Gain after discriminator</h3>
+<h4>A.3: Channel power</h4>
 
-This is the gain applied to the output of the discriminator before the decoder
+Total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>13: Audio volume</h3>
+<h4>A.4: Channel power bar graph</h4>
+
+<h4>A.5: Audio volume</h4>
 
 When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature. 
 
 With the DV serial device(s) amplification factor in dB is given by `(value - 3.0)*5.0`. In most practical cases the middle value of 5.0 (+10 dB) is a comfortable level.
 
-<h3>14: Maximum expected FM deviation</h3>
-
-This is the deviation in kHz leading to maximum (100%) deviation. You should aim for 30 to 50% (+/-300 to +/-500m) deviation on the scope display.
-
-<h3>15: Two slot TDMA handling</h3>
-
-This is useful for two slot TDMA modes that is only DMR at present. FDMA modes are treated as using slot #1 only.
-
-![DSD TDMA handling](../../../doc/img/DSDdemod_plugin_tdma.png)
-
-<h4>15.1: Slot #1 voice select</h4>
-
-Toggle button to select slot #1 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave only this toggle on.
-
-<h4>15.2: Slot #2 voice select</h4>
-
-Toggle button to select slot #2 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave this toggle off.
-
-<h4>15.3: TDMA stereo mode toggle</h4>
-
-  - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
-  - When on the icon shows a pair of loudspeakers. It sends slot #1 vocie to the left stereo audio channel and slot #2 to the right one
-  
-For FDMA standards you may want to leave this as mono mode.
-
-<h3>16: Squelch level</h3>
+<h4>A.6: Squelch level</h4>
 
 The level corresponds to the channel power above which the squelch gate opens.
 
-<h3>17: Squelch time gate</h3>
+<h4>A.7: Squelch time gate</h4>
 
 Number of milliseconds following squelch gate opening after which the signal is actually fed to the decoder. 0 means no delay i.e. immediate feed.
 
-<h3>18: High-pass filter for audio</h3>
+<h4>A.8: High-pass filter for audio</h4>
 
 Use this switch to toggle high-pass filter on the audio
 
-<h3>19: Audio mute and squelch indicator</h3>
+<h4>A.9: Audio mute and squelch indicator</h4>
 
 Audio mute toggle button. This button lights in green when the squelch opens.
 
-<h3>20: UDP output</h3>
+<h3>A.10: UDP output</h3>
 
 Copies audio output to UDP. Output is stereo S16LE samples. Depending on which slots are active the output is the following:
 
@@ -195,57 +102,57 @@ It cannot mix both channels when slot1+2 are active.
 
 UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
-<h3>21: Format specific status display</h3>
+<h3>a.11: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 
-<h4>21.1: D-Star status display</h4>
+<h4>A11.1: D-Star status display</h4>
 
 ![DSD D-Star status](../../../doc/img/DSDdemod_plugin_dstar_status.png)
 
-<h5>21.1.1: Origin (my) and destination (your) callsign</h5>
+<h5>A11.1.1: Origin (my) and destination (your) callsign</h5>
 
   - at the left of the `>` sign is the origin callsign ` MY` with the 4 character informative suffix nest to the slash `/`
   - at the right of the `>` sign is the destination callsign `YOUR`. As per Icom standard this is `CQCQCQ` when a call is made to all stations
   - this information is retrieved from the header or the slow data if it can be decoded
 
-<h5>21.1.2: Repeater callsign</h5>
+<h5>A11.1.2: Repeater callsign</h5>
 
   - at the left of the `>` sign is the origin repeater or `RPT1`
   - at the right of the `>` sign is the destination repeater or `RPT2`
   - this information is retrieved from the header or the slow data if it can be decoded
 
-<h5>21.1.3: Informative text</h5>
+<h5>A11.1.3: Informative text</h5>
 
 When slow data can be decoded this is the 20 character string that is sent in the text frames 
 
-<h5>21.1.4: Geopositional data</h5>
+<h5>A11.1.4: Geopositional data</h5>
 
 When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:  
 
    - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
    - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`. 
 
-<h4>21.2: DMR status display</h4>
+<h4>A11.2: DMR status display</h4>
 
 ![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
 
   - Note 1: statuses are polled at ~1s rate and therefore do not reflect values instantaneously. As a consequence some block types that occur during the conversation may not appear.
   - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared 
 
-<h5>21.2.1: Station role</h5>
+<h5>A11.2.1: Station role</h5>
 
   - `BS`: base station
   - `MS`: mobile station
   - `NA`: not applicable or could not be determined (you should not see this normally)
 
-<h5>21.2.2: TDMA slot #0 status</h5>
+<h5>A11.2.2: TDMA slot #0 status</h5>
 
 For mobile stations on an inbound channel there is no channel identification (no CACH) so information goes there by default.
 
-<h5>21.2.3: TDMA slot #1 status</h5>
+<h5>A11.2.3: TDMA slot #1 status</h5>
 
-<h5>21.2.4: Channel status and color code</h5>
+<h5>A11.2.4: Channel status and color code</h5>
 
 This applies to base stations and mobile stations in continuous mode that is transmissions including the CACH sequences.
 
@@ -260,7 +167,7 @@ This applies to base stations and mobile stations in continuous mode that is tra
     - The color code from 0 to 15 (4 bits)
     - `--`: The color code could not be decoded and information is missing
   
-<h5>21.2.5: Slot type</h5>
+<h5>A11.2.5: Slot type</h5>
 
 This is either:
 
@@ -278,7 +185,7 @@ This is either:
    - `RES`: reserved data block 
    - `UNK`: unknown data type or could not be decoded
 
-<h5>21.2.6: Addressing information</h5>
+<h5>A11.2.6: Addressing information</h5>
 
 String is in the form: `02223297>G00000222`
 
@@ -288,11 +195,11 @@ String is in the form: `02223297>G00000222`
     - `U`: unit (individual) address
   - Next on the right is the target address (24 bits) as defined in the DMR ETSI standard
 
-<h4>21.3: dPMR status display</h4>
+<h4>A11.3: dPMR status display</h4>
 
 ![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
 
-<h5>21.3.1: dPMR frame tyoe</h5>
+<h5>A11.3.1: dPMR frame tyoe</h5>
 
   - `--`: undetermined
   - `HD`: Header of FS1 type
@@ -304,23 +211,23 @@ String is in the form: `02223297>G00000222`
   - `XS`: Extended search: looking for a new payload frame when out of sequence
   - `EN`: End frame
   
-<h5>21.3.2: Colour code</h5>
+<h5>A11.3.2: Colour code</h5>
 
 Colour code in decimal (12 bits)
 
-<h5>21.3.3: Own ID</h5>
+<h5>A11.3.3: Own ID</h5>
 
 Sender's identification code in decimal (24 bits)
 
-<h5>21.3.4: Called ID</h5>
+<h5>A11.3.4: Called ID</h5>
 
 Called party's identification code in decimal (24 bits)
 
-<h4>21.4: Yaesu System Fusion (YSF) status display</h4>
+<h4>A11.4: Yaesu System Fusion (YSF) status display</h4>
 
 ![DSD YSF status](../../../doc/img/DSDdemod_plugin_ysf_status.png)
 
-<h5>21.4.1: FICH data</h5>
+<h5>A11.4.1: FICH data</h5>
 
 This displays a summary of FICH (Frame Identification CHannel) block data. From left to right:
 
@@ -353,126 +260,203 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
       - `L`: local path (as inthe example)
     - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
     
-<h5>21.4.2: Origin and destination callsigns</h5>
+<h5>A11.4.2: Origin and destination callsigns</h5>
 
   - at the left of the `>` sign is the origin callsign
   - at the right of the `>` sign is the destination callsign. It is filled with stars `*` when call is made to all stations (similar to the CQCQCQ in D-Star)
 
-<h5>21.4.3: Origin and destination repeaters callsigns</h5>
+<h5>A11.4.3: Origin and destination repeaters callsigns</h5>
 
   - at the left of the `>` sign is the origin repeater callsign
   - at the right of the `>` sign is the destination repeater callsign. 
 
-<h5>21.4.4: Originator radio ID</h5>
+<h5>A11.4.4: Originator radio ID</h5>
 
 This is the unique character string assigned to the device by the manufacturer.
 
-<h3>22: Discriminator output scope display</h3>
+<h3>B section: digital</h3>
 
-<h4>22.1 Transitions constellation display</h4>
+<h4>B.1: FM signal scope</h4>
 
-This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
+This display shows the sampled points of the demodulated FM signal in a XY plane with either:
+
+  - X as the signal at time t and Y the signal at time t minus symbol time if "transitions constellation" is selected by button (B.13)
+  - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13) 
+
+The display shows 16 points as yellow crosses that can be used to tune the center frequency and FM deviation and gain so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers fron 0 to 15 starting at the top left corner and going from left to right and top to bottom.
+
+<h5>Transition constellation display</h5>
+
+This is selected by the transition constellation or symbol synchronization signal toggle (B.13)
 
 The discriminator signal at 48 kS/s is routed to the scope display with the following connections:
 
-  - I signal: the discriminator samples
-  - Q signal: the discriminator samples delayed by the baud rate i.e. one symbol delay:
+  - X input: the discriminator samples
+  - Y input: the discriminator samples delayed by the baud rate i.e. one symbol delay:
     - 2400 baud: 20 samples
     - 4800 baud: 10 samples
-    - 9600 baud: 5 samples
 
-This allows the visualization of symbol transitions which depend on the type of modulation.
-
-![DSD scope](../../../doc/img/DSDdemod_plugin_scope.png)
-
-<h5>22.1.1: Setting the display</h5>
-
-  - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
-  - On the display buttons you should choose the side by side display
-
-On the same line you can choose any trace length. If it is too short the constellation points will not appear clearly and if it is too long the polar figure will be too dense. Usually 100ms give good results.
-
-<h5>22.1.2: IQ linear display</h5>
-
-The yellow trace (I) is the direct trace and the blue trace (Q) is the delayed trace. This can show how symbols differentiate between each other in a sort of eye diagram.
-
-<h5>22.1.3: IQ polar display</h5>
-
-This shows the constellation of transition points. You should adjust the frequency shift to center the figure and the maximum deviation and/or discriminator gain to contain the figure within the +/-0.4 square. +/- 0.1 to +/- 0.3 usually give the best results.
+Depending on the type of modulation the figure will have different characteristic forms:
 
 <h6>2-FSK or 2-GFSK</h6>
 
-This concerns the following formats:
+![DSD Demodulator plugin GUI 2FSK](../../../doc/img/DSDdemod_plugin_2fsk.png)
+
+This concerns the following standards:
 
   - D-Star
-
-![DSD D-Star polar](../../../doc/img/DSDdemod_plugin_dstar_polar.png)
-
+  
 There are 4 possible points corresponding to the 4 possible transitions. x represents the current symbol and y the previous symbol. The 4 points given by their (y,x) coordinates correspond to the following:
 
-  - (1, 1): upper right corner. The pointer can stay there or move to (1, -1)
-  - (1, -1): upper left corner. The pointer can move to (-1, -1) or (-1, 1)
-  - (-1, 1): lower right corner. The pointer can move to (1, -1) or (1, 1)
-  - (-1, -1): lower left corner. The pointer can stay there or move to (-1, 1)
-
+  - (1, 1): upper right corner. The pointer can stay there or move to (1, -1). Ideally this should be placed at point 3.
+  - (1, -1): upper left corner. The pointer can move to (-1, -1) or (-1, 1). Ideally this should be placed at point 0.
+  - (-1, 1): lower right corner. The pointer can move to (1, -1) or (1, 1). Ideally this should be placed at point 15.
+  - (-1, -1): lower left corner. The pointer can stay there or move to (-1, 1). Ideally this should be placed at point 12.
+ 
 As you can see the pointer can make all moves except between (-1, -1) and (1,1) hence all vertices between the 4 points can appear except the one between the lower left corner and the upper right corner.
 
 <h6>4-FSK or 4-GFSK</h6>
 
-This concerns the following formats:
+![DSD Demodulator plugin GUI 4FSK](../../../doc/img/DSDdemod_plugin_4fsk.png)
+
+This concerns the following standards:
 
   - DMR
   - YSF
   - dPMR
   - NXDN
 
-![DSD DMR polar](../../../doc/img/DSDdemod_plugin_dmr_polar.png)
-
 There are 16 possible points corresponding to the 16 possible transitions between the 4 dibits. The 4 dibits are equally spaced at relative positions of -3, -1, 1, 3 hence the 16 points are also equally spaced between each other on the IQ or (x,y) plane.
 
-Because not all transitions are possible similarly to the 2-FSK case pointer moves from the lower left side of the diagonal to the upper right side are not possible.
+Ideally the figure should show a cloud of persistent points at the locations marked by the yellow crosses (0 to 15).
 
-<h5>22.1.4: I gain</h5>
+<h5>Symbol synchronization display</h5>
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+2-FSK
 
-<h5>22.1.5: Q gain</h5>
+![DSD Demodulator plugin GUI 2FSK symbols](../../../doc/img/DSDdemod_plugin_2fsk_sym.png)
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+4-FSK
 
-<h5>22.1.6: Trigger settings</h5>
+![DSD Demodulator plugin GUI 4FSK symbols](../../../doc/img/DSDdemod_plugin_4fsk_sym.png)
 
-You can leave the trigger free running or set it to I linear with a 0 threshold.
+This is selected by the transition constellation or symbol synchronization signal toggle (B.13)
 
-<h4>22.2: Symbol synchronization display</h4>
+The X input is the discriminator signal and the Y input is the symbol synchronization signal that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
 
-This is selected by the transition constellation or symbol synchronization signal toggle (see 7)
+The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Y input should go down to mid position in the first fourth of the symbol period.
 
-![DSD scope](../../../doc/img/DSDdemod_plugin_scope2.png)
+Ideally the figure should show a cloud of persistent points at the locations marked by points 0 to 3. Each one of these points represent an ideally decoded symbol.
 
-<h5>22.2.1: IQ linear display</h5>
+<h4>B.2: Symbol (Baud) rate</h4>
 
-The I trace (yellow) is the discriminator signal and the Q trace (blue) is the symbol synchronization monitor trace that goes to the estimated maximum discriminator signal level when a zero crossing in the symbol synchronization control signal is detected and goes to mid position ((max - min) / 2) of the discriminator signal when a symbol period starts.
+Here you can specify which symbol rate or Baud rate is expected. Choices are:
 
-The symbol synchronization control signal is obtained by squaring the discriminator signal and passing it through a narrow second order bandpass filter centered on the symbol rate. Its zero crossing should occur close to the first fourth of a symbol period therefore when synchronization is ideal the Q trace (blue) should go down to mid position in the first fourth of the symbol period.
+  - `2.4k`: 2400 S/s used for dPMR and 4800 b/s NXDN
+  - `4.8k`: 4800 S/s used for 9600 b/s NXDN, DMR, D-Star and YSF.
 
-<h5>22.2.2: Setting the display</h5>
+<h4>B.3: Type of frame detected</h4>
 
-  - On the combo box you should choose IQ (lin) for the primary display and IQ (pol) for secondary display
-  - On the display buttons you should choose the first display (1)
+This can be one of the following:
 
-<h5>22.2.3: Timing settings</h5>
+  - `+DMRd`: non-inverted DMR data frame
+  - `+DMRv`: non-inverted DMR voice frame
+  - `+D-STAR`: non-inverted D-Star frame
+  - `-D-STAR`: inverted D-Star frame
+  - `+D-STAR_HD`: non-inverted D-Star header frame encountered
+  - `-D-STAR_HD`: inverted D-Star header frame encountered
+  - `+dPMR`: non-inverted dPMR non-packet frame
+  - `+NXDN`: non-inverted NXDN frame (detection only)
+  - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
 
-You can choose any trace length with the third slider from the left however 100 ms will give you the best view. You may stretch further the display by reducing the full length to 20 ms or less using the first slider. You can move this 20 ms window across the 100 ms trace with the middle slider.
+<h4>B.4: Matched filter toggle</h4>
+ 
+Normally you would always want to have a matched filter however on some strong D-Star signals more synchronization points could be obtained without. When engaged the background of the button is lit in orange.
 
-<h5>22.2.4: I gain</h5>
+<h4>B.5: Symbol PLL lock indicator</h4>
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+Since dsdcc version 1.7.1 the synbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
 
-<h5>22.2.5: Q gain</h5>
+However with marginal signals the ringing filter alone and a few heuristics work better. This is why since DSDcc version 1.7.1 the PLL became optional.
 
-You should set the slider to a unity (1) span (+/- 0.5) with no offset. This corresponds to full range in optimal conditions (100%). You can set the slider fully to the left (2) for a +/- 1.0 spn if you don't exactly match these conditions.
+You can use this button to toggle between the two options:
 
-<h5>22.2.6: Trigger settings</h5>
+  - with the locker icon in locked position: PLL is engaged
+  - with the locker icon in unlocked position: PLL is bypassed
 
-You can leave the trigger free running or set it to I linear with a 0 threshold.
+When in lock position the button lights itself in green when the PLL lock is acquired. Occasional drops may occur without noticeable impact on decoding.
+
+<h4>B.6: Symbol synchronization zero crossing hits in %</h4>
+
+This is the percentage per symbols for which a valid zero crossing has been detected. The more the better the symbol synchronization is tracked however the zero crossing shifts much not deviate too much from 0 (see next).
+
+With the PLL engaged the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
+
+<h4>B.7: Zero crossing shift</h4>
+ 
+This is the current (at display polling time) zero crosing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
+
+  - `2400 S/s`: +/- 5 inclusive
+  - `4800 S/s`: +/- 2 inclusive
+ 
+<h4>B.8: Discriminator input signal median level in %</h4>
+
+This is the estimated median level (center) of the discriminator input signal in percentage of half the total range. When the signal is correctly aligned in the input range it should be 0
+
+<h4>B.9: Discriminator input signal level range in %</h4>
+
+This is the estimated discriminator input signal level range (max - min) in percentage of half the total range. For optimal decoding it should be maintained close to 100.
+
+<h4>B.10 to B.12: Two slot TDMA handling</h4>
+
+This is useful for two slot TDMA modes that is only DMR at present. FDMA modes are treated as using slot #1 only.
+
+![DSD TDMA handling](../../../doc/img/DSDdemod_plugin_tdma.png)
+
+<h5>B.10 (1): Slot #1 voice select</h5>
+
+Toggle button to select slot #1 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave only this toggle on.
+
+<h5>B.11 (2): Slot #2 voice select</h5>
+
+Toggle button to select slot #2 voice output. When on waves appear on the icon. The icon turns green when voice frames are processed for this slot. For FDMA modes you may want to leave this toggle off.
+
+<h5>B.12 (3): TDMA stereo mode toggle</h5>
+
+  - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
+  - When on the icon shows a pair of loudspeakers. It sends slot #1 vocie to the left stereo audio channel and slot #2 to the right one
+  
+For FDMA standards you may want to leave this as mono mode.
+ 
+<h4>B.13: Transition constellation or symbol synchronization signal toggle</h4>
+
+Using this button you can either:
+
+  - show the transitions constellation
+  - show a indicative signal about symbol synchronization
+    - when a zero crossing is detected the signal is set to estimated input discriminator signal maximum value
+    - when the symbol clock is 0 (start of symbol period) the signal is set to the estimated median point of the input discriminator signal
+
+<h4>B.14: Trace length</h4>
+
+This button tunes the length of the trace displayed on B.1. Units are milliseconds. Default value is 300.
+
+<h4>B.15: Trace stroke</h4>
+
+This button tunes the stroke of the points displayer on B.1. The trace has limited persistence based on alpha blending. This is the 8 bit unsigned integer value of the trace alpha blending. Default value is 100.
+
+<h4>B.16: Trace decay</h4>
+
+This button tunes the persistence decay of the points displayer on B.1. The trace has limited persistence based on alpha blending. This controls the alpha value of the black screen printed at the end of each trace and thus the trace points decay time. The value is 255 minus he displayed value using 8 bit unsigned integers.
+
+  - A value of 0 yields no persistence
+  - A value of 255 yields infinite persistence
+  - Default value is 200s
+
+<h4>B.17: Maximum expected FM deviation</h4>
+
+This is the deviation in kHz leading to maximum (100%) deviation. You should aim for 30 to 50% (+/-300 to +/-500m) deviation on the scope display.
+
+<h4>B.18: Gain after discriminator</h4>
+
+This is the gain applied to the output of the discriminator before the decoder
