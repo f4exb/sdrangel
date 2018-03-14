@@ -2,6 +2,8 @@ sdrangel (3.13.0-1) unstable; urgency=medium
 
   * DATV (Digital Amateur TV) demodulator.
   * Option to use RTP protocol for UDP audio for AM, NFM, SSB, WFM.
+  * LimeSDR: show NCO and center frequency actual values
+  * DSD demod: new simplified symbol scope display. Reworked GUI.
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 11 Mar 2018 06:14:18 +0100
 
