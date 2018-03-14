@@ -16,12 +16,14 @@ CONFIG(MINGW64):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
 
 CONFIG(MINGW32):LIBCM256CCSRC = "D:\softs\cm256cc"
 CONFIG(MINGW64):LIBCM256CCSRC = "D:\softs\cm256cc"
+CONFIG(macx):LIBCM256CCSRC = "../../../../deps/cm256cc"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
-INCLUDEPATH += $$LIBNANOMSGSRC/src
+!macx:INCLUDEPATH += $$LIBNANOMSGSRC/src
+macx:INCLUDEPATH += /opt/local/include
 INCLUDEPATH += $$LIBCM256CCSRC
 
 DEFINES += USE_SSE2=1
@@ -37,6 +39,7 @@ CONFIG(Debug):build_subdir = debug
 
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
 CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
 SOURCES += sdrdaemonsourcebuffer.cpp\
 sdrdaemonsourcegui.cpp\
@@ -57,7 +60,8 @@ FORMS += sdrdaemonsourcegui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
+!macx:LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
+macx:LIBS += -L/opt/local/lib -lnanomsg
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

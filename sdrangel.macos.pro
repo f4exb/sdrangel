@@ -5,15 +5,21 @@
 #--------------------------------------------------------
 
 TEMPLATE = subdirs
-SUBDIRS = sdrbase
+SUBDIRS  = httpserver
+SUBDIRS += swagger
+SUBDIRS += logging
+SUBDIRS += sdrbase
 SUBDIRS += sdrgui
 SUBDIRS += devices
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
 SUBDIRS += mbelib
 SUBDIRS += dsdcc
+SUBDIRS += cm256cc
+#SUBDIRS += liblimesuite
+#SUBDIRS += librtlsdr
 SUBDIRS += plugins/samplesource/filesource
-SUBDIRS += plugins/samplesource/sdrdaemon
+SUBDIRS += plugins/samplesource/sdrdaemonsource
 SUBDIRS += plugins/samplesource/rtlsdr
 SUBDIRS += plugins/samplesource/hackrfinput
 SUBDIRS += plugins/samplesink/filesink

@@ -16,15 +16,18 @@ QMAKE_CXXFLAGS += -mssse3
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
+macx:QMAKE_LFLAGS += -F/Library/Frameworks
 
 CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
+CONFIG(macx):LIBLIMESUITESRC = "../../../LimeSuite-17.12.0"
 CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
 CONFIG(MINGW32):LIBPERSEUSSRC = "D:\softs\libperseus-sdr"
+CONFIG(macx):LIBIIOSRC = "../../../libiio"
 CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
 CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
 
@@ -46,7 +49,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
 INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
 INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
 INCLUDEPATH += $$LIBPERSEUSSRC
-INCLUDEPATH += $$LIBIIOSRC
+!macx:INCLUDEPATH += $$LIBIIOSRC
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -63,7 +66,7 @@ SOURCES += limesdr/devicelimesdr.cpp\
         limesdr/devicelimesdrparam.cpp\
         limesdr/devicelimesdrshared.cpp
 
-SOURCES += plutosdr/deviceplutosdr.cpp\
+!macx:SOURCES += plutosdr/deviceplutosdr.cpp\
         plutosdr/deviceplutosdrbox.cpp\
         plutosdr/deviceplutosdrparams.cpp\
         plutosdr/deviceplutosdrscan.cpp\
@@ -90,13 +93,16 @@ HEADERS += plutosdr/deviceplutosdr.h\
         plutosdr/deviceplutosdrshared.h
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
-LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
-LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
-LIBS += -L../libiio/$${build_subdir} -llibiio
-
+!macx {
+    LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
+    LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
+    LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
+    LIBS += -L../libiio/$${build_subdir} -llibiio
+}
 macx {
     LIBS -= -L../libbladerf/$${build_subdir} -llibbladerf
     LIBS -= -L../libhackrf/$${build_subdir} -llibhackrf
     LIBS += -L/opt/local/lib -lhackrf
+    LIBS += -L/usr/local/lib -lLimeSuite
+    LIBS += -framework iio
 }
