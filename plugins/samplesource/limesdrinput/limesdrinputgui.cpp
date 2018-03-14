@@ -298,7 +298,7 @@ void LimeSDRInputGUI::displaySettings()
     ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
     ui->extClock->setExternalClockActive(m_settings.m_extClock);
 
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    setCenterFrequencyDisplay();
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
@@ -347,11 +347,41 @@ void LimeSDRInputGUI::displaySettings()
 void LimeSDRInputGUI::setNCODisplay()
 {
     int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
-    int lowBoundary = std::max(0, (int) m_settings.m_centerFrequency - ncoHalfRange);
-    ui->ncoFrequency->setValueRange(7,
-            lowBoundary/1000,
-            (m_settings.m_centerFrequency + ncoHalfRange)/1000); // frequency dial is in kHz
-    ui->ncoFrequency->setValue((m_settings.m_centerFrequency + m_settings.m_ncoFrequency)/1000);
+    ui->ncoFrequency->setValueRange(
+            false,
+            8,
+            -ncoHalfRange,
+            ncoHalfRange); // frequency dial is in kHz
+
+    ui->ncoFrequency->blockSignals(true);
+    ui->ncoFrequency->setValue(m_settings.m_ncoFrequency);
+    ui->ncoFrequency->blockSignals(false);
+}
+
+void LimeSDRInputGUI::setCenterFrequencyDisplay()
+{
+    int64_t centerFrequency = m_settings.m_centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
+
+    if (m_settings.m_ncoEnable) {
+        centerFrequency += m_settings.m_ncoFrequency;
+    }
+
+    ui->centerFrequency->blockSignals(true);
+    ui->centerFrequency->setValue(centerFrequency < 0 ? 0 : (uint64_t) centerFrequency/1000); // kHz
+    ui->centerFrequency->blockSignals(false);
+}
+
+void LimeSDRInputGUI::setCenterFrequencySetting(uint64_t kHzValue)
+{
+    int64_t centerFrequency = kHzValue*1000;
+
+    if (m_settings.m_ncoEnable) {
+        centerFrequency -= m_settings.m_ncoFrequency;
+    }
+
+    m_settings.m_centerFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 }
 
 void LimeSDRInputGUI::sendSettings()
@@ -455,28 +485,28 @@ void LimeSDRInputGUI::on_record_toggled(bool checked)
 
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 {
-    m_settings.m_centerFrequency = value * 1000;
-    setNCODisplay();
+    setCenterFrequencySetting(value);
     sendSettings();
 }
 
-void LimeSDRInputGUI::on_ncoFrequency_changed(quint64 value)
+void LimeSDRInputGUI::on_ncoFrequency_changed(qint64 value)
 {
-    m_settings.m_ncoFrequency = (int64_t) value - (int64_t) m_settings.m_centerFrequency/1000;
-    m_settings.m_ncoFrequency *= 1000;
+    m_settings.m_ncoFrequency = value;
+    setCenterFrequencyDisplay();
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
 {
     m_settings.m_ncoEnable = checked;
+    setCenterFrequencyDisplay();
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_ncoReset_clicked(bool checked __attribute__((unused)))
 {
     m_settings.m_ncoFrequency = 0;
-    ui->ncoFrequency->setValue(m_settings.m_centerFrequency/1000);
+    ui->ncoFrequency->setValue(0);
     sendSettings();
 }
 

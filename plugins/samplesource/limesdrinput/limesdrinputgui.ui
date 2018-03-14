@@ -35,16 +35,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -256,7 +247,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ValueDial" name="ncoFrequency" native="true">
+      <widget class="ValueDialZ" name="ncoFrequency" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
@@ -281,14 +272,14 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Center frequency with NCO engaged (kHz)</string>
+        <string>NCO frequency (Hz)</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="ncoUnits">
        <property name="text">
-        <string>kHz</string>
+        <string>Hz</string>
        </property>
       </widget>
      </item>
@@ -1165,6 +1156,12 @@ QToolTip{background-color: white; color: black;}</string>
    <class>ExternalClockButton</class>
    <extends>QToolButton</extends>
    <header>gui/externalclockbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
