@@ -77,9 +77,9 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 Use this push button to reset the NCO frequency to 0 and thus center on the main passband of the DAC.
 
-<h3>7: NCO frequency</h3>
+<h3>7: NCO frequency shift</h3>
 
-This is the NCO frequency. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware interpolation factor.
+This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of transmission minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware interpolation factor.
 
 &#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hadrware interpolation of 16 (8) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
 

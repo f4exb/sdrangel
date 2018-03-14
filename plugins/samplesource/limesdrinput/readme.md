@@ -81,9 +81,9 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 USe this push button to reset the NCO frequency to 0 and thus center on the main passband of the ADC.
 
-<h4>2.3: Center frequency with NCO engaged</h4>
+<h4>2.3: NCO frequency shift</h4>
 
-This is the NCO frequency. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
+This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of reception minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
 &#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hadrware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
 

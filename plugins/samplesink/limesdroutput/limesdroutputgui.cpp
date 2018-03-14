@@ -328,9 +328,10 @@ void LimeSDROutputGUI::setNCODisplay()
             false,
             8,
             -ncoHalfRange,
-            ncoHalfRange); // frequency dial is in kHz
+            ncoHalfRange);
 
     ui->ncoFrequency->blockSignals(true);
+    ui->ncoFrequency->setToolTip(QString("NCO frequency shift in Hz (Range: +/- %1 kHz)").arg(ncoHalfRange/1000));
     ui->ncoFrequency->setValue(m_settings.m_ncoFrequency);
     ui->ncoFrequency->blockSignals(false);
 }
