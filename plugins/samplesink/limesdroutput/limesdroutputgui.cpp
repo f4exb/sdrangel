@@ -42,17 +42,17 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(this);
 
-    float minF, maxF, stepF;
+    float minF, maxF;
 
-    m_limeSDROutput->getLORange(minF, maxF, stepF);
+    m_limeSDROutput->getLORange(minF, maxF);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
 
-    m_limeSDROutput->getSRRange(minF, maxF, stepF);
+    m_limeSDROutput->getSRRange(minF, maxF);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
-    m_limeSDROutput->getLPRange(minF, maxF, stepF);
+    m_limeSDROutput->getLPRange(minF, maxF);
     ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 

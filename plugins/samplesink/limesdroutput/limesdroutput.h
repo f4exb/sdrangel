@@ -217,9 +217,9 @@ public:
             QString& errorMessage);
 
     std::size_t getChannelIndex();
-    void getLORange(float& minF, float& maxF, float& stepF) const;
-    void getSRRange(float& minF, float& maxF, float& stepF) const;
-    void getLPRange(float& minF, float& maxF, float& stepF) const;
+    void getLORange(float& minF, float& maxF) const;
+    void getSRRange(float& minF, float& maxF) const;
+    void getLPRange(float& minF, float& maxF) const;
     uint32_t getHWLog2Interp() const;
 
 private:

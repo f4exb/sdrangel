@@ -462,31 +462,28 @@ std::size_t LimeSDROutput::getChannelIndex()
     return m_deviceShared.m_channel;
 }
 
-void LimeSDROutput::getLORange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getLORange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_loRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getLORange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getLORange: min: %f max: %f", range.min, range.max);
 }
 
-void LimeSDROutput::getSRRange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getSRRange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_srRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getSRRange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getSRRange: min: %f max: %f", range.min, range.max);
 }
 
-void LimeSDROutput::getLPRange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getLPRange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getLPRange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getLPRange: min: %f max: %f", range.min, range.max);
 }
 
 uint32_t LimeSDROutput::getHWLog2Interp() const
