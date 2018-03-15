@@ -5,7 +5,7 @@
 */
 
 #include "SystemResources.h"
-#include "ErrorReporting.h"
+#include "Logger.h"
 
 #include <cstdlib> //getenv, system
 #include <vector>
@@ -23,9 +23,10 @@
 #define W_OK 4
 #endif
 
-#ifdef __unix__
-#include <pwd.h>
+#ifdef __MINGW32__
 #include <unistd.h>
+#elif __unix__
+#include <pwd.h>
 #endif
 
 #include <sys/types.h>
@@ -65,6 +66,7 @@ std::string lime::getLimeSuiteRoot(void)
 
 std::string lime::getHomeDirectory(void)
 {
+#ifndef __MINGW32__
     //first check the HOME environment variable
     const char *userHome = std::getenv("HOME");
     if (userHome != nullptr) return userHome;
@@ -74,7 +76,7 @@ std::string lime::getHomeDirectory(void)
     const char *pwDir = getpwuid(getuid())->pw_dir;
     if (pwDir != nullptr) return pwDir;
     #endif
-
+#endif
     return "";
 }
 
@@ -155,7 +157,7 @@ std::string lime::locateImageResource(const std::string &name)
 {
     for (const auto &searchPath : lime::listImageSearchPaths())
     {
-        const std::string fullPath(searchPath + "/17.03/" + name);
+        const std::string fullPath(searchPath + "/18.02/" + name);
         if (access(fullPath.c_str(), R_OK) == 0) return fullPath;
     }
     return "";
@@ -163,9 +165,9 @@ std::string lime::locateImageResource(const std::string &name)
 
 int lime::downloadImageResource(const std::string &name)
 {
-    const std::string destDir(lime::getAppDataDirectory() + "/images/17.03");
+    const std::string destDir(lime::getAppDataDirectory() + "/images/18.02");
     const std::string destFile(destDir + "/" + name);
-    const std::string sourceUrl("http://downloads.myriadrf.org/project/limesuite/17.03/" + name);
+    const std::string sourceUrl("http://downloads.myriadrf.org/project/limesuite/18.02/" + name);
 
     //check if the directory already exists
     struct stat s;

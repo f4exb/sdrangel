@@ -43,6 +43,7 @@ SOURCES += mainwindow.cpp\
         dsp/spectrumscopengcombovis.cpp\
         dsp/scopevis.cpp\
         dsp/scopevisng.cpp\
+        dsp/scopevisxy.cpp\
         dsp/spectrumvis.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
@@ -81,6 +82,7 @@ SOURCES += mainwindow.cpp\
         gui/transverterbutton.cpp\
         gui/transverterdialog.cpp\
         gui/tickedslider.cpp\
+        gui/tvscreen.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
         webapi/webapiadaptergui.cpp
@@ -93,6 +95,7 @@ HEADERS  += mainwindow.h\
         dsp/spectrumscopengcombovis.h\        
         dsp/scopevis.h\
         dsp/scopevisng.h\
+        dsp/scopevisxy.h\
         dsp/spectrumvis.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
@@ -132,6 +135,7 @@ HEADERS  += mainwindow.h\
         gui/tickedslider.h\
         gui/transverterbutton.h\
         gui/transverterdialog.h\
+        gui/tvscreen.h\
         gui/valuedial.h\
         gui/valuedialz.h\
         webapi/webapiadaptergui.h
