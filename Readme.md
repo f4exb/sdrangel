@@ -119,7 +119,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 [LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
 
-<p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental. At least you should always have one of the streams running.</b></p>
+<p><b>&#9888; The latest version of LimeSuite is used and must be considered experimental. Hence LimeSDR support in SDRangel is also experimental.</b></p>
 
 <p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 2.5 MS/s particularly in Tx mode.</p>
 

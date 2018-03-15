@@ -50,7 +50,7 @@ bool DeviceLimeSDR::setNCOFrequency(lms_device_t *device, bool dir_tx, std::size
             return false;
         }
 
-        if (LMS_SetNCOIndex(device, dir_tx, chan, 0, positive) < 0)
+        if (LMS_SetNCOIndex(device, dir_tx, chan, 0, dir_tx^positive) < 0)
         {
             fprintf(stderr, "DeviceLimeSDR::setNCOFrequency: cannot set conversion direction %sfreq\n", positive ? "+" : "-");
             return false;
