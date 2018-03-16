@@ -84,13 +84,13 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_audioFifo1.setAudioNetSink(m_audioNetSink);
     m_audioFifo2.setAudioNetSink(m_audioNetSink);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
 }
 
 DSDDemod::~DSDDemod()

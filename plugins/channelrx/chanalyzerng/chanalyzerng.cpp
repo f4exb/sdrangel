@@ -50,12 +50,12 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
 
+    apply(true);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-	apply(true);
 }
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()

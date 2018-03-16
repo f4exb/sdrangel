@@ -100,13 +100,13 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
 }
 
 UDPSrc::~UDPSrc()

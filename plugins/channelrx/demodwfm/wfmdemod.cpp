@@ -63,13 +63,13 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+	applySettings(m_settings, true);
+
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
-	applySettings(m_settings, true);
 }
 
 WFMDemod::~WFMDemod()

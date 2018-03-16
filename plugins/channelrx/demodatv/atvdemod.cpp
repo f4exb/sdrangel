@@ -85,14 +85,14 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
 
     m_objPhaseDiscri.setFMScaling(1.0f);
 
+    applyStandard();
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-
-    applyStandard();
 }
 
 ATVDemod::~ATVDemod()

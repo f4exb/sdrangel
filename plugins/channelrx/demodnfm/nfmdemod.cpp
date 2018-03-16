@@ -66,6 +66,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {
+    qDebug("NFMDemod::NFMDemod");
 	setObjectName(m_channelId);
 
 	m_audioBuffer.resize(1<<14);
@@ -80,13 +81,13 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+	applySettings(m_settings, true);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
-	applySettings(m_settings, true);
 }
 
 NFMDemod::~NFMDemod()

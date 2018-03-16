@@ -58,15 +58,15 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
 
     m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, rfFilterFftLength);
 
+    //To setup correct Sample Rate
+    channelSampleRateChanged();
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
-
-    //To setup correct Sample Rate
-    channelSampleRateChanged();
 }
 
 DATVDemod::~DATVDemod()
