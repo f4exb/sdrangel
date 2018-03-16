@@ -90,13 +90,13 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;
 
+    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true); // does applyStandard() too;
+
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true); // does applyStandard() too;
 }
 
 ATVMod::~ATVMod()

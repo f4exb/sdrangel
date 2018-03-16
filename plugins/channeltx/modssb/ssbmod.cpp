@@ -99,13 +99,13 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
 	m_inAGC.setClamping(true);
 
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true);
+
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
 }
 
 SSBMod::~SSBMod()
