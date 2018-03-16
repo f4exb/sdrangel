@@ -88,7 +88,6 @@ HEADERS = $$LIBLIMESUITESRC/src/API/*.h\
     $$LIBLIMESUITESRC/src/Si5351C/*.h\
     $$LIBLIMESUITESRC/src/lms7002m/*.h\
     $$LIBLIMESUITESRC/src/FPGA_common/*.h\
-    $$LIBLIMESUITESRC/src/lms7002m_mcu/*.h\    
     $$LIBLIMESUITESRC/src/HPM7/*.h\
     $$LIBLIMESUITESRC/src/kissFFT/*.h
     
