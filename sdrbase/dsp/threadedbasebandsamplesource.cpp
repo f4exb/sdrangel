@@ -36,6 +36,7 @@ ThreadedBasebandSampleSource::ThreadedBasebandSampleSource(BasebandSampleSource*
 
 ThreadedBasebandSampleSource::~ThreadedBasebandSampleSource()
 {
+    stop();
     delete m_thread;
 }
 
