@@ -112,19 +112,19 @@ void TVScreen::initializeGL()
     {
         if (QOpenGLContext::currentContext()->isValid())
         {
-            qDebug() << "DATVScreen::initializeGL: context:"
+            qDebug() << "TVScreen::initializeGL: context:"
                     << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
                     << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
                     << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
         }
         else
         {
-            qDebug() << "DATVScreen::initializeGL: current context is invalid";
+            qDebug() << "TVScreen::initializeGL: current context is invalid";
         }
     }
     else
     {
-        qCritical() << "DATVScreen::initializeGL: no current context";
+        qCritical() << "TVScreen::initializeGL: no current context";
         return;
     }
 
@@ -132,21 +132,21 @@ void TVScreen::initializeGL()
 
     if (objSurface == NULL)
     {
-        qCritical() << "DATVScreen::initializeGL: no surface attached";
+        qCritical() << "TVScreen::initializeGL: no surface attached";
         return;
     }
     else
     {
         if (objSurface->surfaceType() != QSurface::OpenGLSurface)
         {
-            qCritical() << "DATVScreen::initializeGL: surface is not an OpenGLSurface: "
+            qCritical() << "TVScreen::initializeGL: surface is not an OpenGLSurface: "
                     << objSurface->surfaceType()
                     << " cannot use an OpenGL context";
             return;
         }
         else
         {
-            qDebug() << "DATVScreen::initializeGL: OpenGL surface:"
+            qDebug() << "TVScreen::initializeGL: OpenGL surface:"
                     << " class: " << (objSurface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
         }
     }
@@ -198,7 +198,7 @@ void TVScreen::tick()
 
 void TVScreen::connectTimer(const QTimer& objTimer)
 {
-     qDebug() << "DATVScreen::connectTimer";
+     qDebug() << "TVScreen::connectTimer";
      disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
      connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
      m_objTimer.stop();
