@@ -26,6 +26,7 @@
 #ifdef __MINGW32__
 #include <unistd.h>
 #elif __unix__
+#include <unistd.h>
 #include <pwd.h>
 #endif
 
