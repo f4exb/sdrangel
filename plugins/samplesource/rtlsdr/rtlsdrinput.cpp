@@ -34,7 +34,7 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
-const quint64 RTLSDRInput::frequencyLowRangeMin = 1000UL;
+const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMin = 24000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMax = 1900000UL;
