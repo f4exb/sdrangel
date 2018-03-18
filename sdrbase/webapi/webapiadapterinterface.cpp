@@ -36,6 +36,7 @@ std::regex WebAPIAdapterInterface::devicesetFocusURLRe("^/sdrangel/deviceset/([0
 std::regex WebAPIAdapterInterface::devicesetDeviceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device$");
 std::regex WebAPIAdapterInterface::devicesetDeviceSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/settings$");
 std::regex WebAPIAdapterInterface::devicesetDeviceRunURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/run");
+std::regex WebAPIAdapterInterface::devicesetChannelsReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channels/report$");
 std::regex WebAPIAdapterInterface::devicesetChannelURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel$");
 std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");

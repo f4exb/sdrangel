@@ -38,6 +38,8 @@ SWGChannel::SWGChannel() {
     m_title_isSet = false;
     delta_frequency = 0;
     m_delta_frequency_isSet = false;
+    report = nullptr;
+    m_report_isSet = false;
 }
 
 SWGChannel::~SWGChannel() {
@@ -56,6 +58,8 @@ SWGChannel::init() {
     m_title_isSet = false;
     delta_frequency = 0;
     m_delta_frequency_isSet = false;
+    report = new SWGChannelReport();
+    m_report_isSet = false;
 }
 
 void
@@ -69,6 +73,9 @@ SWGChannel::cleanup() {
         delete title;
     }
 
+    if(report != nullptr) { 
+        delete report;
+    }
 }
 
 SWGChannel*
@@ -91,6 +98,8 @@ SWGChannel::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&delta_frequency, pJson["deltaFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&report, pJson["report"], "SWGChannelReport", "SWGChannelReport");
     
 }
 
@@ -122,6 +131,9 @@ SWGChannel::asJsonObject() {
     }
     if(m_delta_frequency_isSet){
         obj->insert("deltaFrequency", QJsonValue(delta_frequency));
+    }
+    if((report != nullptr) && (report->isSet())){
+        toJsonValue(QString("report"), report, obj, QString("SWGChannelReport"));
     }
 
     return obj;
@@ -177,6 +189,16 @@ SWGChannel::setDeltaFrequency(qint32 delta_frequency) {
     this->m_delta_frequency_isSet = true;
 }
 
+SWGChannelReport*
+SWGChannel::getReport() {
+    return report;
+}
+void
+SWGChannel::setReport(SWGChannelReport* report) {
+    this->report = report;
+    this->m_report_isSet = true;
+}
+
 
 bool
 SWGChannel::isSet(){
@@ -187,6 +209,7 @@ SWGChannel::isSet(){
         if(m_uid_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(m_delta_frequency_isSet){ isObjectUpdated = true; break;}
+        if(report != nullptr && report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

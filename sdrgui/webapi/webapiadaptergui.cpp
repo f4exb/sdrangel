@@ -53,6 +53,7 @@
 #include "SWGPresetIdentifier.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
@@ -983,6 +984,27 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
     }
 }
 
+int WebAPIAdapterGUI::devicesetChannelsReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGChannelsDetail& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        getChannelsDetail(&response, deviceSet);
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
@@ -1431,6 +1453,65 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
             channel->getTitle(*channels->back()->getTitle());
+        }
+    }
+}
+
+void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceUISet* deviceUISet)
+{
+    channelsDetail->init();
+    SWGSDRangel::SWGChannelReport *channelReport;
+    QString channelReportError;
+
+    if (deviceUISet->m_deviceSinkEngine) // Tx data
+    {
+        channelsDetail->setChannelcount(deviceUISet->m_deviceSinkAPI->getNbChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
+
+        for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelSourceAPI *channel = deviceUISet->m_deviceSinkAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
+        }
+    }
+
+    if (deviceUISet->m_deviceSourceEngine) // Rx data
+    {
+        channelsDetail->setChannelcount(deviceUISet->m_deviceSourceAPI->getNbChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
+
+        for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelSinkAPI *channel = deviceUISet->m_deviceSourceAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
         }
     }
 }

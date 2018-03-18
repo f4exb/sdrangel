@@ -810,6 +810,38 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset/{deviceSetIndex}/channels/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get channels report
+      operationId: devicesetChannelsReportGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return channels report information
+          schema:
+            $ref: "#/definitions/ChannelsDetail"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+  
           
   /sdrangel/deviceset/{deviceSetIndex}/channel:
     x-swagger-router-controller: deviceset
@@ -1302,6 +1334,23 @@ definitions:
       deltaFrequency:
         description: "Channel shift frequency in Hz from the center of baseband"
         type: integer
+      report:
+        $ref: "#/definitions/ChannelReport"
+        
+  ChannelsDetail:
+    description: "All channels detailed information"
+    required:
+      - channelcount
+    properties:
+      channelcount:
+        description: "Number of channels in the set"
+        type: integer
+      channels:
+        description: "Channels list"
+        type: array
+        items:
+          $ref:  "#/definitions/Channel"
+        
         
   AudioDevices:
     description: "List of audio devices available in the system"
@@ -1551,11 +1600,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
         
   ChannelReport:
-    description: Base channel report. The specific channel report present depends on channelType.
+    description: Base channel report. The specific channel report present depends on channelType or paremt context.
     discriminator: channelType
-    required:
-      - channelType
-      - tx
     properties:
       channelType:
         description: Channel type code

@@ -159,6 +159,11 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelsReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelsDetail& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
@@ -196,6 +201,7 @@ private:
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex);
+    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceUISet* deviceUISet);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

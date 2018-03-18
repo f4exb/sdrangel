@@ -17,6 +17,7 @@
 
 #include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelsDetail.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSettings.h"
@@ -46,6 +47,7 @@ public:
     void devicesetChannelSettingsGet(qint32 device_set_index, qint32 channel_index);
     void devicesetChannelSettingsPatch(qint32 device_set_index, qint32 channel_index, SWGChannelSettings& body);
     void devicesetChannelSettingsPut(qint32 device_set_index, qint32 channel_index, SWGChannelSettings& body);
+    void devicesetChannelsReportGet(qint32 device_set_index);
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem& body);
     void devicesetDeviceRunDelete(qint32 device_set_index);
     void devicesetDeviceRunGet(qint32 device_set_index);
@@ -65,6 +67,7 @@ private:
     void devicesetChannelSettingsGetCallback (SWGHttpRequestWorker * worker);
     void devicesetChannelSettingsPatchCallback (SWGHttpRequestWorker * worker);
     void devicesetChannelSettingsPutCallback (SWGHttpRequestWorker * worker);
+    void devicesetChannelsReportGetCallback (SWGHttpRequestWorker * worker);
     void devicesetDevicePutCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceRunDeleteCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceRunGetCallback (SWGHttpRequestWorker * worker);
@@ -84,6 +87,7 @@ signals:
     void devicesetChannelSettingsGetSignal(SWGChannelSettings* summary);
     void devicesetChannelSettingsPatchSignal(SWGChannelSettings* summary);
     void devicesetChannelSettingsPutSignal(SWGChannelSettings* summary);
+    void devicesetChannelsReportGetSignal(SWGChannelsDetail* summary);
     void devicesetDevicePutSignal(SWGDeviceListItem* summary);
     void devicesetDeviceRunDeleteSignal(SWGDeviceState* summary);
     void devicesetDeviceRunGetSignal(SWGDeviceState* summary);
@@ -102,6 +106,7 @@ signals:
     void devicesetChannelSettingsGetSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPatchSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPutSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelsReportGetSignalE(SWGChannelsDetail* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDevicePutSignalE(SWGDeviceListItem* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunDeleteSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunGetSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -120,6 +125,7 @@ signals:
     void devicesetChannelSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetChannelSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetChannelsReportGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDevicePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceRunGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

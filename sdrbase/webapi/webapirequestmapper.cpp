@@ -38,6 +38,7 @@
 #include "SWGPresetExport.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
@@ -113,6 +114,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
                 devicesetDeviceRunService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelsReportURLRe)) {
+                devicesetChannelsReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelURLRe)) {
                 devicesetChannelService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelIndexURLRe)) {
@@ -1061,6 +1064,43 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
         errorResponse.init();
         *errorResponse.getMessage() = "Wrong integer conversion on device set index";
         response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelsReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "GET")
+    {
+        try
+        {
+            SWGSDRangel::SWGChannelsDetail normalResponse;
+            int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+            int status = m_adapter->devicesetChannelsReportGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            errorResponse.init();
+            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+            response.setStatus(400,"Invalid data");
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
         response.write(errorResponse.asJson().toUtf8());
     }
 }

@@ -11,79 +11,55 @@
  */
 
 /*
- * SWGChannel.h
+ * SWGChannelsDetail.h
  *
- * Channel summarized information
+ * All channels detailed information
  */
 
-#ifndef SWGChannel_H_
-#define SWGChannel_H_
+#ifndef SWGChannelsDetail_H_
+#define SWGChannelsDetail_H_
 
 #include <QJsonObject>
 
 
-#include "SWGChannelReport.h"
-#include <QString>
+#include "SWGChannel.h"
+#include <QList>
 
 #include "SWGObject.h"
 
 namespace SWGSDRangel {
 
-class SWGChannel: public SWGObject {
+class SWGChannelsDetail: public SWGObject {
 public:
-    SWGChannel();
-    SWGChannel(QString* json);
-    virtual ~SWGChannel();
+    SWGChannelsDetail();
+    SWGChannelsDetail(QString* json);
+    virtual ~SWGChannelsDetail();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannel* fromJson(QString &jsonString) override;
+    virtual SWGChannelsDetail* fromJson(QString &jsonString) override;
 
-    qint32 getIndex();
-    void setIndex(qint32 index);
+    qint32 getChannelcount();
+    void setChannelcount(qint32 channelcount);
 
-    QString* getId();
-    void setId(QString* id);
-
-    qint64 getUid();
-    void setUid(qint64 uid);
-
-    QString* getTitle();
-    void setTitle(QString* title);
-
-    qint32 getDeltaFrequency();
-    void setDeltaFrequency(qint32 delta_frequency);
-
-    SWGChannelReport* getReport();
-    void setReport(SWGChannelReport* report);
+    QList<SWGChannel*>* getChannels();
+    void setChannels(QList<SWGChannel*>* channels);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 index;
-    bool m_index_isSet;
+    qint32 channelcount;
+    bool m_channelcount_isSet;
 
-    QString* id;
-    bool m_id_isSet;
-
-    qint64 uid;
-    bool m_uid_isSet;
-
-    QString* title;
-    bool m_title_isSet;
-
-    qint32 delta_frequency;
-    bool m_delta_frequency_isSet;
-
-    SWGChannelReport* report;
-    bool m_report_isSet;
+    QList<SWGChannel*>* channels;
+    bool m_channels_isSet;
 
 };
 
 }
 
-#endif /* SWGChannel_H_ */
+#endif /* SWGChannelsDetail_H_ */
