@@ -185,6 +185,12 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelReportGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainWindow& m_mainWindow;
 

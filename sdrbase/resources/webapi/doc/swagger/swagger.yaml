@@ -997,6 +997,43 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
           
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get a channel report
+      operationId: devicesetChannelReportGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return channel report
+          schema:
+            $ref: "#/definitions/ChannelReport"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
+          
   /swagger:
     x-swagger-pipe: swagger_raw
     
@@ -1470,7 +1507,7 @@ definitions:
         $ref: "#/definitions/PresetIdentifier"
         
   DeviceSettings:
-    description: Base device settings
+    description: Base device settings. The specific device settings present depends on deviceHwType.
     discriminator: deviceHwType
     required:
       - deviceHwType
@@ -1496,7 +1533,7 @@ definitions:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
         
   ChannelSettings:
-    description: Base channel settings
+    description: Base channel settings. The specific channel settings present depends on channelType.
     discriminator: channelType
     required:
       - channelType
@@ -1513,6 +1550,24 @@ definitions:
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
         
+  ChannelReport:
+    description: Base channel report. The specific channel report present depends on channelType.
+    discriminator: channelType
+    required:
+      - channelType
+      - tx
+    properties:
+      channelType:
+        description: Channel type code
+        type: string
+      tx:
+        description: Not zero if it is a tx channel else it is a rx channel
+        type: integer
+      NFMDemodReport:
+        $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+      NFMModReport:
+        $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+
 responses:
 
   Response_500:

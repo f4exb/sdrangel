@@ -20,6 +20,7 @@
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
+#include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
@@ -39,7 +40,9 @@
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGNFMDemodReport.h"
 #include "SWGNFMDemodSettings.h"
+#include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
 #include "SWGPresetExport.h"
 #include "SWGPresetGroup.h"
@@ -72,6 +75,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGChannelListItem").compare(type) == 0) {
       return new SWGChannelListItem();
+    }
+    if(QString("SWGChannelReport").compare(type) == 0) {
+      return new SWGChannelReport();
     }
     if(QString("SWGChannelSettings").compare(type) == 0) {
       return new SWGChannelSettings();
@@ -130,8 +136,14 @@ namespace SWGSDRangel {
     if(QString("SWGLoggingInfo").compare(type) == 0) {
       return new SWGLoggingInfo();
     }
+    if(QString("SWGNFMDemodReport").compare(type) == 0) {
+      return new SWGNFMDemodReport();
+    }
     if(QString("SWGNFMDemodSettings").compare(type) == 0) {
       return new SWGNFMDemodSettings();
+    }
+    if(QString("SWGNFMModReport").compare(type) == 0) {
+      return new SWGNFMModReport();
     }
     if(QString("SWGNFMModSettings").compare(type) == 0) {
       return new SWGNFMModSettings();

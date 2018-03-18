@@ -13,7 +13,7 @@
 /*
  * SWGDeviceSettings.h
  *
- * Base device settings
+ * Base device settings. The specific device settings present depends on deviceHwType.
  */
 
 #ifndef SWGDeviceSettings_H_

@@ -38,3 +38,11 @@ NFMModSettings:
     cwKeyer:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
     
+NFMModReport:
+  description: NFMMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    

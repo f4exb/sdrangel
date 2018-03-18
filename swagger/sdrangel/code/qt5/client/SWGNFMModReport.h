@@ -11,68 +11,47 @@
  */
 
 /*
- * SWGChannelSettings.h
+ * SWGNFMModReport.h
  *
- * Base channel settings. The specific channel settings present depends on channelType.
+ * NFMMod
  */
 
-#ifndef SWGChannelSettings_H_
-#define SWGChannelSettings_H_
+#ifndef SWGNFMModReport_H_
+#define SWGNFMModReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGNFMDemodSettings.h"
-#include "SWGNFMModSettings.h"
-#include <QString>
 
 #include "SWGObject.h"
 
 namespace SWGSDRangel {
 
-class SWGChannelSettings: public SWGObject {
+class SWGNFMModReport: public SWGObject {
 public:
-    SWGChannelSettings();
-    SWGChannelSettings(QString* json);
-    virtual ~SWGChannelSettings();
+    SWGNFMModReport();
+    SWGNFMModReport(QString* json);
+    virtual ~SWGNFMModReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelSettings* fromJson(QString &jsonString) override;
+    virtual SWGNFMModReport* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
-
-    qint32 getTx();
-    void setTx(qint32 tx);
-
-    SWGNFMDemodSettings* getNfmDemodSettings();
-    void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
-
-    SWGNFMModSettings* getNfmModSettings();
-    void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
-
-    qint32 tx;
-    bool m_tx_isSet;
-
-    SWGNFMDemodSettings* nfm_demod_settings;
-    bool m_nfm_demod_settings_isSet;
-
-    SWGNFMModSettings* nfm_mod_settings;
-    bool m_nfm_mod_settings_isSet;
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelSettings_H_ */
+#endif /* SWGNFMModReport_H_ */

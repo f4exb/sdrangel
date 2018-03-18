@@ -136,6 +136,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
 		return m_ctcssDetector.getToneSet();
@@ -220,6 +224,7 @@ private:
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 #endif // INCLUDE_NFMDEMOD_H

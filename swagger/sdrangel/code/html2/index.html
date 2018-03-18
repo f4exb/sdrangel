@@ -841,6 +841,27 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about channel plugin"
 };
+            defs.ChannelReport = {
+  "required" : [ "channelType", "tx" ],
+  "discriminator" : "channelType",
+  "properties" : {
+    "channelType" : {
+      "type" : "string",
+      "description" : "Channel type code"
+    },
+    "tx" : {
+      "type" : "integer",
+      "description" : "Not zero if it is a tx channel else it is a rx channel"
+    },
+    "NFMDemodReport" : {
+      "$ref" : "#/definitions/NFMDemodReport"
+    },
+    "NFMModReport" : {
+      "$ref" : "#/definitions/NFMModReport"
+    }
+  },
+  "description" : "Base channel report. The specific channel report present depends on channelType."
+};
             defs.ChannelSettings = {
   "required" : [ "channelType", "tx" ],
   "discriminator" : "channelType",
@@ -860,7 +881,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/NFMModSettings"
     }
   },
-  "description" : "Base channel settings"
+  "description" : "Base channel settings. The specific channel settings present depends on channelType."
 };
             defs.DVSeralDevices = {
   "required" : [ "nbDevices" ],
@@ -1000,7 +1021,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/RtlSdrSettings"
     }
   },
-  "description" : "Base device settings"
+  "description" : "Base device settings. The specific device settings present depends on deviceHwType."
 };
             defs.DeviceState = {
   "required" : [ "state" ],
@@ -1326,6 +1347,25 @@ margin-bottom: 20px;
   },
   "description" : "Logging parameters setting"
 };
+            defs.NFMDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "ctcssTone" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "CTCSS tone frequency if detected else 0"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    }
+  },
+  "description" : "NFMDemod"
+};
             defs.NFMDemodSettings = {
   "properties" : {
     "inputFrequencyOffset" : {
@@ -1389,6 +1429,16 @@ margin-bottom: 20px;
     }
   },
   "description" : "NFMDemod"
+};
+            defs.NFMModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    }
+  },
+  "description" : "NFMMod"
 };
             defs.NFMModSettings = {
   "properties" : {
@@ -1693,6 +1743,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="DeviceSet" data-name="devicesetChannelPost" class="">
                       <a href="#api-DeviceSet-devicesetChannelPost">devicesetChannelPost</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetChannelReportGet" class="">
+                      <a href="#api-DeviceSet-devicesetChannelReportGet">devicesetChannelReportGet</a>
                     </li>
                     <li data-group="DeviceSet" data-name="devicesetChannelSettingsGet" class="">
                       <a href="#api-DeviceSet-devicesetChannelSettingsGet">devicesetChannelSettingsGet</a>
@@ -2832,6 +2885,500 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-devicesetChannelPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetChannelReportGet">
+                      <article id="api-DeviceSet-devicesetChannelReportGet-0" data-group="User" data-name="devicesetChannelReportGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetChannelReportGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get a channel report</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetChannelReportGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelReportGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelReportGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        try {
+            ChannelReport result = apiInstance.devicesetChannelReportGet(deviceSetIndex, channelIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        try {
+            ChannelReport result = apiInstance.devicesetChannelReportGet(deviceSetIndex, channelIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *channelIndex = 56; // Index of the channel in the channels list for this device set
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetChannelReportGetWith:deviceSetIndex
+    channelIndex:channelIndex
+              completionHandler: ^(ChannelReport output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var channelIndex = 56; // {Integer} Index of the channel in the channels list for this device set
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetChannelReportGet(deviceSetIndex, channelIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetChannelReportGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
+
+            try
+            {
+                ChannelReport result = apiInstance.devicesetChannelReportGet(deviceSetIndex, channelIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetChannelReportGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+
+try {
+    $result = $api_instance->devicesetChannelReportGet($deviceSetIndex, $channelIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetChannelReportGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
+
+eval { 
+    my $result = $api_instance->devicesetChannelReportGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetChannelReportGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelReportGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
+
+try: 
+    api_response = api_instance.deviceset_channel_report_get(deviceSetIndex, channelIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetChannelReportGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelReportGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">channelIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelReportGet_channelIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of the channel in the channels list for this device set
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return channel report </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelReportGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelReportGet-200-schema">
+                                  <div id='responses-devicesetChannelReportGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return channel report",
+  "schema" : {
+    "$ref" : "#/definitions/ChannelReport"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelReportGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelReportGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelReportGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or channel index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelReportGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelReportGet-400-schema">
+                                  <div id='responses-devicesetChannelReportGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or channel index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelReportGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelReportGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelReportGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or channel not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelReportGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelReportGet-404-schema">
+                                  <div id='responses-devicesetChannelReportGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or channel not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelReportGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelReportGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelReportGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelReportGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelReportGet-500-schema">
+                                  <div id='responses-devicesetChannelReportGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelReportGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelReportGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelReportGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelReportGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelReportGet-501-schema">
+                                  <div id='responses-devicesetChannelReportGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelReportGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelReportGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelReportGet-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -16925,7 +17472,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-03T23:35:13.013+01:00
+              Generated 2018-03-18T11:03:22.829+01:00
             </div>
           </div>
       </div>

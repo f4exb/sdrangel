@@ -20,6 +20,8 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGCWKeyerSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGNFMModReport.h"
 
 #include <stdio.h>
 #include <complex.h>
@@ -30,6 +32,7 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 #include "dsp/threadedbasebandsamplesource.h"
+#include "util/db.h"
 
 #include "nfmmod.h"
 
@@ -625,6 +628,16 @@ int NFMMod::webapiSettingsPutPatch(
     return 200;
 }
 
+int NFMMod::webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setNfmModReport(new SWGSDRangel::SWGNFMModReport());
+    response.getNfmModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings)
 {
     response.getNfmModSettings()->setAfBandwidth(settings.m_afBandwidth);
@@ -665,4 +678,9 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+}
+
+void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getNfmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
 }

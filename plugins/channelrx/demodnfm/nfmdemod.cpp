@@ -22,9 +22,12 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGNFMDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGNFMDemodReport.h"
 
 #include "dsp/downchannelizer.h"
 #include "util/stepfunctions.h"
+#include "util/db.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
@@ -643,6 +646,16 @@ int NFMDemod::webapiSettingsPutPatch(
     return 200;
 }
 
+int NFMDemod::webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage __attribute__((unused)))
+{
+    response.setNfmDemodReport(new SWGSDRangel::SWGNFMDemodReport());
+    response.getNfmDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings)
 {
     response.getNfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
@@ -675,3 +688,13 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 }
 
+void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getNfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getNfmDemodReport()->setCtcssTone(m_settings.m_ctcssOn ? (m_ctcssIndex ? 0 : m_ctcssDetector.getToneSet()[m_ctcssIndex-1]) : 0);
+    response.getNfmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
+}

@@ -142,6 +142,62 @@ SWGDeviceSetApi::devicesetChannelPostCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGDeviceSetApi::devicesetChannelReportGet(qint32 device_set_index, qint32 channel_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+    QString channel_indexPathParam("{"); channel_indexPathParam.append("channelIndex").append("}");
+    fullPath.replace(channel_indexPathParam, stringValue(channel_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetChannelReportGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetChannelReportGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGChannelReport* output = static_cast<SWGChannelReport*>(create(json, QString("SWGChannelReport")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetChannelReportGetSignal(output);
+    } else {
+        emit devicesetChannelReportGetSignalE(output, error_type, error_str);
+        emit devicesetChannelReportGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetChannelSettingsGet(qint32 device_set_index, qint32 channel_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings");

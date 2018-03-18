@@ -68,6 +68,7 @@ private:
     void devicesetChannelService(const std::string& deviceSetIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelIndexService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelSettingsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
@@ -75,6 +76,7 @@ private:
     bool validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
+    bool validateChannelReport(SWGSDRangel::SWGChannelReport& deviceReport, QJsonObject& jsonObject, QStringList& channelReportKeys);
 
     void appendSettingsSubKeys(
             const QJsonObject& parentSettingsJsonObject,
@@ -86,6 +88,7 @@ private:
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings);
+    void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

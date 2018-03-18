@@ -11,68 +11,59 @@
  */
 
 /*
- * SWGChannelSettings.h
+ * SWGNFMDemodReport.h
  *
- * Base channel settings. The specific channel settings present depends on channelType.
+ * NFMDemod
  */
 
-#ifndef SWGChannelSettings_H_
-#define SWGChannelSettings_H_
+#ifndef SWGNFMDemodReport_H_
+#define SWGNFMDemodReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGNFMDemodSettings.h"
-#include "SWGNFMModSettings.h"
-#include <QString>
 
 #include "SWGObject.h"
 
 namespace SWGSDRangel {
 
-class SWGChannelSettings: public SWGObject {
+class SWGNFMDemodReport: public SWGObject {
 public:
-    SWGChannelSettings();
-    SWGChannelSettings(QString* json);
-    virtual ~SWGChannelSettings();
+    SWGNFMDemodReport();
+    SWGNFMDemodReport(QString* json);
+    virtual ~SWGNFMDemodReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelSettings* fromJson(QString &jsonString) override;
+    virtual SWGNFMDemodReport* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
 
-    qint32 getTx();
-    void setTx(qint32 tx);
+    float getCtcssTone();
+    void setCtcssTone(float ctcss_tone);
 
-    SWGNFMDemodSettings* getNfmDemodSettings();
-    void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
-
-    SWGNFMModSettings* getNfmModSettings();
-    void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
+    qint32 getSquelch();
+    void setSquelch(qint32 squelch);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
-    qint32 tx;
-    bool m_tx_isSet;
+    float ctcss_tone;
+    bool m_ctcss_tone_isSet;
 
-    SWGNFMDemodSettings* nfm_demod_settings;
-    bool m_nfm_demod_settings_isSet;
-
-    SWGNFMModSettings* nfm_mod_settings;
-    bool m_nfm_mod_settings_isSet;
+    qint32 squelch;
+    bool m_squelch_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelSettings_H_ */
+#endif /* SWGNFMDemodReport_H_ */

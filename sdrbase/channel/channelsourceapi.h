@@ -27,6 +27,7 @@
 namespace SWGSDRangel
 {
     class SWGChannelSettings;
+    class SWGChannelReport;
 }
 
 class SDRBASE_API ChannelSourceAPI {
@@ -53,6 +54,11 @@ public:
             bool force __attribute__((unused)),
             const QStringList& channelSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 

@@ -39,3 +39,4 @@ std::regex WebAPIAdapterInterface::devicesetDeviceRunURLRe("^/sdrangel/deviceset
 std::regex WebAPIAdapterInterface::devicesetChannelURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel$");
 std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");
+std::regex WebAPIAdapterInterface::devicesetChannelReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/report");

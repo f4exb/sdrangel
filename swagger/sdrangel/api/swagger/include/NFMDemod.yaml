@@ -43,3 +43,17 @@ NFMDemodSettings:
     title:
       type: string
     
+NFMDemodReport:
+  description: NFMDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    ctcssTone:
+      description: CTCSS tone frequency if detected else 0
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer

@@ -47,6 +47,7 @@ namespace SWGSDRangel
     class SWGDeviceSettings;
     class SWGDeviceState;
     class SWGChannelSettings;
+    class SWGChannelReport;
     class SWGSuccessResponse;
 }
 
@@ -515,6 +516,22 @@ public:
     	return 501;
     }
 
+
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetChannelReportGet(
+            int deviceSetIndex __attribute__((unused)),
+            int channelIndex __attribute__((unused)),
+            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
     static QString instanceSummaryURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
@@ -535,6 +552,7 @@ public:
     static std::regex devicesetChannelURLRe;
     static std::regex devicesetChannelIndexURLRe;
     static std::regex devicesetChannelSettingsURLRe;
+    static std::regex devicesetChannelReportURLRe;
 };
 
 

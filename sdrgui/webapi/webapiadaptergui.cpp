@@ -54,6 +54,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceState.h"
@@ -1184,6 +1185,66 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
                 channelAPI->getIdentifier(*response.getChannelType());
                 response.setTx(1);
                 return channelAPI->webapiSettingsGet(response, *error.getMessage());
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+
+int WebAPIAdapterGUI::devicesetChannelReportGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            ChannelSinkAPI *channelAPI = deviceSet->m_deviceSourceAPI->getChanelAPIAt(channelIndex);
+
+            if (channelAPI == 0)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                response.setTx(0);
+                return channelAPI->webapiReportGet(response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            ChannelSourceAPI *channelAPI = deviceSet->m_deviceSinkAPI->getChanelAPIAt(channelIndex);
+
+            if (channelAPI == 0)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                response.setTx(1);
+                return channelAPI->webapiReportGet(response, *error.getMessage());
             }
         }
         else

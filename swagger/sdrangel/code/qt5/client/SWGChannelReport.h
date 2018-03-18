@@ -11,37 +11,37 @@
  */
 
 /*
- * SWGChannelSettings.h
+ * SWGChannelReport.h
  *
- * Base channel settings. The specific channel settings present depends on channelType.
+ * Base channel report. The specific channel report present depends on channelType.
  */
 
-#ifndef SWGChannelSettings_H_
-#define SWGChannelSettings_H_
+#ifndef SWGChannelReport_H_
+#define SWGChannelReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGNFMDemodSettings.h"
-#include "SWGNFMModSettings.h"
+#include "SWGNFMDemodReport.h"
+#include "SWGNFMModReport.h"
 #include <QString>
 
 #include "SWGObject.h"
 
 namespace SWGSDRangel {
 
-class SWGChannelSettings: public SWGObject {
+class SWGChannelReport: public SWGObject {
 public:
-    SWGChannelSettings();
-    SWGChannelSettings(QString* json);
-    virtual ~SWGChannelSettings();
+    SWGChannelReport();
+    SWGChannelReport(QString* json);
+    virtual ~SWGChannelReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelSettings* fromJson(QString &jsonString) override;
+    virtual SWGChannelReport* fromJson(QString &jsonString) override;
 
     QString* getChannelType();
     void setChannelType(QString* channel_type);
@@ -49,11 +49,11 @@ public:
     qint32 getTx();
     void setTx(qint32 tx);
 
-    SWGNFMDemodSettings* getNfmDemodSettings();
-    void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
+    SWGNFMDemodReport* getNfmDemodReport();
+    void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
 
-    SWGNFMModSettings* getNfmModSettings();
-    void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
+    SWGNFMModReport* getNfmModReport();
+    void setNfmModReport(SWGNFMModReport* nfm_mod_report);
 
 
     virtual bool isSet() override;
@@ -65,14 +65,14 @@ private:
     qint32 tx;
     bool m_tx_isSet;
 
-    SWGNFMDemodSettings* nfm_demod_settings;
-    bool m_nfm_demod_settings_isSet;
+    SWGNFMDemodReport* nfm_demod_report;
+    bool m_nfm_demod_report_isSet;
 
-    SWGNFMModSettings* nfm_mod_settings;
-    bool m_nfm_mod_settings_isSet;
+    SWGNFMModReport* nfm_mod_report;
+    bool m_nfm_mod_report_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelSettings_H_ */
+#endif /* SWGChannelReport_H_ */

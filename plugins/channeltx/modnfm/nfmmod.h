@@ -227,6 +227,10 @@ public:
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage);
 
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -302,6 +306,7 @@ private:
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 

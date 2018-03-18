@@ -39,6 +39,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
@@ -118,6 +119,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetChannelIndexService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelSettingsURLRe)) {
                 devicesetChannelSettingsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelReportURLRe)) {
+                devicesetChannelReportService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             }
             else // serve static documentation pages
             {
@@ -1270,6 +1273,43 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
     }
 }
 
+void WebAPIRequestMapper::devicesetChannelReportService(
+        const std::string& deviceSetIndexStr,
+        const std::string& channelIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+        int channelIndex = boost::lexical_cast<int>(channelIndexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGChannelReport normalResponse;
+            resetChannelReport(normalResponse);
+            int status = m_adapter->devicesetChannelReportGet(deviceSetIndex, channelIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -1569,6 +1609,59 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
 }
 
+bool WebAPIRequestMapper::validateChannelReport(
+        SWGSDRangel::SWGChannelReport& channelReport,
+        QJsonObject& jsonObject,
+        QStringList& channelReportKeys)
+{
+    if (jsonObject.contains("tx")) {
+        channelReport.setTx(jsonObject["tx"].toInt());
+    } else {
+        channelReport.setTx(0); // assume Rx
+    }
+
+    if (jsonObject.contains("channelType") && jsonObject["channelType"].isString()) {
+        channelReport.setChannelType(new QString(jsonObject["channelType"].toString()));
+    } else {
+        return false;
+    }
+
+    QString *channelType = channelReport.getChannelType();
+
+    if (*channelType == "NFMDemod")
+    {
+        if (channelReport.getTx() == 0)
+        {
+            QJsonObject nfmDemodReportJsonObject = jsonObject["NFMDemodReport"].toObject();
+            channelReportKeys = nfmDemodReportJsonObject.keys();
+            channelReport.setNfmDemodReport(new SWGSDRangel::SWGNFMDemodReport());
+            channelReport.getNfmDemodReport()->fromJsonObject(nfmDemodReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMMod")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject nfmModReportJsonObject = jsonObject["NFMModReport"].toObject();
+            channelReportKeys = nfmModReportJsonObject.keys();
+            channelReport.setNfmModReport(new SWGSDRangel::SWGNFMModReport());
+            channelReport.getNfmModReport()->fromJsonObject(nfmModReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void WebAPIRequestMapper::appendSettingsSubKeys(
         const QJsonObject& parentSettingsJsonObject,
         QJsonObject& childSettingsJsonObject,
@@ -1603,3 +1696,10 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setNfmModSettings(0);
 }
 
+void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport)
+{
+    channelReport.cleanup();
+    channelReport.setChannelType(0);
+    channelReport.setNfmDemodReport(0);
+    channelReport.setNfmModReport(0);
+}
