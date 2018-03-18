@@ -13,7 +13,7 @@
 /*
  * SWGChannelReport.h
  *
- * Base channel report. The specific channel report present depends on channelType.
+ * Base channel report. The specific channel report present depends on channelType or paremt context.
  */
 
 #ifndef SWGChannelReport_H_

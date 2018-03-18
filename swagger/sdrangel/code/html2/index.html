@@ -845,7 +845,6 @@ margin-bottom: 20px;
   "description" : "Summarized information about channel plugin"
 };
             defs.ChannelReport = {
-  "required" : [ "channelType", "tx" ],
   "discriminator" : "channelType",
   "properties" : {
     "channelType" : {
@@ -863,7 +862,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/NFMModReport"
     }
   },
-  "description" : "Base channel report. The specific channel report present depends on channelType."
+  "description" : "Base channel report. The specific channel report present depends on channelType or paremt context."
 };
             defs.ChannelSettings = {
   "required" : [ "channelType", "tx" ],
@@ -17956,7 +17955,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-18T22:42:33.187+01:00
+              Generated 2018-03-19T00:19:38.769+01:00
             </div>
           </div>
       </div>

@@ -1600,11 +1600,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
         
   ChannelReport:
-    description: Base channel report. The specific channel report present depends on channelType.
+    description: Base channel report. The specific channel report present depends on channelType or paremt context.
     discriminator: channelType
-    required:
-      - channelType
-      - tx
     properties:
       channelType:
         description: Channel type code
