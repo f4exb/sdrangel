@@ -64,6 +64,12 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
   
+<h2>nfm_scanner.py</h2>
+  
+Simple NFM scanner with multiple equally spaced NFM channels. Stops whenever any of the channels squelch opens.
+
+Requires numpy
+  
 <h2>nfm_test.py</h2>
 
 Example of creating NFM channels (demodulator and modulator) and changing the settings
@@ -125,6 +131,53 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/settings`
     - HTTP method: `PATCH`
 
+<h2>rx_test.py</h2>
+
+Sets specified Rx in existing source device set or create a new source device set with this Rx. Adds an NFM demodulator channel.
+
+It uses the following APIs:
+
+  - Create a new device set:
+    - Operation ID: `devicesetPost`
+    - URI: `/sdrangel/deviceset`  
+    - HTTP method: `POST`
+  - Get information on a device set:
+    - Operation ID: `devicesetGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}`
+    - HTTP method: `GET`
+  - To select a device in a device set:
+    - Operation ID: `devicesetDevicePut`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device`
+    - HTTP method: `PUT`
+  - To get the settings of a device:
+    - OperationID: `devicesetDeviceSettingsGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/settings`
+    - HTTP method: `GET`
+  - To change the settings of a device:
+    - OperationID: `devicesetDeviceSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/settings`
+    - HTTP method: `PATCH`
+  - To create a new channel:
+    - Operation ID: `devicesetChannelPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
+    - HTTP method: `POST`
+  - To get the settings of a channel:
+    - OperationID: `devicesetChannelSettingsGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `GET`
+  - To change the settings of a channel:
+    - OperationID: `devicesetChannelSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `PATCH`
+  - Start a device streaming
+    - OperationID: `devicesetDeviceRunPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
+    - HTTP method: `POST`
+   
+<h2>rx_tx_test.py</h2>
+
+Combines `rx_test` and `tx_test` to create a pair of source and sink device sets. The APIs used are the same as in `rx_test` or `tx_test`.   
+
 <h2>start_stop.py</h2>
 
 Starts or stops a device in the specified device set
@@ -155,4 +208,45 @@ It uses this API:
     - URI: `/sdrangel`
     - HTTP method: `DELETE`
 
-  
+<h2>tx_test.py</h2>
+
+Sets specified Tx in existing sink device set or create a new sink device set with this Tx. Adds an NFM modulator channel.
+
+It uses the following APIs:
+
+  - Create a new device set:
+    - Operation ID: `devicesetPost`
+    - URI: `/sdrangel/deviceset`  
+    - HTTP method: `POST`
+  - Get information on a device set:
+    - Operation ID: `devicesetGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}`
+    - HTTP method: `GET`
+  - To select a device in a device set:
+    - Operation ID: `devicesetDevicePut`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device`
+    - HTTP method: `PUT`
+  - To get the settings of a device:
+    - OperationID: `devicesetDeviceSettingsGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/settings`
+    - HTTP method: `GET`
+  - To change the settings of a device:
+    - OperationID: `devicesetDeviceSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/settings`
+    - HTTP method: `PATCH`
+  - To create a new channel:
+    - Operation ID: `devicesetChannelPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
+    - HTTP method: `POST`
+  - To get the settings of a channel:
+    - OperationID: `devicesetChannelSettingsGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `GET`
+  - To change the settings of a channel:
+    - OperationID: `devicesetChannelSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `PATCH`
+  - Start a device streaming
+    - OperationID: `devicesetDeviceRunPost`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
+    - HTTP method: `POST`
