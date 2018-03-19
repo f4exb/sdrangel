@@ -16,6 +16,7 @@ requests_methods = {
     "DELETE": requests.delete
 }
 
+# ======================================================================
 class ScanControl:
     def __init__(self, num_channels, channel_step, start_freq, stop_freq, log2_decim):        
         self.channel_shifts = []
@@ -54,6 +55,67 @@ def getInputOptions():
     
     return options
 
+# ======================================================================
+def setupDevice(scan_control, options):
+    settings = callAPI(deviceset_url + "/device/settings", "GET", None, None, "Get device settings")
+    if settings is None:
+        exit(-1)
+    
+    if options.device_hwid == "LimeSDR":
+        settings["limeSdrInputSettings"]["antennaPath"] = 0
+        settings["limeSdrInputSettings"]["devSampleRate"] = scan_control.device_sample_rate
+        settings["limeSdrInputSettings"]["log2HardDecim"] = 4
+        settings["limeSdrInputSettings"]["log2SoftDecim"] = options.log2_decim
+        settings["limeSdrInputSettings"]["centerFrequency"] = scan_control.device_start_freq + 500000
+        settings["limeSdrInputSettings"]["ncoEnable"] = 1
+        settings["limeSdrInputSettings"]["ncoFrequency"] = -500000
+        settings["limeSdrInputSettings"]["lpfBW"] = 1450000
+        settings["limeSdrInputSettings"]["lpfFIRBW"] = scan_control.device_step_freq + 100000
+        settings["limeSdrInputSettings"]["lpfFIREnable"] = 1
+        settings['limeSdrInputSettings']['dcBlock'] = 1
+    elif options.device_hwid == "RTLSDR":
+        settings['rtlSdrSettings']['devSampleRate'] = scan_control.device_sample_rate
+        settings['rtlSdrSettings']['centerFrequency'] = scan_control.device_start_freq
+        settings['rtlSdrSettings']['gain'] = 496
+        settings['rtlSdrSettings']['log2Decim'] = options.log2_decim
+        settings['rtlSdrSettings']['dcBlock'] = 1
+        settings['rtlSdrSettings']['agc'] = 1
+    elif options.device_hwid == "HackRF":
+        settings['hackRFInputSettings']['LOppmTenths'] = -51
+        settings['hackRFInputSettings']['centerFrequency'] = scan_control.device_start_freq
+        settings['hackRFInputSettings']['dcBlock'] = 1
+        settings['hackRFInputSettings']['devSampleRate'] = scan_control.device_sample_rate
+        settings['hackRFInputSettings']['lnaExt'] = 1
+        settings['hackRFInputSettings']['lnaGain'] = 32
+        settings['hackRFInputSettings']['log2Decim'] = options.log2_decim
+        settings['hackRFInputSettings']['vgaGain'] = 24
+
+    r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch device settings")
+    if r is None:
+        exit(-1)
+        
+# ======================================================================
+def setupChannels(scan_control, options):
+    i = 0
+    for shift in scan_control.channel_shifts:
+        settings = callAPI("/deviceset/0/channel", "POST", None, {"channelType": "NFMDemod", "tx": 0}, "Create NFM demod")
+        if settings is None:
+            exit(-1)
+
+        settings = callAPI("/deviceset/0/channel/%d/settings" % i, "GET", None, None, "Get NFM demod settings")
+        if settings is None:
+            exit(-1)
+
+        settings["NFMDemodSettings"]["inputFrequencyOffset"] = int(shift)
+        settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
+        settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+        
+        r = callAPI("/deviceset/0/channel/%d/settings" % i, "PATCH", None, settings, "Change NFM demod")
+        if r is None:
+            exit(-1)
+            
+        i += 1        
+    
 # ======================================================================
 def printResponse(response):
     content_type = response.headers.get("Content-Type", None)
@@ -118,6 +180,11 @@ def main():
         r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 0}, "setup device on Rx device set")
         if r is None:
             exit(-1)
+        
+        setupDevice(scan_control, options)
+        setupChannels(scan_control, options)
+        
+        exit(0)
         
         
         
