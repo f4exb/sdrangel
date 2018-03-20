@@ -27,10 +27,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGChannelSettings: public SWGObject {
+class SWG_API SWGChannelSettings: public SWGObject {
 public:
     SWGChannelSettings();
     SWGChannelSettings(QString* json);

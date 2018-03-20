@@ -25,10 +25,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGSuccessResponse: public SWGObject {
+class SWG_API SWGSuccessResponse: public SWGObject {
 public:
     SWGSuccessResponse();
     SWGSuccessResponse(QString* json);

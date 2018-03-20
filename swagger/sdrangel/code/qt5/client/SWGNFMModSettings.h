@@ -26,10 +26,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGNFMModSettings: public SWGObject {
+class SWG_API SWGNFMModSettings: public SWGObject {
 public:
     SWGNFMModSettings();
     SWGNFMModSettings(QString* json);

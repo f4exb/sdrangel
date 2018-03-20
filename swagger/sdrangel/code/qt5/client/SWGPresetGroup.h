@@ -27,10 +27,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGPresetGroup: public SWGObject {
+class SWG_API SWGPresetGroup: public SWGObject {
 public:
     SWGPresetGroup();
     SWGPresetGroup(QString* json);

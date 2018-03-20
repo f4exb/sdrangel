@@ -25,10 +25,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGPresetImport: public SWGObject {
+class SWG_API SWGPresetImport: public SWGObject {
 public:
     SWGPresetImport();
     SWGPresetImport(QString* json);

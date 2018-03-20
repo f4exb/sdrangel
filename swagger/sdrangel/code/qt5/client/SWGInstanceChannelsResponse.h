@@ -26,10 +26,11 @@
 #include <QList>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGInstanceChannelsResponse: public SWGObject {
+class SWG_API SWGInstanceChannelsResponse: public SWGObject {
 public:
     SWGInstanceChannelsResponse();
     SWGInstanceChannelsResponse(QString* json);

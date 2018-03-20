@@ -24,10 +24,11 @@
 
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGNFMDemodReport: public SWGObject {
+class SWG_API SWGNFMDemodReport: public SWGObject {
 public:
     SWGNFMDemodReport();
     SWGNFMDemodReport(QString* json);

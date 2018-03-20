@@ -102,4 +102,16 @@
 #  define QRTPLIB_API
 #endif
 
+/* the 'SWG_API' controls the import/export of 'swagger' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef swagger_EXPORTS
+#    define SWG_API __SDR_EXPORT
+#  else
+#    define SWG_API __SDR_IMPORT
+#  endif
+#else
+#  define SWG_API
+#endif
+
 #endif /* __SDRANGEL_EXPORT_H */

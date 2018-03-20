@@ -31,10 +31,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGDeviceSettings: public SWGObject {
+class SWG_API SWGDeviceSettings: public SWGObject {
 public:
     SWGDeviceSettings();
     SWGDeviceSettings(QString* json);

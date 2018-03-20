@@ -26,10 +26,11 @@
 #include <QList>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGPresets: public SWGObject {
+class SWG_API SWGPresets: public SWGObject {
 public:
     SWGPresets();
     SWGPresets(QString* json);

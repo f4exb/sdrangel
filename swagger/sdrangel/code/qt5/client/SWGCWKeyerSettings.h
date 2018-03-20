@@ -25,10 +25,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGCWKeyerSettings: public SWGObject {
+class SWG_API SWGCWKeyerSettings: public SWGObject {
 public:
     SWGCWKeyerSettings();
     SWGCWKeyerSettings(QString* json);

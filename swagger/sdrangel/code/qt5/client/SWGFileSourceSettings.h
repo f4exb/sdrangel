@@ -25,10 +25,11 @@
 #include <QString>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGFileSourceSettings: public SWGObject {
+class SWG_API SWGFileSourceSettings: public SWGObject {
 public:
     SWGFileSourceSettings();
     SWGFileSourceSettings(QString* json);

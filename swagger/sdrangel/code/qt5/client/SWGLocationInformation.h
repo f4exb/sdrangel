@@ -24,10 +24,11 @@
 
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGLocationInformation: public SWGObject {
+class SWG_API SWGLocationInformation: public SWGObject {
 public:
     SWGLocationInformation();
     SWGLocationInformation(QString* json);

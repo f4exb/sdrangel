@@ -27,10 +27,11 @@
 #include <QList>
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGDeviceSet: public SWGObject {
+class SWG_API SWGDeviceSet: public SWGObject {
 public:
     SWGDeviceSet();
     SWGDeviceSet(QString* json);

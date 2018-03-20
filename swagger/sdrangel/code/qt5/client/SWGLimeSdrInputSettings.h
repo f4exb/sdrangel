@@ -24,10 +24,11 @@
 
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGLimeSdrInputSettings: public SWGObject {
+class SWG_API SWGLimeSdrInputSettings: public SWGObject {
 public:
     SWGLimeSdrInputSettings();
     SWGLimeSdrInputSettings(QString* json);

@@ -24,10 +24,11 @@
 
 
 #include "SWGObject.h"
+#include "export.h"
 
 namespace SWGSDRangel {
 
-class SWGHackRFInputSettings: public SWGObject {
+class SWG_API SWGHackRFInputSettings: public SWGObject {
 public:
     SWGHackRFInputSettings();
     SWGHackRFInputSettings(QString* json);
