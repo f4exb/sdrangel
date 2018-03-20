@@ -1024,10 +1024,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
-            if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
-                    LMS_CH_RX,
-                    m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
-                    settings.m_centerFrequency) < 0)
+            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXR, settings.m_centerFrequency) < 0)
             {
                 qCritical("LimeSDRInput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
             }
