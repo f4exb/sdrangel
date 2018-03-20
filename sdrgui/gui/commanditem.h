@@ -16,7 +16,7 @@
 
 #include <QTreeWidgetItem>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API CommandItem : public QTreeWidgetItem {
 public:

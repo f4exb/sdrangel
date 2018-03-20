@@ -27,7 +27,7 @@
 #include "staticfilecontroller.h"
 #include "webapiadapterinterface.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {

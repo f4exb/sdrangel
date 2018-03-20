@@ -24,7 +24,7 @@
 #include <string>
 #include <list>
 
-#include "util/export.h"
+#include "export.h"
 
 class QThread;
 class DVSerialWorker;

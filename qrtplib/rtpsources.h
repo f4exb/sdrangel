@@ -43,7 +43,7 @@
 #include "rtcpsdespacket.h"
 #include "rtptypes.h"
 
-#include "util/export.h"
+#include "export.h"
 
 #define RTPSOURCES_HASHSIZE							8317
 

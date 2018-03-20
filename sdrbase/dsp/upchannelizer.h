@@ -21,7 +21,7 @@
 #include <dsp/basebandsamplesource.h>
 #include <vector>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"

@@ -42,7 +42,7 @@
 #include "rtptypes.h"
 #include <stdlib.h>
 
-#include "util/export.h"
+#include "export.h"
 
 #define RTPRANDOM_2POWMIN63										1.08420217248550443400745280086994171142578125e-19
 

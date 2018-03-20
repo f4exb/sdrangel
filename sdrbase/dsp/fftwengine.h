@@ -5,7 +5,7 @@
 #include <fftw3.h>
 #include <list>
 #include "dsp/fftengine.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API FFTWEngine : public FFTEngine {
 public:

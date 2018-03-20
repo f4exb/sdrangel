@@ -19,7 +19,7 @@
 #define SDRGUI_DSP_SCOPEVISXY_H_
 
 #include "dsp/basebandsamplesink.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 
 #include <QColor>

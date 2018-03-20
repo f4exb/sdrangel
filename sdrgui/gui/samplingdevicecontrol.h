@@ -22,7 +22,7 @@
 #include <QComboBox>
 #include <QPushButton>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace Ui {
     class SamplingDeviceControl;

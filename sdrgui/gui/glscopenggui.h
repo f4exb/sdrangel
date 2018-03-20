@@ -22,7 +22,7 @@
 #include <QComboBox>
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "dsp/scopevisng.h"
 #include "settings/serializable.h"

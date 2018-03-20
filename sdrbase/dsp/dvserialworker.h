@@ -29,7 +29,7 @@
 #include "util/message.h"
 #include "util/syncmessenger.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 #include "dsp/filtermbe.h"
 #include "dsp/dsptypes.h"
 

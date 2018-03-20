@@ -15,7 +15,7 @@
 #include "httprequesthandler.h"
 #include "httplistenersettings.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp {
 

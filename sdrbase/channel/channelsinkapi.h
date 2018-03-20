@@ -23,7 +23,7 @@
 #include <QByteArray>
 #include <stdint.h>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {

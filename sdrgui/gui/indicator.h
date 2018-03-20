@@ -19,7 +19,7 @@
 #define INCLUDE_INDICATOR_H
 
 #include <QWidget>
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API Indicator : public QWidget {
 private:

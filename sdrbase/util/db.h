@@ -18,7 +18,7 @@
 #define INCLUDE_UTIL_DB_H_
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API CalcDb
 {

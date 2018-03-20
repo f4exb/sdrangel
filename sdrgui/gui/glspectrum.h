@@ -32,7 +32,7 @@
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
 #include "dsp/channelmarker.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/incrementalarray.h"
 
 class QOpenGLShaderProgram;

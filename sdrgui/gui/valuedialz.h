@@ -21,7 +21,7 @@
 #include <QWidget>
 #include <QTimer>
 #include "gui/colormapper.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API ValueDialZ : public QWidget {
 	Q_OBJECT

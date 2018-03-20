@@ -25,7 +25,7 @@
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 #include "mainparser.h"
 
 class QLabel;

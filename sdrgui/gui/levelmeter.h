@@ -52,7 +52,7 @@
 
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
-#include "util/export.h"
+#include "export.h"
 
 /**
  * Widget which displays a vertical audio level meter, indicating the

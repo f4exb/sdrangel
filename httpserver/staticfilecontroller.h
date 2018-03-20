@@ -13,7 +13,7 @@
 #include "httpresponse.h"
 #include "httprequesthandler.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp {
 

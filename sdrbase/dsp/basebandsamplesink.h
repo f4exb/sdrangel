@@ -20,7 +20,7 @@
 
 #include <QObject>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
 

@@ -46,7 +46,7 @@
 #include <errno.h>
 #endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
 
-#include "util/export.h"
+#include "export.h"
 
 #define RTP_NTPTIMEOFFSET									2208988800UL
 

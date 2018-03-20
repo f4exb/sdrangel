@@ -19,7 +19,7 @@
 #ifndef SDRBASE_WEBAPI_WEBAPISERVER_H_
 #define SDRBASE_WEBAPI_WEBAPISERVER_H_
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp
 {

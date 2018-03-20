@@ -21,7 +21,7 @@
 #include <dsp/basebandsamplesink.h>
 #include <list>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #ifdef SDR_RX_SAMPLE_24BIT
 #include "dsp/inthalfbandfilterdb.h"

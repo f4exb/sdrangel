@@ -11,7 +11,7 @@
 #include <QReadWriteLock>
 #include "httpglobal.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp {
 

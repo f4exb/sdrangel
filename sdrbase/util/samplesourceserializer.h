@@ -18,7 +18,7 @@
 #define INCLUDE_UTIL_SAMPLESOURCESERIALIZER_H_
 
 #include "util/simpleserializer.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API SampleSourceSerializer
 {

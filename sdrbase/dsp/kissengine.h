@@ -3,7 +3,7 @@
 
 #include "dsp/fftengine.h"
 #include "dsp/kissfft.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API KissEngine : public FFTEngine {
 public:

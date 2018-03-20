@@ -4,7 +4,7 @@
 #include <dsp/basebandsamplesink.h>
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevisng.h"
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 

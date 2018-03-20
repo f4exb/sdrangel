@@ -21,7 +21,7 @@
 #include <QString>
 #include <QByteArray>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API CWKeyerSettings
 {

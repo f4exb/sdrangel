@@ -43,7 +43,7 @@
 #include <stdint.h>
 #include <QHostAddress>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

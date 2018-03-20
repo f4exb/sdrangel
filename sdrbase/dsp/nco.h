@@ -19,7 +19,7 @@
 #define INCLUDE_NCO_H
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API NCO {
 private:

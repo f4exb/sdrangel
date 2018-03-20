@@ -49,7 +49,7 @@
 #include "rtcpcompoundpacketbuilder.h"
 #include <list>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

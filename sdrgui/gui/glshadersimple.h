@@ -21,7 +21,7 @@
 #include <QString>
 #include <QOpenGLFunctions>
 
-#include "util/export.h"
+#include "export.h"
 
 class QOpenGLShaderProgram;
 class QMatrix4x4;

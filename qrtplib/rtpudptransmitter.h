@@ -34,7 +34,7 @@
 #define QRTPLIB_RTPUDPTRANSMITTER_H_
 
 #include "rtptransmitter.h"
-#include "util/export.h"
+#include "export.h"
 
 #include <QObject>
 #include <QHostAddress>

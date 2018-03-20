@@ -22,7 +22,7 @@
 #include <QMutex>
 #include <QTime>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API SampleSinkFifo : public QObject {
 	Q_OBJECT

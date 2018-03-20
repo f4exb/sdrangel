@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QLabel>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API ClickableLabel : public QLabel
 {

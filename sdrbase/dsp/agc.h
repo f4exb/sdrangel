@@ -10,7 +10,7 @@
 
 #include "movingaverage.h"
 #include "util/movingaverage.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API AGC
 {

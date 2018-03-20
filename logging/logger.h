@@ -15,7 +15,7 @@
 #include "logglobal.h"
 #include "logmessage.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp {
 

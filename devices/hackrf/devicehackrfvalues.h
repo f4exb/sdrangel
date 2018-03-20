@@ -17,7 +17,7 @@
 #ifndef DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 #define DEVICES_HACKRF_DEVICEHACKRFVALUES_H_
 
-#include "util/export.h"
+#include "export.h"
 
 class DEVICES_API HackRFBandwidths {
 public:

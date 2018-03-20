@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 #include "util/message.h"
-#include "util/export.h"
+#include "export.h"
 
 class DevicePlutoSDRParams;
 

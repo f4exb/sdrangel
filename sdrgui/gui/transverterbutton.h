@@ -23,7 +23,7 @@
 
 #include <QPushButton>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API TransverterButton : public QPushButton {
     Q_OBJECT

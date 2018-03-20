@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "plugin/plugininterface.h"
-#include "util/export.h"
+#include "export.h"
 
 class PluginManager;
 

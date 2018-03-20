@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API Preferences {
 public:

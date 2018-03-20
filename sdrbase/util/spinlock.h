@@ -3,7 +3,7 @@
 
 #include <QAtomicInt>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API Spinlock {
 public:

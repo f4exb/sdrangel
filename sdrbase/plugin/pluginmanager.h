@@ -9,7 +9,7 @@
 
 #include "plugin/plugininterface.h"
 #include "plugin/pluginapi.h"
-#include "util/export.h"
+#include "export.h"
 
 class QComboBox;
 class QPluginLoader;

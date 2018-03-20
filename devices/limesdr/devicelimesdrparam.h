@@ -19,7 +19,7 @@
 
 #include "lime/LimeSuite.h"
 
-#include "util/export.h"
+#include "export.h"
 
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by

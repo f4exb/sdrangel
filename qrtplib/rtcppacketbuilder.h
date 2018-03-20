@@ -44,7 +44,7 @@
 #include "rtcpsdesinfo.h"
 #include "rtptimeutilities.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

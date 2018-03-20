@@ -21,7 +21,7 @@
 #include <QString>
 
 #include "dsp/dspdevicesinkengine.h"
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSource;
 class ThreadedBasebandSampleSource;

@@ -19,7 +19,7 @@
 #define SDRBASE_DSP_HBFILTERTRAITS_H_
 
 #include <stdint.h>
-#include "util/export.h"
+#include "export.h"
 
 // uses Q1.14 format internally, input and output are S16
 

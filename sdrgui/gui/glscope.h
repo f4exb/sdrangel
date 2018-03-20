@@ -32,7 +32,7 @@
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/bitfieldindex.h"
 #include "util/incrementalarray.h"
 

@@ -41,7 +41,7 @@
 #include "rtpconfig.h"
 #include "rtpsources.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

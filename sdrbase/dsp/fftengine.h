@@ -2,7 +2,7 @@
 #define INCLUDE_FFTENGINE_H
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API FFTEngine {
 public:

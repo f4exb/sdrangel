@@ -43,7 +43,7 @@
 #include "rtprandom.h"
 #include <cstddef>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

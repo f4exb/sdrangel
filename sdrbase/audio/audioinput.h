@@ -22,7 +22,7 @@
 #include <QAudioFormat>
 #include <list>
 #include <vector>
-#include "util/export.h"
+#include "export.h"
 
 class QAudioInput;
 class AudioFifo;

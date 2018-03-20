@@ -30,7 +30,7 @@
 #include "dsp/dsptypes.h"
 #include "glshadertextured.h"
 #include "glshadertvarray.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/bitfieldindex.h"
 
 class QPainter;

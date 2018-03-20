@@ -43,7 +43,7 @@
 #include "rtpstructs.h"
 #include "rtpendian.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qrtplib
 {

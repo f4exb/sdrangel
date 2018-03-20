@@ -10,7 +10,7 @@
 #include <QColor>
 #include <vector>
 #include <utility>
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API ColorMapper
 {

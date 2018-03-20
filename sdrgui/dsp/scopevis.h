@@ -3,7 +3,7 @@
 
 #include <boost/circular_buffer.hpp>
 #include <dsp/basebandsamplesink.h>
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 
 class GLScope;

@@ -2,7 +2,7 @@
 #define INCLUDE_NULLSINK_H
 
 #include <dsp/basebandsamplesink.h>
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 

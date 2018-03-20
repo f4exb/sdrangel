@@ -30,7 +30,7 @@
 #include <vector>
 #include <boost/circular_buffer.hpp>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/doublebuffer.h"

@@ -22,7 +22,7 @@
 #include <QSlider>
 #include <QColor>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API TickedSlider : public QSlider
 {

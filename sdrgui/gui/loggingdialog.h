@@ -20,7 +20,7 @@
 
 #include <QDialog>
 #include "settings/mainsettings.h"
-#include "util/export.h"
+#include "export.h"
 
 namespace Ui {
     class LoggingDialog;

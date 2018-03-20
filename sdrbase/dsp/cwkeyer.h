@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QMutex>
 
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "cwkeyersettings.h"
 

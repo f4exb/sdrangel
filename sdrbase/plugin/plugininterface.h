@@ -4,7 +4,7 @@
 #include <QtPlugin>
 #include <QString>
 
-#include "util/export.h"
+#include "export.h"
 
 struct SDRBASE_API PluginDescriptor {
 	// general plugin description

@@ -22,7 +22,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QAtomicInt>
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 

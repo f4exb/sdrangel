@@ -6,7 +6,7 @@
 #include <QByteArray>
 
 #include "settings/serializable.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API ChannelMarker : public QObject, public Serializable {
 	Q_OBJECT

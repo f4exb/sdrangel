@@ -20,7 +20,7 @@
 #include <QTimer>
 #include <QByteArray>
 
-#include "util/export.h"
+#include "export.h"
 
 class SpectrumVis;
 class GLSpectrum;

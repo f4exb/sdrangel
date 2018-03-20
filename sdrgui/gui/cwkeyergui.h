@@ -20,7 +20,7 @@
 
 #include <QWidget>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "settings/serializable.h"
 
 namespace Ui {

@@ -193,7 +193,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         settings/mainsettings.h\
         util/CRC64.h\
         util/db.h\
-        util/export.h\
+        export.h\
         util/message.h\
         util/messagequeue.h\
         util/prettyprint.h\

@@ -31,7 +31,7 @@
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 
-#include "util/export.h"
+#include "export.h"
 
 class QUdpSocket;
 

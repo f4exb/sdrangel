@@ -19,7 +19,7 @@
 
 #include "libhackrf/hackrf.h"
 
-#include "util/export.h"
+#include "export.h"
 
 class DEVICES_API DeviceHackRF
 {

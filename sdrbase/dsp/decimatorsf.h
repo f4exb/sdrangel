@@ -18,7 +18,7 @@
 #define SDRBASE_DSP_DECIMATORSF_H_
 
 #include "dsp/inthalfbandfilterdbf.h"
-#include "util/export.h"
+#include "export.h"
 
 #define DECIMATORSF_HB_FILTER_ORDER 64
 

@@ -20,7 +20,7 @@
 #include <cstddef>
 #include "devicelimesdrparam.h"
 #include "util/message.h"
-#include "util/export.h"
+#include "export.h"
 
 /**
  * Structure shared by a buddy with other buddies

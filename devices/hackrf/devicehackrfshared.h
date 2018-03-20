@@ -18,7 +18,7 @@
 #define DEVICES_HACKRF_DEVICEHACKRFSHARED_H_
 
 #include "util/message.h"
-#include "util/export.h"
+#include "export.h"
 
 class DEVICES_API DeviceHackRFShared
 {

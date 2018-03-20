@@ -29,7 +29,7 @@
 #include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
-#include "util/export.h"
+#include "export.h"
 
 class DeviceSampleSink;
 class BasebandSampleSource;

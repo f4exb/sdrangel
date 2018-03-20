@@ -19,7 +19,7 @@
 #define INCLUDE_DSP_FILTERRC_H_
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 /** First order low-pass IIR filter for real-valued signals. */
 class SDRBASE_API LowPassFilterRC

@@ -23,7 +23,7 @@
 #include <QWaitCondition>
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 //#include "util/udpsink.h"
 
 class AudioNetSink;

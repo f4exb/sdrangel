@@ -22,7 +22,7 @@
 #include <QtGlobal>
 
 #include "webapi/webapiadapterinterface.h"
-#include "util/export.h"
+#include "export.h"
 
 class MainWindow;
 

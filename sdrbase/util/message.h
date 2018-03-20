@@ -19,7 +19,7 @@
 #define INCLUDE_MESSAGE_H
 
 #include <stdlib.h>
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API Message {
 public:

@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 
-#include "util/export.h"
+#include "export.h"
 
 template<uint32_t IntBits>
 class FixedTraits

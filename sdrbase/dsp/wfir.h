@@ -53,7 +53,7 @@
 #ifndef _WFIR_H_
 #define _WFIR_H_
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API WFIR
 {

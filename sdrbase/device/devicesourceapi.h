@@ -23,7 +23,7 @@
 
 #include "dsp/dspdevicesourceengine.h"
 
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;

@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QQueue>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 

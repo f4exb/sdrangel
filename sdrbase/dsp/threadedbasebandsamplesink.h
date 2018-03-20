@@ -23,7 +23,7 @@
 
 #include "samplesinkfifo.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSink;
 class QThread;

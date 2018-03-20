@@ -19,7 +19,7 @@
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 #include <QObject>
 #include <QHostAddress>

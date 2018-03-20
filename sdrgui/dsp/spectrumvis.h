@@ -5,7 +5,7 @@
 #include <QMutex>
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 
 class GLSpectrum;

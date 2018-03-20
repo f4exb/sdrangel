@@ -21,7 +21,7 @@
 #include <QObject>
 #include "dsp/dsptypes.h"
 #include "dsp/samplesourcefifo.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/messagequeue.h"
 
 class Message;

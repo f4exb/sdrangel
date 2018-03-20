@@ -21,7 +21,7 @@
 #include <QString>
 #include "util/message.h"
 #include "fftwindow.h"
-#include "util/export.h"
+#include "export.h"
 
 class DeviceSampleSource;
 class BasebandSampleSink;

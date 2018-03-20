@@ -22,7 +22,7 @@
 #include <QString>
 #include <QList>
 #include "physicalunit.h"
-#include "util/export.h"
+#include "export.h"
 
 class SDRGUI_API ScaleEngine {
 public:

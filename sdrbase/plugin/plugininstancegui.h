@@ -5,7 +5,7 @@
 #include <QString>
 #include <QByteArray>
 
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 class MessageQueue;

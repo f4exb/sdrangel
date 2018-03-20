@@ -21,7 +21,7 @@
 #include <QMutex>
 #include <stdint.h>
 #include <assert.h>
-#include "util/export.h"
+#include "export.h"
 #include "dsp/dsptypes.h"
 
 class SDRBASE_API SampleSourceFifo : public QObject {

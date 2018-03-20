@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace Ui {
 	class AddPresetDialog;

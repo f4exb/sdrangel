@@ -19,7 +19,7 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/movingaverage.h"
-#include "util/export.h"
+#include "export.h"
 
 /** AFSquelch: AF squelch class based on the Modified Goertzel
  * algorithm.

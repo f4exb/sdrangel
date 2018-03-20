@@ -24,7 +24,7 @@
 #include <vector>
 #include "audio/audiooutput.h"
 #include "audio/audioinput.h"
-#include "util/export.h"
+#include "export.h"
 #ifdef DSD_USE_SERIALDV
 #include "dsp/dvserialengine.h"
 #endif

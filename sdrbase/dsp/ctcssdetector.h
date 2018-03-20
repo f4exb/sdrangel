@@ -10,7 +10,7 @@
 #define INCLUDE_GPL_DSP_CTCSSDETECTOR_H_
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
 /** CTCSSDetector: Continuous Tone Coded Squelch System
  * tone detector class based on the Modified Goertzel

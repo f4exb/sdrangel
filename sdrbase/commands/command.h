@@ -25,7 +25,7 @@
 #include <QProcess>
 #include <sys/time.h>
 
-#include "util/export.h"
+#include "export.h"
 
 class SDRBASE_API Command : public QObject
 {

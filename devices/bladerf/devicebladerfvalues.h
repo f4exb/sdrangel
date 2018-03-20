@@ -17,7 +17,7 @@
 #ifndef DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
 #define DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
 
-#include "util/export.h"
+#include "export.h"
 
 class DEVICES_API DeviceBladeRFBandwidths {
 public:

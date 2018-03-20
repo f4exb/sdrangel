@@ -3,7 +3,7 @@
 
 #include <QScrollArea>
 
-#include "util/export.h"
+#include "export.h"
 
 class QBoxLayout;
 class QSpacerItem;

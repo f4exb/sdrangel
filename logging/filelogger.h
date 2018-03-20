@@ -15,7 +15,7 @@
 #include "logger.h"
 #include "fileloggersettings.h"
 
-#include "util/export.h"
+#include "export.h"
 
 namespace qtwebapp {
 

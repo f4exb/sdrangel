@@ -22,7 +22,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSource;
 class QThread;

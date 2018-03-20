@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-#include "util/export.h"
+#include "export.h"
 #include "plugin/plugininterface.h"
 
 class QString;

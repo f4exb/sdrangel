@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "plugin/pluginmanager.h"
-#include "util/export.h"
+#include "export.h"
 
 namespace Ui {
 	class PluginsDialog;

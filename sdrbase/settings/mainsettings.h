@@ -5,7 +5,7 @@
 #include "preferences.h"
 #include "preset.h"
 #include "audio/audiodeviceinfo.h"
-#include "util/export.h"
+#include "export.h"
 
 class Command;
 

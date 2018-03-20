@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "dsp/scopevis.h"
 #include "settings/serializable.h"
