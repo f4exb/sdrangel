@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+"""
+  SDRangel REST API client script
+  
+  Simple scanner for NFM channels. Builds an array of equally spaced channels. Moves device center frequency
+  so that adjacent parts of the spectrum are scanned by the array of channels. Stops when any of the channels
+  is active. Resumes when none of the channels is active.
+  
+  Uses /sdrangel/deviceset/{deviceSetIndex}/channels/report API to get channel information (since v3.13.1)
+"""
+
 import requests, json, traceback, sys
 from optparse import OptionParser
 import time
@@ -53,11 +63,22 @@ def getInputOptions():
     parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
     parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
     parser.add_option("--re-run", dest="rerun", help="re run with given parameters without setting up device and channels", metavar="BOOLEAN", action="store_true", default=False)
+    parser.add_option("-x", "--excl-list", dest="excl_fstr", help="frequencies (in Hz) exclusion comma separated list", metavar="LIST", type="string") 
 
     (options, args) = parser.parse_args()
     
     if (options.address == None):
         options.address = "127.0.0.1:8091"
+    
+    if options.excl_fstr is not None:
+        excl_flist_str = options.excl_fstr.split(',')
+        try:
+            options.excl_flist = list(map(int, excl_flist_str))
+        except ValueError:
+            print("Invalid exclusion frequencies list: %s" % options.excl_fstr)
+            options.excl_flist = []
+    else:
+        options.excl_flist = []
     
     return options
 
@@ -104,6 +125,7 @@ def setupDevice(scan_control, options):
     if r is None:
         exit(-1)
         
+# ======================================================================
 def changeDeviceFrequency(fc, options):
     settings = callAPI(deviceset_url + "/device/settings", "GET", None, None, "Get device settings")
     if settings is None:
@@ -146,7 +168,7 @@ def setupChannels(scan_control, options):
         i += 1        
     
 # ======================================================================
-def checkScanning():
+def checkScanning(fc, options):
     reports = callAPI(deviceset_url + "/channels/report", "GET", None, None, "Get channels report")
     if reports is None:
         exit(-1)
@@ -155,7 +177,10 @@ def checkScanning():
         if "report" in channel:
             if "NFMDemodReport" in channel["report"]:
                 if channel["report"]["NFMDemodReport"]["squelch"] == 1:
-                    return False # stop scanning
+                    f_channel = channel["deltaFrequency"]+fc
+                    if f_channel not in options.excl_flist:
+                        print("Stopped at %d Hz" % f_channel)
+                        return False # stop scanning
     return True # continue scanning
     
 # ======================================================================
@@ -204,13 +229,14 @@ def main():
             exit(1)
         
         freqs = []
-        nb_steps = 1
+        nb_steps = 0
         fc = scan_control.device_start_freq
         while fc <= scan_control.device_stop_freq:
             freqs += [x+fc for x in scan_control.channel_shifts]
             fc += scan_control.device_step_freq
             nb_steps += 1            
         print("Scanned frequencies: %s" % freqs)
+        print("Skipped frequencies: %s" % options.excl_flist)
         print("In %d steps" % nb_steps)
 
         if options.mock: # Stop there if we are just mocking (no API access)
@@ -255,7 +281,7 @@ def main():
         try:
             while True:
                 time.sleep(options.settling_time)
-                if checkScanning(): # shall we move on ?
+                if checkScanning(fc, options): # shall we move on ?
                     fc += scan_control.device_step_freq
                     if fc > scan_control.device_stop_freq:
                         fc = scan_control.device_start_freq
