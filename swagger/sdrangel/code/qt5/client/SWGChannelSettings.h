@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAMDemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
 #include <QString>
@@ -50,6 +51,9 @@ public:
     qint32 getTx();
     void setTx(qint32 tx);
 
+    SWGAMDemodSettings* getAmDemodSettings();
+    void setAmDemodSettings(SWGAMDemodSettings* am_demod_settings);
+
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
 
@@ -65,6 +69,9 @@ private:
 
     qint32 tx;
     bool m_tx_isSet;
+
+    SWGAMDemodSettings* am_demod_settings;
+    bool m_am_demod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

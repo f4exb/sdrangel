@@ -32,6 +32,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_channel_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    am_demod_settings = nullptr;
+    m_am_demod_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -48,6 +50,8 @@ SWGChannelSettings::init() {
     m_channel_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    am_demod_settings = new SWGAMDemodSettings();
+    m_am_demod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -60,6 +64,9 @@ SWGChannelSettings::cleanup() {
         delete channel_type;
     }
 
+    if(am_demod_settings != nullptr) { 
+        delete am_demod_settings;
+    }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
     }
@@ -82,6 +89,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_type, pJson["channelType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&am_demod_settings, pJson["AMDemodSettings"], "SWGAMDemodSettings", "SWGAMDemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -108,6 +117,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if(m_tx_isSet){
         obj->insert("tx", QJsonValue(tx));
+    }
+    if((am_demod_settings != nullptr) && (am_demod_settings->isSet())){
+        toJsonValue(QString("AMDemodSettings"), am_demod_settings, obj, QString("SWGAMDemodSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -139,6 +151,16 @@ SWGChannelSettings::setTx(qint32 tx) {
     this->m_tx_isSet = true;
 }
 
+SWGAMDemodSettings*
+SWGChannelSettings::getAmDemodSettings() {
+    return am_demod_settings;
+}
+void
+SWGChannelSettings::setAmDemodSettings(SWGAMDemodSettings* am_demod_settings) {
+    this->am_demod_settings = am_demod_settings;
+    this->m_am_demod_settings_isSet = true;
+}
+
 SWGNFMDemodSettings*
 SWGChannelSettings::getNfmDemodSettings() {
     return nfm_demod_settings;
@@ -166,6 +188,7 @@ SWGChannelSettings::isSet(){
     do{
         if(channel_type != nullptr && *channel_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(am_demod_settings != nullptr && am_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);

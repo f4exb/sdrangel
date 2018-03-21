@@ -22,12 +22,18 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGAMDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGAMDemodReport.h"
+
 #include "dsp/downchannelizer.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureChannelizer, Message)
@@ -311,5 +317,134 @@ bool AMDemod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+int AMDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+    response.getAmDemodSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int AMDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    AMDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getAmDemodSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("audioSampleRate")) {
+        settings.m_audioSampleRate = response.getAmDemodSettings()->getAudioSampleRate();
+    }
+    if (channelSettingsKeys.contains("copyAudioToUDP")) {
+        settings.m_copyAudioToUDP = response.getAmDemodSettings()->getCopyAudioToUdp() != 0;
+    }
+    if (channelSettingsKeys.contains("copyAudioUseRTP")) {
+        settings.m_copyAudioUseRTP = response.getAmDemodSettings()->getCopyAudioUseRtp() != 0;
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getAmDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getAmDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("squelch")) {
+        settings.m_squelch = response.getAmDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAmDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getAmDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getAmDemodSettings()->getUdpPort();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getAmDemodSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("bandpassEnable")) {
+        settings.m_bandpassEnable = response.getAmDemodSettings()->getBandpassEnable() != 0;
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                48000, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int AMDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmDemodReport(new SWGSDRangel::SWGAMDemodReport());
+    response.getAmDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings)
+{
+    response.getAmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getAmDemodSettings()->setAudioSampleRate(settings.m_audioSampleRate);
+    response.getAmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
+    response.getAmDemodSettings()->setCopyAudioUseRtp(settings.m_copyAudioUseRTP ? 1 : 0);
+    response.getAmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAmDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getAmDemodSettings()->setSquelch(settings.m_squelch);
+    response.getAmDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getAmDemodSettings()->setVolume(settings.m_volume);
+    response.getAmDemodSettings()->setBandpassEnable(settings.m_bandpassEnable ? 1 : 0);
+
+    if (response.getAmDemodSettings()->getTitle()) {
+        *response.getAmDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getAmDemodSettings()->getUdpAddress()) {
+        *response.getAmDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getAmDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+}
+
+void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getAmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getAmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
 }
 

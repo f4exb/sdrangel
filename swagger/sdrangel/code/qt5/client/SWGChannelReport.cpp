@@ -32,6 +32,8 @@ SWGChannelReport::SWGChannelReport() {
     m_channel_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    am_demod_report = nullptr;
+    m_am_demod_report_isSet = false;
     nfm_demod_report = nullptr;
     m_nfm_demod_report_isSet = false;
     nfm_mod_report = nullptr;
@@ -48,6 +50,8 @@ SWGChannelReport::init() {
     m_channel_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    am_demod_report = new SWGAMDemodReport();
+    m_am_demod_report_isSet = false;
     nfm_demod_report = new SWGNFMDemodReport();
     m_nfm_demod_report_isSet = false;
     nfm_mod_report = new SWGNFMModReport();
@@ -60,6 +64,9 @@ SWGChannelReport::cleanup() {
         delete channel_type;
     }
 
+    if(am_demod_report != nullptr) { 
+        delete am_demod_report;
+    }
     if(nfm_demod_report != nullptr) { 
         delete nfm_demod_report;
     }
@@ -82,6 +89,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_type, pJson["channelType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&am_demod_report, pJson["AMDemodReport"], "SWGAMDemodReport", "SWGAMDemodReport");
     
     ::SWGSDRangel::setValue(&nfm_demod_report, pJson["NFMDemodReport"], "SWGNFMDemodReport", "SWGNFMDemodReport");
     
@@ -108,6 +117,9 @@ SWGChannelReport::asJsonObject() {
     }
     if(m_tx_isSet){
         obj->insert("tx", QJsonValue(tx));
+    }
+    if((am_demod_report != nullptr) && (am_demod_report->isSet())){
+        toJsonValue(QString("AMDemodReport"), am_demod_report, obj, QString("SWGAMDemodReport"));
     }
     if((nfm_demod_report != nullptr) && (nfm_demod_report->isSet())){
         toJsonValue(QString("NFMDemodReport"), nfm_demod_report, obj, QString("SWGNFMDemodReport"));
@@ -139,6 +151,16 @@ SWGChannelReport::setTx(qint32 tx) {
     this->m_tx_isSet = true;
 }
 
+SWGAMDemodReport*
+SWGChannelReport::getAmDemodReport() {
+    return am_demod_report;
+}
+void
+SWGChannelReport::setAmDemodReport(SWGAMDemodReport* am_demod_report) {
+    this->am_demod_report = am_demod_report;
+    this->m_am_demod_report_isSet = true;
+}
+
 SWGNFMDemodReport*
 SWGChannelReport::getNfmDemodReport() {
     return nfm_demod_report;
@@ -166,6 +188,7 @@ SWGChannelReport::isSet(){
     do{
         if(channel_type != nullptr && *channel_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(am_demod_report != nullptr && am_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);

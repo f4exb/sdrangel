@@ -696,6 +696,72 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs.AMDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    }
+  },
+  "description" : "AMDemod"
+};
+            defs.AMDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz (rounds to lower kHz)"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power squelch threshold in centi-bels"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "bandpassEnable" : {
+      "type" : "integer",
+      "description" : "use bandpass filter (1 for yes, 0 for no)"
+    },
+    "copyAudioToUDP" : {
+      "type" : "integer"
+    },
+    "copyAudioUseRTP" : {
+      "type" : "integer"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  },
+  "description" : "AMDemod"
+};
             defs.AudioDevice = {
   "properties" : {
     "name" : {
@@ -855,6 +921,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Not zero if it is a tx channel else it is a rx channel"
     },
+    "AMDemodReport" : {
+      "$ref" : "#/definitions/AMDemodReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -875,6 +944,9 @@ margin-bottom: 20px;
     "tx" : {
       "type" : "integer",
       "description" : "Not zero if it is a tx channel else it is a rx channel"
+    },
+    "AMDemodSettings" : {
+      "$ref" : "#/definitions/AMDemodSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -1389,28 +1461,33 @@ margin-bottom: 20px;
   "properties" : {
     "inputFrequencyOffset" : {
       "type" : "integer",
-      "format" : "int64"
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
     },
     "rfBandwidth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz (takes closest value from RF bandwidth set)"
     },
     "afBandwidth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "AF bandwidth in Hz (rounds to lower kHz)"
     },
     "fmDeviation" : {
       "type" : "integer"
     },
     "squelchGate" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "squelch gate in tens of ms"
     },
     "deltaSquelch" : {
       "type" : "integer"
     },
     "squelch" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "power squelch threshold in centi-bels"
     },
     "volume" : {
       "type" : "number",
@@ -17955,7 +18032,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-20T20:09:28.335+01:00
+              Generated 2018-03-21T22:39:00.405+01:00
             </div>
           </div>
       </div>

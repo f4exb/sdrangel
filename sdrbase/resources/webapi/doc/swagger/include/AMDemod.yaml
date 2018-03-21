@@ -1,25 +1,14 @@
-NFMDemodSettings:
-  description: NFMDemod
+AMDemodSettings:
+  description: AMDemod
   properties:
     inputFrequencyOffset:
-      description: channel center frequency shift from baseband center in Hz
+      description: channel center frequency shift from baseband center in Hz    
       type: integer
       format: int64
     rfBandwidth:
-      description: channel RF bandwidth in Hz (takes closest value from RF bandwidth set) 
+      description: channel RF bandwidth in Hz (rounds to lower kHz)
       type: number
       format: float
-    afBandwidth:
-      description: AF bandwidth in Hz (rounds to lower kHz)
-      type: number
-      format: float
-    fmDeviation:
-      type: integer
-    squelchGate:
-      description: squelch gate in tens of ms
-      type: integer
-    deltaSquelch:
-      type: integer
     squelch:
       description: power squelch threshold in centi-bels
       type: number
@@ -27,13 +16,12 @@ NFMDemodSettings:
     volume:
       type: number
       format: float
-    ctcssOn:
+    audioSampleRate:
       type: integer
     audioMute:
       type: integer
-    ctcssIndex:
-      type: integer
-    audioSampleRate:
+    bandpassEnable:
+      description: use bandpass filter (1 for yes, 0 for no)
       type: integer
     copyAudioToUDP:
       type: integer
@@ -47,16 +35,12 @@ NFMDemodSettings:
       type: integer
     title:
       type: string
-    
-NFMDemodReport:
-  description: NFMDemod
+
+AMDemodReport:
+  description: AMDemod
   properties:
     channelPowerDB:
       description: power received in channel (dB)
-      type: number
-      format: float
-    ctcssTone:
-      description: CTCSS tone frequency if detected else 0
       type: number
       format: float
     squelch:

@@ -14,6 +14,8 @@
 #define ModelFactory_H_
 
 
+#include "SWGAMDemodReport.h"
+#include "SWGAMDemodSettings.h"
 #include "SWGAudioDevice.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
@@ -59,6 +61,12 @@
 namespace SWGSDRangel {
 
   inline void* create(QString type) {
+    if(QString("SWGAMDemodReport").compare(type) == 0) {
+      return new SWGAMDemodReport();
+    }
+    if(QString("SWGAMDemodSettings").compare(type) == 0) {
+      return new SWGAMDemodSettings();
+    }
     if(QString("SWGAudioDevice").compare(type) == 0) {
       return new SWGAudioDevice();
     }

@@ -1594,6 +1594,8 @@ definitions:
       tx:
         description: Not zero if it is a tx channel else it is a rx channel
         type: integer
+      AMDemodSettings:
+        $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
       NFMDemodSettings:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1609,6 +1611,8 @@ definitions:
       tx:
         description: Not zero if it is a tx channel else it is a rx channel
         type: integer
+      AMDemodReport:
+        $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
       NFMDemodReport:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:
