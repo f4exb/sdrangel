@@ -112,6 +112,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -132,6 +142,7 @@ private:
 	bool applySettings(const AirspyHFSettings& settings, bool force);
 	airspyhf_device_t *open_airspyhf_from_serial(const QString& serialStr);
 	void setDeviceCenterFrequency(quint64 freq, const AirspyHFSettings& settings);
+	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

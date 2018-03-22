@@ -720,12 +720,12 @@ margin-bottom: 20px;
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float",
-      "description" : "channel RF bandwidth in Hz (rounds to lower kHz)"
+      "description" : "channel RF bandwidth in Hz (floors to next 100 Hz)"
     },
     "squelch" : {
       "type" : "number",
       "format" : "float",
-      "description" : "power squelch threshold in centi-bels"
+      "description" : "power squelch threshold in decibels"
     },
     "volume" : {
       "type" : "number",
@@ -761,6 +761,34 @@ margin-bottom: 20px;
     }
   },
   "description" : "AMDemod"
+};
+            defs.AirspyHFSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "devSampleRateIndex" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AirspyHF"
 };
             defs.AudioDevice = {
   "properties" : {
@@ -1092,6 +1120,9 @@ margin-bottom: 20px;
     "tx" : {
       "type" : "integer",
       "description" : "Not zero if it is a tx device else it is a rx device"
+    },
+    "airspyHFSettings" : {
+      "$ref" : "#/definitions/AirspyHFSettings"
     },
     "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
@@ -18032,7 +18063,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-21T22:39:00.405+01:00
+              Generated 2018-03-22T05:08:39.552+01:00
             </div>
           </div>
       </div>

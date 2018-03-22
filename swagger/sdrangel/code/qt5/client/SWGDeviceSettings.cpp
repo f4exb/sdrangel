@@ -32,6 +32,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_device_hw_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    airspy_hf_settings = nullptr;
+    m_airspy_hf_settings_isSet = false;
     file_source_settings = nullptr;
     m_file_source_settings_isSet = false;
     hack_rf_input_settings = nullptr;
@@ -56,6 +58,8 @@ SWGDeviceSettings::init() {
     m_device_hw_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    airspy_hf_settings = new SWGAirspyHFSettings();
+    m_airspy_hf_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
     m_file_source_settings_isSet = false;
     hack_rf_input_settings = new SWGHackRFInputSettings();
@@ -76,6 +80,9 @@ SWGDeviceSettings::cleanup() {
         delete device_hw_type;
     }
 
+    if(airspy_hf_settings != nullptr) { 
+        delete airspy_hf_settings;
+    }
     if(file_source_settings != nullptr) { 
         delete file_source_settings;
     }
@@ -111,6 +118,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
+    
     ::SWGSDRangel::setValue(&file_source_settings, pJson["fileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
     
     ::SWGSDRangel::setValue(&hack_rf_input_settings, pJson["hackRFInputSettings"], "SWGHackRFInputSettings", "SWGHackRFInputSettings");
@@ -144,6 +153,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if(m_tx_isSet){
         obj->insert("tx", QJsonValue(tx));
+    }
+    if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
+        toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
     }
     if((file_source_settings != nullptr) && (file_source_settings->isSet())){
         toJsonValue(QString("fileSourceSettings"), file_source_settings, obj, QString("SWGFileSourceSettings"));
@@ -185,6 +197,16 @@ void
 SWGDeviceSettings::setTx(qint32 tx) {
     this->tx = tx;
     this->m_tx_isSet = true;
+}
+
+SWGAirspyHFSettings*
+SWGDeviceSettings::getAirspyHfSettings() {
+    return airspy_hf_settings;
+}
+void
+SWGDeviceSettings::setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings) {
+    this->airspy_hf_settings = airspy_hf_settings;
+    this->m_airspy_hf_settings_isSet = true;
 }
 
 SWGFileSourceSettings*
@@ -254,6 +276,7 @@ SWGDeviceSettings::isSet(){
     do{
         if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(airspy_hf_settings != nullptr && airspy_hf_settings->isSet()){ isObjectUpdated = true; break;}
         if(file_source_settings != nullptr && file_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_input_settings != nullptr && hack_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_output_settings != nullptr && hack_rf_output_settings->isSet()){ isObjectUpdated = true; break;}

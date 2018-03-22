@@ -485,6 +485,70 @@ airspyhf_device_t *AirspyHFInput::open_airspyhf_from_serial(const QString& seria
     }
 }
 
+int AirspyHFInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+    response.getAirspyHfSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int AirspyHFInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    AirspyHFSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getAirspyHfSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex")) {
+        settings.m_devSampleRateIndex = response.getAirspyHfSettings()->getDevSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getAirspyHfSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getAirspyHfSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getAirspyHfSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getAirspyHfSettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("bandIndex")) {
+        settings.m_bandIndex = response.getAirspyHfSettings()->getBandIndex() != 0;
+    }
+
+    MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAirspyHF *msgToGUI = MsgConfigureAirspyHF::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings)
+{
+    response.getAirspyHfSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getAirspyHfSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    response.getAirspyHfSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getAirspyHfSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getAirspyHfSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getAirspyHfSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getAirspyHfSettings()->setBandIndex(settings.m_bandIndex ? 1 : 0);
+}
+
 int AirspyHFInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))

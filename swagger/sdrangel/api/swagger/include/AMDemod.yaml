@@ -6,11 +6,11 @@ AMDemodSettings:
       type: integer
       format: int64
     rfBandwidth:
-      description: channel RF bandwidth in Hz (rounds to lower kHz)
+      description: channel RF bandwidth in Hz (floors to next 100 Hz)
       type: number
       format: float
     squelch:
-      description: power squelch threshold in centi-bels
+      description: power squelch threshold in decibels
       type: number
       format: float
     volume:

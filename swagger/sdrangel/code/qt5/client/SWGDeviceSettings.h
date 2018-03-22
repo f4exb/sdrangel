@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAirspyHFSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -54,6 +55,9 @@ public:
     qint32 getTx();
     void setTx(qint32 tx);
 
+    SWGAirspyHFSettings* getAirspyHfSettings();
+    void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
+
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
 
@@ -81,6 +85,9 @@ private:
 
     qint32 tx;
     bool m_tx_isSet;
+
+    SWGAirspyHFSettings* airspy_hf_settings;
+    bool m_airspy_hf_settings_isSet;
 
     SWGFileSourceSettings* file_source_settings;
     bool m_file_source_settings_isSet;

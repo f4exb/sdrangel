@@ -16,6 +16,7 @@
 
 #include "SWGAMDemodReport.h"
 #include "SWGAMDemodSettings.h"
+#include "SWGAirspyHFSettings.h"
 #include "SWGAudioDevice.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioDevicesSelect.h"
@@ -66,6 +67,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAMDemodSettings").compare(type) == 0) {
       return new SWGAMDemodSettings();
+    }
+    if(QString("SWGAirspyHFSettings").compare(type) == 0) {
+      return new SWGAirspyHFSettings();
     }
     if(QString("SWGAudioDevice").compare(type) == 0) {
       return new SWGAudioDevice();

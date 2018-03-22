@@ -3,6 +3,7 @@
         <file>webapi/doc/html2/index.html</file>
         <file>webapi/doc/swagger/swagger.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
+        <file>webapi/doc/swagger/include/AirspyHF.yaml</file>
         <file>webapi/doc/swagger/include/FileSource.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
