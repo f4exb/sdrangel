@@ -390,6 +390,7 @@ int AMDemod::webapiSettingsPutPatch(
     MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(settings, force);
     m_inputMessageQueue.push(msg);
 
+    qDebug("AMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
         MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, force);

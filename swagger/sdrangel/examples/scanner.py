@@ -3,7 +3,7 @@
 """
   SDRangel REST API client script
   
-  Simple scanner for NFM channels. Builds an array of equally spaced channels. Moves device center frequency
+  Simple scanner for AM and NFM channels. Builds an array of equally spaced channels. Moves device center frequency
   so that adjacent parts of the spectrum are scanned by the array of channels. Stops when any of the channels
   is active. Resumes when none of the channels is active.
   
@@ -48,10 +48,11 @@ def getInputOptions():
     parser = OptionParser(usage="usage: %%prog [-t]\n")
     parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
     parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int", default=0) 
-    parser.add_option("-D", "--device-hwid", dest="device_hwid", help="device hardware id", metavar="HWID", type="string", default="RTLSDR") 
+    parser.add_option("-D", "--device-hwid", dest="device_hwid", help="device hardware id", metavar="ID", type="string", default="RTLSDR")
+    parser.add_option("-C", "--channel-id", dest="channel_id", help="channel id", metavar="ID", type="string", default="NFMDemod") 
     parser.add_option("-l", "--log2-decim", dest="log2_decim", help="log2 of the desired software decimation factor", metavar="LOG2", type="int", default=4) 
     parser.add_option("-n", "--num-channels", dest="num_channels", help="number of parallel channels", metavar="NUMBER", type="int", default=8) 
-    parser.add_option("-s", "--freq-step", dest="freq_step", help="frequency step (Hz)", metavar="FREQUENCY", type="int", default=12500) 
+    parser.add_option("-s", "--freq-step", dest="freq_step", help="frequency step (Hz)", metavar="FREQUENCY", type="float", default=12500) 
     parser.add_option("-S", "--freq-start", dest="freq_start", help="frequency start (Hz)", metavar="FREQUENCY", type="int", default=446006250) 
     parser.add_option("-T", "--freq-stop", dest="freq_stop", help="frequency stop (Hz)", metavar="FREQUENCY", type="int", default=446193750) 
     parser.add_option("-b", "--af-bw", dest="af_bw", help="audio babdwidth (kHz)", metavar="FREQUENCY_KHZ", type="int" ,default=3) 
@@ -88,7 +89,16 @@ def setupDevice(scan_control, options):
     if settings is None:
         exit(-1)
     
-    if options.device_hwid == "LimeSDR":
+    if options.device_hwid == "AirspyHF":
+        if scan_control.device_start_freq > 30000000:
+            settings["airspyHFSettings"]["bandIndex"] = 1
+        else:
+            settings["airspyHFSettings"]["bandIndex"] = 0
+        settings["airspyHFSettings"]["centerFrequency"] = scan_control.device_start_freq
+        settings["airspyHFSettings"]["devSampleRateIndex"] = 0
+        settings['airspyHFSettings']['log2Decim'] = options.log2_decim
+        settings['airspyHFSettings']['loPpmCorrection'] = int(options.lo_ppm * 10)  # in tenths of PPM
+    elif options.device_hwid == "LimeSDR":
         settings["limeSdrInputSettings"]["antennaPath"] = 0
         settings["limeSdrInputSettings"]["devSampleRate"] = scan_control.device_sample_rate
         settings["limeSdrInputSettings"]["log2HardDecim"] = 4
@@ -111,7 +121,7 @@ def setupDevice(scan_control, options):
         settings['rtlSdrSettings']['loPpmCorrection'] = int(options.lo_ppm)
         settings['rtlSdrSettings']['rfBandwidth'] = scan_control.device_step_freq + 100000
     elif options.device_hwid == "HackRF":
-        settings['hackRFInputSettings']['LOppmTenths'] = options.lo_ppm * 10 # in tenths of PPM
+        settings['hackRFInputSettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
         settings['hackRFInputSettings']['centerFrequency'] = scan_control.device_start_freq
         settings['hackRFInputSettings']['dcBlock'] = 1
         settings['hackRFInputSettings']['iqImbalance'] = 1
@@ -131,7 +141,9 @@ def changeDeviceFrequency(fc, options):
     if settings is None:
         exit(-1)
 
-    if options.device_hwid == "LimeSDR":
+    if options.device_hwid == "AirspyHF":
+        settings["airspyHFSettings"]["centerFrequency"] = fc
+    elif options.device_hwid == "LimeSDR":
         settings["limeSdrInputSettings"]["centerFrequency"] = fc + 500000
     elif options.device_hwid == "RTLSDR":
         settings['rtlSdrSettings']['centerFrequency'] = fc
@@ -146,7 +158,7 @@ def changeDeviceFrequency(fc, options):
 def setupChannels(scan_control, options):
     i = 0
     for shift in scan_control.channel_shifts:
-        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMDemod", "tx": 0}, "Create NFM demod")
+        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create NFM demod")
         if settings is None:
             exit(-1)
 
@@ -154,14 +166,21 @@ def setupChannels(scan_control, options):
         if settings is None:
             exit(-1)
 
-        settings["NFMDemodSettings"]["inputFrequencyOffset"] = int(shift)
-        settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
-        settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
-        settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10 # centi-Bels
-        settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10 # 10's of ms
-        settings["NFMDemodSettings"]["title"] = "Channel %d" % i
+        if options.channel_id == "NFMDemod":
+            settings["NFMDemodSettings"]["inputFrequencyOffset"] = int(shift)
+            settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
+            settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+            settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10 # centi-Bels
+            settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10 # 10's of ms
+            settings["NFMDemodSettings"]["title"] = "Channel %d" % i
+        elif options.channel_id == "AMDemod":
+            settings["AMDemodSettings"]["inputFrequencyOffset"] = int(shift)
+            settings["AMDemodSettings"]["rfBandwidth"] = options.rf_bw
+            settings["AMDemodSettings"]["squelch"] = options.squelch_db
+            settings["AMDemodSettings"]["title"] = "Channel %d" % i
+            settings["AMDemodSettings"]["bandpassEnable"] = 1 # bandpass filter
         
-        r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change NFM demod")
+        r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
         if r is None:
             exit(-1)
             
@@ -172,11 +191,12 @@ def checkScanning(fc, options):
     reports = callAPI(deviceset_url + "/channels/report", "GET", None, None, "Get channels report")
     if reports is None:
         exit(-1)
+    reportKey = "%sReport" % options.channel_id
     for i in range(reports["channelcount"]):
         channel = reports["channels"][i]
         if "report" in channel:
-            if "NFMDemodReport" in channel["report"]:
-                if channel["report"]["NFMDemodReport"]["squelch"] == 1:
+            if reportKey in channel["report"]:
+                if channel["report"][reportKey]["squelch"] == 1:
                     f_channel = channel["deltaFrequency"]+fc
                     if f_channel not in options.excl_flist:
                         print("Stopped at %d Hz" % f_channel)
@@ -256,7 +276,7 @@ def main():
                 if r is None:
                     exit(-1)
             
-            r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 0}, "setup device on Rx device set")
+            r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": options.device_hwid, "tx": 0}, "setup device on Rx device set")
             if r is None:
                 exit(-1)
             

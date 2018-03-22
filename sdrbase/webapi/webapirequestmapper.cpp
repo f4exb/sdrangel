@@ -1508,6 +1508,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("airspyHFSettings") && jsonObject["airspyHFSettings"].isObject())
+        {
+            QJsonObject airspyHFSettingsJsonObject = jsonObject["airspyHFSettings"].toObject();
+            deviceSettingsKeys = airspyHFSettingsJsonObject.keys();
+            deviceSettings.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+            deviceSettings.getAirspyHfSettings()->fromJsonObject(airspyHFSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("hackRFInputSettings") && jsonObject["hackRFInputSettings"].isObject())
@@ -1608,7 +1623,21 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
     QString *channelType = channelSettings.getChannelType();
 
-    if (*channelType == "NFMDemod")
+    if (*channelType == "AMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject amDemodSettingsJsonObject = jsonObject["AMDemodSettings"].toObject();
+            channelSettingsKeys = amDemodSettingsJsonObject.keys();
+            channelSettings.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+            channelSettings.getAmDemodSettings()->fromJsonObject(amDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)
         {
@@ -1668,7 +1697,21 @@ bool WebAPIRequestMapper::validateChannelReport(
 
     QString *channelType = channelReport.getChannelType();
 
-    if (*channelType == "NFMDemod")
+    if (*channelType == "AMDemod")
+    {
+        if (channelReport.getTx() == 0)
+        {
+            QJsonObject amDemodReportJsonObject = jsonObject["AMDemodReport"].toObject();
+            channelReportKeys = amDemodReportJsonObject.keys();
+            channelReport.setAmDemodReport(new SWGSDRangel::SWGAMDemodReport());
+            channelReport.getAmDemodReport()->fromJsonObject(amDemodReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMDemod")
     {
         if (channelReport.getTx() == 0)
         {

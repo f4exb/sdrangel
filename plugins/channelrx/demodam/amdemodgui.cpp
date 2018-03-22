@@ -91,7 +91,31 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 
 bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
+    if (AMDemod::MsgConfigureAMDemod::match(message))
+    {
+        qDebug("AMDemodGUI::handleMessage: AMDemod::MsgConfigureAMDemod");
+        const AMDemod::MsgConfigureAMDemod& cfg = (AMDemod::MsgConfigureAMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+
 	return false;
+}
+
+void AMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void AMDemodGUI::channelMarkerChangedByCursor()
@@ -201,7 +225,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amDemod = (AMDemod*) rxChannel; //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel); //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -233,6 +258,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
 	applySettings(true);

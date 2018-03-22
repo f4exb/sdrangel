@@ -64,12 +64,6 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
   
-<h2>nfm_scanner.py</h2>
-  
-Simple NFM scanner with multiple equally spaced NFM channels. Stops whenever any of the channels squelch opens.
-
-Requires numpy
-  
 <h2>nfm_test.py</h2>
 
 Example of creating NFM channels (demodulator and modulator) and changing the settings
@@ -178,6 +172,24 @@ It uses the following APIs:
 
 Combines `rx_test` and `tx_test` to create a pair of source and sink device sets. The APIs used are the same as in `rx_test` or `tx_test`.   
 
+<h2>scanner.py</h2>
+  
+Simple AM and NFM scanner with multiple equally spaced channels. Stops whenever any of the channels squelch opens. At the moment the following sampling devices can be used:
+
+  - AirspyHF
+  - HackRF
+  - LimeSDR
+  - RTLSDR
+
+Requires numpy
+
+In addition to some APIs being used in other script it uses:
+
+  - Get channels reports:
+    - Operation ID: `devicesetChannelsReportGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channels/report`
+    - HTTP method: `GET`
+  
 <h2>start_stop.py</h2>
 
 Starts or stops a device in the specified device set
