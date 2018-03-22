@@ -198,7 +198,7 @@ def checkScanning(fc, options):
             if reportKey in channel["report"]:
                 if channel["report"][reportKey]["squelch"] == 1:
                     f_channel = channel["deltaFrequency"]+fc
-                    if f_channel not in options.excl_flist:
+                    if round(f_channel) not in options.excl_flist:
                         print("Stopped at %d Hz" % f_channel)
                         return False # stop scanning
     return True # continue scanning

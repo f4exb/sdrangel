@@ -183,6 +183,8 @@ Simple AM and NFM scanner with multiple equally spaced channels. Stops whenever 
 
 Requires numpy
 
+&#9758; Try to first run with the `-m` (mock) option to see what the scanner parameters will be. In particular pay attention to the computed sample rate that should be within range for your hardware. For devices with fixed or discrete rates make sure the computed sample rate does not exceed the unique device sample rate or the highest possible sample rate.
+
 In addition to some APIs being used in other script it uses:
 
   - Get channels reports:
