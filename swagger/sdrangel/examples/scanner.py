@@ -13,6 +13,7 @@
 import requests, json, traceback, sys
 from optparse import OptionParser
 import time
+import datetime
 import numpy as np
 
 base_url = "http://127.0.0.1:8091/sdrangel"
@@ -64,7 +65,10 @@ def getInputOptions():
     parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
     parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
     parser.add_option("--re-run", dest="rerun", help="re run with given parameters without setting up device and channels", metavar="BOOLEAN", action="store_true", default=False)
-    parser.add_option("-x", "--excl-list", dest="excl_fstr", help="frequencies (in Hz) exclusion comma separated list", metavar="LIST", type="string") 
+    parser.add_option("-x", "--excl-list", dest="excl_fstr", help="frequencies (in Hz) exclusion comma separated list", metavar="LIST", type="string")
+    parser.add_option("--excl-tol", dest="excl_tol", help="match tolerance interval (in Hz) for exclusion frequencies", metavar="FREQUENCY", type="float", default=10.0) 
+    parser.add_option("-v", "--verbosity", dest="verbosity", help="verbosity level", metavar="LEVEL_INT", type="int", default = 0) 
+    parser.add_option("-L", "--delay", dest="delay", help="delay in number of settling time periods before resuming scan", metavar="NUMBER", type="int", default = 1) 
 
     (options, args) = parser.parse_args()
     
@@ -74,12 +78,16 @@ def getInputOptions():
     if options.excl_fstr is not None:
         excl_flist_str = options.excl_fstr.split(',')
         try:
-            options.excl_flist = list(map(int, excl_flist_str))
+            options.excl_flist = list(map(lambda x:round(float(x)/options.excl_tol), excl_flist_str))
+            print(options.excl_flist)
         except ValueError:
             print("Invalid exclusion frequencies list: %s" % options.excl_fstr)
             options.excl_flist = []
     else:
         options.excl_flist = []
+    
+    if options.verbosity > 2:
+        options.verbosity = 2
     
     return options
 
@@ -97,7 +105,7 @@ def setupDevice(scan_control, options):
         settings["airspyHFSettings"]["centerFrequency"] = scan_control.device_start_freq
         settings["airspyHFSettings"]["devSampleRateIndex"] = 0
         settings['airspyHFSettings']['log2Decim'] = options.log2_decim
-        settings['airspyHFSettings']['loPpmCorrection'] = int(options.lo_ppm * 10)  # in tenths of PPM
+        settings['airspyHFSettings']['LOppmTenths'] = int(options.lo_ppm * 10)  # in tenths of PPM
     elif options.device_hwid == "LimeSDR":
         settings["limeSdrInputSettings"]["antennaPath"] = 0
         settings["limeSdrInputSettings"]["devSampleRate"] = scan_control.device_sample_rate
@@ -187,7 +195,7 @@ def setupChannels(scan_control, options):
         i += 1        
     
 # ======================================================================
-def checkScanning(fc, options):
+def checkScanning(fc, options, display_message):
     reports = callAPI(deviceset_url + "/channels/report", "GET", None, None, "Get channels report")
     if reports is None:
         exit(-1)
@@ -198,8 +206,10 @@ def checkScanning(fc, options):
             if reportKey in channel["report"]:
                 if channel["report"][reportKey]["squelch"] == 1:
                     f_channel = channel["deltaFrequency"]+fc
-                    if round(f_channel) not in options.excl_flist:
-                        print("Stopped at %d Hz" % f_channel)
+                    f_frac = round(f_channel/options.excl_tol)
+                    if f_frac not in options.excl_flist:
+                        if display_message: # display message only when stopping for the first time
+                            print("%s Stopped at %d Hz" % (datetime.datetime.now().strftime("%H:%M:%S"),f_frac*options.excl_tol))
                         return False # stop scanning
     return True # continue scanning
     
@@ -293,21 +303,31 @@ def main():
         fc = scan_control.device_start_freq
 
         global verbosity
-        verbosity = 0      
+        verbosity = options.verbosity      
 
         print("Move center to %d Hz" % fc)
         changeDeviceFrequency(fc, options)
 
         try:
+            scanning = False
+            resume_delay = 0
             while True:
                 time.sleep(options.settling_time)
-                if checkScanning(fc, options): # shall we move on ?
-                    fc += scan_control.device_step_freq
-                    if fc > scan_control.device_stop_freq:
-                        fc = scan_control.device_start_freq
-                        print("New pass")
-                    print("Move center to %d Hz" % fc)
-                    changeDeviceFrequency(fc, options)
+                scanning = checkScanning(fc, options, scanning and resume_delay == 0) # shall we move on ?
+                if scanning:
+                    if resume_delay > 0:
+                        resume_delay -= 1
+                    else:
+                        fc += scan_control.device_step_freq
+                        if fc > scan_control.device_stop_freq:
+                            fc = scan_control.device_start_freq
+                            if verbosity > 0:
+                                print("New pass")
+                        if verbosity > 0:
+                            print("Move center to %d Hz" % fc)
+                        changeDeviceFrequency(fc, options)
+                else:
+                    resume_delay = options.delay
         except KeyboardInterrupt:
             print("Terminated by user")
             pass

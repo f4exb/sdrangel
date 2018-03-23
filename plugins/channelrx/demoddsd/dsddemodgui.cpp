@@ -297,7 +297,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->setupUi(this);
 	ui->screenTV->setColor(true);
 	ui->screenTV->resizeTVScreen(200,200);
-	ui->screenTV->setRenderImmediate(true);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
