@@ -102,17 +102,6 @@ void DSPEngine::stopAudioOutput()
     m_audioOutput.stop();
 }
 
-void DSPEngine::startAudioOutputImmediate()
-{
-    m_audioOutput.startImmediate(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioOutputImmediate()
-{
-    m_audioOutput.stopImmediate();
-}
-
 void DSPEngine::startAudioInput()
 {
     m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);

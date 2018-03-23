@@ -52,8 +52,6 @@ public:
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 	void startAudioOutput();
 	void stopAudioOutput();
-    void startAudioOutputImmediate();
-    void stopAudioOutputImmediate();
     void setAudioOutputDeviceIndex(int index) { m_audioOutputDeviceIndex = index; }
 
     void startAudioInput();
