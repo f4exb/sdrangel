@@ -34,7 +34,6 @@
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "device/deviceenumerator.h"
-#include "audio/audiodeviceinfo.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/commanditem.h"
@@ -64,6 +63,9 @@
 #include "commands/command.h"
 
 #include "mainwindow.h"
+
+#include <audio/audiodevicemanager.h>
+
 #include "ui_mainwindow.h"
 
 #include <string>
@@ -97,7 +99,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;
-	m_settings.setAudioDeviceInfo(m_dspEngine->getAudioDeviceInfo());
+	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -1412,11 +1414,11 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 
 void MainWindow::on_action_Audio_triggered()
 {
-	AudioDialog audioDialog(m_dspEngine->getAudioDeviceInfo(), this);
+	AudioDialog audioDialog(m_dspEngine->getAudioDeviceManager(), this);
 	audioDialog.exec();
-	m_dspEngine->setAudioInputVolume(m_dspEngine->getAudioDeviceInfo()->getInputVolume());
-	m_dspEngine->setAudioInputDeviceIndex(m_dspEngine->getAudioDeviceInfo()->getInputDeviceIndex());
-	m_dspEngine->setAudioOutputDeviceIndex(m_dspEngine->getAudioDeviceInfo()->getOutputDeviceIndex());
+	m_dspEngine->setAudioInputVolume(m_dspEngine->getAudioDeviceManager()->getInputVolume());
+	m_dspEngine->setAudioInputDeviceIndex(m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
+	m_dspEngine->setAudioOutputDeviceIndex(m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
 }
 
 void MainWindow::on_action_Logging_triggered()

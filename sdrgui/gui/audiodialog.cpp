@@ -1,9 +1,10 @@
 #include <gui/audiodialog.h>
+
+#include <audio/audiodevicemanager.h>
 #include <QTreeWidgetItem>
 #include "ui_audiodialog.h"
-#include "audio/audiodeviceinfo.h"
 
-AudioDialog::AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent) :
+AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceInfo, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::AudioDialog),
 	m_audioDeviceInfo(audioDeviceInfo)

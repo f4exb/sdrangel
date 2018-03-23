@@ -18,11 +18,11 @@
 #ifndef INCLUDE_DSPENGINE_H
 #define INCLUDE_DSPENGINE_H
 
+#include <audio/audiodevicemanager.h>
 #include <QObject>
 #include <QTimer>
 
 #include <vector>
-#include "audio/audiodeviceinfo.h"
 #include "audio/audiooutput.h"
 #include "audio/audioinput.h"
 #include "export.h"
@@ -49,7 +49,7 @@ public:
 	DSPDeviceSinkEngine *addDeviceSinkEngine();
 	void removeLastDeviceSinkEngine();
 
-	AudioDeviceInfo *getAudioDeviceInfo() { return &m_audioDeviceInfo; }
+	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 	void startAudioOutput();
 	void stopAudioOutput();
     void startAudioOutputImmediate();
@@ -95,7 +95,7 @@ private:
 	uint m_deviceSourceEnginesUIDSequence;
 	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
 	uint m_deviceSinkEnginesUIDSequence;
-    AudioDeviceInfo m_audioDeviceInfo;
+    AudioDeviceManager m_audioDeviceManager;
 	AudioOutput m_audioOutput;
 	AudioInput m_audioInput;
 	uint m_audioOutputSampleRate;

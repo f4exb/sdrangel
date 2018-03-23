@@ -15,10 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "audio/audiodeviceinfo.h"
+#include <audio/audiodevicemanager.h>
 #include "util/simpleserializer.h"
 
-AudioDeviceInfo::AudioDeviceInfo() :
+AudioDeviceManager::AudioDeviceManager() :
     m_inputDeviceIndex(-1),  // default device
     m_outputDeviceIndex(-1), // default device
     m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
@@ -29,14 +29,14 @@ AudioDeviceInfo::AudioDeviceInfo() :
     m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 }
 
-void AudioDeviceInfo::resetToDefaults()
+void AudioDeviceManager::resetToDefaults()
 {
     m_inputDeviceIndex = -1;
     m_outputDeviceIndex = -1;
     m_inputVolume = 1.0f;
 }
 
-QByteArray AudioDeviceInfo::serialize() const
+QByteArray AudioDeviceManager::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputDeviceIndex);
@@ -45,7 +45,7 @@ QByteArray AudioDeviceInfo::serialize() const
     return s.final();
 }
 
-bool AudioDeviceInfo::deserialize(const QByteArray& data)
+bool AudioDeviceManager::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -68,87 +68,87 @@ bool AudioDeviceInfo::deserialize(const QByteArray& data)
     }
 }
 
-void AudioDeviceInfo::setInputDeviceIndex(int inputDeviceIndex)
+void AudioDeviceManager::setInputDeviceIndex(int inputDeviceIndex)
 {
     int nbDevices = m_inputDevicesInfo.size();
     m_inputDeviceIndex = inputDeviceIndex < -1 ? -1 : inputDeviceIndex >= nbDevices ? nbDevices-1 : inputDeviceIndex;
 }
 
-void AudioDeviceInfo::setOutputDeviceIndex(int outputDeviceIndex)
+void AudioDeviceManager::setOutputDeviceIndex(int outputDeviceIndex)
 {
     int nbDevices = m_outputDevicesInfo.size();
     m_outputDeviceIndex = outputDeviceIndex < -1 ? -1 : outputDeviceIndex >= nbDevices ? nbDevices-1 : outputDeviceIndex;
 }
 
-void AudioDeviceInfo::setInputVolume(float inputVolume)
+void AudioDeviceManager::setInputVolume(float inputVolume)
 {
     m_inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
 }
 
-void AudioDeviceInfo::addAudioSink(AudioFifo* audioFifo)
+void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::addAudioSink");
     m_audioOutput.addFifo(audioFifo);
 }
 
-void AudioDeviceInfo::removeAudioSink(AudioFifo* audioFifo)
+void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::removeAudioSink");
     m_audioOutput.removeFifo(audioFifo);
 }
 
-void AudioDeviceInfo::addAudioSource(AudioFifo* audioFifo)
+void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::addAudioSource");
     m_audioInput.addFifo(audioFifo);
 }
 
-void AudioDeviceInfo::removeAudioSource(AudioFifo* audioFifo)
+void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::removeAudioSource");
     m_audioInput.removeFifo(audioFifo);
 }
 
-void AudioDeviceInfo::startAudioOutput()
+void AudioDeviceManager::startAudioOutput()
 {
     m_audioOutput.start(m_outputDeviceIndex, m_audioOutputSampleRate);
     m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
-void AudioDeviceInfo::stopAudioOutput()
+void AudioDeviceManager::stopAudioOutput()
 {
     m_audioOutput.stop();
 }
 
-void AudioDeviceInfo::startAudioOutputImmediate()
+void AudioDeviceManager::startAudioOutputImmediate()
 {
     m_audioOutput.startImmediate(m_outputDeviceIndex, m_audioOutputSampleRate);
     m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
-void AudioDeviceInfo::stopAudioOutputImmediate()
+void AudioDeviceManager::stopAudioOutputImmediate()
 {
     m_audioOutput.stopImmediate();
 }
 
-void AudioDeviceInfo::startAudioInput()
+void AudioDeviceManager::startAudioInput()
 {
     m_audioInput.start(m_inputDeviceIndex, m_audioInputSampleRate);
     m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
 }
 
-void AudioDeviceInfo::stopAudioInput()
+void AudioDeviceManager::stopAudioInput()
 {
     m_audioInput.stop();
 }
 
-void AudioDeviceInfo::startAudioInputImmediate()
+void AudioDeviceManager::startAudioInputImmediate()
 {
     m_audioInput.startImmediate(m_inputDeviceIndex, m_audioInputSampleRate);
     m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
 }
 
-void AudioDeviceInfo::stopAudioInputImmediate()
+void AudioDeviceManager::stopAudioInputImmediate()
 {
     m_audioInput.stopImmediate();
 }

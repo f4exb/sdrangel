@@ -4,7 +4,7 @@
 #include "settings/mainsettings.h"
 #include "commands/command.h"
 
-MainSettings::MainSettings() : m_audioDeviceInfo(0)
+MainSettings::MainSettings() : m_audioDeviceManager(0)
 {
 	resetToDefaults();
 }
@@ -29,9 +29,9 @@ void MainSettings::load()
 	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
 	m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
 
-	if (m_audioDeviceInfo)
+	if (m_audioDeviceManager)
 	{
-	    m_audioDeviceInfo->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
+	    m_audioDeviceManager->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
 	}
 
 	QStringList groups = s.childGroups();
@@ -80,9 +80,9 @@ void MainSettings::save() const
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
 	s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
 
-	if (m_audioDeviceInfo)
+	if (m_audioDeviceManager)
 	{
-	    s.setValue("audio", qCompress(m_audioDeviceInfo->serialize()).toBase64());
+	    s.setValue("audio", qCompress(m_audioDeviceManager->serialize()).toBase64());
 	}
 
 	QStringList groups = s.childGroups();

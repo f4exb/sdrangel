@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AUDIODEVICEINFO_H
-#define INCLUDE_AUDIODEVICEINFO_H
+#ifndef INCLUDE_AUDIODEVICEMANGER_H
+#define INCLUDE_AUDIODEVICEMANGER_H
 
 #include <QStringList>
 #include <QList>
@@ -28,9 +28,9 @@
 
 class AudioFifo;
 
-class SDRBASE_API AudioDeviceInfo {
+class SDRBASE_API AudioDeviceManager {
 public:
-	AudioDeviceInfo();
+	AudioDeviceManager();
 
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
@@ -81,4 +81,4 @@ private:
 	friend class MainSettings;
 };
 
-#endif // INCLUDE_AUDIODEVICEINFO_H
+#endif // INCLUDE_AUDIODEVICEMANGER_H

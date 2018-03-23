@@ -5,7 +5,7 @@
 
 #include "export.h"
 
-class AudioDeviceInfo;
+class AudioDeviceManager;
 
 namespace Ui {
 	class AudioDialog;
@@ -15,13 +15,13 @@ class SDRGUI_API AudioDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	explicit AudioDialog(AudioDeviceInfo* audioDeviceInfo, QWidget* parent = NULL);
+	explicit AudioDialog(AudioDeviceManager* audioDeviceInfo, QWidget* parent = NULL);
 	~AudioDialog();
 
 private:
 	Ui::AudioDialog* ui;
 
-	AudioDeviceInfo* m_audioDeviceInfo;
+	AudioDeviceManager* m_audioDeviceInfo;
 	float m_inputVolume;
 
 private slots:

@@ -59,7 +59,7 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     qDebug() << "MainCore::MainCore: start";
 
     m_instance = this;
-    m_settings.setAudioDeviceInfo(m_dspEngine->getAudioDeviceInfo());
+    m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("pluginssrv"));

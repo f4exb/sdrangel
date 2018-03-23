@@ -1,10 +1,10 @@
 #ifndef INCLUDE_SETTINGS_H
 #define INCLUDE_SETTINGS_H
 
+#include <audio/audiodevicemanager.h>
 #include <QString>
 #include "preferences.h"
 #include "preset.h"
-#include "audio/audiodeviceinfo.h"
 #include "export.h"
 
 class Command;
@@ -57,12 +57,12 @@ public:
     bool getUseLogFile() const { return m_preferences.getUseLogFile(); }
     const QString& getLogFileName() const { return m_preferences.getLogFileName(); }
 
-	const AudioDeviceInfo *getAudioDeviceInfo() const { return m_audioDeviceInfo; }
-	void setAudioDeviceInfo(AudioDeviceInfo *audioDeviceInfo) { m_audioDeviceInfo = audioDeviceInfo; }
+	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
+	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
 
 protected:
 	Preferences m_preferences;
-	AudioDeviceInfo *m_audioDeviceInfo;
+	AudioDeviceManager *m_audioDeviceManager;
 	Preset m_workingPreset;
 	typedef QList<Preset*> Presets;
 	Presets m_presets;

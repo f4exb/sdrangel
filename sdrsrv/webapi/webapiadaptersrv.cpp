@@ -228,17 +228,17 @@ int WebAPIAdapterSrv::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceInfo()->getOutputDevices();
+    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
     response.init();
     response.setNbInputDevices(nbInputDevices);
-    response.setInputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputDeviceIndex());
+    response.setInputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
     response.setNbOutputDevices(nbOutputDevices);
-    response.setOutputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getOutputDeviceIndex());
-    response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputVolume());
+    response.setOutputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
+    response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputVolume());
     QList<SWGSDRangel::SWGAudioDevice*> *inputDevices = response.getInputDevices();
     QList<SWGSDRangel::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
 
@@ -268,8 +268,8 @@ int WebAPIAdapterSrv::instanceAudioPatch(
     int inputIndex = response.getInputIndex();
     int outputIndex = response.getOutputIndex();
 
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceInfo()->getOutputDevices();
+    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
@@ -277,17 +277,17 @@ int WebAPIAdapterSrv::instanceAudioPatch(
     inputIndex = inputIndex < -1 ? -1 : inputIndex > nbInputDevices ? nbInputDevices-1 : inputIndex;
     outputIndex = outputIndex < -1 ? -1 : outputIndex > nbOutputDevices ? nbOutputDevices-1 : outputIndex;
 
-    m_mainCore.m_dspEngine->getAudioDeviceInfo()->setInputVolume(inputVolume);
-    m_mainCore.m_dspEngine->getAudioDeviceInfo()->setInputDeviceIndex(inputIndex);
-    m_mainCore.m_dspEngine->getAudioDeviceInfo()->setOutputDeviceIndex(outputIndex);
+    m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputVolume(inputVolume);
+    m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputDeviceIndex(inputIndex);
+    m_mainCore.m_dspEngine->getAudioDeviceManager()->setOutputDeviceIndex(outputIndex);
 
     m_mainCore.m_dspEngine->setAudioInputVolume(inputVolume);
     m_mainCore.m_dspEngine->setAudioInputDeviceIndex(inputIndex);
     m_mainCore.m_dspEngine->setAudioOutputDeviceIndex(outputIndex);
 
-    response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputVolume());
-    response.setInputIndex(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getInputDeviceIndex());
-    response.setOutputIndex(m_mainCore.m_dspEngine->getAudioDeviceInfo()->getOutputDeviceIndex());
+    response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputVolume());
+    response.setInputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
+    response.setOutputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
 
     return 200;
 }
