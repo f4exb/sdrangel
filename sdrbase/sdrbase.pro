@@ -49,7 +49,7 @@ win32 {
         dsp/dvserialworker.cpp
 }
 
-SOURCES += audio/audiodeviceinfo.cpp\
+SOURCES += audio/audiodevicemanager.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
@@ -119,7 +119,7 @@ SOURCES += audio/audiodeviceinfo.cpp\
         webapi/webapiserver.cpp\
         mainparser.cpp
 
-HEADERS  += audio/audiodeviceinfo.h\
+HEADERS  += audio/audiodevicemanager.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
