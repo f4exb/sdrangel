@@ -56,8 +56,6 @@ public:
 
     void startAudioInput();
     void stopAudioInput();
-    void startAudioInputImmediate();
-    void stopAudioInputImmediate();
     void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
     void setAudioInputDeviceIndex(int index) { m_audioInputDeviceIndex = index; }
 

@@ -113,17 +113,6 @@ void DSPEngine::stopAudioInput()
     m_audioInput.stop();
 }
 
-void DSPEngine::startAudioInputImmediate()
-{
-    m_audioInput.startImmediate(m_audioInputDeviceIndex, m_audioInputSampleRate);
-    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioInputImmediate()
-{
-    m_audioInput.stopImmediate();
-}
-
 void DSPEngine::addAudioSink(AudioFifo* audioFifo)
 {
 	qDebug("DSPEngine::addAudioSink");
