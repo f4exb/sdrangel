@@ -55,7 +55,6 @@ public:
     bool selectRow(int intLine);
     bool setDataColor(int intCol, int intRed, int intGreen, int intBlue);
     bool setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha);
-    void setRenderImmediate(bool blnRenderImmediate) { m_blnRenderImmediate = blnRenderImmediate; }
     void setAlphaBlend(bool blnAlphaBlend) { m_objGLShaderArray.setAlphaBlend(blnAlphaBlend); }
     void setAlphaReset() { m_objGLShaderArray.setAlphaReset(); }
 
@@ -80,7 +79,6 @@ private:
     QMutex m_objMutex;
     bool m_blnDataChanged;
     bool m_blnConfigChanged;
-    bool m_blnRenderImmediate;
 
     GLShaderTVArray m_objGLShaderArray;
 

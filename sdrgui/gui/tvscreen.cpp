@@ -38,7 +38,6 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
     m_blnGLContextInitialized = false;
-    m_blnRenderImmediate = false;
 
     //Par défaut
     m_intAskedCols = TV_COLS;
@@ -71,10 +70,6 @@ void TVScreen::renderImage(unsigned char * objData)
 {
     m_chrLastData = objData;
     m_blnDataChanged = true;
-
-    if (m_blnRenderImmediate) {
-    	update();
-    }
 }
 
 void TVScreen::resetImage()
