@@ -28,7 +28,6 @@
 #include "export.h"
 #include "mainparser.h"
 
-class AudioDeviceInfo;
 class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -282,7 +281,6 @@ private:
     QTimer m_masterTimer;
     std::vector<DeviceSet*> m_deviceSets;
     PluginManager* m_pluginManager;
-    AudioDeviceInfo m_audioDeviceInfo;
 
     WebAPIRequestMapper *m_requestMapper;
     WebAPIServer *m_apiServer;

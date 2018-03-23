@@ -97,7 +97,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;
-	m_settings.setAudioDeviceInfo(&m_audioDeviceInfo);
+	m_settings.setAudioDeviceInfo(m_dspEngine->getAudioDeviceInfo());
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -1412,11 +1412,11 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 
 void MainWindow::on_action_Audio_triggered()
 {
-	AudioDialog audioDialog(&m_audioDeviceInfo, this);
+	AudioDialog audioDialog(m_dspEngine->getAudioDeviceInfo(), this);
 	audioDialog.exec();
-	m_dspEngine->setAudioInputVolume(m_audioDeviceInfo.getInputVolume());
-	m_dspEngine->setAudioInputDeviceIndex(m_audioDeviceInfo.getInputDeviceIndex());
-	m_dspEngine->setAudioOutputDeviceIndex(m_audioDeviceInfo.getOutputDeviceIndex());
+	m_dspEngine->setAudioInputVolume(m_dspEngine->getAudioDeviceInfo()->getInputVolume());
+	m_dspEngine->setAudioInputDeviceIndex(m_dspEngine->getAudioDeviceInfo()->getInputDeviceIndex());
+	m_dspEngine->setAudioOutputDeviceIndex(m_dspEngine->getAudioDeviceInfo()->getOutputDeviceIndex());
 }
 
 void MainWindow::on_action_Logging_triggered()

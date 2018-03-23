@@ -22,7 +22,11 @@
 #include <QList>
 #include <QAudioDeviceInfo>
 
+#include "audio/audioinput.h"
+#include "audio/audiooutput.h"
 #include "export.h"
+
+class AudioFifo;
 
 class SDRBASE_API AudioDeviceInfo {
 public:
@@ -30,18 +34,43 @@ public:
 
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
+
     int getInputDeviceIndex() const { return m_inputDeviceIndex; }
     int getOutputDeviceIndex() const { return m_outputDeviceIndex; }
     float getInputVolume() const { return m_inputVolume; }
+
     void setInputDeviceIndex(int inputDeviceIndex);
     void setOutputDeviceIndex(int inputDeviceIndex);
     void setInputVolume(float inputVolume);
+
+    unsigned int getAudioSampleRate() const { return m_audioOutputSampleRate; }
+
+    void addAudioSink(AudioFifo* audioFifo);    //!< Add the audio sink
+    void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
+
+    void addAudioSource(AudioFifo* audioFifo);    //!< Add an audio source
+    void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
+
+    void startAudioOutput();
+    void stopAudioOutput();
+    void startAudioOutputImmediate();
+    void stopAudioOutputImmediate();
+
+    void startAudioInput();
+    void stopAudioInput();
+    void startAudioInputImmediate();
+    void stopAudioInputImmediate();
+    void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
 private:
 	QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
     int m_inputDeviceIndex;
     int m_outputDeviceIndex;
+    unsigned int m_audioOutputSampleRate;
+    unsigned int m_audioInputSampleRate;
+    AudioOutput m_audioOutput;
+    AudioInput m_audioInput;
     float m_inputVolume;
 
     void resetToDefaults();

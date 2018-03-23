@@ -21,6 +21,8 @@
 AudioDeviceInfo::AudioDeviceInfo() :
     m_inputDeviceIndex(-1),  // default device
     m_outputDeviceIndex(-1), // default device
+    m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
+    m_audioInputSampleRate(48000),  // Use default input device at 48 kHz
     m_inputVolume(1.0f)
 {
     m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
@@ -82,3 +84,72 @@ void AudioDeviceInfo::setInputVolume(float inputVolume)
 {
     m_inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
 }
+
+void AudioDeviceInfo::addAudioSink(AudioFifo* audioFifo)
+{
+    qDebug("AudioDeviceInfo::addAudioSink");
+    m_audioOutput.addFifo(audioFifo);
+}
+
+void AudioDeviceInfo::removeAudioSink(AudioFifo* audioFifo)
+{
+    qDebug("AudioDeviceInfo::removeAudioSink");
+    m_audioOutput.removeFifo(audioFifo);
+}
+
+void AudioDeviceInfo::addAudioSource(AudioFifo* audioFifo)
+{
+    qDebug("AudioDeviceInfo::addAudioSource");
+    m_audioInput.addFifo(audioFifo);
+}
+
+void AudioDeviceInfo::removeAudioSource(AudioFifo* audioFifo)
+{
+    qDebug("AudioDeviceInfo::removeAudioSource");
+    m_audioInput.removeFifo(audioFifo);
+}
+
+void AudioDeviceInfo::startAudioOutput()
+{
+    m_audioOutput.start(m_outputDeviceIndex, m_audioOutputSampleRate);
+    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
+}
+
+void AudioDeviceInfo::stopAudioOutput()
+{
+    m_audioOutput.stop();
+}
+
+void AudioDeviceInfo::startAudioOutputImmediate()
+{
+    m_audioOutput.startImmediate(m_outputDeviceIndex, m_audioOutputSampleRate);
+    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
+}
+
+void AudioDeviceInfo::stopAudioOutputImmediate()
+{
+    m_audioOutput.stopImmediate();
+}
+
+void AudioDeviceInfo::startAudioInput()
+{
+    m_audioInput.start(m_inputDeviceIndex, m_audioInputSampleRate);
+    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
+}
+
+void AudioDeviceInfo::stopAudioInput()
+{
+    m_audioInput.stop();
+}
+
+void AudioDeviceInfo::startAudioInputImmediate()
+{
+    m_audioInput.startImmediate(m_inputDeviceIndex, m_audioInputSampleRate);
+    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
+}
+
+void AudioDeviceInfo::stopAudioInputImmediate()
+{
+    m_audioInput.stopImmediate();
+}
+
