@@ -120,17 +120,6 @@ void AudioDeviceManager::stopAudioOutput()
     m_audioOutput.stop();
 }
 
-void AudioDeviceManager::startAudioOutputImmediate()
-{
-    m_audioOutput.startImmediate(m_outputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
-}
-
-void AudioDeviceManager::stopAudioOutputImmediate()
-{
-    m_audioOutput.stopImmediate();
-}
-
 void AudioDeviceManager::startAudioInput()
 {
     m_audioInput.start(m_inputDeviceIndex, m_audioInputSampleRate);
@@ -141,15 +130,3 @@ void AudioDeviceManager::stopAudioInput()
 {
     m_audioInput.stop();
 }
-
-void AudioDeviceManager::startAudioInputImmediate()
-{
-    m_audioInput.startImmediate(m_inputDeviceIndex, m_audioInputSampleRate);
-    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
-}
-
-void AudioDeviceManager::stopAudioInputImmediate()
-{
-    m_audioInput.stopImmediate();
-}
-

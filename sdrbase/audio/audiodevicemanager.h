@@ -53,13 +53,9 @@ public:
 
     void startAudioOutput();
     void stopAudioOutput();
-    void startAudioOutputImmediate();
-    void stopAudioOutputImmediate();
 
     void startAudioInput();
     void stopAudioInput();
-    void startAudioInputImmediate();
-    void stopAudioInputImmediate();
     void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
 private:
