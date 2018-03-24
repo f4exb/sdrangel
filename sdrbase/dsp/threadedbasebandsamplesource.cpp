@@ -36,7 +36,10 @@ ThreadedBasebandSampleSource::ThreadedBasebandSampleSource(BasebandSampleSource*
 
 ThreadedBasebandSampleSource::~ThreadedBasebandSampleSource()
 {
-    stop();
+    if (m_thread->isRunning()) {
+        stop();
+    }
+
     delete m_thread;
 }
 
