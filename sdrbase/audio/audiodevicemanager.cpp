@@ -18,10 +18,9 @@
 #include <audio/audiodevicemanager.h>
 #include "util/simpleserializer.h"
 
-AudioDeviceManager::AudioDeviceManager() :
+AudioDeviceManager::AudioDeviceManager(unsigned int defaultAudioSampleRate) :
+    m_defaultAudioSampleRate(defaultAudioSampleRate),
     m_inputDeviceIndex(-1),  // default device
-    m_outputDeviceIndex(-1), // default device
-    m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
     m_audioInputSampleRate(48000),  // Use default input device at 48 kHz
     m_inputVolume(1.0f)
 {
@@ -29,10 +28,18 @@ AudioDeviceManager::AudioDeviceManager() :
     m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 }
 
+AudioDeviceManager::~AudioDeviceManager()
+{
+    QMap<int, AudioOutput*>::iterator it = m_audioOutputs.begin();
+
+    for (; it != m_audioOutputs.end(); ++it) {
+        delete(*it);
+    }
+}
+
 void AudioDeviceManager::resetToDefaults()
 {
     m_inputDeviceIndex = -1;
-    m_outputDeviceIndex = -1;
     m_inputVolume = 1.0f;
 }
 
@@ -40,7 +47,6 @@ QByteArray AudioDeviceManager::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputDeviceIndex);
-    s.writeS32(2, m_outputDeviceIndex);
     s.writeFloat(3, m_inputVolume);
     return s.final();
 }
@@ -57,7 +63,6 @@ bool AudioDeviceManager::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         d.readS32(1, &m_inputDeviceIndex, -1);
-        d.readS32(2, &m_outputDeviceIndex, -1);
         d.readFloat(3, &m_inputVolume, 1.0f);
         return true;
     }
@@ -68,16 +73,19 @@ bool AudioDeviceManager::deserialize(const QByteArray& data)
     }
 }
 
+int AudioDeviceManager::getOutputDeviceIndex(AudioFifo* audioFifo) const
+{
+    if (m_audioSinkFifos.find(audioFifo) == m_audioSinkFifos.end()) {
+        return -2; // error
+    } else {
+        return m_audioSinkFifos[audioFifo];
+    }
+}
+
 void AudioDeviceManager::setInputDeviceIndex(int inputDeviceIndex)
 {
     int nbDevices = m_inputDevicesInfo.size();
     m_inputDeviceIndex = inputDeviceIndex < -1 ? -1 : inputDeviceIndex >= nbDevices ? nbDevices-1 : inputDeviceIndex;
-}
-
-void AudioDeviceManager::setOutputDeviceIndex(int outputDeviceIndex)
-{
-    int nbDevices = m_outputDevicesInfo.size();
-    m_outputDeviceIndex = outputDeviceIndex < -1 ? -1 : outputDeviceIndex >= nbDevices ? nbDevices-1 : outputDeviceIndex;
 }
 
 void AudioDeviceManager::setInputVolume(float inputVolume)
@@ -85,31 +93,61 @@ void AudioDeviceManager::setInputVolume(float inputVolume)
     m_inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
 }
 
-void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo)
+void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex)
 {
-    qDebug("AudioDeviceInfo::addAudioSink");
+    qDebug("AudioDeviceManager::addAudioSink: %d: %p", outputDeviceIndex, audioFifo);
 
-    if (m_audioOutput.getNbFifos() == 0) {
-        startAudioOutput();
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end())
+    {
+        m_audioOutputs[outputDeviceIndex] = new AudioOutput();
+        m_audioOutputSampleRates[outputDeviceIndex] = m_defaultAudioSampleRate;
     }
 
-    m_audioOutput.addFifo(audioFifo);
+    if (m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) {
+        startAudioOutput(outputDeviceIndex);
+    }
+
+    if (m_audioSinkFifos.find(audioFifo) == m_audioSinkFifos.end()) // new FIFO
+    {
+        m_audioOutputs[outputDeviceIndex]->addFifo(audioFifo);
+    }
+    else
+    {
+        int audioOutputDeviceIndex = m_audioSinkFifos[audioFifo];
+
+        if (audioOutputDeviceIndex != outputDeviceIndex) // change of audio device
+        {
+            removeAudioSink(audioFifo); // remove from current
+            m_audioOutputs[outputDeviceIndex]->addFifo(audioFifo); // add to new
+        }
+    }
+
+    m_audioSinkFifos[audioFifo] = outputDeviceIndex; // register audio FIFO
 }
 
 void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
 {
-    qDebug("AudioDeviceInfo::removeAudioSink");
+    qDebug("AudioDeviceManager::removeAudioSink: %p", audioFifo);
 
-    m_audioOutput.removeFifo(audioFifo);
-
-    if (m_audioOutput.getNbFifos() == 0) {
-        stopAudioOutput();
+    if (m_audioSinkFifos.find(audioFifo) == m_audioSinkFifos.end())
+    {
+        qWarning("AudioDeviceManager::removeAudioSink: audio FIFO %p not found", audioFifo);
+        return;
     }
+
+    int audioOutputDeviceIndex = m_audioSinkFifos[audioFifo];
+    m_audioOutputs[audioOutputDeviceIndex]->removeFifo(audioFifo);
+
+    if (m_audioOutputs[audioOutputDeviceIndex]->getNbFifos() == 0) {
+        stopAudioOutput(audioOutputDeviceIndex);
+    }
+
+    m_audioSinkFifos.remove(audioFifo); // unregister audio FIFO
 }
 
 void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo)
 {
-    qDebug("AudioDeviceInfo::addAudioSource");
+    qDebug("AudioDeviceManager::addAudioSource");
 
     if (m_audioInput.getNbFifos() == 0) {
         startAudioInput();
@@ -120,7 +158,7 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo)
 
 void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
 {
-    qDebug("AudioDeviceInfo::removeAudioSource");
+    qDebug("AudioDeviceManager::removeAudioSource");
 
     m_audioInput.removeFifo(audioFifo);
 
@@ -129,15 +167,17 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
     }
 }
 
-void AudioDeviceManager::startAudioOutput()
+void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
 {
-    m_audioOutput.start(m_outputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
+    m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, m_audioOutputSampleRates[outputDeviceIndex]);
+    m_audioOutputSampleRates[outputDeviceIndex] = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+//    m_audioOutput.start(m_outputDeviceIndex, m_audioOutputSampleRate);
+//    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
 }
 
-void AudioDeviceManager::stopAudioOutput()
+void AudioDeviceManager::stopAudioOutput(int outputDeviceIndex)
 {
-    m_audioOutput.stop();
+    m_audioOutputs[outputDeviceIndex]->stop();
 }
 
 void AudioDeviceManager::startAudioInput()

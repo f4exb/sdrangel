@@ -26,7 +26,7 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
         treeItem = new QTreeWidgetItem(ui->audioOutTree);
         treeItem->setText(0, qPrintable(it->deviceName()));
 
-        if (i == m_audioDeviceManager->getOutputDeviceIndex())
+        if (i == 0)
         {
             ui->audioOutTree->setCurrentItem(treeItem);
         }
@@ -78,10 +78,8 @@ AudioDialog::~AudioDialog()
 void AudioDialog::accept()
 {
     int inIndex = ui->audioInTree->indexOfTopLevelItem(ui->audioInTree->currentItem());
-    int outIndex = ui->audioOutTree->indexOfTopLevelItem(ui->audioOutTree->currentItem());
 
     m_audioDeviceManager->m_inputDeviceIndex = inIndex - 1;
-    m_audioDeviceManager->m_outputDeviceIndex = outIndex - 1;
     m_audioDeviceManager->m_inputVolume = m_inputVolume;
 
 	QDialog::accept();

@@ -41,7 +41,7 @@ public:
 
 	static DSPEngine *instance();
 
-	uint getAudioSampleRate() const { return m_audioOutputSampleRate; }
+	unsigned int getDefaultAudioSampleRate() const { return m_defaultAudioSampleRate; }
 
 	DSPDeviceSourceEngine *addDeviceSourceEngine();
 	void removeLastDeviceSourceEngine();
@@ -78,14 +78,11 @@ private:
 	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
 	uint m_deviceSinkEnginesUIDSequence;
     AudioDeviceManager m_audioDeviceManager;
-	AudioOutput m_audioOutput;
-	AudioInput m_audioInput;
-	uint m_audioOutputSampleRate;
-    uint m_audioInputSampleRate;
     int m_audioInputDeviceIndex;
     int m_audioOutputDeviceIndex;
     QTimer m_masterTimer;
 	bool m_dvSerialSupport;
+	static const unsigned int m_defaultAudioSampleRate = 48000;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
 #endif

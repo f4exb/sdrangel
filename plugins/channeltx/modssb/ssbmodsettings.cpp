@@ -51,7 +51,7 @@ void SSBModSettings::resetToDefaults()
     m_usb = true;
     m_toneFrequency = 1000.0;
     m_volumeFactor = 1.0;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_spanLog2 = 3;
     m_audioBinaural = false;
     m_audioFlipChannels = false;

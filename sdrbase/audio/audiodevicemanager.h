@@ -20,6 +20,7 @@
 
 #include <QStringList>
 #include <QList>
+#include <QMap>
 #include <QAudioDeviceInfo>
 
 #include "audio/audioinput.h"
@@ -30,22 +31,20 @@ class AudioFifo;
 
 class SDRBASE_API AudioDeviceManager {
 public:
-	AudioDeviceManager();
+	AudioDeviceManager(unsigned int defaultAudioSampleRate);
+	~AudioDeviceManager();
 
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
 
+    int getOutputDeviceIndex(AudioFifo* audioFifo) const;
     int getInputDeviceIndex() const { return m_inputDeviceIndex; }
-    int getOutputDeviceIndex() const { return m_outputDeviceIndex; }
     float getInputVolume() const { return m_inputVolume; }
 
     void setInputDeviceIndex(int inputDeviceIndex);
-    void setOutputDeviceIndex(int inputDeviceIndex);
     void setInputVolume(float inputVolume);
 
-    unsigned int getAudioSampleRate() const { return m_audioOutputSampleRate; }
-
-    void addAudioSink(AudioFifo* audioFifo);    //!< Add the audio sink
+    void addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
     void addAudioSource(AudioFifo* audioFifo);    //!< Add an audio source
@@ -54,13 +53,14 @@ public:
     void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
 private:
+    unsigned int m_defaultAudioSampleRate;
 	QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
+    QMap<AudioFifo*, int> m_audioSinkFifos; //< Audio sink FIFO to audio output device index-1 map
+    QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index-1 to audio output map (index -1 is default device)
+    QMap<int, unsigned int> m_audioOutputSampleRates; //!< audio device index-1 to audio sample rate
     int m_inputDeviceIndex;
-    int m_outputDeviceIndex;
-    unsigned int m_audioOutputSampleRate;
     unsigned int m_audioInputSampleRate;
-    AudioOutput m_audioOutput;
     AudioInput m_audioInput;
     float m_inputVolume;
 
@@ -68,8 +68,8 @@ private:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
-    void startAudioOutput();
-    void stopAudioOutput();
+    void startAudioOutput(int outputDeviceIndex);
+    void stopAudioOutput(int outputDeviceIndex);
     void startAudioInput();
     void stopAudioInput();
 

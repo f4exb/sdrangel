@@ -41,7 +41,7 @@ public:
 	void removeFifo(AudioFifo* audioFifo);
 	int getNbFifos() const { return m_audioFifos.size(); }
 
-	uint getRate() const { return m_audioFormat.sampleRate(); }
+	unsigned int getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
 
 private:

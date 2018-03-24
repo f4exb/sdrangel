@@ -26,8 +26,7 @@
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
-	m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
-    m_audioInputSampleRate(48000),  // Use default input device at 48 kHz
+    m_audioDeviceManager(m_defaultAudioSampleRate),
     m_audioInputDeviceIndex(-1),    // default device
     m_audioOutputDeviceIndex(-1)    // default device
 {
@@ -37,9 +36,6 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
-    m_audioOutput.setOnExit(true);
-    m_audioInput.setOnExit(true);
-
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())

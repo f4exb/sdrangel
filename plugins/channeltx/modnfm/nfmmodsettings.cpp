@@ -50,7 +50,7 @@ void NFMModSettings::resetToDefaults()
     m_rfBandwidth = 12500.0f;
     m_fmDeviation = 5000.0f;
     m_toneFrequency = 1000.0f;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;

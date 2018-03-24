@@ -42,7 +42,7 @@ void WFMModSettings::resetToDefaults()
     m_afBandwidth = 15000.0f;
     m_fmDeviation = 50000.0f;
     m_toneFrequency = 1000.0f;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;

@@ -237,7 +237,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
     response.setNbInputDevices(nbInputDevices);
     response.setInputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
     response.setNbOutputDevices(nbOutputDevices);
-    response.setOutputDeviceSelectedIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
+    response.setOutputDeviceSelectedIndex(-1); // FIXME: remove
     response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputVolume());
     QList<SWGSDRangel::SWGAudioDevice*> *inputDevices = response.getInputDevices();
     QList<SWGSDRangel::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
@@ -279,11 +279,10 @@ int WebAPIAdapterSrv::instanceAudioPatch(
 
     m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputVolume(inputVolume);
     m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputDeviceIndex(inputIndex);
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->setOutputDeviceIndex(outputIndex);
 
     response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputVolume());
     response.setInputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
-    response.setOutputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
+    response.setOutputIndex(-1); // FIXME: remove
 
     return 200;
 }

@@ -33,7 +33,7 @@ void AMDemodSettings::resetToDefaults()
     m_rfBandwidth = 5000;
     m_squelch = -40.0;
     m_volume = 2.0;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_audioMute = false;
     m_bandpassEnable = false;
     m_copyAudioToUDP = false;

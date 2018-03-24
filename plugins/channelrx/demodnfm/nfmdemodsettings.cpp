@@ -49,7 +49,7 @@ void NFMDemodSettings::resetToDefaults()
     m_ctcssOn = false;
     m_audioMute = false;
     m_ctcssIndex = 0;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_copyAudioToUDP = false;
     m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";

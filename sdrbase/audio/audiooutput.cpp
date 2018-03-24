@@ -33,23 +33,23 @@ AudioOutput::AudioOutput() :
 
 AudioOutput::~AudioOutput()
 {
-	stop();
-
-	QMutexLocker mutexLocker(&m_mutex);
-
-	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
-	{
-		delete *it;
-	}
-
-	m_audioFifos.clear();
+//	stop();
+//
+//	QMutexLocker mutexLocker(&m_mutex);
+//
+//	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
+//	{
+//		delete *it;
+//	}
+//
+//	m_audioFifos.clear();
 }
 
 bool AudioOutput::start(int device, int rate)
 {
 
-	if (m_audioUsageCount == 0)
-	{
+//	if (m_audioUsageCount == 0)
+//	{
         QMutexLocker mutexLocker(&m_mutex);
         QAudioDeviceInfo devInfo;
 
@@ -109,9 +109,9 @@ bool AudioOutput::start(int device, int rate)
         {
             qWarning("AudioOutput::start: cannot start");
         }
-	}
-
-	m_audioUsageCount++;
+//	}
+//
+//	m_audioUsageCount++;
 
 	return true;
 }
@@ -120,20 +120,25 @@ void AudioOutput::stop()
 {
     qDebug("AudioOutput::stop");
 
-    if (m_audioUsageCount > 0)
-    {
-        m_audioUsageCount--;
+    QMutexLocker mutexLocker(&m_mutex);
+    m_audioOutput->stop();
+    QIODevice::close();
+    delete m_audioOutput;
 
-        if (m_audioUsageCount == 0)
-        {
-            QMutexLocker mutexLocker(&m_mutex);
-            QIODevice::close();
-
-            if (!m_onExit) {
-                delete m_audioOutput;
-            }
-        }
-    }
+//    if (m_audioUsageCount > 0)
+//    {
+//        m_audioUsageCount--;
+//
+//        if (m_audioUsageCount == 0)
+//        {
+//            QMutexLocker mutexLocker(&m_mutex);
+//            QIODevice::close();
+//
+//            if (!m_onExit) {
+//                delete m_audioOutput;
+//            }
+//        }
+//    }
 }
 
 void AudioOutput::addFifo(AudioFifo* audioFifo)

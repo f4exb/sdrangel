@@ -41,7 +41,7 @@ void BFMDemodSettings::resetToDefaults()
     m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_audioStereo = false;
     m_lsbStereo = false;
     m_showPilot = false;

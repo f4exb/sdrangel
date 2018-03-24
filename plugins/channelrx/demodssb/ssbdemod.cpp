@@ -66,7 +66,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_spanLog2 = 3;
 	m_inputSampleRate = 48000;
 	m_inputFrequencyOffset = 0;
-	m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+	m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

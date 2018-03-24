@@ -39,7 +39,7 @@ void DSDDemodSettings::resetToDefaults()
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
     m_squelch = -40.0;
     m_audioMute = false;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
+    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_enableCosineFiltering = false;
     m_syncOrConstellation = false;
     m_slot1On = true;
