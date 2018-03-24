@@ -88,8 +88,11 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 
 ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 {
-    stop();
-	delete m_threadedBasebandSampleSinkFifo; // Valgrind memcheck
+    if (m_thread->isRunning()) {
+        stop();
+    }
+
+    delete m_threadedBasebandSampleSinkFifo; // Valgrind memcheck
 	delete m_thread;
 }
 
