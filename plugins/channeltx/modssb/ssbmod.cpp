@@ -88,7 +88,7 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
 
 	// CW keyer
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
@@ -126,7 +126,7 @@ SSBMod::~SSBMod()
         delete m_DSBFilterBuffer;
     }
 
-    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);

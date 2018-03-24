@@ -50,26 +50,17 @@ public:
 	void removeLastDeviceSinkEngine();
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
-	void startAudioOutput();
-	void stopAudioOutput();
-    void setAudioOutputDeviceIndex(int index) { m_audioOutputDeviceIndex = index; }
+	void startAudioOutput() { m_audioDeviceManager.startAudioOutput(); }
+	void stopAudioOutput() { m_audioDeviceManager.stopAudioOutput(); }
 
-    void startAudioInput();
-    void stopAudioInput();
-    void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
-    void setAudioInputDeviceIndex(int index) { m_audioInputDeviceIndex = index; }
+    void startAudioInput() { m_audioDeviceManager.startAudioInput(); }
+    void stopAudioInput() {m_audioDeviceManager.stopAudioInput(); }
 
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
 
     DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(uint deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
     DSPDeviceSinkEngine *getDeviceSinkEngineByUID(uint uid);
-
-    void addAudioSink(AudioFifo* audioFifo); //!< Add the audio sink
-	void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
-
-	void addAudioSource(AudioFifo* audioFifo); //!< Add an audio source
-    void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
 	// Serial DV methods:
 

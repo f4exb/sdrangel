@@ -84,7 +84,7 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo);
     m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
     m_audioNetSink->setStereo(true);
@@ -105,7 +105,7 @@ BFMDemod::~BFMDemod()
 		delete m_rfFilter;
 	}
 
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 	delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);

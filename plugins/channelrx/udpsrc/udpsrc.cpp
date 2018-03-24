@@ -118,7 +118,7 @@ UDPSrc::~UDPSrc()
     delete m_udpBufferMono16;
 	delete[] m_udpAudioBuf;
 	if (UDPFilter) delete UDPFilter;
-	if (m_settings.m_audioActive) DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -543,11 +543,11 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
         if (settings.m_audioActive)
         {
             m_audioBufferFill = 0;
-            DSPEngine::instance()->addAudioSink(&m_audioFifo);
+            DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo);
         }
         else
         {
-            DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+            DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
         }
     }
 

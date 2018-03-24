@@ -281,10 +281,6 @@ int WebAPIAdapterSrv::instanceAudioPatch(
     m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputDeviceIndex(inputIndex);
     m_mainCore.m_dspEngine->getAudioDeviceManager()->setOutputDeviceIndex(outputIndex);
 
-    m_mainCore.m_dspEngine->setAudioInputVolume(inputVolume);
-    m_mainCore.m_dspEngine->setAudioInputDeviceIndex(inputIndex);
-    m_mainCore.m_dspEngine->setAudioOutputDeviceIndex(outputIndex);
-
     response.setInputVolume(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputVolume());
     response.setInputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
     response.setOutputIndex(m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());

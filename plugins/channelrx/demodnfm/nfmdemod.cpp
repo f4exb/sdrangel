@@ -80,7 +80,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo);
 	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
@@ -95,7 +95,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
 NFMDemod::~NFMDemod()
 {
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 	delete m_audioNetSink;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);

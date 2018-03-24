@@ -63,7 +63,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 	m_magsq = 0.0;
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo);
     m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
@@ -78,7 +78,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 AMDemod::~AMDemod()
 {
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
     delete m_audioNetSink;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);

@@ -72,8 +72,8 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_magsqPeak = 0.0f;
     m_magsqCount = 0;
 
-	DSPEngine::instance()->addAudioSink(&m_audioFifo1);
-    DSPEngine::instance()->addAudioSink(&m_audioFifo2);
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo1);
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo2);
 
 //    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_settings.m_udpPort);
 //    m_audioFifo1.setUDPSink(m_udpBufferAudio);
@@ -96,8 +96,8 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 DSDDemod::~DSDDemod()
 {
     delete[] m_sampleBuffer;
-	DSPEngine::instance()->removeAudioSink(&m_audioFifo1);
-    DSPEngine::instance()->removeAudioSink(&m_audioFifo2);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo1);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo2);
 //    delete m_udpBufferAudio;
     delete m_audioNetSink;
 

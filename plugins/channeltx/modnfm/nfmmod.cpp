@@ -73,7 +73,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
 	m_ctcssNco.setFreq(88.5, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
 
     // CW keyer
     m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
@@ -91,7 +91,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 
 NFMMod::~NFMMod()
 {
-    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;

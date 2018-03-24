@@ -91,52 +91,6 @@ void DSPEngine::removeLastDeviceSinkEngine()
     }
 }
 
-void DSPEngine::startAudioOutput()
-{
-    m_audioOutput.start(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioOutput()
-{
-    m_audioOutput.stop();
-}
-
-void DSPEngine::startAudioInput()
-{
-    m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);
-    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioInput()
-{
-    m_audioInput.stop();
-}
-
-void DSPEngine::addAudioSink(AudioFifo* audioFifo)
-{
-	qDebug("DSPEngine::addAudioSink");
-	m_audioOutput.addFifo(audioFifo);
-}
-
-void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
-{
-	qDebug("DSPEngine::removeAudioSink");
-	m_audioOutput.removeFifo(audioFifo);
-}
-
-void DSPEngine::addAudioSource(AudioFifo* audioFifo)
-{
-    qDebug("DSPEngine::addAudioSource");
-    m_audioInput.addFifo(audioFifo);
-}
-
-void DSPEngine::removeAudioSource(AudioFifo* audioFifo)
-{
-    qDebug("DSPEngine::removeAudioSource");
-    m_audioInput.removeFifo(audioFifo);
-}
-
 DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
 {
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();

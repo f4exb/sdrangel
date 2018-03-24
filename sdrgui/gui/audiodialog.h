@@ -15,13 +15,13 @@ class SDRGUI_API AudioDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	explicit AudioDialog(AudioDeviceManager* audioDeviceInfo, QWidget* parent = NULL);
+	explicit AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent = 0);
 	~AudioDialog();
 
 private:
 	Ui::AudioDialog* ui;
 
-	AudioDeviceManager* m_audioDeviceInfo;
+	AudioDeviceManager* m_audioDeviceManager;
 	float m_inputVolume;
 
 private slots:

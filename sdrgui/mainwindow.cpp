@@ -1416,9 +1416,6 @@ void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialog audioDialog(m_dspEngine->getAudioDeviceManager(), this);
 	audioDialog.exec();
-	m_dspEngine->setAudioInputVolume(m_dspEngine->getAudioDeviceManager()->getInputVolume());
-	m_dspEngine->setAudioInputDeviceIndex(m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
-	m_dspEngine->setAudioOutputDeviceIndex(m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());
 }
 
 void MainWindow::on_action_Logging_triggered()

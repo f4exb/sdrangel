@@ -280,10 +280,6 @@ int WebAPIAdapterGUI::instanceAudioPatch(
     m_mainWindow.m_dspEngine->getAudioDeviceManager()->setInputDeviceIndex(inputIndex);
     m_mainWindow.m_dspEngine->getAudioDeviceManager()->setOutputDeviceIndex(outputIndex);
 
-    m_mainWindow.m_dspEngine->setAudioInputVolume(inputVolume);
-    m_mainWindow.m_dspEngine->setAudioInputDeviceIndex(inputIndex);
-    m_mainWindow.m_dspEngine->setAudioOutputDeviceIndex(outputIndex);
-
     response.setInputVolume(m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputVolume());
     response.setInputIndex(m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceIndex());
     response.setOutputIndex(m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceIndex());

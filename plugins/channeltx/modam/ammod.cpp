@@ -66,7 +66,7 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
 
 	// CW keyer
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
@@ -88,7 +88,7 @@ AMMod::~AMMod()
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
-    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 }
 
 void AMMod::pull(Sample& sample)
