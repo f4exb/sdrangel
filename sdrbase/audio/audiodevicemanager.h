@@ -51,11 +51,6 @@ public:
     void addAudioSource(AudioFifo* audioFifo);    //!< Add an audio source
     void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
-    void startAudioOutput();
-    void stopAudioOutput();
-
-    void startAudioInput();
-    void stopAudioInput();
     void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
 private:
@@ -72,6 +67,11 @@ private:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    void startAudioOutput();
+    void stopAudioOutput();
+    void startAudioInput();
+    void stopAudioInput();
 
 	friend class AudioDialog;
 	friend class MainSettings;

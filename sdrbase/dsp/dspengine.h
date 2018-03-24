@@ -50,11 +50,6 @@ public:
 	void removeLastDeviceSinkEngine();
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
-	void startAudioOutput() { m_audioDeviceManager.startAudioOutput(); }
-	void stopAudioOutput() { m_audioDeviceManager.stopAudioOutput(); }
-
-    void startAudioInput() { m_audioDeviceManager.startAudioInput(); }
-    void stopAudioInput() {m_audioDeviceManager.stopAudioInput(); }
 
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);

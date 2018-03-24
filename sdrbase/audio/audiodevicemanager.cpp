@@ -88,25 +88,45 @@ void AudioDeviceManager::setInputVolume(float inputVolume)
 void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::addAudioSink");
+
+    if (m_audioOutput.getNbFifos() == 0) {
+        startAudioOutput();
+    }
+
     m_audioOutput.addFifo(audioFifo);
 }
 
 void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::removeAudioSink");
+
     m_audioOutput.removeFifo(audioFifo);
+
+    if (m_audioOutput.getNbFifos() == 0) {
+        stopAudioOutput();
+    }
 }
 
 void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::addAudioSource");
+
+    if (m_audioInput.getNbFifos() == 0) {
+        startAudioInput();
+    }
+
     m_audioInput.addFifo(audioFifo);
 }
 
 void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
 {
     qDebug("AudioDeviceInfo::removeAudioSource");
+
     m_audioInput.removeFifo(audioFifo);
+
+    if (m_audioInput.getNbFifos() == 0) {
+        stopAudioInput();
+    }
 }
 
 void AudioDeviceManager::startAudioOutput()
