@@ -8,6 +8,7 @@ QT += core network
 
 TEMPLATE = lib
 TARGET = swagger
+INCLUDEPATH += ../exports
 INCLUDEPATH += $$PWD/sdrangel/code/qt5/client
 
 win32 {
