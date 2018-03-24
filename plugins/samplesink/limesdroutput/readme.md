@@ -4,7 +4,7 @@
 
 This output sample sink plugin sends its samples to a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
-<p><b>&#9888; The latest version of LimeSuite is used and must be considered experimental. Hence LimeSDR support in SDRangel is also experimental. Tx does not work.</b></p>
+<p><b>&#9888; The latest version of LimeSuite is used and must be considered experimental. Hence LimeSDR support in SDRangel is also experimental. Tx does not work properly now.</b></p>
 
 LimeSDR is a 2x2 MIMO device so it has two transmitting channels that can run concurrently. To activate the second channel when the first is already active just open a new sink tab in the main window (Devices -> Add sink device) and select the same LimeSDR device.
 

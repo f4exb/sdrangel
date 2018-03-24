@@ -68,7 +68,7 @@ def getInputOptions():
     parser.add_option("-x", "--excl-list", dest="excl_fstr", help="frequencies (in Hz) exclusion comma separated list", metavar="LIST", type="string")
     parser.add_option("--excl-tol", dest="excl_tol", help="match tolerance interval (in Hz) for exclusion frequencies", metavar="FREQUENCY", type="float", default=10.0) 
     parser.add_option("-v", "--verbosity", dest="verbosity", help="verbosity level", metavar="LEVEL_INT", type="int", default = 0) 
-    parser.add_option("-L", "--delay", dest="delay", help="delay in number of settling time periods before resuming scan", metavar="NUMBER", type="int", default = 1) 
+    parser.add_option("-L", "--delay", dest="delay", help="delay in number of settling time periods before resuming scan", metavar="NUMBER", type="int", default = 5) 
 
     (options, args) = parser.parse_args()
     

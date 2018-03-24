@@ -1,6 +1,7 @@
 sdrangel (3.13.1-1) unstable; urgency=medium
 
-  * Web API: settings and report enry points for AM demod and AirspyHF 
+  * Web API: settings and report enry points for AM demod and AirspyHF
+  * Web API: client Python script scanner example 
   * LimeSDR: fixed channelA/B frequency setting with latest LimeSuite
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 25 Mar 2018 06:14:18 +0100

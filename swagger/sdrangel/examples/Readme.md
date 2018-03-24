@@ -180,6 +180,8 @@ Simple AM and NFM scanner with multiple equally spaced channels. Stops whenever 
   - HackRF
   - LimeSDR
   - RTLSDR
+  
+Check `./scanner.py --help` for the options. 
 
 Requires numpy
 
