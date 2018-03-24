@@ -37,9 +37,6 @@ public:
 	bool start(int device, int rate);
 	void stop();
 
-    bool startImmediate(int device, int rate);
-    void stopImmediate();
-
 	void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
 
@@ -52,8 +49,7 @@ private:
 	uint m_audioUsageCount;
 	bool m_onExit;
 
-	typedef std::list<AudioFifo*> AudioFifos;
-	AudioFifos m_audioFifos;
+	std::list<AudioFifo*> m_audioFifos;
 	std::vector<qint32> m_mixBuffer;
 
 	QAudioFormat m_audioFormat;
