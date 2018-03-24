@@ -47,7 +47,7 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
         treeItem = new QTreeWidgetItem(ui->audioInTree);
         treeItem->setText(0, qPrintable(it->deviceName()));
 
-        if (i == m_audioDeviceManager->getInputDeviceIndex())
+        if (i == 0)
         {
             ui->audioInTree->setCurrentItem(treeItem);
         }
@@ -65,7 +65,6 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
 
 	ui->tabWidget->setCurrentIndex(0);
 
-    m_inputVolume = m_audioDeviceManager->m_inputVolume;
 	ui->inputVolume->setValue((int) (m_inputVolume * 100.0f));
 	ui->inputVolumeText->setText(QString("%1").arg(m_inputVolume, 0, 'f', 2));
 }
@@ -77,11 +76,6 @@ AudioDialog::~AudioDialog()
 
 void AudioDialog::accept()
 {
-    int inIndex = ui->audioInTree->indexOfTopLevelItem(ui->audioInTree->currentItem());
-
-    m_audioDeviceManager->m_inputDeviceIndex = inIndex - 1;
-    m_audioDeviceManager->m_inputVolume = m_inputVolume;
-
 	QDialog::accept();
 }
 

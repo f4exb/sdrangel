@@ -37,32 +37,25 @@ public:
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
 
-    int getOutputDeviceIndex(AudioFifo* audioFifo) const;
-    int getInputDeviceIndex() const { return m_inputDeviceIndex; }
-    float getInputVolume() const { return m_inputVolume; }
-
-    void setInputDeviceIndex(int inputDeviceIndex);
-    void setInputVolume(float inputVolume);
-
     void addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
-    void addAudioSource(AudioFifo* audioFifo);    //!< Add an audio source
+    void addAudioSource(AudioFifo* audioFifo, int inputDeviceIndex = -1);    //!< Add an audio source
     void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
-
-    void setAudioInputVolume(float volume) { m_audioInput.setVolume(volume); }
 
 private:
     unsigned int m_defaultAudioSampleRate;
-	QList<QAudioDeviceInfo> m_inputDevicesInfo;
+
+    QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
+
     QMap<AudioFifo*, int> m_audioSinkFifos; //< Audio sink FIFO to audio output device index-1 map
     QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index-1 to audio output map (index -1 is default device)
     QMap<int, unsigned int> m_audioOutputSampleRates; //!< audio device index-1 to audio sample rate
-    int m_inputDeviceIndex;
-    unsigned int m_audioInputSampleRate;
-    AudioInput m_audioInput;
-    float m_inputVolume;
+
+    QMap<AudioFifo*, int> m_audioSourceFifos; //< Audio source FIFO to audio input device index-1 map
+    QMap<int, AudioInput*> m_audioInputs; //!< audio device index-1 to audio input map (index -1 is default device)
+    QMap<int, unsigned int> m_audioInputSampleRates; //!< audio device index-1 to audio sample rate
 
     void resetToDefaults();
     QByteArray serialize() const;
@@ -70,8 +63,8 @@ private:
 
     void startAudioOutput(int outputDeviceIndex);
     void stopAudioOutput(int outputDeviceIndex);
-    void startAudioInput();
-    void stopAudioInput();
+    void startAudioInput(int inputDeviceIndex);
+    void stopAudioInput(int inputDeviceIndex);
 
 	friend class AudioDialog;
 	friend class MainSettings;
