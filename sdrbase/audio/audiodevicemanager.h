@@ -22,23 +22,49 @@
 #include <QList>
 #include <QMap>
 #include <QAudioDeviceInfo>
-#include <QDataStream>
 
 #include "audio/audioinput.h"
 #include "audio/audiooutput.h"
 #include "export.h"
 
+class QDataStream;
 class AudioFifo;
+class MessageQueue;
 
 class SDRBASE_API AudioDeviceManager {
 public:
     class InputDeviceInfo
     {
     public:
+        InputDeviceInfo() :
+            sampleRate(m_defaultAudioSampleRate),
+            volume(m_defaultAudioInputVolume)
+        {}
         unsigned int sampleRate;
         float volume;
         friend QDataStream& operator<<(QDataStream& ds, const InputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, InputDeviceInfo& info);
+    };
+
+    class OutputDeviceInfo
+    {
+    public:
+        OutputDeviceInfo() :
+            sampleRate(m_defaultAudioSampleRate),
+            udpAddress(m_defaultUDPAddress),
+            udpPort(m_defaultUDPPort),
+            copyToUDP(false),
+            udpStereo(false),
+            udpUseRTP(false)
+        {}
+        unsigned int sampleRate;
+        QString udpAddress;
+        quint16 udpPort;
+        bool copyToUDP;
+        bool udpStereo;
+        bool udpUseRTP;
+        friend QDataStream& operator<<(QDataStream& ds, const OutputDeviceInfo& info);
+        friend QDataStream& operator>>(QDataStream& ds, OutputDeviceInfo& info);
     };
 
 	AudioDeviceManager();
@@ -51,24 +77,28 @@ public:
     bool getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const;
     bool getInputDeviceName(int outputDeviceIndex, QString &deviceName) const;
 
-    void addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex = -1); //!< Add the audio sink
+    void addAudioSink(AudioFifo* audioFifo, MessageQueue *sampleSinkMessageQueue, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
 
-    void addAudioSource(AudioFifo* audioFifo, int inputDeviceIndex = -1);    //!< Add an audio source
+    void addAudioSource(AudioFifo* audioFifo, MessageQueue *sampleSourceMessageQueue, int inputDeviceIndex = -1);    //!< Add an audio source
     void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
     static const unsigned int m_defaultAudioSampleRate = 48000;
     static const float m_defaultAudioInputVolume;
-private:
+    static const QString m_defaultUDPAddress;
+    static const quint16 m_defaultUDPPort = 9998;
 
+private:
     QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
 
-    QMap<AudioFifo*, int> m_audioSinkFifos; //< Audio sink FIFO to audio output device index-1 map
+    QMap<AudioFifo*, int> m_audioSinkFifos; //< audio sink FIFO to audio output device index-1 map
+    QMap<AudioFifo*, MessageQueue*> m_sampleSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
     QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
-    QMap<QString, unsigned int> m_audioOutputSampleRates; //!< audio device name to audio sample rate
+    QMap<QString, OutputDeviceInfo> m_audioOutputInfos; //!< audio device name to audio output info
 
-    QMap<AudioFifo*, int> m_audioSourceFifos; //< Audio source FIFO to audio input device index-1 map
+    QMap<AudioFifo*, int> m_audioSourceFifos; //< audio source FIFO to audio input device index-1 map
+    QMap<AudioFifo*, MessageQueue*> m_sampleSourceMessageQueues; //!< audio source FIFO to attached source message queue
     QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
     QMap<QString, InputDeviceInfo> m_audioInputInfos; //!< audio device name to audio input device info
 
@@ -94,5 +124,9 @@ private:
 };
 
 QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info);
+QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::InputDeviceInfo& info);
+
+QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::OutputDeviceInfo& info);
+QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& info);
 
 #endif // INCLUDE_AUDIODEVICEMANGER_H

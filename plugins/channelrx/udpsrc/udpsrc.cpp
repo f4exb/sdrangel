@@ -543,7 +543,7 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
         if (settings.m_audioActive)
         {
             m_audioBufferFill = 0;
-            DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo);
+            DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
         }
         else
         {

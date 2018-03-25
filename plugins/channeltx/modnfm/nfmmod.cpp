@@ -73,7 +73,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
 	m_ctcssNco.setFreq(88.5, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
 
     // CW keyer
     m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);

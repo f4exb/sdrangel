@@ -66,7 +66,7 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
 
 	// CW keyer
 	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);

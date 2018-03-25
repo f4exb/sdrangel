@@ -75,7 +75,7 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 
 	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
 	m_toneNcoRF.setFreq(1000.0, m_outputSampleRate);
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
 
     // CW keyer
     m_cwKeyer.setSampleRate(m_outputSampleRate);

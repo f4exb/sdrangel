@@ -18,9 +18,11 @@
 #include "audio/audiodevicemanager.h"
 #include "util/simpleserializer.h"
 
+#include <QDataStream>
 #include <QDebug>
 
 const float AudioDeviceManager::m_defaultAudioInputVolume = 0.15f;
+const QString AudioDeviceManager::m_defaultUDPAddress = "127.0.0.1";
 
 QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info)
 {
@@ -31,6 +33,18 @@ QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceIn
 QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::InputDeviceInfo& info)
 {
     ds >> info.sampleRate >> info.volume;
+    return ds;
+}
+
+QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::OutputDeviceInfo& info)
+{
+    ds << info.sampleRate << info.udpAddress << info.udpPort << info.copyToUDP << info.udpStereo << info.udpUseRTP;
+    return ds;
+}
+
+QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& info)
+{
+    ds >> info.sampleRate >> info.udpAddress >> info.udpPort >> info.copyToUDP >> info.udpStereo >> info.udpUseRTP;
     return ds;
 }
 
@@ -122,7 +136,7 @@ void AudioDeviceManager::serializeInputMap(QByteArray& data) const
 void AudioDeviceManager::serializeOutputMap(QByteArray& data) const
 {
     QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
-    *stream << m_audioOutputSampleRates;
+    *stream << m_audioOutputInfos;
     delete stream;
 }
 
@@ -167,10 +181,10 @@ void AudioDeviceManager::deserializeInputMap(QByteArray& data)
 void AudioDeviceManager::deserializeOutputMap(QByteArray& data)
 {
     QDataStream readStream(&data, QIODevice::ReadOnly);
-    readStream >> m_audioOutputSampleRates;
+    readStream >> m_audioOutputInfos;
 }
 
-void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex)
+void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sampleSinkMessageQueue, int outputDeviceIndex)
 {
     qDebug("AudioDeviceManager::addAudioSink: %d: %p", outputDeviceIndex, audioFifo);
 
@@ -198,6 +212,7 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, int outputDeviceInde
     }
 
     m_audioSinkFifos[audioFifo] = outputDeviceIndex; // register audio FIFO
+    m_sampleSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
 }
 
 void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
@@ -218,9 +233,10 @@ void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
     }
 
     m_audioSinkFifos.remove(audioFifo); // unregister audio FIFO
+    m_sampleSinkMessageQueues.remove(audioFifo);
 }
 
-void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, int inputDeviceIndex)
+void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *sampleSourceMessageQueue, int inputDeviceIndex)
 {
     qDebug("AudioDeviceManager::addAudioSource: %d: %p", inputDeviceIndex, audioFifo);
 
@@ -248,6 +264,7 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, int inputDeviceInd
     }
 
     m_audioSourceFifos[audioFifo] = inputDeviceIndex; // register audio FIFO
+    m_sampleSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
 }
 
 void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
@@ -268,23 +285,47 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
     }
 
     m_audioSourceFifos.remove(audioFifo); // unregister audio FIFO
+    m_sampleSourceMessageQueues.remove(audioFifo);
 }
 
 void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
 {
     unsigned int sampleRate;
+    QString udpAddress;
+    quint16 udpPort;
+    bool copyAudioToUDP;
+    bool udpStereo;
+    bool udpUseRTP;
     QString deviceName;
 
     if (getOutputDeviceName(outputDeviceIndex, deviceName))
     {
-        if (m_audioOutputSampleRates.find(deviceName) == m_audioOutputSampleRates.end()) {
+        if (m_audioOutputInfos.find(deviceName) == m_audioOutputInfos.end())
+        {
             sampleRate = m_defaultAudioSampleRate;
-        } else {
-            sampleRate = m_audioOutputSampleRates[deviceName];
+            udpAddress = m_defaultUDPAddress;
+            udpPort = m_defaultUDPPort;
+            copyAudioToUDP = false;
+            udpStereo = false;
+            udpUseRTP = false;
+        }
+        else
+        {
+            sampleRate = m_audioOutputInfos[deviceName].sampleRate;
+            udpAddress = m_audioOutputInfos[deviceName].udpAddress;
+            udpPort = m_audioOutputInfos[deviceName].udpPort;
+            copyAudioToUDP = m_audioOutputInfos[deviceName].copyToUDP;
+            udpStereo = m_audioOutputInfos[deviceName].udpStereo;
+            udpUseRTP = m_audioOutputInfos[deviceName].udpUseRTP;
         }
 
         m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, sampleRate);
-        m_audioOutputSampleRates[deviceName] = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+        m_audioOutputInfos[deviceName].sampleRate = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+        m_audioOutputInfos[deviceName].udpAddress = udpAddress;
+        m_audioOutputInfos[deviceName].udpPort = udpPort;
+        m_audioOutputInfos[deviceName].copyToUDP = copyAudioToUDP;
+        m_audioOutputInfos[deviceName].udpStereo = udpStereo;
+        m_audioOutputInfos[deviceName].udpUseRTP = udpUseRTP;
     }
     else
     {
@@ -347,12 +388,17 @@ void AudioDeviceManager::debugAudioInputInfos() const
 
 void AudioDeviceManager::debugAudioOutputInfos() const
 {
-    QMap<QString, unsigned int>::const_iterator it = m_audioOutputSampleRates.begin();
+    QMap<QString, OutputDeviceInfo>::const_iterator it = m_audioOutputInfos.begin();
 
-    for (; it != m_audioOutputSampleRates.end(); ++it)
+    for (; it != m_audioOutputInfos.end(); ++it)
     {
         qDebug() << "AudioDeviceManager::debugAudioOutputInfos:"
                 << " name: " << it.key()
-                << " sampleRate: " << it.value();
+                << " sampleRate: " << it.value().sampleRate
+                << " udpAddress: " << it.value().udpAddress
+                << " udpPort: " << it.value().udpPort
+                << " copyToUDP: " << it.value().copyToUDP
+                << " udpStereo: " << it.value().udpStereo
+                << " udpUseRTP: " << it.value().udpUseRTP;
     }
 }

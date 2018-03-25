@@ -23,11 +23,13 @@
 #include <QAudioFormat>
 #include <list>
 #include <vector>
+#include <stdint.h>
 #include "export.h"
 
 class QAudioOutput;
 class AudioFifo;
 class AudioOutputPipe;
+class AudioNetSink;
 
 class SDRBASE_API AudioOutput : QIODevice {
 public:
@@ -44,9 +46,17 @@ public:
 	unsigned int getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
 
+	void setUdpDestination(const QString& address, uint16_t port);
+	void setUdpCopyToUDP(bool copyToUDP);
+	void setUdpStereo(bool stereo);
+	void setUdpUseRTP(bool useRTP);
+
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
+	AudioNetSink* m_audioNetSink;
+	bool m_copyAudioToUdp;
+	bool m_udpStereo;
 	uint m_audioUsageCount;
 	bool m_onExit;
 

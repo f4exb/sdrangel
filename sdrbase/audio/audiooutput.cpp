@@ -19,12 +19,16 @@
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
 #include <QAudioOutput>
-#include "audio/audiooutput.h"
-#include "audio/audiofifo.h"
+#include "audiooutput.h"
+#include "audiofifo.h"
+#include "audionetsink.h"
 
 AudioOutput::AudioOutput() :
 	m_mutex(QMutex::Recursive),
 	m_audioOutput(0),
+	m_audioNetSink(0),
+	m_copyAudioToUdp(false),
+	m_udpStereo(false),
 	m_audioUsageCount(0),
 	m_onExit(false),
 	m_audioFifos()
@@ -100,6 +104,7 @@ bool AudioOutput::start(int device, int rate)
         }
 
         m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
+        m_audioNetSink = new AudioNetSink(0);
 
         QIODevice::open(QIODevice::ReadOnly);
 
@@ -123,6 +128,8 @@ void AudioOutput::stop()
     QMutexLocker mutexLocker(&m_mutex);
     m_audioOutput->stop();
     QIODevice::close();
+    delete m_audioNetSink;
+    m_audioNetSink = 0;
     delete m_audioOutput;
 
 //    if (m_audioUsageCount > 0)
@@ -161,6 +168,35 @@ bool AudioOutput::open(OpenMode mode)
 	Q_UNUSED(mode);
 	return false;
 }*/
+
+void AudioOutput::setUdpDestination(const QString& address, uint16_t port)
+{
+    if (m_audioNetSink) {
+        m_audioNetSink->setDestination(address, port);
+    }
+}
+
+void AudioOutput::setUdpCopyToUDP(bool copyToUDP)
+{
+    m_copyAudioToUdp = copyToUDP;
+}
+
+void AudioOutput::setUdpStereo(bool stereo)
+{
+    if (m_audioNetSink) {
+        m_audioNetSink->setStereo(stereo);
+    }
+
+    m_udpStereo = stereo;
+}
+
+void AudioOutput::setUdpUseRTP(bool useRTP)
+{
+    if (m_audioNetSink) {
+        m_audioNetSink->selectType(useRTP ? AudioNetSink::SinkRTP : AudioNetSink::SinkUDP);
+    }
+}
+
 
 qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {
