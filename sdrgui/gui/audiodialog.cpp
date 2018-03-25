@@ -4,7 +4,7 @@
 #include <QTreeWidgetItem>
 #include "ui_audiodialog.h"
 
-AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
+AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::AudioDialog),
 	m_audioDeviceManager(audioDeviceManager)
@@ -15,16 +15,18 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
 
 	// out panel
 
+	QAudioDeviceInfo defaultOutputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
 	treeItem = new QTreeWidgetItem(ui->audioOutTree);
-	treeItem->setText(0, tr("Default (use first suitable device)"));
+	treeItem->setText(0, tr("System default output device"));
 
 	const QList<QAudioDeviceInfo>& outputDevices = m_audioDeviceManager->getOutputDevices();
 	i = 0;
 
     for(QList<QAudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
     {
+        bool isDefaultDevice = it->deviceName() == defaultOutputDeviceInfo.deviceName();
         treeItem = new QTreeWidgetItem(ui->audioOutTree);
-        treeItem->setText(0, qPrintable(it->deviceName()));
+        treeItem->setText(0, it->deviceName() + (isDefaultDevice ? "(*)" : ""));
 
         if (i == 0)
         {
@@ -36,16 +38,18 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
 
     // in panel
 
+    QAudioDeviceInfo defaultInputDeviceInfo = QAudioDeviceInfo::defaultInputDevice();
     treeItem = new QTreeWidgetItem(ui->audioInTree);
-    treeItem->setText(0, tr("Default (use first suitable device)"));
+    treeItem->setText(0, tr("System default input device"));
 
     const QList<QAudioDeviceInfo>& inputDevices = m_audioDeviceManager->getInputDevices();
     i = 0;
 
     for(QList<QAudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
     {
+        bool isDefaultDevice = it->deviceName() == defaultInputDeviceInfo.deviceName();
         treeItem = new QTreeWidgetItem(ui->audioInTree);
-        treeItem->setText(0, qPrintable(it->deviceName()));
+        treeItem->setText(0, it->deviceName() + (isDefaultDevice ? "(*)" : ""));
 
         if (i == 0)
         {
@@ -69,17 +73,17 @@ AudioDialog::AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent
 	ui->inputVolumeText->setText(QString("%1").arg(m_inputVolume, 0, 'f', 2));
 }
 
-AudioDialog::~AudioDialog()
+AudioDialogX::~AudioDialogX()
 {
 	delete ui;
 }
 
-void AudioDialog::accept()
+void AudioDialogX::accept()
 {
 	QDialog::accept();
 }
 
-void AudioDialog::on_inputVolume_valueChanged(int value)
+void AudioDialogX::on_inputVolume_valueChanged(int value)
 {
     m_inputVolume = (float) value / 100.0f;
     ui->inputVolumeText->setText(QString("%1").arg(m_inputVolume, 0, 'f', 2));

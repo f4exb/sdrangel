@@ -11,12 +11,12 @@ namespace Ui {
 	class AudioDialog;
 }
 
-class SDRGUI_API AudioDialog : public QDialog {
+class SDRGUI_API AudioDialogX : public QDialog {
 	Q_OBJECT
 
 public:
-	explicit AudioDialog(AudioDeviceManager* audioDeviceManager, QWidget* parent = 0);
-	~AudioDialog();
+	explicit AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent = 0);
+	~AudioDialogX();
 
 private:
 	Ui::AudioDialog* ui;

@@ -119,7 +119,6 @@ private:
     void deserializeOutputMap(QByteArray& data);
     void debugAudioOutputInfos() const;
 
-	friend class AudioDialog;
 	friend class MainSettings;
 };
 

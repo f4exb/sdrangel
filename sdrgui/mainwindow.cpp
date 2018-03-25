@@ -1414,7 +1414,7 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 
 void MainWindow::on_action_Audio_triggered()
 {
-	AudioDialog audioDialog(m_dspEngine->getAudioDeviceManager(), this);
+	AudioDialogX audioDialog(m_dspEngine->getAudioDeviceManager(), this);
 	audioDialog.exec();
 }
 
