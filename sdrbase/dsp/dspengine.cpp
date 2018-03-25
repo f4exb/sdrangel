@@ -26,7 +26,6 @@
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
-    m_audioDeviceManager(m_defaultAudioSampleRate),
     m_audioInputDeviceIndex(-1),    // default device
     m_audioOutputDeviceIndex(-1)    // default device
 {

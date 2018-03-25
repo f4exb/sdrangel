@@ -18,8 +18,9 @@
 #include <audio/audiodevicemanager.h>
 #include "util/simpleserializer.h"
 
-AudioDeviceManager::AudioDeviceManager(unsigned int defaultAudioSampleRate) :
-    m_defaultAudioSampleRate(defaultAudioSampleRate)
+const float AudioDeviceManager::m_defaultAudioInputVolume = 0.15f;
+
+AudioDeviceManager::AudioDeviceManager()
 {
     m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
     m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -31,6 +32,48 @@ AudioDeviceManager::~AudioDeviceManager()
 
     for (; it != m_audioOutputs.end(); ++it) {
         delete(*it);
+    }
+}
+
+bool AudioDeviceManager::getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const
+{
+    if (outputDeviceIndex < 0)
+    {
+        deviceName = "System default device";
+        return true;
+    }
+    else
+    {
+        if (outputDeviceIndex < m_outputDevicesInfo.size())
+        {
+            deviceName = m_outputDevicesInfo[outputDeviceIndex].deviceName();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+bool AudioDeviceManager::getInputDeviceName(int inputDeviceIndex, QString &deviceName) const
+{
+    if (inputDeviceIndex < 0)
+    {
+        deviceName = "System default device";
+        return true;
+    }
+    else
+    {
+        if (inputDeviceIndex < m_inputDevicesInfo.size())
+        {
+            deviceName = m_inputDevicesInfo[inputDeviceIndex].deviceName();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -68,10 +111,8 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, int outputDeviceInde
 {
     qDebug("AudioDeviceManager::addAudioSink: %d: %p", outputDeviceIndex, audioFifo);
 
-    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end())
-    {
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) {
         m_audioOutputs[outputDeviceIndex] = new AudioOutput();
-        m_audioOutputSampleRates[outputDeviceIndex] = m_defaultAudioSampleRate;
     }
 
     if (m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) {
@@ -120,10 +161,8 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, int inputDeviceInd
 {
     qDebug("AudioDeviceManager::addAudioSource: %d: %p", inputDeviceIndex, audioFifo);
 
-    if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end())
-    {
+    if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end()) {
         m_audioInputs[inputDeviceIndex] = new AudioInput();
-        m_audioInputSampleRates[inputDeviceIndex] = m_defaultAudioSampleRate;
     }
 
     if (m_audioInputs[inputDeviceIndex]->getNbFifos() == 0) {
@@ -170,8 +209,24 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
 
 void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
 {
-    m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, m_audioOutputSampleRates[outputDeviceIndex]);
-    m_audioOutputSampleRates[outputDeviceIndex] = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+    unsigned int sampleRate;
+    QString deviceName;
+
+    if (getOutputDeviceName(outputDeviceIndex, deviceName))
+    {
+        if (m_audioOutputSampleRates.find(deviceName) == m_audioOutputSampleRates.end()) {
+            sampleRate = m_defaultAudioSampleRate;
+        } else {
+            sampleRate = m_audioOutputSampleRates[deviceName];
+        }
+
+        m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, sampleRate);
+        m_audioOutputSampleRates[deviceName] = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+    }
+    else
+    {
+        qWarning("AudioDeviceManager::startAudioOutput: unknown device index %d", outputDeviceIndex);
+    }
 }
 
 void AudioDeviceManager::stopAudioOutput(int outputDeviceIndex)
@@ -181,8 +236,32 @@ void AudioDeviceManager::stopAudioOutput(int outputDeviceIndex)
 
 void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 {
-    m_audioInputs[inputDeviceIndex]->start(inputDeviceIndex, m_audioInputSampleRates[inputDeviceIndex]);
-    m_audioInputSampleRates[inputDeviceIndex] = m_audioInputs[inputDeviceIndex]->getRate(); // update with actual rate
+    unsigned int sampleRate;
+    float volume;
+    QString deviceName;
+
+    if (getInputDeviceName(inputDeviceIndex, deviceName))
+    {
+        if (m_audioInputSampleRates.find(deviceName) == m_audioInputSampleRates.end()) {
+            sampleRate = m_defaultAudioSampleRate;
+        } else {
+            sampleRate = m_audioInputSampleRates[deviceName];
+        }
+
+        if (m_audioInputVolumes.find(deviceName) == m_audioInputVolumes.end()) {
+            volume = m_defaultAudioInputVolume;
+        } else {
+            volume = m_audioInputVolumes[deviceName];
+        }
+
+        m_audioInputs[inputDeviceIndex]->start(inputDeviceIndex, sampleRate);
+        m_audioInputSampleRates[deviceName] = m_audioInputs[inputDeviceIndex]->getRate(); // update with actual rate
+        m_audioInputs[inputDeviceIndex]->setVolume(volume);
+    }
+    else
+    {
+        qWarning("AudioDeviceManager::startAudioInput: unknown device index %d", inputDeviceIndex);
+    }
 }
 
 void AudioDeviceManager::stopAudioInput(int inputDeviceIndex)

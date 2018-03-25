@@ -31,11 +31,15 @@ class AudioFifo;
 
 class SDRBASE_API AudioDeviceManager {
 public:
-	AudioDeviceManager(unsigned int defaultAudioSampleRate);
+	AudioDeviceManager();
 	~AudioDeviceManager();
+
 
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
+
+    bool getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const;
+    bool getInputDeviceName(int outputDeviceIndex, QString &deviceName) const;
 
     void addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
@@ -43,19 +47,21 @@ public:
     void addAudioSource(AudioFifo* audioFifo, int inputDeviceIndex = -1);    //!< Add an audio source
     void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
+    static const unsigned int m_defaultAudioSampleRate = 48000;
+    static const float m_defaultAudioInputVolume;
 private:
-    unsigned int m_defaultAudioSampleRate;
 
     QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
 
     QMap<AudioFifo*, int> m_audioSinkFifos; //< Audio sink FIFO to audio output device index-1 map
-    QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index-1 to audio output map (index -1 is default device)
-    QMap<int, unsigned int> m_audioOutputSampleRates; //!< audio device index-1 to audio sample rate
+    QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
+    QMap<QString, unsigned int> m_audioOutputSampleRates; //!< audio device name to audio sample rate
 
     QMap<AudioFifo*, int> m_audioSourceFifos; //< Audio source FIFO to audio input device index-1 map
-    QMap<int, AudioInput*> m_audioInputs; //!< audio device index-1 to audio input map (index -1 is default device)
-    QMap<int, unsigned int> m_audioInputSampleRates; //!< audio device index-1 to audio sample rate
+    QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
+    QMap<QString, unsigned int> m_audioInputSampleRates; //!< audio device name to audio sample rate
+    QMap<QString, float> m_audioInputVolumes; //!< audio device name to input volume
 
     void resetToDefaults();
     QByteArray serialize() const;
