@@ -22,6 +22,7 @@
 #include <QList>
 #include <QMap>
 #include <QAudioDeviceInfo>
+#include <QDataStream>
 
 #include "audio/audioinput.h"
 #include "audio/audiooutput.h"
@@ -31,6 +32,15 @@ class AudioFifo;
 
 class SDRBASE_API AudioDeviceManager {
 public:
+    class InputDeviceInfo
+    {
+    public:
+        unsigned int sampleRate;
+        float volume;
+        friend QDataStream& operator<<(QDataStream& ds, const InputDeviceInfo& info);
+        friend QDataStream& operator>>(QDataStream& ds, InputDeviceInfo& info);
+    };
+
 	AudioDeviceManager();
 	~AudioDeviceManager();
 
@@ -60,8 +70,7 @@ private:
 
     QMap<AudioFifo*, int> m_audioSourceFifos; //< Audio source FIFO to audio input device index-1 map
     QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
-    QMap<QString, unsigned int> m_audioInputSampleRates; //!< audio device name to audio sample rate
-    QMap<QString, float> m_audioInputVolumes; //!< audio device name to input volume
+    QMap<QString, InputDeviceInfo> m_audioInputInfos; //!< audio device name to audio input device info
 
     void resetToDefaults();
     QByteArray serialize() const;
@@ -72,8 +81,18 @@ private:
     void startAudioInput(int inputDeviceIndex);
     void stopAudioInput(int inputDeviceIndex);
 
+    void serializeInputMap(QByteArray& data) const;
+    void deserializeInputMap(QByteArray& data);
+    void debugAudioInputInfos() const;
+
+    void serializeOutputMap(QByteArray& data) const;
+    void deserializeOutputMap(QByteArray& data);
+    void debugAudioOutputInfos() const;
+
 	friend class AudioDialog;
 	friend class MainSettings;
 };
+
+QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info);
 
 #endif // INCLUDE_AUDIODEVICEMANGER_H

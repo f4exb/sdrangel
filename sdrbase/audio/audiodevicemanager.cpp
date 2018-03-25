@@ -15,10 +15,24 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <audio/audiodevicemanager.h>
+#include "audio/audiodevicemanager.h"
 #include "util/simpleserializer.h"
 
+#include <QDebug>
+
 const float AudioDeviceManager::m_defaultAudioInputVolume = 0.15f;
+
+QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info)
+{
+    ds << info.sampleRate << info.volume;
+    return ds;
+}
+
+QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::InputDeviceInfo& info)
+{
+    ds >> info.sampleRate >> info.volume;
+    return ds;
+}
 
 AudioDeviceManager::AudioDeviceManager()
 {
@@ -83,12 +97,39 @@ void AudioDeviceManager::resetToDefaults()
 
 QByteArray AudioDeviceManager::serialize() const
 {
+    qDebug("AudioDeviceManager::serialize");
+    debugAudioInputInfos();
+    debugAudioOutputInfos();
+
     SimpleSerializer s(1);
+    QByteArray data;
+
+    serializeInputMap(data);
+    s.writeBlob(1, data);
+    serializeOutputMap(data);
+    s.writeBlob(2, data);
+
     return s.final();
+}
+
+void AudioDeviceManager::serializeInputMap(QByteArray& data) const
+{
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    *stream << m_audioInputInfos;
+    delete stream;
+}
+
+void AudioDeviceManager::serializeOutputMap(QByteArray& data) const
+{
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    *stream << m_audioOutputSampleRates;
+    delete stream;
 }
 
 bool AudioDeviceManager::deserialize(const QByteArray& data)
 {
+    qDebug("AudioDeviceManager::deserialize");
+
     SimpleDeserializer d(data);
 
     if(!d.isValid()) {
@@ -98,6 +139,16 @@ bool AudioDeviceManager::deserialize(const QByteArray& data)
 
     if(d.getVersion() == 1)
     {
+        QByteArray data;
+
+        d.readBlob(1, &data);
+        deserializeInputMap(data);
+        d.readBlob(2, &data);
+        deserializeOutputMap(data);
+
+        debugAudioInputInfos();
+        debugAudioOutputInfos();
+
         return true;
     }
     else
@@ -105,6 +156,18 @@ bool AudioDeviceManager::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void AudioDeviceManager::deserializeInputMap(QByteArray& data)
+{
+    QDataStream readStream(&data, QIODevice::ReadOnly);
+    readStream >> m_audioInputInfos;
+}
+
+void AudioDeviceManager::deserializeOutputMap(QByteArray& data)
+{
+    QDataStream readStream(&data, QIODevice::ReadOnly);
+    readStream >> m_audioOutputSampleRates;
 }
 
 void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, int outputDeviceIndex)
@@ -198,9 +261,9 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
     }
 
     int audioInputDeviceIndex = m_audioSourceFifos[audioFifo];
-    m_audioOutputs[audioInputDeviceIndex]->removeFifo(audioFifo);
+    m_audioInputs[audioInputDeviceIndex]->removeFifo(audioFifo);
 
-    if (m_audioOutputs[audioInputDeviceIndex]->getNbFifos() == 0) {
+    if (m_audioInputs[audioInputDeviceIndex]->getNbFifos() == 0) {
         stopAudioInput(audioInputDeviceIndex);
     }
 
@@ -242,21 +305,21 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 
     if (getInputDeviceName(inputDeviceIndex, deviceName))
     {
-        if (m_audioInputSampleRates.find(deviceName) == m_audioInputSampleRates.end()) {
+        if (m_audioInputInfos.find(deviceName) == m_audioInputInfos.end())
+        {
             sampleRate = m_defaultAudioSampleRate;
-        } else {
-            sampleRate = m_audioInputSampleRates[deviceName];
-        }
-
-        if (m_audioInputVolumes.find(deviceName) == m_audioInputVolumes.end()) {
             volume = m_defaultAudioInputVolume;
-        } else {
-            volume = m_audioInputVolumes[deviceName];
+        }
+        else
+        {
+            sampleRate = m_audioInputInfos[deviceName].sampleRate;
+            volume = m_audioInputInfos[deviceName].volume;
         }
 
         m_audioInputs[inputDeviceIndex]->start(inputDeviceIndex, sampleRate);
-        m_audioInputSampleRates[deviceName] = m_audioInputs[inputDeviceIndex]->getRate(); // update with actual rate
         m_audioInputs[inputDeviceIndex]->setVolume(volume);
+        m_audioInputInfos[deviceName].sampleRate = m_audioInputs[inputDeviceIndex]->getRate();
+        m_audioInputInfos[deviceName].volume = volume;
     }
     else
     {
@@ -267,4 +330,29 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 void AudioDeviceManager::stopAudioInput(int inputDeviceIndex)
 {
     m_audioInputs[inputDeviceIndex]->stop();
+}
+
+void AudioDeviceManager::debugAudioInputInfos() const
+{
+    QMap<QString, InputDeviceInfo>::const_iterator it = m_audioInputInfos.begin();
+
+    for (; it != m_audioInputInfos.end(); ++it)
+    {
+        qDebug() << "AudioDeviceManager::debugAudioInputInfos:"
+                << " name: " << it.key()
+                << " sampleRate: " << it.value().sampleRate
+                << " volume: " << it.value().volume;
+    }
+}
+
+void AudioDeviceManager::debugAudioOutputInfos() const
+{
+    QMap<QString, unsigned int>::const_iterator it = m_audioOutputSampleRates.begin();
+
+    for (; it != m_audioOutputSampleRates.end(); ++it)
+    {
+        qDebug() << "AudioDeviceManager::debugAudioOutputInfos:"
+                << " name: " << it.key()
+                << " sampleRate: " << it.value();
+    }
 }
