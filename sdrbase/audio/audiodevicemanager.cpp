@@ -573,6 +573,8 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpCopyToUDP(deviceInfo.copyToUDP);
     audioOutput->setUdpDestination(deviceInfo.udpAddress, deviceInfo.udpPort);
     audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
+    audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
+    audioOutput->setUdpChannelFormat(deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
 }
 
 void AudioDeviceManager::unsetOutputDeviceInfo(int outputDeviceIndex)

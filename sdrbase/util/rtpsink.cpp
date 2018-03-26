@@ -53,7 +53,7 @@ RTPSink::RTPSink(QUdpSocket *udpSocket, bool stereo) :
         qDebug("RTPSink::RTPSink: created session: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    setPayloadType(m_payloadType);
+    setPayloadInformation(m_payloadType, m_sampleRate);
     m_valid = true;
 
     uint32_t endianTest32 = 1;
@@ -68,6 +68,74 @@ RTPSink::~RTPSink()
 
     if (m_byteBuffer) {
         delete[] m_byteBuffer;
+    }
+}
+
+void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
+{
+    uint32_t timestampinc;
+    QMutexLocker locker(&m_mutex);
+
+    qDebug("RTPSink::setPayloadType: %d sampleRate: %d", payloadType, sampleRate);
+
+    switch (payloadType)
+    {
+    case PayloadL16Stereo:
+        m_sampleBytes = 4;
+        m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 100;
+        break;
+    case PayloadL16Mono:
+    default:
+        m_sampleBytes = 2;
+        m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 50;
+        break;
+    }
+
+    m_packetSamples = m_sampleRate/50; // 20ms packet samples
+    m_bufferSize = m_packetSamples * m_sampleBytes;
+
+    if (m_byteBuffer) {
+        delete[] m_byteBuffer;
+    }
+
+    m_byteBuffer = new uint8_t[m_bufferSize];
+    m_sampleBufferIndex = 0;
+    m_payloadType = payloadType;
+
+    int status = m_rtpSession.SetTimestampUnit(1.0 / (double) m_sampleRate);
+
+    if (status < 0) {
+        qCritical("RTPSink::setPayloadType: cannot set timestamp unit: %s", qrtplib::RTPGetErrorString(status).c_str());
+    } else {
+        qDebug("RTPSink::setPayloadType: timestamp unit set to %f: %s",
+               1.0 / (double) m_sampleRate,
+               qrtplib::RTPGetErrorString(status).c_str());
+    }
+
+    status = m_rtpSession.SetDefaultMark(false);
+
+    if (status < 0) {
+        qCritical("RTPSink::setPayloadType: cannot set default mark: %s", qrtplib::RTPGetErrorString(status).c_str());
+    } else {
+        qDebug("RTPSink::setPayloadType: set default mark to false: %s", qrtplib::RTPGetErrorString(status).c_str());
+    }
+
+    status = m_rtpSession.SetDefaultTimestampIncrement(timestampinc);
+
+    if (status < 0) {
+        qCritical("RTPSink::setPayloadType: cannot set default timestamp increment: %s", qrtplib::RTPGetErrorString(status).c_str());
+    } else {
+        qDebug("RTPSink::setPayloadType: set default timestamp increment to %d: %s", timestampinc, qrtplib::RTPGetErrorString(status).c_str());
+    }
+
+    status = m_rtpSession.SetMaximumPacketSize(m_bufferSize+40);
+
+    if (status < 0) {
+        qCritical("RTPSink::setPayloadType: cannot set maximum packet size: %s", qrtplib::RTPGetErrorString(status).c_str());
+    } else {
+        qDebug("RTPSink::setPayloadType: set maximum packet size to %d bytes: %s", m_bufferSize+40, qrtplib::RTPGetErrorString(status).c_str());
     }
 }
 

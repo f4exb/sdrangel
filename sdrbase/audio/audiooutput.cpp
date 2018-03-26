@@ -197,11 +197,14 @@ void AudioOutput::setUdpUseRTP(bool useRTP)
 
 void AudioOutput::setUdpChannelMode(UDPChannelMode udpChannelMode)
 {
-    if (m_audioNetSink) {
-        m_audioNetSink->setStereo(udpChannelMode == UDPChannelStereo);
-    }
-
     m_udpChannelMode = udpChannelMode;
+}
+
+void AudioOutput::setUdpChannelFormat(bool stereo, int sampleRate)
+{
+    if (m_audioNetSink) {
+        m_audioNetSink->setParameters(stereo, sampleRate);
+    }
 }
 
 qint64 AudioOutput::readData(char* data, qint64 maxLen)

@@ -58,6 +58,7 @@ public:
 	void setUdpCopyToUDP(bool copyToUDP);
 	void setUdpUseRTP(bool useRTP);
 	void setUdpChannelMode(UDPChannelMode udpChannelMode);
+	void setUdpChannelFormat(bool stereo, int sampleRate);
 
 private:
 	QMutex m_mutex;

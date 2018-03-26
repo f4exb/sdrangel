@@ -49,6 +49,7 @@ public:
 
     bool isValid() const { return m_valid; }
     void setPayloadType(PayloadType payloadType);
+    void setPayloadInformation(PayloadType payloadType, int sampleRate);
 
     void setDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);

@@ -94,6 +94,11 @@ void AudioNetSink::setStereo(bool stereo)
     m_rtpBufferAudio->setPayloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
 }
 
+void AudioNetSink::setParameters(bool stereo, int sampleRate)
+{
+    m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
+}
+
 void AudioNetSink::write(qint16 sample)
 {
     if (m_type == SinkUDP)
