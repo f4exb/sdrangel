@@ -198,8 +198,8 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPAddress->setText(m_outputDeviceInfo.udpAddress);
     ui->outputUDPPort->setText(tr("%1").arg(m_outputDeviceInfo.udpPort));
     ui->outputUDPCopy->setChecked(m_outputDeviceInfo.copyToUDP);
-    ui->outputUDPStereo->setChecked(m_outputDeviceInfo.udpStereo);
     ui->outputUDPUseRTP->setChecked(m_outputDeviceInfo.udpUseRTP);
+    ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
 }
 
 void AudioDialogX::updateOutputDeviceInfo()
@@ -208,7 +208,7 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.udpAddress = ui->outputUDPAddress->text();
     m_outputDeviceInfo.udpPort = m_outputUDPPort;
     m_outputDeviceInfo.copyToUDP = ui->outputUDPCopy->isChecked();
-    m_outputDeviceInfo.udpStereo = ui->outputUDPStereo->isChecked();
     m_outputDeviceInfo.udpUseRTP = ui->outputUDPUseRTP->isChecked();
+    m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
 }
 

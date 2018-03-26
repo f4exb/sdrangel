@@ -33,6 +33,14 @@ class AudioNetSink;
 
 class SDRBASE_API AudioOutput : QIODevice {
 public:
+    enum UDPChannelMode
+    {
+        UDPChannelLeft,
+        UDPChannelRight,
+        UDPChannelMixed,
+        UDPChannelStereo
+    };
+
 	AudioOutput();
 	virtual ~AudioOutput();
 
@@ -48,15 +56,15 @@ public:
 
 	void setUdpDestination(const QString& address, uint16_t port);
 	void setUdpCopyToUDP(bool copyToUDP);
-	void setUdpStereo(bool stereo);
 	void setUdpUseRTP(bool useRTP);
+	void setUdpChannelMode(UDPChannelMode udpChannelMode);
 
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
 	AudioNetSink* m_audioNetSink;
 	bool m_copyAudioToUdp;
-	bool m_udpStereo;
+	UDPChannelMode m_udpChannelMode;
 	uint m_audioUsageCount;
 	bool m_onExit;
 

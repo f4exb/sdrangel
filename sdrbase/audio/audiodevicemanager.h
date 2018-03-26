@@ -58,23 +58,23 @@ public:
             udpAddress(m_defaultUDPAddress),
             udpPort(m_defaultUDPPort),
             copyToUDP(false),
-            udpStereo(false),
-            udpUseRTP(false)
+            udpUseRTP(false),
+            udpChannelMode(AudioOutput::UDPChannelLeft)
         {}
         void resetToDefaults() {
             sampleRate = m_defaultAudioSampleRate;
             udpAddress = m_defaultUDPAddress;
             udpPort = m_defaultUDPPort;
             copyToUDP = false;
-            udpStereo = false;
             udpUseRTP = false;
+            udpChannelMode = AudioOutput::UDPChannelLeft;
         }
         unsigned int sampleRate;
         QString udpAddress;
         quint16 udpPort;
         bool copyToUDP;
-        bool udpStereo;
         bool udpUseRTP;
+        AudioOutput::UDPChannelMode udpChannelMode;
         friend QDataStream& operator<<(QDataStream& ds, const OutputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, OutputDeviceInfo& info);
     };

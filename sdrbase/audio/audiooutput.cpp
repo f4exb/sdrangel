@@ -28,7 +28,7 @@ AudioOutput::AudioOutput() :
 	m_audioOutput(0),
 	m_audioNetSink(0),
 	m_copyAudioToUdp(false),
-	m_udpStereo(false),
+	m_udpChannelMode(UDPChannelLeft),
 	m_audioUsageCount(0),
 	m_onExit(false),
 	m_audioFifos()
@@ -188,15 +188,6 @@ void AudioOutput::setUdpCopyToUDP(bool copyToUDP)
     m_copyAudioToUdp = copyToUDP;
 }
 
-void AudioOutput::setUdpStereo(bool stereo)
-{
-    if (m_audioNetSink) {
-        m_audioNetSink->setStereo(stereo);
-    }
-
-    m_udpStereo = stereo;
-}
-
 void AudioOutput::setUdpUseRTP(bool useRTP)
 {
     if (m_audioNetSink) {
@@ -204,6 +195,14 @@ void AudioOutput::setUdpUseRTP(bool useRTP)
     }
 }
 
+void AudioOutput::setUdpChannelMode(UDPChannelMode udpChannelMode)
+{
+    if (m_audioNetSink) {
+        m_audioNetSink->setStereo(udpChannelMode == UDPChannelStereo);
+    }
+
+    m_udpChannelMode = udpChannelMode;
+}
 
 qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {

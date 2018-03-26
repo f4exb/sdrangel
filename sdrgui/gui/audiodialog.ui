@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>472</width>
     <height>349</height>
    </rect>
   </property>
@@ -204,13 +204,33 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="outputUDPStereo">
-           <property name="toolTip">
-            <string>Copy to UDP as stereo (no L+R mix)</string>
+          <widget class="QComboBox" name="outputUDPChannelMode">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
            </property>
-           <property name="text">
-            <string>S</string>
-           </property>
+           <item>
+            <property name="text">
+             <string>Left</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Right</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Mixed</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Stereo</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
