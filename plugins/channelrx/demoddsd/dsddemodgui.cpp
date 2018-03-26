@@ -238,18 +238,6 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
-void DSDDemodGUI::on_udpOutput_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
-void DSDDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -273,7 +261,6 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -345,10 +332,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
-    if (!m_dsdDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->hide();
-    }
-
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
@@ -380,11 +363,6 @@ void DSDDemodGUI::updateMyPosition()
     }
 }
 
-void DSDDemodGUI::displayUDPAddress()
-{
-    ui->udpOutput->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
-}
-
 void DSDDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
@@ -396,7 +374,6 @@ void DSDDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -426,12 +403,7 @@ void DSDDemodGUI::displaySettings()
     ui->slot2On->setChecked(m_settings.m_slot2On);
     ui->tdmaStereoSplit->setChecked(m_settings.m_tdmaStereo);
     ui->audioMute->setChecked(m_settings.m_audioMute);
-    ui->udpOutput->setChecked(m_settings.m_copyAudioToUDP);
     ui->symbolPLLLock->setChecked(m_settings.m_pllLock);
-
-    if (m_dsdDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
 

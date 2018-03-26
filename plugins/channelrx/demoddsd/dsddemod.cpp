@@ -75,15 +75,6 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo1, getInputMessageQueue());
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo2, getInputMessageQueue());
 
-//    m_udpBufferAudio = new UDPSink<AudioSample>(this, m_udpBlockSize, m_settings.m_udpPort);
-//    m_audioFifo1.setUDPSink(m_udpBufferAudio);
-//    m_audioFifo2.setUDPSink(m_udpBufferAudio);
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
-    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
-    m_audioNetSink->setStereo(true);
-    m_audioFifo1.setAudioNetSink(m_audioNetSink);
-    m_audioFifo2.setAudioNetSink(m_audioNetSink);
-
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 
@@ -98,8 +89,6 @@ DSDDemod::~DSDDemod()
     delete[] m_sampleBuffer;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo2);
-//    delete m_udpBufferAudio;
-    delete m_audioNetSink;
 
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -371,10 +360,6 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	}
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
-        BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
-        const QThread *thread = cfg.getThread();
-        qDebug("DSDDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -430,7 +415,6 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_slot2On: " << m_settings.m_slot2On
             << " m_tdmaStereo: " << m_settings.m_tdmaStereo
             << " m_pllLock: " << m_settings.m_pllLock
-            << " m_udpCopyAudio: " << m_settings.m_copyAudioToUDP
             << " m_udpAddress: " << m_settings.m_udpAddress
             << " m_udpPort: " << m_settings.m_udpPort
             << " m_highPassFilter: "<< m_settings.m_highPassFilter
@@ -486,42 +470,6 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
     if ((settings.m_pllLock != m_settings.m_pllLock) || force)
     {
         m_dsdDecoder.setSymbolPLLLock(settings.m_pllLock);
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort) || force)
-    {
-//        m_udpBufferAudio->setAddress(const_cast<QString&>(settings.m_udpAddress));
-//        m_udpBufferAudio->setPort(settings.m_udpPort);
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
-    }
-
-    if ((settings.m_copyAudioToUDP != m_settings.m_copyAudioToUDP)
-        || (settings.m_slot1On != m_settings.m_slot1On)
-        || (settings.m_slot2On != m_settings.m_slot2On) || force)
-    {
-        m_audioFifo1.setCopyToUDP(settings.m_slot1On && settings.m_copyAudioToUDP);
-        m_audioFifo2.setCopyToUDP(settings.m_slot2On && !settings.m_slot1On && settings.m_copyAudioToUDP);
-    }
-
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("DSDDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("DSDDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("DSDDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("DSDDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
     }
 
     if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)

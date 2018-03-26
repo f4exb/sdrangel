@@ -46,8 +46,6 @@ void DSDDemodSettings::resetToDefaults()
     m_slot2On = false;
     m_tdmaStereo = false;
     m_pllLock = true;
-    m_copyAudioToUDP = false;
-    m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 255, 255).rgb();
@@ -87,7 +85,6 @@ QByteArray DSDDemodSettings::serialize() const
 
     s.writeString(18, m_title);
     s.writeBool(19, m_highPassFilter);
-    s.writeBool(20, m_copyAudioUseRTP);
     s.writeS32(21, m_traceLengthMutliplier);
     s.writeS32(22, m_traceStroke);
     s.writeS32(23, m_traceDecay);
@@ -144,7 +141,6 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readBool(16, &m_tdmaStereo, false);
         d.readString(18, &m_title, "DSD Demodulator");
         d.readBool(19, &m_highPassFilter, false);
-        d.readBool(20, &m_copyAudioUseRTP, false);
         d.readS32(21, &tmp, 6);
         m_traceLengthMutliplier = tmp < 2 ? 2 : tmp > 30 ? 30 : tmp;
         d.readS32(22, &tmp, 100);

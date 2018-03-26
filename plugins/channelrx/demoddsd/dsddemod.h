@@ -125,8 +125,6 @@ public:
         m_magsqCount = 0;
     }
 
-    bool isAudioNetSinkRTPCapable() const { return false; }
-
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -199,8 +197,6 @@ private:
 	QMutex m_settingsMutex;
 
     PhaseDiscriminators m_phaseDiscri;
-    //UDPSink<AudioSample> *m_udpBufferAudio;
-    AudioNetSink *m_audioNetSink;
 
     static const int m_udpBlockSize;
 

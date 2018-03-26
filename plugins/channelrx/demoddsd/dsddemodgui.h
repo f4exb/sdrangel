@@ -105,7 +105,6 @@ private:
 	void applySettings(bool force = false);
     void displaySettings();
 	void updateMyPosition();
-	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -131,8 +130,6 @@ private slots:
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
-    void on_udpOutput_toggled(bool checked);
-    void on_useRTP_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();
