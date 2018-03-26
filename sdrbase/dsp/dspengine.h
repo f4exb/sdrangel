@@ -18,11 +18,11 @@
 #ifndef INCLUDE_DSPENGINE_H
 #define INCLUDE_DSPENGINE_H
 
-#include <audio/audiodevicemanager.h>
 #include <QObject>
 #include <QTimer>
-
 #include <vector>
+
+#include "audio/audiodevicemanager.h"
 #include "audio/audiooutput.h"
 #include "audio/audioinput.h"
 #include "export.h"

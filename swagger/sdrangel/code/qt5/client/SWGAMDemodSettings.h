@@ -54,9 +54,6 @@ public:
     float getVolume();
     void setVolume(float volume);
 
-    qint32 getAudioSampleRate();
-    void setAudioSampleRate(qint32 audio_sample_rate);
-
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
@@ -96,9 +93,6 @@ private:
 
     float volume;
     bool m_volume_isSet;
-
-    qint32 audio_sample_rate;
-    bool m_audio_sample_rate_isSet;
 
     qint32 audio_mute;
     bool m_audio_mute_isSet;

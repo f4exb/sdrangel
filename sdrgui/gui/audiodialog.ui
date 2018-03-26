@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>349</height>
    </rect>
   </property>
   <property name="font">
@@ -69,7 +69,7 @@
             <number>192000</number>
            </property>
            <property name="singleStep">
-            <number>50</number>
+            <number>1000</number>
            </property>
            <property name="value">
             <number>48000</number>
@@ -90,6 +90,22 @@
           </spacer>
          </item>
          <item>
+          <widget class="QLabel" name="outputDefaultText">
+           <property name="minimumSize">
+            <size>
+             <width>16</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Default values indicator</string>
+           </property>
+           <property name="text">
+            <string>D</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="outputReset">
            <property name="maximumSize">
             <size>
@@ -108,16 +124,16 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="udpLayout">
+        <layout class="QHBoxLayout" name="outputUDPLayout">
          <item>
-          <widget class="QLabel" name="udpAddressLabel">
+          <widget class="QLabel" name="outputUDPAddressLabel">
            <property name="text">
             <string>Addr</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="udpAddress">
+          <widget class="QLineEdit" name="outputUDPAddress">
            <property name="maximumSize">
             <size>
              <width>140</width>
@@ -136,14 +152,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="udpPortLabel">
+          <widget class="QLabel" name="outputUDPPortLabel">
            <property name="text">
             <string>Port</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="udpPort">
+          <widget class="QLineEdit" name="outputUDPPort">
            <property name="maximumSize">
             <size>
              <width>60</width>
@@ -178,7 +194,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="ButtonSwitch" name="udpCopy">
+          <widget class="ButtonSwitch" name="outputUDPCopy">
            <property name="toolTip">
             <string>Copy audio to UDP</string>
            </property>
@@ -188,7 +204,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="udpStereo">
+          <widget class="QCheckBox" name="outputUDPStereo">
            <property name="toolTip">
             <string>Copy to UDP as stereo (no L+R mix)</string>
            </property>
@@ -198,7 +214,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="udpUseRTP">
+          <widget class="QCheckBox" name="outputUDPUseRTP">
            <property name="toolTip">
             <string>Use RTP protocol</string>
            </property>
@@ -206,6 +222,51 @@
             <string>R</string>
            </property>
           </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="outputGeneralLayout">
+         <item>
+          <widget class="QPushButton" name="outputCleanup">
+           <property name="toolTip">
+            <string>Remove references to devices not listed</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/res.qrc">
+             <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ButtonSwitch" name="outputResetKey">
+           <property name="toolTip">
+            <string>Remove settings for this device and return to defaults</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/res.qrc">
+             <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -255,7 +316,7 @@
             <number>192000</number>
            </property>
            <property name="singleStep">
-            <number>50</number>
+            <number>1000</number>
            </property>
            <property name="value">
             <number>48000</number>
@@ -327,6 +388,22 @@
           </spacer>
          </item>
          <item>
+          <widget class="QLabel" name="inputDefaultText">
+           <property name="minimumSize">
+            <size>
+             <width>16</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Default values indicator</string>
+           </property>
+           <property name="text">
+            <string>D</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="inputReset">
            <property name="maximumSize">
             <size>
@@ -341,6 +418,51 @@
             <string>R</string>
            </property>
           </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="inputGeneralLayout">
+         <item>
+          <widget class="QPushButton" name="inputCleanup">
+           <property name="toolTip">
+            <string>Remove references to devices not listed</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/res.qrc">
+             <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ButtonSwitch" name="inputResetKey">
+           <property name="toolTip">
+            <string>Remove settings for this device and return to defaults</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/res.qrc">
+             <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -372,7 +494,9 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>audioOutTree</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../resources/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

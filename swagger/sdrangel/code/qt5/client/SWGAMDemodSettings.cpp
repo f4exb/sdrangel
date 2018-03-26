@@ -36,8 +36,6 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_squelch_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     bandpass_enable = 0;
@@ -70,8 +68,6 @@ SWGAMDemodSettings::init() {
     m_squelch_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     bandpass_enable = 0;
@@ -92,7 +88,6 @@ SWGAMDemodSettings::init() {
 
 void
 SWGAMDemodSettings::cleanup() {
-
 
 
 
@@ -129,8 +124,6 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "float", "");
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
-    
-    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
@@ -175,9 +168,6 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
-    }
-    if(m_audio_sample_rate_isSet){
-        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
@@ -245,16 +235,6 @@ void
 SWGAMDemodSettings::setVolume(float volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
-}
-
-qint32
-SWGAMDemodSettings::getAudioSampleRate() {
-    return audio_sample_rate;
-}
-void
-SWGAMDemodSettings::setAudioSampleRate(qint32 audio_sample_rate) {
-    this->audio_sample_rate = audio_sample_rate;
-    this->m_audio_sample_rate_isSet = true;
 }
 
 qint32
@@ -346,7 +326,6 @@ SWGAMDemodSettings::isSet(){
         if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
         if(m_squelch_isSet){ isObjectUpdated = true; break;}
         if(m_volume_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_bandpass_enable_isSet){ isObjectUpdated = true; break;}
         if(m_copy_audio_to_udp_isSet){ isObjectUpdated = true; break;}

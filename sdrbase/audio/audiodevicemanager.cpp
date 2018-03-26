@@ -17,12 +17,16 @@
 
 #include "audio/audiodevicemanager.h"
 #include "util/simpleserializer.h"
+#include "util/messagequeue.h"
+#include "dsp/dspcommands.h"
 
 #include <QDataStream>
+#include <QSet>
 #include <QDebug>
 
 const float AudioDeviceManager::m_defaultAudioInputVolume = 0.15f;
 const QString AudioDeviceManager::m_defaultUDPAddress = "127.0.0.1";
+const QString AudioDeviceManager::m_defaultDeviceName = "System default device";
 
 QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info)
 {
@@ -67,7 +71,7 @@ bool AudioDeviceManager::getOutputDeviceName(int outputDeviceIndex, QString &dev
 {
     if (outputDeviceIndex < 0)
     {
-        deviceName = "System default device";
+        deviceName = m_defaultDeviceName;
         return true;
     }
     else
@@ -88,7 +92,7 @@ bool AudioDeviceManager::getInputDeviceName(int inputDeviceIndex, QString &devic
 {
     if (inputDeviceIndex < 0)
     {
-        deviceName = "System default device";
+        deviceName = m_defaultDeviceName;
         return true;
     }
     else
@@ -212,7 +216,8 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
     }
 
     m_audioSinkFifos[audioFifo] = outputDeviceIndex; // register audio FIFO
-    m_sampleSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
+    m_audioFifoToSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
+    m_outputDeviceSinkMessageQueues[outputDeviceIndex].append(sampleSinkMessageQueue);
 }
 
 void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
@@ -233,7 +238,8 @@ void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
     }
 
     m_audioSinkFifos.remove(audioFifo); // unregister audio FIFO
-    m_sampleSinkMessageQueues.remove(audioFifo);
+    m_outputDeviceSinkMessageQueues[audioOutputDeviceIndex].removeOne(m_audioFifoToSinkMessageQueues[audioFifo]);
+    m_audioFifoToSinkMessageQueues.remove(audioFifo);
 }
 
 void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *sampleSourceMessageQueue, int inputDeviceIndex)
@@ -264,7 +270,8 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
     }
 
     m_audioSourceFifos[audioFifo] = inputDeviceIndex; // register audio FIFO
-    m_sampleSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
+    m_audioFifoToSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
+    m_outputDeviceSinkMessageQueues[inputDeviceIndex].append(sampleSourceMessageQueue);
 }
 
 void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
@@ -285,7 +292,8 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
     }
 
     m_audioSourceFifos.remove(audioFifo); // unregister audio FIFO
-    m_sampleSourceMessageQueues.remove(audioFifo);
+    m_inputDeviceSourceMessageQueues[audioInputDeviceIndex].removeOne(m_audioFifoToSourceMessageQueues[audioFifo]);
+    m_audioFifoToSourceMessageQueues.remove(audioFifo);
 }
 
 void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
@@ -371,6 +379,294 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 void AudioDeviceManager::stopAudioInput(int inputDeviceIndex)
 {
     m_audioInputs[inputDeviceIndex]->stop();
+}
+
+bool AudioDeviceManager::getInputDeviceInfo(const QString& deviceName, InputDeviceInfo& deviceInfo) const
+{
+    if (m_audioInputInfos.find(deviceName) == m_audioInputInfos.end())
+    {
+        return false;
+    }
+    else
+    {
+        deviceInfo = m_audioInputInfos[deviceName];
+        return true;
+    }
+}
+
+bool AudioDeviceManager::getOutputDeviceInfo(const QString& deviceName, OutputDeviceInfo& deviceInfo) const
+{
+    if (m_audioOutputInfos.find(deviceName) == m_audioOutputInfos.end())
+    {
+        return false;
+    }
+    else
+    {
+        deviceInfo = m_audioOutputInfos[deviceName];
+        return true;
+    }
+}
+
+int AudioDeviceManager::getInputSampleRate(int inputDeviceIndex)
+{
+    QString deviceName;
+
+    if (!getInputDeviceName(inputDeviceIndex, deviceName))
+    {
+        qDebug("AudioDeviceManager::getInputSampleRate: unknown device index %d", inputDeviceIndex);
+        return m_defaultAudioSampleRate;
+    }
+
+    InputDeviceInfo deviceInfo;
+
+    if (!getInputDeviceInfo(deviceName, deviceInfo))
+    {
+        qDebug("AudioDeviceManager::getInputSampleRate: unknown device %s", qPrintable(deviceName));
+        return m_defaultAudioSampleRate;
+    }
+    else
+    {
+        return deviceInfo.sampleRate;
+    }
+}
+
+int AudioDeviceManager::getOutputSampleRate(int outputDeviceIndex)
+{
+    QString deviceName;
+
+    if (!getOutputDeviceName(outputDeviceIndex, deviceName))
+    {
+        qDebug("AudioDeviceManager::getOutputSampleRate: unknown device index %d", outputDeviceIndex);
+        return m_defaultAudioSampleRate;
+    }
+
+    OutputDeviceInfo deviceInfo;
+
+    if (!getOutputDeviceInfo(deviceName, deviceInfo))
+    {
+        qDebug("AudioDeviceManager::getOutputSampleRate: unknown device %s", qPrintable(deviceName));
+        return m_defaultAudioSampleRate;
+    }
+    else
+    {
+        return deviceInfo.sampleRate;
+    }
+}
+
+
+void AudioDeviceManager::setInputDeviceInfo(int inputDeviceIndex, const InputDeviceInfo& deviceInfo)
+{
+    QString deviceName;
+
+    if (!getInputDeviceName(inputDeviceIndex, deviceName))
+    {
+        qWarning("AudioDeviceManager::setInputDeviceInfo: unknown device index %d", inputDeviceIndex);
+        return;
+    }
+
+    InputDeviceInfo oldDeviceInfo;
+
+    if (!getInputDeviceInfo(deviceName, oldDeviceInfo))
+    {
+        qDebug("AudioDeviceManager::setInputDeviceInfo: unknown device %s", qPrintable(deviceName));
+    }
+
+    m_audioInputInfos[deviceName] = deviceInfo;
+
+    if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end()) { // no FIFO registered yet hence no audio input has been allocated yet
+        return;
+    }
+
+    AudioInput *audioInput = m_audioInputs[inputDeviceIndex];
+
+    if (oldDeviceInfo.sampleRate != deviceInfo.sampleRate)
+    {
+        audioInput->stop();
+        audioInput->start(inputDeviceIndex, deviceInfo.sampleRate);
+        m_audioInputInfos[deviceName].sampleRate = audioInput->getRate(); // store actual sample rate
+
+        // send message to attached channels
+        QList<MessageQueue *>::const_iterator it = m_inputDeviceSourceMessageQueues[inputDeviceIndex].begin();
+
+        for (; it != m_inputDeviceSourceMessageQueues[inputDeviceIndex].end(); ++it)
+        {
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate);
+            (*it)->push(msg);
+        }
+    }
+
+    audioInput->setVolume(deviceInfo.volume);
+}
+
+void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const OutputDeviceInfo& deviceInfo)
+{
+    QString deviceName;
+
+    if (!getOutputDeviceName(outputDeviceIndex, deviceName))
+    {
+        qWarning("AudioDeviceManager::setOutputDeviceInfo: unknown device index %d", outputDeviceIndex);
+        return;
+    }
+
+    OutputDeviceInfo oldDeviceInfo;
+
+    if (!getOutputDeviceInfo(deviceName, oldDeviceInfo))
+    {
+        qDebug("AudioDeviceManager::setOutputDeviceInfo: unknown device %s", qPrintable(deviceName));
+    }
+
+    m_audioOutputInfos[deviceName] = deviceInfo;
+
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) { // no FIFO registered yet hence no audio output has been allocated yet
+        return;
+    }
+
+    AudioOutput *audioOutput = m_audioOutputs[outputDeviceIndex];
+
+    if (oldDeviceInfo.sampleRate != deviceInfo.sampleRate)
+    {
+        audioOutput->stop();
+        audioOutput->start(outputDeviceIndex, deviceInfo.sampleRate);
+        m_audioOutputInfos[deviceName].sampleRate = audioOutput->getRate(); // store actual sample rate
+
+        // send message to attached channels
+        QList<MessageQueue *>::const_iterator it = m_outputDeviceSinkMessageQueues[outputDeviceIndex].begin();
+
+        for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
+        {
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate);
+            (*it)->push(msg);
+        }
+    }
+
+    audioOutput->setUdpCopyToUDP(deviceInfo.copyToUDP);
+    audioOutput->setUdpDestination(deviceInfo.udpAddress, deviceInfo.udpPort);
+    audioOutput->setUdpStereo(deviceInfo.udpStereo);
+    audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
+}
+
+void AudioDeviceManager::unsetOutputDeviceInfo(int outputDeviceIndex)
+{
+    QString deviceName;
+
+    if (!getOutputDeviceName(outputDeviceIndex, deviceName))
+    {
+        qWarning("AudioDeviceManager::unsetOutputDeviceInfo: unknown device index %d", outputDeviceIndex);
+        return;
+    }
+
+    OutputDeviceInfo oldDeviceInfo;
+
+    if (!getOutputDeviceInfo(deviceName, oldDeviceInfo))
+    {
+        qDebug("AudioDeviceManager::unsetOutputDeviceInfo: unregistered device %s", qPrintable(deviceName));
+        return;
+    }
+
+    m_audioOutputInfos.remove(deviceName);
+
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) { // no FIFO registered yet hence no audio output has been allocated yet
+        return;
+    }
+
+    stopAudioOutput(outputDeviceIndex);
+    startAudioOutput(outputDeviceIndex);
+
+    if (oldDeviceInfo.sampleRate != m_audioOutputInfos[deviceName].sampleRate)
+    {
+        // send message to attached channels
+        QList<MessageQueue *>::const_iterator it = m_outputDeviceSinkMessageQueues[outputDeviceIndex].begin();
+
+        for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
+        {
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate);
+            (*it)->push(msg);
+        }
+    }
+}
+
+void AudioDeviceManager::unsetInputDeviceInfo(int inputDeviceIndex)
+{
+    QString deviceName;
+
+    if (!getInputDeviceName(inputDeviceIndex, deviceName))
+    {
+        qWarning("AudioDeviceManager::unsetInputDeviceInfo: unknown device index %d", inputDeviceIndex);
+        return;
+    }
+
+    InputDeviceInfo oldDeviceInfo;
+
+    if (!getInputDeviceInfo(deviceName, oldDeviceInfo))
+    {
+        qDebug("AudioDeviceManager::unsetInputDeviceInfo: unregistered device %s", qPrintable(deviceName));
+        return;
+    }
+
+    m_audioInputInfos.remove(deviceName);
+
+    if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end()) { // no FIFO registered yet hence no audio input has been allocated yet
+        return;
+    }
+
+    stopAudioInput(inputDeviceIndex);
+    startAudioInput(inputDeviceIndex);
+
+    if (oldDeviceInfo.sampleRate != m_audioInputInfos[deviceName].sampleRate)
+    {
+        // send message to attached channels
+        QList<MessageQueue *>::const_iterator it = m_inputDeviceSourceMessageQueues[inputDeviceIndex].begin();
+
+        for (; it != m_inputDeviceSourceMessageQueues[inputDeviceIndex].end(); ++it)
+        {
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate);
+            (*it)->push(msg);
+        }
+    }
+}
+
+void AudioDeviceManager::inputInfosCleanup()
+{
+    QSet<QString> deviceNames;
+    deviceNames.insert(m_defaultDeviceName);
+    QList<QAudioDeviceInfo>::const_iterator itd = m_inputDevicesInfo.begin();
+
+    for (; itd != m_inputDevicesInfo.end(); ++itd) {
+        deviceNames.insert(itd->deviceName());
+    }
+
+    QMap<QString, InputDeviceInfo>::iterator itm = m_audioInputInfos.begin();
+
+    for (; itm != m_audioInputInfos.end(); ++itm)
+    {
+        if (!deviceNames.contains(itm.key()))
+        {
+            qDebug("AudioDeviceManager::inputInfosCleanup: removing key: %s", qPrintable(itm.key()));
+            m_audioInputInfos.remove(itm.key());
+        }
+    }
+}
+
+void AudioDeviceManager::outputInfosCleanup()
+{
+    QSet<QString> deviceNames;
+    deviceNames.insert(m_defaultDeviceName);
+    QList<QAudioDeviceInfo>::const_iterator itd = m_outputDevicesInfo.begin();
+
+    for (; itd != m_outputDevicesInfo.end(); ++itd) {
+        deviceNames.insert(itd->deviceName());
+    }
+
+    QMap<QString, OutputDeviceInfo>::iterator itm = m_audioOutputInfos.begin();
+
+    for (; itm != m_audioOutputInfos.end(); ++itm)
+    {
+        if (!deviceNames.contains(itm.key()))
+        {
+            qDebug("AudioDeviceManager::outputInfosCleanup: removing key: %s", qPrintable(itm.key()));
+            m_audioOutputInfos.remove(itm.key());
+        }
+    }
 }
 
 void AudioDeviceManager::debugAudioInputInfos() const

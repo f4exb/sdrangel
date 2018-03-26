@@ -32,6 +32,8 @@ SWGAMDemodReport::SWGAMDemodReport() {
     m_channel_power_db_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
 }
 
 SWGAMDemodReport::~SWGAMDemodReport() {
@@ -44,10 +46,13 @@ SWGAMDemodReport::init() {
     m_channel_power_db_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
 }
 
 void
 SWGAMDemodReport::cleanup() {
+
 
 
 }
@@ -66,6 +71,8 @@ SWGAMDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     
 }
 
@@ -88,6 +95,9 @@ SWGAMDemodReport::asJsonObject() {
     }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
+    }
+    if(m_audio_sample_rate_isSet){
+        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
 
     return obj;
@@ -113,6 +123,16 @@ SWGAMDemodReport::setSquelch(qint32 squelch) {
     this->m_squelch_isSet = true;
 }
 
+qint32
+SWGAMDemodReport::getAudioSampleRate() {
+    return audio_sample_rate;
+}
+void
+SWGAMDemodReport::setAudioSampleRate(qint32 audio_sample_rate) {
+    this->audio_sample_rate = audio_sample_rate;
+    this->m_audio_sample_rate_isSet = true;
+}
+
 
 bool
 SWGAMDemodReport::isSet(){
@@ -120,6 +140,7 @@ SWGAMDemodReport::isSet(){
     do{
         if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
         if(m_squelch_isSet){ isObjectUpdated = true; break;}
+        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

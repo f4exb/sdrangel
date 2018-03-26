@@ -16,8 +16,6 @@ AMDemodSettings:
     volume:
       type: number
       format: float
-    audioSampleRate:
-      type: integer
     audioMute:
       type: integer
     bandpassEnable:
@@ -46,3 +44,6 @@ AMDemodReport:
     squelch:
       description: squelch status (1 if open else 0)
       type: integer
+    audioSampleRate:
+      type: integer
+      

@@ -27,7 +27,6 @@ struct AMDemodSettings
     Real m_rfBandwidth;
     Real m_squelch;
     Real m_volume;
-    quint32 m_audioSampleRate;
     bool m_audioMute;
     bool m_bandpassEnable;
     bool m_copyAudioToUDP;

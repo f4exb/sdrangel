@@ -371,4 +371,17 @@ private:
 	int m_centerFrequency;
 };
 
+class SDRBASE_API DSPConfigureAudio : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPConfigureAudio(int sampleRate) : m_sampleRate(sampleRate)
+    { }
+
+    int getSampleRate() const { return m_sampleRate; }
+
+private:
+    int m_sampleRate;
+};
+
 #endif // INCLUDE_DSPCOMMANDS_H

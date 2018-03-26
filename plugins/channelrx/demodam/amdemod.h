@@ -115,6 +115,7 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 
@@ -146,6 +147,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     AMDemodSettings m_settings;
+    uint32_t m_audioSampleRate;
     bool m_running;
 
 	NCO m_nco;
@@ -176,6 +178,7 @@ private:
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const AMDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
@@ -197,7 +200,7 @@ private:
 
         if (m_magsq >= m_squelchLevel)
         {
-            if (m_squelchCount <= m_settings.m_audioSampleRate / 10)
+            if (m_squelchCount <= m_audioSampleRate / 10)
             {
                 m_squelchCount++;
             }
@@ -212,7 +215,7 @@ private:
 
         qint16 sample;
 
-        if ((m_squelchCount >= m_settings.m_audioSampleRate / 20) && !m_settings.m_audioMute)
+        if ((m_squelchCount >= m_audioSampleRate / 20) && !m_settings.m_audioMute)
         {
             Real demod = sqrt(magsq);
             m_volumeAGC.feed(demod);
@@ -224,7 +227,7 @@ private:
                 demod /= 301.0f;
             }
 
-            Real attack = (m_squelchCount - 0.05f * m_settings.m_audioSampleRate) / (0.05f * m_settings.m_audioSampleRate);
+            Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
             sample = demod * attack * 2048 * m_settings.m_volume;
             if (m_settings.m_copyAudioToUDP) {
                 m_audioNetSink->write(demod * attack * 32768.0f);

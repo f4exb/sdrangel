@@ -40,6 +40,10 @@ public:
             sampleRate(m_defaultAudioSampleRate),
             volume(m_defaultAudioInputVolume)
         {}
+        void resetToDefaults() {
+            sampleRate = m_defaultAudioSampleRate;
+            volume = m_defaultAudioInputVolume;
+        }
         unsigned int sampleRate;
         float volume;
         friend QDataStream& operator<<(QDataStream& ds, const InputDeviceInfo& info);
@@ -57,6 +61,14 @@ public:
             udpStereo(false),
             udpUseRTP(false)
         {}
+        void resetToDefaults() {
+            sampleRate = m_defaultAudioSampleRate;
+            udpAddress = m_defaultUDPAddress;
+            udpPort = m_defaultUDPPort;
+            copyToUDP = false;
+            udpStereo = false;
+            udpUseRTP = false;
+        }
         unsigned int sampleRate;
         QString udpAddress;
         quint16 udpPort;
@@ -70,12 +82,11 @@ public:
 	AudioDeviceManager();
 	~AudioDeviceManager();
 
-
 	const QList<QAudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
     const QList<QAudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
 
     bool getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const;
-    bool getInputDeviceName(int outputDeviceIndex, QString &deviceName) const;
+    bool getInputDeviceName(int inputDeviceIndex, QString &deviceName) const;
 
     void addAudioSink(AudioFifo* audioFifo, MessageQueue *sampleSinkMessageQueue, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink
@@ -83,22 +94,36 @@ public:
     void addAudioSource(AudioFifo* audioFifo, MessageQueue *sampleSourceMessageQueue, int inputDeviceIndex = -1);    //!< Add an audio source
     void removeAudioSource(AudioFifo* audioFifo); //!< Remove an audio source
 
+    bool getInputDeviceInfo(const QString& deviceName, InputDeviceInfo& deviceInfo) const;
+    bool getOutputDeviceInfo(const QString& deviceName, OutputDeviceInfo& deviceInfo) const;
+    int getInputSampleRate(int inputDeviceIndex = -1);
+    int getOutputSampleRate(int outputDeviceIndex = -1);
+    void setInputDeviceInfo(int inputDeviceIndex, const InputDeviceInfo& deviceInfo);
+    void setOutputDeviceInfo(int outputDeviceIndex, const OutputDeviceInfo& deviceInfo);
+    void unsetInputDeviceInfo(int inputDeviceIndex);
+    void unsetOutputDeviceInfo(int outputDeviceIndex);
+    void inputInfosCleanup();  //!< Remove input info from map for input devices not present
+    void outputInfosCleanup(); //!< Remove output info from map for output devices not present
+
     static const unsigned int m_defaultAudioSampleRate = 48000;
     static const float m_defaultAudioInputVolume;
     static const QString m_defaultUDPAddress;
     static const quint16 m_defaultUDPPort = 9998;
+    static const QString m_defaultDeviceName;
 
 private:
     QList<QAudioDeviceInfo> m_inputDevicesInfo;
     QList<QAudioDeviceInfo> m_outputDevicesInfo;
 
     QMap<AudioFifo*, int> m_audioSinkFifos; //< audio sink FIFO to audio output device index-1 map
-    QMap<AudioFifo*, MessageQueue*> m_sampleSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
+    QMap<AudioFifo*, MessageQueue*> m_audioFifoToSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
+    QMap<int, QList<MessageQueue*> > m_outputDeviceSinkMessageQueues; //!< sink message queues attached to device
     QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
     QMap<QString, OutputDeviceInfo> m_audioOutputInfos; //!< audio device name to audio output info
 
     QMap<AudioFifo*, int> m_audioSourceFifos; //< audio source FIFO to audio input device index-1 map
-    QMap<AudioFifo*, MessageQueue*> m_sampleSourceMessageQueues; //!< audio source FIFO to attached source message queue
+    QMap<AudioFifo*, MessageQueue*> m_audioFifoToSourceMessageQueues; //!< audio source FIFO to attached source message queue
+    QMap<int, QList<MessageQueue*> > m_inputDeviceSourceMessageQueues; //!< sink message queues attached to device
     QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
     QMap<QString, InputDeviceInfo> m_audioInputInfos; //!< audio device name to audio input device info
 
