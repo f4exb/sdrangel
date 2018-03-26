@@ -60,7 +60,7 @@ bool AudioOutput::start(int device, int rate)
         if (device < 0)
         {
             devInfo = QAudioDeviceInfo::defaultOutputDevice();
-            qWarning("AudioOutput::start: using default device %s", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+            qWarning("AudioOutput::start: using system default device %s", qPrintable(devInfo.defaultOutputDevice().deviceName()));
         }
         else
         {
@@ -69,12 +69,12 @@ bool AudioOutput::start(int device, int rate)
             if (device < devicesInfo.size())
             {
                 devInfo = devicesInfo[device];
-                qWarning("AudioOutput::start: using audio device #%d: %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
+                qWarning("AudioOutput::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
             }
             else
             {
                 devInfo = QAudioDeviceInfo::defaultOutputDevice();
-                qWarning("AudioOutput::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
+                qWarning("AudioOutput::start: audio device #%d does not exist. Using system default device %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
             }
         }
 
@@ -90,7 +90,14 @@ bool AudioOutput::start(int device, int rate)
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
             m_audioFormat = devInfo.nearestFormat(m_audioFormat);
-            qWarning("AudioOutput::start: %d Hz S16_LE audio format not supported. New rate: %d", rate, m_audioFormat.sampleRate());
+            std::ostringstream os;
+            os << " sampleRate: " << m_audioFormat.sampleRate()
+               << " channelCount: " << m_audioFormat.channelCount()
+               << " sampleSize: " << m_audioFormat.sampleSize()
+               << " codec: "  << m_audioFormat.codec().toStdString()
+               << " byteOrder: " <<  (m_audioFormat.byteOrder() == QAudioFormat::BigEndian ? "BE" : "LE")
+               << " sampleType: " << (int) m_audioFormat.sampleType();
+            qWarning("AudioOutput::start: format %d Hz 2xS16LE audio/pcm not supported. Using: %s", rate, os.str().c_str());
         }
         else
         {

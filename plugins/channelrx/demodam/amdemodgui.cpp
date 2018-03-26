@@ -22,7 +22,7 @@
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
-
+#include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_amdemodgui.h"
 #include "plugin/pluginapi.h"
@@ -31,6 +31,8 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 
 #include "amdemod.h"
 
@@ -230,6 +232,9 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
+	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -341,6 +346,19 @@ void AMDemodGUI::leaveEvent(QEvent*)
 void AMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void AMDemodGUI::audioSelect()
+{
+    qDebug("AMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void AMDemodGUI::tick()

@@ -41,6 +41,7 @@ void AMDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_rgbColor = QColor(255, 255, 0).rgb();
     m_title = "AM Demodulator";
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray AMDemodSettings::serialize() const
@@ -59,6 +60,7 @@ QByteArray AMDemodSettings::serialize() const
     s.writeBool(8, m_bandpassEnable);
     s.writeString(9, m_title);
     s.writeBool(10, m_copyAudioUseRTP);
+    s.writeString(11, m_audioDeviceName);
     return s.final();
 }
 
@@ -95,6 +97,7 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_bandpassEnable, false);
         d.readString(9, &m_title, "AM Demodulator");
         d.readBool(10, &m_copyAudioUseRTP, false);
+        d.readString(11, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }

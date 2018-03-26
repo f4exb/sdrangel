@@ -87,6 +87,8 @@ public:
 
     bool getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const;
     bool getInputDeviceName(int inputDeviceIndex, QString &deviceName) const;
+    int getOutputDeviceIndex(const QString &deviceName) const;
+    int getInputDeviceIndex(const QString &deviceName) const;
 
     void addAudioSink(AudioFifo* audioFifo, MessageQueue *sampleSinkMessageQueue, int outputDeviceIndex = -1); //!< Add the audio sink
     void removeAudioSink(AudioFifo* audioFifo); //!< Remove the audio sink

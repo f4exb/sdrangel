@@ -59,16 +59,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -171,7 +162,7 @@
       <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
-         <string>Mute/Unmute audio</string>
+         <string>Left: Mute/Unmute audio Right: view/select audio device</string>
         </property>
         <property name="text">
          <string>...</string>

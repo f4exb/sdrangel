@@ -23,9 +23,12 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
 
     for(QList<QAudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
     {
-        bool isDefaultDevice = it->deviceName() == defaultOutputDeviceInfo.deviceName();
         treeItem = new QTreeWidgetItem(ui->audioOutTree);
-        treeItem->setText(0, it->deviceName() + (isDefaultDevice ? "(*)" : ""));
+        treeItem->setText(0, it->deviceName());
+
+        if (it->deviceName() == defaultOutputDeviceInfo.deviceName()) {
+            treeItem->setBackground(0, QBrush(qRgb(96,96,96)));
+        }
     }
 
     // in panel
@@ -39,9 +42,12 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
 
     for(QList<QAudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
     {
-        bool isDefaultDevice = it->deviceName() == defaultInputDeviceInfo.deviceName();
         treeItem = new QTreeWidgetItem(ui->audioInTree);
-        treeItem->setText(0, it->deviceName() + (isDefaultDevice ? "(*)" : ""));
+        treeItem->setText(0, it->deviceName());
+
+        if (it->deviceName() == defaultInputDeviceInfo.deviceName()) {
+            treeItem->setBackground(0, QBrush(qRgb(96,96,96)));
+        }
     }
 
     m_outputUDPPort = 9998;
@@ -124,13 +130,12 @@ void AudioDialogX::on_audioOutTree_currentItemChanged(
         ui->outputResetKey->setChecked(false);
     }
 
+    //qDebug("AudioDialogX::on_audioOutTree_currentItemChanged: %s", qPrintable(outDeviceName));
     bool found = m_audioDeviceManager->getOutputDeviceInfo(outDeviceName, outDeviceInfo);
     m_outputDeviceInfo = outDeviceInfo;
     ui->outputDefaultText->setText(found ? "" : "D");
 
     updateOutputDisplay();
-
-    //qDebug("AudioDialogX::on_audioOutTree_currentItemChanged: %d:%s", outIndex, qPrintable(outDeviceName));
 }
 
 void AudioDialogX::on_inputVolume_valueChanged(int value)

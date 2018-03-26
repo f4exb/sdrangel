@@ -4,6 +4,8 @@ set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
     gui/addpresetdialog.cpp
+    gui/audiodialog.cpp
+    gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channelwindow.cpp
@@ -12,6 +14,7 @@ set(sdrgui_SOURCES
     gui/commanditem.cpp
     gui/commandkeyreceiver.cpp
     gui/commandoutputdialog.cpp
+    gui/crightclickenabler.cpp
     gui/cwkeyergui.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
@@ -32,7 +35,6 @@ set(sdrgui_SOURCES
     gui/loggingdialog.cpp
     gui/mypositiondialog.cpp
     gui/pluginsdialog.cpp
-    gui/audiodialog.cpp
     gui/presetitem.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicecontrol.cpp
@@ -62,6 +64,8 @@ set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
     gui/addpresetdialog.h
+    gui/audiodialog.h
+    gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
     gui/buttonswitch.h
     gui/channelwindow.h
@@ -69,6 +73,7 @@ set(sdrgui_HEADERS
     gui/commanditem.h
     gui/commandkeyreceiver.h
     gui/commandoutputdialog.h
+    gui/crightclickenabler.h
     gui/cwkeyergui.h
     gui/editcommanddialog.h
     gui/externalclockbutton.h
@@ -90,7 +95,6 @@ set(sdrgui_HEADERS
     gui/mypositiondialog.h
     gui/physicalunit.h
     gui/pluginsdialog.h
-    gui/audiodialog.h
     gui/presetitem.h
     gui/rollupwidget.h
     gui/samplingdevicecontrol.h
@@ -136,6 +140,7 @@ set(sdrgui_FORMS
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui
     gui/audiodialog.ui
+    gui/audioselectdialog.ui
     gui/samplingdevicecontrol.ui
     gui/samplingdevicedialog.ui
     gui/myposdialog.ui

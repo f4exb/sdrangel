@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,37 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef SDRGUI_GUI_CRIGHTCLICKENABLER_H_
+#define SDRGUI_GUI_CRIGHTCLICKENABLER_H_
 
-#include <QByteArray>
+#include <QAbstractButton>
+#include <QMouseEvent>
 
-class Serializable;
+class CRightClickEnabler : public QObject {
+    Q_OBJECT
+public:
+    CRightClickEnabler(QAbstractButton *button);
 
-struct AMDemodSettings
-{
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    bool m_copyAudioUseRTP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
-    QString m_audioDeviceName;
+signals:
+    void rightClick();
 
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+protected:
+    inline bool eventFilter(QObject *watched __attribute__((unused)), QEvent *event) override {
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            auto mouseEvent = (QMouseEvent*)event;
+            if (mouseEvent->button() == Qt::RightButton) {
+                //_button->click();
+                emit rightClick();
+            }
+        }
+        return false;
+    }
+
+private:
+    QAbstractButton* _button;
 };
 
-
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* SDRGUI_GUI_CRIGHTCLICKENABLER_H_ */

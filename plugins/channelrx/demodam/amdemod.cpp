@@ -218,9 +218,6 @@ bool AMDemod::handleMessage(const Message& cmd)
             applyAudioSampleRate(sampleRate);
         }
 
-        AMDemodSettings settings = m_settings;
-        applyAudioSampleRate(cfg.getSampleRate());
-
         return true;
     }
 	else
@@ -283,6 +280,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
@@ -312,18 +310,31 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         if (settings.m_copyAudioUseRTP)
         {
             if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to RTP mode");
+                qDebug("AMDemod::applySettings: set audio sink to RTP mode");
             } else {
-                qWarning("NFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
+                qWarning("AMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
             }
         }
         else
         {
             if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to UDP mode");
+                qDebug("AMDemod::applySettings: set audio sink to UDP mode");
             } else {
-                qWarning("NFMDemod::applySettings: failed to set audio sink to UDP mode");
+                qWarning("AMDemod::applySettings: failed to set audio sink to UDP mode");
             }
+        }
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
         }
     }
 

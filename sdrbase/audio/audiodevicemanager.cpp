@@ -109,6 +109,33 @@ bool AudioDeviceManager::getInputDeviceName(int inputDeviceIndex, QString &devic
     }
 }
 
+int AudioDeviceManager::getOutputDeviceIndex(const QString &deviceName) const
+{
+    for (int i = 0; i < m_outputDevicesInfo.size(); i++)
+    {
+        //qDebug("AudioDeviceManager::getOutputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(m_outputDevicesInfo[i].deviceName()));
+        if (deviceName == m_outputDevicesInfo[i].deviceName()) {
+            return i;
+        }
+    }
+
+    return -1; // system default
+}
+
+int AudioDeviceManager::getInputDeviceIndex(const QString &deviceName) const
+{
+    for (int i = 0; i < m_inputDevicesInfo.size(); i++)
+    {
+        //qDebug("AudioDeviceManager::getInputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(m_inputDevicesInfo[i].deviceName()));
+        if (deviceName == m_inputDevicesInfo[i].deviceName()) {
+            return i;
+        }
+    }
+
+    return -1; // system default
+}
+
+
 void AudioDeviceManager::resetToDefaults()
 {
 }
@@ -203,6 +230,9 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
     if (m_audioSinkFifos.find(audioFifo) == m_audioSinkFifos.end()) // new FIFO
     {
         m_audioOutputs[outputDeviceIndex]->addFifo(audioFifo);
+        m_audioSinkFifos[audioFifo] = outputDeviceIndex; // register audio FIFO
+        m_audioFifoToSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
+        m_outputDeviceSinkMessageQueues[outputDeviceIndex].append(sampleSinkMessageQueue);
     }
     else
     {
@@ -212,12 +242,11 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
         {
             removeAudioSink(audioFifo); // remove from current
             m_audioOutputs[outputDeviceIndex]->addFifo(audioFifo); // add to new
+            m_audioSinkFifos[audioFifo] = outputDeviceIndex; // new index
+            m_outputDeviceSinkMessageQueues[audioOutputDeviceIndex].removeOne(sampleSinkMessageQueue);
+            m_outputDeviceSinkMessageQueues[outputDeviceIndex].append(sampleSinkMessageQueue);
         }
     }
-
-    m_audioSinkFifos[audioFifo] = outputDeviceIndex; // register audio FIFO
-    m_audioFifoToSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
-    m_outputDeviceSinkMessageQueues[outputDeviceIndex].append(sampleSinkMessageQueue);
 }
 
 void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)

@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,37 +15,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef SDRGUI_GUI_AUDIOSELECTDIALOG_H_
+#define SDRGUI_GUI_AUDIOSELECTDIALOG_H_
 
-#include <QByteArray>
+#include <QDialog>
 
-class Serializable;
+#include "export.h"
+#include "audio/audiodevicemanager.h"
 
-struct AMDemodSettings
-{
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    bool m_copyAudioUseRTP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
+class QTreeWidgetItem;
+
+namespace Ui {
+    class AudioSelectDialog;
+}
+
+class SDRGUI_API AudioSelectDialog : public QDialog {
+    Q_OBJECT
+public:
+    explicit AudioSelectDialog(AudioDeviceManager* audioDeviceManager, const QString& deviceName, bool input = false, QWidget* parent = 0);
+    ~AudioSelectDialog();
+
     QString m_audioDeviceName;
+    bool m_selected;
 
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+private:
+    Ui::AudioSelectDialog* ui;
+    AudioDeviceManager* m_audioDeviceManager;
+    bool m_input;
+
+private slots:
+    void accept();
+    void reject();
+    //void on_audioInTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
+
 };
 
-
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* SDRGUI_GUI_AUDIOSELECTDIALOG_H_ */
