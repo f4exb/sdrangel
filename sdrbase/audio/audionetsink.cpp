@@ -91,7 +91,7 @@ void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
 
 void AudioNetSink::setStereo(bool stereo)
 {
-    m_rtpBufferAudio->setPayloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Stereo);
+    m_rtpBufferAudio->setPayloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
 }
 
 void AudioNetSink::write(qint16 sample)
@@ -113,6 +113,32 @@ void AudioNetSink::write(qint16 sample)
     else if (m_type == SinkRTP)
     {
         m_rtpBufferAudio->write((uint8_t *) &sample);
+    }
+}
+
+void AudioNetSink::write(qint16 lSample, qint16 rSample)
+{
+    if (m_type == SinkUDP)
+    {
+        if (m_bufferIndex >= m_udpBlockSize)
+        {
+            m_udpSocket->writeDatagram((const char*)m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
+            m_bufferIndex = 0;
+        }
+        else
+        {
+            qint16 *p = (qint16*) &m_data[m_bufferIndex];
+            *p = lSample;
+            m_bufferIndex += sizeof(qint16);
+            p = (qint16*) &m_data[m_bufferIndex];
+            *p = rSample;
+            m_bufferIndex += sizeof(qint16);
+        }
+    }
+    else if (m_type == SinkRTP)
+    {
+        m_rtpBufferAudio->write((uint8_t *) &lSample);
+        m_rtpBufferAudio->write((uint8_t *) &rSample);
     }
 }
 

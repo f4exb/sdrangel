@@ -46,6 +46,7 @@ public:
     void setStereo(bool stereo);
 
     void write(qint16 sample);
+    void write(qint16 lSample, qint16 rSample);
     void write(AudioSample* samples, uint32_t numSamples);
 
     bool isRTPCapable() const;

@@ -261,41 +261,61 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 	//std::vector<qint32>::const_iterator src = m_mixBuffer.begin(); // Valgrind optim
 	qint16* dst = (qint16*) data;
-	qint32 s;
+	qint32 sl, sr;
 
 	for (uint i = 0; i < framesPerBuffer; i++)
 	{
 		// left channel
 
 		//s = *src++; // Valgrind optim
-		s = m_mixBuffer[2*i];
+		sl = m_mixBuffer[2*i];
 
-		if(s < -32768)
+		if(sl < -32768)
 		{
-			s = -32768;
+			sl = -32768;
 		}
-		else if (s > 32767)
+		else if (sl > 32767)
 		{
-			s = 32767;
+			sl = 32767;
 		}
 
-		*dst++ = s;
+		*dst++ = sl;
 
 		// right channel
 
 		//s = *src++; // Valgrind optim
-		s = m_mixBuffer[2*i + 1];
+		sr = m_mixBuffer[2*i + 1];
 
-		if(s < -32768)
+		if(sr < -32768)
 		{
-			s = -32768;
+			sr = -32768;
 		}
-		else if (s > 32767)
+		else if (sr > 32767)
 		{
-			s = 32767;
+			sr = 32767;
 		}
 
-		*dst++ = s;
+		*dst++ = sr;
+
+		if ((m_copyAudioToUdp) && (m_audioNetSink))
+		{
+	        switch (m_udpChannelMode)
+	        {
+            case UDPChannelStereo:
+                m_audioNetSink->write(sl, sr);
+                break;
+            case UDPChannelMixed:
+                m_audioNetSink->write((sl+sr)/2);
+                break;
+            case UDPChannelRight:
+                m_audioNetSink->write(sr);
+                break;
+	        case UDPChannelLeft:
+	        default:
+	            m_audioNetSink->write(sl);
+	            break;
+	        }
+		}
 	}
 
 	return framesPerBuffer * 4;
