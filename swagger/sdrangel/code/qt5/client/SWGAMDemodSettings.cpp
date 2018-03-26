@@ -42,8 +42,6 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_bandpass_enable_isSet = false;
     copy_audio_to_udp = 0;
     m_copy_audio_to_udp_isSet = false;
-    copy_audio_use_rtp = 0;
-    m_copy_audio_use_rtp_isSet = false;
     udp_address = nullptr;
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -74,8 +72,6 @@ SWGAMDemodSettings::init() {
     m_bandpass_enable_isSet = false;
     copy_audio_to_udp = 0;
     m_copy_audio_to_udp_isSet = false;
-    copy_audio_use_rtp = 0;
-    m_copy_audio_use_rtp_isSet = false;
     udp_address = new QString("");
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -88,7 +84,6 @@ SWGAMDemodSettings::init() {
 
 void
 SWGAMDemodSettings::cleanup() {
-
 
 
 
@@ -130,8 +125,6 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bandpass_enable, pJson["bandpassEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&copy_audio_to_udp, pJson["copyAudioToUDP"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&copy_audio_use_rtp, pJson["copyAudioUseRTP"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
@@ -177,9 +170,6 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(m_copy_audio_to_udp_isSet){
         obj->insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
-    }
-    if(m_copy_audio_use_rtp_isSet){
-        obj->insert("copyAudioUseRTP", QJsonValue(copy_audio_use_rtp));
     }
     if(udp_address != nullptr && *udp_address != QString("")){
         toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
@@ -267,16 +257,6 @@ SWGAMDemodSettings::setCopyAudioToUdp(qint32 copy_audio_to_udp) {
     this->m_copy_audio_to_udp_isSet = true;
 }
 
-qint32
-SWGAMDemodSettings::getCopyAudioUseRtp() {
-    return copy_audio_use_rtp;
-}
-void
-SWGAMDemodSettings::setCopyAudioUseRtp(qint32 copy_audio_use_rtp) {
-    this->copy_audio_use_rtp = copy_audio_use_rtp;
-    this->m_copy_audio_use_rtp_isSet = true;
-}
-
 QString*
 SWGAMDemodSettings::getUdpAddress() {
     return udp_address;
@@ -329,7 +309,6 @@ SWGAMDemodSettings::isSet(){
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_bandpass_enable_isSet){ isObjectUpdated = true; break;}
         if(m_copy_audio_to_udp_isSet){ isObjectUpdated = true; break;}
-        if(m_copy_audio_use_rtp_isSet){ isObjectUpdated = true; break;}
         if(udp_address != nullptr && *udp_address != QString("")){ isObjectUpdated = true; break;}
         if(m_udp_port_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}

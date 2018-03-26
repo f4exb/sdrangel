@@ -228,7 +228,7 @@ private:
             }
 
             Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
-            sample = demod * attack * 2048 * m_settings.m_volume;
+            sample = demod * attack * (m_audioSampleRate/24) * m_settings.m_volume;
             if (m_settings.m_copyAudioToUDP) {
                 m_audioNetSink->write(demod * attack * 32768.0f);
             }

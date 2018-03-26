@@ -463,5 +463,6 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getAmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getAmDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getAmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 

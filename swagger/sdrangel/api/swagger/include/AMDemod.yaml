@@ -23,8 +23,6 @@ AMDemodSettings:
       type: integer
     copyAudioToUDP:
       type: integer
-    copyAudioUseRTP:
-      type: integer
     udpAddress:
       type: string
     udpPort:
@@ -45,5 +43,7 @@ AMDemodReport:
       description: squelch status (1 if open else 0)
       type: integer
     audioSampleRate:
+      type: integer
+    channelSampleRate:
       type: integer
       

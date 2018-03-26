@@ -50,6 +50,9 @@ public:
     qint32 getAudioSampleRate();
     void setAudioSampleRate(qint32 audio_sample_rate);
 
+    qint32 getChannelSampleRate();
+    void setChannelSampleRate(qint32 channel_sample_rate);
+
 
     virtual bool isSet() override;
 
@@ -62,6 +65,9 @@ private:
 
     qint32 audio_sample_rate;
     bool m_audio_sample_rate_isSet;
+
+    qint32 channel_sample_rate;
+    bool m_channel_sample_rate_isSet;
 
 };
 
