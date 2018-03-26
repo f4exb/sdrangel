@@ -179,12 +179,6 @@ void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
     applySettings();
 }
 
-void AMDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -257,10 +251,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
-    if (!m_amDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->hide();
-    }
-
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -325,10 +315,6 @@ void AMDemodGUI::displaySettings()
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
-
-    if (m_amDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }

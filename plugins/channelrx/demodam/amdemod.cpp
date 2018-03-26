@@ -277,7 +277,6 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioMute: " << settings.m_audioMute
             << " m_bandpassEnable: " << settings.m_bandpassEnable
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " m_audioDeviceName: " << settings.m_audioDeviceName
@@ -303,26 +302,6 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
         m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
-    }
-
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("AMDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("AMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("AMDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("AMDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -387,9 +366,6 @@ int AMDemod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("copyAudioToUDP")) {
         settings.m_copyAudioToUDP = response.getAmDemodSettings()->getCopyAudioToUdp() != 0;
-    }
-    if (channelSettingsKeys.contains("copyAudioUseRTP")) {
-        settings.m_copyAudioUseRTP = response.getAmDemodSettings()->getCopyAudioUseRtp() != 0;
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset"))
     {
@@ -457,7 +433,6 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 {
     response.getAmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getAmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
-    response.getAmDemodSettings()->setCopyAudioUseRtp(settings.m_copyAudioUseRTP ? 1 : 0);
     response.getAmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getAmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAmDemodSettings()->setRgbColor(settings.m_rgbColor);
