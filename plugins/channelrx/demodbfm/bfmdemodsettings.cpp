@@ -46,8 +46,6 @@ void BFMDemodSettings::resetToDefaults()
     m_lsbStereo = false;
     m_showPilot = false;
     m_rdsActive = false;
-    m_copyAudioToUDP = false;
-    m_copyAudioUseRTP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(80, 120, 228).rgb();

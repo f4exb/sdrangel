@@ -85,9 +85,6 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
-    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
-    m_audioNetSink->setStereo(true);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -106,7 +103,6 @@ BFMDemod::~BFMDemod()
 	}
 
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-	delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -237,12 +233,6 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
                     m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
                     m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
-
-                    if (m_settings.m_copyAudioToUDP)
-                    {
-                        m_audioNetSink->write(m_audioBuffer[m_audioBufferFill].l);
-                        m_audioNetSink->write(m_audioBuffer[m_audioBufferFill].r);
-                    }
 				}
 				else
 				{
@@ -251,12 +241,6 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					quint16 sample = (qint16)(deemph * (1<<12) * m_settings.m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
-
-					if (m_settings.m_copyAudioToUDP)
-					{
-					    m_audioNetSink->write(m_audioBuffer[m_audioBufferFill].l);
-                        m_audioNetSink->write(m_audioBuffer[m_audioBufferFill].r);
-                    }
 				}
 
 				++m_audioBufferFill;
@@ -356,10 +340,6 @@ bool BFMDemod::handleMessage(const Message& cmd)
     }
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
-        BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
-        const QThread *thread = cfg.getThread();
-        qDebug("BFMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -434,7 +414,6 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_lsbStereo: " << settings.m_lsbStereo
             << " m_showPilot: " << settings.m_showPilot
             << " m_rdsActive: " << settings.m_rdsActive
-            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;
@@ -494,32 +473,6 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     {
         m_deemphasisFilterX.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
         m_deemphasisFilterY.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort) || force)
-    {
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
-    }
-
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("WFMDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("WFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("WFMDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("WFMDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
     }
 
     m_settings = settings;

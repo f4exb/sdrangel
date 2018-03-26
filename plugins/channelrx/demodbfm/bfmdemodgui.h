@@ -80,7 +80,6 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
     void displaySettings();
-	void displayUDPAddress();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();
 
@@ -108,8 +107,6 @@ private slots:
 	void on_lsbStereo_toggled(bool lsb);
 	void on_showPilot_clicked();
 	void on_rds_clicked();
-	void on_copyAudioToUDP_toggled(bool copy);
-    void on_useRTP_toggled(bool checked);
 	void on_g14ProgServiceNames_currentIndexChanged(int index);
 	void on_clearData_clicked(bool checked);
 	void on_g00AltFrequenciesBox_activated(int index);

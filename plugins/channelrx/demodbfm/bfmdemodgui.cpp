@@ -201,18 +201,6 @@ void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
 	applySettings();
 }
 
-void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy)
-{
-    m_settings.m_copyAudioToUDP = copy;
-    applySettings();
-}
-
-void BFMDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void BFMDemodGUI::on_showPilot_clicked()
 {
     m_settings.m_showPilot = ui->showPilot->isChecked();
@@ -324,7 +312,6 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -381,10 +368,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
-    if (!m_bfmDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->hide();
-    }
-
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
@@ -405,11 +388,6 @@ BFMDemodGUI::~BFMDemodGUI()
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_bfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
-}
-
-void BFMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void BFMDemodGUI::blockApplySettings(bool block)
@@ -442,7 +420,6 @@ void BFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -464,11 +441,6 @@ void BFMDemodGUI::displaySettings()
     ui->lsbStereo->setChecked(m_settings.m_lsbStereo);
     ui->showPilot->setChecked(m_settings.m_showPilot);
     ui->rds->setChecked(m_settings.m_rdsActive);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
-
-    if (m_bfmDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }
