@@ -89,11 +89,6 @@ void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
     }
 }
 
-void AudioNetSink::setStereo(bool stereo)
-{
-    m_rtpBufferAudio->setPayloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono);
-}
-
 void AudioNetSink::setParameters(bool stereo, int sampleRate)
 {
     m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
