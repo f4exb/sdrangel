@@ -103,11 +103,6 @@ NFMDemod::~NFMDemod()
     delete m_channelizer;
 }
 
-bool NFMDemod::isAudioNetSinkRTPCapable() const
-{
-    return m_audioNetSink && m_audioNetSink->isRTPCapable();
-}
-
 float arctan2(Real y, Real x)
 {
 	Real coeff_1 = M_PI / 4;
@@ -436,7 +431,6 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_ctcssOn: " << settings.m_ctcssOn
             << " m_audioMute: " << settings.m_audioMute
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;
@@ -501,26 +495,6 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("NFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("NFMDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
-    }
-
     m_settings = settings;
 }
 
@@ -579,9 +553,6 @@ int NFMDemod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("copyAudioToUDP")) {
         settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
-    }
-    if (channelSettingsKeys.contains("copyAudioUseRTP")) {
-        settings.m_copyAudioUseRTP = response.getNfmDemodSettings()->getCopyAudioUseRtp() != 0;
     }
     if (channelSettingsKeys.contains("ctcssIndex")) {
         settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
@@ -662,7 +633,6 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getNfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getNfmDemodSettings()->setAudioSampleRate(settings.m_audioSampleRate);
     response.getNfmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
-    response.getNfmDemodSettings()->setCopyAudioUseRtp(settings.m_copyAudioUseRTP ? 1 : 0);
     response.getNfmDemodSettings()->setCtcssIndex(settings.m_ctcssIndex);
     response.getNfmDemodSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
     response.getNfmDemodSettings()->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);

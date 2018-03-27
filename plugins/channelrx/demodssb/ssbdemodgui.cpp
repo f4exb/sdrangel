@@ -203,12 +203,6 @@ void SSBDemodGUI::on_copyAudioToUDP_toggled(bool checked)
     applySettings();
 }
 
-void SSBDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
@@ -288,9 +282,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
-    if (!m_ssbDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->hide();
-    }
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
@@ -522,10 +513,6 @@ void SSBDemodGUI::displaySettings()
     s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
     ui->agcThresholdGateText->setText(s);
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
-
-    if (m_ssbDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }

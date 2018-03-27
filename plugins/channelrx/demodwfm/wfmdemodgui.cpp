@@ -137,12 +137,6 @@ void WFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
     applySettings();
 }
 
-void WFMDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
@@ -213,10 +207,6 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
-    if (!m_wfmDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->hide();
-    }
-
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
@@ -278,10 +268,6 @@ void WFMDemodGUI::displaySettings()
 
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
-
-    if (m_wfmDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }

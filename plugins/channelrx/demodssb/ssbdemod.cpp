@@ -113,11 +113,6 @@ SSBDemod::~SSBDemod()
     delete m_channelizer;
 }
 
-bool SSBDemod::isAudioNetSinkRTPCapable() const
-{
-    return m_audioNetSink && m_audioNetSink->isRTPCapable();
-}
-
 void SSBDemod::configure(MessageQueue* messageQueue,
 		Real Bandwidth,
 		Real LowCutoff,
@@ -396,7 +391,6 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_copyAudioUseRTP: " << settings.m_copyAudioUseRTP
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
@@ -494,26 +488,6 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
         m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
-    }
-
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("NFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("NFMDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("NFMDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
     }
 
     m_spanLog2 = settings.m_spanLog2;

@@ -88,11 +88,6 @@ WFMDemod::~WFMDemod()
     delete m_channelizer;
 }
 
-bool WFMDemod::isAudioNetSinkRTPCapable() const
-{
-    return m_audioNetSink && m_audioNetSink->isRTPCapable();
-}
-
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
@@ -332,26 +327,6 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
         m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
-    }
-
-    if ((settings.m_copyAudioUseRTP != m_settings.m_copyAudioUseRTP) || force)
-    {
-        if (settings.m_copyAudioUseRTP)
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkRTP)) {
-                qDebug("WFMDemod::applySettings: set audio sink to RTP mode");
-            } else {
-                qWarning("WFMDemod::applySettings: RTP support for audio sink not available. Fall back too UDP");
-            }
-        }
-        else
-        {
-            if (m_audioNetSink->selectType(AudioNetSink::SinkUDP)) {
-                qDebug("WFMDemod::applySettings: set audio sink to UDP mode");
-            } else {
-                qWarning("WFMDemod::applySettings: failed to set audio sink to UDP mode");
-            }
-        }
     }
 
     m_settings = settings;

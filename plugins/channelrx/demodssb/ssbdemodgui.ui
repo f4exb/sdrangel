@@ -53,16 +53,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -874,16 +865,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="useRTP">
-        <property name="toolTip">
-         <string>Use RTP protocol for audio copy to UDP</string>
-        </property>
-        <property name="text">
-         <string>R</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
          <string>Mute/Unmute audio</string>
@@ -921,16 +902,7 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="leftMargin">
-     <number>3</number>
-    </property>
-    <property name="topMargin">
-     <number>3</number>
-    </property>
-    <property name="rightMargin">
-     <number>3</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>3</number>
     </property>
     <item>

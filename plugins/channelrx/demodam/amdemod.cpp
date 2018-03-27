@@ -87,11 +87,6 @@ AMDemod::~AMDemod()
     delete m_channelizer;
 }
 
-bool AMDemod::isAudioNetSinkRTPCapable() const
-{
-    return m_audioNetSink && m_audioNetSink->isRTPCapable();
-}
-
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;

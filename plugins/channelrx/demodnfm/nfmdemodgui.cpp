@@ -210,12 +210,6 @@ void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
     applySettings();
 }
 
-void NFMDemodGUI::on_useRTP_toggled(bool checked)
-{
-    m_settings.m_copyAudioUseRTP = checked;
-    applySettings();
-}
-
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
 	m_settings.m_ctcssIndex = index;
@@ -320,10 +314,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	QChar delta = QChar(0x94, 0x03);
 	ui->deltaSquelch->setText(delta);
 
-	if (!m_nfmDemod->isAudioNetSinkRTPCapable()) {
-	    ui->useRTP->hide();
-	}
-
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
@@ -401,10 +391,6 @@ void NFMDemodGUI::displaySettings()
     ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
-
-    if (m_nfmDemod->isAudioNetSinkRTPCapable()) {
-        ui->useRTP->setChecked(m_settings.m_copyAudioUseRTP);
-    }
 
     blockApplySettings(false);
 }
