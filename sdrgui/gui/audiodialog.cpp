@@ -14,9 +14,12 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
 
 	// out panel
 
+	AudioDeviceManager::OutputDeviceInfo outDeviceInfo;
 	QAudioDeviceInfo defaultOutputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
 	treeItem = new QTreeWidgetItem(ui->audioOutTree);
-	treeItem->setText(0, AudioDeviceManager::m_defaultDeviceName);
+	treeItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
+	bool found = m_audioDeviceManager->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outDeviceInfo);
+	treeItem->setText(0, found ? "__" : "_D");
 	ui->audioOutTree->setCurrentItem(treeItem);
 
 	const QList<QAudioDeviceInfo>& outputDevices = m_audioDeviceManager->getOutputDevices();
@@ -24,18 +27,27 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
     for(QList<QAudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioOutTree);
-        treeItem->setText(0, it->deviceName());
+        treeItem->setText(1, it->deviceName());
+        bool systemDefault = it->deviceName() == defaultOutputDeviceInfo.deviceName();
+        found = m_audioDeviceManager->getOutputDeviceInfo(it->deviceName(), outDeviceInfo);
+        treeItem->setText(0, QString(systemDefault ? "S" : "_") + QString(found ? "_" : "D"));
 
-        if (it->deviceName() == defaultOutputDeviceInfo.deviceName()) {
-            treeItem->setBackground(0, QBrush(qRgb(96,96,96)));
+        if (systemDefault) {
+            treeItem->setBackground(1, QBrush(qRgb(96,96,96)));
         }
     }
 
+    ui->audioOutTree->resizeColumnToContents(0);
+    ui->audioOutTree->resizeColumnToContents(1);
+
     // in panel
 
+    AudioDeviceManager::InputDeviceInfo inDeviceInfo;
     QAudioDeviceInfo defaultInputDeviceInfo = QAudioDeviceInfo::defaultInputDevice();
     treeItem = new QTreeWidgetItem(ui->audioInTree);
-    treeItem->setText(0, AudioDeviceManager::m_defaultDeviceName);
+    treeItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
+    found = m_audioDeviceManager->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inDeviceInfo);
+    treeItem->setText(0, found ? "__" : "_D");
     ui->audioInTree->setCurrentItem(treeItem);
 
     const QList<QAudioDeviceInfo>& inputDevices = m_audioDeviceManager->getInputDevices();
@@ -43,12 +55,18 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
     for(QList<QAudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioInTree);
-        treeItem->setText(0, it->deviceName());
+        treeItem->setText(1, it->deviceName());
+        bool systemDefault = it->deviceName() == defaultInputDeviceInfo.deviceName();
+        found = m_audioDeviceManager->getInputDeviceInfo(it->deviceName(), inDeviceInfo);
+        treeItem->setText(0, QString(systemDefault ? "S" : "_") + QString(found ? "_" : "D"));
 
-        if (it->deviceName() == defaultInputDeviceInfo.deviceName()) {
-            treeItem->setBackground(0, QBrush(qRgb(96,96,96)));
+        if (systemDefault) {
+            treeItem->setBackground(1, QBrush(qRgb(96,96,96)));
         }
     }
+
+    ui->audioInTree->resizeColumnToContents(0);
+    ui->audioInTree->resizeColumnToContents(1);
 
     m_outputUDPPort = 9998;
     m_outIndex = -1;
@@ -101,7 +119,7 @@ void AudioDialogX::on_audioInTree_currentItemChanged(
         QTreeWidgetItem* previousItem)
 {
     AudioDeviceManager::InputDeviceInfo inDeviceInfo;
-    QString inDeviceName = currentItem->text(0);
+    QString inDeviceName = currentItem->text(1);
     int newIndex = ui->audioInTree->indexOfTopLevelItem(currentItem);
     int oldIndex = ui->audioInTree->indexOfTopLevelItem(previousItem);
     //qDebug("AudioDialogX::on_audioInTree_currentItemChanged: %s", qPrintable(inDeviceName));
@@ -122,7 +140,7 @@ void AudioDialogX::on_audioOutTree_currentItemChanged(
         QTreeWidgetItem* previousItem)
 {
     AudioDeviceManager::OutputDeviceInfo outDeviceInfo;
-    QString outDeviceName = currentItem->text(0);
+    QString outDeviceName = currentItem->text(1);
     int newIndex = ui->audioOutTree->indexOfTopLevelItem(currentItem);
     int oldIndex = ui->audioOutTree->indexOfTopLevelItem(previousItem);
 

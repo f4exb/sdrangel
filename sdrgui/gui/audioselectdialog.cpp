@@ -27,28 +27,42 @@ AudioSelectDialog::AudioSelectDialog(AudioDeviceManager* audioDeviceManager, con
 {
     ui->setupUi(this);
     QTreeWidgetItem *treeItem, *defaultItem, *selectedItem = 0;
+    bool systemDefault;
+    int sampleRate;
 
     // panel
 
     QAudioDeviceInfo defaultDeviceInfo = input ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice();
     defaultItem = new QTreeWidgetItem(ui->audioTree);
-    defaultItem->setText(0, AudioDeviceManager::m_defaultDeviceName);
+    defaultItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
+    bool deviceFound = getDeviceInfos(input, AudioDeviceManager::m_defaultDeviceName, systemDefault, sampleRate);
+    defaultItem->setText(0, deviceFound ? "__" : "_D");
+    defaultItem->setText(2, tr("%1").arg(sampleRate));
+    defaultItem->setTextAlignment(2, Qt::AlignRight);
 
     QList<QAudioDeviceInfo> devices = input ? m_audioDeviceManager->getInputDevices() : m_audioDeviceManager->getOutputDevices();
 
     for(QList<QAudioDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioTree);
-        treeItem->setText(0, it->deviceName());
+        treeItem->setText(1, it->deviceName());
+        bool deviceFound = getDeviceInfos(input, it->deviceName(), systemDefault, sampleRate);
+        treeItem->setText(0, QString(systemDefault ? "S" : "_") + QString(deviceFound ? "_" : "D"));
+        treeItem->setText(2, tr("%1").arg(sampleRate));
+        treeItem->setTextAlignment(2, Qt::AlignRight);
 
-        if (it->deviceName() == defaultDeviceInfo.deviceName()) {
-            treeItem->setBackground(0, QBrush(qRgb(96,96,96)));
+        if (systemDefault) {
+            treeItem->setBackground(1, QBrush(qRgb(80,80,80)));
         }
 
         if (deviceName == it->deviceName()) {
             selectedItem = treeItem;
         }
     }
+
+    ui->audioTree->resizeColumnToContents(0);
+    ui->audioTree->resizeColumnToContents(1);
+    ui->audioTree->resizeColumnToContents(2);
 
     if (selectedItem) {
         ui->audioTree->setCurrentItem(selectedItem);
@@ -90,5 +104,36 @@ void AudioSelectDialog::reject()
     QDialog::reject();
 }
 
+bool AudioSelectDialog::getDeviceInfos(bool input, const QString& deviceName, bool& systemDefault, int& sampleRate)
+{
+    bool found;
+
+    if (input)
+    {
+        AudioDeviceManager::InputDeviceInfo inDeviceInfo;
+        found = m_audioDeviceManager->getInputDeviceInfo(deviceName, inDeviceInfo);
+        systemDefault = deviceName == QAudioDeviceInfo::defaultInputDevice().deviceName();
+
+        if (found) {
+            sampleRate = inDeviceInfo.sampleRate;
+        } else {
+            sampleRate = AudioDeviceManager::m_defaultAudioSampleRate;
+        }
+    }
+    else
+    {
+        AudioDeviceManager::OutputDeviceInfo outDeviceInfo;
+        found = m_audioDeviceManager->getOutputDeviceInfo(deviceName, outDeviceInfo);
+        systemDefault = deviceName == QAudioDeviceInfo::defaultOutputDevice().deviceName();
+
+        if (found) {
+            sampleRate = outDeviceInfo.sampleRate;
+        } else {
+            sampleRate = AudioDeviceManager::m_defaultAudioSampleRate;
+        }
+    }
+
+    return found;
+}
 
 

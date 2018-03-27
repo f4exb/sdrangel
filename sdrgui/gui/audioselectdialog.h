@@ -39,6 +39,7 @@ public:
     bool m_selected;
 
 private:
+    bool getDeviceInfos(bool input, const QString& deviceName, bool& systemDefault, int& sampleRate);
     Ui::AudioSelectDialog* ui;
     AudioDeviceManager* m_audioDeviceManager;
     bool m_input;

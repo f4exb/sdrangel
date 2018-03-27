@@ -22,9 +22,25 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTreeWidget" name="audioTree">
+     <property name="indentation">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>3</number>
+     </property>
      <column>
       <property name="text">
-       <string notr="true">Device</string>
+       <string notr="true">SD</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Device</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Rate</string>
       </property>
      </column>
     </widget>
