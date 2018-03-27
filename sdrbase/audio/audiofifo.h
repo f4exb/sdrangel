@@ -24,9 +24,6 @@
 
 #include "dsp/dsptypes.h"
 #include "export.h"
-//#include "util/udpsink.h"
-
-class AudioNetSink;
 
 class SDRBASE_API AudioFifo : public QObject {
 	Q_OBJECT
@@ -49,10 +46,6 @@ public:
 	inline bool isFull() const { return m_fill == m_size; }
 	inline uint32_t size() const { return m_size; }
 
-	//void setUDPSink(UDPSink<AudioSample> *udpSink) { m_udpSink = udpSink; }
-	void setAudioNetSink(AudioNetSink *audioNetSink) { m_audioNetSink = audioNetSink; }
-	void setCopyToUDP(bool copyToUDP) { m_copyToUDP = copyToUDP; }
-
 private:
 	QMutex m_mutex;
 
@@ -69,10 +62,6 @@ private:
 	QMutex m_readWaitLock;
 	QWaitCondition m_writeWaitCondition;
 	QWaitCondition m_readWaitCondition;
-
-	//UDPSink<AudioSample> *m_udpSink;
-	AudioNetSink *m_audioNetSink;
-	bool m_copyToUDP;
 
 	bool create(uint32_t numSamples);
 };
