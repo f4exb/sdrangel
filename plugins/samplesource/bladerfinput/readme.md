@@ -66,7 +66,7 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 <h3>5: Decimation factor</h3>
 
-The I/Q stream from the BladeRF ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
+The I/Q stream from the BladeRF ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
 <h3>6: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
 

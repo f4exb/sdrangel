@@ -35,16 +35,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -234,7 +225,7 @@
        <property name="toolTip">
         <string>XB200 board mode</string>
        </property>
-       <property name="currentText">
+       <property name="currentText" stdset="0">
         <string>None</string>
        </property>
        <property name="currentIndex">
@@ -379,7 +370,7 @@
         <string>Decimation factor</string>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
@@ -409,6 +400,11 @@
        <item>
         <property name="text">
          <string>32</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64</string>
         </property>
        </item>
       </widget>

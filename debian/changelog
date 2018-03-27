@@ -1,3 +1,9 @@
+sdrangel (3.14.0-1) unstable; urgency=medium
+
+  * New audio devices management
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 1 Apr 2018 06:14:18 +0100
+
 sdrangel (3.13.1-1) unstable; urgency=medium
 
   * Web API: settings and report enry points for AM demod and AirspyHF

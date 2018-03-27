@@ -100,7 +100,7 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 <h3>7: Decimation factor</h3>
 
-The I/Q stream from the RTLSDR ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
+The I/Q stream from the RTLSDR ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
 <h3>8: Direct sampling mode</h3>
 

@@ -62,7 +62,7 @@ Use this combo box to select the HF or VHF range. This will set the limits of th
   - HF: 9 kHz to 31 MHz
   - VHF: 60 to 260 MHz
 
-<h3>5: Device to hast sample rate</h3>
+<h3>5: Device to host sample rate</h3>
 
 This is the device to host sample rate in kilo samples per second (kS/s).
 
@@ -70,7 +70,7 @@ Although the combo box is there to present a choice of sample rates at present t
 
 <h3>6: Decimation factor</h3>
 
-The I/Q stream from the AirspyHF to host is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64. When using audio channel plugins (AM, DSD, NFM, SSB...) please make sure that the sample rate is not less than 48 kHz (no decimation by 32 or 64).
+The I/Q stream from the AirspyHF to host is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64. When using audio channel plugins (AM, DSD, NFM, SSB...) please make sure that the sample rate is not less than the audio sample rate.
 
 <h3>7: Transverter mode open dialog</h3>
 
