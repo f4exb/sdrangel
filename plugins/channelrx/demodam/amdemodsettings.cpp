@@ -59,6 +59,7 @@ QByteArray AMDemodSettings::serialize() const
     s.writeBool(8, m_bandpassEnable);
     s.writeString(9, m_title);
     s.writeString(11, m_audioDeviceName);
+
     return s.final();
 }
 

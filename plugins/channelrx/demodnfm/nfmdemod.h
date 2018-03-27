@@ -179,6 +179,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
 	NFMDemodSettings m_settings;
+	uint32_t m_audioSampleRate;
 	bool m_running;
 
 	NCO m_nco;
@@ -221,6 +222,7 @@ private:
 //    void apply(bool force = false);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };

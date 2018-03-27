@@ -80,7 +80,8 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
@@ -381,6 +382,20 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	    m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
 	    return true;
 	}
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "NFMDemod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
+
+        return true;
+    }
 	else if (DSPSignalNotification::match(cmd))
 	{
 	    return true;
@@ -389,6 +404,25 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void NFMDemod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("NFMDemod::applyAudioSampleRate: %d", sampleRate);
+
+    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+            sampleRate, m_settings.m_inputFrequencyOffset);
+    m_inputMessageQueue.push(channelConfigMsg);
+
+    m_settingsMutex.lock();
+    m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
+    m_interpolatorDistanceRemain = 0;
+    m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
+    m_lowpass.create(301, sampleRate, 250.0);
+    m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
 }
 
 void NFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
@@ -406,9 +440,9 @@ void NFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     if ((inputSampleRate != m_inputSampleRate) || force)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.2);
+        m_interpolator.create(16, inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_audioSampleRate;
         m_settingsMutex.unlock();
     }
 
@@ -433,15 +467,15 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_settingsMutex.lock();
         m_interpolator.create(16, m_inputSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         m_settingsMutex.unlock();
     }
 
@@ -451,12 +485,10 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         m_phaseDiscri.setFMScaling((8.0f*settings.m_rfBandwidth) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
         m_settingsMutex.lock();
-        m_lowpass.create(301, settings.m_audioSampleRate, 250.0);
-        m_bandpass.create(301, settings.m_audioSampleRate, 300.0, settings.m_afBandwidth);
+        m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_afBandwidth);
         m_settingsMutex.unlock();
     }
 
@@ -495,6 +527,19 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
     m_settings = settings;
 }
 
@@ -514,7 +559,7 @@ bool NFMDemod::deserialize(const QByteArray& data)
     }
 
     NFMDemod::MsgConfigureChannelizer* channelConfigMsg = NFMDemod::MsgConfigureChannelizer::create(
-            48000, m_settings.m_inputFrequencyOffset);
+            m_audioSampleRate, m_settings.m_inputFrequencyOffset);
     m_inputMessageQueue.push(channelConfigMsg);
 
     MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(m_settings, true);
@@ -547,9 +592,6 @@ int NFMDemod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
-    }
-    if (channelSettingsKeys.contains("audioSampleRate")) {
-        settings.m_audioSampleRate = response.getNfmDemodSettings()->getAudioSampleRate();
     }
     if (channelSettingsKeys.contains("copyAudioToUDP")) {
         settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
@@ -631,7 +673,6 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getNfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
     response.getNfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getNfmDemodSettings()->setAudioSampleRate(settings.m_audioSampleRate);
     response.getNfmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
     response.getNfmDemodSettings()->setCtcssIndex(settings.m_ctcssIndex);
     response.getNfmDemodSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
@@ -667,4 +708,6 @@ void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getNfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getNfmDemodReport()->setCtcssTone(m_settings.m_ctcssOn ? (m_ctcssIndex ? 0 : m_ctcssDetector.getToneSet()[m_ctcssIndex-1]) : 0);
     response.getNfmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
+    response.getNfmDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getNfmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }

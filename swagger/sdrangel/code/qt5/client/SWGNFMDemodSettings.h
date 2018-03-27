@@ -75,9 +75,6 @@ public:
     qint32 getCtcssIndex();
     void setCtcssIndex(qint32 ctcss_index);
 
-    qint32 getAudioSampleRate();
-    void setAudioSampleRate(qint32 audio_sample_rate);
-
     qint32 getCopyAudioToUdp();
     void setCopyAudioToUdp(qint32 copy_audio_to_udp);
 
@@ -129,9 +126,6 @@ private:
 
     qint32 ctcss_index;
     bool m_ctcss_index_isSet;
-
-    qint32 audio_sample_rate;
-    bool m_audio_sample_rate_isSet;
 
     qint32 copy_audio_to_udp;
     bool m_copy_audio_to_udp_isSet;

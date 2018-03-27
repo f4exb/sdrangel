@@ -50,8 +50,6 @@ SWGNFMDemodSettings::SWGNFMDemodSettings() {
     m_audio_mute_isSet = false;
     ctcss_index = 0;
     m_ctcss_index_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     copy_audio_to_udp = 0;
     m_copy_audio_to_udp_isSet = false;
     udp_address = nullptr;
@@ -92,8 +90,6 @@ SWGNFMDemodSettings::init() {
     m_audio_mute_isSet = false;
     ctcss_index = 0;
     m_ctcss_index_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     copy_audio_to_udp = 0;
     m_copy_audio_to_udp_isSet = false;
     udp_address = new QString("");
@@ -108,7 +104,6 @@ SWGNFMDemodSettings::init() {
 
 void
 SWGNFMDemodSettings::cleanup() {
-
 
 
 
@@ -163,8 +158,6 @@ SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ctcss_index, pJson["ctcssIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&copy_audio_to_udp, pJson["copyAudioToUDP"], "qint32", "");
     
@@ -224,9 +217,6 @@ SWGNFMDemodSettings::asJsonObject() {
     }
     if(m_ctcss_index_isSet){
         obj->insert("ctcssIndex", QJsonValue(ctcss_index));
-    }
-    if(m_audio_sample_rate_isSet){
-        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_copy_audio_to_udp_isSet){
         obj->insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
@@ -358,16 +348,6 @@ SWGNFMDemodSettings::setCtcssIndex(qint32 ctcss_index) {
 }
 
 qint32
-SWGNFMDemodSettings::getAudioSampleRate() {
-    return audio_sample_rate;
-}
-void
-SWGNFMDemodSettings::setAudioSampleRate(qint32 audio_sample_rate) {
-    this->audio_sample_rate = audio_sample_rate;
-    this->m_audio_sample_rate_isSet = true;
-}
-
-qint32
 SWGNFMDemodSettings::getCopyAudioToUdp() {
     return copy_audio_to_udp;
 }
@@ -433,7 +413,6 @@ SWGNFMDemodSettings::isSet(){
         if(m_ctcss_on_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_ctcss_index_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_copy_audio_to_udp_isSet){ isObjectUpdated = true; break;}
         if(udp_address != nullptr && *udp_address != QString("")){ isObjectUpdated = true; break;}
         if(m_udp_port_isSet){ isObjectUpdated = true; break;}

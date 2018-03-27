@@ -34,6 +34,10 @@ SWGNFMDemodReport::SWGNFMDemodReport() {
     m_ctcss_tone_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    channel_sample_rate = 0;
+    m_channel_sample_rate_isSet = false;
 }
 
 SWGNFMDemodReport::~SWGNFMDemodReport() {
@@ -48,10 +52,16 @@ SWGNFMDemodReport::init() {
     m_ctcss_tone_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    channel_sample_rate = 0;
+    m_channel_sample_rate_isSet = false;
 }
 
 void
 SWGNFMDemodReport::cleanup() {
+
+
 
 
 
@@ -73,6 +83,10 @@ SWGNFMDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ctcss_tone, pJson["ctcssTone"], "float", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
 }
 
@@ -98,6 +112,12 @@ SWGNFMDemodReport::asJsonObject() {
     }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
+    }
+    if(m_audio_sample_rate_isSet){
+        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
+    }
+    if(m_channel_sample_rate_isSet){
+        obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
     }
 
     return obj;
@@ -133,6 +153,26 @@ SWGNFMDemodReport::setSquelch(qint32 squelch) {
     this->m_squelch_isSet = true;
 }
 
+qint32
+SWGNFMDemodReport::getAudioSampleRate() {
+    return audio_sample_rate;
+}
+void
+SWGNFMDemodReport::setAudioSampleRate(qint32 audio_sample_rate) {
+    this->audio_sample_rate = audio_sample_rate;
+    this->m_audio_sample_rate_isSet = true;
+}
+
+qint32
+SWGNFMDemodReport::getChannelSampleRate() {
+    return channel_sample_rate;
+}
+void
+SWGNFMDemodReport::setChannelSampleRate(qint32 channel_sample_rate) {
+    this->channel_sample_rate = channel_sample_rate;
+    this->m_channel_sample_rate_isSet = true;
+}
+
 
 bool
 SWGNFMDemodReport::isSet(){
@@ -141,6 +181,8 @@ SWGNFMDemodReport::isSet(){
         if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
         if(m_ctcss_tone_isSet){ isObjectUpdated = true; break;}
         if(m_squelch_isSet){ isObjectUpdated = true; break;}
+        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_channel_sample_rate_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
