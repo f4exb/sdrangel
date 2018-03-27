@@ -163,7 +163,7 @@
         <item>
          <widget class="QToolButton" name="audioStereo">
           <property name="toolTip">
-           <string>Mono/Stereo toggle and pilot lock indicator</string>
+           <string>Light: Pilot lock indicator Left: Mono/Stereo toggle Right: select audio device</string>
           </property>
           <property name="autoFillBackground">
            <bool>true</bool>

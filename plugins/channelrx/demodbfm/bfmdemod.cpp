@@ -54,6 +54,9 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+
     m_magsq = 0.0f;
     m_magsqSum = 0.0f;
     m_magsqPeak = 0.0f;
@@ -77,14 +80,12 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
 
 
-	m_deemphasisFilterX.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
-	m_deemphasisFilterY.configure(default_deemphasis * m_settings.m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterX.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterY.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
  	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
-
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -338,6 +339,20 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "BFMDemod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
+
+        return true;
+    }
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
         return true;
@@ -361,6 +376,28 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void BFMDemod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("BFMDemod::applyAudioSampleRate: %d", sampleRate);
+
+    m_settingsMutex.lock();
+
+    m_interpolator.create(16, m_inputSampleRate, m_settings.m_afBandwidth);
+    m_interpolatorDistanceRemain = (Real) m_inputSampleRate / sampleRate;
+    m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) sampleRate;
+
+    m_interpolatorStereo.create(16, m_inputSampleRate, m_settings.m_afBandwidth);
+    m_interpolatorStereoDistanceRemain = (Real) m_inputSampleRate / sampleRate;
+    m_interpolatorStereoDistance =  (Real) m_inputSampleRate / (Real) sampleRate;
+
+    m_deemphasisFilterX.configure(default_deemphasis * sampleRate * 1.0e-6);
+    m_deemphasisFilterY.configure(default_deemphasis * sampleRate * 1.0e-6);
+
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
+}
+
 void BFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "BFMDemod::applyChannelSettings:"
@@ -380,12 +417,12 @@ void BFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
         m_settingsMutex.lock();
 
         m_interpolator.create(16, inputSampleRate, m_settings.m_afBandwidth);
-        m_interpolatorDistanceRemain = (Real) inputSampleRate / m_settings.m_audioSampleRate;
-        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistanceRemain = (Real) inputSampleRate / m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_audioSampleRate;
 
         m_interpolatorStereo.create(16, inputSampleRate, m_settings.m_afBandwidth);
-        m_interpolatorStereoDistanceRemain = (Real) inputSampleRate / m_settings.m_audioSampleRate;
-        m_interpolatorStereoDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorStereoDistanceRemain = (Real) inputSampleRate / m_audioSampleRate;
+        m_interpolatorStereoDistance =  (Real) inputSampleRate / (Real) m_audioSampleRate;
 
         m_interpolatorRDS.create(4, inputSampleRate, 600.0);
         m_interpolatorRDSDistanceRemain = (Real) inputSampleRate / 250000.0;
@@ -428,12 +465,12 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_settingsMutex.lock();
 
         m_interpolator.create(16, m_inputSampleRate, settings.m_afBandwidth);
-        m_interpolatorDistanceRemain = (Real) m_inputSampleRate / settings.m_audioSampleRate;
-        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistanceRemain = (Real) m_inputSampleRate / m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) m_audioSampleRate;
 
         m_interpolatorStereo.create(16, m_inputSampleRate, settings.m_afBandwidth);
-        m_interpolatorStereoDistanceRemain = (Real) m_inputSampleRate / settings.m_audioSampleRate;
-        m_interpolatorStereoDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorStereoDistanceRemain = (Real) m_inputSampleRate / m_audioSampleRate;
+        m_interpolatorStereoDistance =  (Real) m_inputSampleRate / (Real) m_audioSampleRate;
 
         m_interpolatorRDS.create(4, m_inputSampleRate, 600.0);
         m_interpolatorRDSDistanceRemain = (Real) m_inputSampleRate / 250000.0;
@@ -453,12 +490,11 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
         m_settingsMutex.lock();
         qDebug() << "BFMDemod::handleMessage: m_lowpass.create";
-        m_lowpass.create(21, settings.m_audioSampleRate, settings.m_afBandwidth);
+        m_lowpass.create(21, m_audioSampleRate, settings.m_afBandwidth);
         m_settingsMutex.unlock();
     }
 
@@ -469,10 +505,17 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_squelchLevel *= m_squelchLevel;
     }
 
-    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
-        m_deemphasisFilterX.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
-        m_deemphasisFilterY.configure(default_deemphasis * settings.m_audioSampleRate * 1.0e-6);
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_settings = settings;

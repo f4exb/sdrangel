@@ -36,6 +36,8 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 #include "bfmdemodsettings.h"
@@ -331,6 +333,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioStereo);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -453,6 +458,19 @@ void BFMDemodGUI::leaveEvent(QEvent*)
 void BFMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void BFMDemodGUI::audioSelect()
+{
+    qDebug("BFMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void BFMDemodGUI::tick()

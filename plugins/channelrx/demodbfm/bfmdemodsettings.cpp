@@ -41,7 +41,6 @@ void BFMDemodSettings::resetToDefaults()
     m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
-    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_audioStereo = false;
     m_lsbStereo = false;
     m_showPilot = false;
@@ -50,6 +49,7 @@ void BFMDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_rgbColor = QColor(80, 120, 228).rgb();
     m_title = "Broadcast FM Demod";
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray BFMDemodSettings::serialize() const
@@ -74,6 +74,7 @@ QByteArray BFMDemodSettings::serialize() const
     }
 
     s.writeString(12, m_title);
+    s.writeString(13, m_audioDeviceName);
 
     return s.final();
 }
@@ -122,6 +123,7 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(12, &m_title, "Broadcast FM Demod");
+        d.readString(13, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }

@@ -169,6 +169,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     BFMDemodSettings m_settings;
+    quint32 m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)
@@ -225,6 +226,7 @@ private:
 
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
+	void applyAudioSampleRate(int sampleRate);
 };
 
 #endif // INCLUDE_BFMDEMOD_H
