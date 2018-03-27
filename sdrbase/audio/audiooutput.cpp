@@ -217,31 +217,31 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 //    QMutexLocker mutexLocker(&m_mutex);
 //#endif
 
-	unsigned int framesPerBuffer = maxLen / 4;
+	unsigned int samplesPerBuffer = maxLen / 4;
 
-	if (framesPerBuffer == 0)
+	if (samplesPerBuffer == 0)
 	{
 		return 0;
 	}
 
-	if (m_mixBuffer.size() < framesPerBuffer * 2)
+	if (m_mixBuffer.size() < samplesPerBuffer * 2)
 	{
-		m_mixBuffer.resize(framesPerBuffer * 2); // allocate 2 qint32 per frame (stereo)
+		m_mixBuffer.resize(samplesPerBuffer * 2); // allocate 2 qint32 per sample (stereo)
 
-		if (m_mixBuffer.size() != framesPerBuffer * 2)
+		if (m_mixBuffer.size() != samplesPerBuffer * 2)
 		{
 			return 0;
 		}
 	}
 
-	memset(&m_mixBuffer[0], 0x00, 2 * framesPerBuffer * sizeof(m_mixBuffer[0])); // start with silence
+	memset(&m_mixBuffer[0], 0x00, 2 * samplesPerBuffer * sizeof(m_mixBuffer[0])); // start with silence
 
 	// sum up a block from all fifos
 
 	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
 		// use outputBuffer as temp - yes, one memcpy could be saved
-		uint samples = (*it)->read((quint8*) data, framesPerBuffer, 1);
+		unsigned int samples = (*it)->read((quint8*) data, samplesPerBuffer, 1);
 		const qint16* src = (const qint16*) data;
 		std::vector<qint32>::iterator dst = m_mixBuffer.begin();
 
@@ -250,7 +250,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 //            qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
 //		}
 
-		for (uint i = 0; i < samples; i++)
+		for (unsigned int i = 0; i < samples; i++)
 		{
 			*dst += *src;
 			++src;
@@ -266,7 +266,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 	qint16* dst = (qint16*) data;
 	qint32 sl, sr;
 
-	for (uint i = 0; i < framesPerBuffer; i++)
+	for (unsigned int i = 0; i < samplesPerBuffer; i++)
 	{
 		// left channel
 
@@ -321,7 +321,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 		}
 	}
 
-	return framesPerBuffer * 4;
+	return samplesPerBuffer * 4;
 }
 
 qint64 AudioOutput::writeData(const char* data, qint64 len)
