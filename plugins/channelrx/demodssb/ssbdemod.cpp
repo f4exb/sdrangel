@@ -66,7 +66,9 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_spanLog2 = 3;
 	m_inputSampleRate = 48000;
 	m_inputFrequencyOffset = 0;
-	m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
+
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -86,7 +88,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
+    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

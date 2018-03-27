@@ -60,7 +60,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
+    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

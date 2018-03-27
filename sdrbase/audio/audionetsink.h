@@ -37,7 +37,8 @@ public:
         SinkRTP
     } SinkType;
 
-    AudioNetSink(QObject *parent, bool stereo = false, bool useRTP = true);
+    AudioNetSink(QObject *parent); //!< without RTP
+    AudioNetSink(QObject *parent, int sampleRate, bool stereo); //!< with RTP
     ~AudioNetSink();
 
     void setDestination(const QString& address, uint16_t port);

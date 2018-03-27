@@ -65,7 +65,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-    m_audioNetSink = new AudioNetSink(0, false, false); // parent thread allocated dynamically
+    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

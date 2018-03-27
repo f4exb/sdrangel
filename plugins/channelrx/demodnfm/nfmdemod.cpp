@@ -81,7 +81,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically
+	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
 	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

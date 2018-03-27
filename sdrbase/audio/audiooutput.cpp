@@ -111,7 +111,7 @@ bool AudioOutput::start(int device, int rate)
         }
 
         m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
-        m_audioNetSink = new AudioNetSink(0);
+        m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
 
         QIODevice::open(QIODevice::ReadOnly);
 

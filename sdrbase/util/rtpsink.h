@@ -44,7 +44,7 @@ public:
         PayloadL16Stereo,
     } PayloadType;
 
-    RTPSink(QUdpSocket *udpSocket, bool stereo);
+    RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo);
     ~RTPSink();
 
     bool isValid() const { return m_valid; }
