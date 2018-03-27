@@ -87,7 +87,6 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
     m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
@@ -336,6 +335,20 @@ bool SSBDemod::handleMessage(const Message& cmd)
         m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "SSBDemod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         return true;
@@ -370,12 +383,37 @@ void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
         m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_audioSampleRate;
         m_settingsMutex.unlock();
     }
 
     m_inputSampleRate = inputSampleRate;
     m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void SSBDemod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("SSBDemod::applyAudioSampleRate: %d", sampleRate);
+
+    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+            sampleRate, m_settings.m_inputFrequencyOffset);
+    m_inputMessageQueue.push(channelConfigMsg);
+
+    m_settingsMutex.lock();
+    m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+    m_interpolatorDistanceRemain = 0;
+    m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
+    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate);
+    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate);
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
+        m_guiMessageQueue->push(cfg);
+    }
 }
 
 void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
@@ -395,17 +433,17 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate;
+            << " agcThresholdGate: " << settings.m_agcThresholdGate
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_lowCutoff != settings.m_lowCutoff) ||
-        (m_settings.m_audioSampleRate != settings.m_audioSampleRate) || force)
+        (m_settings.m_lowCutoff != settings.m_lowCutoff) || force)
     {
         float band, lowCutoff;
 
         band = settings.m_rfBandwidth;
         lowCutoff = settings.m_lowCutoff;
-        m_audioSampleRate = settings.m_audioSampleRate;
 
         if (band < 0) {
             band = -band;
@@ -427,7 +465,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_settingsMutex.lock();
         m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
         DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
@@ -488,6 +526,18 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
         m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_spanLog2 = settings.m_spanLog2;

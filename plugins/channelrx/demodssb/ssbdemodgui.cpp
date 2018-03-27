@@ -9,11 +9,14 @@
 #include "ui_ssbdemodgui.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 #include "ssbdemod.h"
 
@@ -77,9 +80,31 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool SSBDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool SSBDemodGUI::handleMessage(const Message& message)
 {
-	return false;
+    if (DSPConfigureAudio::match(message))
+    {
+        qDebug("SSBDemodGUI::handleMessage: DSPConfigureAudio: %d", m_ssbDemod->getAudioSampleRate());
+        applyBandwidths(); // will update spectrum details with new sample rate
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void SSBDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void SSBDemodGUI::channelMarkerChangedByCursor()
@@ -249,6 +274,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
 	m_ssbDemod->setSampleSink(m_spectrumVis);
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -284,6 +312,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -316,7 +345,7 @@ void SSBDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
         SSBDemod::MsgConfigureChannelizer* channelConfigMsg = SSBDemod::MsgConfigureChannelizer::create(
-                48000, m_channelMarker.getCenterFrequency());
+                m_ssbDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
         m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
 
         SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create( m_settings, force);
@@ -328,10 +357,10 @@ void SSBDemodGUI::applyBandwidths(bool force)
 {
     bool dsb = ui->dsb->isChecked();
     int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = 48000 / (1<<spanLog2);
+    m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = 480/(1<<spanLog2);
+    int bwMax = m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -543,6 +572,19 @@ void SSBDemodGUI::leaveEvent(QEvent*)
 void SSBDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void SSBDemodGUI::audioSelect()
+{
+    qDebug("SSBDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void SSBDemodGUI::tick()

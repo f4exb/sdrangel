@@ -120,6 +120,7 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
 
@@ -282,6 +283,7 @@ private:
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
 };
 
 #endif // INCLUDE_SSBDEMOD_H

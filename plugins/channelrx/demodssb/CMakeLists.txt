@@ -1,5 +1,7 @@
 project(ssb)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(ssb_SOURCES
 	ssbdemod.cpp
 	ssbdemodgui.cpp

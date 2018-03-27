@@ -98,6 +98,8 @@ private slots:
 	void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
+    void audioSelect();
 	void tick();
 };
 

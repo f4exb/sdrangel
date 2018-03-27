@@ -45,13 +45,13 @@ Toggles between SSB (icon with one sideband signal) and DSB (icon with double si
 
 <h3>8: Spectrum display frequency span</h3>
 
-The 48 kHz channel sample rate is further decimated by powers of two for the spectrum display and in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
+The audio sample rate SR is further decimated by powers of two for the spectrum display and in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
 
-  - 1 (no decimation): 24 kHz (SSB) or 48 kHz (DSB)
-  - 2: 12 kHz (SSB) or 24 kHz (DSB)
-  - 4: 6 kHz (SSB) or 12 kHz (DSB)
-  - 8: 3 kHz (SSB) or 6 kHz (DSB)
-  - 16: 1.5 kHz (SSB) or 3 kHz (DSB)
+  - 1 (no decimation): SR/2 (SSB) or SR (DSB)
+  - 2: SR/4 (SSB) or SR/2 (DSB)
+  - 4: SR/8 (SSB) or SR/4 (DSB)
+  - 8: SR/16 (SSB) or SR/8 (DSB)
+  - 16: SR/32 (SSB) or SR/16 (DSB)
 
 The span value display is set as follows depending on the SSB or DSB mode:
 

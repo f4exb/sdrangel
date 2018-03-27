@@ -223,6 +223,8 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 void AMDemod::applyAudioSampleRate(int sampleRate)
 {
+    qDebug("AMDemod::applyAudioSampleRate: %d", sampleRate);
+
     MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
             sampleRate, m_settings.m_inputFrequencyOffset);
     m_inputMessageQueue.push(channelConfigMsg);
