@@ -23,14 +23,17 @@
 
 const int AudioNetSink::m_udpBlockSize = 512;
 
-AudioNetSink::AudioNetSink(QObject *parent, bool stereo) :
+AudioNetSink::AudioNetSink(QObject *parent, bool stereo, bool useRTP) :
     m_type(SinkUDP),
     m_rtpBufferAudio(0),
     m_bufferIndex(0),
     m_port(9998)
 {
     m_udpSocket = new QUdpSocket(parent);
-    m_rtpBufferAudio = new RTPSink(m_udpSocket, stereo);
+
+    if (useRTP) {
+        m_rtpBufferAudio = new RTPSink(m_udpSocket, stereo);
+    }
 }
 
 AudioNetSink::~AudioNetSink()
@@ -44,7 +47,7 @@ AudioNetSink::~AudioNetSink()
 
 bool AudioNetSink::isRTPCapable() const
 {
-        return m_rtpBufferAudio->isValid();
+    return m_rtpBufferAudio && m_rtpBufferAudio->isValid();
 }
 
 bool AudioNetSink::selectType(SinkType type)
@@ -91,7 +94,9 @@ void AudioNetSink::deleteDestination(const QString& address, uint16_t port)
 
 void AudioNetSink::setParameters(bool stereo, int sampleRate)
 {
-    m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
+    if (m_rtpBufferAudio) {
+        m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
+    }
 }
 
 void AudioNetSink::write(qint16 sample)
