@@ -130,7 +130,12 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
         qDebug("RTPSink::setPayloadInformation: set default timestamp increment to %d: %s", timestampinc, qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    int maximumPacketSize = std::max(m_bufferSize+40, RTP_MINPACKETSIZE);
+    int maximumPacketSize = m_bufferSize+20; // was +40
+
+    while (maximumPacketSize < RTP_MINPACKETSIZE) {
+        maximumPacketSize += m_bufferSize;
+    }
+
     status = m_rtpSession.SetMaximumPacketSize(maximumPacketSize);
 
     if (status < 0) {
