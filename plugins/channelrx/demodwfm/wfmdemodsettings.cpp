@@ -42,12 +42,12 @@ void WFMDemodSettings::resetToDefaults()
     m_volume = 2.0;
     m_squelch = -60.0;
     m_audioMute = false;
-    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_copyAudioToUDP = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(0, 0, 255).rgb();
     m_title = "WFM Demodulator";
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray WFMDemodSettings::serialize() const
@@ -60,10 +60,12 @@ QByteArray WFMDemodSettings::serialize() const
     s.writeS32(5, m_squelch);
     s.writeU32(7, m_rgbColor);
     s.writeString(8, m_title);
+    s.writeString(9, m_audioDeviceName);
 
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
     }
+
 
     return s.final();
 }
@@ -96,6 +98,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         m_squelch = tmp;
         d.readU32(7, &m_rgbColor);
         d.readString(8, &m_title, "WFM Demodulator");
+        d.readString(9, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         d.readBlob(11, &bytetmp);
 

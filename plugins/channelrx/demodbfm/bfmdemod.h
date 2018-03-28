@@ -224,9 +224,9 @@ private:
 
     static const int m_udpBlockSize;
 
+	void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
-	void applyAudioSampleRate(int sampleRate);
 };
 
 #endif // INCLUDE_BFMDEMOD_H

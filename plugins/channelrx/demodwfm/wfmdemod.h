@@ -135,6 +135,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     WFMDemodSettings m_settings;
+    quint32 m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
@@ -165,6 +166,7 @@ private:
 
     static const int m_udpBlockSize;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const WFMDemodSettings& settings, bool force = false);
 };

@@ -60,6 +60,7 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 	m_audioBufferFill = 0;
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
     m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
     m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
@@ -243,6 +244,20 @@ bool WFMDemod::handleMessage(const Message& cmd)
         m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "WFMDemod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         return true;
@@ -251,6 +266,21 @@ bool WFMDemod::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void WFMDemod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("WFMDemod::applyAudioSampleRate: %d", sampleRate);
+
+    m_settingsMutex.lock();
+
+    m_interpolator.create(16, m_inputSampleRate, m_settings.m_afBandwidth);
+    m_interpolatorDistanceRemain = (Real) m_inputSampleRate / sampleRate;
+    m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) sampleRate;
+
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
 }
 
 void WFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
@@ -269,8 +299,8 @@ void WFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     {
         qDebug() << "WFMDemod::applyChannelSettings: m_interpolator.create";
         m_interpolator.create(16, inputSampleRate, m_settings.m_afBandwidth);
-        m_interpolatorDistanceRemain = (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
-        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistanceRemain = (Real) inputSampleRate / (Real) m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_audioSampleRate;
         qDebug() << "WFMDemod::applySettings: m_rfFilter->create_filter";
         Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
         Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
@@ -295,17 +325,17 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
-    if((settings.m_audioSampleRate != m_settings.m_audioSampleRate) ||
-        (settings.m_afBandwidth != m_settings.m_afBandwidth) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
+       (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_settingsMutex.lock();
         qDebug() << "WFMDemod::applySettings: m_interpolator.create";
         m_interpolator.create(16, m_inputSampleRate, settings.m_afBandwidth);
-        m_interpolatorDistanceRemain = (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
-        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistanceRemain = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         qDebug() << "WFMDemod::applySettings: m_rfFilter->create_filter";
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
@@ -327,6 +357,19 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         || (m_settings.m_udpPort != settings.m_udpPort) || force)
     {
         m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_settings = settings;

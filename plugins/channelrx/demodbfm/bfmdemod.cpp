@@ -453,6 +453,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_rdsActive: " << settings.m_rdsActive
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
     if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)

@@ -13,6 +13,8 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 #include "wfmdemod.h"
@@ -177,6 +179,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
 	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -285,6 +290,19 @@ void WFMDemodGUI::leaveEvent(QEvent*)
 void WFMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void WFMDemodGUI::audioSelect()
+{
+    qDebug("WFMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void WFMDemodGUI::tick()

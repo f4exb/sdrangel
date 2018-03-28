@@ -377,6 +377,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="audioMute">
+        <property name="toolTip">
+         <string>Left: audio mute Right: select audio device</string>
+        </property>
         <property name="text">
          <string/>
         </property>

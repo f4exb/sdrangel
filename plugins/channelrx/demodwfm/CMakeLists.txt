@@ -1,5 +1,7 @@
 project(wfm)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(wfm_SOURCES
 	wfmdemod.cpp
 	wfmdemodgui.cpp
