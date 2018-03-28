@@ -307,8 +307,6 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 

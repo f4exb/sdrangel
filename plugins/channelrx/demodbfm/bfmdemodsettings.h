@@ -32,8 +32,6 @@ struct BFMDemodSettings
     bool m_lsbStereo;
     bool m_showPilot;
     bool m_rdsActive;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;

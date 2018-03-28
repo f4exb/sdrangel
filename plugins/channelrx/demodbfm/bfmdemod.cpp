@@ -21,7 +21,6 @@
 #include <complex.h>
 
 #include "audio/audiooutput.h"
-#include "audio/audionetsink.h"
 #include "dsp/dspengine.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
@@ -451,8 +450,6 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_lsbStereo: " << settings.m_lsbStereo
             << " m_showPilot: " << settings.m_showPilot
             << " m_rdsActive: " << settings.m_rdsActive
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
