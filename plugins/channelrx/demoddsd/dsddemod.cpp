@@ -217,6 +217,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                                 m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
                                 m_settings.m_highPassFilter,
+                                m_audioSampleRate != 8000, // upsample to 48k unless native 8k
                                 &m_audioFifo1);
                     }
 
@@ -233,6 +234,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                                 m_settings.m_volume * 10.0,
                                 m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
                                 m_settings.m_highPassFilter,
+                                m_audioSampleRate != 8000, // upsample to 48k unless native 8k
                                 &m_audioFifo2);
                     }
 
@@ -391,9 +393,11 @@ void DSDDemod::applyAudioSampleRate(int sampleRate)
 {
     qDebug("DSDDemod::applyAudioSampleRate: %d", sampleRate);
 
-    if (sampleRate != 48000) {
-        qWarning("DSDDemod::applyAudioSampleRate: audio does not work properly with sample rates other than 48 kS/s");
+    if ((sampleRate != 48000) || (sampleRate != 8000)) {
+        qWarning("DSDDemod::applyAudioSampleRate: audio does not work properly with sample rates other than 48 or 8 kS/s");
     }
+
+    m_dsdDecoder.set48k(sampleRate != 8000);
 
     m_audioSampleRate = sampleRate;
 }

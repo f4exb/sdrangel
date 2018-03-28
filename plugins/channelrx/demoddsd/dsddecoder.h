@@ -71,6 +71,7 @@ public:
     void setBaudRate(int baudRate);
     void setSymbolPLLLock(bool pllLock) { m_decoder.setSymbolPLLLock(pllLock); }
     void useHPMbelib(bool useHP) { m_decoder.useHPMbelib(useHP); }
+    void set48k(bool to48k);
 
 private:
     DSDcc::DSDDecoder m_decoder;

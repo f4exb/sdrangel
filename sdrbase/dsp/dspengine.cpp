@@ -164,9 +164,10 @@ void DSPEngine::pushMbeFrame(
         int mbeVolumeIndex,
         unsigned char channels,
         bool useHP,
+        bool upSample48k,
         AudioFifo *audioFifo)
 {
-    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, audioFifo);
+    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, upSample48k, audioFifo);
 }
 #else
 void DSPEngine::pushMbeFrame(
@@ -175,6 +176,7 @@ void DSPEngine::pushMbeFrame(
         int mbeVolumeIndex __attribute((unused)),
         unsigned char channels __attribute((unused)),
         bool useHP __attribute((unused)),
+        bool upSample48k __attribute((unused)),
         AudioFifo *audioFifo __attribute((unused)))
 {}
 #endif

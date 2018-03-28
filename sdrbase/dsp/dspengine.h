@@ -68,6 +68,7 @@ public:
 	        int mbeVolumeIndex,
 	        unsigned char channels,
 	        bool useHP,
+	        bool upSample48k,
 	        AudioFifo *audioFifo);
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
