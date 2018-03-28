@@ -22,7 +22,6 @@
 #include <stdio.h>
 
 #include "audio/audiooutput.h"
-#include "audio/audionetsink.h"
 #include "dsp/dspengine.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"

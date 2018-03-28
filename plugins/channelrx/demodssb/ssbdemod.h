@@ -38,7 +38,6 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class AudioNetSink;
 
 class SSBDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:

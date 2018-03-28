@@ -39,7 +39,6 @@
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class DeviceSourceAPI;
-class AudioNetSink;
 
 class WFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:

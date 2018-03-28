@@ -25,7 +25,6 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
-#include "audio/audionetsink.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 

@@ -40,7 +40,6 @@
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class AudioNetSink;
 
 class NFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:

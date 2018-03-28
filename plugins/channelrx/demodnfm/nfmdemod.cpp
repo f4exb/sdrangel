@@ -33,7 +33,6 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
-#include "audio/audionetsink.h"
 
 #include "nfmdemodgui.h"
 #include "nfmdemod.h"
