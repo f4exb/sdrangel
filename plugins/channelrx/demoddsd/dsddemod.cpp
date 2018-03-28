@@ -74,6 +74,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo1, getInputMessageQueue());
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo2, getInputMessageQueue());
+    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -358,6 +359,20 @@ bool DSDDemod::handleMessage(const Message& cmd)
 		m_dsdDecoder.setMyPoint(cfg.getMyLatitude(), cfg.getMyLongitude());
 		return true;
 	}
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "DSDDemod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
+
+        return true;
+    }
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
         return true;
@@ -370,6 +385,17 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void DSDDemod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("DSDDemod::applyAudioSampleRate: %d", sampleRate);
+
+    if (sampleRate != 48000) {
+        qWarning("DSDDemod::applyAudioSampleRate: audio does not work properly with sample rates other than 48 kS/s");
+    }
+
+    m_audioSampleRate = sampleRate;
 }
 
 void DSDDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
@@ -389,7 +415,7 @@ void DSDDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
         m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, (m_settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) inputSampleRate / (Real) 48000;
         m_settingsMutex.unlock();
     }
 
@@ -418,6 +444,7 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_udpAddress: " << m_settings.m_udpAddress
             << " m_udpPort: " << m_settings.m_udpPort
             << " m_highPassFilter: "<< m_settings.m_highPassFilter
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
@@ -425,7 +452,7 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         m_settingsMutex.lock();
         m_interpolator.create(16, m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_audioSampleRate;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) 48000;
         m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
         m_settingsMutex.unlock();
     }
@@ -475,6 +502,20 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
     if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
     {
         m_dsdDecoder.useHPMbelib(settings.m_highPassFilter);
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo1, getInputMessageQueue(), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo2, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_settings = settings;

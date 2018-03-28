@@ -39,7 +39,6 @@ void DSDDemodSettings::resetToDefaults()
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
     m_squelch = -40.0;
     m_audioMute = false;
-    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_enableCosineFiltering = false;
     m_syncOrConstellation = false;
     m_slot1On = true;
@@ -54,6 +53,7 @@ void DSDDemodSettings::resetToDefaults()
     m_traceLengthMutliplier = 6; // 300 ms
     m_traceStroke = 100;
     m_traceDecay = 200;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray DSDDemodSettings::serialize() const
@@ -85,6 +85,7 @@ QByteArray DSDDemodSettings::serialize() const
 
     s.writeString(18, m_title);
     s.writeBool(19, m_highPassFilter);
+    s.writeString(20, m_audioDeviceName);
     s.writeS32(21, m_traceLengthMutliplier);
     s.writeS32(22, m_traceStroke);
     s.writeS32(23, m_traceDecay);
@@ -141,6 +142,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readBool(16, &m_tdmaStereo, false);
         d.readString(18, &m_title, "DSD Demodulator");
         d.readBool(19, &m_highPassFilter, false);
+        d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readS32(21, &tmp, 6);
         m_traceLengthMutliplier = tmp < 2 ? 2 : tmp > 30 ? 30 : tmp;
         d.readS32(22, &tmp, 100);

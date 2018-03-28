@@ -132,6 +132,7 @@ private slots:
     void on_symbolPLLLock_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void audioSelect();
     void tick();
 };
 

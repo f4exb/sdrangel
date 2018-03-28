@@ -163,6 +163,7 @@ private:
     int m_inputSampleRate;
 	int m_inputFrequencyOffset;
 	DSDDemodSettings m_settings;
+    quint32 m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -200,6 +201,7 @@ private:
 
     static const int m_udpBlockSize;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
 };
