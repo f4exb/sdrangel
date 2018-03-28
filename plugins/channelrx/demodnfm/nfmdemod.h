@@ -209,9 +209,7 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-
 	AudioFifo m_audioFifo;
-    AudioNetSink *m_audioNetSink;
 
 	QMutex m_settingsMutex;
 

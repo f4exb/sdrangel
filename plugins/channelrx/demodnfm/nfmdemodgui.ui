@@ -589,19 +589,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="ButtonSwitch" name="copyAudioToUDP">
-        <property name="toolTip">
-         <string>Copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>U</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>

@@ -82,8 +82,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-	m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
-	m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -97,7 +95,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 NFMDemod::~NFMDemod()
 {
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-	delete m_audioNetSink;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -257,18 +254,12 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
                 {
                     sample = 0;
-                    if (m_settings.m_copyAudioToUDP) {
-                        m_audioNetSink->write(0);
-                    }
                 }
                 else
                 {
                     demod = m_bandpass.filter(demod);
                     Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
                     sample = demod * m_settings.m_volume * squelchFactor;
-                    if (m_settings.m_copyAudioToUDP) {
-                        m_audioNetSink->write(demod * 5.0f * squelchFactor);
-                    }
                 }
             }
             else
@@ -284,9 +275,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
 
                 sample = 0;
-                if (m_settings.m_copyAudioToUDP) {
-                    m_audioNetSink->write(0);
-                }
             }
 
             m_audioBuffer[m_audioBufferFill].l = sample;
@@ -379,7 +367,6 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	    BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
 	    const QThread *thread = cfg.getThread();
 	    qDebug("NFMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-	    m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
 	    return true;
 	}
     else if (DSPConfigureAudio::match(cmd))
@@ -464,9 +451,6 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
             << " m_audioMute: " << settings.m_audioMute
-            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
@@ -514,12 +498,6 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         }
 
         m_squelchCount = 0; // reset squelch open counter
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort) || force)
-    {
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
     }
 
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force)
@@ -593,9 +571,6 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
     }
-    if (channelSettingsKeys.contains("copyAudioToUDP")) {
-        settings.m_copyAudioToUDP = response.getNfmDemodSettings()->getCopyAudioToUdp() != 0;
-    }
     if (channelSettingsKeys.contains("ctcssIndex")) {
         settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
     }
@@ -627,12 +602,6 @@ int NFMDemod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getNfmDemodSettings()->getTitle();
-    }
-    if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getNfmDemodSettings()->getUdpAddress();
-    }
-    if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getNfmDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getNfmDemodSettings()->getVolume();
@@ -673,7 +642,6 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getNfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
     response.getNfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getNfmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
     response.getNfmDemodSettings()->setCtcssIndex(settings.m_ctcssIndex);
     response.getNfmDemodSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
     response.getNfmDemodSettings()->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);
@@ -683,19 +651,12 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getNfmDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getNfmDemodSettings()->setSquelch(settings.m_squelch);
     response.getNfmDemodSettings()->setSquelchGate(settings.m_squelchGate);
-    response.getNfmDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getNfmDemodSettings()->setVolume(settings.m_volume);
 
     if (response.getNfmDemodSettings()->getTitle()) {
         *response.getNfmDemodSettings()->getTitle() = settings.m_title;
     } else {
         response.getNfmDemodSettings()->setTitle(new QString(settings.m_title));
-    }
-
-    if (response.getNfmDemodSettings()->getUdpAddress()) {
-        *response.getNfmDemodSettings()->getUdpAddress() = settings.m_udpAddress;
-    } else {
-        response.getNfmDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
 }
 

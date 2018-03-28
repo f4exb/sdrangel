@@ -49,9 +49,6 @@ void NFMDemodSettings::resetToDefaults()
     m_ctcssOn = false;
     m_audioMute = false;
     m_ctcssIndex = 0;
-    m_copyAudioToUDP = false;
-    m_udpAddress = "127.0.0.1";
-    m_udpPort = 9998;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;

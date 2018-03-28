@@ -206,12 +206,6 @@ void NFMDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
-void NFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
 	m_settings.m_ctcssIndex = index;
@@ -233,14 +227,11 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -358,7 +349,6 @@ void NFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -393,16 +383,10 @@ void NFMDemodGUI::displaySettings()
 
     ui->ctcssOn->setChecked(m_settings.m_ctcssOn);
     ui->audioMute->setChecked(m_settings.m_audioMute);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
 
     blockApplySettings(false);
-}
-
-void NFMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void NFMDemodGUI::leaveEvent(QEvent*)
