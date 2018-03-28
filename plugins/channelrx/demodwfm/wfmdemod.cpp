@@ -61,8 +61,6 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
-    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -81,7 +79,6 @@ WFMDemod::~WFMDemod()
 	}
 
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-    delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -149,10 +146,6 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				m_sampleBuffer.push_back(Sample(sample, sample));
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
-
-				if (m_settings.m_copyAudioToUDP) {
-				    m_audioNetSink->write(sample);
-				}
 
 				++m_audioBufferFill;
 
@@ -241,7 +234,6 @@ bool WFMDemod::handleMessage(const Message& cmd)
         BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
         const QThread *thread = cfg.getThread();
         qDebug("WFMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPConfigureAudio::match(cmd))
@@ -322,9 +314,6 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             << " m_afBandwidth: " << settings.m_afBandwidth
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
-            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
@@ -351,12 +340,6 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         qDebug() << "WFMDemod::applySettings: set m_squelchLevel";
         m_squelchLevel = pow(10.0, settings.m_squelch / 20.0);
         m_squelchLevel *= m_squelchLevel;
-    }
-
-    if ((m_settings.m_udpAddress != settings.m_udpAddress)
-        || (m_settings.m_udpPort != settings.m_udpPort) || force)
-    {
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)

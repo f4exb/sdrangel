@@ -38,6 +38,8 @@ This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can
 
 This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
 
-<h3>9: Audio mute</h3>
+<h3>9: Audio mute and select audio output</h3>
 
-Use this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+
+If you right click on this button this will open a dialog to select the audio output device.

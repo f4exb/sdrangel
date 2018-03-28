@@ -156,7 +156,6 @@ private:
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-    AudioNetSink *m_audioNetSink;
 
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
