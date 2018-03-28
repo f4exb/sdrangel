@@ -182,11 +182,12 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-  /sdrangel/audio/input/set:
+  
+  /sdrangel/audio/input/parameters:
     x-swagger-router-controller: instance
     patch:
       description: Set audio input device paramaters
-      operationId: instanceAudioInputSetPatch
+      operationId: instanceAudioInputPatch
       tags:
         - Instance
       consumes: 
@@ -211,12 +212,57 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
+    delete:
+      description: Delete audio input device paramaters and return to defaults
+      operationId: instanceAudioInputDelete
+      tags:
+        - Instance
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio input parameters. Index is used to identify the device.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioInputDevice"
+      responses:
+        "200":
+          description: Success. Returns default parameters.
+          schema:
+            $ref: "#/definitions/AudioInputDevice"
+        "404":
+          description: Audio input device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
           
-  /sdrangel/audio/output/set:
+  
+  /sdrangel/audio/input/cleanup:
+    x-swagger-router-controller: instance
+    patch:
+      description: Remove registered parameters for devices not in  list of available input devices for this instance
+      operationId: instanceAudioInputCleanupPatch
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/audio/output/parameters:
     x-swagger-router-controller: instance
     patch:
       description: Set audio output device parameters
-      operationId: instanceAudioOutputSetPatch
+      operationId: instanceAudioOutputPatch
       tags:
         - Instance
       consumes: 
@@ -237,6 +283,50 @@ paths:
           description: Audio output device not found
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Delete audio output device paramaters and return to defaults
+      operationId: instanceAudioOutputDelete
+      tags:
+        - Instance
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio output parameters. Index is used to identify the device.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+      responses:
+        "200":
+          description: Success. Returns actual data in particular the actual sample rate.
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+        "404":
+          description: Audio output device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+  
+  /sdrangel/audio/output/cleanup:
+    x-swagger-router-controller: instance
+    patch:
+      description: Remove registered parameters for devices not in  list of available output devices for this instance
+      operationId: instanceAudioOutputCleanupPatch
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":

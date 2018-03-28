@@ -394,6 +394,88 @@ int WebAPIAdapterGUI::instanceAudioOutputPatch(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceAudioInputDelete(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
+
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
+        return 404;
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+
+    response.setSampleRate(inputDeviceInfo.sampleRate);
+    response.setVolume(inputDeviceInfo.volume);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioOutputDelete(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
+
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
+        return 404;
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+
+    response.setSampleRate(outputDeviceInfo.sampleRate);
+    response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
+    response.setUdpUsesRtp(outputDeviceInfo.udpUseRTP == 0 ? 0 : 1);
+    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode % 4);
+
+    if (response.getUdpAddress()) {
+        *response.getUdpAddress() = outputDeviceInfo.udpAddress;
+    } else {
+        response.setUdpAddress(new QString(outputDeviceInfo.udpAddress));
+    }
+
+    response.setUdpPort(outputDeviceInfo.udpPort % (1<<16));
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
+
+    response.init();
+    *response.getMessage() = QString("Unregistered parameters for devices not in list of available input devices for this instance");
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
+
+    response.init();
+    *response.getMessage() = QString("Unregistered parameters for devices not in list of available output devices for this instance");
+
+    return 200;
+}
+
 int WebAPIAdapterGUI::instanceLocationGet(
         SWGSDRangel::SWGLocationInformation& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))

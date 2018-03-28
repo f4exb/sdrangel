@@ -73,6 +73,22 @@ public:
             const QStringList& audioOutputKeys,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceAudioInputDelete(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputDelete(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioInputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceLocationGet(
             SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error);

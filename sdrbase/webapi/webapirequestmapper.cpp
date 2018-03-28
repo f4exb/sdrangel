@@ -84,10 +84,14 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLoggingService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
             instanceAudioService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAudioInputSetURL) {
-            instanceAudioInputSetService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAudioOutputSetURL) {
-            instanceAudioOutputSetService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioInputParametersURL) {
+            instanceAudioInputParametersService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioOutputParametersURL) {
+            instanceAudioOutputParametersService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioInputCleanupURL) {
+            instanceAudioInputCleanupService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioOutputCleanupURL) {
+            instanceAudioOutputCleanupService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
@@ -328,24 +332,24 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
     }
 }
 
-void WebAPIRequestMapper::instanceAudioInputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::instanceAudioInputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     // TODO
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
 
-    if (request.getMethod() == "PATCH")
+    QString jsonStr = request.getBody();
+    QJsonObject jsonObject;
+
+    if (parseJsonBody(jsonStr, jsonObject, response))
     {
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
+        SWGSDRangel::SWGAudioInputDevice normalResponse;
+        resetAudioInputDevice(normalResponse);
+        QStringList audioInputDeviceKeys;
 
-        if (parseJsonBody(jsonStr, jsonObject, response))
+        if (validateAudioInputDevice(normalResponse, jsonObject, audioInputDeviceKeys))
         {
-            SWGSDRangel::SWGAudioInputDevice normalResponse;
-            resetAudioInputDevice(normalResponse);
-            QStringList audioInputDeviceKeys;
-
-            if (validateAudioInputDevice(normalResponse, jsonObject, audioInputDeviceKeys))
+            if (request.getMethod() == "PATCH")
             {
                 int status = m_adapter->instanceAudioInputPatch(
                         normalResponse,
@@ -359,48 +363,61 @@ void WebAPIRequestMapper::instanceAudioInputSetService(qtwebapp::HttpRequest& re
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
+            else if (request.getMethod() == "DELETE")
+            {
+                int status = m_adapter->instanceAudioInputDelete(
+                        normalResponse,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
             else
             {
-                response.setStatus(400,"Invalid JSON request");
+                response.setStatus(405,"Invalid HTTP method");
                 errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON request";
+                *errorResponse.getMessage() = "Invalid HTTP method";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
         else
         {
-            response.setStatus(400,"Invalid JSON format");
+            response.setStatus(400,"Invalid JSON request");
             errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
+            *errorResponse.getMessage() = "Invalid JSON request";
             response.write(errorResponse.asJson().toUtf8());
         }
     }
     else
     {
-        response.setStatus(405,"Invalid HTTP method");
+        response.setStatus(400,"Invalid JSON format");
         errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
+        *errorResponse.getMessage() = "Invalid JSON format";
         response.write(errorResponse.asJson().toUtf8());
     }
 }
 
-void WebAPIRequestMapper::instanceAudioOutputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::instanceAudioOutputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
 
-    if (request.getMethod() == "PATCH")
+    QString jsonStr = request.getBody();
+    QJsonObject jsonObject;
+
+    if (parseJsonBody(jsonStr, jsonObject, response))
     {
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
+        SWGSDRangel::SWGAudioOutputDevice normalResponse;
+        resetAudioOutputDevice(normalResponse);
+        QStringList audioOutputDeviceKeys;
 
-        if (parseJsonBody(jsonStr, jsonObject, response))
+        if (validateAudioOutputDevice(normalResponse, jsonObject, audioOutputDeviceKeys))
         {
-            SWGSDRangel::SWGAudioOutputDevice normalResponse;
-            resetAudioOutputDevice(normalResponse);
-            QStringList audioOutputDeviceKeys;
-
-            if (validateAudioOutputDevice(normalResponse, jsonObject, audioOutputDeviceKeys))
+            if (request.getMethod() == "PATCH")
             {
                 int status = m_adapter->instanceAudioOutputPatch(
                         normalResponse,
@@ -414,19 +431,86 @@ void WebAPIRequestMapper::instanceAudioOutputSetService(qtwebapp::HttpRequest& r
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
+            else if (request.getMethod() == "DELETE")
+            {
+                int status = m_adapter->instanceAudioOutputDelete(
+                        normalResponse,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
             else
             {
-                response.setStatus(400,"Invalid JSON request");
+                response.setStatus(405,"Invalid HTTP method");
                 errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON request";
+                *errorResponse.getMessage() = "Invalid HTTP method";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
         else
         {
-            response.setStatus(400,"Invalid JSON format");
+            response.setStatus(400,"Invalid JSON request");
             errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
+            *errorResponse.getMessage() = "Invalid JSON request";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(400,"Invalid JSON format");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid JSON format";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioInputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PATCH")
+    {
+        SWGSDRangel::SWGSuccessResponse normalResponse;
+
+        int status = m_adapter->instanceAudioInputCleanupPatch(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioOutputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PATCH")
+    {
+        SWGSDRangel::SWGSuccessResponse normalResponse;
+
+        int status = m_adapter->instanceAudioOutputCleanupPatch(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }

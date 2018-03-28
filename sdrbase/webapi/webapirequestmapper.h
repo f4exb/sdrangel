@@ -52,8 +52,10 @@ private:
     void instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void instanceAudioInputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void instanceAudioOutputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioInputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioOutputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioInputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioOutputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

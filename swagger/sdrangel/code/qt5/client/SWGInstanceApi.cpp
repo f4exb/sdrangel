@@ -81,14 +81,66 @@ SWGInstanceApi::instanceAudioGetCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGInstanceApi::instanceAudioInputSetPatch(SWGAudioInputDevice& body) {
+SWGInstanceApi::instanceAudioInputCleanupPatch() {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/input/set");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/input/cleanup");
 
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
     SWGHttpRequestInput input(fullPath, "PATCH");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceAudioInputCleanupPatchCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceAudioInputCleanupPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceAudioInputCleanupPatchSignal(output);
+    } else {
+        emit instanceAudioInputCleanupPatchSignalE(output, error_type, error_str);
+        emit instanceAudioInputCleanupPatchSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceAudioInputDelete(SWGAudioInputDevice& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/input/parameters");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "DELETE");
 
 
     
@@ -104,13 +156,13 @@ SWGInstanceApi::instanceAudioInputSetPatch(SWGAudioInputDevice& body) {
     connect(worker,
             &SWGHttpRequestWorker::on_execution_finished,
             this,
-            &SWGInstanceApi::instanceAudioInputSetPatchCallback);
+            &SWGInstanceApi::instanceAudioInputDeleteCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGInstanceApi::instanceAudioInputSetPatchCallback(SWGHttpRequestWorker * worker) {
+SWGInstanceApi::instanceAudioInputDeleteCallback(SWGHttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -128,17 +180,17 @@ SWGInstanceApi::instanceAudioInputSetPatchCallback(SWGHttpRequestWorker * worker
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceAudioInputSetPatchSignal(output);
+        emit instanceAudioInputDeleteSignal(output);
     } else {
-        emit instanceAudioInputSetPatchSignalE(output, error_type, error_str);
-        emit instanceAudioInputSetPatchSignalEFull(worker, error_type, error_str);
+        emit instanceAudioInputDeleteSignalE(output, error_type, error_str);
+        emit instanceAudioInputDeleteSignalEFull(worker, error_type, error_str);
     }
 }
 
 void
-SWGInstanceApi::instanceAudioOutputSetPatch(SWGAudioOutputDevice& body) {
+SWGInstanceApi::instanceAudioInputPatch(SWGAudioInputDevice& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/output/set");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/input/parameters");
 
 
 
@@ -159,13 +211,120 @@ SWGInstanceApi::instanceAudioOutputSetPatch(SWGAudioOutputDevice& body) {
     connect(worker,
             &SWGHttpRequestWorker::on_execution_finished,
             this,
-            &SWGInstanceApi::instanceAudioOutputSetPatchCallback);
+            &SWGInstanceApi::instanceAudioInputPatchCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGInstanceApi::instanceAudioOutputSetPatchCallback(SWGHttpRequestWorker * worker) {
+SWGInstanceApi::instanceAudioInputPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGAudioInputDevice* output = static_cast<SWGAudioInputDevice*>(create(json, QString("SWGAudioInputDevice")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceAudioInputPatchSignal(output);
+    } else {
+        emit instanceAudioInputPatchSignalE(output, error_type, error_str);
+        emit instanceAudioInputPatchSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceAudioOutputCleanupPatch() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/output/cleanup");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PATCH");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceAudioOutputCleanupPatchCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceAudioOutputCleanupPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceAudioOutputCleanupPatchSignal(output);
+    } else {
+        emit instanceAudioOutputCleanupPatchSignalE(output, error_type, error_str);
+        emit instanceAudioOutputCleanupPatchSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceAudioOutputDelete(SWGAudioOutputDevice& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/output/parameters");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "DELETE");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceAudioOutputDeleteCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceAudioOutputDeleteCallback(SWGHttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -183,10 +342,65 @@ SWGInstanceApi::instanceAudioOutputSetPatchCallback(SWGHttpRequestWorker * worke
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceAudioOutputSetPatchSignal(output);
+        emit instanceAudioOutputDeleteSignal(output);
     } else {
-        emit instanceAudioOutputSetPatchSignalE(output, error_type, error_str);
-        emit instanceAudioOutputSetPatchSignalEFull(worker, error_type, error_str);
+        emit instanceAudioOutputDeleteSignalE(output, error_type, error_str);
+        emit instanceAudioOutputDeleteSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceAudioOutputPatch(SWGAudioOutputDevice& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/audio/output/parameters");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PATCH");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceAudioOutputPatchCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceAudioOutputPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGAudioOutputDevice* output = static_cast<SWGAudioOutputDevice*>(create(json, QString("SWGAudioOutputDevice")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceAudioOutputPatchSignal(output);
+    } else {
+        emit instanceAudioOutputPatchSignalE(output, error_type, error_str);
+        emit instanceAudioOutputPatchSignalEFull(worker, error_type, error_str);
     }
 }
 

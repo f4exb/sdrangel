@@ -153,7 +153,7 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/audio/input (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/audio/input/parameters (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioInputPatch(
@@ -167,12 +167,64 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/audio/output (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/audio/output/parameters (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioOutputPatch(
             SWGSDRangel::SWGAudioOutputDevice& response __attribute__((unused)),
             const QStringList& audioOutputKeys __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/audio/input/parameters (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioInputDelete(
+            SWGSDRangel::SWGAudioInputDevice& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/audio/output/paramaters (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioOutputDelete(
+            SWGSDRangel::SWGAudioOutputDevice& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/audio/input/cleanup (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioInputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/audio/output/cleanup (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioOutputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
         error.init();
@@ -568,10 +620,10 @@ public:
     static QString instanceChannelsURL;
     static QString instanceLoggingURL;
     static QString instanceAudioURL;
-    static QString instanceAudioInputSetURL;
-    static QString instanceAudioOutputSetURL;
-    static QString instanceAudioInputUnsetURL;
-    static QString instanceAudioOutputUnsetURL;
+    static QString instanceAudioInputParametersURL;
+    static QString instanceAudioOutputParametersURL;
+    static QString instanceAudioInputCleanupURL;
+    static QString instanceAudioOutputCleanupURL;
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
     static QString instancePresetsURL;
