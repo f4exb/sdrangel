@@ -28,7 +28,6 @@
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
-#include "audio/audionetsink.h"
 #include "util/message.h"
 #include "amdemodsettings.h"
 
@@ -168,7 +167,6 @@ private:
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
-    AudioNetSink *m_audioNetSink;
 
     static const int m_udpBlockSize;
 
@@ -227,18 +225,11 @@ private:
 
             Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
             sample = demod * attack * (m_audioSampleRate/24) * m_settings.m_volume;
-            if (m_settings.m_copyAudioToUDP) {
-                m_audioNetSink->write(demod * attack * 32768.0f);
-            }
-
             m_squelchOpen = true;
         }
         else
         {
             sample = 0;
-            if (m_settings.m_copyAudioToUDP) {
-                m_audioNetSink->write(0);
-            }
             m_squelchOpen = false;
         }
 

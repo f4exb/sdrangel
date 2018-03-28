@@ -21,12 +21,6 @@ AMDemodSettings:
     bandpassEnable:
       description: use bandpass filter (1 for yes, 0 for no)
       type: integer
-    copyAudioToUDP:
-      type: integer
-    udpAddress:
-      type: string
-    udpPort:
-      type: integer
     rgbColor:
       type: integer
     title:

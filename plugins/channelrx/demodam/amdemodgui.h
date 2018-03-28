@@ -59,7 +59,6 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
-	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -71,7 +70,6 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
-    void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

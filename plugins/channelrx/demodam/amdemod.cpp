@@ -65,8 +65,6 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
-    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -80,7 +78,6 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 AMDemod::~AMDemod()
 {
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-    delete m_audioNetSink;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -194,7 +191,6 @@ bool AMDemod::handleMessage(const Message& cmd)
         BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
         const QThread *thread = cfg.getThread();
         qDebug("AMDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -273,9 +269,6 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
             << " m_bandpassEnable: " << settings.m_bandpassEnable
-            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
@@ -293,12 +286,6 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
     if ((m_settings.m_squelch != settings.m_squelch) || force)
     {
         m_squelchLevel = pow(10.0, settings.m_squelch / 10.0);
-    }
-
-    if ((m_settings.m_udpAddress != settings.m_udpAddress)
-        || (m_settings.m_udpPort != settings.m_udpPort) || force)
-    {
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -361,9 +348,6 @@ int AMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getAmDemodSettings()->getAudioMute() != 0;
     }
-    if (channelSettingsKeys.contains("copyAudioToUDP")) {
-        settings.m_copyAudioToUDP = response.getAmDemodSettings()->getCopyAudioToUdp() != 0;
-    }
     if (channelSettingsKeys.contains("inputFrequencyOffset"))
     {
         settings.m_inputFrequencyOffset = response.getAmDemodSettings()->getInputFrequencyOffset();
@@ -380,12 +364,6 @@ int AMDemod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getAmDemodSettings()->getTitle();
-    }
-    if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getAmDemodSettings()->getUdpAddress();
-    }
-    if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getAmDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getAmDemodSettings()->getVolume();
@@ -429,12 +407,10 @@ int AMDemod::webapiReportGet(
 void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings)
 {
     response.getAmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getAmDemodSettings()->setCopyAudioToUdp(settings.m_copyAudioToUDP ? 1 : 0);
     response.getAmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getAmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAmDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAmDemodSettings()->setSquelch(settings.m_squelch);
-    response.getAmDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getAmDemodSettings()->setVolume(settings.m_volume);
     response.getAmDemodSettings()->setBandpassEnable(settings.m_bandpassEnable ? 1 : 0);
 
@@ -442,12 +418,6 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
         *response.getAmDemodSettings()->getTitle() = settings.m_title;
     } else {
         response.getAmDemodSettings()->setTitle(new QString(settings.m_title));
-    }
-
-    if (response.getAmDemodSettings()->getUdpAddress()) {
-        *response.getAmDemodSettings()->getUdpAddress() = settings.m_udpAddress;
-    } else {
-        response.getAmDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
 }
 

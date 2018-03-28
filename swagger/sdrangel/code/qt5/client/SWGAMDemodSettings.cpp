@@ -40,12 +40,6 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_audio_mute_isSet = false;
     bandpass_enable = 0;
     m_bandpass_enable_isSet = false;
-    copy_audio_to_udp = 0;
-    m_copy_audio_to_udp_isSet = false;
-    udp_address = nullptr;
-    m_udp_address_isSet = false;
-    udp_port = 0;
-    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -70,12 +64,6 @@ SWGAMDemodSettings::init() {
     m_audio_mute_isSet = false;
     bandpass_enable = 0;
     m_bandpass_enable_isSet = false;
-    copy_audio_to_udp = 0;
-    m_copy_audio_to_udp_isSet = false;
-    udp_address = new QString("");
-    m_udp_address_isSet = false;
-    udp_port = 0;
-    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -89,11 +77,6 @@ SWGAMDemodSettings::cleanup() {
 
 
 
-
-
-    if(udp_address != nullptr) { 
-        delete udp_address;
-    }
 
 
     if(title != nullptr) { 
@@ -123,12 +106,6 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&bandpass_enable, pJson["bandpassEnable"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&copy_audio_to_udp, pJson["copyAudioToUDP"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -167,15 +144,6 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(m_bandpass_enable_isSet){
         obj->insert("bandpassEnable", QJsonValue(bandpass_enable));
-    }
-    if(m_copy_audio_to_udp_isSet){
-        obj->insert("copyAudioToUDP", QJsonValue(copy_audio_to_udp));
-    }
-    if(udp_address != nullptr && *udp_address != QString("")){
-        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
-    }
-    if(m_udp_port_isSet){
-        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -248,36 +216,6 @@ SWGAMDemodSettings::setBandpassEnable(qint32 bandpass_enable) {
 }
 
 qint32
-SWGAMDemodSettings::getCopyAudioToUdp() {
-    return copy_audio_to_udp;
-}
-void
-SWGAMDemodSettings::setCopyAudioToUdp(qint32 copy_audio_to_udp) {
-    this->copy_audio_to_udp = copy_audio_to_udp;
-    this->m_copy_audio_to_udp_isSet = true;
-}
-
-QString*
-SWGAMDemodSettings::getUdpAddress() {
-    return udp_address;
-}
-void
-SWGAMDemodSettings::setUdpAddress(QString* udp_address) {
-    this->udp_address = udp_address;
-    this->m_udp_address_isSet = true;
-}
-
-qint32
-SWGAMDemodSettings::getUdpPort() {
-    return udp_port;
-}
-void
-SWGAMDemodSettings::setUdpPort(qint32 udp_port) {
-    this->udp_port = udp_port;
-    this->m_udp_port_isSet = true;
-}
-
-qint32
 SWGAMDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -308,9 +246,6 @@ SWGAMDemodSettings::isSet(){
         if(m_volume_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_bandpass_enable_isSet){ isObjectUpdated = true; break;}
-        if(m_copy_audio_to_udp_isSet){ isObjectUpdated = true; break;}
-        if(udp_address != nullptr && *udp_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_udp_port_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
     }while(false);

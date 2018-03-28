@@ -16,15 +16,11 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>3: Audio mute</h3>
+<h3>3: Audio mute and audio output select</h3>
 
-Use this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
 
-<h3>4: UDP output</h3>
-
-Copies audio output to UDP. Audio is set at fixed level and is muted by the mute button (13) and squelch (9) is also applied. Output is mono S16LE samples. 
-
-UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
+If you right click on it it will open a dialog to select the audio output device.
 
 <h3>5: Level meter in dB</h3>
 

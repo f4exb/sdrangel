@@ -35,9 +35,6 @@ void AMDemodSettings::resetToDefaults()
     m_volume = 2.0;
     m_audioMute = false;
     m_bandpassEnable = false;
-    m_copyAudioToUDP = false;
-    m_udpAddress = "127.0.0.1";
-    m_udpPort = 9999;
     m_rgbColor = QColor(255, 255, 0).rgb();
     m_title = "AM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;

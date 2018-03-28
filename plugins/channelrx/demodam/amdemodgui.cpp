@@ -173,12 +173,6 @@ void AMDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
-void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -194,14 +188,11 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -296,7 +287,6 @@ void AMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -314,14 +304,8 @@ void AMDemodGUI::displaySettings()
 
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
     blockApplySettings(false);
-}
-
-void AMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)
