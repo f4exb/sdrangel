@@ -144,13 +144,11 @@ To avoid unwanted squelch opening on short transient bursts only signals wilth p
 
 When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
 
-<h3>12: Copy audio to UDP</h3>
+<h3>13: Audio mute and audio output select</h3>
 
-Copies audio output to UDP. Output is mono S16LE samples regardless of binaural/monaural operation.
+Left click on this button to toggle audio mute for this channel.
 
-<h3>13: Audio mute</h3>
-
-Use this button to toggle audio mute for this channel.
+If you right click on it a dialog will open to select the audio output device.
 
 <h3>14: Spectrum display</h3>
 

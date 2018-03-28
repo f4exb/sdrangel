@@ -855,16 +855,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="copyAudioToUDP">
-        <property name="toolTip">
-         <string>Copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>U</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
          <string>Mute/Unmute audio</string>

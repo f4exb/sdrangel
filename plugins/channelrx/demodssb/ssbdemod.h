@@ -276,8 +276,6 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
-    AudioNetSink *m_audioNetSink;
-	static const int m_udpBlockSize;
 
 	QMutex m_settingsMutex;
 

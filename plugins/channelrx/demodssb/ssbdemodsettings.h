@@ -32,14 +32,11 @@ struct SSBDemodSettings
     bool m_audioFlipChannels;
     bool m_dsb;
     bool m_audioMute;
-    bool m_copyAudioToUDP;
     bool m_agc;
     bool m_agcClamping;
     int  m_agcTimeLog2;
     int  m_agcPowerThreshold;
     int  m_agcThresholdGate;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;

@@ -222,12 +222,6 @@ void SSBDemodGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
     ui->lowCut->setValue(-lcValue);
 }
 
-void SSBDemodGUI::on_copyAudioToUDP_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
@@ -235,14 +229,11 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -486,7 +477,6 @@ void SSBDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -541,14 +531,8 @@ void SSBDemodGUI::displaySettings()
     ui->agcThresholdGate->setValue(m_settings.m_agcThresholdGate);
     s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
     ui->agcThresholdGateText->setText(s);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
     blockApplySettings(false);
-}
-
-void SSBDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)

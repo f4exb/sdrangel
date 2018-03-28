@@ -38,7 +38,6 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureChannelizer, Message)
 
 const QString SSBDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.ssb";
 const QString SSBDemod::m_channelId = "SSBDemod";
-const int SSBDemod::m_udpBlockSize = 512;
 
 SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
@@ -87,9 +86,6 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
 
-    m_audioNetSink = new AudioNetSink(0); // parent thread allocated dynamically - no RTP
-    m_audioNetSink->setDestination(m_settings.m_udpAddress, m_settings.m_udpPort);
-
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
 
@@ -104,7 +100,6 @@ SSBDemod::~SSBDemod()
 	if (SSBFilter) delete SSBFilter;
 	if (DSBFilter) delete DSBFilter;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-    delete m_audioNetSink;
 
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -220,8 +215,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			{
 				m_audioBuffer[m_audioBufferFill].r = 0;
 				m_audioBuffer[m_audioBufferFill].l = 0;
-
-                if (m_settings.m_copyAudioToUDP) { m_audioNetSink->write(0); }
 			}
 			else
 			{
@@ -237,8 +230,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal);
 						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal);
 					}
-
-                    if (m_settings.m_copyAudioToUDP) { m_audioNetSink->write(m_audioBuffer[m_audioBufferFill].r + m_audioBuffer[m_audioBufferFill].l); }
 				}
 				else
 				{
@@ -246,8 +237,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 					qint16 sample = (qint16)(demod * m_volume * agcVal);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
-
-					if (m_settings.m_copyAudioToUDP) { m_audioNetSink->write(sample); }
 				}
 			}
 
@@ -332,7 +321,6 @@ bool SSBDemod::handleMessage(const Message& cmd)
         BasebandSampleSink::MsgThreadedSink& cfg = (BasebandSampleSink::MsgThreadedSink&) cmd;
         const QThread *thread = cfg.getThread();
         qDebug("SSBDemod::handleMessage: BasebandSampleSink::MsgThreadedSink: %p", thread);
-        m_audioNetSink->moveToThread(const_cast<QThread*>(thread)); // use the thread for udp sinks
         return true;
     }
     else if (DSPConfigureAudio::match(cmd))
@@ -428,7 +416,6 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
-            << " m_copyAudioToUDP: " << settings.m_copyAudioToUDP
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
@@ -520,12 +507,6 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " agcPowerThreshold: " << agcPowerThreshold
             << " agcThresholdGate: " << agcThresholdGate
             << " agcClamping: " << agcClamping;
-    }
-
-    if ((m_settings.m_udpAddress != settings.m_udpAddress)
-        || (m_settings.m_udpPort != settings.m_udpPort) || force)
-    {
-        m_audioNetSink->setDestination(settings.m_udpAddress, settings.m_udpPort);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
