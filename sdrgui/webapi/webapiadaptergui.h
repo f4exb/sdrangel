@@ -63,8 +63,14 @@ public:
             SWGSDRangel::SWGAudioDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceAudioPatch(
-            SWGSDRangel::SWGAudioDevicesSelect& response,
+    virtual int instanceAudioInputPatch(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            const QStringList& audioInputKeys,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputPatch(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            const QStringList& audioOutputKeys,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLocationGet(

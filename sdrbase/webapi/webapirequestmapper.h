@@ -52,6 +52,8 @@ private:
     void instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioInputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAudioOutputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -78,6 +80,8 @@ private:
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateChannelReport(SWGSDRangel::SWGChannelReport& deviceReport, QJsonObject& jsonObject, QStringList& channelReportKeys);
+    bool validateAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice, QJsonObject& jsonObject, QStringList& audioInputDeviceKeys);
+    bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
 
     void appendSettingsSubKeys(
             const QJsonObject& parentSettingsJsonObject,
@@ -90,6 +94,8 @@ private:
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings);
     void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
+    void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);
+    void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

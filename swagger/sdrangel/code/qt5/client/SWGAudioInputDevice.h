@@ -11,69 +11,79 @@
  */
 
 /*
- * SWGAudioDevices.h
+ * SWGAudioInputDevice.h
  *
- * List of audio devices available in the system
+ * Audio input device
  */
 
-#ifndef SWGAudioDevices_H_
-#define SWGAudioDevices_H_
+#ifndef SWGAudioInputDevice_H_
+#define SWGAudioInputDevice_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAudioInputDevice.h"
-#include "SWGAudioOutputDevice.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAudioDevices: public SWGObject {
+class SWG_API SWGAudioInputDevice: public SWGObject {
 public:
-    SWGAudioDevices();
-    SWGAudioDevices(QString* json);
-    virtual ~SWGAudioDevices();
+    SWGAudioInputDevice();
+    SWGAudioInputDevice(QString* json);
+    virtual ~SWGAudioInputDevice();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAudioDevices* fromJson(QString &jsonString) override;
+    virtual SWGAudioInputDevice* fromJson(QString &jsonString) override;
 
-    qint32 getNbInputDevices();
-    void setNbInputDevices(qint32 nb_input_devices);
+    QString* getName();
+    void setName(QString* name);
 
-    QList<SWGAudioInputDevice*>* getInputDevices();
-    void setInputDevices(QList<SWGAudioInputDevice*>* input_devices);
+    qint32 getIndex();
+    void setIndex(qint32 index);
 
-    qint32 getNbOutputDevices();
-    void setNbOutputDevices(qint32 nb_output_devices);
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
 
-    QList<SWGAudioOutputDevice*>* getOutputDevices();
-    void setOutputDevices(QList<SWGAudioOutputDevice*>* output_devices);
+    qint32 getIsSystemDefault();
+    void setIsSystemDefault(qint32 is_system_default);
+
+    qint32 getDefaultUnregistered();
+    void setDefaultUnregistered(qint32 default_unregistered);
+
+    float getVolume();
+    void setVolume(float volume);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 nb_input_devices;
-    bool m_nb_input_devices_isSet;
+    QString* name;
+    bool m_name_isSet;
 
-    QList<SWGAudioInputDevice*>* input_devices;
-    bool m_input_devices_isSet;
+    qint32 index;
+    bool m_index_isSet;
 
-    qint32 nb_output_devices;
-    bool m_nb_output_devices_isSet;
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
-    QList<SWGAudioOutputDevice*>* output_devices;
-    bool m_output_devices_isSet;
+    qint32 is_system_default;
+    bool m_is_system_default_isSet;
+
+    qint32 default_unregistered;
+    bool m_default_unregistered_isSet;
+
+    float volume;
+    bool m_volume_isSet;
 
 };
 
 }
 
-#endif /* SWGAudioDevices_H_ */
+#endif /* SWGAudioInputDevice_H_ */

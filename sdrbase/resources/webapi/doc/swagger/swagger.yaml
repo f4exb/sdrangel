@@ -182,9 +182,11 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
+  /sdrangel/audio/input/set:
+    x-swagger-router-controller: instance
     patch:
-      description: Set audio devices
-      operationId: instanceAudioPatch
+      description: Set audio input device paramaters
+      operationId: instanceAudioInputSetPatch
       tags:
         - Instance
       consumes: 
@@ -192,15 +194,49 @@ paths:
       parameters:
         - name: body
           in: body
-          description: Select audio devices to use for this instance
+          description: Audio input parameters. Index is used to identify the device. Only settable fields are considered.
           required: true
           schema:
-            $ref: "#/definitions/AudioDevicesSelect"
+            $ref: "#/definitions/AudioInputDevice"
       responses:
         "200":
-          description: Success
+          description: Success. Returns actual data in particular the actual sample rate.
           schema:
-            $ref: "#/definitions/AudioDevicesSelect"
+            $ref: "#/definitions/AudioInputDevice"
+        "404":
+          description: Audio input device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
+  /sdrangel/audio/output/set:
+    x-swagger-router-controller: instance
+    patch:
+      description: Set audio output device parameters
+      operationId: instanceAudioOutputSetPatch
+      tags:
+        - Instance
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+      responses:
+        "200":
+          description: Success. Returns actual data in particular the actual sample rate.
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+        "404":
+          description: Audio output device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -1355,64 +1391,83 @@ definitions:
   AudioDevices:
     description: "List of audio devices available in the system"
     required:
-      - inputVolume
       - nbInputDevices
-      - inputDeviceSelectedIndex
       - nbOutputDevices
-      - outputDeviceSelectedIndex
     properties:
-      inputVolume:
-        description: "Audio input volume [0.0..1.0]"
-        type: number
-        format: float
       nbInputDevices:
         description: "Number of input audio devices"
-        type: integer
-      inputDeviceSelectedIndex:
-        description: "Index of selected input audio devices (-1 if default)"
         type: integer
       inputDevices:
         description: "List of input devices"
         type: array
         items:
-          $ref: "#/definitions/AudioDevice"        
+          $ref: "#/definitions/AudioInputDevice"        
       nbOutputDevices:
         description: "Number of output audio devices"
-        type: integer
-      outputDeviceSelectedIndex:
-        description: "Index of selected output audio devices (-1 if default)"
         type: integer
       outputDevices:
         description: "List of output devices"
         type: array
         items:
-          $ref: "#/definitions/AudioDevice"
+          $ref: "#/definitions/AudioOutputDevice"
           
-  AudioDevice:
-    description: "Audio device"
+  AudioInputDevice:
+    description: "Audio input device"
     properties:
       name: 
         description: "Displayable name of the device"
         type: string
-        
-  AudioDevicesSelect:
-    description: "Audio devices selected"
-    required:
-      - inputVolume
-      - inputIndex
-      - outputIndex
-    properties:
-      inputVolume:
+      index:
+        description: "Index in attached devices list. -1 for system default"
+        type: integer
+      sampleRate: 
+        description: "Device sample rate in S/s"
+        type: integer
+      isSystemDefault:
+        description: "1 if this device is the system default else 0"
+        type: integer
+      defaultUnregistered:
+        description: "1 if this device is unregistered and therefore will inherit default values else 0"
+        type: integer
+      volume:
         description: "Audio input volume [0.0..1.0]"
         type: number
         format: float
-      inputIndex:
-        description: "Index of the audio input device (-1 for default)"
+
+  AudioOutputDevice:
+    description: "Audio output device"
+    properties:
+      name: 
+        description: "Displayable name of the device"
+        type: string
+      index:
+        description: "Index in attached devices list. -1 for system default"
         type: integer
-      outputIndex:
-        description: "Index of the audio output device (-1 for default)"
+      sampleRate: 
+        description: "Device sample rate in S/s"
         type: integer
-        
+      isSystemDefault:
+        description: "1 if this device is the system default else 0"
+        type: integer
+      defaultUnregistered:
+        description: "1 if this device is unregistered and therefore will inherit default values else 0"
+        type: integer
+      copyToUDP:
+        description: '1 if audio is copied to UDP else 0'
+        type: integer
+      udpUsesRTP:
+        description: '1 if RTP protocol is used over UDP else 0'
+        type: integer
+      udpChannelMode:
+        description: 'How audio data is copied to UDP: 0: left 1: right 2: mixed 3: stereo'
+        type: integer
+      udpAddress:
+        description: "UDP destination address"
+        type: string
+      udpPort:
+        description: "UDP destination port"
+        type: integer
+
   LocationInformation:
     description: "Instance geolocation information"
     required:

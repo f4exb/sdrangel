@@ -17,9 +17,9 @@
 #include "SWGAMDemodReport.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAirspyHFSettings.h"
-#include "SWGAudioDevice.h"
 #include "SWGAudioDevices.h"
-#include "SWGAudioDevicesSelect.h"
+#include "SWGAudioInputDevice.h"
+#include "SWGAudioOutputDevice.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
@@ -71,14 +71,14 @@ namespace SWGSDRangel {
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
       return new SWGAirspyHFSettings();
     }
-    if(QString("SWGAudioDevice").compare(type) == 0) {
-      return new SWGAudioDevice();
-    }
     if(QString("SWGAudioDevices").compare(type) == 0) {
       return new SWGAudioDevices();
     }
-    if(QString("SWGAudioDevicesSelect").compare(type) == 0) {
-      return new SWGAudioDevicesSelect();
+    if(QString("SWGAudioInputDevice").compare(type) == 0) {
+      return new SWGAudioInputDevice();
+    }
+    if(QString("SWGAudioOutputDevice").compare(type) == 0) {
+      return new SWGAudioOutputDevice();
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
       return new SWGCWKeyerSettings();

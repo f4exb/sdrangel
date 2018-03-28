@@ -781,74 +781,108 @@ margin-bottom: 20px;
   },
   "description" : "AirspyHF"
 };
-            defs.AudioDevice = {
-  "properties" : {
-    "name" : {
-      "type" : "string",
-      "description" : "Displayable name of the device"
-    }
-  },
-  "description" : "Audio device"
-};
             defs.AudioDevices = {
-  "required" : [ "inputDeviceSelectedIndex", "inputVolume", "nbInputDevices", "nbOutputDevices", "outputDeviceSelectedIndex" ],
+  "required" : [ "nbInputDevices", "nbOutputDevices" ],
   "properties" : {
-    "inputVolume" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "Audio input volume [0.0..1.0]"
-    },
     "nbInputDevices" : {
       "type" : "integer",
       "description" : "Number of input audio devices"
-    },
-    "inputDeviceSelectedIndex" : {
-      "type" : "integer",
-      "description" : "Index of selected input audio devices (-1 if default)"
     },
     "inputDevices" : {
       "type" : "array",
       "description" : "List of input devices",
       "items" : {
-        "$ref" : "#/definitions/AudioDevice"
+        "$ref" : "#/definitions/AudioInputDevice"
       }
     },
     "nbOutputDevices" : {
       "type" : "integer",
       "description" : "Number of output audio devices"
     },
-    "outputDeviceSelectedIndex" : {
-      "type" : "integer",
-      "description" : "Index of selected output audio devices (-1 if default)"
-    },
     "outputDevices" : {
       "type" : "array",
       "description" : "List of output devices",
       "items" : {
-        "$ref" : "#/definitions/AudioDevice"
+        "$ref" : "#/definitions/AudioOutputDevice"
       }
     }
   },
   "description" : "List of audio devices available in the system"
 };
-            defs.AudioDevicesSelect = {
-  "required" : [ "inputIndex", "inputVolume", "outputIndex" ],
+            defs.AudioInputDevice = {
   "properties" : {
-    "inputVolume" : {
+    "name" : {
+      "type" : "string",
+      "description" : "Displayable name of the device"
+    },
+    "index" : {
+      "type" : "integer",
+      "description" : "Index in attached devices list. -1 for system default"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Device sample rate in S/s"
+    },
+    "isSystemDefault" : {
+      "type" : "integer",
+      "description" : "1 if this device is the system default else 0"
+    },
+    "defaultUnregistered" : {
+      "type" : "integer",
+      "description" : "1 if this device is unregistered and therefore will inherit default values else 0"
+    },
+    "volume" : {
       "type" : "number",
       "format" : "float",
       "description" : "Audio input volume [0.0..1.0]"
-    },
-    "inputIndex" : {
-      "type" : "integer",
-      "description" : "Index of the audio input device (-1 for default)"
-    },
-    "outputIndex" : {
-      "type" : "integer",
-      "description" : "Index of the audio output device (-1 for default)"
     }
   },
-  "description" : "Audio devices selected"
+  "description" : "Audio input device"
+};
+            defs.AudioOutputDevice = {
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "Displayable name of the device"
+    },
+    "index" : {
+      "type" : "integer",
+      "description" : "Index in attached devices list. -1 for system default"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Device sample rate in S/s"
+    },
+    "isSystemDefault" : {
+      "type" : "integer",
+      "description" : "1 if this device is the system default else 0"
+    },
+    "defaultUnregistered" : {
+      "type" : "integer",
+      "description" : "1 if this device is unregistered and therefore will inherit default values else 0"
+    },
+    "copyToUDP" : {
+      "type" : "integer",
+      "description" : "1 if audio is copied to UDP else 0"
+    },
+    "udpUsesRTP" : {
+      "type" : "integer",
+      "description" : "1 if RTP protocol is used over UDP else 0"
+    },
+    "udpChannelMode" : {
+      "type" : "integer",
+      "description" : "How audio data is copied to UDP: 0: left 1: right 2: mixed 3: stereo"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP destination address"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP destination port"
+    }
+  },
+  "description" : "Audio output device"
 };
             defs.CWKeyerSettings = {
   "properties" : {
@@ -1905,8 +1939,11 @@ margin-bottom: 20px;
                     <li data-group="Instance" data-name="instanceAudioGet" class="">
                       <a href="#api-Instance-instanceAudioGet">instanceAudioGet</a>
                     </li>
-                    <li data-group="Instance" data-name="instanceAudioPatch" class="">
-                      <a href="#api-Instance-instanceAudioPatch">instanceAudioPatch</a>
+                    <li data-group="Instance" data-name="instanceAudioInputSetPatch" class="">
+                      <a href="#api-Instance-instanceAudioInputSetPatch">instanceAudioInputSetPatch</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceAudioOutputSetPatch" class="">
+                      <a href="#api-Instance-instanceAudioOutputSetPatch">instanceAudioOutputSetPatch</a>
                     </li>
                     <li data-group="Instance" data-name="instanceChannels" class="">
                       <a href="#api-Instance-instanceChannels">instanceChannels</a>
@@ -10766,41 +10803,41 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
-                    <div id="api-Instance-instanceAudioPatch">
-                      <article id="api-Instance-instanceAudioPatch-0" data-group="User" data-name="instanceAudioPatch" data-version="0">
+                    <div id="api-Instance-instanceAudioInputSetPatch">
+                      <article id="api-Instance-instanceAudioInputSetPatch-0" data-group="User" data-name="instanceAudioInputSetPatch" data-version="0">
                         <div class="pull-left">
-                          <h1>instanceAudioPatch</h1>
+                          <h1>instanceAudioInputSetPatch</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Set audio devices</p>
+                        <p class="marked">Set audio input device paramaters</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/audio</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/audio/input/set</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Instance-instanceAudioPatch-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceAudioPatch-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceAudioPatch-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceAudioPatch-0-python">Python</a></li>
+                          <li class="active"><a href="#examples-Instance-instanceAudioInputSetPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioInputSetPatch-0-python">Python</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Instance-instanceAudioPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/audio"</code></pre>
+                          <div class="tab-pane active" id="examples-Instance-instanceAudioInputSetPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/audio/input/set"</code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-java">
+                          <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
 import SWGSDRangel.auth.*;
 import SWGSDRangel.model.*;
@@ -10814,47 +10851,47 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         
         InstanceApi apiInstance = new InstanceApi();
-        AudioDevicesSelect body = ; // AudioDevicesSelect | Select audio devices to use for this instance
+        AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
         try {
-            AudioDevicesSelect result = apiInstance.instanceAudioPatch(body);
+            AudioInputDevice result = apiInstance.instanceAudioInputSetPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceAudioPatch");
+            System.err.println("Exception when calling InstanceApi#instanceAudioInputSetPatch");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-android">
+                          <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-android">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
 
 public class InstanceApiExample {
 
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
-        AudioDevicesSelect body = ; // AudioDevicesSelect | Select audio devices to use for this instance
+        AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
         try {
-            AudioDevicesSelect result = apiInstance.instanceAudioPatch(body);
+            AudioInputDevice result = apiInstance.instanceAudioInputSetPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceAudioPatch");
+            System.err.println("Exception when calling InstanceApi#instanceAudioInputSetPatch");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-groovy">
+  <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">AudioDevicesSelect *body = ; // Select audio devices to use for this instance
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">AudioInputDevice *body = ; // Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioPatchWith:body
-              completionHandler: ^(AudioDevicesSelect output, NSError* error) {
+[apiInstance instanceAudioInputSetPatchWith:body
+              completionHandler: ^(AudioInputDevice output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -10865,12 +10902,12 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-javascript">
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
 
 var api = new SdRangel.InstanceApi()
 
-var body = ; // {AudioDevicesSelect} Select audio devices to use for this instance
+var body = ; // {AudioInputDevice} Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
 
 var callback = function(error, data, response) {
@@ -10880,14 +10917,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.instanceAudioPatch(body, callback);
+api.instanceAudioInputSetPatch(body, callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-angular">
+                            <!--<div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-csharp">
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using SWGSDRangel.Api;
@@ -10896,22 +10933,22 @@ using SWGSDRangel.Model;
 
 namespace Example
 {
-    public class instanceAudioPatchExample
+    public class instanceAudioInputSetPatchExample
     {
         public void main()
         {
             
             var apiInstance = new InstanceApi();
-            var body = new AudioDevicesSelect(); // AudioDevicesSelect | Select audio devices to use for this instance
+            var body = new AudioInputDevice(); // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
             try
             {
-                AudioDevicesSelect result = apiInstance.instanceAudioPatch(body);
+                AudioInputDevice result = apiInstance.instanceAudioInputSetPatch(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
             {
-                Debug.Print("Exception when calling InstanceApi.instanceAudioPatch: " + e.Message );
+                Debug.Print("Exception when calling InstanceApi.instanceAudioInputSetPatch: " + e.Message );
             }
         }
     }
@@ -10919,40 +10956,40 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-php">
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\InstanceApi();
-$body = ; // AudioDevicesSelect | Select audio devices to use for this instance
+$body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
 try {
-    $result = $api_instance->instanceAudioPatch($body);
+    $result = $api_instance->instanceAudioInputSetPatch($body);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling InstanceApi->instanceAudioPatch: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling InstanceApi->instanceAudioInputSetPatch: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-perl">
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use SWGSDRangel::Configuration;
 use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
-my $body = SWGSDRangel::Object::AudioDevicesSelect->new(); # AudioDevicesSelect | Select audio devices to use for this instance
+my $body = SWGSDRangel::Object::AudioInputDevice->new(); # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
 eval { 
-    my $result = $api_instance->instanceAudioPatch(body => $body);
+    my $result = $api_instance->instanceAudioInputSetPatch(body => $body);
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling InstanceApi->instanceAudioPatch: $@\n";
+    warn "Exception when calling InstanceApi->instanceAudioInputSetPatch: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Instance-instanceAudioPatch-0-python">
+                            <div class="tab-pane" id="examples-Instance-instanceAudioInputSetPatch-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import swagger_sdrangel
@@ -10961,13 +10998,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
-body =  # AudioDevicesSelect | Select audio devices to use for this instance
+body =  # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
 try: 
-    api_response = api_instance.instance_audio_patch(body)
+    api_response = api_instance.instance_audio_input_set_patch(body)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling InstanceApi->instanceAudioPatch: %s\n" % e)</code></pre>
+    print("Exception when calling InstanceApi->instanceAudioInputSetPatch: %s\n" % e)</code></pre>
                             </div>
                           </div>
 
@@ -10990,10 +11027,10 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Select audio devices to use for this instance",
+  "description" : "Audio input parameters. Index is used to identify the device. Only settable fields are considered.",
   "required" : true,
   "schema" : {
-    "$ref" : "#/definitions/AudioDevicesSelect"
+    "$ref" : "#/definitions/AudioInputDevice"
   }
 };
   var schema = schemaWrapper.schema;
@@ -11007,12 +11044,12 @@ $(document).ready(function() {
   }
 
   var view = new JSONSchemaView(schema,2,{isBodyParam: true});
-  var result = $('#d2e199_instanceAudioPatch_body');
+  var result = $('#d2e199_instanceAudioInputSetPatch_body');
   result.empty();
   result.append(view.render());
 });
 </script>
-<div id="d2e199_instanceAudioPatch_body"></div>
+<div id="d2e199_instanceAudioInputSetPatch_body"></div>
 </td>
 </tr>
 
@@ -11021,24 +11058,24 @@ $(document).ready(function() {
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - Success </h3>
+                            <h3> Status: 200 - Success. Returns actual data in particular the actual sample rate. </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceAudioPatch-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceAudioInputSetPatch-200-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceAudioPatch-200-schema">
-                                  <div id='responses-instanceAudioPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceAudioInputSetPatch-200-schema">
+                                  <div id='responses-instanceAudioInputSetPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Success",
+  "description" : "Success. Returns actual data in particular the actual sample rate.",
   "schema" : {
-    "$ref" : "#/definitions/AudioDevicesSelect"
+    "$ref" : "#/definitions/AudioInputDevice"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -11053,14 +11090,57 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceAudioPatch-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceAudioPatch-200-schema-200');
+                                        $('#responses-instanceAudioInputSetPatch-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioInputSetPatch-200-schema-200');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceAudioPatch-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceAudioInputSetPatch-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Audio input device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceAudioInputSetPatch-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceAudioInputSetPatch-404-schema">
+                                  <div id='responses-instanceAudioInputSetPatch-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Audio input device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceAudioInputSetPatch-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioInputSetPatch-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceAudioInputSetPatch-404-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -11068,14 +11148,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceAudioPatch-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceAudioInputSetPatch-500-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceAudioPatch-500-schema">
-                                  <div id='responses-instanceAudioPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceAudioInputSetPatch-500-schema">
+                                  <div id='responses-instanceAudioInputSetPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -11096,14 +11176,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceAudioPatch-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceAudioPatch-500-schema-500');
+                                        $('#responses-instanceAudioInputSetPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioInputSetPatch-500-schema-500');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceAudioPatch-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceAudioInputSetPatch-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -11111,14 +11191,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceAudioPatch-501-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-instanceAudioInputSetPatch-501-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceAudioPatch-501-schema">
-                                  <div id='responses-instanceAudioPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-instanceAudioInputSetPatch-501-schema">
+                                  <div id='responses-instanceAudioInputSetPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -11139,14 +11219,444 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceAudioPatch-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceAudioPatch-501-schema-501');
+                                        $('#responses-instanceAudioInputSetPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioInputSetPatch-501-schema-501');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-instanceAudioPatch-501-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-instanceAudioInputSetPatch-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceAudioOutputSetPatch">
+                      <article id="api-Instance-instanceAudioOutputSetPatch-0" data-group="User" data-name="instanceAudioOutputSetPatch" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceAudioOutputSetPatch</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Set audio output device parameters</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/audio/output/set</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceAudioOutputSetPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceAudioOutputSetPatch-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceAudioOutputSetPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/audio/output/set"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+        try {
+            AudioOutputDevice result = apiInstance.instanceAudioOutputSetPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceAudioOutputSetPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+        try {
+            AudioOutputDevice result = apiInstance.instanceAudioOutputSetPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceAudioOutputSetPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">AudioOutputDevice *body = ; // Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceAudioOutputSetPatchWith:body
+              completionHandler: ^(AudioOutputDevice output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var body = ; // {AudioOutputDevice} Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceAudioOutputSetPatch(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceAudioOutputSetPatchExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var body = new AudioOutputDevice(); // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+            try
+            {
+                AudioOutputDevice result = apiInstance.instanceAudioOutputSetPatch(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceAudioOutputSetPatch: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+try {
+    $result = $api_instance->instanceAudioOutputSetPatch($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceAudioOutputSetPatch: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $body = SWGSDRangel::Object::AudioOutputDevice->new(); # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+eval { 
+    my $result = $api_instance->instanceAudioOutputSetPatch(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceAudioOutputSetPatch: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceAudioOutputSetPatch-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+body =  # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+
+try: 
+    api_response = api_instance.instance_audio_output_set_patch(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceAudioOutputSetPatch: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Audio output parameters. Index is used to identify the device. Only settable fields are considered.",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/AudioOutputDevice"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_instanceAudioOutputSetPatch_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_instanceAudioOutputSetPatch_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success. Returns actual data in particular the actual sample rate. </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceAudioOutputSetPatch-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceAudioOutputSetPatch-200-schema">
+                                  <div id='responses-instanceAudioOutputSetPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success. Returns actual data in particular the actual sample rate.",
+  "schema" : {
+    "$ref" : "#/definitions/AudioOutputDevice"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceAudioOutputSetPatch-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioOutputSetPatch-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceAudioOutputSetPatch-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Audio output device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceAudioOutputSetPatch-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceAudioOutputSetPatch-404-schema">
+                                  <div id='responses-instanceAudioOutputSetPatch-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Audio output device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceAudioOutputSetPatch-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioOutputSetPatch-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceAudioOutputSetPatch-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceAudioOutputSetPatch-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceAudioOutputSetPatch-500-schema">
+                                  <div id='responses-instanceAudioOutputSetPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceAudioOutputSetPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioOutputSetPatch-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceAudioOutputSetPatch-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceAudioOutputSetPatch-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceAudioOutputSetPatch-501-schema">
+                                  <div id='responses-instanceAudioOutputSetPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceAudioOutputSetPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceAudioOutputSetPatch-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceAudioOutputSetPatch-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -18045,7 +18555,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-28T09:46:11.248+02:00
+              Generated 2018-03-29T00:32:59.208+02:00
             </div>
           </div>
       </div>

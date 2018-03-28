@@ -11,69 +11,103 @@
  */
 
 /*
- * SWGAudioDevices.h
+ * SWGAudioOutputDevice.h
  *
- * List of audio devices available in the system
+ * Audio output device
  */
 
-#ifndef SWGAudioDevices_H_
-#define SWGAudioDevices_H_
+#ifndef SWGAudioOutputDevice_H_
+#define SWGAudioOutputDevice_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAudioInputDevice.h"
-#include "SWGAudioOutputDevice.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAudioDevices: public SWGObject {
+class SWG_API SWGAudioOutputDevice: public SWGObject {
 public:
-    SWGAudioDevices();
-    SWGAudioDevices(QString* json);
-    virtual ~SWGAudioDevices();
+    SWGAudioOutputDevice();
+    SWGAudioOutputDevice(QString* json);
+    virtual ~SWGAudioOutputDevice();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAudioDevices* fromJson(QString &jsonString) override;
+    virtual SWGAudioOutputDevice* fromJson(QString &jsonString) override;
 
-    qint32 getNbInputDevices();
-    void setNbInputDevices(qint32 nb_input_devices);
+    QString* getName();
+    void setName(QString* name);
 
-    QList<SWGAudioInputDevice*>* getInputDevices();
-    void setInputDevices(QList<SWGAudioInputDevice*>* input_devices);
+    qint32 getIndex();
+    void setIndex(qint32 index);
 
-    qint32 getNbOutputDevices();
-    void setNbOutputDevices(qint32 nb_output_devices);
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
 
-    QList<SWGAudioOutputDevice*>* getOutputDevices();
-    void setOutputDevices(QList<SWGAudioOutputDevice*>* output_devices);
+    qint32 getIsSystemDefault();
+    void setIsSystemDefault(qint32 is_system_default);
+
+    qint32 getDefaultUnregistered();
+    void setDefaultUnregistered(qint32 default_unregistered);
+
+    qint32 getCopyToUdp();
+    void setCopyToUdp(qint32 copy_to_udp);
+
+    qint32 getUdpUsesRtp();
+    void setUdpUsesRtp(qint32 udp_uses_rtp);
+
+    qint32 getUdpChannelMode();
+    void setUdpChannelMode(qint32 udp_channel_mode);
+
+    QString* getUdpAddress();
+    void setUdpAddress(QString* udp_address);
+
+    qint32 getUdpPort();
+    void setUdpPort(qint32 udp_port);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 nb_input_devices;
-    bool m_nb_input_devices_isSet;
+    QString* name;
+    bool m_name_isSet;
 
-    QList<SWGAudioInputDevice*>* input_devices;
-    bool m_input_devices_isSet;
+    qint32 index;
+    bool m_index_isSet;
 
-    qint32 nb_output_devices;
-    bool m_nb_output_devices_isSet;
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
-    QList<SWGAudioOutputDevice*>* output_devices;
-    bool m_output_devices_isSet;
+    qint32 is_system_default;
+    bool m_is_system_default_isSet;
+
+    qint32 default_unregistered;
+    bool m_default_unregistered_isSet;
+
+    qint32 copy_to_udp;
+    bool m_copy_to_udp_isSet;
+
+    qint32 udp_uses_rtp;
+    bool m_udp_uses_rtp_isSet;
+
+    qint32 udp_channel_mode;
+    bool m_udp_channel_mode_isSet;
+
+    QString* udp_address;
+    bool m_udp_address_isSet;
+
+    qint32 udp_port;
+    bool m_udp_port_isSet;
 
 };
 
 }
 
-#endif /* SWGAudioDevices_H_ */
+#endif /* SWGAudioOutputDevice_H_ */

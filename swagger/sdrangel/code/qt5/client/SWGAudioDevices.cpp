@@ -28,18 +28,12 @@ SWGAudioDevices::SWGAudioDevices(QString* json) {
 }
 
 SWGAudioDevices::SWGAudioDevices() {
-    input_volume = 0.0f;
-    m_input_volume_isSet = false;
     nb_input_devices = 0;
     m_nb_input_devices_isSet = false;
-    input_device_selected_index = 0;
-    m_input_device_selected_index_isSet = false;
     input_devices = nullptr;
     m_input_devices_isSet = false;
     nb_output_devices = 0;
     m_nb_output_devices_isSet = false;
-    output_device_selected_index = 0;
-    m_output_device_selected_index_isSet = false;
     output_devices = nullptr;
     m_output_devices_isSet = false;
 }
@@ -50,26 +44,18 @@ SWGAudioDevices::~SWGAudioDevices() {
 
 void
 SWGAudioDevices::init() {
-    input_volume = 0.0f;
-    m_input_volume_isSet = false;
     nb_input_devices = 0;
     m_nb_input_devices_isSet = false;
-    input_device_selected_index = 0;
-    m_input_device_selected_index_isSet = false;
-    input_devices = new QList<SWGAudioDevice*>();
+    input_devices = new QList<SWGAudioInputDevice*>();
     m_input_devices_isSet = false;
     nb_output_devices = 0;
     m_nb_output_devices_isSet = false;
-    output_device_selected_index = 0;
-    m_output_device_selected_index_isSet = false;
-    output_devices = new QList<SWGAudioDevice*>();
+    output_devices = new QList<SWGAudioOutputDevice*>();
     m_output_devices_isSet = false;
 }
 
 void
 SWGAudioDevices::cleanup() {
-
-
 
     if(input_devices != nullptr) { 
         auto arr = input_devices;
@@ -78,7 +64,6 @@ SWGAudioDevices::cleanup() {
         }
         delete input_devices;
     }
-
 
     if(output_devices != nullptr) { 
         auto arr = output_devices;
@@ -100,20 +85,14 @@ SWGAudioDevices::fromJson(QString &json) {
 
 void
 SWGAudioDevices::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&input_volume, pJson["inputVolume"], "float", "");
-    
     ::SWGSDRangel::setValue(&nb_input_devices, pJson["nbInputDevices"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&input_device_selected_index, pJson["inputDeviceSelectedIndex"], "qint32", "");
     
-    
-    ::SWGSDRangel::setValue(&input_devices, pJson["inputDevices"], "QList", "SWGAudioDevice");
+    ::SWGSDRangel::setValue(&input_devices, pJson["inputDevices"], "QList", "SWGAudioInputDevice");
     ::SWGSDRangel::setValue(&nb_output_devices, pJson["nbOutputDevices"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&output_device_selected_index, pJson["outputDeviceSelectedIndex"], "qint32", "");
     
-    
-    ::SWGSDRangel::setValue(&output_devices, pJson["outputDevices"], "QList", "SWGAudioDevice");
+    ::SWGSDRangel::setValue(&output_devices, pJson["outputDevices"], "QList", "SWGAudioOutputDevice");
 }
 
 QString
@@ -130,39 +109,20 @@ SWGAudioDevices::asJson ()
 QJsonObject*
 SWGAudioDevices::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_input_volume_isSet){
-        obj->insert("inputVolume", QJsonValue(input_volume));
-    }
     if(m_nb_input_devices_isSet){
         obj->insert("nbInputDevices", QJsonValue(nb_input_devices));
     }
-    if(m_input_device_selected_index_isSet){
-        obj->insert("inputDeviceSelectedIndex", QJsonValue(input_device_selected_index));
-    }
     if(input_devices->size() > 0){
-        toJsonArray((QList<void*>*)input_devices, obj, "inputDevices", "SWGAudioDevice");
+        toJsonArray((QList<void*>*)input_devices, obj, "inputDevices", "SWGAudioInputDevice");
     }
     if(m_nb_output_devices_isSet){
         obj->insert("nbOutputDevices", QJsonValue(nb_output_devices));
     }
-    if(m_output_device_selected_index_isSet){
-        obj->insert("outputDeviceSelectedIndex", QJsonValue(output_device_selected_index));
-    }
     if(output_devices->size() > 0){
-        toJsonArray((QList<void*>*)output_devices, obj, "outputDevices", "SWGAudioDevice");
+        toJsonArray((QList<void*>*)output_devices, obj, "outputDevices", "SWGAudioOutputDevice");
     }
 
     return obj;
-}
-
-float
-SWGAudioDevices::getInputVolume() {
-    return input_volume;
-}
-void
-SWGAudioDevices::setInputVolume(float input_volume) {
-    this->input_volume = input_volume;
-    this->m_input_volume_isSet = true;
 }
 
 qint32
@@ -175,22 +135,12 @@ SWGAudioDevices::setNbInputDevices(qint32 nb_input_devices) {
     this->m_nb_input_devices_isSet = true;
 }
 
-qint32
-SWGAudioDevices::getInputDeviceSelectedIndex() {
-    return input_device_selected_index;
-}
-void
-SWGAudioDevices::setInputDeviceSelectedIndex(qint32 input_device_selected_index) {
-    this->input_device_selected_index = input_device_selected_index;
-    this->m_input_device_selected_index_isSet = true;
-}
-
-QList<SWGAudioDevice*>*
+QList<SWGAudioInputDevice*>*
 SWGAudioDevices::getInputDevices() {
     return input_devices;
 }
 void
-SWGAudioDevices::setInputDevices(QList<SWGAudioDevice*>* input_devices) {
+SWGAudioDevices::setInputDevices(QList<SWGAudioInputDevice*>* input_devices) {
     this->input_devices = input_devices;
     this->m_input_devices_isSet = true;
 }
@@ -205,22 +155,12 @@ SWGAudioDevices::setNbOutputDevices(qint32 nb_output_devices) {
     this->m_nb_output_devices_isSet = true;
 }
 
-qint32
-SWGAudioDevices::getOutputDeviceSelectedIndex() {
-    return output_device_selected_index;
-}
-void
-SWGAudioDevices::setOutputDeviceSelectedIndex(qint32 output_device_selected_index) {
-    this->output_device_selected_index = output_device_selected_index;
-    this->m_output_device_selected_index_isSet = true;
-}
-
-QList<SWGAudioDevice*>*
+QList<SWGAudioOutputDevice*>*
 SWGAudioDevices::getOutputDevices() {
     return output_devices;
 }
 void
-SWGAudioDevices::setOutputDevices(QList<SWGAudioDevice*>* output_devices) {
+SWGAudioDevices::setOutputDevices(QList<SWGAudioOutputDevice*>* output_devices) {
     this->output_devices = output_devices;
     this->m_output_devices_isSet = true;
 }
@@ -230,12 +170,9 @@ bool
 SWGAudioDevices::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_volume_isSet){ isObjectUpdated = true; break;}
         if(m_nb_input_devices_isSet){ isObjectUpdated = true; break;}
-        if(m_input_device_selected_index_isSet){ isObjectUpdated = true; break;}
         if(input_devices->size() > 0){ isObjectUpdated = true; break;}
         if(m_nb_output_devices_isSet){ isObjectUpdated = true; break;}
-        if(m_output_device_selected_index_isSet){ isObjectUpdated = true; break;}
         if(output_devices->size() > 0){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

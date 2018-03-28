@@ -84,6 +84,10 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLoggingService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
             instanceAudioService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioInputSetURL) {
+            instanceAudioInputSetService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioOutputSetURL) {
+            instanceAudioOutputSetService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
@@ -315,21 +319,106 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else if (request.getMethod() == "PATCH")
+    else
     {
-        SWGSDRangel::SWGAudioDevicesSelect normalResponse;
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioInputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    // TODO
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PATCH")
+    {
         QString jsonStr = request.getBody();
         QJsonObject jsonObject;
 
         if (parseJsonBody(jsonStr, jsonObject, response))
         {
-            normalResponse.fromJson(jsonStr);
-            int status = m_adapter->instanceAudioPatch(normalResponse, errorResponse);
-            response.setStatus(status);
+            SWGSDRangel::SWGAudioInputDevice normalResponse;
+            resetAudioInputDevice(normalResponse);
+            QStringList audioInputDeviceKeys;
 
-            if (status/100 == 2) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
+            if (validateAudioInputDevice(normalResponse, jsonObject, audioInputDeviceKeys))
+            {
+                int status = m_adapter->instanceAudioInputPatch(
+                        normalResponse,
+                        audioInputDeviceKeys,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioOutputSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+
+    if (request.getMethod() == "PATCH")
+    {
+        QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
+
+        if (parseJsonBody(jsonStr, jsonObject, response))
+        {
+            SWGSDRangel::SWGAudioOutputDevice normalResponse;
+            resetAudioOutputDevice(normalResponse);
+            QStringList audioOutputDeviceKeys;
+
+            if (validateAudioOutputDevice(normalResponse, jsonObject, audioOutputDeviceKeys))
+            {
+                int status = m_adapter->instanceAudioOutputPatch(
+                        normalResponse,
+                        audioOutputDeviceKeys,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
@@ -1745,6 +1834,72 @@ bool WebAPIRequestMapper::validateChannelReport(
     }
 }
 
+bool WebAPIRequestMapper::validateAudioInputDevice(
+        SWGSDRangel::SWGAudioInputDevice& audioInputDevice,
+        QJsonObject& jsonObject,
+        QStringList& audioInputDeviceKeys)
+{
+    if (jsonObject.contains("index")) {
+        audioInputDevice.setIndex(jsonObject["index"].toInt());
+    } else {
+        audioInputDevice.setIndex(-1); // assume systam default
+    }
+    if (jsonObject.contains("sampleRate"))
+    {
+        audioInputDevice.setSampleRate(jsonObject["sampleRate"].toInt());
+        audioInputDeviceKeys.append("sampleRate");
+    }
+    if (jsonObject.contains("volume"))
+    {
+        audioInputDevice.setVolume(jsonObject["volume"].toDouble());
+        audioInputDeviceKeys.append("volume");
+    }
+    return true;
+}
+
+bool WebAPIRequestMapper::validateAudioOutputDevice(
+        SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice,
+        QJsonObject& jsonObject,
+        QStringList& audioOutputDeviceKeys)
+{
+    if (jsonObject.contains("index")) {
+        audioOutputDevice.setIndex(jsonObject["index"].toInt());
+    } else {
+        audioOutputDevice.setIndex(-1); // assume systam default
+    }
+    if (jsonObject.contains("sampleRate"))
+    {
+        audioOutputDevice.setSampleRate(jsonObject["sampleRate"].toInt());
+        audioOutputDeviceKeys.append("sampleRate");
+    }
+    if (jsonObject.contains("copyToUDP"))
+    {
+        audioOutputDevice.setCopyToUdp(jsonObject["copyToUDP"].toInt() == 0 ? 0 : 1);
+        audioOutputDeviceKeys.append("copyToUDP");
+    }
+    if (jsonObject.contains("udpUsesRTP"))
+    {
+        audioOutputDevice.setUdpUsesRtp(jsonObject["udpUsesRTP"].toInt() == 0 ? 0 : 1);
+        audioOutputDeviceKeys.append("udpUsesRTP");
+    }
+    if (jsonObject.contains("udpChannelMode"))
+    {
+        audioOutputDevice.setUdpChannelMode(jsonObject["udpChannelMode"].toInt());
+        audioOutputDeviceKeys.append("udpChannelMode");
+    }
+    if (jsonObject.contains("udpAddress"))
+    {
+        audioOutputDevice.setUdpAddress(new QString(jsonObject["udpAddress"].toString()));
+        audioOutputDeviceKeys.append("udpAddress");
+    }
+    if (jsonObject.contains("udpPort"))
+    {
+        audioOutputDevice.setUdpPort(jsonObject["udpPort"].toInt());
+        audioOutputDeviceKeys.append("udpPort");
+    }
+    return true;
+}
+
 void WebAPIRequestMapper::appendSettingsSubKeys(
         const QJsonObject& parentSettingsJsonObject,
         QJsonObject& childSettingsJsonObject,
@@ -1785,4 +1940,17 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setChannelType(0);
     channelReport.setNfmDemodReport(0);
     channelReport.setNfmModReport(0);
+}
+
+void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)
+{
+    audioInputDevice.cleanup();
+    audioInputDevice.setName(0);
+}
+
+void WebAPIRequestMapper::resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice)
+{
+    audioOutputDevice.cleanup();
+    audioOutputDevice.setName(0);
+    audioOutputDevice.setUdpAddress(0);
 }

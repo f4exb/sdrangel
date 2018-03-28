@@ -33,7 +33,8 @@ namespace SWGSDRangel
     class SWGInstanceChannelsResponse;
     class SWGLoggingInfo;
     class SWGAudioDevices;
-    class SWGAudioDevicesSelect;
+    class SWGAudioInputDevice;
+    class SWGAudioOutputDevice;
     class SWGLocationInformation;
     class SWGDVSeralDevices;
     class SWGPresets;
@@ -152,16 +153,31 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/audio (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/audio/input (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
-    virtual int instanceAudioPatch(
-            SWGSDRangel::SWGAudioDevicesSelect& response __attribute__((unused)),
+    virtual int instanceAudioInputPatch(
+            SWGSDRangel::SWGAudioInputDevice& response __attribute__((unused)),
+            const QStringList& audioInputKeys __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/audio/output (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAudioOutputPatch(
+            SWGSDRangel::SWGAudioOutputDevice& response __attribute__((unused)),
+            const QStringList& audioOutputKeys __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
     }
 
     /**
@@ -552,6 +568,10 @@ public:
     static QString instanceChannelsURL;
     static QString instanceLoggingURL;
     static QString instanceAudioURL;
+    static QString instanceAudioInputSetURL;
+    static QString instanceAudioOutputSetURL;
+    static QString instanceAudioInputUnsetURL;
+    static QString instanceAudioOutputUnsetURL;
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
     static QString instancePresetsURL;
