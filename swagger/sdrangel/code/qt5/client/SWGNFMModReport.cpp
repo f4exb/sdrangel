@@ -30,6 +30,10 @@ SWGNFMModReport::SWGNFMModReport(QString* json) {
 SWGNFMModReport::SWGNFMModReport() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    channel_sample_rate = 0;
+    m_channel_sample_rate_isSet = false;
 }
 
 SWGNFMModReport::~SWGNFMModReport() {
@@ -40,10 +44,16 @@ void
 SWGNFMModReport::init() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
+    audio_sample_rate = 0;
+    m_audio_sample_rate_isSet = false;
+    channel_sample_rate = 0;
+    m_channel_sample_rate_isSet = false;
 }
 
 void
 SWGNFMModReport::cleanup() {
+
+
 
 }
 
@@ -59,6 +69,10 @@ SWGNFMModReport::fromJson(QString &json) {
 void
 SWGNFMModReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
+    
+    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
 }
 
@@ -79,6 +93,12 @@ SWGNFMModReport::asJsonObject() {
     if(m_channel_power_db_isSet){
         obj->insert("channelPowerDB", QJsonValue(channel_power_db));
     }
+    if(m_audio_sample_rate_isSet){
+        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
+    }
+    if(m_channel_sample_rate_isSet){
+        obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
+    }
 
     return obj;
 }
@@ -93,12 +113,34 @@ SWGNFMModReport::setChannelPowerDb(float channel_power_db) {
     this->m_channel_power_db_isSet = true;
 }
 
+qint32
+SWGNFMModReport::getAudioSampleRate() {
+    return audio_sample_rate;
+}
+void
+SWGNFMModReport::setAudioSampleRate(qint32 audio_sample_rate) {
+    this->audio_sample_rate = audio_sample_rate;
+    this->m_audio_sample_rate_isSet = true;
+}
+
+qint32
+SWGNFMModReport::getChannelSampleRate() {
+    return channel_sample_rate;
+}
+void
+SWGNFMModReport::setChannelSampleRate(qint32 channel_sample_rate) {
+    this->channel_sample_rate = channel_sample_rate;
+    this->m_channel_sample_rate_isSet = true;
+}
+
 
 bool
 SWGNFMModReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
+        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_channel_sample_rate_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

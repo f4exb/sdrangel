@@ -44,12 +44,24 @@ public:
     float getChannelPowerDb();
     void setChannelPowerDb(float channel_power_db);
 
+    qint32 getAudioSampleRate();
+    void setAudioSampleRate(qint32 audio_sample_rate);
+
+    qint32 getChannelSampleRate();
+    void setChannelSampleRate(qint32 channel_sample_rate);
+
 
     virtual bool isSet() override;
 
 private:
     float channel_power_db;
     bool m_channel_power_db_isSet;
+
+    qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
+
+    qint32 channel_sample_rate;
+    bool m_channel_sample_rate_isSet;
 
 };
 

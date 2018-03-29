@@ -112,6 +112,7 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
 
     void configureFileName();
+    void audioSelect();
     void tick();
 };
 

@@ -40,8 +40,6 @@ SWGNFMModSettings::SWGNFMModSettings() {
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
     m_volume_factor_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     channel_mute = 0;
     m_channel_mute_isSet = false;
     play_loop = 0;
@@ -78,8 +76,6 @@ SWGNFMModSettings::init() {
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
     m_volume_factor_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     channel_mute = 0;
     m_channel_mute_isSet = false;
     play_loop = 0;
@@ -100,7 +96,6 @@ SWGNFMModSettings::init() {
 
 void
 SWGNFMModSettings::cleanup() {
-
 
 
 
@@ -143,8 +138,6 @@ SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tone_frequency, pJson["toneFrequency"], "float", "");
     
     ::SWGSDRangel::setValue(&volume_factor, pJson["volumeFactor"], "float", "");
-    
-    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_mute, pJson["channelMute"], "qint32", "");
     
@@ -195,9 +188,6 @@ SWGNFMModSettings::asJsonObject() {
     }
     if(m_volume_factor_isSet){
         obj->insert("volumeFactor", QJsonValue(volume_factor));
-    }
-    if(m_audio_sample_rate_isSet){
-        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_channel_mute_isSet){
         obj->insert("channelMute", QJsonValue(channel_mute));
@@ -285,16 +275,6 @@ void
 SWGNFMModSettings::setVolumeFactor(float volume_factor) {
     this->volume_factor = volume_factor;
     this->m_volume_factor_isSet = true;
-}
-
-qint32
-SWGNFMModSettings::getAudioSampleRate() {
-    return audio_sample_rate;
-}
-void
-SWGNFMModSettings::setAudioSampleRate(qint32 audio_sample_rate) {
-    this->audio_sample_rate = audio_sample_rate;
-    this->m_audio_sample_rate_isSet = true;
 }
 
 qint32
@@ -388,7 +368,6 @@ SWGNFMModSettings::isSet(){
         if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
         if(m_tone_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_volume_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_channel_mute_isSet){ isObjectUpdated = true; break;}
         if(m_play_loop_isSet){ isObjectUpdated = true; break;}
         if(m_ctcss_on_isSet){ isObjectUpdated = true; break;}
