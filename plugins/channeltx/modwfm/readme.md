@@ -60,9 +60,11 @@ Switches to the Morse keyer input. You must switch it off to make other inputs a
 
 Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
-<h4>10.4: Audio input select</h4>
+<h4>10.4: Audio input select and select audio input device</h4>
 
-Switches to the audio input. You must switch it off to make other inputs available.
+Left click to switch to the audio input. You must switch it off to make other inputs available.
+
+Right click to select audio input device.
 
 <h3>11: CW (Morse) text</h3>
 

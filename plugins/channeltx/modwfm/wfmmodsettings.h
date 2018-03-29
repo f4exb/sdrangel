@@ -32,11 +32,11 @@ struct WFMModSettings
     float m_fmDeviation;
     float m_toneFrequency;
     float m_volumeFactor;
-    quint32 m_audioSampleRate;
     bool m_channelMute;
     bool m_playLoop;
     quint32 m_rgbColor;
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_cwKeyerGUI;

@@ -277,9 +277,9 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     WFMModSettings m_settings;
+    quint32 m_audioSampleRate;
 
     NCO m_carrierNco;
-    NCOF m_toneNco;
     NCOF m_toneNcoRF;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
@@ -316,6 +316,7 @@ private:
     CWKeyer m_cwKeyer;
     static const int m_levelNbSamples;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const WFMModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
