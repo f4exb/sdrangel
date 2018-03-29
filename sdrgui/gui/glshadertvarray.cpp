@@ -113,7 +113,7 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
     m_objImage->fill(QColor(0, 0, 0));
 
     m_objTexture = new QOpenGLTexture(*m_objImage);
-    m_objTexture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+    //m_objTexture->setFormat(QOpenGLTexture::RGBA8_UNorm); avoids OpenGL warning and in fact is useless
     m_objTexture->setMinificationFilter(QOpenGLTexture::Linear);
     m_objTexture->setMagnificationFilter(QOpenGLTexture::Linear);
     m_objTexture->setWrapMode(QOpenGLTexture::ClampToEdge);
