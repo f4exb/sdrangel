@@ -262,9 +262,6 @@ public:
             { }
     };
 
-private slots:
-    void channelSampleRateChanged();
-
 private:
     class MsgConfigureDATVDemod : public Message
     {

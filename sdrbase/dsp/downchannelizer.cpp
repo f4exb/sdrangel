@@ -110,8 +110,6 @@ void DownChannelizer::stop()
 
 bool DownChannelizer::handleMessage(const Message& cmd)
 {
-	qDebug() << "DownChannelizer::handleMessage: " << cmd.getIdentifier();
-
 	// TODO: apply changes only if input sample rate or requested output sample rate change. Change of center frequency has no impact.
 
 	if (DSPSignalNotification::match(cmd))
@@ -146,19 +144,13 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 	}
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
+        qDebug() << "DownChannelizer::handleMessage: MsgThreadedSink: forwarded to demod";
         return m_sampleSink->handleMessage(cmd); // this message is passed to the demod
     }
 	else
 	{
+        qDebug() << "DownChannelizer::handleMessage: " << cmd.getIdentifier() << " unhandled";
 	    return false;
-//		if (m_sampleSink != 0)
-//		{
-//			return m_sampleSink->handleMessage(cmd);
-//		}
-//		else
-//		{
-//			return false;
-//		}
 	}
 }
 
