@@ -458,13 +458,13 @@ int LimeSDRInput::getSampleRate() const
 
 quint64 LimeSDRInput::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
 void LimeSDRInput::setCenterFrequency(qint64 centerFrequency)
 {
     LimeSDRInputSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
+    settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 
     MsgConfigureLimeSDR* message = MsgConfigureLimeSDR::create(settings, false);
     m_inputMessageQueue.push(message);

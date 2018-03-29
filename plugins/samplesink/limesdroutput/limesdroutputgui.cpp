@@ -109,12 +109,12 @@ void LimeSDROutputGUI::resetToDefaults()
 
 qint64 LimeSDROutputGUI::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
 void LimeSDROutputGUI::setCenterFrequency(qint64 centerFrequency)
 {
-    m_settings.m_centerFrequency = centerFrequency;
+    m_settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
     displaySettings();
     sendSettings();
 }
