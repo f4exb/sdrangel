@@ -210,7 +210,7 @@
             <string>Copy audio to UDP</string>
            </property>
            <property name="text">
-            <string>U</string>
+            <string>UDP</string>
            </property>
           </widget>
          </item>
@@ -221,6 +221,9 @@
              <width>80</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Channel copy mode</string>
            </property>
            <item>
             <property name="text">
@@ -250,7 +253,7 @@
             <string>Use RTP protocol</string>
            </property>
            <property name="text">
-            <string>R</string>
+            <string>RTP</string>
            </property>
           </widget>
          </item>
