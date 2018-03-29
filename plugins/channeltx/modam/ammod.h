@@ -276,6 +276,7 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     AMModSettings m_settings;
+    quint32 m_audioSampleRate;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -309,6 +310,7 @@ private:
 
     static const int m_levelNbSamples;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const AMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
