@@ -52,6 +52,7 @@ The baseband stream is interpolated by this value before being sent to the HackR
   - **8**: multiply baseband stream sample rate by 8
   - **16**: multiply baseband stream sample rate by 16
   - **32**: multiply baseband stream sample rate by 32
+  - **64**: multiply baseband stream sample rate by 64
 
 The main samples buffer is based on the baseband sample rate and will introduce ~500ms delay for interpolation by 16 or lower and ~1s for interpolation by 32.  
 
