@@ -32,6 +32,8 @@
 
 #include "rtprandomurandom.h"
 #include "rtperrors.h"
+#include <Qt>
+#include <cstdio>
 
 namespace qrtplib
 {
@@ -43,18 +45,22 @@ RTPRandomURandom::RTPRandomURandom()
 
 RTPRandomURandom::~RTPRandomURandom()
 {
-    if (device)
+    if (device) {
         fclose(device);
+    }
 }
 
 int RTPRandomURandom::Init()
 {
-    if (device)
+    if (device) {
         return ERR_RTP_RTPRANDOMURANDOM_ALREADYOPEN;
+    }
 
     device = fopen("/dev/urandom", "rb");
-    if (device == 0)
+
+    if (device == 0) {
         return ERR_RTP_RTPRANDOMURANDOM_CANTOPEN;
+    }
 
     return 0;
 }
@@ -62,12 +68,16 @@ int RTPRandomURandom::Init()
 uint8_t RTPRandomURandom::GetRandom8()
 {
     if (!device)
+    {
+        qWarning("RTPRandomURandom::GetRandom8: no device");
         return 0;
+    }
 
     uint8_t value;
 
-    if (fread(&value, sizeof(uint8_t), 1, device) != sizeof(uint8_t))
+    if (fread(&value, 1, sizeof(uint8_t), device) != sizeof(uint8_t))
     {
+        qWarning("RTPRandomURandom::GetRandom8: cannot read unsigned 8 bit value from device");
         return 0;
     }
 
@@ -77,12 +87,16 @@ uint8_t RTPRandomURandom::GetRandom8()
 uint16_t RTPRandomURandom::GetRandom16()
 {
     if (!device)
+    {
+        qWarning("RTPRandomURandom::GetRandom16: no device");
         return 0;
+    }
 
     uint16_t value;
 
-    if (fread(&value, sizeof(uint16_t), 1, device) != sizeof(uint16_t))
+    if (fread(&value, 1, sizeof(uint16_t), device) != sizeof(uint16_t))
     {
+        qWarning("RTPRandomURandom::GetRandom16: cannot read unsigned 16 bit value from device");
         return 0;
     }
 
@@ -92,12 +106,16 @@ uint16_t RTPRandomURandom::GetRandom16()
 uint32_t RTPRandomURandom::GetRandom32()
 {
     if (!device)
+    {
+        qWarning("RTPRandomURandom::GetRandom32: no device");
         return 0;
+    }
 
     uint32_t value;
 
-    if (fread(&value, sizeof(uint32_t), 1, device) != sizeof(uint32_t))
+    if (fread(&value, 1, sizeof(uint32_t), device) != sizeof(uint32_t))
     {
+        qWarning("RTPRandomURandom::GetRandom32: cannot read unsigned 32 bit value from device");
         return 0;
     }
 
@@ -107,12 +125,16 @@ uint32_t RTPRandomURandom::GetRandom32()
 double RTPRandomURandom::GetRandomDouble()
 {
     if (!device)
+    {
+        qWarning("RTPRandomURandom::GetRandomDouble: no device");
         return 0;
+    }
 
     uint64_t value;
 
-    if (fread(&value, sizeof(uint64_t), 1, device) != sizeof(uint64_t))
+    if (fread(&value, 1, sizeof(uint64_t), device) != sizeof(uint64_t))
     {
+        qWarning("RTPRandomURandom::GetRandomDouble: cannot read unsigned 64 bit value from device");
         return 0;
     }
 

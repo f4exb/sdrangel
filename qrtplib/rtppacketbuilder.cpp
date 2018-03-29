@@ -41,9 +41,27 @@ namespace qrtplib
 {
 
 RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) :
-        rtprnd(r), lastwallclocktime(0, 0)
+        rtprnd(r),
+        maxpacksize(0),
+        buffer(0),
+        packetlength(0),
+        lastwallclocktime(0, 0)
 {
     init = false;
+    deftsset = false;
+    defptset = false;
+    defmarkset = false;
+    defaultmark = false;
+    defaulttimestampinc = 0;
+    ssrc = 0;
+    timestamp = 0;
+    seqnr = 0;
+    prevrtptimestamp = 0;
+    lastrtptimestamp = 0;
+    defaultpayloadtype = 0;
+    numcsrcs = 0;
+    numpayloadbytes = 0;
+    numpackets = 0;
     timeinit.Dummy();
 
     //std::cout << (void *)(&rtprnd) << std::endl;
@@ -54,7 +72,7 @@ RTPPacketBuilder::~RTPPacketBuilder()
     Destroy();
 }
 
-int RTPPacketBuilder::Init(std::size_t max)
+int RTPPacketBuilder::Init(unsigned int max)
 {
     if (init)
         return ERR_RTP_PACKBUILD_ALREADYINIT;
@@ -66,6 +84,7 @@ int RTPPacketBuilder::Init(std::size_t max)
     if (buffer == 0)
         return ERR_RTP_OUTOFMEM;
     packetlength = 0;
+    numpackets = 0;
 
     CreateNewSSRC();
 
@@ -87,7 +106,7 @@ void RTPPacketBuilder::Destroy()
     init = false;
 }
 
-int RTPPacketBuilder::SetMaximumPacketSize(std::size_t max)
+int RTPPacketBuilder::SetMaximumPacketSize(unsigned int max)
 {
     uint8_t *newbuf;
 
@@ -161,6 +180,8 @@ uint32_t RTPPacketBuilder::CreateNewSSRC()
     timestamp = rtprnd.GetRandom32();
     seqnr = rtprnd.GetRandom16();
 
+    qDebug("RTPPacketBuilder::CreateNewSSRC: timestamp: %u", timestamp);
+
     // p 38: the count SHOULD be reset if the sender changes its SSRC identifier
     numpayloadbytes = 0;
     numpackets = 0;
@@ -186,7 +207,7 @@ uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
     return ssrc;
 }
 
-int RTPPacketBuilder::BuildPacket(const void *data, std::size_t len)
+int RTPPacketBuilder::BuildPacket(const void *data, unsigned int len)
 {
     if (!init)
         return ERR_RTP_PACKBUILD_NOTINIT;
@@ -199,14 +220,14 @@ int RTPPacketBuilder::BuildPacket(const void *data, std::size_t len)
     return PrivateBuildPacket(data, len, defaultpayloadtype, defaultmark, defaulttimestampinc, false);
 }
 
-int RTPPacketBuilder::BuildPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc)
+int RTPPacketBuilder::BuildPacket(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc)
 {
     if (!init)
         return ERR_RTP_PACKBUILD_NOTINIT;
     return PrivateBuildPacket(data, len, pt, mark, timestampinc, false);
 }
 
-int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
+int RTPPacketBuilder::BuildPacketEx(const void *data, unsigned int len, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords)
 {
     if (!init)
         return ERR_RTP_PACKBUILD_NOTINIT;
@@ -219,7 +240,7 @@ int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len, uint16_t 
     return PrivateBuildPacket(data, len, defaultpayloadtype, defaultmark, defaulttimestampinc, true, hdrextID, hdrextdata, numhdrextwords);
 }
 
-int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
+int RTPPacketBuilder::BuildPacketEx(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords)
 {
     if (!init)
         return ERR_RTP_PACKBUILD_NOTINIT;
@@ -227,8 +248,8 @@ int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len, uint8_t p
 
 }
 
-int RTPPacketBuilder::PrivateBuildPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, bool gotextension, uint16_t hdrextID, const void *hdrextdata,
-        std::size_t numhdrextwords)
+int RTPPacketBuilder::PrivateBuildPacket(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc, bool gotextension, uint16_t hdrextID, const void *hdrextdata,
+        unsigned int numhdrextwords)
 {
     RTPPacket p(pt, data, len, seqnr, timestamp, ssrc, mark, numcsrcs, csrcs, gotextension, hdrextID, (uint16_t) numhdrextwords, hdrextdata, buffer, maxpacksize);
     int status = p.GetCreationError();
@@ -254,6 +275,8 @@ int RTPPacketBuilder::PrivateBuildPacket(const void *data, std::size_t len, uint
     numpackets++;
     timestamp += timestampinc;
     seqnr++;
+
+    //qDebug("RTPPacketBuilder::PrivateBuildPacket: numpackets: %u timestamp: %u timestampinc: %u seqnr: %u", numpackets, timestamp, timestampinc, seqnr);
 
     return 0;
 }

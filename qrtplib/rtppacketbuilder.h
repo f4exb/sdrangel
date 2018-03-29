@@ -65,7 +65,7 @@ public:
     ~RTPPacketBuilder();
 
     /** Initializes the builder to only allow packets with a size below \c maxpacksize. */
-    int Init(std::size_t maxpacksize);
+    int Init(unsigned int maxpacksize);
 
     /** Cleans up the builder. */
     void Destroy();
@@ -87,7 +87,7 @@ public:
     }
 
     /** Sets the maximum allowed packet size to \c maxpacksize. */
-    int SetMaximumPacketSize(std::size_t maxpacksize);
+    int SetMaximumPacketSize(unsigned int maxpacksize);
 
     /** Adds a CSRC to the CSRC list which will be stored in the RTP packets. */
     int AddCSRC(uint32_t csrc);
@@ -103,14 +103,14 @@ public:
      *  and timestamp increment used will be those that have been set using the \c SetDefault
      *  functions below.
      */
-    int BuildPacket(const void *data, std::size_t len);
+    int BuildPacket(const void *data, unsigned int len);
 
     /** Builds a packet with payload \c data and payload length \c len.
      *  Builds a packet with payload \c data and payload length \c len. The payload type will be
      *  set to \c pt, the marker bit to \c mark and after building this packet, the timestamp will
      *  be incremented with \c timestamp.
      */
-    int BuildPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc);
+    int BuildPacket(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc);
 
     /** Builds a packet with payload \c data and payload length \c len.
      *  Builds a packet with payload \c data and payload length \c len. The payload type, marker
@@ -119,7 +119,7 @@ public:
      *  \c hdrextID and data \c hdrextdata. The length of the header extension data is given by
      *  \c numhdrextwords which expresses the length in a number of 32-bit words.
      */
-    int BuildPacketEx(const void *data, std::size_t len, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords);
+    int BuildPacketEx(const void *data, unsigned int len, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords);
 
     /** Builds a packet with payload \c data and payload length \c len.
      *  Builds a packet with payload \c data and payload length \c len. The payload type will be set
@@ -128,7 +128,7 @@ public:
      *  with identifier \c hdrextID and data \c hdrextdata. The length of the header extension
      *  data is given by \c numhdrextwords which expresses the length in a number of 32-bit words.
      */
-    int BuildPacketEx(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords);
+    int BuildPacketEx(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords);
 
     /** Returns a pointer to the last built RTP packet data. */
     uint8_t *GetPacket()
@@ -139,7 +139,7 @@ public:
     }
 
     /** Returns the size of the last built RTP packet. */
-    std::size_t GetPacketLength()
+    unsigned int GetPacketLength()
     {
         if (!init)
             return 0;
@@ -237,13 +237,19 @@ public:
         ssrc = s;
     }
 private:
-    int PrivateBuildPacket(const void *data, std::size_t len, uint8_t pt, bool mark, uint32_t timestampinc, bool gotextension, uint16_t hdrextID = 0, const void *hdrextdata = 0,
-            std::size_t numhdrextwords = 0);
+    int PrivateBuildPacket(
+            const void *data,
+            unsigned int len, uint8_t pt,
+            bool mark,
+            uint32_t timestampinc,
+            bool gotextension, uint16_t hdrextID = 0,
+            const void *hdrextdata = 0,
+            unsigned int numhdrextwords = 0);
 
     RTPRandom &rtprnd;
-    std::size_t maxpacksize;
+    unsigned int maxpacksize;
     uint8_t *buffer;
-    std::size_t packetlength;
+    unsigned int packetlength;
 
     uint32_t numpayloadbytes;
     uint32_t numpackets;

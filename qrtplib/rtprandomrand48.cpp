@@ -31,6 +31,7 @@
  */
 
 #include "rtprandomrand48.h"
+#include <Qt>
 
 namespace qrtplib
 {
@@ -72,6 +73,7 @@ uint32_t RTPRandomRand48::GetRandom32()
 {
     state = ((0x5DEECE66DULL * state) + 0xBULL) & 0x0000ffffffffffffULL;
     uint32_t x = (uint32_t) ((state >> 16) & 0xffffffffULL);
+    qDebug("RTPRandomRand48::GetRandom32: %u", x);
 
     return x;
 }
