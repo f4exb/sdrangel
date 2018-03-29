@@ -37,6 +37,8 @@ NFMDemodSettings:
       type: integer
     title:
       type: string
+    audioDeviceName:
+      type: string
     
 NFMDemodReport:
   description: NFMDemod

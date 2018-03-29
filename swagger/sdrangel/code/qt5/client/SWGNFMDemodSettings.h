@@ -81,6 +81,9 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    QString* getAudioDeviceName();
+    void setAudioDeviceName(QString* audio_device_name);
+
 
     virtual bool isSet() override;
 
@@ -123,6 +126,9 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    QString* audio_device_name;
+    bool m_audio_device_name_isSet;
 
 };
 

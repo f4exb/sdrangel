@@ -25,6 +25,8 @@ AMDemodSettings:
       type: integer
     title:
       type: string
+    audioDeviceName:
+      type: string
 
 AMDemodReport:
   description: AMDemod

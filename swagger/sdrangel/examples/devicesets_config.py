@@ -13,7 +13,7 @@ base_url = "http://127.0.0.1:8091/sdrangel"
 #   - Descriptive message fragment
 commands = [
     ["/deviceset/0/device", "PUT", None, {"hwType": "BladeRF"}, "setup BladeRF on Rx 0"],
-    ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145640000, "type": "R", "name": "Repeaters extended"}}, "load preset on Rx 0"],
+    ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145480000, "type": "R", "name": "Rept + Simplex + DV"}}, "load preset on Rx 0"],
     ["/deviceset", "POST", None, None, "add Rx 1 device set"],
     ["/deviceset/1/device", "PUT", None, {"hwType": "SDRdaemonSource"}, "setup SDRdaemonSource on Rx 1"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 1, "preset": {"groupName": "OM430", "centerFrequency": 439550000, "type": "R", "name": "F5ZKP Daemon RPi3 SUSE"}}, "load preset on Rx 1"],

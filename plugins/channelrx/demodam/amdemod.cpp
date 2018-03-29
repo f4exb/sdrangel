@@ -371,6 +371,9 @@ int AMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("bandpassEnable")) {
         settings.m_bandpassEnable = response.getAmDemodSettings()->getBandpassEnable() != 0;
     }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -418,6 +421,12 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
         *response.getAmDemodSettings()->getTitle() = settings.m_title;
     } else {
         response.getAmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getAmDemodSettings()->getAudioDeviceName()) {
+        *response.getAmDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getAmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 }
 

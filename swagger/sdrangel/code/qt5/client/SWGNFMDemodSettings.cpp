@@ -54,6 +54,8 @@ SWGNFMDemodSettings::SWGNFMDemodSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    audio_device_name = nullptr;
+    m_audio_device_name_isSet = false;
 }
 
 SWGNFMDemodSettings::~SWGNFMDemodSettings() {
@@ -88,6 +90,8 @@ SWGNFMDemodSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    audio_device_name = new QString("");
+    m_audio_device_name_isSet = false;
 }
 
 void
@@ -106,6 +110,9 @@ SWGNFMDemodSettings::cleanup() {
 
     if(title != nullptr) { 
         delete title;
+    }
+    if(audio_device_name != nullptr) { 
+        delete audio_device_name;
     }
 }
 
@@ -145,6 +152,8 @@ SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
 }
 
@@ -200,6 +209,9 @@ SWGNFMDemodSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(audio_device_name != nullptr && *audio_device_name != QString("")){
+        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
     }
 
     return obj;
@@ -335,6 +347,16 @@ SWGNFMDemodSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
+QString*
+SWGNFMDemodSettings::getAudioDeviceName() {
+    return audio_device_name;
+}
+void
+SWGNFMDemodSettings::setAudioDeviceName(QString* audio_device_name) {
+    this->audio_device_name = audio_device_name;
+    this->m_audio_device_name_isSet = true;
+}
+
 
 bool
 SWGNFMDemodSettings::isSet(){
@@ -353,6 +375,7 @@ SWGNFMDemodSettings::isSet(){
         if(m_ctcss_index_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
+        if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

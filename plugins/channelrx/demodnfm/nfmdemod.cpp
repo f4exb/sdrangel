@@ -605,6 +605,9 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getNfmDemodSettings()->getVolume();
     }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getNfmDemodSettings()->getAudioDeviceName();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -656,6 +659,12 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
         *response.getNfmDemodSettings()->getTitle() = settings.m_title;
     } else {
         response.getNfmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getNfmDemodSettings()->getAudioDeviceName()) {
+        *response.getNfmDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getNfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 }
 
