@@ -212,6 +212,39 @@ void RTPSink::write(const uint8_t *sampleByte)
     }
 }
 
+void RTPSink::write(const uint8_t *sampleByteL, const uint8_t *sampleByteR)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (m_sampleBufferIndex < m_packetSamples)
+    {
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
+                sampleByteL,
+                elemLength(m_payloadType),
+                m_sampleBytes,
+                m_endianReverse);
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes + elemLength(m_payloadType)],
+                sampleByteR,
+                elemLength(m_payloadType),
+                m_sampleBytes,
+                m_endianReverse);
+        m_sampleBufferIndex++;
+    }
+    else
+    {
+        int status = m_rtpSession.SendPacket((const void *) m_byteBuffer, (std::size_t) m_bufferSize);
+
+        if (status < 0) {
+            qCritical("RTPSink::write: cannot write packet: %s", qrtplib::RTPGetErrorString(status).c_str());
+        }
+
+        writeNetBuf(&m_byteBuffer[0], sampleByteL,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
+        writeNetBuf(&m_byteBuffer[2], sampleByteR,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
+        m_sampleBufferIndex = 1;
+    }
+
+}
+
 void RTPSink::write(const uint8_t *samples, int nbSamples)
 {
     int samplesIndex = 0;

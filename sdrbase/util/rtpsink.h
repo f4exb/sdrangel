@@ -55,6 +55,7 @@ public:
     void addDestination(const QString& address, uint16_t port);
 
     void write(const uint8_t *sampleByte);
+    void write(const uint8_t *sampleByteL, const uint8_t *sampleByteR);
     void write(const uint8_t *sampleByte, int nbSamples);
 
 protected:

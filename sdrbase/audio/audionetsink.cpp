@@ -148,8 +148,7 @@ void AudioNetSink::write(qint16 lSample, qint16 rSample)
     }
     else if (m_type == SinkRTP)
     {
-        m_rtpBufferAudio->write((uint8_t *) &lSample);
-        m_rtpBufferAudio->write((uint8_t *) &rSample);
+        m_rtpBufferAudio->write((uint8_t *) &lSample, (uint8_t *) &rSample);
     }
 }
 
