@@ -51,7 +51,6 @@ void SSBModSettings::resetToDefaults()
     m_usb = true;
     m_toneFrequency = 1000.0;
     m_volumeFactor = 1.0;
-    m_audioSampleRate = DSPEngine::instance()->getDefaultAudioSampleRate();
     m_spanLog2 = 3;
     m_audioBinaural = false;
     m_audioFlipChannels = false;
@@ -69,6 +68,7 @@ void SSBModSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_title = "SSB Modulator";
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray SSBModSettings::serialize() const
@@ -106,6 +106,7 @@ QByteArray SSBModSettings::serialize() const
     }
 
     s.writeString(19, m_title);
+    s.writeString(20, m_audioDeviceName);
 
     return s.final();
 }
@@ -171,6 +172,7 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(19, &m_title, "SSB Modulator");
+        d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }

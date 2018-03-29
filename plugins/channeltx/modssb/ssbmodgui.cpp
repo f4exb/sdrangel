@@ -30,6 +30,9 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
@@ -106,6 +109,12 @@ bool SSBModGUI::handleMessage(const Message& message)
     {
         m_samplesCount = ((SSBMod::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
         updateWithStreamTime();
+        return true;
+    }
+    else if (DSPConfigureAudio::match(message))
+    {
+        qDebug("SSBModGUI::handleMessage: DSPConfigureAudio: %d", m_ssbMod->getAudioSampleRate());
+        applyBandwidths(); // will update spectrum details with new sample rate
         return true;
     }
     else
@@ -379,6 +388,9 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -453,10 +465,10 @@ void SSBModGUI::applyBandwidths(bool force)
 {
     bool dsb = ui->dsb->isChecked();
     int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = 48000 / (1<<spanLog2);
+    m_spectrumRate = m_ssbMod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = 480/(1<<spanLog2);
+    int bwMax = m_ssbMod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -666,6 +678,19 @@ void SSBModGUI::leaveEvent(QEvent*)
 void SSBModGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void SSBModGUI::audioSelect()
+{
+    qDebug("SSBModGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void SSBModGUI::tick()

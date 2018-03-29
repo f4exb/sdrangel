@@ -34,7 +34,6 @@ struct SSBModSettings
     bool m_usb;
     float m_toneFrequency;
     float m_volumeFactor;
-    quint32 m_audioSampleRate;
     int  m_spanLog2;
     bool m_audioBinaural;
     bool m_audioFlipChannels;
@@ -54,6 +53,7 @@ struct SSBModSettings
     uint16_t m_udpPort;
 
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

@@ -248,6 +248,7 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -279,6 +280,7 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     SSBModSettings m_settings;
+    quint32 m_audioSampleRate;
 
     NCOF m_carrierNco;
     NCOF m_toneNco;
@@ -327,6 +329,7 @@ private:
 
     static const int m_levelNbSamples;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const SSBModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
