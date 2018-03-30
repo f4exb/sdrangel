@@ -3,6 +3,7 @@
 #include <audio/audiodevicemanager.h>
 #include <QTreeWidgetItem>
 #include "ui_audiodialog.h"
+#include <math.h>
 
 AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
 	QDialog(parent),
