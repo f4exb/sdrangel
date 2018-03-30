@@ -406,6 +406,7 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
     m_lowpass.create(301, sampleRate, 250.0);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
+    m_audioFifo.setSize(sampleRate);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;

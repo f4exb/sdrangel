@@ -411,6 +411,8 @@ void SSBDemod::applyAudioSampleRate(int sampleRate)
         m_agcThresholdGate = agcThresholdGate;
     }
 
+    m_audioFifo.setSize(sampleRate);
+
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;

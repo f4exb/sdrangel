@@ -230,6 +230,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
+    m_audioFifo.setSize(sampleRate);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
