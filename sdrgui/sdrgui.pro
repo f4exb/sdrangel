@@ -55,6 +55,7 @@ SOURCES += mainwindow.cpp\
         gui/commanditem.cpp\
         gui/commandkeyreceiver.cpp\
         gui/commandoutputdialog.cpp\
+        gui/crightclickenabler.cpp\
         gui/cwkeyergui.cpp\
         gui/editcommanddialog.cpp\
         gui/externalclockbutton.cpp\
@@ -73,6 +74,7 @@ SOURCES += mainwindow.cpp\
         gui/loggingdialog.cpp\
         gui/pluginsdialog.cpp\
         gui/audiodialog.cpp\
+        gui/audioselectdialog.cpp\
         gui/presetitem.cpp\
         gui/rollupwidget.cpp\
         gui/samplingdevicecontrol.cpp\
@@ -100,6 +102,7 @@ HEADERS  += mainwindow.h\
         gui/aboutdialog.h\
         gui/addpresetdialog.h\
         gui/audiodialog.h\
+        gui/audioselectdialog.h\
         gui/basicchannelsettingsdialog.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
@@ -108,6 +111,7 @@ HEADERS  += mainwindow.h\
         gui/commanditem.h\
         gui/commandkeyreceiver.h\
         gui/commandoutputdialog.h\
+        gui/crightclickenabler.h\
         gui/cwkeyergui.h\
         gui/editcommanddialog.h\
         gui/externalclockbutton.h\
@@ -149,6 +153,7 @@ FORMS    += mainwindow.ui\
         gui/editcommanddialog.ui\
         gui/externalclockdialog.ui\
         gui/audiodialog.ui\
+        gui/audioselectdialog.ui\
         gui/glscopegui.ui\
         gui/glscopenggui.ui\
         gui/aboutdialog.ui\
