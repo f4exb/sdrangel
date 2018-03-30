@@ -529,92 +529,11 @@ When the mouse is over the channel window or over the central line in the spectr
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
   
-<h4>6.4,5,6: UDP address (4) receive port (5) and send port (6)</h4>
-
-Some channels can exchange data over UDP. Depending on the channel the data is the following:
-
-<table>
-  <tr>
-    <th>Channel</th>
-    <th>Data sent</th>
-    <th>Type</th>
-    <th>Data received</th>
-    <th>Type</th>
-    <th>Address</th>
-  </tr>
-  <tr>
-    <td>AM demod</td>
-    <td>Audio</td>
-    <td>Mono</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>
-  <tr>
-    <td>BFM demod</td>
-    <td>Audio</td>
-    <td>Stereo</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>  
-  <tr>
-    <td>DSD demod</td>
-    <td>Audio</td>
-    <td>Stereo</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>  
-  <tr>
-    <td>NFM demod</td>
-    <td>Audio</td>
-    <td>Mono</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>
-  <tr>
-    <td>SSB demod</td>
-    <td>Audio</td>
-    <td>Mono</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>
-  <tr>
-    <td>WFM demod</td>
-    <td>Audio</td>
-    <td>Mono</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Remote</td>
-  </tr>
-  <tr>
-    <td>UDP source</td>
-    <td>Audio, I/Q</td>
-    <td>Mono, Stereo</td>
-    <td>Audio</td>
-    <td>Mono</td>
-    <td>Remote</td>
-  </tr>
-  <tr>
-    <td>UDP sink</td>
-    <td>N/A</td>
-    <td>N/A</td>
-    <td>Audio, I/Q</td>
-    <td>Mono, Stereo</td>
-    <td>Local</td>
-  </tr>
-</table>
-  
-Data type is S16LE 1 channel (Mono) or 2 channels (Stereo or I/Q)
-
-<h4>6.7: Validate and exit dialog</h4>
+<h4>6.4: Validate and exit dialog</h4>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
 
-<h4>6.8: Cancel changes and exit dialog</h4>
+<h4>6.5: Cancel changes and exit dialog</h4>
 
 Do not make any changes and exit dialog
 
