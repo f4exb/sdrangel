@@ -1,6 +1,6 @@
 if(NOT LIBHACKRF_FOUND)
 
-  pkg_check_modules (LIBHACKRF_PKG libairspy)
+  pkg_check_modules (LIBHACKRF_PKG libhackrf)
   find_path(LIBHACKRF_INCLUDE_DIR NAMES libhackrf/hackrf.h
     PATHS
     ${LIBHACKRF_PKG_INCLUDE_DIRS}
