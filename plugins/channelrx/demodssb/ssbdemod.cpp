@@ -387,11 +387,30 @@ void SSBDemod::applyAudioSampleRate(int sampleRate)
     m_inputMessageQueue.push(channelConfigMsg);
 
     m_settingsMutex.lock();
+
     m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
+
     SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate);
     DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate);
+
+    int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
+    int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
+
+    if (m_agcNbSamples != agcNbSamples)
+    {
+        m_agc.resize(agcNbSamples, agcTarget);
+        m_agc.setStepDownDelay(agcNbSamples);
+        m_agcNbSamples = agcNbSamples;
+    }
+
+    if (m_agcThresholdGate != agcThresholdGate)
+    {
+        m_agc.setGate(agcThresholdGate);
+        m_agcThresholdGate = agcThresholdGate;
+    }
+
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -468,10 +487,10 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
         (m_settings.m_agcClamping != settings.m_agcClamping) || force)
     {
-        int agcNbSamples = 48 * (1<<settings.m_agcTimeLog2);
+        int agcNbSamples = (m_audioSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
         m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -SSBDemodSettings::m_minPowerThresholdDB);
         double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = 48 * settings.m_agcThresholdGate; // ms
+        int agcThresholdGate = (m_audioSampleRate / 1000) * settings.m_agcThresholdGate; // ms
         bool agcClamping = settings.m_agcClamping;
 
         if (m_agcNbSamples != agcNbSamples)
