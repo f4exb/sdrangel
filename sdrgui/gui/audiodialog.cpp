@@ -122,15 +122,13 @@ void AudioDialogX::on_audioInTree_currentItemChanged(
     QString inDeviceName = currentItem->text(1);
     int newIndex = ui->audioInTree->indexOfTopLevelItem(currentItem);
     int oldIndex = ui->audioInTree->indexOfTopLevelItem(previousItem);
-    //qDebug("AudioDialogX::on_audioInTree_currentItemChanged: %s", qPrintable(inDeviceName));
 
     if (newIndex != oldIndex) {
         ui->inputResetKey->setChecked(false);
     }
 
-    bool found = m_audioDeviceManager->getInputDeviceInfo(inDeviceName, inDeviceInfo);
+    m_audioDeviceManager->getInputDeviceInfo(inDeviceName, inDeviceInfo);
     m_inputDeviceInfo = inDeviceInfo;
-    ui->inputDefaultText->setText(found ? "" : "D");
 
     updateInputDisplay();
 }
@@ -148,10 +146,8 @@ void AudioDialogX::on_audioOutTree_currentItemChanged(
         ui->outputResetKey->setChecked(false);
     }
 
-    //qDebug("AudioDialogX::on_audioOutTree_currentItemChanged: %s", qPrintable(outDeviceName));
-    bool found = m_audioDeviceManager->getOutputDeviceInfo(outDeviceName, outDeviceInfo);
+    m_audioDeviceManager->getOutputDeviceInfo(outDeviceName, outDeviceInfo);
     m_outputDeviceInfo = outDeviceInfo;
-    ui->outputDefaultText->setText(found ? "" : "D");
 
     updateOutputDisplay();
 }

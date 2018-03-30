@@ -101,22 +101,6 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="outputDefaultText">
-           <property name="minimumSize">
-            <size>
-             <width>16</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Default values indicator</string>
-           </property>
-           <property name="text">
-            <string>D</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="outputReset">
            <property name="maximumSize">
             <size>
@@ -428,22 +412,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="inputDefaultText">
-           <property name="minimumSize">
-            <size>
-             <width>16</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Default values indicator</string>
-           </property>
-           <property name="text">
-            <string>D</string>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="inputReset">
