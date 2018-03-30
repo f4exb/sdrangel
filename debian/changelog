@@ -1,8 +1,11 @@
 sdrangel (3.14.0-1) unstable; urgency=medium
 
   * New audio devices management
+  * DATV demod: fixed message handling and thus screen initialization issue
+  * Removed UDP/RTP copy audio from channel sink plugins entirely
+  * Removed UDP address and port from Channel marker
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 1 Apr 2018 06:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 30 Mar 2018 16:14:18 +0200
 
 sdrangel (3.13.1-1) unstable; urgency=medium
 
