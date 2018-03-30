@@ -231,7 +231,7 @@ public:
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
 
-    void setTVScreen(TVScreen *objScreen);
+    void setTVScreen(TVScreen *objScreen); //!< set by the GUI
     int getSampleRate();
     int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
