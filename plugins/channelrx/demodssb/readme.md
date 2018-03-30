@@ -148,7 +148,7 @@ When the power threshold is close to the noise floor a few milliseconds help in 
 
 Left click on this button to toggle audio mute for this channel.
 
-If you right click on it a dialog will open to select the audio output device.
+If you right click on it a dialog will open to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>14: Spectrum display</h3>
 

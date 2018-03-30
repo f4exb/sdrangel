@@ -86,23 +86,13 @@ Number of milliseconds following squelch gate opening after which the signal is 
 
 Use this switch to toggle high-pass filter on the audio
 
-<h4>A.9: Audio mute and squelch indicator</h4>
+<h4>A.9: Audio mute, squelch indicator and select audio output device</h4>
 
-Audio mute toggle button. This button lights in green when the squelch opens.
+Left click to mute/unmute audio. This button lights in green when the squelch opens.
 
-<h3>A.10: UDP output</h3>
+If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
-Copies audio output to UDP. Output is stereo S16LE samples. Depending on which slots are active the output is the following:
-
-  - Slot 1: slot 1 on left channel
-  - Slot 2: slot 2 on right channel
-  - Slot 1+2: slot 1 on left channel 
-
-It cannot mix both channels when slot1+2 are active.
-
-UDP address and send port are specified in the basic channel settings. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
-
-<h3>a.11: Format specific status display</h3>
+<h3>A.11: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 

@@ -574,7 +574,7 @@
       <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
-         <string>Mute/Unmute audio</string>
+         <string>Left: Mute/Unmute audio Right: Select audio output device</string>
         </property>
         <property name="text">
          <string>...</string>

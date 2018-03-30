@@ -60,7 +60,7 @@ Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
 Left click to switch to the audio input. You must switch it off to make other inputs available.
 
-Right click to select audio input device.
+Right click to select audio input device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>10: CW (Morse) text</h3>
 

@@ -62,4 +62,4 @@ This is the value of the tone squelch received when the CTCSS is activated. It d
 
 Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
 
-If you right click on it it will open a dialog to select the audio output device.
+If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
