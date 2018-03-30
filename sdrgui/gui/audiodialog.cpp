@@ -172,7 +172,7 @@ void AudioDialogX::on_inputCleanup_clicked(bool checked __attribute__((unused)))
 void AudioDialogX::updateInputDisplay()
 {
     ui->inputSampleRate->setValue(m_inputDeviceInfo.sampleRate);
-    ui->inputVolume->setValue(roundf(m_inputDeviceInfo.volume * 100.0f));
+    ui->inputVolume->setValue(round(m_inputDeviceInfo.volume * 100.0f));
     ui->inputVolumeText->setText(QString("%1").arg(m_inputDeviceInfo.volume, 0, 'f', 2));
 }
 
