@@ -133,8 +133,6 @@ void SSBModGUI::channelMarkerChangedByCursor()
 void SSBModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress();
-    m_settings.m_udpPort = m_channelMarker.getUDPReceivePort();
     displaySettings();
     applySettings();
 }
@@ -401,8 +399,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("SSB Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true);
 

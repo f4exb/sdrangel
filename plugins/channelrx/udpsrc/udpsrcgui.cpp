@@ -171,9 +171,6 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_channelMarker.setBandwidth(16000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("UDP Sample Source");
-	m_channelMarker.setUDPAddress("127.0.0.1");
-	m_channelMarker.setUDPSendPort(9999);
-	m_channelMarker.setUDPReceivePort(9998);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -221,7 +218,6 @@ void UDPSrcGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
@@ -249,13 +245,6 @@ void UDPSrcGUI::displaySettings()
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
-
-    displayUDPAddress();
-}
-
-void UDPSrcGUI::displayUDPAddress()
-{
-    ui->addressText->setText(tr("%1:%2/%3").arg(m_channelMarker.getUDPAddress()).arg(m_channelMarker.getUDPSendPort()).arg(m_channelMarker.getUDPReceivePort()));
 }
 
 void UDPSrcGUI::setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleFormat)
@@ -552,14 +541,11 @@ void UDPSrcGUI::onMenuDialogCalled(const QPoint &p)
 
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettingsImmediate();
 }

@@ -66,15 +66,6 @@ public:
 	void setMovable(bool movable) { m_movable = movable; }
 	bool getMovable() const { return m_movable; }
 
-	void setUDPAddress(const QString& udpAddress);
-	const QString& getUDPAddress() const { return m_udpAddress; }
-
-	void setUDPReceivePort(quint16 port);
-	quint16 getUDPReceivePort() const { return m_udpReceivePort; }
-
-    void setUDPSendPort(quint16 port);
-    quint16 getUDPSendPort() const { return m_udpSendPort; }
-
     void setFrequencyScaleDisplayType(frequencyScaleDisplay_t type) { m_fScaleDisplayType = type; }
     frequencyScaleDisplay_t getFrequencyScaleDisplayType() const { return m_fScaleDisplayType; }
 
@@ -100,9 +91,6 @@ protected:
 	bool m_highlighted;
 	QColor m_color;
 	bool m_movable;
-	QString m_udpAddress;
-	quint16 m_udpReceivePort;
-    quint16 m_udpSendPort;
     frequencyScaleDisplay_t m_fScaleDisplayType;
 
     void resetToDefaults();

@@ -85,7 +85,6 @@ private:
 	void applySettings(bool force = false);
 	void applySettingsImmediate(bool force = false);
 	void displaySettings();
-	void displayUDPAddress();
 	void setSampleFormat(int index);
 	void setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleFormat);
 

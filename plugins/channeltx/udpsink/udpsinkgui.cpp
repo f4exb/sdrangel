@@ -194,8 +194,6 @@ void UDPSinkGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
-    m_channelMarker.setUDPAddress(m_settings.m_udpAddress);
-    m_channelMarker.setUDPReceivePort(m_settings.m_udpPort); // activate signal on the last setting only
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor);
 
@@ -429,8 +427,6 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPReceivePort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
 
     setWindowTitle(m_channelMarker.getTitle());
