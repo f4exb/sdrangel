@@ -82,6 +82,8 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 
+    m_lowpass.create(301, m_audioSampleRate, 250.0);
+
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
 

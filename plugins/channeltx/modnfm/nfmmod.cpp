@@ -74,6 +74,7 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
 
+    m_lowpass.create(301, m_audioSampleRate, 250.0);
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
 	m_ctcssNco.setFreq(88.5, m_audioSampleRate);
 
