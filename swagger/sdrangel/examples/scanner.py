@@ -57,7 +57,8 @@ def getInputOptions():
     parser.add_option("-S", "--freq-start", dest="freq_start", help="frequency start (Hz)", metavar="FREQUENCY", type="int", default=446006250) 
     parser.add_option("-T", "--freq-stop", dest="freq_stop", help="frequency stop (Hz)", metavar="FREQUENCY", type="int", default=446193750) 
     parser.add_option("-b", "--af-bw", dest="af_bw", help="audio babdwidth (kHz)", metavar="FREQUENCY_KHZ", type="int" ,default=3) 
-    parser.add_option("-r", "--rf-bw", dest="rf_bw", help="RF babdwidth (Hz). Sets to nearest available", metavar="FREQUENCY", type="int", default=10000) 
+    parser.add_option("-r", "--rf-bw", dest="rf_bw", help="RF babdwidth (Hz). Sets to nearest available", metavar="FREQUENCY", type="int", default=10000)
+    parser.add_option("--vol", dest="volume", help="audio volume", metavar="VOLUME", type="float", default=1.0)
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="BOOLEAN", action="store_true", default=False)
     parser.add_option("-m", "--mock", dest="mock", help="just print calculated values and exit", metavar="BOOLEAN", action="store_true", default=False)
     parser.add_option("--ppm", dest="lo_ppm", help="LO correction in PPM", metavar="PPM", type="float", default=0.0)
@@ -178,12 +179,14 @@ def setupChannels(scan_control, options):
             settings["NFMDemodSettings"]["inputFrequencyOffset"] = int(shift)
             settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
             settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+            settings["NFMDemodSettings"]["volume"] = options.volume
             settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10 # centi-Bels
             settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10 # 10's of ms
             settings["NFMDemodSettings"]["title"] = "Channel %d" % i
         elif options.channel_id == "AMDemod":
             settings["AMDemodSettings"]["inputFrequencyOffset"] = int(shift)
             settings["AMDemodSettings"]["rfBandwidth"] = options.rf_bw
+            settings["AMDemodSettings"]["volume"] = options.volume
             settings["AMDemodSettings"]["squelch"] = options.squelch_db
             settings["AMDemodSettings"]["title"] = "Channel %d" % i
             settings["AMDemodSettings"]["bandpassEnable"] = 1 # bandpass filter
