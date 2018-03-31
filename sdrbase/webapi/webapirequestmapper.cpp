@@ -1696,6 +1696,36 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "BladeRF") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("bladeRFInputSettings") && jsonObject["bladeRFInputSettings"].isObject())
+        {
+            QJsonObject bladeRFInputSettingsJsonObject = jsonObject["bladeRFInputSettings"].toObject();
+            deviceSettingsKeys = bladeRFInputSettingsJsonObject.keys();
+            deviceSettings.setBladeRfInputSettings(new SWGSDRangel::SWGBladeRFInputSettings());
+            deviceSettings.getBladeRfInputSettings()->fromJsonObject(bladeRFInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "BladeRF") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("bladeRFOutputSettings") && jsonObject["bladeRFOutputSettings"].isObject())
+        {
+            QJsonObject bladeRFOutputSettingsJsonObject = jsonObject["bladeRFOutputSettings"].toObject();
+            deviceSettingsKeys = bladeRFOutputSettingsJsonObject.keys();
+            deviceSettings.setBladeRfOutputSettings(new SWGSDRangel::SWGBladeRFOutputSettings());
+            deviceSettings.getBladeRfOutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("hackRFInputSettings") && jsonObject["hackRFInputSettings"].isObject())

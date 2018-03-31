@@ -112,6 +112,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -126,7 +136,7 @@ private:
     void closeDevice();
 	bool applySettings(const BladeRFInputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
-//	struct bladerf *open_bladerf_from_serial(const char *serial);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFInputSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

@@ -1,0 +1,54 @@
+BladeRFInputSettings:
+  description: BladeRF
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    lnaGain:
+      type: integer
+    vga1:
+      type: integer
+    vga2:
+      type: integer
+    bandwidth:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    xb200:
+      type: integer
+    xb200Path:
+      type: integer
+    xb200Filter:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+      
+BladeRFOutputSettings:
+  description: BladeRF
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    vga1:
+      type: integer
+    vga2:
+      type: integer
+    bandwidth:
+      type: integer
+    log2Interp:
+      type: integer
+    xb200:
+      type: integer
+    xb200Path:
+      type: integer
+    xb200Filter:
+      type: integer
+      

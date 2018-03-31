@@ -23,6 +23,8 @@
 
 
 #include "SWGAirspyHFSettings.h"
+#include "SWGBladeRFInputSettings.h"
+#include "SWGBladeRFOutputSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -58,6 +60,12 @@ public:
     SWGAirspyHFSettings* getAirspyHfSettings();
     void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
 
+    SWGBladeRFInputSettings* getBladeRfInputSettings();
+    void setBladeRfInputSettings(SWGBladeRFInputSettings* blade_rf_input_settings);
+
+    SWGBladeRFOutputSettings* getBladeRfOutputSettings();
+    void setBladeRfOutputSettings(SWGBladeRFOutputSettings* blade_rf_output_settings);
+
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
 
@@ -88,6 +96,12 @@ private:
 
     SWGAirspyHFSettings* airspy_hf_settings;
     bool m_airspy_hf_settings_isSet;
+
+    SWGBladeRFInputSettings* blade_rf_input_settings;
+    bool m_blade_rf_input_settings_isSet;
+
+    SWGBladeRFOutputSettings* blade_rf_output_settings;
+    bool m_blade_rf_output_settings_isSet;
 
     SWGFileSourceSettings* file_source_settings;
     bool m_file_source_settings_isSet;

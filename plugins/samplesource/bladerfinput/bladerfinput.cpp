@@ -609,6 +609,94 @@ bladerf_lna_gain BladerfInput::getLnaGain(int lnaGain)
 	}
 }
 
+int BladerfInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setBladeRfInputSettings(new SWGSDRangel::SWGBladeRFInputSettings());
+    response.getBladeRfInputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+void BladerfInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFInputSettings& settings)
+{
+    response.getBladeRfInputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getBladeRfInputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getBladeRfInputSettings()->setLnaGain(settings.m_lnaGain);
+    response.getBladeRfInputSettings()->setVga1(settings.m_vga1);
+    response.getBladeRfInputSettings()->setVga2(settings.m_vga2);
+    response.getBladeRfInputSettings()->setBandwidth(settings.m_bandwidth);
+    response.getBladeRfInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getBladeRfInputSettings()->setFcPos((int) settings.m_fcPos);
+    response.getBladeRfInputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
+    response.getBladeRfInputSettings()->setXb200Path((int) settings.m_xb200Path);
+    response.getBladeRfInputSettings()->setXb200Filter((int) settings.m_xb200Filter);
+    response.getBladeRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getBladeRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+}
+
+int BladerfInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    BladeRFInputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getBladeRfInputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getBladeRfInputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("lnaGain")) {
+        settings.m_lnaGain = response.getBladeRfInputSettings()->getLnaGain();
+    }
+    if (deviceSettingsKeys.contains("vga1")) {
+        settings.m_vga1 = response.getBladeRfInputSettings()->getVga1();
+    }
+    if (deviceSettingsKeys.contains("vga2")) {
+        settings.m_vga2 = response.getBladeRfInputSettings()->getVga2();
+    }
+    if (deviceSettingsKeys.contains("bandwidth")) {
+        settings.m_bandwidth = response.getBladeRfInputSettings()->getBandwidth();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getBladeRfInputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = static_cast<BladeRFInputSettings::fcPos_t>(response.getBladeRfInputSettings()->getFcPos());
+    }
+    if (deviceSettingsKeys.contains("xb200")) {
+        settings.m_xb200 = response.getBladeRfInputSettings()->getXb200() == 0 ? 0 : 1;
+    }
+    if (deviceSettingsKeys.contains("xb200Path")) {
+        settings.m_xb200Path = static_cast<bladerf_xb200_path>(response.getBladeRfInputSettings()->getXb200Path());
+    }
+    if (deviceSettingsKeys.contains("xb200Filter")) {
+        settings.m_xb200Filter = static_cast<bladerf_xb200_filter>(response.getBladeRfInputSettings()->getXb200Filter());
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getBladeRfInputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getBladeRfInputSettings()->getIqCorrection() != 0;
+    }
+
+    MsgConfigureBladerf *msg = MsgConfigureBladerf::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBladerf *msgToGUI = MsgConfigureBladerf::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
 int BladerfInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
@@ -634,42 +722,3 @@ int BladerfInput::webapiRun(
 
     return 200;
 }
-
-//struct bladerf *BladerfInput::open_bladerf_from_serial(const char *serial)
-//{
-//    int status;
-//    struct bladerf *dev;
-//    struct bladerf_devinfo info;
-//
-//    /* Initialize all fields to "don't care" wildcard values.
-//     *
-//     * Immediately passing this to bladerf_open_with_devinfo() would cause
-//     * libbladeRF to open any device on any available backend. */
-//    bladerf_init_devinfo(&info);
-//
-//    /* Specify the desired device's serial number, while leaving all other
-//     * fields in the info structure wildcard values */
-//    if (serial != NULL)
-//    {
-//		strncpy(info.serial, serial, BLADERF_SERIAL_LENGTH - 1);
-//		info.serial[BLADERF_SERIAL_LENGTH - 1] = '\0';
-//    }
-//
-//    status = bladerf_open_with_devinfo(&dev, &info);
-//
-//    if (status == BLADERF_ERR_NODEV)
-//    {
-//        fprintf(stderr, "No devices available with serial=%s\n", serial);
-//        return NULL;
-//    }
-//    else if (status != 0)
-//    {
-//        fprintf(stderr, "Failed to open device with serial=%s (%s)\n",
-//                serial, bladerf_strerror(status));
-//        return NULL;
-//    }
-//    else
-//    {
-//        return dev;
-//    }
-//}

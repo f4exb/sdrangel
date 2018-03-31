@@ -20,6 +20,8 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
+#include "SWGBladeRFInputSettings.h"
+#include "SWGBladeRFOutputSettings.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
@@ -79,6 +81,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAudioOutputDevice").compare(type) == 0) {
       return new SWGAudioOutputDevice();
+    }
+    if(QString("SWGBladeRFInputSettings").compare(type) == 0) {
+      return new SWGBladeRFInputSettings();
+    }
+    if(QString("SWGBladeRFOutputSettings").compare(type) == 0) {
+      return new SWGBladeRFOutputSettings();
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
       return new SWGCWKeyerSettings();

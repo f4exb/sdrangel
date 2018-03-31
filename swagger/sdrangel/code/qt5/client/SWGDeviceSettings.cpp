@@ -34,6 +34,10 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_tx_isSet = false;
     airspy_hf_settings = nullptr;
     m_airspy_hf_settings_isSet = false;
+    blade_rf_input_settings = nullptr;
+    m_blade_rf_input_settings_isSet = false;
+    blade_rf_output_settings = nullptr;
+    m_blade_rf_output_settings_isSet = false;
     file_source_settings = nullptr;
     m_file_source_settings_isSet = false;
     hack_rf_input_settings = nullptr;
@@ -60,6 +64,10 @@ SWGDeviceSettings::init() {
     m_tx_isSet = false;
     airspy_hf_settings = new SWGAirspyHFSettings();
     m_airspy_hf_settings_isSet = false;
+    blade_rf_input_settings = new SWGBladeRFInputSettings();
+    m_blade_rf_input_settings_isSet = false;
+    blade_rf_output_settings = new SWGBladeRFOutputSettings();
+    m_blade_rf_output_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
     m_file_source_settings_isSet = false;
     hack_rf_input_settings = new SWGHackRFInputSettings();
@@ -82,6 +90,12 @@ SWGDeviceSettings::cleanup() {
 
     if(airspy_hf_settings != nullptr) { 
         delete airspy_hf_settings;
+    }
+    if(blade_rf_input_settings != nullptr) { 
+        delete blade_rf_input_settings;
+    }
+    if(blade_rf_output_settings != nullptr) { 
+        delete blade_rf_output_settings;
     }
     if(file_source_settings != nullptr) { 
         delete file_source_settings;
@@ -120,6 +134,10 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
     
+    ::SWGSDRangel::setValue(&blade_rf_input_settings, pJson["bladeRFInputSettings"], "SWGBladeRFInputSettings", "SWGBladeRFInputSettings");
+    
+    ::SWGSDRangel::setValue(&blade_rf_output_settings, pJson["bladeRFOutputSettings"], "SWGBladeRFOutputSettings", "SWGBladeRFOutputSettings");
+    
     ::SWGSDRangel::setValue(&file_source_settings, pJson["fileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
     
     ::SWGSDRangel::setValue(&hack_rf_input_settings, pJson["hackRFInputSettings"], "SWGHackRFInputSettings", "SWGHackRFInputSettings");
@@ -156,6 +174,12 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
         toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
+    }
+    if((blade_rf_input_settings != nullptr) && (blade_rf_input_settings->isSet())){
+        toJsonValue(QString("bladeRFInputSettings"), blade_rf_input_settings, obj, QString("SWGBladeRFInputSettings"));
+    }
+    if((blade_rf_output_settings != nullptr) && (blade_rf_output_settings->isSet())){
+        toJsonValue(QString("bladeRFOutputSettings"), blade_rf_output_settings, obj, QString("SWGBladeRFOutputSettings"));
     }
     if((file_source_settings != nullptr) && (file_source_settings->isSet())){
         toJsonValue(QString("fileSourceSettings"), file_source_settings, obj, QString("SWGFileSourceSettings"));
@@ -207,6 +231,26 @@ void
 SWGDeviceSettings::setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings) {
     this->airspy_hf_settings = airspy_hf_settings;
     this->m_airspy_hf_settings_isSet = true;
+}
+
+SWGBladeRFInputSettings*
+SWGDeviceSettings::getBladeRfInputSettings() {
+    return blade_rf_input_settings;
+}
+void
+SWGDeviceSettings::setBladeRfInputSettings(SWGBladeRFInputSettings* blade_rf_input_settings) {
+    this->blade_rf_input_settings = blade_rf_input_settings;
+    this->m_blade_rf_input_settings_isSet = true;
+}
+
+SWGBladeRFOutputSettings*
+SWGDeviceSettings::getBladeRfOutputSettings() {
+    return blade_rf_output_settings;
+}
+void
+SWGDeviceSettings::setBladeRfOutputSettings(SWGBladeRFOutputSettings* blade_rf_output_settings) {
+    this->blade_rf_output_settings = blade_rf_output_settings;
+    this->m_blade_rf_output_settings_isSet = true;
 }
 
 SWGFileSourceSettings*
@@ -277,6 +321,8 @@ SWGDeviceSettings::isSet(){
         if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
         if(airspy_hf_settings != nullptr && airspy_hf_settings->isSet()){ isObjectUpdated = true; break;}
+        if(blade_rf_input_settings != nullptr && blade_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
+        if(blade_rf_output_settings != nullptr && blade_rf_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(file_source_settings != nullptr && file_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_input_settings != nullptr && hack_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_output_settings != nullptr && hack_rf_output_settings->isSet()){ isObjectUpdated = true; break;}

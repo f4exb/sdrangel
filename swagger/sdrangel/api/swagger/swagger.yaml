@@ -1715,6 +1715,10 @@ definitions:
         type: integer
       airspyHFSettings:
         $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+      bladeRFInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFInputSettings"
+      bladeRFOutputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFOutputSettings"
       fileSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
       hackRFInputSettings:

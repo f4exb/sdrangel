@@ -535,6 +535,78 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 	return true;
 }
 
+int BladerfOutput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setBladeRfOutputSettings(new SWGSDRangel::SWGBladeRFOutputSettings());
+    response.getBladeRfOutputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+void BladerfOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFOutputSettings& settings)
+{
+    response.getBladeRfOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getBladeRfOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getBladeRfOutputSettings()->setVga1(settings.m_vga1);
+    response.getBladeRfOutputSettings()->setVga2(settings.m_vga2);
+    response.getBladeRfOutputSettings()->setBandwidth(settings.m_bandwidth);
+    response.getBladeRfOutputSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getBladeRfOutputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
+    response.getBladeRfOutputSettings()->setXb200Path((int) settings.m_xb200Path);
+    response.getBladeRfOutputSettings()->setXb200Filter((int) settings.m_xb200Filter);
+}
+
+int BladerfOutput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    BladeRFOutputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getBladeRfOutputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getBladeRfOutputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("vga1")) {
+        settings.m_vga1 = response.getBladeRfOutputSettings()->getVga1();
+    }
+    if (deviceSettingsKeys.contains("vga2")) {
+        settings.m_vga2 = response.getBladeRfOutputSettings()->getVga2();
+    }
+    if (deviceSettingsKeys.contains("bandwidth")) {
+        settings.m_bandwidth = response.getBladeRfOutputSettings()->getBandwidth();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getBladeRfOutputSettings()->getLog2Interp();
+    }
+    if (deviceSettingsKeys.contains("xb200")) {
+        settings.m_xb200 = response.getBladeRfOutputSettings()->getXb200() == 0 ? 0 : 1;
+    }
+    if (deviceSettingsKeys.contains("xb200Path")) {
+        settings.m_xb200Path = static_cast<bladerf_xb200_path>(response.getBladeRfOutputSettings()->getXb200Path());
+    }
+    if (deviceSettingsKeys.contains("xb200Filter")) {
+        settings.m_xb200Filter = static_cast<bladerf_xb200_filter>(response.getBladeRfOutputSettings()->getXb200Filter());
+    }
+
+    MsgConfigureBladerf *msg = MsgConfigureBladerf::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBladerf *msgToGUI = MsgConfigureBladerf::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
 int BladerfOutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))

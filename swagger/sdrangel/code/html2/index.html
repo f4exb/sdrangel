@@ -887,6 +887,84 @@ margin-bottom: 20px;
   },
   "description" : "Audio output device"
 };
+            defs.BladeRFInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "lnaGain" : {
+      "type" : "integer"
+    },
+    "vga1" : {
+      "type" : "integer"
+    },
+    "vga2" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "xb200" : {
+      "type" : "integer"
+    },
+    "xb200Path" : {
+      "type" : "integer"
+    },
+    "xb200Filter" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BladeRF"
+};
+            defs.BladeRFOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "vga1" : {
+      "type" : "integer"
+    },
+    "vga2" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "xb200" : {
+      "type" : "integer"
+    },
+    "xb200Path" : {
+      "type" : "integer"
+    },
+    "xb200Filter" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BladeRF"
+};
             defs.CWKeyerSettings = {
   "properties" : {
     "sampleRate" : {
@@ -1151,6 +1229,12 @@ margin-bottom: 20px;
     },
     "airspyHFSettings" : {
       "$ref" : "#/definitions/AirspyHFSettings"
+    },
+    "bladeRFInputSettings" : {
+      "$ref" : "#/definitions/BladeRFInputSettings"
+    },
+    "bladeRFOutputSettings" : {
+      "$ref" : "#/definitions/BladeRFOutputSettings"
     },
     "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
@@ -20106,7 +20190,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-03-29T15:31:47.724+02:00
+              Generated 2018-03-31T18:20:57.874+02:00
             </div>
           </div>
       </div>
