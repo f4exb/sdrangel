@@ -68,31 +68,61 @@ Total power in dB relative to a +/- 1.0 amplitude signal received in the pass ba
 
 <h4>A.4: Channel power bar graph</h4>
 
-<h4>A.5: Audio volume</h4>
+<h4>A.5: Activate status text log</h4>
+
+Check to send the status text lines (A.12) to the log. Uncheck to dismiss sending.
+
+<h4>A.6 View status text log</h4>
+
+Click to open a dialog to view the status text lines log:
+
+![DSD Demodulator status text log GUI](../../../doc/img/DSDdemod_plugin_status_text_log.png)
+
+<h5>A.6.1 Clear log</h5>
+
+Push this button to clear the log
+
+<h5>A.6.2 Pin to last line</h5>
+
+Use this toggle to pin or unpin the log to the last line
+
+<h5>A.6.3 Save log to file</h5>
+
+Save the present log content to a file
+
+<h5>A.6.4 Timestamp</h5>
+
+Each line in the log starts with the timestamp when the status line was fetched from the decoder
+
+<h5>A.6.5 Status text</h5>
+
+One line per status text
+
+<h4>A.7: Audio volume</h4>
 
 When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature. 
 
 With the DV serial device(s) amplification factor in dB is given by `(value - 3.0)*5.0`. In most practical cases the middle value of 5.0 (+10 dB) is a comfortable level.
 
-<h4>A.6: Squelch level</h4>
+<h4>A.8: Squelch level</h4>
 
 The level corresponds to the channel power above which the squelch gate opens.
 
-<h4>A.7: Squelch time gate</h4>
+<h4>A.9: Squelch time gate</h4>
 
 Number of milliseconds following squelch gate opening after which the signal is actually fed to the decoder. 0 means no delay i.e. immediate feed.
 
-<h4>A.8: High-pass filter for audio</h4>
+<h4>A.10: High-pass filter for audio</h4>
 
 Use this switch to toggle high-pass filter on the audio
 
-<h4>A.9: Audio mute, squelch indicator and select audio output device</h4>
+<h4>A.11: Audio mute, squelch indicator and select audio output device</h4>
 
 Left click to mute/unmute audio. This button lights in green when the squelch opens.
 
 If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
-<h3>A.11: Format specific status display</h3>
+<h3>A.12: Format specific status display</h3>
 
 When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
 
