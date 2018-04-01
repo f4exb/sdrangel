@@ -81,11 +81,11 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
                 m_cols = cols;
             }
 
-            drawGraticule();
 			m_tvScreen->renderImage(0);
 			m_tvScreen->update();
 			usleep(5000);
 			m_tvScreen->resetImage(m_alphaReset);
+            drawGraticule();
 			m_pixelCount = 0;
 		}
 	}
