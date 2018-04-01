@@ -20,6 +20,9 @@
 
 #include <QDateTime>
 #include <QScrollBar>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextStream>
 
 DSDStatusTextDialog::DSDStatusTextDialog(QWidget* parent) :
     QDialog(parent),
@@ -52,4 +55,33 @@ void DSDStatusTextDialog::addLine(const QString& line)
 void DSDStatusTextDialog::on_clear_clicked()
 {
     ui->logEdit->clear();
+}
+
+void DSDStatusTextDialog::on_saveLog_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                    tr("Open log file"), ".", tr("Log files (*.log)"));
+
+    if (fileName != "")
+    {
+        QFileInfo fileInfo(fileName);
+
+        if (fileInfo.suffix() != "log") {
+            fileName += ".log";
+        }
+
+        QFile exportFile(fileName);
+
+        if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream outstream(&exportFile);
+            outstream << ui->logEdit->toPlainText();
+            exportFile.close();
+        }
+        else
+        {
+            QMessageBox::information(this, tr("Message"), tr("Cannot open file for writing"));
+        }
+    }
+
 }

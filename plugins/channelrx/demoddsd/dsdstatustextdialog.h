@@ -39,6 +39,7 @@ private:
 
 private slots:
     void on_clear_clicked();
+    void on_saveLog_clicked();
 };
 
 
