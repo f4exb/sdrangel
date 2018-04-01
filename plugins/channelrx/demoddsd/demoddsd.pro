@@ -44,16 +44,19 @@ dsddemod.cpp\
 dsddemodgui.cpp\
 dsddemodplugin.cpp\
 dsddemodbaudrates.cpp\
-dsddemodsettings.cpp
+dsddemodsettings.cpp\
+dsdstatustextdialog.cpp
 
 HEADERS = dsddecoder.h\
 dsddemod.h\
 dsddemodgui.h\
 dsddemodplugin.h\
 dsddemodbaudrates.h\
-dsddemodsettings.h
+dsddemodsettings.h\
+dsdstatustextdialog.h
 
-FORMS = dsddemodgui.ui
+FORMS = dsddemodgui.ui\
+dsdstatustextdialog.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
