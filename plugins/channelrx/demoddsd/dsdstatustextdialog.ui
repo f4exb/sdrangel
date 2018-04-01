@@ -81,6 +81,9 @@
         <iconset resource="../../../sdrgui/resources/res.qrc">
          <normaloff>:/save.png</normaloff>:/save.png</iconset>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
