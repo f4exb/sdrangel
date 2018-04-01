@@ -273,7 +273,7 @@ This display shows the sampled points of the demodulated FM signal in a XY plane
   - X as the signal at time t and Y the signal at time t minus symbol time if "transitions constellation" is selected by button (B.13)
   - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13) 
 
-The display shows 16 points as yellow crosses that can be used to tune the center frequency and FM deviation and gain so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers fron 0 to 15 starting at the top left corner and going from left to right and top to bottom.
+The display shows 16 points as yellow crosses that can be used to tune the center frequency (A.1) and FM deviation (B.17) so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers fron 0 to 15 starting at the top left corner and going from left to right and top to bottom.
 
 <h5>Transition constellation display</h5>
 
@@ -351,6 +351,8 @@ This can be one of the following:
 
   - `+DMRd`: non-inverted DMR data frame
   - `+DMRv`: non-inverted DMR voice frame
+  - `-DMRd`: inverted DMR data frame
+  - `-DMRv`: inverted DMR voice frame
   - `+D-STAR`: non-inverted D-Star frame
   - `-D-STAR`: inverted D-Star frame
   - `+D-STAR_HD`: non-inverted D-Star header frame encountered
@@ -445,8 +447,13 @@ This button tunes the persistence decay of the points displayer on B.1. The trac
 
 <h4>B.17: Maximum expected FM deviation</h4>
 
-This is the deviation in kHz leading to maximum (100%) deviation. You should aim for 30 to 50% (+/-300 to +/-500m) deviation on the scope display.
+This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviation. You should adjust this value to make the figure on the signal scope fill the entire screen as shown in the screenshots above. The typical deviations by mode for a unit gain (1.0 at B.18) are:
+  
+  - DMR: &#177;5.4k
+  - dPMR: &#177;2.7k
+  - D-Star: &#177;3.5k
+  - YSF: &#177;7.0k
 
 <h4>B.18: Gain after discriminator</h4>
 
-This is the gain applied to the output of the discriminator before the decoder
+This is the gain applied to the output of the discriminator before the decoder. Normally this would be set at unit gain 1.0 while the FM deviation is adjusted. However this can be used to extend the range of FM adjustment.

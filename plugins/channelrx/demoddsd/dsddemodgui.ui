@@ -827,7 +827,7 @@
         <rect>
          <x>50</x>
          <y>107</y>
-         <width>151</width>
+         <width>141</width>
          <height>16</height>
         </rect>
        </property>
@@ -835,13 +835,16 @@
         <string>Maximum frequency deviation (kHz)</string>
        </property>
        <property name="maximum">
-        <number>500</number>
+        <number>100</number>
        </property>
        <property name="pageStep">
         <number>1</number>
        </property>
+       <property name="value">
+        <number>35</number>
+       </property>
        <property name="sliderPosition">
-        <number>50</number>
+        <number>35</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -863,20 +866,20 @@
       <widget class="QLabel" name="fmDeviationText">
        <property name="geometry">
         <rect>
-         <x>210</x>
+         <x>200</x>
          <y>100</y>
-         <width>40</width>
+         <width>50</width>
          <height>29</height>
         </rect>
        </property>
        <property name="minimumSize">
         <size>
-         <width>40</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>00.0k</string>
+        <string>+00.0k</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -900,7 +903,7 @@
         <rect>
          <x>50</x>
          <y>137</y>
-         <width>151</width>
+         <width>141</width>
          <height>16</height>
         </rect>
        </property>
@@ -917,7 +920,7 @@
         <number>50</number>
        </property>
        <property name="maximum">
-        <number>400</number>
+        <number>200</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -1054,15 +1057,15 @@
       <widget class="QLabel" name="demodGainText">
        <property name="geometry">
         <rect>
-         <x>210</x>
+         <x>200</x>
          <y>130</y>
-         <width>40</width>
+         <width>50</width>
          <height>29</height>
         </rect>
        </property>
        <property name="minimumSize">
         <size>
-         <width>35</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>

@@ -1,3 +1,11 @@
+sdrangel (3.14.1-1) unstable; urgency=medium
+
+  * NFM: fixed lowpass filter initialization (CTCSS)
+  * DSD demod: set FM deviation independent from RF bandwidth
+  * DSD demod: implemented DMR negative with DSDcc v1.7.5
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 01 Apr 2018 12:14:18 +0200
+
 sdrangel (3.14.0-1) unstable; urgency=medium
 
   * New audio devices management

@@ -456,13 +456,13 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         m_interpolator.create(16, m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) 48000;
-        m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
+        //m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
         m_settingsMutex.unlock();
     }
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
+        m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
     }
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
