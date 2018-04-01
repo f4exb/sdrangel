@@ -265,6 +265,12 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
+void DSDDemodGUI::on_viewStatusLog_clicked()
+{
+    qDebug("DSDDemodGUI::on_viewStatusLog_clicked");
+    m_dsdStatusTextDialog.exec();
+}
+
 DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::DSDDemodGUI),
@@ -279,7 +285,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_slot2On(false),
 	m_tdmaStereo(false),
 	m_squelchOpen(false),
-	m_tickCount(0)
+	m_tickCount(0),
+	m_dsdStatusTextDialog(0)
 {
 	ui->setupUi(this);
 	ui->screenTV->setColor(true);
@@ -680,6 +687,10 @@ void DSDDemodGUI::tick()
 
 	    formatStatusText();
 	    ui->formatStatusText->setText(QString(m_formatStatusText));
+
+	    if (ui->activateStatusLog->isChecked()) {
+	        m_dsdStatusTextDialog.addLine(QString(m_formatStatusText));
+	    }
 
 	    if (m_formatStatusText[0] == '\0') {
 	        ui->formatStatusText->setStyleSheet("QLabel { background:rgb(53,53,53); }"); // turn off background

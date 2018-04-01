@@ -9,6 +9,7 @@ set(dsddemod_SOURCES
     dsddemodbaudrates.cpp
     dsddemodsettings.cpp
     dsddecoder.cpp
+    dsdstatustextdialog.cpp
 )
 
 set(dsddemod_HEADERS
@@ -18,10 +19,12 @@ set(dsddemod_HEADERS
     dsddemodbaudrates.h
     dsddemodsettings.h
     dsddecoder.h
+    dsdstatustextdialog.h
 )
 
 set(dsddemod_FORMS
     dsddemodgui.ui
+    dsdstatustextdialog.ui
 )
 
 if (BUILD_DEBIAN)

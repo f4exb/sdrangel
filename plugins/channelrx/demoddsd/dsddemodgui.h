@@ -28,6 +28,7 @@
 #include "util/messagequeue.h"
 
 #include "dsddemodsettings.h"
+#include "dsdstatustextdialog.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -98,6 +99,8 @@ private:
 
 	MessageQueue m_inputMessageQueue;
 
+	DSDStatusTextDialog m_dsdStatusTextDialog;
+
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~DSDDemodGUI();
 
@@ -132,6 +135,7 @@ private slots:
     void on_symbolPLLLock_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void on_viewStatusLog_clicked();
     void audioSelect();
     void tick();
 };

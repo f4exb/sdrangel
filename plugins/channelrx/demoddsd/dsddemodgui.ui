@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
+    <width>613</width>
     <height>392</height>
    </rect>
   </property>
@@ -255,6 +255,62 @@
     <item>
      <layout class="QHBoxLayout" name="squelchLayout">
       <item>
+       <widget class="QCheckBox" name="activateStatusLog">
+        <property name="toolTip">
+         <string>Activate status text log</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="viewStatusLog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>View status text log</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
          <string>Vol</string>
@@ -309,22 +365,16 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <widget class="Line" name="line_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Vertical</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="squelchLabel">
         <property name="text">
-         <string>Sq</string>
+         <string> Sq</string>
         </property>
        </widget>
       </item>
@@ -486,6 +536,9 @@
           <family>DejaVu Sans Mono</family>
           <pointsize>9</pointsize>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Status text</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
