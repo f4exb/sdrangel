@@ -45,6 +45,7 @@ set(sdrbase_SOURCES
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
     dsp/recursivefilters.cpp
+    dsp/symsync.cpp
     dsp/threadedbasebandsamplesink.cpp
     dsp/threadedbasebandsamplesource.cpp
     dsp/wfir.cpp
@@ -146,6 +147,7 @@ set(sdrbase_HEADERS
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h
+    dsp/symsync.h
     dsp/threadedbasebandsamplesink.h
     dsp/threadedbasebandsamplesource.h
     dsp/wfir.h
@@ -262,6 +264,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/httpserver
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${LIQUIDDSPSRC}/include
 )
 
 target_link_libraries(sdrbase
@@ -269,6 +272,7 @@ target_link_libraries(sdrbase
     httpserver
     qrtplib
     swagger
+    liquiddsp
 )
 
 if(FFTW3F_FOUND)

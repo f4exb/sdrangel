@@ -317,6 +317,7 @@ set(math_SOURCES
     ${LIQUIDDSPSRC}/src/math/src/math.complex.c
     ${LIQUIDDSPSRC}/src/math/src/math.trig.c
     ${LIQUIDDSPSRC}/src/math/src/modular_arithmetic.c
+    ${LIQUIDDSPSRC}/src/math/src/windows.c
     )
  
 #
@@ -441,7 +442,7 @@ set(vector_SOURCES
 #
 # Library
 #
-set(liquid_SOURCES
+set(liquiddsp_SOURCES
     ${LIQUIDDSPSRC}/src/libliquid.c
     ${agc_SOURCES}
     ${audio_SOURCES}
@@ -466,17 +467,27 @@ set(liquid_SOURCES
     ${vector_SOURCES}
     )
     
-add_library(liquid SHARED ${liquid_SOURCES})
+
+add_definitions(${QT_DEFINITIONS})
+add_definitions(-DQT_SHARED)
+        
+add_library(liquiddsp SHARED 
+    ${liquiddsp_SOURCES}     
+    ${liquiddsp_HEADERS_MOC}
+)
+
 if (HAVE_LIBM)
-    target_link_libraries(liquid m)
-endif ()
-if (HAVE_LIBFEC)
-    target_link_libraries(liquid fec)
-endif ()
-if (NOT LIQUID_FFTOVERRIDE AND HAVE_LIBFFTW3F)
-    target_link_libraries(liquid fftw3f)
+    target_link_libraries(liquiddsp m)
 endif ()
 
-set_property(TARGET liquid PROPERTY OUTPUT_NAME "liquid")
-set_property(TARGET liquid PROPERTY SOVERSION "${LIQUID_VERSION}")
-set_property(TARGET liquid PROPERTY COMPILE_FLAGS "${_EXTRA_C_FLAGS}")
+if (HAVE_LIBFEC)
+    target_link_libraries(liquiddsp fec)
+endif ()
+
+if (NOT LIQUID_FFTOVERRIDE AND HAVE_LIBFFTW3F)
+    target_link_libraries(liquiddsp fftw3f)
+endif ()
+
+#set_property(TARGET liquid PROPERTY OUTPUT_NAME "liquid")
+#set_property(TARGET liquid PROPERTY SOVERSION "${LIQUID_VERSION}")
+set_property(TARGET liquiddsp PROPERTY COMPILE_FLAGS "${_EXTRA_C_FLAGS}")
