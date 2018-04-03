@@ -29,6 +29,7 @@
 #include <boost/circular_buffer.hpp>
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/projector.h"
 #include "export.h"
 #include "util/message.h"
 #include "util/doublebuffer.h"
@@ -41,20 +42,9 @@ class GLScopeNG;
 class SDRGUI_API ScopeVisNG : public BasebandSampleSink {
 
 public:
-    enum ProjectionType
-    {
-        ProjectionReal = 0, //!< Extract real part
-        ProjectionImag,     //!< Extract imaginary part
-        ProjectionMagLin,   //!< Calculate linear magnitude or modulus
-        ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
-        ProjectionPhase,    //!< Calculate phase
-        ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
-		nbProjectionTypes   //!< Gives the number of projections in the enum
-    };
-
     struct TraceData
     {
-        ProjectionType m_projectionType; //!< Complex to real projection type
+        Projector::ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
         float m_amp;                     //!< Amplification factor
         uint32_t m_ampIndex;             //!< Index in list of amplification factors
@@ -74,7 +64,7 @@ public:
         bool m_viewTrace;                //!< Trace visibility
 
         TraceData() :
-            m_projectionType(ProjectionReal),
+            m_projectionType(Projector::ProjectionReal),
             m_inputIndex(0),
             m_amp(1.0f),
             m_ampIndex(0),
@@ -106,7 +96,7 @@ public:
 
     struct TriggerData
     {
-        ProjectionType m_projectionType; //!< Complex to real projection type
+        Projector::ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
         Real m_triggerLevel;             //!< Level in real units
         int  m_triggerLevelCoarse;
@@ -124,7 +114,7 @@ public:
         float m_triggerColorB;           //!< Trigger line display color - blue shortcut
 
         TriggerData() :
-            m_projectionType(ProjectionReal),
+            m_projectionType(Projector::ProjectionReal),
             m_inputIndex(0),
             m_triggerLevel(0.0f),
             m_triggerLevelCoarse(0),
@@ -513,96 +503,6 @@ private:
     // ---------------------------------------------
 
     /**
-     * Projection stuff
-     */
-    class Projector
-    {
-    public:
-        Projector(ProjectionType projectionType) :
-            m_projectionType(projectionType),
-            m_prevArg(0.0f),
-			m_cache(0),
-			m_cacheMaster(true)
-        {}
-
-        ~Projector()
-        {}
-
-        ProjectionType getProjectionType() const { return m_projectionType; }
-        void settProjectionType(ProjectionType projectionType) { m_projectionType = projectionType; }
-        void setCache(Real *cache) { m_cache = cache; }
-        void setCacheMaster(bool cacheMaster) { m_cacheMaster = cacheMaster; }
-
-        Real run(const Sample& s)
-        {
-        	Real v;
-
-        	if ((m_cache) && !m_cacheMaster) {
-        		return m_cache[(int) m_projectionType];
-        	}
-        	else
-        	{
-                switch (m_projectionType)
-                {
-                case ProjectionImag:
-                    v = s.m_imag / SDR_RX_SCALEF;
-                    break;
-                case ProjectionMagLin:
-                {
-                	Real re = s.m_real / SDR_RX_SCALEF;
-                	Real im = s.m_imag / SDR_RX_SCALEF;
-                	Real magsq = re*re + im*im;
-                    v = std::sqrt(magsq);
-                }
-                    break;
-                case ProjectionMagDB:
-                {
-                	Real re = s.m_real / SDR_RX_SCALEF;
-                	Real im = s.m_imag / SDR_RX_SCALEF;
-                	Real magsq = re*re + im*im;
-                    v = log10f(magsq) * 10.0f;
-                }
-                    break;
-                case ProjectionPhase:
-                    v = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
-                    break;
-                case ProjectionDPhase:
-                {
-                    Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);
-                    Real dPhi = (curArg - m_prevArg) / M_PI;
-                    m_prevArg = curArg;
-
-                    if (dPhi < -1.0f) {
-                        dPhi += 2.0f;
-                    } else if (dPhi > 1.0f) {
-                        dPhi -= 2.0f;
-                    }
-
-                    v = dPhi;
-                }
-                    break;
-                case ProjectionReal:
-                default:
-                    v = s.m_real / SDR_RX_SCALEF;
-                    break;
-                }
-
-                if (m_cache) {
-                	m_cache[(int) m_projectionType] = v;
-                }
-
-                return v;
-        	}
-        }
-
-    private:
-        ProjectionType m_projectionType;
-        Real m_prevArg;
-        Real *m_cache;
-        bool m_cacheMaster;
-    };
-
-    /**
      * Trigger stuff
      */
     enum TriggerState
@@ -623,7 +523,7 @@ private:
         uint32_t m_triggerCounter;    //!< Counter of trigger occurences
 
         TriggerCondition(const TriggerData& triggerData) :
-            m_projector(ProjectionReal),
+            m_projector(Projector::ProjectionReal),
             m_triggerData(triggerData),
             m_prevCondition(false),
             m_triggerDelayCount(0),
@@ -785,7 +685,7 @@ private:
         Real m_sumPow;            //!< Cumulative power over the current trace for MagDB overlay display
         int m_nbPow;              //!< Number of power samples over the current trace for MagDB overlay display
 
-        TraceControl() : m_projector(ProjectionReal)
+        TraceControl() : m_projector(Projector::ProjectionReal)
         {
             reset();
         }
@@ -794,7 +694,7 @@ private:
         {
         }
 
-        void initProjector(ProjectionType projectionType)
+        void initProjector(Projector::ProjectionType projectionType)
         {
             m_projector.settProjectionType(projectionType);
         }
@@ -967,9 +867,9 @@ private:
 
             bool condition, trigger;
 
-            if (triggerCondition.m_projector.getProjectionType() == ProjectionMagDB) {
+            if (triggerCondition.m_projector.getProjectionType() == Projector::ProjectionMagDB) {
                 condition = triggerCondition.m_projector.run(s) > m_levelPowerDB;
-            } else if (triggerCondition.m_projector.getProjectionType() == ProjectionMagLin) {
+            } else if (triggerCondition.m_projector.getProjectionType() == Projector::ProjectionMagLin) {
                 condition = triggerCondition.m_projector.run(s) > m_levelPowerLin;
             } else {
                 condition = triggerCondition.m_projector.run(s) > m_level;
@@ -1040,7 +940,7 @@ private:
     int m_maxTraceDelay;                           //!< Maximum trace delay
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
     QMutex m_mutex;
-    Real m_projectorCache[(int) nbProjectionTypes];
+    Real m_projectorCache[(int) Projector::nbProjectionTypes];
     bool m_triggerOneShot;                         //!< True when one shot mode is active
     bool m_triggerWaitForReset;                    //!< In one shot mode suspended until reset by UI
     uint32_t m_currentTraceMemoryIndex;            //!< The current index of trace in memory (0: current)

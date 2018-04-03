@@ -1868,22 +1868,22 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 
     switch (traceData.m_projectionType)
     {
-    case ScopeVisNG::ProjectionMagDB: // dB scale
+    case Projector::ProjectionMagDB: // dB scale
         scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
         break;
-    case ScopeVisNG::ProjectionMagLin:
+    case Projector::ProjectionMagLin:
         if (amp_range < 2.0) {
             scale.setRange(Unit::None, amp_ofs * 1000.0, amp_range * 1000.0 + amp_ofs * 1000.0);
         } else {
             scale.setRange(Unit::None, amp_ofs, amp_range + amp_ofs);
         }
         break;
-    case ScopeVisNG::ProjectionPhase: // Phase or frequency
-    case ScopeVisNG::ProjectionDPhase:
+    case Projector::ProjectionPhase: // Phase or frequency
+    case Projector::ProjectionDPhase:
         scale.setRange(Unit::None, -1.0/traceData.m_amp + amp_ofs, 1.0/traceData.m_amp + amp_ofs);
         break;
-    case ScopeVisNG::ProjectionReal: // Linear generic
-    case ScopeVisNG::ProjectionImag:
+    case Projector::ProjectionReal: // Linear generic
+    case Projector::ProjectionImag:
     default:
         if (amp_range < 2.0) {
             scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);

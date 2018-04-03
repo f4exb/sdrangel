@@ -62,7 +62,7 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
     setObjectName("ScopeVisNG");
     m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
     m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
-    for (int i = 0; i < (int) nbProjectionTypes; i++) {
+    for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
     }
 }
@@ -449,18 +449,18 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                 continue;
             }
 
-            ProjectionType projectionType = itData->m_projectionType;
+            Projector::ProjectionType projectionType = itData->m_projectionType;
 
             if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
                 uint32_t& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
 
-                if (projectionType == ProjectionMagLin)
+                if (projectionType == Projector::ProjectionMagLin)
                 {
                     v = (itCtl->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
                 }
-                else if (projectionType == ProjectionMagDB)
+                else if (projectionType == Projector::ProjectionMagDB)
                 {
                    // there is no processing advantage in direct calculation without projector
 //                    uint32_t magsq = begin->m_real*begin->m_real + begin->m_imag*begin->m_imag;
@@ -786,8 +786,8 @@ void ScopeVisNG::updateMaxTraceDelay()
 {
     int maxTraceDelay = 0;
     bool allocateCache = false;
-    uint32_t projectorCounts[(int) nbProjectionTypes];
-    memset(projectorCounts, 0, ((int) nbProjectionTypes)*sizeof(uint32_t));
+    uint32_t projectorCounts[(int) Projector::nbProjectionTypes];
+    memset(projectorCounts, 0, ((int) Projector::nbProjectionTypes)*sizeof(uint32_t));
     std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
     std::vector<TraceControl>::iterator itCtrl = m_traces.m_tracesControl.begin();
 
@@ -799,7 +799,7 @@ void ScopeVisNG::updateMaxTraceDelay()
         }
 
         if (itData->m_projectionType < 0) {
-            itData->m_projectionType = ProjectionReal;
+            itData->m_projectionType = Projector::ProjectionReal;
         }
 
         if (projectorCounts[(int) itData->m_projectionType] > 0)
@@ -861,11 +861,11 @@ void ScopeVisNG::computeDisplayTriggerLevels()
             float levelPowerdB = (100.0f * (level - 1.0f));
             float v;
 
-            if (itData->m_projectionType == ProjectionMagLin)
+            if (itData->m_projectionType == Projector::ProjectionMagLin)
             {
                 v = (levelPowerLin - itData->m_ofs)*itData->m_amp - 1.0f;
             }
-            else if (itData->m_projectionType == ProjectionMagDB)
+            else if (itData->m_projectionType == Projector::ProjectionMagDB)
             {
                 float ofsdB = itData->m_ofs * 100.0f;
                 v = ((levelPowerdB + 100.0f - ofsdB)*itData->m_amp)/50.0f - 1.0f;
