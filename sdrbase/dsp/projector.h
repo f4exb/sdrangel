@@ -17,6 +17,8 @@
 
 #include "dsptypes.h"
 
+class SymbolSynchronizer;
+
 class Projector
 {
 public:
@@ -47,4 +49,5 @@ private:
     Real m_prevArg;
     Real *m_cache;
     bool m_cacheMaster;
+    SymbolSynchronizer *m_symSync;
 };

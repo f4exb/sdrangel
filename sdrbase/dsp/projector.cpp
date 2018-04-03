@@ -23,10 +23,14 @@ Projector::Projector(ProjectionType projectionType) :
     m_prevArg(0.0f),
     m_cache(0),
     m_cacheMaster(true)
-{}
+{
+    m_symSync = new SymbolSynchronizer();
+}
 
 Projector::~Projector()
-{}
+{
+    delete m_symSync;
+}
 
 Real Projector::run(const Sample& s)
 {
@@ -75,6 +79,9 @@ Real Projector::run(const Sample& s)
 
             v = dPhi;
         }
+            break;
+        case ProjectionClock:
+            v = m_symSync->run(s);
             break;
         case ProjectionReal:
         default:
