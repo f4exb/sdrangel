@@ -69,6 +69,9 @@ ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
 
 ScopeVisNG::~ScopeVisNG()
 {
+    for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
+        delete *it;
+    }
 }
 
 void ScopeVisNG::setSampleRate(int sampleRate)
@@ -267,15 +270,15 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
     {
         if ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay))
         {
-            TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+            TriggerCondition* triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
 
             while (begin < end)
             {
                 if (m_triggerState == TriggerDelay)
                 {
-                    if (triggerCondition.m_triggerDelayCount > 0) // skip samples during delay period
+                    if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
                     {
-                        triggerCondition.m_triggerDelayCount--;
+                        triggerCondition->m_triggerDelayCount--;
                         ++begin;
                         continue;
                     }
@@ -301,11 +304,11 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
                 }
 
                 // look for trigger
-                if (m_triggerComparator.triggered(*begin, triggerCondition))
+                if (m_triggerComparator.triggered(*begin, *triggerCondition))
                 {
-                    if (triggerCondition.m_triggerData.m_triggerDelay > 0)
+                    if (triggerCondition->m_triggerData.m_triggerDelay > 0)
                     {
-                        triggerCondition.m_triggerDelayCount = triggerCondition.m_triggerData.m_triggerDelay; // initialize delayed samples counter
+                        triggerCondition->m_triggerDelayCount = triggerCondition->m_triggerData.m_triggerDelay; // initialize delayed samples counter
                         m_triggerState = TriggerDelay;
                         ++begin;
                         continue;
@@ -398,18 +401,18 @@ void ScopeVisNG::processTrace(const SampleVector::const_iterator& cbegin, const 
 
 bool ScopeVisNG::nextTrigger()
 {
-    TriggerCondition& triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+    TriggerCondition *triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
 
-    if (triggerCondition.m_triggerData.m_triggerRepeat > 0)
+    if (triggerCondition->m_triggerData.m_triggerRepeat > 0)
     {
-        if (triggerCondition.m_triggerCounter < triggerCondition.m_triggerData.m_triggerRepeat)
+        if (triggerCondition->m_triggerCounter < triggerCondition->m_triggerData.m_triggerRepeat)
         {
-            triggerCondition.m_triggerCounter++;
+            triggerCondition->m_triggerCounter++;
             return true; // not final keep going
         }
         else
         {
-            triggerCondition.m_triggerCounter = 0; // reset for next time
+            triggerCondition->m_triggerCounter = 0; // reset for next time
         }
     }
 
@@ -623,8 +626,8 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
-        m_triggerConditions.push_back(TriggerCondition(conf.getTriggerData()));
-        m_triggerConditions.back().initProjector();
+        m_triggerConditions.push_back(new TriggerCondition(conf.getTriggerData()));
+        m_triggerConditions.back()->initProjector();
         return true;
     }
     else if (MsgScopeVisNGChangeTrigger::match(message))
@@ -635,12 +638,12 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         if (triggerIndex < m_triggerConditions.size())
         {
-            m_triggerConditions[triggerIndex].setData(conf.getTriggerData());
+            m_triggerConditions[triggerIndex]->setData(conf.getTriggerData());
 
             if (triggerIndex == m_focusedTriggerIndex)
             {
                 computeDisplayTriggerLevels();
-                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
+                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
                 updateGLScopeDisplay();
             }
         }
@@ -653,8 +656,11 @@ bool ScopeVisNG::handleMessage(const Message& message)
         MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
 
-        if (triggerIndex < m_triggerConditions.size()) {
+        if (triggerIndex < m_triggerConditions.size())
+        {
+            TriggerCondition *triggerCondition = m_triggerConditions[triggerIndex];
             m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
+            delete triggerCondition;
         }
 
         return true;
@@ -671,12 +677,12 @@ bool ScopeVisNG::handleMessage(const Message& message)
 
         int nextTriggerIndex = (triggerIndex + (conf.getMoveUp() ? 1 : -1)) % m_triggerConditions.size();
 
-        TriggerCondition nextTrigger = m_triggerConditions[nextTriggerIndex];
+        TriggerCondition *nextTrigger = m_triggerConditions[nextTriggerIndex];
         m_triggerConditions[nextTriggerIndex] = m_triggerConditions[triggerIndex];
         m_triggerConditions[triggerIndex] = nextTrigger;
 
         computeDisplayTriggerLevels();
-        m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
+        m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
         updateGLScopeDisplay();
 
         return true;
@@ -690,7 +696,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         {
             m_focusedTriggerIndex = triggerIndex;
             computeDisplayTriggerLevels();
-            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex].m_triggerData);
+            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
             updateGLScopeDisplay();
         }
 
@@ -854,9 +860,9 @@ void ScopeVisNG::computeDisplayTriggerLevels()
 
     for (; itData != m_traces.m_tracesData.end(); ++itData)
     {
-        if ((m_focusedTriggerIndex < m_triggerConditions.size()) && (m_triggerConditions[m_focusedTriggerIndex].m_projector.getProjectionType() == itData->m_projectionType))
+        if ((m_focusedTriggerIndex < m_triggerConditions.size()) && (m_triggerConditions[m_focusedTriggerIndex]->m_projector.getProjectionType() == itData->m_projectionType))
         {
-            float level = m_triggerConditions[m_focusedTriggerIndex].m_triggerData.m_triggerLevel;
+            float level = m_triggerConditions[m_focusedTriggerIndex]->m_triggerData.m_triggerLevel;
             float levelPowerLin = level + 1.0f;
             float levelPowerdB = (100.0f * (level - 1.0f));
             float v;

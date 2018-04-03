@@ -169,7 +169,7 @@ public:
     {
         if (triggerIndex < m_triggerConditions.size())
         {
-            triggerData = m_triggerConditions[triggerIndex].m_triggerData;
+            triggerData = m_triggerConditions[triggerIndex]->m_triggerData;
         }
     }
 
@@ -181,7 +181,7 @@ public:
         }
     }
 
-    const TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex].m_triggerData; }
+    const TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
     const std::vector<TraceData>& getTracesData() const { return m_traces.m_tracesData; }
     uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
 
@@ -529,12 +529,10 @@ private:
             m_triggerDelayCount(0),
             m_triggerCounter(0)
         {
-            qDebug("TriggerCondition");
         }
 
         ~TriggerCondition()
         {
-            qDebug("~TriggerCondition");
         }
 
         void initProjector()
@@ -689,13 +687,11 @@ private:
 
         TraceControl() : m_projector(Projector::ProjectionReal)
         {
-            qDebug("TraceControl::TraceControl");
             reset();
         }
 
         ~TraceControl()
         {
-            qDebug("TraceControl::~TraceControl");
         }
 
         void initProjector(Projector::ProjectionType projectionType)
@@ -737,8 +733,18 @@ private:
 
         ~Traces()
         {
-            if (m_x0) delete[] m_x0;
-            if (m_x1) delete[] m_x1;
+            for (std::vector<TraceControl*>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it) {
+                delete *it;
+            }
+
+            if (m_x0) {
+                delete[] m_x0;
+            }
+
+            if (m_x1) {
+                delete[] m_x1;
+            }
+
             m_maxTraceSize = 0;
         }
 
@@ -937,7 +943,7 @@ private:
 
     GLScopeNG* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
-    std::vector<TriggerCondition> m_triggerConditions; //!< Chain of triggers
+    std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers
     uint32_t m_currentTriggerIndex;                //!< Index of current index in the chain
     uint32_t m_focusedTriggerIndex;                //!< Index of the trigger that has focus
     TriggerState m_triggerState;                   //!< Current trigger state
