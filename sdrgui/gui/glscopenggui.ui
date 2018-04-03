@@ -646,16 +646,7 @@ kS/s</string>
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -720,32 +711,7 @@ kS/s</string>
        </property>
        <item>
         <property name="text">
-         <string>Real</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Imag</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Mag</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MagdB</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Phi</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>dPhi</string>
+         <string>TBD</string>
         </property>
        </item>
       </widget>
@@ -962,16 +928,7 @@ kS/s</string>
        <property name="spacing">
         <number>2</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -1296,16 +1253,7 @@ kS/s</string>
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -1370,32 +1318,7 @@ kS/s</string>
        </property>
        <item>
         <property name="text">
-         <string>Real</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Imag</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Mag</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MagdB</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Phi</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>dPhi</string>
+         <string>TBD</string>
         </property>
        </item>
       </widget>
@@ -1608,16 +1531,7 @@ kS/s</string>
        <property name="spacing">
         <number>2</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
