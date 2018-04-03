@@ -529,10 +529,12 @@ private:
             m_triggerDelayCount(0),
             m_triggerCounter(0)
         {
+            qDebug("TriggerCondition");
         }
 
         ~TriggerCondition()
         {
+            qDebug("~TriggerCondition");
         }
 
         void initProjector()
@@ -687,11 +689,13 @@ private:
 
         TraceControl() : m_projector(Projector::ProjectionReal)
         {
+            qDebug("TraceControl::TraceControl");
             reset();
         }
 
         ~TraceControl()
         {
+            qDebug("TraceControl::~TraceControl");
         }
 
         void initProjector(Projector::ProjectionType projectionType)
@@ -715,7 +719,7 @@ private:
 
     struct Traces
     {
-        std::vector<TraceControl> m_tracesControl;    //!< Corresponding traces control data
+        std::vector<TraceControl*> m_tracesControl;   //!< Corresponding traces control data
         std::vector<TraceData> m_tracesData;          //!< Corresponding traces data
         std::vector<float *> m_traces[2];             //!< Double buffer of traces processed by glScope
         int m_traceSize;                              //!< Current size of a trace in buffer
@@ -750,11 +754,13 @@ private:
         {
             if (m_traces[0].size() < m_maxNbTraces)
             {
+                qDebug("ScopeVisNG::addTrace");
                 m_traces[0].push_back(0);
                 m_traces[1].push_back(0);
                 m_tracesData.push_back(traceData);
-                m_tracesControl.push_back(TraceControl());
-                m_tracesControl.back().initProjector(traceData.m_projectionType);
+                m_tracesControl.push_back(new TraceControl());
+                TraceControl *traceControl = m_tracesControl.back();
+                traceControl->initProjector(traceData.m_projectionType);
 
                 resize(traceSize);
             }
@@ -763,8 +769,9 @@ private:
         void changeTrace(const TraceData& traceData, uint32_t traceIndex)
         {
             if (traceIndex < m_tracesControl.size()) {
-                m_tracesControl[traceIndex].releaseProjector();
-                m_tracesControl[traceIndex].initProjector(traceData.m_projectionType);
+                TraceControl *traceControl = m_tracesControl[traceIndex];
+                traceControl->releaseProjector();
+                traceControl->initProjector(traceData.m_projectionType);
                 m_tracesData[traceIndex] = traceData;
             }
         }
@@ -773,11 +780,14 @@ private:
         {
             if (traceIndex < m_tracesControl.size())
             {
+                qDebug("ScopeVisNG::removeTrace");
                 m_traces[0].erase(m_traces[0].begin() + traceIndex);
                 m_traces[1].erase(m_traces[1].begin() + traceIndex);
-            	m_tracesControl[traceIndex].releaseProjector();
+                TraceControl *traceControl = m_tracesControl[traceIndex];
+                traceControl->releaseProjector();
                 m_tracesControl.erase(m_tracesControl.begin() + traceIndex);
                 m_tracesData.erase(m_tracesData.begin() + traceIndex);
+                delete traceControl;
 
                 resize(m_traceSize); // reallocate pointers
             }
@@ -792,19 +802,24 @@ private:
             int nextControlIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesControl.size());
             int nextDataIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesData.size()); // should be the same
 
-            m_tracesControl[traceIndex].releaseProjector();
-            m_tracesControl[nextControlIndex].releaseProjector();
+            TraceControl *traceControl = m_tracesControl[traceIndex];
+            TraceControl *nextTraceControl = m_tracesControl[nextControlIndex];
 
-            TraceControl nextControl = m_tracesControl[nextControlIndex];
-            m_tracesControl[nextControlIndex] = m_tracesControl[traceIndex];
-            m_tracesControl[traceIndex] = nextControl;
+            traceControl->releaseProjector();
+            nextTraceControl->releaseProjector();
+
+            m_tracesControl[nextControlIndex] = traceControl;
+            m_tracesControl[traceIndex] = nextTraceControl;
 
             TraceData nextData = m_tracesData[nextDataIndex];
             m_tracesData[nextDataIndex] = m_tracesData[traceIndex];
             m_tracesData[traceIndex] = nextData;
 
-            m_tracesControl[traceIndex].initProjector(m_tracesData[traceIndex].m_projectionType);
-            m_tracesControl[nextControlIndex].initProjector(m_tracesData[nextDataIndex].m_projectionType);
+            traceControl = m_tracesControl[traceIndex];
+            nextTraceControl = m_tracesControl[nextControlIndex];
+
+            traceControl->initProjector(m_tracesData[traceIndex].m_projectionType);
+            nextTraceControl->initProjector(m_tracesData[nextDataIndex].m_projectionType);
         }
 
         void resize(int traceSize)
@@ -838,9 +853,9 @@ private:
         {
             evenOddIndex = !evenOddIndex;
 
-            for (std::vector<TraceControl>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it)
+            for (std::vector<TraceControl*>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it)
             {
-                it->m_traceCount[currentBufferIndex()] = 0;
+                (*it)->m_traceCount[currentBufferIndex()] = 0;
             }
         }
 

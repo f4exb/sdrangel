@@ -439,7 +439,7 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 
     while ((begin < end) && (m_nbSamples > 0))
     {
-        std::vector<TraceControl>::iterator itCtl = m_traces.m_tracesControl.begin();
+        std::vector<TraceControl*>::iterator itCtl = m_traces.m_tracesControl.begin();
         std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
         std::vector<float *>::iterator itTrace = m_traces.m_traces[m_traces.currentBufferIndex()].begin();
 
@@ -451,21 +451,21 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
 
             Projector::ProjectionType projectionType = itData->m_projectionType;
 
-            if (itCtl->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
+            if ((*itCtl)->m_traceCount[m_traces.currentBufferIndex()] < m_traceSize)
             {
-                uint32_t& traceCount = itCtl->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
+                uint32_t& traceCount = (*itCtl)->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
 
                 if (projectionType == Projector::ProjectionMagLin)
                 {
-                    v = (itCtl->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
+                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
                 }
                 else if (projectionType == Projector::ProjectionMagDB)
                 {
                    // there is no processing advantage in direct calculation without projector
 //                    uint32_t magsq = begin->m_real*begin->m_real + begin->m_imag*begin->m_imag;
 //                    v = ((log10f(magsq/1073741824.0f)*0.2f - 2.0f*itData->m_ofs) + 2.0f)*itData->m_amp - 1.0f;
-                    float pdB = itCtl->m_projector.run(*begin);
+                    float pdB = (*itCtl)->m_projector.run(*begin);
                     float p = pdB - (100.0f * itData->m_ofs);
                     v = ((p/50.0f) + 2.0f)*itData->m_amp - 1.0f;
 
@@ -473,34 +473,34 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                     {
                         if (traceCount == shift)
                         {
-                            itCtl->m_maxPow = -200.0f;
-                            itCtl->m_sumPow = 0.0f;
-                            itCtl->m_nbPow = 1;
+                            (*itCtl)->m_maxPow = -200.0f;
+                            (*itCtl)->m_sumPow = 0.0f;
+                            (*itCtl)->m_nbPow = 1;
                         }
 
                         if (pdB > -200.0f)
                         {
-                            if (pdB > itCtl->m_maxPow)
+                            if (pdB > (*itCtl)->m_maxPow)
                             {
-                                itCtl->m_maxPow = pdB;
+                                (*itCtl)->m_maxPow = pdB;
                             }
 
-                            itCtl->m_sumPow += pdB;
-                            itCtl->m_nbPow++;
+                            (*itCtl)->m_sumPow += pdB;
+                            (*itCtl)->m_nbPow++;
                         }
                     }
 
-                    if ((m_nbSamples == 1) && (itCtl->m_nbPow > 0)) // on last sample create power display overlay
+                    if ((m_nbSamples == 1) && ((*itCtl)->m_nbPow > 0)) // on last sample create power display overlay
                     {
-                        double avgPow = itCtl->m_sumPow / itCtl->m_nbPow;
-                        double peakToAvgPow = itCtl->m_maxPow - avgPow;
-                        itData->m_textOverlay = QString("%1  %2  %3").arg(itCtl->m_maxPow, 0, 'f', 1).arg(avgPow, 0, 'f', 1).arg(peakToAvgPow, 4, 'f', 1, ' ');
-                        itCtl->m_nbPow = 0;
+                        double avgPow = (*itCtl)->m_sumPow / (*itCtl)->m_nbPow;
+                        double peakToAvgPow = (*itCtl)->m_maxPow - avgPow;
+                        itData->m_textOverlay = QString("%1  %2  %3").arg((*itCtl)->m_maxPow, 0, 'f', 1).arg(avgPow, 0, 'f', 1).arg(peakToAvgPow, 4, 'f', 1, ' ');
+                        (*itCtl)->m_nbPow = 0;
                     }
                 }
                 else
                 {
-                    v = (itCtl->m_projector.run(*begin) - itData->m_ofs) * itData->m_amp;
+                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs) * itData->m_amp;
                 }
 
                 if(v > 1.0f) {
@@ -789,7 +789,7 @@ void ScopeVisNG::updateMaxTraceDelay()
     uint32_t projectorCounts[(int) Projector::nbProjectionTypes];
     memset(projectorCounts, 0, ((int) Projector::nbProjectionTypes)*sizeof(uint32_t));
     std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
-    std::vector<TraceControl>::iterator itCtrl = m_traces.m_tracesControl.begin();
+    std::vector<TraceControl*>::iterator itCtrl = m_traces.m_tracesControl.begin();
 
     for (; itData != m_traces.m_tracesData.end(); ++itData, ++itCtrl)
     {
@@ -805,11 +805,11 @@ void ScopeVisNG::updateMaxTraceDelay()
         if (projectorCounts[(int) itData->m_projectionType] > 0)
         {
             allocateCache = true;
-            itCtrl->m_projector.setCacheMaster(false);
+            (*itCtrl)->m_projector.setCacheMaster(false);
         }
         else
         {
-            itCtrl->m_projector.setCacheMaster(true);
+            (*itCtrl)->m_projector.setCacheMaster(true);
         }
 
         projectorCounts[(int) itData->m_projectionType]++;
@@ -820,9 +820,9 @@ void ScopeVisNG::updateMaxTraceDelay()
     for (; itCtrl != m_traces.m_tracesControl.end(); ++itCtrl)
     {
         if (allocateCache) {
-            itCtrl->m_projector.setCache(m_projectorCache);
+            (*itCtrl)->m_projector.setCache(m_projectorCache);
         } else {
-            itCtrl->m_projector.setCache(0);
+            (*itCtrl)->m_projector.setCache(0);
         }
     }
 
