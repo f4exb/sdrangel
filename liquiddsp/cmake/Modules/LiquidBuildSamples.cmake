@@ -1,0 +1,12 @@
+function(LIQUID_BUILD_SAMPLES)
+    cmake_parse_arguments(LBS "" "SUITE" "SAMPLES" ${ARGN})
+    if (NOT DEFINED LBS_SUITE)
+        message(FATAL_ERROR "Need to specify SUITE <name>")
+    endif ()
+    foreach(_sample IN ITEMS ${LBS_SAMPLES})
+        add_executable("${LBS_SUITE}_${_sample}" "${_sample}.c")
+        target_link_libraries("${LBS_SUITE}_${_sample}" ${LIQUID_LIBRARY})
+        set_property(TARGET "${LBS_SUITE}_${_sample}" PROPERTY OUTPUT_NAME "${_sample}")
+    endforeach()
+endfunction() 
+
