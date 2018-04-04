@@ -28,9 +28,11 @@ public:
     ~SymbolSynchronizer();
 
     Real run(const Sample& s);
+    liquid_float_complex runZ(const Sample& s);
 
 private:
     symsync_crcf m_sync;
     liquid_float_complex m_z[4+4]; // 4 samples per symbol. One symbol plus extra space
+    liquid_float_complex m_z0;
     int m_syncSampleCount;
 };

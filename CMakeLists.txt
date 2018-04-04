@@ -218,7 +218,6 @@ add_subdirectory(httpserver)
 add_subdirectory(logging)
 add_subdirectory(qrtplib)
 add_subdirectory(swagger)
-add_subdirectory(liquiddsp)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}

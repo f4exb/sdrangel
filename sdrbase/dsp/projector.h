@@ -17,8 +17,6 @@
 
 #include "dsptypes.h"
 
-class SymbolSynchronizer;
-
 class Projector
 {
 public:
@@ -30,7 +28,6 @@ public:
         ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
         ProjectionPhase,    //!< Calculate phase
         ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
-        ProjectionClock,    //!< Clock projection (symbol synchronization)
 		nbProjectionTypes   //!< Gives the number of projections in the enum
     };
 
@@ -49,5 +46,4 @@ private:
     Real m_prevArg;
     Real *m_cache;
     bool m_cacheMaster;
-    SymbolSynchronizer *m_symSync;
 };

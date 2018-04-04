@@ -24,12 +24,12 @@ SymbolSynchronizer::SymbolSynchronizer()
     // For now use hardcoded values:
     //   - RRC filter
     //   - 4 samples per symbol
-    //   - 5 sybols delay filter
+    //   - 5 symbols delay filter
     //   - 0.5 filter excess bandwidth factor
     //   - 32 filter elements for the internal polyphase filter
     m_sync = symsync_crcf_create_rnyquist(LIQUID_FIRFILT_RRC, 4, 5, 0.5f, 32);
     //   - 0.02 loop filter bandwidth factor
-    symsync_crcf_set_lf_bw(m_sync, 0.02f);
+    symsync_crcf_set_lf_bw(m_sync, 0.01f);
     //   - 4 samples per symbol output rate
     symsync_crcf_set_output_rate(m_sync, 4);
     m_syncSampleCount = 0;
@@ -43,20 +43,53 @@ SymbolSynchronizer::~SymbolSynchronizer()
 Real SymbolSynchronizer::run(const Sample& s)
 {
     unsigned int nn;
-    Real v = 0.0f;
+    Real v = -1.0f;
     liquid_float_complex y = (s.m_real / SDR_RX_SCALEF) + (s.m_imag / SDR_RX_SCALEF)*I;
     symsync_crcf_execute(m_sync, &y, 1, m_z, &nn);
 
     for (unsigned int i = 0; i < nn; i++)
     {
-        v = (m_syncSampleCount < 2) ? 1.0f : 0.0f; // actual sync is at 0
+        if (nn != 1) {
+            qDebug("SymbolSynchronizer::run: %u", nn);
+        }
 
-        if (m_syncSampleCount < 4) {
+        if (m_syncSampleCount % 4 == 0) {
+            v = 1.0f;
+        }
+
+        if (m_syncSampleCount < 4095) {
+            m_syncSampleCount++;
+        } else {
+            qDebug("SymbolSynchronizer::run: tau: %f", symsync_crcf_get_tau(m_sync));
+            m_syncSampleCount = 0;
+        }
+    }
+
+    return v;
+}
+
+liquid_float_complex SymbolSynchronizer::runZ(const Sample& s)
+{
+    unsigned int nn;
+    liquid_float_complex y = (s.m_real / SDR_RX_SCALEF) + (s.m_imag / SDR_RX_SCALEF)*I;
+    symsync_crcf_execute(m_sync, &y, 1, m_z, &nn);
+
+    for (unsigned int i = 0; i < nn; i++)
+    {
+        if (nn != 1) {
+            qDebug("SymbolSynchronizer::run: %u", nn);
+        }
+
+        if (m_syncSampleCount == 0) {
+            m_z0 = m_z[i];
+        }
+
+        if (m_syncSampleCount < 3) {
             m_syncSampleCount++;
         } else {
             m_syncSampleCount = 0;
         }
     }
 
-    return v;
+    return m_z0;
 }

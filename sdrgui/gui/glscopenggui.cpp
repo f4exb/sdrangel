@@ -1152,7 +1152,6 @@ void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)
     comboBox->addItem("MagdB", Projector::ProjectionMagDB);
     comboBox->addItem("Phi", Projector::ProjectionPhase);
     comboBox->addItem("dPhi", Projector::ProjectionDPhase);
-    comboBox->addItem("Clk", Projector::ProjectionClock);
 }
 
 void GLScopeNGGUI::disableLiveMode(bool disable)
