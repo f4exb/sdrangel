@@ -84,28 +84,28 @@ RTPSession::~RTPSession()
         delete rtprnd;
 }
 
-int RTPSession::Create(const RTPSessionParams &sessparams, const RTPTransmissionParams *transparams /* = 0 */, RTPTransmitter::TransmissionProtocol protocol)
-{
-    int status;
-
-    if (created)
-        return ERR_RTP_SESSION_ALREADYCREATED;
-
-    usingpollthread = sessparams.IsUsingPollThread();
-
-    useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
-    sentpackets = false;
-
-    // Check max packet size
-
-    if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
-        return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
-
-    // Initialize the transmission component
-
-    rtptrans = 0;
-    switch (protocol)
-    {
+//int RTPSession::Create(const RTPSessionParams &sessparams, const RTPTransmissionParams *transparams /* = 0 */, RTPTransmitter::TransmissionProtocol protocol)
+//{
+//    int status;
+//
+//    if (created)
+//        return ERR_RTP_SESSION_ALREADYCREATED;
+//
+//    usingpollthread = sessparams.IsUsingPollThread();
+//
+//    useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
+//    sentpackets = false;
+//
+//    // Check max packet size
+//
+//    if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
+//        return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
+//
+//    // Initialize the transmission component
+//
+//    rtptrans = 0;
+//    switch (protocol)
+//    {
     // TODO: see if we keep this Create method or use the one with the transmitter specified
 //    case RTPTransmitter::IPv4UDPProto:
 //        rtptrans = new RTPUDPv4Transmitter();
@@ -121,26 +121,27 @@ int RTPSession::Create(const RTPSessionParams &sessparams, const RTPTransmission
 //    case RTPTransmitter::TCPProto:
 //        rtptrans = new RTPTCPTransmitter();
 //        break;
-    default:
-        return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
-    }
 
-    if (rtptrans == 0)
-        return ERR_RTP_OUTOFMEM;
-    if ((status = rtptrans->Init()) < 0)
-    {
-        delete rtptrans;
-        return status;
-    }
-    if ((status = rtptrans->Create(maxpacksize, transparams)) < 0)
-    {
-        delete rtptrans;
-        return status;
-    }
-
-    deletetransmitter = true;
-    return InternalCreate(sessparams);
-}
+//      default:
+//        return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
+//    }
+//
+//    if (rtptrans == 0)
+//        return ERR_RTP_OUTOFMEM;
+//    if ((status = rtptrans->Init()) < 0)
+//    {
+//        delete rtptrans;
+//        return status;
+//    }
+//    if ((status = rtptrans->Create(maxpacksize, transparams)) < 0)
+//    {
+//        delete rtptrans;
+//        return status;
+//    }
+//
+//    deletetransmitter = true;
+//    return InternalCreate(sessparams);
+//}
 
 int RTPSession::Create(const RTPSessionParams &sessparams, RTPTransmitter *transmitter)
 {

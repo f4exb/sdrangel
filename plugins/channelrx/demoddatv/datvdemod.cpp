@@ -765,7 +765,6 @@ void DATVDemod::InitDATVFramework()
 
 void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
-    qint16 * ptrBufferToRelease=NULL;
     float fltI;
     float fltQ;
     leansdr::cf32 objIQ;
@@ -859,18 +858,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
             }
 
         }
-
-        //********** demodulation **********
-
     }
-
-    if(ptrBufferToRelease!=NULL)
-    {
-        delete ptrBufferToRelease;
-    }
-
-
-
 }
 
 void DATVDemod::start()

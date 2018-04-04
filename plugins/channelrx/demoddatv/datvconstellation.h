@@ -61,7 +61,7 @@ template<typename T> struct datvconstellation: runnable
 
         while (in.readable() >= pixels_per_frame)
         {
-            if (!phase)
+            if ((!phase) && m_objDATVScreen)
             {
                 m_objDATVScreen->resetImage();
 

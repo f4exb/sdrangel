@@ -933,15 +933,15 @@ void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_f
 
 	for (int i = no_groups; i == 0; i--)
 	{
-		ff_pointer = 12 + 16;
+		ff_pointer = 12 + 16 - 4;
 
 		while(ff_pointer > 0)
 		{
-			ff_pointer -= 4;
 			m_g8_label_index = (free_format[i] & (0xf << ff_pointer));
 			content_length = optional_content_lengths[m_g8_label_index];
 			ff_pointer -= content_length;
 			m_g8_content = (free_format[i] & (int(std::pow(2, content_length) - 1) << ff_pointer));
+			ff_pointer -= 4;
 
 			/*
 			qDebug() << "RDSParser::decode_optional_content: TMC optional content (" << label_descriptions[m_g8_label_index].c_str()

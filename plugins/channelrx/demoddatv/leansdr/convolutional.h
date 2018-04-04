@@ -137,10 +137,10 @@ struct deconvol_poly2
 	  ++pin;						   \
 	}
             // Don't shift by more than the operand width
-            switch (sizeof(Thist) * 8)
+            switch (sizeof(Thist) /* 8*/)
             {
 #if 0  // Not needed yet - avoid compiler warnings
-            case 64:
+            case 8:
             LOOP(63); LOOP(62); LOOP(61); LOOP(60);
             LOOP(59); LOOP(58); LOOP(57); LOOP(56);
             LOOP(55); LOOP(54); LOOP(53); LOOP(52);
@@ -151,7 +151,7 @@ struct deconvol_poly2
             LOOP(35); LOOP(34); LOOP(33); LOOP(32);
             // Fall-through
 #endif
-            case 32:
+            case 4:
                 LOOP(31)
                 ;
                 LOOP(30)
@@ -185,7 +185,7 @@ struct deconvol_poly2
                 LOOP(16)
                 ;
                 // Fall-through
-            case 16:
+            case 2:
                 LOOP(15)
                 ;
                 LOOP(14)
@@ -203,7 +203,7 @@ struct deconvol_poly2
                 LOOP(8)
                 ;
                 // Fall-through
-            case 8:
+            case 1:
                 LOOP(7)
                 ;
                 LOOP(6)
@@ -227,24 +227,24 @@ struct deconvol_poly2
             }
 #undef LOOP
 #endif
-            switch (sizeof(Thist) * 8)
+            switch (sizeof(Thist) /* 8*/)
             {
 #if 0  // Not needed yet - avoid compiler warnings
-            case 64:
+            case 8:
             *pout++ = wd >> 56;
             *pout++ = wd >> 48;
             *pout++ = wd >> 40;
             *pout++ = wd >> 32;
             // Fall-through
 #endif
-            case 32:
+            case 4:
                 *pout++ = wd >> 24;
                 *pout++ = wd >> 16;
                 // Fall-through
-            case 16:
+            case 2:
                 *pout++ = wd >> 8;
                 // Fall-through
-            case 8:
+            case 1:
                 *pout++ = wd;
                 break;
             default:

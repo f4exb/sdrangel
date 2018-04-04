@@ -388,16 +388,19 @@ toJsonValue(QString name, void* value, QJsonObject* output, QString type) {
         SWGObject *SWGobject = reinterpret_cast<SWGObject *>(value);
         if(SWGobject != nullptr) {
             QJsonObject* o = (*SWGobject).asJsonObject();
-            if(name != nullptr) {
-                output->insert(name, *o);
-                if(o != nullptr) delete o;
-            }
-            else {
-                output->empty();
-                for(QString key : o->keys()) {
-                    output->insert(key, o->value(key));
-                }
-            }
+            if (o != nullptr)
+            {
+	            if(name != nullptr) {
+	                output->insert(name, *o);
+	                if(o != nullptr) delete o;
+	            }
+	            else {
+	                output->empty();
+	                for(QString key : o->keys()) {
+	                    output->insert(key, o->value(key));
+	                }
+	            }
+	        }
         }
     }
     else if(QStringLiteral("QString").compare(type) == 0) {

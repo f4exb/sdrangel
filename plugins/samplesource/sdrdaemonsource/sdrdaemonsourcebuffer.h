@@ -46,12 +46,12 @@ public:
 
         bool operator==(const MetaDataFEC& rhs)
         {
-            return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
+            return (memcmp((const char *) this, (const char *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
         }
 
         void init()
         {
-            memset((void *) this, 0, sizeof(MetaDataFEC));
+            memset((char *) this, 0, sizeof(MetaDataFEC));
         }
     };
 

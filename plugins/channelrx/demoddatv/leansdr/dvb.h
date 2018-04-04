@@ -106,8 +106,8 @@ inline cstln_lut<256> * make_dvbs2_constellation(cstln_lut<256>::predef c,
 }
 
 // EN 300 421, section 4.4.3, table 2 Punctured code, G1=0171, G2=0133
-static const int DVBS_G1 = 0171;
-static const int DVBS_G2 = 0133;
+static const int DVBS_G1 = 121;
+static const int DVBS_G2 = 91;
 
 //  G1 = 0b1111001
 //  G2 = 0b1011011
@@ -1286,7 +1286,7 @@ struct randomizer: runnable
     {
         // EN 300 421, section 4.4.1 Transport multiplex adaptation
         pattern[0] = 0xff;  // Invert one in eight sync bytes
-        unsigned short st = 000251;  // 0b 000 000 010 101 001 (Fig 2 reversed)
+        unsigned short st = 169;  // 0b 000 000 010 101 001 (Fig 2 reversed)
         for (int i = 1; i < 188 * 8; ++i)
         {
             u8 out = 0;
@@ -1338,7 +1338,7 @@ struct derandomizer: runnable
     {
         // EN 300 421, section 4.4.1 Transport multiplex adaptation
         pattern[0] = 0xff;  // Restore the inverted sync byte
-        unsigned short st = 000251;  // 0b 000 000 010 101 001 (Fig 2 reversed)
+        unsigned short st = 169;  // 0b 000 000 010 101 001 (Fig 2 reversed)
         for (int i = 1; i < 188 * 8; ++i)
         {
             u8 out = 0;

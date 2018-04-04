@@ -392,7 +392,7 @@ void DSDDemod::applyAudioSampleRate(int sampleRate)
 {
     qDebug("DSDDemod::applyAudioSampleRate: %d", sampleRate);
 
-    if ((sampleRate != 48000) || (sampleRate != 8000)) {
+    if ((sampleRate != 48000) && (sampleRate != 8000)) {
         qWarning("DSDDemod::applyAudioSampleRate: audio does not work properly with sample rates other than 48 or 8 kS/s");
     }
 

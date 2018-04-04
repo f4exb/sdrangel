@@ -53,6 +53,9 @@ RTPUDPTransmitter::RTPUDPTransmitter() :
     m_rtcpPort = 0;
     m_rtpPort = 0;
     m_receivemode = RTPTransmitter::AcceptAll;
+    m_maxpacksize = 0;
+    memset(m_rtpBuffer, 0, m_absoluteMaxPackSize);
+    memset(m_rtcpBuffer, 0, m_absoluteMaxPackSize);
 }
 
 RTPUDPTransmitter::~RTPUDPTransmitter()

@@ -40,6 +40,7 @@ UDPSinkFEC::UDPSinkFEC() :
     m_frameCount(0),
     m_sampleIndex(0)
 {
+    memset((char *) m_txBlocks, 0, 4*256);
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];
@@ -115,11 +116,11 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
             metaData.m_crc32 = crc32.checksum();
 
-            memset((void *) &m_superBlock, 0, sizeof(m_superBlock));
+            memset((char *) &m_superBlock, 0, sizeof(m_superBlock));
 
             m_superBlock.header.frameIndex = m_frameCount;
             m_superBlock.header.blockIndex = m_txBlockIndex;
-            memcpy((void *) &m_superBlock.protectedBlock, (const void *) &metaData, sizeof(MetaDataFEC));
+            memcpy((char *) &m_superBlock.protectedBlock, (const char *) &metaData, sizeof(MetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {
@@ -143,16 +144,16 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            memcpy((void *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
-                    (const void *) &(*it),
+            memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                    (const char *) &(*it),
                     inRemainingSamples * sizeof(Sample));
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            memcpy((void *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
-                    (const void *) &(*it),
+            memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                    (const char *) &(*it),
                     (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
@@ -283,7 +284,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; ++i)
         {
             if (i >= cm256Params.OriginalCount) {
-                memset((void *) &txBlockx[i].protectedBlock, 0, sizeof(UDPSinkFEC::ProtectedBlock));
+                memset((char *) &txBlockx[i].protectedBlock, 0, sizeof(UDPSinkFEC::ProtectedBlock));
             }
 
             txBlockx[i].header.frameIndex = frameIndex;

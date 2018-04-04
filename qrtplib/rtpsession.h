@@ -94,7 +94,7 @@ public:
      *  proto is of type RTPTransmitter::UserDefinedProto, the NewUserDefinedTransmitter function must
      *  be implemented.
      */
-    int Create(const RTPSessionParams &sessparams, const RTPTransmissionParams *transparams = 0, RTPTransmitter::TransmissionProtocol proto = RTPTransmitter::IPv4UDPProto);
+    //int Create(const RTPSessionParams &sessparams, const RTPTransmissionParams *transparams = 0, RTPTransmitter::TransmissionProtocol proto = RTPTransmitter::IPv4UDPProto);
 
     /** Creates an RTP session using \c transmitter as transmission component.
      *  This function creates an RTP session with parameters \c sessparams, which will use the

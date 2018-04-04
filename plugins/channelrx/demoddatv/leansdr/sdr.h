@@ -603,7 +603,7 @@ private:
         { // Average power in first quadrant with unit grid
             int q = m / 2;
             float avgpower = 2
-                    * (q * 0.25 + (q - 1) * q / 2
+                    * (q * 0.25 + (q - 1) * (q / 2)
                             + (q - 1) * q * (2 * q - 1) / 6) / q;
             scale = 1.0 / sqrtf(avgpower);
         }
