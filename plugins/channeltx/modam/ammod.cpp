@@ -33,7 +33,6 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
@@ -53,7 +52,6 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(AMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
@@ -165,12 +163,12 @@ void AMMod::modulateSample()
 
 void AMMod::pullAF(Real& sample)
 {
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
-    case AMModInputTone:
+    case AMModSettings::AMModInputTone:
         sample = m_toneNco.next();
         break;
-    case AMModInputFile:
+    case AMModSettings::AMModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
@@ -199,10 +197,10 @@ void AMMod::pullAF(Real& sample)
             sample = 0.0f;
         }
         break;
-    case AMModInputAudio:
+    case AMModSettings::AMModInputAudio:
         sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
         break;
-    case AMModInputCWTone:
+    case AMModSettings::AMModInputCWTone:
         Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -223,7 +221,7 @@ void AMMod::pullAF(Real& sample)
             }
         }
         break;
-    case AMModInputNone:
+    case AMModSettings::AMModInputNone:
     default:
         sample = 0.0f;
         break;
@@ -310,13 +308,6 @@ bool AMMod::handleMessage(const Message& cmd)
         MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
-
-        return true;
-    }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
 
         return true;
     }
@@ -457,6 +448,7 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
             << " m_volumeFactor: " << settings.m_volumeFactor
             << " m_audioMute: " << settings.m_channelMute
             << " m_playLoop: " << settings.m_playLoop
+            << " m_modAFInput " << settings.m_modAFInput
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 

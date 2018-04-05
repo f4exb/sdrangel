@@ -23,6 +23,15 @@ class Serializable;
 
 struct AMModSettings
 {
+    typedef enum
+    {
+        AMModInputNone,
+        AMModInputTone,
+        AMModInputFile,
+        AMModInputAudio,
+        AMModInputCWTone
+    } AMModInputAF;
+
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     float m_modFactor;
@@ -32,6 +41,7 @@ struct AMModSettings
     bool m_playLoop;
     quint32 m_rgbColor;
     QString m_title;
+    AMModInputAF m_modAFInput;
     QString m_audioDeviceName;
 
     Serializable *m_channelMarker;

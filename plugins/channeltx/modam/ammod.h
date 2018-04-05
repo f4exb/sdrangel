@@ -89,15 +89,6 @@ public:
         { }
     };
 
-    typedef enum
-    {
-        AMModInputNone,
-        AMModInputTone,
-        AMModInputFile,
-        AMModInputAudio,
-        AMModInputCWTone
-    } AMModInputAF;
-
     class MsgConfigureFileSourceName : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -154,27 +145,6 @@ public:
 
         MsgConfigureFileSourceStreamTiming() :
             Message()
-        { }
-    };
-
-    class MsgConfigureAFInput : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        AMModInputAF getAFInput() const { return m_afInput; }
-
-        static MsgConfigureAFInput* create(AMModInputAF afInput)
-        {
-            return new MsgConfigureAFInput(afInput);
-        }
-
-    private:
-        AMModInputAF m_afInput;
-
-        MsgConfigureAFInput(AMModInputAF afInput) :
-            Message(),
-            m_afInput(afInput)
         { }
     };
 
@@ -302,7 +272,6 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    AMModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;

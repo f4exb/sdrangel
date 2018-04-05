@@ -74,7 +74,6 @@ private:
     int m_samplesCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    AMMod::AMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
     explicit AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
