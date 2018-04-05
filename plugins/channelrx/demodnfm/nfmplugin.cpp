@@ -2,7 +2,9 @@
 #include "plugin/pluginapi.h"
 
 #include "nfmplugin.h"
+#ifndef SERVER_MODE
 #include "nfmdemodgui.h"
+#endif
 #include "nfmdemod.h"
 
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {

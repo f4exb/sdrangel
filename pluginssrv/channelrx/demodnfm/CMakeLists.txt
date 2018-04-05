@@ -29,13 +29,11 @@ add_definitions(-DQT_SHARED)
 add_library(demodnfmsrv SHARED
 	${nfm_SOURCES}
 	${nfm_HEADERS_MOC}
-	${nfm_FORMS_HEADERS}
 )
 
 target_link_libraries(demodnfmsrv
 	${QT_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 )
 

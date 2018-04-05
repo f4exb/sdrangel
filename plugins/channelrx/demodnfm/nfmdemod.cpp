@@ -34,7 +34,6 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
-#include "nfmdemodgui.h"
 #include "nfmdemod.h"
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
