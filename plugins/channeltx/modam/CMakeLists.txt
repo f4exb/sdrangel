@@ -23,6 +23,7 @@ set(modam_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -41,6 +42,7 @@ target_link_libraries(modam
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(modam Core Widgets)

@@ -23,11 +23,16 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGAMModReport.h"
+
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
@@ -504,4 +509,173 @@ bool AMMod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+
+int AMMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+    response.getAmModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int AMMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    AMModSettings settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getAmModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getAmModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("modAFInput")) {
+        settings.m_modAFInput = (AMModSettings::AMModInputAF) response.getAmModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getAmModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getAmModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAmModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAmModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getAmModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getAmModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("modFactor")) {
+        settings.m_modFactor = response.getAmModSettings()->getModFactor();
+    }
+
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+
+        if (channelSettingsKeys.contains("cwKeyer.loop")) {
+            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+        }
+        if (channelSettingsKeys.contains("cwKeyer.mode")) {
+            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.text")) {
+            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
+            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
+            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+        }
+
+        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        m_cwKeyer.setText(cwKeyerSettings.m_text);
+        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyer);
+        }
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        AMMod::MsgConfigureChannelizer *msgChan = AMMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureAMMod *msg = MsgConfigureAMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMMod *msgToGUI = MsgConfigureAMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int AMMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmModReport(new SWGSDRangel::SWGAMModReport());
+    response.getAmModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMModSettings& settings)
+{
+    response.getAmModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getAmModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAmModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getAmModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getAmModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAmModSettings()->setModFactor(settings.m_modFactor);
+    response.getAmModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getAmModSettings()->getTitle()) {
+        *response.getAmModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAmModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getAmModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getAmModSettings()->setVolumeFactor(settings.m_volumeFactor);
+
+    if (!response.getAmModSettings()->getCwKeyer()) {
+        response.getAmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
+    }
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    if (response.getAmModSettings()->getAudioDeviceName()) {
+        *response.getAmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getAmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getAmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getAmModReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getAmModReport()->setChannelSampleRate(m_outputSampleRate);
 }

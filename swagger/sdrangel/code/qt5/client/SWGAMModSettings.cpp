@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGNFMModSettings.h"
+#include "SWGAMModSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,20 +22,18 @@
 
 namespace SWGSDRangel {
 
-SWGNFMModSettings::SWGNFMModSettings(QString* json) {
+SWGAMModSettings::SWGAMModSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGNFMModSettings::SWGNFMModSettings() {
+SWGAMModSettings::SWGAMModSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    af_bandwidth = 0.0f;
-    m_af_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
+    mod_factor = 0.0f;
+    m_mod_factor_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
@@ -44,10 +42,6 @@ SWGNFMModSettings::SWGNFMModSettings() {
     m_channel_mute_isSet = false;
     play_loop = 0;
     m_play_loop_isSet = false;
-    ctcss_on = 0;
-    m_ctcss_on_isSet = false;
-    ctcss_index = 0;
-    m_ctcss_index_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -60,20 +54,18 @@ SWGNFMModSettings::SWGNFMModSettings() {
     m_cw_keyer_isSet = false;
 }
 
-SWGNFMModSettings::~SWGNFMModSettings() {
+SWGAMModSettings::~SWGAMModSettings() {
     this->cleanup();
 }
 
 void
-SWGNFMModSettings::init() {
+SWGAMModSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    af_bandwidth = 0.0f;
-    m_af_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
+    mod_factor = 0.0f;
+    m_mod_factor_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
@@ -82,10 +74,6 @@ SWGNFMModSettings::init() {
     m_channel_mute_isSet = false;
     play_loop = 0;
     m_play_loop_isSet = false;
-    ctcss_on = 0;
-    m_ctcss_on_isSet = false;
-    ctcss_index = 0;
-    m_ctcss_index_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -99,10 +87,7 @@ SWGNFMModSettings::init() {
 }
 
 void
-SWGNFMModSettings::cleanup() {
-
-
-
+SWGAMModSettings::cleanup() {
 
 
 
@@ -123,8 +108,8 @@ SWGNFMModSettings::cleanup() {
     }
 }
 
-SWGNFMModSettings*
-SWGNFMModSettings::fromJson(QString &json) {
+SWGAMModSettings*
+SWGAMModSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -133,14 +118,12 @@ SWGNFMModSettings::fromJson(QString &json) {
 }
 
 void
-SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
+SWGAMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
-    ::SWGSDRangel::setValue(&af_bandwidth, pJson["afBandwidth"], "float", "");
-    
-    ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
+    ::SWGSDRangel::setValue(&mod_factor, pJson["modFactor"], "float", "");
     
     ::SWGSDRangel::setValue(&tone_frequency, pJson["toneFrequency"], "float", "");
     
@@ -149,10 +132,6 @@ SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_mute, pJson["channelMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&play_loop, pJson["playLoop"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&ctcss_on, pJson["ctcssOn"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&ctcss_index, pJson["ctcssIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -167,7 +146,7 @@ SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGNFMModSettings::asJson ()
+SWGAMModSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -178,7 +157,7 @@ SWGNFMModSettings::asJson ()
 }
 
 QJsonObject*
-SWGNFMModSettings::asJsonObject() {
+SWGAMModSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
@@ -186,11 +165,8 @@ SWGNFMModSettings::asJsonObject() {
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
-    if(m_af_bandwidth_isSet){
-        obj->insert("afBandwidth", QJsonValue(af_bandwidth));
-    }
-    if(m_fm_deviation_isSet){
-        obj->insert("fmDeviation", QJsonValue(fm_deviation));
+    if(m_mod_factor_isSet){
+        obj->insert("modFactor", QJsonValue(mod_factor));
     }
     if(m_tone_frequency_isSet){
         obj->insert("toneFrequency", QJsonValue(tone_frequency));
@@ -203,12 +179,6 @@ SWGNFMModSettings::asJsonObject() {
     }
     if(m_play_loop_isSet){
         obj->insert("playLoop", QJsonValue(play_loop));
-    }
-    if(m_ctcss_on_isSet){
-        obj->insert("ctcssOn", QJsonValue(ctcss_on));
-    }
-    if(m_ctcss_index_isSet){
-        obj->insert("ctcssIndex", QJsonValue(ctcss_index));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -230,170 +200,137 @@ SWGNFMModSettings::asJsonObject() {
 }
 
 qint64
-SWGNFMModSettings::getInputFrequencyOffset() {
+SWGAMModSettings::getInputFrequencyOffset() {
     return input_frequency_offset;
 }
 void
-SWGNFMModSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
+SWGAMModSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->input_frequency_offset = input_frequency_offset;
     this->m_input_frequency_offset_isSet = true;
 }
 
 float
-SWGNFMModSettings::getRfBandwidth() {
+SWGAMModSettings::getRfBandwidth() {
     return rf_bandwidth;
 }
 void
-SWGNFMModSettings::setRfBandwidth(float rf_bandwidth) {
+SWGAMModSettings::setRfBandwidth(float rf_bandwidth) {
     this->rf_bandwidth = rf_bandwidth;
     this->m_rf_bandwidth_isSet = true;
 }
 
 float
-SWGNFMModSettings::getAfBandwidth() {
-    return af_bandwidth;
+SWGAMModSettings::getModFactor() {
+    return mod_factor;
 }
 void
-SWGNFMModSettings::setAfBandwidth(float af_bandwidth) {
-    this->af_bandwidth = af_bandwidth;
-    this->m_af_bandwidth_isSet = true;
+SWGAMModSettings::setModFactor(float mod_factor) {
+    this->mod_factor = mod_factor;
+    this->m_mod_factor_isSet = true;
 }
 
 float
-SWGNFMModSettings::getFmDeviation() {
-    return fm_deviation;
-}
-void
-SWGNFMModSettings::setFmDeviation(float fm_deviation) {
-    this->fm_deviation = fm_deviation;
-    this->m_fm_deviation_isSet = true;
-}
-
-float
-SWGNFMModSettings::getToneFrequency() {
+SWGAMModSettings::getToneFrequency() {
     return tone_frequency;
 }
 void
-SWGNFMModSettings::setToneFrequency(float tone_frequency) {
+SWGAMModSettings::setToneFrequency(float tone_frequency) {
     this->tone_frequency = tone_frequency;
     this->m_tone_frequency_isSet = true;
 }
 
 float
-SWGNFMModSettings::getVolumeFactor() {
+SWGAMModSettings::getVolumeFactor() {
     return volume_factor;
 }
 void
-SWGNFMModSettings::setVolumeFactor(float volume_factor) {
+SWGAMModSettings::setVolumeFactor(float volume_factor) {
     this->volume_factor = volume_factor;
     this->m_volume_factor_isSet = true;
 }
 
 qint32
-SWGNFMModSettings::getChannelMute() {
+SWGAMModSettings::getChannelMute() {
     return channel_mute;
 }
 void
-SWGNFMModSettings::setChannelMute(qint32 channel_mute) {
+SWGAMModSettings::setChannelMute(qint32 channel_mute) {
     this->channel_mute = channel_mute;
     this->m_channel_mute_isSet = true;
 }
 
 qint32
-SWGNFMModSettings::getPlayLoop() {
+SWGAMModSettings::getPlayLoop() {
     return play_loop;
 }
 void
-SWGNFMModSettings::setPlayLoop(qint32 play_loop) {
+SWGAMModSettings::setPlayLoop(qint32 play_loop) {
     this->play_loop = play_loop;
     this->m_play_loop_isSet = true;
 }
 
 qint32
-SWGNFMModSettings::getCtcssOn() {
-    return ctcss_on;
-}
-void
-SWGNFMModSettings::setCtcssOn(qint32 ctcss_on) {
-    this->ctcss_on = ctcss_on;
-    this->m_ctcss_on_isSet = true;
-}
-
-qint32
-SWGNFMModSettings::getCtcssIndex() {
-    return ctcss_index;
-}
-void
-SWGNFMModSettings::setCtcssIndex(qint32 ctcss_index) {
-    this->ctcss_index = ctcss_index;
-    this->m_ctcss_index_isSet = true;
-}
-
-qint32
-SWGNFMModSettings::getRgbColor() {
+SWGAMModSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGNFMModSettings::setRgbColor(qint32 rgb_color) {
+SWGAMModSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 QString*
-SWGNFMModSettings::getTitle() {
+SWGAMModSettings::getTitle() {
     return title;
 }
 void
-SWGNFMModSettings::setTitle(QString* title) {
+SWGAMModSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 QString*
-SWGNFMModSettings::getAudioDeviceName() {
+SWGAMModSettings::getAudioDeviceName() {
     return audio_device_name;
 }
 void
-SWGNFMModSettings::setAudioDeviceName(QString* audio_device_name) {
+SWGAMModSettings::setAudioDeviceName(QString* audio_device_name) {
     this->audio_device_name = audio_device_name;
     this->m_audio_device_name_isSet = true;
 }
 
 qint32
-SWGNFMModSettings::getModAfInput() {
+SWGAMModSettings::getModAfInput() {
     return mod_af_input;
 }
 void
-SWGNFMModSettings::setModAfInput(qint32 mod_af_input) {
+SWGAMModSettings::setModAfInput(qint32 mod_af_input) {
     this->mod_af_input = mod_af_input;
     this->m_mod_af_input_isSet = true;
 }
 
 SWGCWKeyerSettings*
-SWGNFMModSettings::getCwKeyer() {
+SWGAMModSettings::getCwKeyer() {
     return cw_keyer;
 }
 void
-SWGNFMModSettings::setCwKeyer(SWGCWKeyerSettings* cw_keyer) {
+SWGAMModSettings::setCwKeyer(SWGCWKeyerSettings* cw_keyer) {
     this->cw_keyer = cw_keyer;
     this->m_cw_keyer_isSet = true;
 }
 
 
 bool
-SWGNFMModSettings::isSet(){
+SWGAMModSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
         if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_af_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
+        if(m_mod_factor_isSet){ isObjectUpdated = true; break;}
         if(m_tone_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_volume_factor_isSet){ isObjectUpdated = true; break;}
         if(m_channel_mute_isSet){ isObjectUpdated = true; break;}
         if(m_play_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_ctcss_on_isSet){ isObjectUpdated = true; break;}
-        if(m_ctcss_index_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}

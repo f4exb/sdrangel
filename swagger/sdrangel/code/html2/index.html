@@ -756,6 +756,69 @@ margin-bottom: 20px;
   },
   "description" : "AMDemod"
 };
+            defs.AMModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AMMod"
+};
+            defs.AMModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "modFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "modulation factor from 0.0 to 1.0"
+    },
+    "toneFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volumeFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "playLoop" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "modAFInput" : {
+      "type" : "integer"
+    },
+    "cwKeyer" : {
+      "$ref" : "#/definitions/CWKeyerSettings"
+    }
+  },
+  "description" : "AMMod"
+};
             defs.AirspyHFSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1058,6 +1121,9 @@ margin-bottom: 20px;
     "AMDemodReport" : {
       "$ref" : "#/definitions/AMDemodReport"
     },
+    "AMModReport" : {
+      "$ref" : "#/definitions/AMModReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1081,6 +1147,9 @@ margin-bottom: 20px;
     },
     "AMDemodSettings" : {
       "$ref" : "#/definitions/AMDemodSettings"
+    },
+    "AMModSettings" : {
+      "$ref" : "#/definitions/AMModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -1721,6 +1790,9 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
       "type" : "string"
     },
     "modAFInput" : {
@@ -20190,7 +20262,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-04-04T22:16:33.651+02:00
+              Generated 2018-04-06T00:10:47.664+02:00
             </div>
           </div>
       </div>

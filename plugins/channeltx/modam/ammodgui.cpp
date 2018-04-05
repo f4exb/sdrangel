@@ -106,6 +106,21 @@ bool AMModGUI::handleMessage(const Message& message)
         updateWithStreamTime();
         return true;
     }
+    else if (AMMod::MsgConfigureAMMod::match(message))
+    {
+        const AMMod::MsgConfigureAMMod& cfg = (AMMod::MsgConfigureAMMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        return true;
+    }
     else
     {
         return false;
@@ -375,6 +390,16 @@ void AMModGUI::displaySettings()
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
+
+    ui->tone->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputTone) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->mic->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputAudio) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->play->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputFile) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->morseKeyer->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputCWTone) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+
+    ui->tone->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputTone);
+    ui->mic->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputAudio);
+    ui->play->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputFile);
+    ui->morseKeyer->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputCWTone);
 
     blockApplySettings(false);
 }

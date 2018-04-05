@@ -11,83 +11,60 @@
  */
 
 /*
- * SWGChannelSettings.h
+ * SWGAMModReport.h
  *
- * Base channel settings. The specific channel settings present depends on channelType.
+ * AMMod
  */
 
-#ifndef SWGChannelSettings_H_
-#define SWGChannelSettings_H_
+#ifndef SWGAMModReport_H_
+#define SWGAMModReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAMDemodSettings.h"
-#include "SWGAMModSettings.h"
-#include "SWGNFMDemodSettings.h"
-#include "SWGNFMModSettings.h"
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGChannelSettings: public SWGObject {
+class SWG_API SWGAMModReport: public SWGObject {
 public:
-    SWGChannelSettings();
-    SWGChannelSettings(QString* json);
-    virtual ~SWGChannelSettings();
+    SWGAMModReport();
+    SWGAMModReport(QString* json);
+    virtual ~SWGAMModReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelSettings* fromJson(QString &jsonString) override;
+    virtual SWGAMModReport* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
 
-    qint32 getTx();
-    void setTx(qint32 tx);
+    qint32 getAudioSampleRate();
+    void setAudioSampleRate(qint32 audio_sample_rate);
 
-    SWGAMDemodSettings* getAmDemodSettings();
-    void setAmDemodSettings(SWGAMDemodSettings* am_demod_settings);
-
-    SWGAMModSettings* getAmModSettings();
-    void setAmModSettings(SWGAMModSettings* am_mod_settings);
-
-    SWGNFMDemodSettings* getNfmDemodSettings();
-    void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
-
-    SWGNFMModSettings* getNfmModSettings();
-    void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
+    qint32 getChannelSampleRate();
+    void setChannelSampleRate(qint32 channel_sample_rate);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
-    qint32 tx;
-    bool m_tx_isSet;
+    qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
 
-    SWGAMDemodSettings* am_demod_settings;
-    bool m_am_demod_settings_isSet;
-
-    SWGAMModSettings* am_mod_settings;
-    bool m_am_mod_settings_isSet;
-
-    SWGNFMDemodSettings* nfm_demod_settings;
-    bool m_nfm_demod_settings_isSet;
-
-    SWGNFMModSettings* nfm_mod_settings;
-    bool m_nfm_mod_settings_isSet;
+    qint32 channel_sample_rate;
+    bool m_channel_sample_rate_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelSettings_H_ */
+#endif /* SWGAMModReport_H_ */

@@ -9,6 +9,7 @@
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
+        <file>webapi/doc/swagger/include/AMMod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>

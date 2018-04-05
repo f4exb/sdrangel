@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGNFMModSettings.h
+ * SWGAMModSettings.h
  *
- * NFMMod
+ * AMMod
  */
 
-#ifndef SWGNFMModSettings_H_
-#define SWGNFMModSettings_H_
+#ifndef SWGAMModSettings_H_
+#define SWGAMModSettings_H_
 
 #include <QJsonObject>
 
@@ -30,18 +30,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGNFMModSettings: public SWGObject {
+class SWG_API SWGAMModSettings: public SWGObject {
 public:
-    SWGNFMModSettings();
-    SWGNFMModSettings(QString* json);
-    virtual ~SWGNFMModSettings();
+    SWGAMModSettings();
+    SWGAMModSettings(QString* json);
+    virtual ~SWGAMModSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGNFMModSettings* fromJson(QString &jsonString) override;
+    virtual SWGAMModSettings* fromJson(QString &jsonString) override;
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
@@ -49,11 +49,8 @@ public:
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
-    float getAfBandwidth();
-    void setAfBandwidth(float af_bandwidth);
-
-    float getFmDeviation();
-    void setFmDeviation(float fm_deviation);
+    float getModFactor();
+    void setModFactor(float mod_factor);
 
     float getToneFrequency();
     void setToneFrequency(float tone_frequency);
@@ -66,12 +63,6 @@ public:
 
     qint32 getPlayLoop();
     void setPlayLoop(qint32 play_loop);
-
-    qint32 getCtcssOn();
-    void setCtcssOn(qint32 ctcss_on);
-
-    qint32 getCtcssIndex();
-    void setCtcssIndex(qint32 ctcss_index);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -98,11 +89,8 @@ private:
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
 
-    float af_bandwidth;
-    bool m_af_bandwidth_isSet;
-
-    float fm_deviation;
-    bool m_fm_deviation_isSet;
+    float mod_factor;
+    bool m_mod_factor_isSet;
 
     float tone_frequency;
     bool m_tone_frequency_isSet;
@@ -115,12 +103,6 @@ private:
 
     qint32 play_loop;
     bool m_play_loop_isSet;
-
-    qint32 ctcss_on;
-    bool m_ctcss_on_isSet;
-
-    qint32 ctcss_index;
-    bool m_ctcss_index_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
@@ -141,4 +123,4 @@ private:
 
 }
 
-#endif /* SWGNFMModSettings_H_ */
+#endif /* SWGAMModSettings_H_ */

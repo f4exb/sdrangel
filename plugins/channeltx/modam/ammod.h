@@ -215,6 +215,20 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -287,6 +301,8 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 

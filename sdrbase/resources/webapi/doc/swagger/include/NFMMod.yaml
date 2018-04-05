@@ -31,6 +31,8 @@ NFMModSettings:
       type: integer
     title:
       type: string
+    audioDeviceName:
+      type: string      
     modAFInput:
       type: integer
     cwKeyer:

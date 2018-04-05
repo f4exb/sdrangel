@@ -1840,6 +1840,27 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "AMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject amModSettingsJsonObject = jsonObject["AMModSettings"].toObject();
+            channelSettingsKeys = amModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(amModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+            channelSettings.getAmModSettings()->fromJsonObject(amModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)
@@ -1908,6 +1929,20 @@ bool WebAPIRequestMapper::validateChannelReport(
             channelReportKeys = amDemodReportJsonObject.keys();
             channelReport.setAmDemodReport(new SWGSDRangel::SWGAMDemodReport());
             channelReport.getAmDemodReport()->fromJsonObject(amDemodReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "AMMod")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject amModReportJsonObject = jsonObject["AMModReport"].toObject();
+            channelReportKeys = amModReportJsonObject.keys();
+            channelReport.setAmModReport(new SWGSDRangel::SWGAMModReport());
+            channelReport.getAmModReport()->fromJsonObject(amModReportJsonObject);
             return true;
         }
         else {

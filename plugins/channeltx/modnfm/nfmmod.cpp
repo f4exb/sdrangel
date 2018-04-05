@@ -653,7 +653,7 @@ int NFMMod::webapiSettingsPutPatch(
     if (frequencyOffsetChanged)
     {
         NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
-                48000, settings.m_inputFrequencyOffset);
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(msgChan);
     }
 
@@ -719,10 +719,10 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
     }
 
-    if (response.getNfmDemodSettings()->getAudioDeviceName()) {
-        *response.getNfmDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    if (response.getNfmModSettings()->getAudioDeviceName()) {
+        *response.getNfmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
     } else {
-        response.getNfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        response.getNfmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);

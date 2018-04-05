@@ -1747,6 +1747,8 @@ definitions:
         type: integer
       AMDemodSettings:
         $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
+      AMModSettings:
+        $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
       NFMDemodSettings:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1764,6 +1766,8 @@ definitions:
         type: integer
       AMDemodReport:
         $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
+      AMModReport:
+        $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
       NFMDemodReport:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

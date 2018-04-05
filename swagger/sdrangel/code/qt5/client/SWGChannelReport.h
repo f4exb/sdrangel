@@ -23,6 +23,7 @@
 
 
 #include "SWGAMDemodReport.h"
+#include "SWGAMModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include <QString>
@@ -54,6 +55,9 @@ public:
     SWGAMDemodReport* getAmDemodReport();
     void setAmDemodReport(SWGAMDemodReport* am_demod_report);
 
+    SWGAMModReport* getAmModReport();
+    void setAmModReport(SWGAMModReport* am_mod_report);
+
     SWGNFMDemodReport* getNfmDemodReport();
     void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
 
@@ -72,6 +76,9 @@ private:
 
     SWGAMDemodReport* am_demod_report;
     bool m_am_demod_report_isSet;
+
+    SWGAMModReport* am_mod_report;
+    bool m_am_mod_report_isSet;
 
     SWGNFMDemodReport* nfm_demod_report;
     bool m_nfm_demod_report_isSet;
