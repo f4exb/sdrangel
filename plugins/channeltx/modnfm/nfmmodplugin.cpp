@@ -15,10 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "nfmmodgui.h"
+#endif
+#include "nfmmod.h"
 #include "nfmmodplugin.h"
 
 const PluginDescriptor NFMModPlugin::m_pluginDescriptor = {
