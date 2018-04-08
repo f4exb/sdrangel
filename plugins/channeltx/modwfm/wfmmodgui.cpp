@@ -106,6 +106,21 @@ bool WFMModGUI::handleMessage(const Message& message)
         updateWithStreamTime();
         return true;
     }
+    else if (WFMMod::MsgConfigureWFMMod::match(message))
+    {
+        const WFMMod::MsgConfigureWFMMod& cfg = (WFMMod::MsgConfigureWFMMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        return true;
+    }
     else
     {
         return false;
@@ -192,9 +207,8 @@ void WFMModGUI::on_play_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputFile : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputFile : WFMModSettings::WFMModInputNone;
+    applySettings();
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -204,9 +218,8 @@ void WFMModGUI::on_tone_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputTone : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputTone : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_morseKeyer_toggled(bool checked)
@@ -214,9 +227,8 @@ void WFMModGUI::on_morseKeyer_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->play->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputCWTone : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputCWTone : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_mic_toggled(bool checked)
@@ -224,9 +236,8 @@ void WFMModGUI::on_mic_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputAudio : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputAudio : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_navTimeSlider_valueChanged(int value)
@@ -278,8 +289,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_recordSampleRate(48000),
     m_samplesCount(0),
     m_tickCount(0),
-    m_enableNavTime(false),
-    m_modAFInput(WFMMod::WFMModInputNone)
+    m_enableNavTime(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -401,6 +411,16 @@ void WFMModGUI::displaySettings()
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
 
+    ui->tone->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputTone) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->mic->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputAudio) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->play->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputFile) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->morseKeyer->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+
+    ui->tone->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputTone);
+    ui->mic->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputAudio);
+    ui->play->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputFile);
+    ui->morseKeyer->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone);
+
     blockApplySettings(false);
 }
 
@@ -433,7 +453,7 @@ void WFMModGUI::tick()
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-    if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == WFMMod::WFMModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == WFMModSettings::WFMModInputFile))
     {
         WFMMod::MsgConfigureFileSourceStreamTiming* message = WFMMod::MsgConfigureFileSourceStreamTiming::create();
         m_wfmMod->getInputMessageQueue()->push(message);

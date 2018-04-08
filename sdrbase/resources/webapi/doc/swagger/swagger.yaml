@@ -1753,6 +1753,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+      WFMModSettings:
+        $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
         
   ChannelReport:
     description: Base channel report. The specific channel report present depends on channelType or paremt context.
@@ -1772,6 +1774,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+      WFMModReport:
+        $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
 
 responses:
 

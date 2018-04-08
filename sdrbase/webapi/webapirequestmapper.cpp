@@ -1896,6 +1896,27 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "WFMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject wfmModSettingsJsonObject = jsonObject["WFMModSettings"].toObject();
+            channelSettingsKeys = wfmModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(wfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+            channelSettings.getWfmModSettings()->fromJsonObject(wfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else
     {
         return false;
@@ -1971,6 +1992,20 @@ bool WebAPIRequestMapper::validateChannelReport(
             channelReportKeys = nfmModReportJsonObject.keys();
             channelReport.setNfmModReport(new SWGSDRangel::SWGNFMModReport());
             channelReport.getNfmModReport()->fromJsonObject(nfmModReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "WFMMod")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject wfmModReportJsonObject = jsonObject["WFMModReport"].toObject();
+            channelReportKeys = wfmModReportJsonObject.keys();
+            channelReport.setWfmModReport(new SWGSDRangel::SWGWFMModReport());
+            channelReport.getWfmModReport()->fromJsonObject(wfmModReportJsonObject);
             return true;
         }
         else {

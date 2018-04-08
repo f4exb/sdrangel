@@ -1129,6 +1129,9 @@ margin-bottom: 20px;
     },
     "NFMModReport" : {
       "$ref" : "#/definitions/NFMModReport"
+    },
+    "WFMModReport" : {
+      "$ref" : "#/definitions/WFMModReport"
     }
   },
   "description" : "Base channel report. The specific channel report present depends on channelType or paremt context."
@@ -1156,6 +1159,9 @@ margin-bottom: 20px;
     },
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
+    },
+    "WFMModSettings" : {
+      "$ref" : "#/definitions/WFMModSettings"
     }
   },
   "description" : "Base channel settings. The specific channel settings present depends on channelType."
@@ -2028,6 +2034,72 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.WFMModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "WFMMod"
+};
+            defs.WFMModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "afBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "toneFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volumeFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "playLoop" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "modAFInput" : {
+      "type" : "integer"
+    },
+    "cwKeyer" : {
+      "$ref" : "#/definitions/CWKeyerSettings"
+    }
+  },
+  "description" : "WFMMod"
 };
   </script>
 
@@ -20262,7 +20334,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-04-06T00:10:47.664+02:00
+              Generated 2018-04-08T18:14:01.611+02:00
             </div>
           </div>
       </div>

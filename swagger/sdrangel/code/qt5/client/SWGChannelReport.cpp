@@ -40,6 +40,8 @@ SWGChannelReport::SWGChannelReport() {
     m_nfm_demod_report_isSet = false;
     nfm_mod_report = nullptr;
     m_nfm_mod_report_isSet = false;
+    wfm_mod_report = nullptr;
+    m_wfm_mod_report_isSet = false;
 }
 
 SWGChannelReport::~SWGChannelReport() {
@@ -60,6 +62,8 @@ SWGChannelReport::init() {
     m_nfm_demod_report_isSet = false;
     nfm_mod_report = new SWGNFMModReport();
     m_nfm_mod_report_isSet = false;
+    wfm_mod_report = new SWGWFMModReport();
+    m_wfm_mod_report_isSet = false;
 }
 
 void
@@ -79,6 +83,9 @@ SWGChannelReport::cleanup() {
     }
     if(nfm_mod_report != nullptr) { 
         delete nfm_mod_report;
+    }
+    if(wfm_mod_report != nullptr) { 
+        delete wfm_mod_report;
     }
 }
 
@@ -104,6 +111,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_demod_report, pJson["NFMDemodReport"], "SWGNFMDemodReport", "SWGNFMDemodReport");
     
     ::SWGSDRangel::setValue(&nfm_mod_report, pJson["NFMModReport"], "SWGNFMModReport", "SWGNFMModReport");
+    
+    ::SWGSDRangel::setValue(&wfm_mod_report, pJson["WFMModReport"], "SWGWFMModReport", "SWGWFMModReport");
     
 }
 
@@ -138,6 +147,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((nfm_mod_report != nullptr) && (nfm_mod_report->isSet())){
         toJsonValue(QString("NFMModReport"), nfm_mod_report, obj, QString("SWGNFMModReport"));
+    }
+    if((wfm_mod_report != nullptr) && (wfm_mod_report->isSet())){
+        toJsonValue(QString("WFMModReport"), wfm_mod_report, obj, QString("SWGWFMModReport"));
     }
 
     return obj;
@@ -203,6 +215,16 @@ SWGChannelReport::setNfmModReport(SWGNFMModReport* nfm_mod_report) {
     this->m_nfm_mod_report_isSet = true;
 }
 
+SWGWFMModReport*
+SWGChannelReport::getWfmModReport() {
+    return wfm_mod_report;
+}
+void
+SWGChannelReport::setWfmModReport(SWGWFMModReport* wfm_mod_report) {
+    this->wfm_mod_report = wfm_mod_report;
+    this->m_wfm_mod_report_isSet = true;
+}
+
 
 bool
 SWGChannelReport::isSet(){
@@ -214,6 +236,7 @@ SWGChannelReport::isSet(){
         if(am_mod_report != nullptr && am_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}
+        if(wfm_mod_report != nullptr && wfm_mod_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

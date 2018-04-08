@@ -40,6 +40,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
     m_nfm_mod_settings_isSet = false;
+    wfm_mod_settings = nullptr;
+    m_wfm_mod_settings_isSet = false;
 }
 
 SWGChannelSettings::~SWGChannelSettings() {
@@ -60,6 +62,8 @@ SWGChannelSettings::init() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
     m_nfm_mod_settings_isSet = false;
+    wfm_mod_settings = new SWGWFMModSettings();
+    m_wfm_mod_settings_isSet = false;
 }
 
 void
@@ -79,6 +83,9 @@ SWGChannelSettings::cleanup() {
     }
     if(nfm_mod_settings != nullptr) { 
         delete nfm_mod_settings;
+    }
+    if(wfm_mod_settings != nullptr) { 
+        delete wfm_mod_settings;
     }
 }
 
@@ -104,6 +111,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
+    
+    ::SWGSDRangel::setValue(&wfm_mod_settings, pJson["WFMModSettings"], "SWGWFMModSettings", "SWGWFMModSettings");
     
 }
 
@@ -138,6 +147,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((nfm_mod_settings != nullptr) && (nfm_mod_settings->isSet())){
         toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
+    }
+    if((wfm_mod_settings != nullptr) && (wfm_mod_settings->isSet())){
+        toJsonValue(QString("WFMModSettings"), wfm_mod_settings, obj, QString("SWGWFMModSettings"));
     }
 
     return obj;
@@ -203,6 +215,16 @@ SWGChannelSettings::setNfmModSettings(SWGNFMModSettings* nfm_mod_settings) {
     this->m_nfm_mod_settings_isSet = true;
 }
 
+SWGWFMModSettings*
+SWGChannelSettings::getWfmModSettings() {
+    return wfm_mod_settings;
+}
+void
+SWGChannelSettings::setWfmModSettings(SWGWFMModSettings* wfm_mod_settings) {
+    this->wfm_mod_settings = wfm_mod_settings;
+    this->m_wfm_mod_settings_isSet = true;
+}
+
 
 bool
 SWGChannelSettings::isSet(){
@@ -214,6 +236,7 @@ SWGChannelSettings::isSet(){
         if(am_mod_settings != nullptr && am_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(wfm_mod_settings != nullptr && wfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

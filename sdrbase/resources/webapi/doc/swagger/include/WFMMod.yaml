@@ -1,0 +1,48 @@
+WFMModSettings:
+  description: WFMMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    afBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    toneFrequency:
+      type: number
+      format: float
+    volumeFactor:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    playLoop:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    modAFInput:
+      type: integer
+    cwKeyer:
+      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+
+WFMModReport:
+  description: WFMMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+       

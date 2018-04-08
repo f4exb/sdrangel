@@ -162,6 +162,17 @@ def setupChannel(options):
         settings["AMModSettings"]["toneFrequency"] = 600
         settings["AMModSettings"]["modFactor"] = 0.9
         settings["AMModSettings"]["rfBandwidth"] = 7500
+    elif options.channel_id == "WFMMod":
+        settings["WFMModSettings"]["title"] = "Test WFM"
+        settings["WFMModSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["WFMModSettings"]["cwKeyer"]["text"] = "VVV DE F4EXB  "
+        settings["WFMModSettings"]["cwKeyer"]["loop"] = 1
+        settings["WFMModSettings"]["cwKeyer"]["mode"] = 1 # text
+        settings["WFMModSettings"]["modAFInput"] = 4 # CW text
+        settings["WFMModSettings"]["toneFrequency"] = 600
+        settings["WFMModSettings"]["fmDeviation"] = 25000
+        settings["WFMModSettings"]["rfBandwidth"] = 75000
+        settings["WFMModSettings"]["afBandwidth"] = 3000
     
     r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change modulator")
     if r is None:

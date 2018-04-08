@@ -44,15 +44,6 @@ class WFMMod : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    typedef enum
-    {
-        WFMModInputNone,
-        WFMModInputTone,
-        WFMModInputFile,
-        WFMModInputAudio,
-        WFMModInputCWTone
-    } WFMModInputAF;
-
     class MsgConfigureWFMMod : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -158,27 +149,6 @@ public:
         { }
     };
 
-    class MsgConfigureAFInput : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        WFMModInputAF getAFInput() const { return m_afInput; }
-
-        static MsgConfigureAFInput* create(WFMModInputAF afInput)
-        {
-            return new MsgConfigureAFInput(afInput);
-        }
-
-    private:
-        WFMModInputAF m_afInput;
-
-        MsgConfigureAFInput(WFMModInputAF afInput) :
-            Message(),
-            m_afInput(afInput)
-        { }
-    };
-
     class MsgReportFileSourceStreamTiming : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -246,6 +216,20 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -309,7 +293,6 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    WFMModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
@@ -323,6 +306,8 @@ private:
     void calculateLevel(const Real& sample);
     void openFileStream();
     void seekFileStream(int seekPercentage);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 

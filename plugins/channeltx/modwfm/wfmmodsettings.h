@@ -23,6 +23,15 @@ class Serializable;
 
 struct WFMModSettings
 {
+    typedef enum
+    {
+        WFMModInputNone,
+        WFMModInputTone,
+        WFMModInputFile,
+        WFMModInputAudio,
+        WFMModInputCWTone
+    } WFMModInputAF;
+
     static const int m_nbRfBW;
     static const int m_rfBW[];
 
@@ -36,6 +45,7 @@ struct WFMModSettings
     bool m_playLoop;
     quint32 m_rgbColor;
     QString m_title;
+    WFMModInputAF m_modAFInput;
     QString m_audioDeviceName;
 
     Serializable *m_channelMarker;

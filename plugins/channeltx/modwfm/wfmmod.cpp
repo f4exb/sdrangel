@@ -22,11 +22,16 @@
 #include <complex.h>
 #include <algorithm>
 
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGAMModReport.h"
+
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "util/db.h"
 
 #include "wfmmod.h"
 
@@ -34,7 +39,6 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMMod, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
@@ -56,7 +60,6 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
     m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(WFMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
@@ -119,7 +122,8 @@ void WFMMod::pull(Sample& sample)
 
 	m_settingsMutex.lock();
 
-	if ((m_afInput == WFMModInputFile) || (m_afInput == WFMModInputAudio))
+	if ((m_settings.m_modAFInput == WFMModSettings::WFMModInputFile)
+	   || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAudio))
 	{
 	    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
 	    {
@@ -178,13 +182,13 @@ void WFMMod::pullAudio(int nbSamples)
 
 void WFMMod::pullAF(Complex& sample)
 {
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
-    case WFMModInputTone:
+    case WFMModSettings::WFMModInputTone:
         sample.real(m_toneNcoRF.next() * m_settings.m_volumeFactor);
         sample.imag(0.0f);
         break;
-    case WFMModInputFile:
+    case WFMModSettings::WFMModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
@@ -217,13 +221,13 @@ void WFMMod::pullAF(Complex& sample)
             sample.imag(0.0f);
         }
         break;
-    case WFMModInputAudio:
+    case WFMModSettings::WFMModInputAudio:
         {
             sample.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor);
             sample.imag(0.0f);
         }
         break;
-    case WFMModInputCWTone:
+    case WFMModSettings::WFMModInputCWTone:
         Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -247,7 +251,7 @@ void WFMMod::pullAF(Complex& sample)
             }
         }
         break;
-    case WFMModInputNone:
+    case WFMModSettings::WFMModInputNone:
     default:
         sample.real(0.0f);
         sample.imag(0.0f);
@@ -334,13 +338,6 @@ bool WFMMod::handleMessage(const Message& cmd)
         MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
-
-        return true;
-    }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
 
         return true;
     }
@@ -545,3 +542,177 @@ bool WFMMod::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+int WFMMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+    response.getWfmModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int WFMMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    WFMModSettings settings;
+    bool channelizerChange = false;
+
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getWfmModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getWfmModSettings()->getInputFrequencyOffset();
+        channelizerChange = true;
+    }
+    if (channelSettingsKeys.contains("modAFInput")) {
+        settings.m_modAFInput = (WFMModSettings::WFMModInputAF) response.getWfmModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getWfmModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getWfmModSettings()->getRfBandwidth();
+        channelizerChange = true;
+    }
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getWfmModSettings()->getAfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getWfmModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getWfmModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getWfmModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getWfmModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getWfmModSettings()->getFmDeviation();
+    }
+
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getWfmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+
+        if (channelSettingsKeys.contains("cwKeyer.loop")) {
+            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+        }
+        if (channelSettingsKeys.contains("cwKeyer.mode")) {
+            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.text")) {
+            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
+            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
+            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+        }
+
+        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        m_cwKeyer.setText(cwKeyerSettings.m_text);
+        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyer);
+        }
+    }
+
+    if (channelizerChange)
+    {
+        WFMMod::MsgConfigureChannelizer *msgChan = WFMMod::MsgConfigureChannelizer::create(
+                settings.m_rfBandwidth, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureWFMMod *msg = MsgConfigureWFMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureWFMMod *msgToGUI = MsgConfigureWFMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int WFMMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setWfmModReport(new SWGSDRangel::SWGWFMModReport());
+    response.getWfmModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void WFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMModSettings& settings)
+{
+    response.getWfmModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getWfmModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getWfmModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getWfmModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getWfmModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getWfmModSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getWfmModSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getWfmModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getWfmModSettings()->getTitle()) {
+        *response.getWfmModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getWfmModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getWfmModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getWfmModSettings()->setVolumeFactor(settings.m_volumeFactor);
+
+    if (!response.getWfmModSettings()->getCwKeyer()) {
+        response.getWfmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
+    }
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getWfmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    if (response.getWfmModSettings()->getAudioDeviceName()) {
+        *response.getWfmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getWfmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void WFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getWfmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getWfmModReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getWfmModReport()->setChannelSampleRate(m_outputSampleRate);
+}
+

@@ -26,6 +26,7 @@
 #include "SWGAMModSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
+#include "SWGWFMModSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -64,6 +65,9 @@ public:
     SWGNFMModSettings* getNfmModSettings();
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
 
+    SWGWFMModSettings* getWfmModSettings();
+    void setWfmModSettings(SWGWFMModSettings* wfm_mod_settings);
+
 
     virtual bool isSet() override;
 
@@ -85,6 +89,9 @@ private:
 
     SWGNFMModSettings* nfm_mod_settings;
     bool m_nfm_mod_settings_isSet;
+
+    SWGWFMModSettings* wfm_mod_settings;
+    bool m_wfm_mod_settings_isSet;
 
 };
 

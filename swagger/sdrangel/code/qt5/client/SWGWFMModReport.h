@@ -11,90 +11,60 @@
  */
 
 /*
- * SWGChannelReport.h
+ * SWGWFMModReport.h
  *
- * Base channel report. The specific channel report present depends on channelType or paremt context.
+ * WFMMod
  */
 
-#ifndef SWGChannelReport_H_
-#define SWGChannelReport_H_
+#ifndef SWGWFMModReport_H_
+#define SWGWFMModReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAMDemodReport.h"
-#include "SWGAMModReport.h"
-#include "SWGNFMDemodReport.h"
-#include "SWGNFMModReport.h"
-#include "SWGWFMModReport.h"
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGChannelReport: public SWGObject {
+class SWG_API SWGWFMModReport: public SWGObject {
 public:
-    SWGChannelReport();
-    SWGChannelReport(QString* json);
-    virtual ~SWGChannelReport();
+    SWGWFMModReport();
+    SWGWFMModReport(QString* json);
+    virtual ~SWGWFMModReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelReport* fromJson(QString &jsonString) override;
+    virtual SWGWFMModReport* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
 
-    qint32 getTx();
-    void setTx(qint32 tx);
+    qint32 getAudioSampleRate();
+    void setAudioSampleRate(qint32 audio_sample_rate);
 
-    SWGAMDemodReport* getAmDemodReport();
-    void setAmDemodReport(SWGAMDemodReport* am_demod_report);
-
-    SWGAMModReport* getAmModReport();
-    void setAmModReport(SWGAMModReport* am_mod_report);
-
-    SWGNFMDemodReport* getNfmDemodReport();
-    void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
-
-    SWGNFMModReport* getNfmModReport();
-    void setNfmModReport(SWGNFMModReport* nfm_mod_report);
-
-    SWGWFMModReport* getWfmModReport();
-    void setWfmModReport(SWGWFMModReport* wfm_mod_report);
+    qint32 getChannelSampleRate();
+    void setChannelSampleRate(qint32 channel_sample_rate);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
-    qint32 tx;
-    bool m_tx_isSet;
+    qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
 
-    SWGAMDemodReport* am_demod_report;
-    bool m_am_demod_report_isSet;
-
-    SWGAMModReport* am_mod_report;
-    bool m_am_mod_report_isSet;
-
-    SWGNFMDemodReport* nfm_demod_report;
-    bool m_nfm_demod_report_isSet;
-
-    SWGNFMModReport* nfm_mod_report;
-    bool m_nfm_mod_report_isSet;
-
-    SWGWFMModReport* wfm_mod_report;
-    bool m_wfm_mod_report_isSet;
+    qint32 channel_sample_rate;
+    bool m_channel_sample_rate_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelReport_H_ */
+#endif /* SWGWFMModReport_H_ */

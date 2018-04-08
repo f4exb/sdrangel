@@ -62,6 +62,8 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
+#include "SWGWFMModReport.h"
+#include "SWGWFMModSettings.h"
 
 namespace SWGSDRangel {
 
@@ -209,6 +211,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
+    }
+    if(QString("SWGWFMModReport").compare(type) == 0) {
+      return new SWGWFMModReport();
+    }
+    if(QString("SWGWFMModSettings").compare(type) == 0) {
+      return new SWGWFMModSettings();
     }
     
     return nullptr;
