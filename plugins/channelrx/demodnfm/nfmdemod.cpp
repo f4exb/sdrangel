@@ -55,7 +55,8 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_ctcssIndex(0),
         m_sampleCount(0),
         m_squelchCount(0),
-        m_squelchGate(2),
+        m_squelchGate(4800),
+        m_squelchDecay(480),
         m_squelchLevel(-990),
         m_squelchOpen(false),
         m_afSquelchOpen(false),
@@ -75,11 +76,11 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
 	m_agcLevel = 1.0;
 
-	m_ctcssDetector.setCoefficients(3000, 6000.0); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(24, 600, 48000.0, 200, 0); // 0.5ms test period, 300ms average span, 48kS/s SR, 100ms attack, no decay
-
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+
+	m_ctcssDetector.setCoefficients(m_audioSampleRate/16, m_audioSampleRate/8.0f); // 0.5s / 2 Hz resolution
+	m_afSquelch.setCoefficients(m_audioSampleRate/2000, 600, m_audioSampleRate, 200, 0); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
 
     m_lowpass.create(301, m_audioSampleRate, 250.0);
 
@@ -136,6 +137,7 @@ Real angleDist(Real a, Real b)
 void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
+	float f = (m_audioSampleRate / 48000.0f);
 
 	if (!m_running) {
 	    return;
@@ -174,13 +176,13 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_settings.m_deltaSquelch)
             {
-                if (m_afSquelch.analyze(demod)) {
-                    m_afSquelchOpen = m_afSquelch.evaluate() ? m_squelchGate + 480 : 0;
+                if (m_afSquelch.analyze(demod * f)) {
+                    m_afSquelchOpen = m_afSquelch.evaluate() ? m_squelchGate + m_squelchDecay : 0;
                 }
 
                 if (m_afSquelchOpen)
                 {
-                    if (m_squelchCount < m_squelchGate + 480)
+                    if (m_squelchCount < m_squelchGate + m_squelchDecay)
                     {
                         m_squelchCount++;
                     }
@@ -204,7 +206,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
                 else
                 {
-                    if (m_squelchCount < m_squelchGate + 480)
+                    if (m_squelchCount < m_squelchGate + m_squelchDecay)
                     {
                         m_squelchCount++;
                     }
@@ -217,7 +219,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             {
                 if (m_settings.m_ctcssOn)
                 {
-                    Real ctcss_sample = m_lowpass.filter(demod);
+                    Real ctcss_sample = m_lowpass.filter(demod * f);
 
                     if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
                     {
@@ -257,8 +259,8 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
                 else
                 {
-                    demod = m_bandpass.filter(demod);
-                    Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / 480.0f);
+                    demod = m_bandpass.filter(demod * f);
+                    Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / (Real) m_squelchDecay);
                     sample = demod * m_settings.m_volume * squelchFactor;
                 }
             }
@@ -407,6 +409,12 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
     m_lowpass.create(301, sampleRate, 250.0);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
+    m_squelchGate = (sampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
+    m_squelchDecay = (sampleRate / 100); // decay is fixed at 10ms
+    m_squelchCount = 0; // reset squelch open counter
+    m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
+    m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
+    m_phaseDiscri.setFMScaling((8.0f*sampleRate) / static_cast<float>(m_settings.m_fmDeviation)); // integrate 4x factor
     m_audioFifo.setSize(sampleRate);
     m_settingsMutex.unlock();
 
@@ -464,10 +472,9 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling((8.0f*settings.m_rfBandwidth) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
+        m_phaseDiscri.setFMScaling((8.0f*m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
@@ -479,7 +486,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
     {
-        m_squelchGate = 480 * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
+        m_squelchGate = (m_audioSampleRate / 100) * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
     }
 
@@ -614,7 +621,7 @@ int NFMDemod::webapiSettingsPutPatch(
     if (frequencyOffsetChanged)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                48000, settings.m_inputFrequencyOffset);
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(channelConfigMsg);
     }
 
