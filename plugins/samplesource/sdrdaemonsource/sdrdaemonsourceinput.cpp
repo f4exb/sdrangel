@@ -313,7 +313,7 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     if (force || (m_settings.m_log2Decim != settings.m_log2Decim))
     {
         if (nbArgs > 0) os << ",";
-        os << "decim=" << m_settings.m_log2Decim;
+        os << "decim=" << settings.m_log2Decim;
         nbArgs++;
     }
 
