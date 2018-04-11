@@ -330,13 +330,13 @@
          <string>Sound volume</string>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>20</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>20</number>
+         <number>10</number>
         </property>
        </widget>
       </item>
@@ -358,7 +358,7 @@
          <string>Sound volume</string>
         </property>
         <property name="text">
-         <string>2.0</string>
+         <string>1.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
