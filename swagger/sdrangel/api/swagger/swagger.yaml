@@ -1753,6 +1753,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
+      SSBModSettings:
+        $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
       WFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/WFMMod.yaml#/WFMModSettings"
         
@@ -1774,6 +1776,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
+      SSBModReport:
+        $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       WFMModReport:
         $ref: "http://localhost:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
 

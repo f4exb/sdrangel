@@ -60,6 +60,8 @@
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
 #include "SWGRtlSdrSettings.h"
+#include "SWGSSBModReport.h"
+#include "SWGSSBModSettings.h"
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
 #include "SWGWFMModReport.h"
@@ -205,6 +207,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
+    }
+    if(QString("SWGSSBModReport").compare(type) == 0) {
+      return new SWGSSBModReport();
+    }
+    if(QString("SWGSSBModSettings").compare(type) == 0) {
+      return new SWGSSBModSettings();
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();

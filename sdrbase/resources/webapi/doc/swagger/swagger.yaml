@@ -1753,6 +1753,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+      SSBModSettings:
+        $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       WFMModSettings:
         $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
         
@@ -1774,6 +1776,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+      SSBModReport:
+        $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
       WFMModReport:
         $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
 

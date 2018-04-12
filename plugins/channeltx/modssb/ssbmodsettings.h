@@ -49,9 +49,6 @@ struct SSBModSettings
     int m_agcThresholdDelay;
     quint32 m_rgbColor;
 
-    QString m_udpAddress;
-    uint16_t m_udpPort;
-
     QString m_title;
     QString m_audioDeviceName;
 

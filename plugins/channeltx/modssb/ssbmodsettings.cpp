@@ -65,8 +65,6 @@ void SSBModSettings::resetToDefaults()
     m_agcThresholdGate = 192;
     m_agcThresholdDelay = 2400;
     m_rgbColor = QColor(0, 255, 0).rgb();
-    m_udpAddress = "127.0.0.1";
-    m_udpPort = 9999;
     m_title = "SSB Modulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
