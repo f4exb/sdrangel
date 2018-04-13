@@ -25,6 +25,15 @@ class Serializable;
 
 struct SSBModSettings
 {
+    typedef enum
+    {
+        SSBModInputNone,
+        SSBModInputTone,
+        SSBModInputFile,
+        SSBModInputAudio,
+        SSBModInputCWTone
+    } SSBModInputAF;
+
     static const int m_nbAGCTimeConstants;
     static const int m_agcTimeConstant[];
 
@@ -50,6 +59,7 @@ struct SSBModSettings
     quint32 m_rgbColor;
 
     QString m_title;
+    SSBModInputAF m_modAFInput;
     QString m_audioDeviceName;
 
     Serializable *m_channelMarker;

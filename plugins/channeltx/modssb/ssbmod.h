@@ -44,15 +44,6 @@ class SSBMod : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    typedef enum
-    {
-        SSBModInputNone,
-        SSBModInputTone,
-        SSBModInputFile,
-        SSBModInputAudio,
-        SSBModInputCWTone
-    } SSBModInputAF;
-
     class MsgConfigureSSBMod : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -155,27 +146,6 @@ public:
 
         MsgConfigureFileSourceStreamTiming() :
             Message()
-        { }
-    };
-
-    class MsgConfigureAFInput : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        SSBModInputAF getAFInput() const { return m_afInput; }
-
-        static MsgConfigureAFInput* create(SSBModInputAF afInput)
-        {
-            return new MsgConfigureAFInput(afInput);
-        }
-
-    private:
-        SSBModInputAF m_afInput;
-
-        MsgConfigureAFInput(SSBModInputAF afInput) :
-            Message(),
-            m_afInput(afInput)
         { }
     };
 
@@ -319,7 +289,6 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    SSBModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;

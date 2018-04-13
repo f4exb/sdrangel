@@ -34,7 +34,6 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
@@ -62,7 +61,6 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
@@ -211,9 +209,9 @@ void SSBMod::pullAF(Complex& sample)
     int decim = 1<<(m_settings.m_spanLog2 - 1);
     unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
-    case SSBModInputTone:
+    case SSBModSettings::SSBModInputTone:
     	if (m_settings.m_dsb)
     	{
     		Real t = m_toneNco.next()/1.25;
@@ -229,7 +227,7 @@ void SSBMod::pullAF(Complex& sample)
     		}
     	}
         break;
-    case SSBModInputFile:
+    case SSBModSettings::SSBModInputFile:
     	// Monaural (mono):
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
@@ -295,7 +293,7 @@ void SSBMod::pullAF(Complex& sample)
             ci.imag(0.0f);
         }
         break;
-    case SSBModInputAudio:
+    case SSBModSettings::SSBModInputAudio:
         if (m_settings.m_audioBinaural)
     	{
         	if (m_settings.m_audioFlipChannels)
@@ -326,7 +324,7 @@ void SSBMod::pullAF(Complex& sample)
         }
 
         break;
-    case SSBModInputCWTone:
+    case SSBModSettings::SSBModInputCWTone:
     	Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -376,12 +374,13 @@ void SSBMod::pullAF(Complex& sample)
         }
 
         break;
-    case SSBModInputNone:
+    case SSBModSettings::SSBModInputNone:
     default:
         break;
     }
 
-    if ((m_afInput == SSBModInputFile) || (m_afInput == SSBModInputAudio)) // real audio
+    if ((m_settings.m_modAFInput == SSBModSettings::SSBModInputFile)
+       || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAudio)) // real audio
     {
     	if (m_settings.m_dsb)
     	{
@@ -439,7 +438,8 @@ void SSBMod::pullAF(Complex& sample)
             }
     	}
     } // Real audio
-    else if ((m_afInput == SSBModInputTone) || (m_afInput == SSBModInputCWTone)) // tone
+    else if ((m_settings.m_modAFInput == SSBModSettings::SSBModInputTone)
+          || (m_settings.m_modAFInput == SSBModSettings::SSBModInputCWTone)) // tone
     {
         m_sum += sample;
 
@@ -562,13 +562,6 @@ bool SSBMod::handleMessage(const Message& cmd)
         MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
-
-        return true;
-    }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
 
         return true;
     }

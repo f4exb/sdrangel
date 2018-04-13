@@ -66,6 +66,7 @@ void SSBModSettings::resetToDefaults()
     m_agcThresholdDelay = 2400;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Modulator";
+    m_modAFInput = SSBModInputAF::SSBModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
@@ -105,6 +106,7 @@ QByteArray SSBModSettings::serialize() const
 
     s.writeString(19, m_title);
     s.writeString(20, m_audioDeviceName);
+    s.writeS32(21, (int) m_modAFInput);
 
     return s.final();
 }
@@ -171,6 +173,13 @@ bool SSBModSettings::deserialize(const QByteArray& data)
 
         d.readString(19, &m_title, "SSB Modulator");
         d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+
+        d.readS32(21, &tmp, 0);
+        if ((tmp < 0) || (tmp > (int) SSBModInputAF::SSBModInputTone)) {
+            m_modAFInput = SSBModInputNone;
+        } else {
+            m_modAFInput = (SSBModInputAF) tmp;
+        }
 
         return true;
     }

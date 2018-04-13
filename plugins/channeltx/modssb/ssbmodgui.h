@@ -77,7 +77,6 @@ private:
     int m_samplesCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
     QIcon m_iconDSBUSB;
