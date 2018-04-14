@@ -179,6 +179,7 @@ private:
     int m_inputFrequencyOffset;
 	NFMDemodSettings m_settings;
 	uint32_t m_audioSampleRate;
+	float m_discriCompensation; //!< compensation factor that depends on audio rate (1 for 48 kS/s)
 	bool m_running;
 
 	NCO m_nco;

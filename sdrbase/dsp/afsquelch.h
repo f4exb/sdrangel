@@ -26,18 +26,18 @@
  */
 class SDRBASE_API AFSquelch {
 public:
-    // allows user defined tone pair
-	AFSquelch(unsigned int nbTones,
-			const double *tones);
+    // constructor with default values
+	AFSquelch();
     virtual ~AFSquelch();
 
     // setup the basic parameters and coefficients
     void setCoefficients(
             unsigned int N,              //!< the algorithm "block"  size
 			unsigned int nbAvg,          //!< averaging size
-			unsigned int SampleRate,     //!< input signal sample rate
-			unsigned int _samplesAttack, //!< number of results before squelch opens
-			unsigned int _samplesDecay); //!< number of results keeping squelch open
+			unsigned int sampleRate,     //!< input signal sample rate
+			unsigned int samplesAttack,  //!< number of results before squelch opens
+			unsigned int samplesDecay,   //!< number of results keeping squelch open
+			const double *tones);        //!< center frequency of tones tested
 
     // set the detection threshold
     void setThreshold(double _threshold);

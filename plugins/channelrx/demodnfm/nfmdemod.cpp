@@ -44,6 +44,7 @@ const QString NFMDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.nfm";
 const QString NFMDemod::m_channelId = "NFMDemod";
 
 static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
+static const double afSqTones_lowrate[2] = {1000.0, 3500.0};
 const int NFMDemod::m_udpBlockSize = 512;
 
 NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
@@ -64,7 +65,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_afSquelch(2, afSqTones),
+        m_afSquelch(),
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -78,9 +79,11 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    m_discriCompensation = (m_audioSampleRate/48000.0f);
+    m_discriCompensation *= sqrt(m_discriCompensation);
 
 	m_ctcssDetector.setCoefficients(m_audioSampleRate/16, m_audioSampleRate/8.0f); // 0.5s / 2 Hz resolution
-	m_afSquelch.setCoefficients(m_audioSampleRate/2000, 600, m_audioSampleRate, 200, 0); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
+	m_afSquelch.setCoefficients(m_audioSampleRate/2000, 600, m_audioSampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
 
     m_lowpass.create(301, m_audioSampleRate, 250.0);
 
@@ -137,7 +140,6 @@ Real angleDist(Real a, Real b)
 void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
 	Complex ci;
-	float f = (m_audioSampleRate / 48000.0f);
 
 	if (!m_running) {
 	    return;
@@ -176,7 +178,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_settings.m_deltaSquelch)
             {
-                if (m_afSquelch.analyze(demod * f)) {
+                if (m_afSquelch.analyze(demod * m_discriCompensation)) {
                     m_afSquelchOpen = m_afSquelch.evaluate() ? m_squelchGate + m_squelchDecay : 0;
                 }
 
@@ -219,7 +221,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             {
                 if (m_settings.m_ctcssOn)
                 {
-                    Real ctcss_sample = m_lowpass.filter(demod * f);
+                    Real ctcss_sample = m_lowpass.filter(demod * m_discriCompensation);
 
                     if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
                     {
@@ -259,7 +261,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
                 else
                 {
-                    demod = m_bandpass.filter(demod * f);
+                    demod = m_bandpass.filter(demod * m_discriCompensation);
                     Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / (Real) m_squelchDecay);
                     sample = demod * m_settings.m_volume * squelchFactor;
                 }
@@ -404,6 +406,7 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_inputMessageQueue.push(channelConfigMsg);
 
     m_settingsMutex.lock();
+
     m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
@@ -413,9 +416,20 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_squelchDecay = (sampleRate / 100); // decay is fixed at 10ms
     m_squelchCount = 0; // reset squelch open counter
     m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
-    m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
+
+    if (sampleRate < 16000) {
+        m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones_lowrate); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
+
+    } else {
+        m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
+    }
+
+    m_discriCompensation = (sampleRate/48000.0f);
+    m_discriCompensation *= sqrt(m_discriCompensation);
+
     m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
+
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
