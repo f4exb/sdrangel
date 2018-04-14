@@ -1896,6 +1896,27 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "SSBMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject ssbModSettingsJsonObject = jsonObject["SSBModSettings"].toObject();
+            channelSettingsKeys = ssbModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(ssbModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+            channelSettings.getSsbModSettings()->fromJsonObject(ssbModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "WFMMod")
     {
         if (channelSettings.getTx() != 0)
@@ -1992,6 +2013,20 @@ bool WebAPIRequestMapper::validateChannelReport(
             channelReportKeys = nfmModReportJsonObject.keys();
             channelReport.setNfmModReport(new SWGSDRangel::SWGNFMModReport());
             channelReport.getNfmModReport()->fromJsonObject(nfmModReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "SSBMod")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject ssbModReportJsonObject = jsonObject["SSBModReport"].toObject();
+            channelReportKeys = ssbModReportJsonObject.keys();
+            channelReport.setSsbModReport(new SWGSDRangel::SWGSSBModReport());
+            channelReport.getSsbModReport()->fromJsonObject(ssbModReportJsonObject);
             return true;
         }
         else {

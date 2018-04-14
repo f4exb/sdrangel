@@ -511,7 +511,6 @@ bool AMMod::deserialize(const QByteArray& data)
     }
 }
 
-
 int AMMod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
@@ -541,6 +540,9 @@ int AMMod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("modAFInput")) {
         settings.m_modAFInput = (AMModSettings::AMModInputAF) response.getAmModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getAmModSettings()->getAudioDeviceName();
     }
     if (channelSettingsKeys.contains("playLoop")) {
         settings.m_playLoop = response.getAmModSettings()->getPlayLoop() != 0;

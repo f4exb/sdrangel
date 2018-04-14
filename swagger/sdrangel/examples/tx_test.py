@@ -162,6 +162,16 @@ def setupChannel(options):
         settings["AMModSettings"]["toneFrequency"] = 600
         settings["AMModSettings"]["modFactor"] = 0.9
         settings["AMModSettings"]["rfBandwidth"] = 7500
+    elif options.channel_id == "SSBMod":
+        settings["SSBModSettings"]["title"] = "Test SSB"
+        settings["SSBModSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["SSBModSettings"]["cwKeyer"]["text"] = "VVV DE F4EXB  "
+        settings["SSBModSettings"]["cwKeyer"]["loop"] = 1
+        settings["SSBModSettings"]["cwKeyer"]["mode"] = 1 # text
+        settings["SSBModSettings"]["modAFInput"] = 4 # CW text
+        settings["SSBModSettings"]["toneFrequency"] = 600
+        settings["SSBModSettings"]["bandwidth"] = 1000
+        settings["SSBModSettings"]["lowCut"] = 300
     elif options.channel_id == "WFMMod":
         settings["WFMModSettings"]["title"] = "Test WFM"
         settings["WFMModSettings"]["inputFrequencyOffset"] = options.channel_freq

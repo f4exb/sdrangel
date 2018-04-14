@@ -117,6 +117,21 @@ bool SSBModGUI::handleMessage(const Message& message)
         applyBandwidths(); // will update spectrum details with new sample rate
         return true;
     }
+    else if (SSBMod::MsgConfigureSSBMod::match(message))
+    {
+        const SSBMod::MsgConfigureSSBMod& cfg = (SSBMod::MsgConfigureSSBMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        return true;
+    }
     else
     {
         return false;
