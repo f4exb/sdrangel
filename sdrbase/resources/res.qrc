@@ -10,8 +10,10 @@
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
+        <file>webapi/doc/swagger/include/ATVMod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
+        <file>webapi/doc/swagger/include/SSBMod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger-ui/swagger-ui.js.map</file>

@@ -1749,6 +1749,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/AMDemod.yaml#/AMDemodSettings"
       AMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/AMMod.yaml#/AMModSettings"
+      ATVModSettings:
+        $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModSettings"
       NFMDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1772,6 +1774,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/AMDemod.yaml#/AMDemodReport"
       AMModReport:
         $ref: "http://localhost:8081/api/swagger/include/AMMod.yaml#/AMModReport"
+      ATVModReport:
+        $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
       NFMDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

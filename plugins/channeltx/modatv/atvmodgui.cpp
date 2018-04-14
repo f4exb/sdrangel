@@ -149,6 +149,15 @@ bool ATVModGUI::handleMessage(const Message& message)
         setRFFiltersSlidersRange(sampleRate);
         return true;
     }
+    else if (ATVMod::MsgConfigureATVMod::match(message))
+    {
+        const ATVMod::MsgConfigureATVMod& cfg = (ATVMod::MsgConfigureATVMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
     else
     {
         return false;

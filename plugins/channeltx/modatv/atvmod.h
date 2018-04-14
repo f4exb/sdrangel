@@ -411,6 +411,20 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
     int getEffectiveSampleRate() const { return m_tvSampleRate; };
     double getMagSq() const { return m_movingAverage.asDouble(); }
     void getCameraNumbers(std::vector<int>& numbers);
@@ -582,6 +596,9 @@ private:
     void resizeCameras();
     void resizeCamera();
     void mixImageAndText(cv::Mat& image);
+
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
     inline void pullImageLine(Real& sample, bool noHSync = false)
     {

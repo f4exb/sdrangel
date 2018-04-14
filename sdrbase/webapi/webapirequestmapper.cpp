@@ -1861,6 +1861,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "ATVMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject atvModSettingsJsonObject = jsonObject["ATVModSettings"].toObject();
+            channelSettingsKeys = atvModSettingsJsonObject.keys();
+            channelSettings.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+            channelSettings.getAtvModSettings()->fromJsonObject(atvModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)
@@ -1985,6 +1999,20 @@ bool WebAPIRequestMapper::validateChannelReport(
             channelReportKeys = amModReportJsonObject.keys();
             channelReport.setAmModReport(new SWGSDRangel::SWGAMModReport());
             channelReport.getAmModReport()->fromJsonObject(amModReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "ATVMod")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject atvModReportJsonObject = jsonObject["ATVModReport"].toObject();
+            channelReportKeys = atvModReportJsonObject.keys();
+            channelReport.setAtvModReport(new SWGSDRangel::SWGATVModReport());
+            channelReport.getAtvModReport()->fromJsonObject(atvModReportJsonObject);
             return true;
         }
         else {

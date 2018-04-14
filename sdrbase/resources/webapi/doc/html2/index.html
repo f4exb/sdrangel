@@ -819,6 +819,90 @@ margin-bottom: 20px;
   },
   "description" : "AMMod"
 };
+            defs.ATVModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ATVMod"
+};
+            defs.ATVModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "rfOppBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "atvStd" : {
+      "type" : "integer"
+    },
+    "nbLines" : {
+      "type" : "integer"
+    },
+    "fps" : {
+      "type" : "integer"
+    },
+    "atvModInput" : {
+      "type" : "integer"
+    },
+    "uniformLevel" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "atvModulation" : {
+      "type" : "integer"
+    },
+    "videoPlayLoop" : {
+      "type" : "integer"
+    },
+    "videoPlay" : {
+      "type" : "integer"
+    },
+    "cameraPlay" : {
+      "type" : "integer"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "invertedVideo" : {
+      "type" : "integer"
+    },
+    "rfScalingFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmExcursion" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "forceDecimator" : {
+      "type" : "integer"
+    },
+    "overlayText" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  },
+  "description" : "ATVMod"
+};
             defs.AirspyHFSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1124,6 +1208,9 @@ margin-bottom: 20px;
     "AMModReport" : {
       "$ref" : "#/definitions/AMModReport"
     },
+    "ATVModReport" : {
+      "$ref" : "#/definitions/ATVModReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1156,6 +1243,9 @@ margin-bottom: 20px;
     },
     "AMModSettings" : {
       "$ref" : "#/definitions/AMModSettings"
+    },
+    "ATVModSettings" : {
+      "$ref" : "#/definitions/ATVModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -20439,7 +20529,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-04-12T23:48:02.735+02:00
+              Generated 2018-04-14T22:10:55.895+02:00
             </div>
           </div>
       </div>

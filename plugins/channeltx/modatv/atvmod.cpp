@@ -17,12 +17,17 @@
 #include <QDebug>
 #include <time.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGATVModReport.h"
+
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "util/db.h"
 
 #include "atvmod.h"
 
@@ -1176,4 +1181,158 @@ bool ATVMod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+int ATVMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+    response.getAtvModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ATVMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    ATVModSettings settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getAtvModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getAtvModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rfOppBandwidth")) {
+        settings.m_rfOppBandwidth = response.getAtvModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("atvStd")) {
+        settings.m_atvStd = (ATVModSettings::ATVStd) response.getAtvModSettings()->getAtvStd();
+    }
+    if (channelSettingsKeys.contains("nbLines")) {
+        settings.m_nbLines = response.getAtvModSettings()->getNbLines();
+    }
+    if (channelSettingsKeys.contains("fps")) {
+        settings.m_fps = response.getAtvModSettings()->getFps();
+    }
+    if (channelSettingsKeys.contains("atvModInput")) {
+        settings.m_atvModInput = (ATVModSettings::ATVModInput) response.getAtvModSettings()->getAtvModInput();
+    }
+    if (channelSettingsKeys.contains("uniformLevel")) {
+        settings.m_uniformLevel = response.getAtvModSettings()->getUniformLevel();
+    }
+    if (channelSettingsKeys.contains("atvModulation")) {
+        settings.m_atvModulation = (ATVModSettings::ATVModulation) response.getAtvModSettings()->getAtvModulation();
+    }
+    if (channelSettingsKeys.contains("videoPlayLoop")) {
+        settings.m_videoPlayLoop = response.getAtvModSettings()->getVideoPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("videoPlay")) {
+        settings.m_videoPlay = response.getAtvModSettings()->getVideoPlay() != 0;
+    }
+    if (channelSettingsKeys.contains("cameraPlay")) {
+        settings.m_cameraPlay = response.getAtvModSettings()->getCameraPlay() != 0;
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getAtvModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("invertedVideo")) {
+        settings.m_invertedVideo = response.getAtvModSettings()->getInvertedVideo() != 0;
+    }
+    if (channelSettingsKeys.contains("rfScalingFactor")) {
+        settings.m_rfScalingFactor = response.getAtvModSettings()->getRfScalingFactor();
+    }
+    if (channelSettingsKeys.contains("fmExcursion")) {
+        settings.m_fmExcursion = response.getAtvModSettings()->getFmExcursion();
+    }
+    if (channelSettingsKeys.contains("forceDecimator")) {
+        settings.m_forceDecimator = response.getAtvModSettings()->getForceDecimator() != 0;
+    }
+    if (channelSettingsKeys.contains("overlayText")) {
+        settings.m_overlayText = *response.getAtvModSettings()->getOverlayText();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAtvModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAtvModSettings()->getTitle();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
+                settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int ATVMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAtvModReport(new SWGSDRangel::SWGATVModReport());
+    response.getAtvModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings)
+{
+    response.getAtvModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAtvModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAtvModSettings()->setRfOppBandwidth(settings.m_rfOppBandwidth);
+    response.getAtvModSettings()->setAtvStd(settings.m_atvStd);
+    response.getAtvModSettings()->setNbLines(settings.m_nbLines);
+    response.getAtvModSettings()->setFps(settings.m_fps);
+    response.getAtvModSettings()->setAtvModInput(settings.m_atvModInput);
+    response.getAtvModSettings()->setUniformLevel(settings.m_uniformLevel);
+    response.getAtvModSettings()->setAtvModulation(settings.m_atvModulation);
+    response.getAtvModSettings()->setVideoPlayLoop(settings.m_videoPlayLoop ? 1 : 0);
+    response.getAtvModSettings()->setVideoPlay(settings.m_videoPlay ? 1 : 0);
+    response.getAtvModSettings()->setCameraPlay(settings.m_cameraPlay ? 1 : 0);
+    response.getAtvModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getAtvModSettings()->setInvertedVideo(settings.m_invertedVideo ? 1 : 0);
+    response.getAtvModSettings()->setRfScalingFactor(settings.m_rfScalingFactor);
+    response.getAtvModSettings()->setFmExcursion(settings.m_fmExcursion);
+    response.getAtvModSettings()->setForceDecimator(settings.m_forceDecimator ? 1 : 0);
+
+    if (response.getAtvModSettings()->getOverlayText()) {
+        *response.getAtvModSettings()->getOverlayText() = settings.m_overlayText;
+    } else {
+        response.getAtvModSettings()->setOverlayText(new QString(settings.m_overlayText));
+    }
+
+    response.getAtvModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getAtvModSettings()->getTitle()) {
+        *response.getAtvModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAtvModSettings()->setTitle(new QString(settings.m_title));
+    }
+}
+
+void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getAtvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getAtvModReport()->setChannelSampleRate(m_outputSampleRate);
 }

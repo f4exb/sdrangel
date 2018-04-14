@@ -24,7 +24,8 @@ def getInputOptions():
     parser.add_option("-C", "--channel-id", dest="channel_id", help="channel id", metavar="ID", type="string", default="NFMDemod") 
     parser.add_option("-F", "--device-freq", dest="device_freq", help="device center frequency (kHz)", metavar="FREQ", type="int") 
     parser.add_option("-f", "--channel-freq", dest="channel_freq", help="channel center frequency (Hz)", metavar="FREQ", type="int")
-    parser.add_option("-s", "--sample-rate", dest="sample_rate", help="host to device sample rate (kS/s)", metavar="RATE", type="int")
+    parser.add_option("-s", "--sample-rate", dest="sample_rate", help="host to device sample rate (S/s)", metavar="RATE", type="int")
+    parser.add_option("-l", "--log2-interp", dest="log2_interp", help="log2 of interpolation factor", metavar="RATE", type="int")
     parser.add_option("-A", "--antenna-path", dest="antenna_path", help="antenna path number", metavar="NUMBER", type="int")
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
 
@@ -46,8 +47,11 @@ def getInputOptions():
         options.channel_freq = 0
         
     if options.sample_rate == None:
-        options.sample_rate = 2600
+        options.sample_rate = 2600000
     
+    if options.log2_interp == None:
+        options.log2_interp = 4
+
     if options.antenna_path == None:
         options.antenna_path = 1
 
@@ -103,19 +107,19 @@ def setupDevice(options):
 
     if options.device_hwid == "BladeRF":
         settings['bladeRFOutputSettings']['centerFrequency'] = options.device_freq*1000
-        settings['bladeRFOutputSettings']['devSampleRate'] = options.sample_rate*1000
+        settings['bladeRFOutputSettings']['devSampleRate'] = options.sample_rate
         settings['bladeRFOutputSettings']['vga1'] = -20
         settings['bladeRFOutputSettings']['vga2'] = 6
         settings['bladeRFOutputSettings']['bandwidth'] = 1500*1000
-        settings['bladeRFOutputSettings']['log2Interp'] = 4
+        settings['bladeRFOutputSettings']['log2Interp'] = options.log2_interp
         settings['bladeRFOutputSettings']['xb200'] = 1 # assume XB200 is mounted
         settings['bladeRFOutputSettings']['xb200Path'] = 1 if options.device_freq < 300000 else 0
         settings['bladeRFOutputSettings']['xb200Filter'] = setupBladeRFXB200(options.device_freq)
     elif options.device_hwid == "LimeSDR":
         settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path
-        settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate*1000
+        settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate
         settings["limeSdrOutputSettings"]["log2HardInterp"] = 4
-        settings["limeSdrOutputSettings"]["log2SoftInterp"] = 4
+        settings["limeSdrOutputSettings"]["log2SoftInterp"] = options.log2_interp
         settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq*1000 + 500000
         settings["limeSdrOutputSettings"]["ncoEnable"] = 1
         settings["limeSdrOutputSettings"]["ncoFrequency"] = -500000
@@ -125,9 +129,9 @@ def setupDevice(options):
     elif options.device_hwid == "HackRF":
         settings['hackRFOutputSettings']['LOppmTenths'] = -51
         settings['hackRFOutputSettings']['centerFrequency'] = options.device_freq*1000
-        settings['hackRFOutputSettings']['devSampleRate'] = options.sample_rate*1000
+        settings['hackRFOutputSettings']['devSampleRate'] = options.sample_rate
         settings['hackRFOutputSettings']['lnaExt'] = 0
-        settings['hackRFOutputSettings']['log2Interp'] = 4
+        settings['hackRFOutputSettings']['log2Interp'] = options.log2_interp
         settings['hackRFOutputSettings']['vgaGain'] = 24
     
     r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch device settings")
@@ -162,6 +166,19 @@ def setupChannel(options):
         settings["AMModSettings"]["toneFrequency"] = 600
         settings["AMModSettings"]["modFactor"] = 0.9
         settings["AMModSettings"]["rfBandwidth"] = 7500
+    elif options.channel_id == "ATVMod":
+        settings["ATVModSettings"]["title"] = "Test ATV"
+        settings["ATVModSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["ATVModSettings"]["rfBandwidth"] = 30000
+        settings["ATVModSettings"]["forceDecimator"] = 1 # This is to engage filter
+        settings["ATVModSettings"]["atvStd"] = 5        # ATVStdHSkip
+        settings["ATVModSettings"]["atvModInput"] = 1   # ATVModInputHBars
+        settings["ATVModSettings"]["atvModulation"] = 1 # ATVModulationFM
+        settings["ATVModSettings"]["fps"] = 2
+        settings["ATVModSettings"]["nbLines"] = 90
+        settings["ATVModSettings"]["uniformLevel"] = 1.0 # 100% white
+        settings["ATVModSettings"]["fmExcursion"] = 0.2 # FM excursion is 20% of channel bandwidth
+        settings["ATVModSettings"]["overlayText"] = "F4EXB"
     elif options.channel_id == "SSBMod":
         settings["SSBModSettings"]["title"] = "Test SSB"
         settings["SSBModSettings"]["inputFrequencyOffset"] = options.channel_freq

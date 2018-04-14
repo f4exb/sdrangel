@@ -79,9 +79,6 @@ struct ATVModSettings
     quint32       m_rgbColor;
     QString       m_title;
 
-    QString m_udpAddress;
-    uint16_t m_udpPort;
-
     Serializable *m_channelMarker;
 
     ATVModSettings();
