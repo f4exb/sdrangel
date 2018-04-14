@@ -43,7 +43,6 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
-MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportEffectiveSampleRate, Message)
 
 const QString ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
@@ -73,7 +72,7 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
 	m_videoEOF(false),
 	m_videoOK(false),
 	m_cameraIndex(-1),
-	m_showOverlayText(false),
+	//m_showOverlayText(false),
     m_SSBFilter(0),
     m_SSBFilterBuffer(0),
     m_SSBFilterBufferIndex(0),
@@ -325,7 +324,7 @@ void ATVMod::pullVideo(Real& sample)
 
             		if (!colorFrame.empty()) // some frames may not come out properly
             		{
-            		    if (m_showOverlayText) {
+            		    if (m_settings.m_showOverlayText) {
             		        mixImageAndText(colorFrame);
             		    }
 
@@ -445,7 +444,7 @@ void ATVMod::pullVideo(Real& sample)
 
                 if (!colorFrame.empty()) // some frames may not come out properly
                 {
-                    if (m_showOverlayText) {
+                    if (m_settings.m_showOverlayText) {
                         mixImageAndText(colorFrame);
                     }
 
@@ -618,28 +617,6 @@ bool ATVMod::handleMessage(const Message& cmd)
     {
         MsgConfigureOverlayText& cfg = (MsgConfigureOverlayText&) cmd;
         m_overlayText = cfg.getOverlayText().toStdString();
-        return true;
-    }
-    else if (MsgConfigureShowOverlayText::match(cmd))
-    {
-        MsgConfigureShowOverlayText& cfg = (MsgConfigureShowOverlayText&) cmd;
-        bool showOverlayText = cfg.getShowOverlayText();
-
-        if (!m_imageFromFile.empty())
-        {
-            m_imageFromFile.copyTo(m_imageOriginal);
-
-            if (showOverlayText) {
-                qDebug("ATVMod::handleMessage: overlay text");
-                mixImageAndText(m_imageOriginal);
-            } else{
-                qDebug("ATVMod::handleMessage: clear text");
-            }
-
-            resizeImage();
-        }
-
-        m_showOverlayText = showOverlayText;
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -825,7 +802,7 @@ void ATVMod::openImage(const QString& fileName)
 	{
         m_imageFromFile.copyTo(m_imageOriginal);
 
-        if (m_showOverlayText) {
+        if (m_settings.m_showOverlayText) {
             mixImageAndText(m_imageOriginal);
 	    }
 
@@ -1106,6 +1083,7 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
             << " m_rfScalingFactor: " << settings.m_rfScalingFactor
             << " m_fmExcursion: " << settings.m_fmExcursion
             << " m_forceDecimator: " << settings.m_forceDecimator
+            << " m_showOverlayText: " << settings.m_showOverlayText
             << " force: " << force;
 
     if ((settings.m_atvStd != m_settings.m_atvStd)
@@ -1156,6 +1134,23 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         m_DSBFilterBufferIndex = 0;
 
         m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force)
+    {
+        if (!m_imageFromFile.empty())
+        {
+            m_imageFromFile.copyTo(m_imageOriginal);
+
+            if (settings.m_showOverlayText) {
+                qDebug("ATVMod::applySettings: set overlay text");
+                mixImageAndText(m_imageOriginal);
+            } else{
+                qDebug("ATVMod::applySettings: clear overlay text");
+            }
+
+            resizeImage();
+        }
     }
 
     m_settings = settings;

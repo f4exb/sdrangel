@@ -46,6 +46,7 @@ void ATVModSettings::resetToDefaults()
     m_rfScalingFactor = 0.891235351562f * SDR_TX_SCALEF; // -1dB
     m_fmExcursion = 0.5f;         // half bandwidth
     m_forceDecimator = false;
+    m_showOverlayText = false;
     m_overlayText = "ATV";
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Modulator";

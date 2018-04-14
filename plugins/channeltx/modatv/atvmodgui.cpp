@@ -563,8 +563,8 @@ void ATVModGUI::on_cameraManualFPS_valueChanged(int value)
 
 void ATVModGUI::on_overlayTextShow_toggled(bool checked)
 {
-    ATVMod::MsgConfigureShowOverlayText* message = ATVMod::MsgConfigureShowOverlayText::create(checked);
-    m_atvMod->getInputMessageQueue()->push(message);
+    m_settings.m_showOverlayText = checked;
+    applySettings();
 }
 
 void ATVModGUI::on_overlayText_textEdited(const QString& arg1 __attribute__((unused)))

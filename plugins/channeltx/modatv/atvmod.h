@@ -345,27 +345,6 @@ public:
         { }
     };
 
-    class MsgConfigureShowOverlayText : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getShowOverlayText() const { return m_showOverlayText; }
-
-        static MsgConfigureShowOverlayText* create(bool showOverlayText)
-        {
-            return new MsgConfigureShowOverlayText(showOverlayText);
-        }
-
-    private:
-        bool m_showOverlayText;
-
-        MsgConfigureShowOverlayText(bool showOverlayText) :
-            Message(),
-            m_showOverlayText(showOverlayText)
-        { }
-    };
-
     class MsgReportEffectiveSampleRate : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -555,7 +534,6 @@ private:
     int m_cameraIndex;           //!< curent camera index in list of available cameras
 
     std::string m_overlayText;
-    bool m_showOverlayText;
 
     // Used for standard SSB
     fftfilt* m_SSBFilter;
