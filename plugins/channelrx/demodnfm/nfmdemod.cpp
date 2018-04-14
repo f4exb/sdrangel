@@ -414,7 +414,7 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_squelchCount = 0; // reset squelch open counter
     m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
     m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
-    m_phaseDiscri.setFMScaling((8.0f*sampleRate) / static_cast<float>(m_settings.m_fmDeviation)); // integrate 4x factor
+    m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_settingsMutex.unlock();
 

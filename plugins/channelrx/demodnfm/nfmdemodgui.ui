@@ -330,7 +330,7 @@
          <string>Sound volume</string>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>40</number>
         </property>
         <property name="pageStep">
          <number>1</number>

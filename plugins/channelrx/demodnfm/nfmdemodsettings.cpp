@@ -25,8 +25,8 @@
 const int NFMDemodSettings::m_rfBW[] = {
     5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
-const int NFMDemodSettings::m_fmDev[] = { // corresponding FM deviations
-    1000, 1500, 2000, 2000,  2000,  2500,  3000,  3500,  5000
+const int NFMDemodSettings::m_fmDev[] = { // corresponding single side FM deviations at 0.4 * BW
+    2000, 2500, 3330, 4000,  5000,  6000,  8000,  10000,  16000
 };
 const int NFMDemodSettings::m_nbRfBW = 9;
 
