@@ -744,6 +744,10 @@ void ATVModGUI::displaySettings()
     ui->overlayText->setText(m_settings.m_overlayText);
     ui->overlayTextShow->setChecked(m_settings.m_showOverlayText);
 
+    ui->playCamera->setChecked(m_settings.m_cameraPlay);
+    ui->playVideo->setChecked(m_settings.m_videoPlay);
+    ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
+
     blockApplySettings(false);
 }
 

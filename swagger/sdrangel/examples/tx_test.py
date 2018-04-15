@@ -28,6 +28,9 @@ def getInputOptions():
     parser.add_option("-l", "--log2-interp", dest="log2_interp", help="log2 of interpolation factor", metavar="RATE", type="int")
     parser.add_option("-A", "--antenna-path", dest="antenna_path", help="antenna path number", metavar="NUMBER", type="int")
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
+    parser.add_option("--ppm", dest="lo_ppm", help="LO correction in ppm", metavar="FILENAME", type="float", default=0)
+    parser.add_option("--image", dest="image_file", help="image file for ATV modulator (sends image)", metavar="FILENAME", type="string")
+    parser.add_option("--video", dest="video_file", help="video file for ATV modulator (sends video)", metavar="FILENAME", type="string")
 
     (options, args) = parser.parse_args()
     
@@ -127,7 +130,7 @@ def setupDevice(options):
         settings["limeSdrOutputSettings"]["lpfFIRBW"] = 100000
         settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1
     elif options.device_hwid == "HackRF":
-        settings['hackRFOutputSettings']['LOppmTenths'] = -51
+        settings['hackRFOutputSettings']['LOppmTenths'] = round(options.lo_ppm*10)
         settings['hackRFOutputSettings']['centerFrequency'] = options.device_freq*1000
         settings['hackRFOutputSettings']['devSampleRate'] = options.sample_rate
         settings['hackRFOutputSettings']['lnaExt'] = 0
@@ -171,9 +174,19 @@ def setupChannel(options):
         settings["ATVModSettings"]["inputFrequencyOffset"] = options.channel_freq
         settings["ATVModSettings"]["rfBandwidth"] = 30000
         settings["ATVModSettings"]["forceDecimator"] = 1 # This is to engage filter
-        settings["ATVModSettings"]["imageFileName"] = "/home/f4exb/sdrangel/lena_4.3.png"
+        
+        if options.image_file is not None:
+            settings["ATVModSettings"]["imageFileName"] = options.image_file
+            settings["ATVModSettings"]["atvModInput"] = 6   # m_atvModulation
+        elif options.video_file is not None:
+            settings["ATVModSettings"]["videoFileName"] = options.video_file
+            settings["ATVModSettings"]["atvModInput"] = 7   # ATVModInputVideo            
+            settings["ATVModSettings"]["videoPlayLoop"] = 1
+            settings["ATVModSettings"]["videoPlay"] = 1
+        else:
+            settings["ATVModSettings"]["atvModInput"] = 1   # ATVModInputHBars
+            
         settings["ATVModSettings"]["atvStd"] = 5        # ATVStdHSkip
-        settings["ATVModSettings"]["atvModInput"] = 6   # ATVModInputImage
         settings["ATVModSettings"]["atvModulation"] = 1 # ATVModulationFM
         settings["ATVModSettings"]["fps"] = 2
         settings["ATVModSettings"]["nbLines"] = 90
