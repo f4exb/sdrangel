@@ -29,7 +29,6 @@
 #include "bladerf/devicebladerfshared.h"
 
 #include "bladerfoutput.h"
-#include "bladerfoutputgui.h"
 #include "bladerfoutputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfOutput::MsgConfigureBladerf, Message)
