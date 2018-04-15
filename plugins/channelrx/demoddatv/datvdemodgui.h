@@ -69,7 +69,6 @@ private slots:
     void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
 
-    void channelSampleRateChanged();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
     void tick();
