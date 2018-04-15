@@ -1,10 +1,12 @@
-sdrangel (3.14.1-1) unstable; urgency=medium
+sdrangel (3.14.2-1) unstable; urgency=medium
 
-  * Web API: settings and report for AM mod
-  * Server: AirspyHF, BladeRF, AM support
+  * Web API: settings and report for all channel Tx plugins
+  * Server: AirspyHF, BladeRF and all channel Tx plugins support
   * PVS-Studio static analysis corrections (4)
+  * NFM demod: fixed AF squelch and audio sample rate handling
+  * BFM demod: fixed segfault in RDS parser
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 08 Apr 2018 12:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 Apr 2018 12:14:18 +0200
 
 sdrangel (3.14.1-1) unstable; urgency=medium
 
