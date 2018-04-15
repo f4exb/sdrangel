@@ -90,8 +90,6 @@ SOURCES += mainwindow.cpp\
         webapi/webapiadaptergui.cpp
 
 HEADERS  += mainwindow.h\
-        device/devicesourceapi.h\
-        device/devicesinkapi.h\
         device/deviceuiset.h\
         dsp/spectrumscopecombovis.h\
         dsp/spectrumscopengcombovis.h\        

@@ -86,6 +86,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/nco.cpp\
         dsp/ncof.cpp\
         dsp/phaselock.cpp\
+        dsp/projector.cpp\
         dsp/recursivefilters.cpp\
         dsp/samplesinkfifo.cpp\
         dsp/samplesourcefifo.cpp\
@@ -171,6 +172,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/ncof.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
+        dsp/projector.h\
         dsp/recursivefilters.h\
         dsp/samplesinkfifo.h\
         dsp/samplesourcefifo.h\
@@ -193,7 +195,6 @@ HEADERS  += audio/audiodevicemanager.h\
         settings/mainsettings.h\
         util/CRC64.h\
         util/db.h\
-        export.h\
         util/message.h\
         util/messagequeue.h\
         util/prettyprint.h\
