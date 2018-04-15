@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
+    <width>382</width>
     <height>403</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>342</width>
+    <width>382</width>
     <height>0</height>
    </size>
   </property>
@@ -31,11 +31,11 @@
   <property name="windowTitle">
    <string>UDP Sample Sink</string>
   </property>
-  <property name="toolTipDuration">
-   <number>-1</number>
-  </property>
   <property name="statusTip">
    <string>UDP Sample Sink</string>
+  </property>
+  <property name="toolTipDuration" stdset="0">
+   <number>-1</number>
   </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
@@ -56,16 +56,7 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -92,7 +83,7 @@
          <string>Input sample rate (S/s)</string>
         </property>
         <property name="inputMask">
-         <string>0009999</string>
+         <string>0009999; </string>
         </property>
         <property name="text">
          <string>48000</string>
@@ -122,7 +113,7 @@
          <string>Signal bandwidth (Hz)</string>
         </property>
         <property name="inputMask">
-         <string>0009999</string>
+         <string>0009999; </string>
         </property>
         <property name="text">
          <string>32000</string>
@@ -506,7 +497,7 @@
          <string>FM deviation in Hz</string>
         </property>
         <property name="inputMask">
-         <string>00000</string>
+         <string>00000; </string>
         </property>
         <property name="text">
          <string>2500</string>
@@ -532,7 +523,7 @@
          <string>Percentage of AM modulation</string>
         </property>
         <property name="inputMask">
-         <string>000</string>
+         <string>000; </string>
         </property>
         <property name="text">
          <string>95</string>
@@ -897,16 +888,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>

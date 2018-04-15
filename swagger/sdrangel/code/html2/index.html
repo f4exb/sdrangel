@@ -1229,6 +1229,9 @@ margin-bottom: 20px;
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
     },
+    "UDPSinkReport" : {
+      "$ref" : "#/definitions/UDPSinkReport"
+    },
     "WFMModReport" : {
       "$ref" : "#/definitions/WFMModReport"
     }
@@ -1264,6 +1267,9 @@ margin-bottom: 20px;
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
+    },
+    "UDPSinkSettings" : {
+      "$ref" : "#/definitions/UDPSinkSettings"
     },
     "WFMModSettings" : {
       "$ref" : "#/definitions/WFMModSettings"
@@ -2238,6 +2244,91 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.UDPSinkReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "UDPSink"
+};
+            defs.UDPSinkSettings = {
+  "properties" : {
+    "sampleFormat" : {
+      "type" : "integer"
+    },
+    "inputSampleRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "lowCutoff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "amModFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "gainIn" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gainOut" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelchGate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelchEnabled" : {
+      "type" : "integer"
+    },
+    "autoRWBalance" : {
+      "type" : "integer"
+    },
+    "stereoInput" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "format" : "uint16"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  },
+  "description" : "UDPSink"
 };
             defs.WFMModReport = {
   "properties" : {
@@ -20538,7 +20629,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-04-15T01:40:30.919+02:00
+              Generated 2018-04-15T11:16:57.480+02:00
             </div>
           </div>
       </div>

@@ -1,5 +1,7 @@
 project(udpsink)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(udpsink_SOURCES
 	udpsink.cpp
 	udpsinkgui.cpp
@@ -25,6 +27,7 @@ set(udpsink_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 #include(${QT_USE_FILE})
@@ -44,6 +47,7 @@ target_link_libraries(modudpsink
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 qt5_use_modules(modudpsink Core Widgets Network)

@@ -1,0 +1,62 @@
+UDPSinkSettings:
+  description: UDPSink
+  properties:
+    sampleFormat:
+      type: integer
+    inputSampleRate:
+      type: number
+      format: float
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    lowCutoff:
+      type: number
+      format: float
+    fmDeviation:
+      type: integer
+    amModFactor:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    gainIn:
+      type: number
+      format: float
+    gainOut:
+      type: number
+      format: float
+    squelch:
+      type: number
+      format: float
+    squelchGate:
+      type: number
+      format: float
+    squelchEnabled:
+      type: integer      
+    autoRWBalance:
+      type: integer            
+    stereoInput:
+      type: integer            
+    rgbColor:
+      type: integer            
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
+      format: uint16            
+    title:
+      type: string
+
+UDPSinkReport:
+  description: UDPSink
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+ 

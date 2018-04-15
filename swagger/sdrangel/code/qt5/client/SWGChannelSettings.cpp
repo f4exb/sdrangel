@@ -44,6 +44,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_mod_settings_isSet = false;
     ssb_mod_settings = nullptr;
     m_ssb_mod_settings_isSet = false;
+    udp_sink_settings = nullptr;
+    m_udp_sink_settings_isSet = false;
     wfm_mod_settings = nullptr;
     m_wfm_mod_settings_isSet = false;
 }
@@ -70,6 +72,8 @@ SWGChannelSettings::init() {
     m_nfm_mod_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
     m_ssb_mod_settings_isSet = false;
+    udp_sink_settings = new SWGUDPSinkSettings();
+    m_udp_sink_settings_isSet = false;
     wfm_mod_settings = new SWGWFMModSettings();
     m_wfm_mod_settings_isSet = false;
 }
@@ -97,6 +101,9 @@ SWGChannelSettings::cleanup() {
     }
     if(ssb_mod_settings != nullptr) { 
         delete ssb_mod_settings;
+    }
+    if(udp_sink_settings != nullptr) { 
+        delete udp_sink_settings;
     }
     if(wfm_mod_settings != nullptr) { 
         delete wfm_mod_settings;
@@ -129,6 +136,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
     
     ::SWGSDRangel::setValue(&ssb_mod_settings, pJson["SSBModSettings"], "SWGSSBModSettings", "SWGSSBModSettings");
+    
+    ::SWGSDRangel::setValue(&udp_sink_settings, pJson["UDPSinkSettings"], "SWGUDPSinkSettings", "SWGUDPSinkSettings");
     
     ::SWGSDRangel::setValue(&wfm_mod_settings, pJson["WFMModSettings"], "SWGWFMModSettings", "SWGWFMModSettings");
     
@@ -171,6 +180,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((ssb_mod_settings != nullptr) && (ssb_mod_settings->isSet())){
         toJsonValue(QString("SSBModSettings"), ssb_mod_settings, obj, QString("SWGSSBModSettings"));
+    }
+    if((udp_sink_settings != nullptr) && (udp_sink_settings->isSet())){
+        toJsonValue(QString("UDPSinkSettings"), udp_sink_settings, obj, QString("SWGUDPSinkSettings"));
     }
     if((wfm_mod_settings != nullptr) && (wfm_mod_settings->isSet())){
         toJsonValue(QString("WFMModSettings"), wfm_mod_settings, obj, QString("SWGWFMModSettings"));
@@ -259,6 +271,16 @@ SWGChannelSettings::setSsbModSettings(SWGSSBModSettings* ssb_mod_settings) {
     this->m_ssb_mod_settings_isSet = true;
 }
 
+SWGUDPSinkSettings*
+SWGChannelSettings::getUdpSinkSettings() {
+    return udp_sink_settings;
+}
+void
+SWGChannelSettings::setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings) {
+    this->udp_sink_settings = udp_sink_settings;
+    this->m_udp_sink_settings_isSet = true;
+}
+
 SWGWFMModSettings*
 SWGChannelSettings::getWfmModSettings() {
     return wfm_mod_settings;
@@ -282,6 +304,7 @@ SWGChannelSettings::isSet(){
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(udp_sink_settings != nullptr && udp_sink_settings->isSet()){ isObjectUpdated = true; break;}
         if(wfm_mod_settings != nullptr && wfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

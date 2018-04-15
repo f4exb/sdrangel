@@ -1931,6 +1931,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "UDPSink")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
+            channelSettingsKeys = udpSinkSettingsJsonObject.keys();
+            channelSettings.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+            channelSettings.getUdpSinkSettings()->fromJsonObject(udpSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "WFMMod")
     {
         if (channelSettings.getTx() != 0)
@@ -2055,6 +2069,20 @@ bool WebAPIRequestMapper::validateChannelReport(
             channelReportKeys = ssbModReportJsonObject.keys();
             channelReport.setSsbModReport(new SWGSDRangel::SWGSSBModReport());
             channelReport.getSsbModReport()->fromJsonObject(ssbModReportJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "UDPSink")
+    {
+        if (channelReport.getTx() != 0)
+        {
+            QJsonObject udpSinkReportJsonObject = jsonObject["UDPSinkReport"].toObject();
+            channelReportKeys = udpSinkReportJsonObject.keys();
+            channelReport.setUdpSinkReport(new SWGSDRangel::SWGUDPSinkReport());
+            channelReport.getUdpSinkReport()->fromJsonObject(udpSinkReportJsonObject);
             return true;
         }
         else {

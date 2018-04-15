@@ -44,6 +44,8 @@ SWGChannelReport::SWGChannelReport() {
     m_nfm_mod_report_isSet = false;
     ssb_mod_report = nullptr;
     m_ssb_mod_report_isSet = false;
+    udp_sink_report = nullptr;
+    m_udp_sink_report_isSet = false;
     wfm_mod_report = nullptr;
     m_wfm_mod_report_isSet = false;
 }
@@ -70,6 +72,8 @@ SWGChannelReport::init() {
     m_nfm_mod_report_isSet = false;
     ssb_mod_report = new SWGSSBModReport();
     m_ssb_mod_report_isSet = false;
+    udp_sink_report = new SWGUDPSinkReport();
+    m_udp_sink_report_isSet = false;
     wfm_mod_report = new SWGWFMModReport();
     m_wfm_mod_report_isSet = false;
 }
@@ -97,6 +101,9 @@ SWGChannelReport::cleanup() {
     }
     if(ssb_mod_report != nullptr) { 
         delete ssb_mod_report;
+    }
+    if(udp_sink_report != nullptr) { 
+        delete udp_sink_report;
     }
     if(wfm_mod_report != nullptr) { 
         delete wfm_mod_report;
@@ -129,6 +136,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_mod_report, pJson["NFMModReport"], "SWGNFMModReport", "SWGNFMModReport");
     
     ::SWGSDRangel::setValue(&ssb_mod_report, pJson["SSBModReport"], "SWGSSBModReport", "SWGSSBModReport");
+    
+    ::SWGSDRangel::setValue(&udp_sink_report, pJson["UDPSinkReport"], "SWGUDPSinkReport", "SWGUDPSinkReport");
     
     ::SWGSDRangel::setValue(&wfm_mod_report, pJson["WFMModReport"], "SWGWFMModReport", "SWGWFMModReport");
     
@@ -171,6 +180,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((ssb_mod_report != nullptr) && (ssb_mod_report->isSet())){
         toJsonValue(QString("SSBModReport"), ssb_mod_report, obj, QString("SWGSSBModReport"));
+    }
+    if((udp_sink_report != nullptr) && (udp_sink_report->isSet())){
+        toJsonValue(QString("UDPSinkReport"), udp_sink_report, obj, QString("SWGUDPSinkReport"));
     }
     if((wfm_mod_report != nullptr) && (wfm_mod_report->isSet())){
         toJsonValue(QString("WFMModReport"), wfm_mod_report, obj, QString("SWGWFMModReport"));
@@ -259,6 +271,16 @@ SWGChannelReport::setSsbModReport(SWGSSBModReport* ssb_mod_report) {
     this->m_ssb_mod_report_isSet = true;
 }
 
+SWGUDPSinkReport*
+SWGChannelReport::getUdpSinkReport() {
+    return udp_sink_report;
+}
+void
+SWGChannelReport::setUdpSinkReport(SWGUDPSinkReport* udp_sink_report) {
+    this->udp_sink_report = udp_sink_report;
+    this->m_udp_sink_report_isSet = true;
+}
+
 SWGWFMModReport*
 SWGChannelReport::getWfmModReport() {
     return wfm_mod_report;
@@ -282,6 +304,7 @@ SWGChannelReport::isSet(){
         if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_report != nullptr && ssb_mod_report->isSet()){ isObjectUpdated = true; break;}
+        if(udp_sink_report != nullptr && udp_sink_report->isSet()){ isObjectUpdated = true; break;}
         if(wfm_mod_report != nullptr && wfm_mod_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

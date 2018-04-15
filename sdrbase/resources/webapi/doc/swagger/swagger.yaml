@@ -1757,6 +1757,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
       SSBModSettings:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
+      UDPSinkSettings:
+        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
       WFMModSettings:
         $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
         
@@ -1782,6 +1784,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBModReport:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
+      UDPSinkReport:
+        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
       WFMModReport:
         $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
 

@@ -28,6 +28,7 @@
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGSSBModReport.h"
+#include "SWGUDPSinkReport.h"
 #include "SWGWFMModReport.h"
 #include <QString>
 
@@ -73,6 +74,9 @@ public:
     SWGSSBModReport* getSsbModReport();
     void setSsbModReport(SWGSSBModReport* ssb_mod_report);
 
+    SWGUDPSinkReport* getUdpSinkReport();
+    void setUdpSinkReport(SWGUDPSinkReport* udp_sink_report);
+
     SWGWFMModReport* getWfmModReport();
     void setWfmModReport(SWGWFMModReport* wfm_mod_report);
 
@@ -103,6 +107,9 @@ private:
 
     SWGSSBModReport* ssb_mod_report;
     bool m_ssb_mod_report_isSet;
+
+    SWGUDPSinkReport* udp_sink_report;
+    bool m_udp_sink_report_isSet;
 
     SWGWFMModReport* wfm_mod_report;
     bool m_wfm_mod_report_isSet;

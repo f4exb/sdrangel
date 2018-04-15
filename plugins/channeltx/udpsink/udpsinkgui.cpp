@@ -85,8 +85,19 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
 
 bool UDPSinkGUI::handleMessage(const Message& message __attribute__((unused)))
 {
-    qDebug() << "UDPSinkGUI::handleMessage";
-    return false;
+    if (UDPSink::MsgConfigureUDPSink::match(message))
+    {
+        const UDPSink::MsgConfigureUDPSink& cfg = (UDPSink::MsgConfigureUDPSink&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void UDPSinkGUI::handleSourceMessages()
@@ -233,6 +244,9 @@ void UDPSinkGUI::displaySettings()
     ui->squelchGate->setValue(roundf(m_settings.m_squelchGate * 100.0));
 
     ui->addressText->setText(tr("%1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
+
+    ui->applyBtn->setEnabled(false);
+    ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
     blockApplySettings(false);
 }

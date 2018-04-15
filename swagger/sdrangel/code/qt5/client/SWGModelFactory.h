@@ -66,6 +66,8 @@
 #include "SWGSSBModSettings.h"
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
+#include "SWGUDPSinkReport.h"
+#include "SWGUDPSinkSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
 
@@ -227,6 +229,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
+    }
+    if(QString("SWGUDPSinkReport").compare(type) == 0) {
+      return new SWGUDPSinkReport();
+    }
+    if(QString("SWGUDPSinkSettings").compare(type) == 0) {
+      return new SWGUDPSinkSettings();
     }
     if(QString("SWGWFMModReport").compare(type) == 0) {
       return new SWGWFMModReport();
