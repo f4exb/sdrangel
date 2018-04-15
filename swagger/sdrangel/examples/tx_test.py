@@ -171,14 +171,16 @@ def setupChannel(options):
         settings["ATVModSettings"]["inputFrequencyOffset"] = options.channel_freq
         settings["ATVModSettings"]["rfBandwidth"] = 30000
         settings["ATVModSettings"]["forceDecimator"] = 1 # This is to engage filter
+        settings["ATVModSettings"]["imageFileName"] = "/home/f4exb/sdrangel/lena_4.3.png"
         settings["ATVModSettings"]["atvStd"] = 5        # ATVStdHSkip
-        settings["ATVModSettings"]["atvModInput"] = 1   # ATVModInputHBars
+        settings["ATVModSettings"]["atvModInput"] = 6   # ATVModInputImage
         settings["ATVModSettings"]["atvModulation"] = 1 # ATVModulationFM
         settings["ATVModSettings"]["fps"] = 2
         settings["ATVModSettings"]["nbLines"] = 90
         settings["ATVModSettings"]["uniformLevel"] = 1.0 # 100% white
         settings["ATVModSettings"]["fmExcursion"] = 0.2 # FM excursion is 20% of channel bandwidth
         settings["ATVModSettings"]["overlayText"] = "F4EXB"
+        settings["ATVModSettings"]["showOverlayText"] = 1 
     elif options.channel_id == "SSBMod":
         settings["SSBModSettings"]["title"] = "Test SSB"
         settings["SSBModSettings"]["inputFrequencyOffset"] = options.channel_freq

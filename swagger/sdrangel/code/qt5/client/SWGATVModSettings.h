@@ -93,6 +93,9 @@ public:
     qint32 getForceDecimator();
     void setForceDecimator(qint32 force_decimator);
 
+    qint32 getShowOverlayText();
+    void setShowOverlayText(qint32 show_overlay_text);
+
     QString* getOverlayText();
     void setOverlayText(QString* overlay_text);
 
@@ -101,6 +104,12 @@ public:
 
     QString* getTitle();
     void setTitle(QString* title);
+
+    QString* getImageFileName();
+    void setImageFileName(QString* image_file_name);
+
+    QString* getVideoFileName();
+    void setVideoFileName(QString* video_file_name);
 
 
     virtual bool isSet() override;
@@ -157,6 +166,9 @@ private:
     qint32 force_decimator;
     bool m_force_decimator_isSet;
 
+    qint32 show_overlay_text;
+    bool m_show_overlay_text_isSet;
+
     QString* overlay_text;
     bool m_overlay_text_isSet;
 
@@ -165,6 +177,12 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    QString* image_file_name;
+    bool m_image_file_name_isSet;
+
+    QString* video_file_name;
+    bool m_video_file_name_isSet;
 
 };
 

@@ -42,7 +42,6 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
-MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportEffectiveSampleRate, Message)
 
 const QString ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
@@ -613,12 +612,6 @@ bool ATVMod::handleMessage(const Message& cmd)
 
     	return true;
     }
-    else if (MsgConfigureOverlayText::match(cmd))
-    {
-        MsgConfigureOverlayText& cfg = (MsgConfigureOverlayText&) cmd;
-        m_overlayText = cfg.getOverlayText().toStdString();
-        return true;
-    }
     else if (DSPSignalNotification::match(cmd))
     {
         return true;
@@ -800,6 +793,7 @@ void ATVMod::openImage(const QString& fileName)
 
 	if (m_imageOK)
 	{
+        m_imageFileName = fileName;
         m_imageFromFile.copyTo(m_imageOriginal);
 
         if (m_settings.m_showOverlayText) {
@@ -807,6 +801,11 @@ void ATVMod::openImage(const QString& fileName)
 	    }
 
 	    resizeImage();
+	}
+	else
+	{
+	    m_imageFileName.clear();
+        qDebug("ATVMod::openImage: cannot open image file %s", qPrintable(fileName));
 	}
 }
 
@@ -818,6 +817,7 @@ void ATVMod::openVideo(const QString& fileName)
 
     if (m_videoOK)
     {
+        m_videoFileName = fileName;
         m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -845,7 +845,8 @@ void ATVMod::openVideo(const QString& fileName)
     }
     else
     {
-        qDebug("ATVMod::openVideo: cannot open video file");
+        m_videoFileName.clear();
+        qDebug("ATVMod::openVideo: cannot open video file %s", qPrintable(fileName));
     }
 }
 
@@ -1001,13 +1002,13 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     int baseline=0;
 
     fontScale = fontScale < 4.0f ? 4.0f : fontScale; // minimum size
-    cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
+    cv::Size textSize = cv::getTextSize(m_settings.m_overlayText.toStdString(), fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 
     // position the text in the top left corner
     cv::Point textOrg(6, textSize.height+10);
     // then put the text itself
-    cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
+    cv::putText(image, m_settings.m_overlayText.toStdString(), textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
 }
 
 void ATVMod::applyChannelSettings(int outputSampleRate, int inputFrequencyOffset, bool force)
@@ -1250,6 +1251,9 @@ int ATVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("forceDecimator")) {
         settings.m_forceDecimator = response.getAtvModSettings()->getForceDecimator() != 0;
     }
+    if (channelSettingsKeys.contains("showOverlayText")) {
+        settings.m_showOverlayText = response.getAtvModSettings()->getShowOverlayText() != 0;
+    }
     if (channelSettingsKeys.contains("overlayText")) {
         settings.m_overlayText = *response.getAtvModSettings()->getOverlayText();
     }
@@ -1274,6 +1278,34 @@ int ATVMod::webapiSettingsPutPatch(
     {
         MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
+    }
+
+    if (channelSettingsKeys.contains("imageFileName"))
+    {
+        MsgConfigureImageFileName *msg = MsgConfigureImageFileName::create(
+                *response.getAtvModSettings()->getImageFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureImageFileName *msgToGUI = MsgConfigureImageFileName::create(
+                    *response.getAtvModSettings()->getImageFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
+    }
+
+    if (channelSettingsKeys.contains("videoFileName"))
+    {
+        MsgConfigureVideoFileName *msg = MsgConfigureVideoFileName::create(
+                *response.getAtvModSettings()->getVideoFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureVideoFileName *msgToGUI = MsgConfigureVideoFileName::create(
+                    *response.getAtvModSettings()->getVideoFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
     }
 
     webapiFormatChannelSettings(response, settings);
@@ -1310,6 +1342,7 @@ void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAtvModSettings()->setRfScalingFactor(settings.m_rfScalingFactor);
     response.getAtvModSettings()->setFmExcursion(settings.m_fmExcursion);
     response.getAtvModSettings()->setForceDecimator(settings.m_forceDecimator ? 1 : 0);
+    response.getAtvModSettings()->setShowOverlayText(settings.m_showOverlayText ? 1 : 0);
 
     if (response.getAtvModSettings()->getOverlayText()) {
         *response.getAtvModSettings()->getOverlayText() = settings.m_overlayText;
@@ -1323,6 +1356,18 @@ void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         *response.getAtvModSettings()->getTitle() = settings.m_title;
     } else {
         response.getAtvModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getAtvModSettings()->getImageFileName()) {
+        *response.getAtvModSettings()->getImageFileName() = m_imageFileName;
+    } else {
+        response.getAtvModSettings()->setImageFileName(new QString(m_imageFileName));
+    }
+
+    if (response.getAtvModSettings()->getVideoFileName()) {
+        *response.getAtvModSettings()->getVideoFileName() = m_videoFileName;
+    } else {
+        response.getAtvModSettings()->setVideoFileName(new QString(m_videoFileName));
     }
 }
 

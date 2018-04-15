@@ -158,6 +158,18 @@ bool ATVModGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (ATVMod::MsgConfigureImageFileName::match(message))
+    {
+        const ATVMod::MsgConfigureImageFileName& cfg = (ATVMod::MsgConfigureImageFileName&) message;
+        ui->imageFileText->setText(cfg.getFileName());
+        return true;
+    }
+    else if (ATVMod::MsgConfigureVideoFileName::match(message))
+    {
+        const ATVMod::MsgConfigureVideoFileName& cfg = (ATVMod::MsgConfigureVideoFileName&) message;
+        ui->videoFileText->setText(cfg.getFileName());
+        return true;
+    }
     else
     {
         return false;
@@ -570,8 +582,7 @@ void ATVModGUI::on_overlayTextShow_toggled(bool checked)
 void ATVModGUI::on_overlayText_textEdited(const QString& arg1 __attribute__((unused)))
 {
     m_settings.m_overlayText = arg1;
-    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
-    m_atvMod->getInputMessageQueue()->push(message);
+    applySettings();
 }
 
 void ATVModGUI::configureImageFileName()
@@ -731,9 +742,7 @@ void ATVModGUI::displaySettings()
     ui->uniformLevelText->setText(QString("%1").arg(ui->uniformLevel->value()));
 
     ui->overlayText->setText(m_settings.m_overlayText);
-
-    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
-    m_atvMod->getInputMessageQueue()->push(message);
+    ui->overlayTextShow->setChecked(m_settings.m_showOverlayText);
 
     blockApplySettings(false);
 }

@@ -324,27 +324,6 @@ public:
         { }
     };
 
-    class MsgConfigureOverlayText : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const QString& getOverlayText() const { return m_overlayText; }
-
-        static MsgConfigureOverlayText* create(const QString& overlayText)
-        {
-            return new MsgConfigureOverlayText(overlayText);
-        }
-
-    private:
-        QString m_overlayText;
-
-        MsgConfigureOverlayText(const QString& overlayText) :
-            Message(),
-            m_overlayText(overlayText)
-        { }
-    };
-
     class MsgReportEffectiveSampleRate : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -534,6 +513,8 @@ private:
     int m_cameraIndex;           //!< curent camera index in list of available cameras
 
     std::string m_overlayText;
+    QString m_imageFileName;
+    QString m_videoFileName;
 
     // Used for standard SSB
     fftfilt* m_SSBFilter;

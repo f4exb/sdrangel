@@ -41,11 +41,17 @@ ATVModSettings:
       format: float
     forceDecimator:
       type: integer
+    showOverlayText:
+      type: integer
     overlayText:
       type: string
     rgbColor:
       type: integer
     title:
+      type: string
+    imageFileName:
+      type: string
+    videoFileName:
       type: string
      
 ATVModReport:

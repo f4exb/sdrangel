@@ -62,12 +62,18 @@ SWGATVModSettings::SWGATVModSettings() {
     m_fm_excursion_isSet = false;
     force_decimator = 0;
     m_force_decimator_isSet = false;
+    show_overlay_text = 0;
+    m_show_overlay_text_isSet = false;
     overlay_text = nullptr;
     m_overlay_text_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    image_file_name = nullptr;
+    m_image_file_name_isSet = false;
+    video_file_name = nullptr;
+    m_video_file_name_isSet = false;
 }
 
 SWGATVModSettings::~SWGATVModSettings() {
@@ -110,16 +116,23 @@ SWGATVModSettings::init() {
     m_fm_excursion_isSet = false;
     force_decimator = 0;
     m_force_decimator_isSet = false;
+    show_overlay_text = 0;
+    m_show_overlay_text_isSet = false;
     overlay_text = new QString("");
     m_overlay_text_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    image_file_name = new QString("");
+    m_image_file_name_isSet = false;
+    video_file_name = new QString("");
+    m_video_file_name_isSet = false;
 }
 
 void
 SWGATVModSettings::cleanup() {
+
 
 
 
@@ -143,6 +156,12 @@ SWGATVModSettings::cleanup() {
 
     if(title != nullptr) { 
         delete title;
+    }
+    if(image_file_name != nullptr) { 
+        delete image_file_name;
+    }
+    if(video_file_name != nullptr) { 
+        delete video_file_name;
     }
 }
 
@@ -191,11 +210,17 @@ SWGATVModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&force_decimator, pJson["forceDecimator"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&show_overlay_text, pJson["showOverlayText"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&overlay_text, pJson["overlayText"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&image_file_name, pJson["imageFileName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&video_file_name, pJson["videoFileName"], "QString", "QString");
     
 }
 
@@ -264,6 +289,9 @@ SWGATVModSettings::asJsonObject() {
     if(m_force_decimator_isSet){
         obj->insert("forceDecimator", QJsonValue(force_decimator));
     }
+    if(m_show_overlay_text_isSet){
+        obj->insert("showOverlayText", QJsonValue(show_overlay_text));
+    }
     if(overlay_text != nullptr && *overlay_text != QString("")){
         toJsonValue(QString("overlayText"), overlay_text, obj, QString("QString"));
     }
@@ -272,6 +300,12 @@ SWGATVModSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(image_file_name != nullptr && *image_file_name != QString("")){
+        toJsonValue(QString("imageFileName"), image_file_name, obj, QString("QString"));
+    }
+    if(video_file_name != nullptr && *video_file_name != QString("")){
+        toJsonValue(QString("videoFileName"), video_file_name, obj, QString("QString"));
     }
 
     return obj;
@@ -447,6 +481,16 @@ SWGATVModSettings::setForceDecimator(qint32 force_decimator) {
     this->m_force_decimator_isSet = true;
 }
 
+qint32
+SWGATVModSettings::getShowOverlayText() {
+    return show_overlay_text;
+}
+void
+SWGATVModSettings::setShowOverlayText(qint32 show_overlay_text) {
+    this->show_overlay_text = show_overlay_text;
+    this->m_show_overlay_text_isSet = true;
+}
+
 QString*
 SWGATVModSettings::getOverlayText() {
     return overlay_text;
@@ -477,6 +521,26 @@ SWGATVModSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
+QString*
+SWGATVModSettings::getImageFileName() {
+    return image_file_name;
+}
+void
+SWGATVModSettings::setImageFileName(QString* image_file_name) {
+    this->image_file_name = image_file_name;
+    this->m_image_file_name_isSet = true;
+}
+
+QString*
+SWGATVModSettings::getVideoFileName() {
+    return video_file_name;
+}
+void
+SWGATVModSettings::setVideoFileName(QString* video_file_name) {
+    this->video_file_name = video_file_name;
+    this->m_video_file_name_isSet = true;
+}
+
 
 bool
 SWGATVModSettings::isSet(){
@@ -499,9 +563,12 @@ SWGATVModSettings::isSet(){
         if(m_rf_scaling_factor_isSet){ isObjectUpdated = true; break;}
         if(m_fm_excursion_isSet){ isObjectUpdated = true; break;}
         if(m_force_decimator_isSet){ isObjectUpdated = true; break;}
+        if(m_show_overlay_text_isSet){ isObjectUpdated = true; break;}
         if(overlay_text != nullptr && *overlay_text != QString("")){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
+        if(image_file_name != nullptr && *image_file_name != QString("")){ isObjectUpdated = true; break;}
+        if(video_file_name != nullptr && *video_file_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
