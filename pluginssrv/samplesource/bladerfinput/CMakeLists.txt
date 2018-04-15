@@ -63,6 +63,6 @@ target_link_libraries(inputbladerfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputbladerfsrv Core Widgets)
+qt5_use_modules(inputbladerfsrv Core)
 
 install(TARGETS inputbladerfsrv DESTINATION lib/pluginssrv/samplesource)

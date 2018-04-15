@@ -30,7 +30,6 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 
-#include "bladerfinputgui.h"
 #include "bladerfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)

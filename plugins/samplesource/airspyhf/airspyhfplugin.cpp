@@ -15,14 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include <libairspyhf/airspyhf.h>
 
 #include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "airspyhfplugin.h"
+#ifdef SERVER_MODE
+#include "airspyhfinput.h"
+#else
 #include "airspyhfgui.h"
+#endif
 
 
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
@@ -95,6 +98,15 @@ PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* AirspyHFPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* AirspyHFPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -111,6 +123,7 @@ PluginInstanceGUI* AirspyHFPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *AirspyHFPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

@@ -14,16 +14,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../bladerfinput/bladerfinputplugin.h"
+#include "bladerfinputplugin.h"
 
 #include <QtPlugin>
-#include <QAction>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include <device/devicesourceapi.h>
 
+#ifdef SERVER_MODE
+#include "bladerfinput.h"
+#else
 #include "bladerfinputgui.h"
+#endif
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("BladeRF Input"),
@@ -82,6 +85,15 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -98,6 +110,7 @@ PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *BlderfInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

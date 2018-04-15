@@ -28,7 +28,6 @@
 
 #include "airspyhfinput.h"
 
-#include "airspyhfgui.h"
 #include "airspyhfplugin.h"
 #include "airspyhfsettings.h"
 #include "airspyhfthread.h"
