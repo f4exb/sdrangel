@@ -20,11 +20,14 @@
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "udpsinkgui.h"
+#endif
+#include "udpsink.h"
 
 const PluginDescriptor UDPSinkPlugin::m_pluginDescriptor = {
 	QString("UDP Channel Sink"),
-	QString("3.12.0"),
+	QString("3.14.2"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -50,10 +53,19 @@ void UDPSinkPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(UDPSink::m_channelIdURI, UDPSink::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* UDPSinkPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
     return UDPSinkGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
+#endif
 
 BasebandSampleSource* UDPSinkPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {

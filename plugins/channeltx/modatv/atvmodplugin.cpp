@@ -15,10 +15,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "atvmodgui.h"
+#endif
 #include "atvmod.h"
 #include "atvmodplugin.h"
 
@@ -50,10 +51,19 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(ATVMod::m_channelIdURI, ATVMod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
     return ATVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
+#endif
 
 BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
