@@ -29,6 +29,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
 #include "util/db.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "ui_atvmodgui.h"
@@ -603,6 +604,22 @@ void ATVModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 {
 }
 
+void ATVModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ATVModGUI),
@@ -621,6 +638,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_atvMod = (ATVMod*) channelTx; //new ATVMod(m_deviceUISet->m_deviceSinkAPI);
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
@@ -696,6 +714,7 @@ void ATVModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     setChannelMarkerBandwidth();
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
