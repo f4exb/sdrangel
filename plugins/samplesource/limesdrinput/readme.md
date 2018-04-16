@@ -75,23 +75,49 @@ The button is lit when NCO is active and dark when inactive.
 
 Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an independent NCO in each Rx channel that can span the bandwidth received by the ADC. This effectively allows non zero digital IF.
 
-<h4>2.2: Zero (reset) NCO frequency</h4>
-
-USe this push button to reset the NCO frequency to 0 and thus center on the main passband of the ADC.
-
-<h4>2.3: NCO frequency shift</h4>
+<h4>2.2: NCO frequency shift</h4>
 
 This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of reception minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
 &#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hadrware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
 
-<h4>2.4: DC component auto correction</h4>
+<h4>2.3: DC component auto correction</h4>
 
 Enables or disables the auto remove DC component
 
-<h4>2.5: I/Q balance auto correction</h4>
+<h4>2.4: I/Q balance auto correction</h4>
 
 Enables or disables the auto I/Q balance correction. The DC correction must be enabled for this to be effective.
+
+<h4>2.5: Transverter mode open dialog</h4>
+
+This button opens a dialog to set the transverter mode frequency translation options:
+
+![SDR Daemon source input stream trasverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+
+Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
+
+<h5>2.5.1: Translating frequency</h5>
+
+You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+
+For example a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the PlutoSDR will be set to 127.130 MHz.
+
+If you use a down converter to receive the 6 cm band narrowband center frequency of 5670 MHz at 432 MHz you would set the translating frequency to 5760 - 432 = 5328 MHz thus dial +5,328,000,000 Hz.
+
+For bands even higher in the frequency spectrum the GHz digits are not really significant so you can have them set at 1 GHz. Thus to receive the 10368 MHz frequency at 432 MHz you would set the translating frequency to 1368 - 432 = 936 MHz. Note that in this case the frequency of the LO used in the mixer of the transverter is set at 9936 MHz.
+
+The Hz precision allows a fine tuning of the transverter LO offset
+
+<h5>2.5.2: Translating frequency enable/disable</h5>
+
+Use this toggle button to activate or deactivate the frequency translation
+
+<h5>2.5.3: Confirmation buttons</h5>
+
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
 
 <h4>2.6: External clock control</h4>
 
