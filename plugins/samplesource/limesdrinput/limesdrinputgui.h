@@ -75,6 +75,7 @@ private:
     void updateSampleRateAndFrequency();
     void updateADCRate();
     void blockApplySettings(bool block);
+    void updateFrequencyLimits();
 
 private slots:
     void handleInputMessages();
@@ -83,7 +84,6 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_ncoFrequency_changed(qint64 value);
     void on_ncoEnable_toggled(bool checked);
-    void on_ncoReset_clicked(bool checked);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
     void on_sampleRate_changed(quint64 value);
@@ -99,6 +99,7 @@ private slots:
     void on_pgaGain_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
     void on_extClock_clicked();
+    void on_transverter_clicked();
 
     void updateHardware();
     void updateStatus();

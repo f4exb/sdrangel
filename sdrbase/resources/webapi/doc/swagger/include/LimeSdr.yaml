@@ -40,6 +40,11 @@ LimeSdrInputSettings:
       type: integer
     extClockFreq: 
       type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
       
 LimeSdrOutputSettings:
   description: LimeSDR

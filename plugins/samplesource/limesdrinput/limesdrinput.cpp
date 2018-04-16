@@ -735,6 +735,10 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
 
+    qint64 deviceCenterFrequency = settings.m_centerFrequency;
+    deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+
     if (LMS_GetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreq) != 0)
     {
         qCritical("LimeSDRInput::applySettings: could not get clock gen frequency");
@@ -1016,21 +1020,24 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || setAntennaAuto || force)
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+            || (m_settings.m_transverterMode != settings.m_transverterMode)
+            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+            || setAntennaAuto || force)
     {
         forwardChangeRxDSP = true;
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
-            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXR, settings.m_centerFrequency) < 0)
+            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXR, deviceCenterFrequency) < 0)
             {
-                qCritical("LimeSDRInput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
+                qCritical("LimeSDRInput::applySettings: could not set frequency to %lld", deviceCenterFrequency);
             }
             else
             {
                 doCalibration = true;
-                m_deviceShared.m_centerFrequency = settings.m_centerFrequency; // for buddies
-                qDebug("LimeSDRInput::applySettings: frequency set to %lu", settings.m_centerFrequency);
+                m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
+                qDebug("LimeSDRInput::applySettings: frequency set to %lld", deviceCenterFrequency);
             }
         }
     }
@@ -1217,6 +1224,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     QLocale loc;
 
     qDebug().noquote() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " deviceCenterFrequency: " << deviceCenterFrequency
             << " device stream sample rate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
             << " sample rate with soft decimation: " << loc.toString( m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim)) << "S/s"
             << " ADC sample rate with hard decimation: " << loc.toString(m_settings.m_devSampleRate*(1<<m_settings.m_log2HardDecim)) << "S/s"
@@ -1314,6 +1324,12 @@ int LimeSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("tiaGain")) {
         settings.m_tiaGain = response.getLimeSdrInputSettings()->getTiaGain();
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getLimeSdrInputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getLimeSdrInputSettings()->getTransverterMode() != 0;
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1349,6 +1365,8 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getLimeSdrInputSettings()->setNcoFrequency(settings.m_ncoFrequency);
     response.getLimeSdrInputSettings()->setPgaGain(settings.m_pgaGain);
     response.getLimeSdrInputSettings()->setTiaGain(settings.m_tiaGain);
+    response.getLimeSdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getLimeSdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 }
 
 int LimeSDRInput::webapiRunGet(

@@ -231,22 +231,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ncoReset">
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Reset the NCO to zero frequency</string>
-       </property>
-       <property name="text">
-        <string>R</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="ValueDialZ" name="ncoFrequency" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -313,6 +297,19 @@
        </property>
        <property name="text">
         <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>X</string>
        </property>
       </widget>
      </item>
@@ -1175,6 +1172,11 @@ QToolTip{background-color: white; color: black;}</string>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QPushButton</extends>
+   <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

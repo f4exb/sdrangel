@@ -43,6 +43,8 @@ void LimeSDRInputSettings::resetToDefaults()
     m_pgaGain = 16;
     m_extClock = false;
     m_extClockFreq = 10000000; // 10 MHz
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray LimeSDRInputSettings::serialize() const
@@ -67,6 +69,8 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeU32(17, m_pgaGain);
     s.writeBool(18, m_extClock);
     s.writeU32(19, m_extClockFreq);
+    s.writeBool(20, m_transverterMode);
+    s.writeS64(21, m_transverterDeltaFrequency);
 
     return s.final();
 }
@@ -105,6 +109,8 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readU32(17, &m_pgaGain, 16);
         d.readBool(18, &m_extClock, false);
         d.readU32(19, &m_extClockFreq, 10000000);
+        d.readBool(20, &m_transverterMode, false);
+        d.readS64(21, &m_transverterDeltaFrequency, 0);
 
         return true;
     }

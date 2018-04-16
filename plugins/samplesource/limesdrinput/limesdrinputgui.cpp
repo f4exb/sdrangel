@@ -242,6 +242,23 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
     }
 }
 
+void LimeSDRInputGUI::updateFrequencyLimits()
+{
+    // values in kHz
+    float minF, maxF;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    m_limeSDRInput->getLORange(minF, maxF);
+    qint64 minLimit = minF/1000 + deltaFrequency;
+    qint64 maxLimit = maxF/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("LimeSDRInputGUI::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void LimeSDRInputGUI::handleInputMessages()
 {
     Message* message;
@@ -504,13 +521,6 @@ void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
     sendSettings();
 }
 
-void LimeSDRInputGUI::on_ncoReset_clicked(bool checked __attribute__((unused)))
-{
-    m_settings.m_ncoFrequency = 0;
-    ui->ncoFrequency->setValue(0);
-    sendSettings();
-}
-
 void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
@@ -631,4 +641,15 @@ void LimeSDRInputGUI::on_extClock_clicked()
     qDebug("LimeSDRInputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
     sendSettings();
 }
+
+void LimeSDRInputGUI::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    sendSettings();
+}
+
 
