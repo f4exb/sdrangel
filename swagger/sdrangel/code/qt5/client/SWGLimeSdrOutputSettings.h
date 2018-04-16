@@ -80,6 +80,12 @@ public:
     qint32 getExtClockFreq();
     void setExtClockFreq(qint32 ext_clock_freq);
 
+    qint32 getTransverterMode();
+    void setTransverterMode(qint32 transverter_mode);
+
+    qint64 getTransverterDeltaFrequency();
+    void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
+
 
     virtual bool isSet() override;
 
@@ -122,6 +128,12 @@ private:
 
     qint32 ext_clock_freq;
     bool m_ext_clock_freq_isSet;
+
+    qint32 transverter_mode;
+    bool m_transverter_mode_isSet;
+
+    qint64 transverter_delta_frequency;
+    bool m_transverter_delta_frequency_isSet;
 
 };
 

@@ -54,6 +54,8 @@ struct LimeSDROutputSettings
     PathRFE  m_antennaPath;
     bool     m_extClock;     //!< True if external clock source
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
+    bool     m_transverterMode;
+    qint64   m_transverterDeltaFrequency;
 
     LimeSDROutputSettings();
     void resetToDefaults();

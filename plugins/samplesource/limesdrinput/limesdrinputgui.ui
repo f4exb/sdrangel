@@ -308,6 +308,9 @@
          <height>24</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Transverter frequency translation dialog</string>
+       </property>
        <property name="text">
         <string>X</string>
        </property>

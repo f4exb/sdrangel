@@ -74,8 +74,8 @@ private:
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateADCRate();
-    void blockApplySettings(bool block);
     void updateFrequencyLimits();
+    void blockApplySettings(bool block);
 
 private slots:
     void handleInputMessages();

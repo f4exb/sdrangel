@@ -701,6 +701,10 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
 
+    qint64 deviceCenterFrequency = settings.m_centerFrequency;
+    deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+
     if (LMS_GetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreq) != 0)
     {
         qCritical("LimeSDROutput::applySettings: could not get clock gen frequency");
@@ -852,32 +856,35 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                     settings.m_antennaPath))
             {
                 doCalibration = true;
-                qDebug("LimeSDRInput::applySettings: set antenna path to %d",
+                qDebug("LimeSDROutput::applySettings: set antenna path to %d",
                         (int) settings.m_antennaPath);
             }
             else
             {
-                qCritical("LimeSDRInput::applySettings: could not set antenna path to %d",
+                qCritical("LimeSDROutput::applySettings: could not set antenna path to %d",
                         (int) settings.m_antennaPath);
             }
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+        || force)
     {
         forwardChangeTxDSP = true;
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
-            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXT, settings.m_centerFrequency) < 0)
+            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXT, deviceCenterFrequency) < 0)
             {
-                qCritical("LimeSDROutput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
+                qCritical("LimeSDROutput::applySettings: could not set frequency to %lld", deviceCenterFrequency);
             }
             else
             {
                 doCalibration = true;
-                m_deviceShared.m_centerFrequency = settings.m_centerFrequency; // for buddies
-                qDebug("LimeSDROutput::applySettings: frequency set to %lu", settings.m_centerFrequency);
+                m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
+                qDebug("LimeSDROutput::applySettings: frequency set to %lld", deviceCenterFrequency);
             }
         }
     }
@@ -1063,6 +1070,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     QLocale loc;
 
     qDebug().noquote() << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " deviceCenterFrequency: " << deviceCenterFrequency
             << " device stream sample rate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
             << " sample rate with soft interpolation: " << loc.toString( m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp)) << "S/s"
             << " DAC sample rate with hard interpolation: " << loc.toString(m_settings.m_devSampleRate*(1<<m_settings.m_log2HardInterp)) << "S/s"
@@ -1142,6 +1152,12 @@ int LimeSDROutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("ncoFrequency")) {
         settings.m_ncoFrequency = response.getLimeSdrOutputSettings()->getNcoFrequency();
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getLimeSdrOutputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getLimeSdrOutputSettings()->getTransverterMode() != 0;
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1171,6 +1187,8 @@ void LimeSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getLimeSdrOutputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
     response.getLimeSdrOutputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
     response.getLimeSdrOutputSettings()->setNcoFrequency(settings.m_ncoFrequency);
+    response.getLimeSdrOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getLimeSdrOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 }
 
 int LimeSDROutput::webapiRunGet(

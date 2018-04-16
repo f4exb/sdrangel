@@ -1021,9 +1021,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
-            || setAntennaAuto || force)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+        || setAntennaAuto || force)
     {
         forwardChangeRxDSP = true;
 

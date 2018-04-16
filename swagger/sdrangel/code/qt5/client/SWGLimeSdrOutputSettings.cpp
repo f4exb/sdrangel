@@ -54,6 +54,10 @@ SWGLimeSdrOutputSettings::SWGLimeSdrOutputSettings() {
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
     m_ext_clock_freq_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
 }
 
 SWGLimeSdrOutputSettings::~SWGLimeSdrOutputSettings() {
@@ -88,10 +92,16 @@ SWGLimeSdrOutputSettings::init() {
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
     m_ext_clock_freq_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
 }
 
 void
 SWGLimeSdrOutputSettings::cleanup() {
+
+
 
 
 
@@ -143,6 +153,10 @@ SWGLimeSdrOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ext_clock, pJson["extClock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ext_clock_freq, pJson["extClockFreq"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
 }
 
@@ -198,6 +212,12 @@ SWGLimeSdrOutputSettings::asJsonObject() {
     }
     if(m_ext_clock_freq_isSet){
         obj->insert("extClockFreq", QJsonValue(ext_clock_freq));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
 
     return obj;
@@ -333,6 +353,26 @@ SWGLimeSdrOutputSettings::setExtClockFreq(qint32 ext_clock_freq) {
     this->m_ext_clock_freq_isSet = true;
 }
 
+qint32
+SWGLimeSdrOutputSettings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGLimeSdrOutputSettings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGLimeSdrOutputSettings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGLimeSdrOutputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
 
 bool
 SWGLimeSdrOutputSettings::isSet(){
@@ -351,6 +391,8 @@ SWGLimeSdrOutputSettings::isSet(){
         if(m_antenna_path_isSet){ isObjectUpdated = true; break;}
         if(m_ext_clock_isSet){ isObjectUpdated = true; break;}
         if(m_ext_clock_freq_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
