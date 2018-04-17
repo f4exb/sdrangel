@@ -193,7 +193,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 {
                     if (m_squelchCount > 0)
                     {
-                        m_squelchCount--;
+                        m_squelchCount -= 10;
                     }
                 }
             }
@@ -203,7 +203,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 {
                     if (m_squelchCount > 0)
                     {
-                        m_squelchCount--;
+                        m_squelchCount -= 10;
                     }
                 }
                 else
