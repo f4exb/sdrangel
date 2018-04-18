@@ -26,6 +26,7 @@ def getInputOptions():
     parser.add_option("-f", "--channel-freq", dest="channel_freq", help="channel center frequency (Hz)", metavar="FREQ", type="int")
     parser.add_option("-s", "--sample-rate", dest="sample_rate", help="host to device sample rate (S/s)", metavar="RATE", type="int")
     parser.add_option("-l", "--log2-interp", dest="log2_interp", help="log2 of interpolation factor", metavar="RATE", type="int")
+    parser.add_option("-L", "--log2-interp-hard", dest="log2_interp_hard", help="log2 of hardware interpolation factor", metavar="RATE", type="int")
     parser.add_option("-A", "--antenna-path", dest="antenna_path", help="antenna path number", metavar="NUMBER", type="int")
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
     parser.add_option("--ppm", dest="lo_ppm", help="LO correction in ppm", metavar="FILENAME", type="float", default=0)
@@ -53,6 +54,9 @@ def getInputOptions():
         options.sample_rate = 2600000
     
     if options.log2_interp == None:
+        options.log2_interp = 4
+
+    if options.log2_interp_hard == None:
         options.log2_interp = 4
 
     if options.antenna_path == None:
@@ -121,7 +125,7 @@ def setupDevice(options):
     elif options.device_hwid == "LimeSDR":
         settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path
         settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate
-        settings["limeSdrOutputSettings"]["log2HardInterp"] = 4
+        settings["limeSdrOutputSettings"]["log2HardInterp"] = options.log2_interp_hard
         settings["limeSdrOutputSettings"]["log2SoftInterp"] = options.log2_interp
         settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq*1000 + 500000
         settings["limeSdrOutputSettings"]["ncoEnable"] = 1
@@ -129,6 +133,7 @@ def setupDevice(options):
         settings["limeSdrOutputSettings"]["lpfBW"] = 4050000
         settings["limeSdrOutputSettings"]["lpfFIRBW"] = 100000
         settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1
+        settings["limeSdrOutputSettings"]["gain"] = 17
     elif options.device_hwid == "HackRF":
         settings['hackRFOutputSettings']['LOppmTenths'] = round(options.lo_ppm*10)
         settings['hackRFOutputSettings']['centerFrequency'] = options.device_freq*1000
@@ -208,13 +213,15 @@ def setupChannel(options):
         settings["UDPSinkSettings"]["title"] = "Test UDP Sink"
         settings["UDPSinkSettings"]["inputFrequencyOffset"] = options.channel_freq
         settings["UDPSinkSettings"]["rfBandwidth"] = 12500
-        settings["UDPSinkSettings"]["fmDeviation"] = 5000
-        settings["UDPSinkSettings"]["autoRWBalance"] = 0
+        settings["UDPSinkSettings"]["fmDeviation"] = 6000
+        settings["UDPSinkSettings"]["autoRWBalance"] = 1
         settings["UDPSinkSettings"]["stereoInput"] = 0
         settings["UDPSinkSettings"]["udpAddress"] = "127.0.0.1"
         settings["UDPSinkSettings"]["udpPort"] = 9998
-        settings["UDPSinkSettings"]["inputSampleRate"] = 24000
+        settings["UDPSinkSettings"]["inputSampleRate"] = 48000
         settings["UDPSinkSettings"]["sampleFormat"] = 1 # FormatNFM
+        settings["UDPSinkSettings"]["gainIn"] = 2.5
+        settings["UDPSinkSettings"]["gainOut"] = 2.8
     elif options.channel_id == "WFMMod":
         settings["WFMModSettings"]["title"] = "Test WFM"
         settings["WFMModSettings"]["inputFrequencyOffset"] = options.channel_freq

@@ -40,8 +40,9 @@ public:
     void resetReadIndex();
     void resizeBuffer(float sampleRate);
 
-    void readSample(FixReal &t);
-    void readSample(Sample &s);
+    void readSample(qint16 &t);      //!< audio mono
+    void readSample(AudioSample &a); //!< audio stereo
+    void readSample(Sample &s);      //!< I/Q stream
 
     void setAutoRWBalance(bool autoRWBalance) { m_autoRWBalance = autoRWBalance; }
     void setFeedbackMessageQueue(MessageQueue *messageQueue) { m_feedbackMessageQueue = messageQueue; }
@@ -104,7 +105,7 @@ private:
     int m_udpDumpIndex;
     int m_nbUDPFrames;
     int m_nbAllocatedUDPFrames;
-    int m_writeIndex;
+    int m_writeFrameIndex;
     int m_readFrameIndex;
     int m_readIndex;
     int m_rwDelta;

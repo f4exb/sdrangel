@@ -175,7 +175,7 @@ void UDPSink::modulateSample()
     }
     else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatNFM)
     {
-        FixReal t;
+        qint16 t;
         readMonoSample(t);
 
         m_inMovingAverage.feed((t*t)/1073741824.0);
@@ -198,7 +198,7 @@ void UDPSink::modulateSample()
     }
     else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatAM)
     {
-        FixReal t;
+        qint16 t;
         readMonoSample(t);
         m_inMovingAverage.feed((t*t)/(SDR_TX_SCALED*SDR_TX_SCALED));
         m_inMagsq = m_inMovingAverage.average();
@@ -219,7 +219,7 @@ void UDPSink::modulateSample()
     }
     else if ((m_settings.m_sampleFormat == UDPSinkSettings::FormatLSB) || (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSB))
     {
-        FixReal t;
+        qint16 t;
         Complex c, ci;
         fftfilt::cmplx *filtered;
         int n_out = 0;

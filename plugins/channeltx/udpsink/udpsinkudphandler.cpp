@@ -33,7 +33,7 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     m_udpDumpIndex(0),
     m_nbUDPFrames(m_minNbUDPFrames),
     m_nbAllocatedUDPFrames(m_minNbUDPFrames),
-    m_writeIndex(0),
+    m_writeFrameIndex(0),
     m_readFrameIndex(m_minNbUDPFrames/2),
     m_readIndex(0),
     m_rwDelta(m_minNbUDPFrames/2),
@@ -129,31 +129,45 @@ void UDPSinkUDPHandler::dataReadyRead()
 
 void UDPSinkUDPHandler::moveData(char *blk)
 {
-    memcpy(m_udpBuf[m_writeIndex], blk, m_udpBlockSize);
+    memcpy(m_udpBuf[m_writeFrameIndex], blk, m_udpBlockSize);
 
-    if (m_writeIndex < m_nbUDPFrames - 1) {
-        m_writeIndex++;
+    if (m_writeFrameIndex < m_nbUDPFrames - 1) {
+        m_writeFrameIndex++;
     } else {
-        m_writeIndex = 0;
+        m_writeFrameIndex = 0;
     }
 }
 
-void UDPSinkUDPHandler::readSample(FixReal &t)
+void UDPSinkUDPHandler::readSample(qint16 &t)
 {
-    if (m_readFrameIndex == m_writeIndex) // block until more writes
+    if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
     {
         t = 0;
     }
     else
     {
-        memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(FixReal));
-        advanceReadPointer((int) sizeof(FixReal));
+        memcpy(&t, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(qint16));
+        advanceReadPointer((int) sizeof(qint16));
+    }
+}
+
+void UDPSinkUDPHandler::readSample(AudioSample &a)
+{
+    if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
+    {
+        a.l = 0;
+        a.r = 0;
+    }
+    else
+    {
+        memcpy(&a, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(AudioSample));
+        advanceReadPointer((int) sizeof(AudioSample));
     }
 }
 
 void UDPSinkUDPHandler::readSample(Sample &s)
 {
-    if (m_readFrameIndex == m_writeIndex) // block until more writes
+    if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
     {
         s.m_real = 0;
         s.m_imag = 0;
@@ -181,7 +195,7 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
         }
         else
         {
-            m_rwDelta = m_writeIndex; // raw R/W delta estimate
+            m_rwDelta = m_writeFrameIndex; // raw R/W delta estimate
             int nbUDPFrames2 = m_nbUDPFrames/2;
             float d = (m_rwDelta - nbUDPFrames2)/(float) m_nbUDPFrames;
             //qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
@@ -233,7 +247,7 @@ void UDPSinkUDPHandler::applyUDPLink(const QString& address, quint16 port)
 
 void UDPSinkUDPHandler::resetReadIndex()
 {
-    m_readFrameIndex = (m_writeIndex + (m_nbUDPFrames/2)) % m_nbUDPFrames;
+    m_readFrameIndex = (m_writeFrameIndex + (m_nbUDPFrames/2)) % m_nbUDPFrames;
     m_rwDelta = m_nbUDPFrames/2;
     m_readIndex = 0;
     m_d = 0.0f;
@@ -252,7 +266,7 @@ void UDPSinkUDPHandler::resizeBuffer(float sampleRate)
     }
 
     m_nbUDPFrames = 2*halfNbFrames;
-    m_writeIndex = 0;
+    m_writeFrameIndex = 0;
 
     resetReadIndex();
 }

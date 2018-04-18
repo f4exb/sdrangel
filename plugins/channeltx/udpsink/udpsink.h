@@ -300,14 +300,14 @@ private:
         }
     }
 
-    inline void readMonoSample(FixReal& t)
+    inline void readMonoSample(qint16& t)
     {
-        Sample s;
 
         if (m_settings.m_stereoInput)
         {
-            m_udpHandler.readSample(s);
-            t = ((s.m_real + s.m_imag) * m_settings.m_gainIn) / 2;
+            AudioSample a;
+            m_udpHandler.readSample(a);
+            t = ((a.l + a.r) * m_settings.m_gainIn) / 2;
         }
         else
         {
