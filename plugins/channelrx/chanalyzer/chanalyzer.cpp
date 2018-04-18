@@ -63,12 +63,12 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
-	if (SSBFilter) delete SSBFilter;
-	if (DSBFilter) delete DSBFilter;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    if (SSBFilter) delete SSBFilter;
+    if (DSBFilter) delete DSBFilter;
 }
 
 void ChannelAnalyzer::configure(MessageQueue* messageQueue,

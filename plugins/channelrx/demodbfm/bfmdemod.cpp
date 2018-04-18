@@ -78,7 +78,6 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 
     m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
 
-
 	m_deemphasisFilterX.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
 	m_deemphasisFilterY.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
  	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
@@ -97,17 +96,13 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 
 BFMDemod::~BFMDemod()
 {
-	if (m_rfFilter)
-	{
-		delete m_rfFilter;
-	}
-
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_rfFilter;
 }
 
 void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))

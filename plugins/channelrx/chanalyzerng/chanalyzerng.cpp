@@ -60,12 +60,12 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 
 ChannelAnalyzerNG::~ChannelAnalyzerNG()
 {
-	delete SSBFilter;
-	delete DSBFilter;
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete SSBFilter;
+    delete DSBFilter;
 }
 
 void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,

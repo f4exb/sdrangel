@@ -117,12 +117,12 @@ UDPSrc::~UDPSrc()
     delete m_udpBuffer16;
     delete m_udpBufferMono16;
 	delete[] m_udpAudioBuf;
-	if (UDPFilter) delete UDPFilter;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete UDPFilter;
 }
 
 void UDPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)

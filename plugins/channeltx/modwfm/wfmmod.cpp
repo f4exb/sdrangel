@@ -98,13 +98,13 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 
 WFMMod::~WFMMod()
 {
-    delete m_rfFilter;
-    delete[] m_rfFilterBuffer;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_rfFilter;
+    delete[] m_rfFilterBuffer;
 }
 
 void WFMMod::pull(Sample& sample)

@@ -72,17 +72,13 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 WFMDemod::~WFMDemod()
 {
-	if (m_rfFilter)
-	{
-		delete m_rfFilter;
-	}
-
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
 	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_rfFilter;
 }
 
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))

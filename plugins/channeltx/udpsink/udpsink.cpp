@@ -82,12 +82,12 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
 
 UDPSink::~UDPSink()
 {
-    delete[] m_SSBFilterBuffer;
-    delete m_SSBFilter;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_SSBFilter;
+    delete[] m_SSBFilterBuffer;
 }
 
 void UDPSink::start()

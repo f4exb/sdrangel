@@ -114,28 +114,17 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 
 SSBMod::~SSBMod()
 {
-    if (m_SSBFilter) {
-        delete m_SSBFilter;
-    }
-
-    if (m_DSBFilter) {
-        delete m_DSBFilter;
-    }
-
-    if (m_SSBFilterBuffer) {
-        delete m_SSBFilterBuffer;
-    }
-
-    if (m_DSBFilterBuffer) {
-        delete m_DSBFilterBuffer;
-    }
-
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+
+    delete m_SSBFilter;
+    delete m_DSBFilter;
+    delete[] m_SSBFilterBuffer;
+    delete[] m_DSBFilterBuffer;
 }
 
 void SSBMod::pull(Sample& sample)

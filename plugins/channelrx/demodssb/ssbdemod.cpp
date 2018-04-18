@@ -96,14 +96,14 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 
 SSBDemod::~SSBDemod()
 {
-	if (SSBFilter) delete SSBFilter;
-	if (DSBFilter) delete DSBFilter;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete SSBFilter;
+    delete DSBFilter;
 }
 
 void SSBDemod::configure(MessageQueue* messageQueue,

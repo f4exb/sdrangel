@@ -73,12 +73,11 @@ TCPSrc::TCPSrc(DeviceSourceAPI* deviceAPI) :
 
 TCPSrc::~TCPSrc()
 {
-	if (TCPFilter) delete TCPFilter;
-
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete TCPFilter;
 }
 
 void TCPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)

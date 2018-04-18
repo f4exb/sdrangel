@@ -110,6 +110,10 @@ ATVMod::~ATVMod()
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_SSBFilter;
+    delete m_DSBFilter;
+    delete[] m_SSBFilterBuffer;
+    delete[] m_DSBFilterBuffer;
 }
 
 void ATVMod::pullAudio(int nbSamples __attribute__((unused)))

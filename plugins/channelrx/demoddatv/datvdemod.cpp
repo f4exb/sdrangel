@@ -91,6 +91,7 @@ DATVDemod::~DATVDemod()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_objRFFilter;
 }
 
 bool DATVDemod::SetTVScreen(TVScreen *objScreen)

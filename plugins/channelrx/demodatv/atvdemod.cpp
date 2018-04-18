@@ -101,6 +101,8 @@ ATVDemod::~ATVDemod()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_DSBFilter;
+    delete m_DSBFilterBuffer;
 }
 
 void ATVDemod::setTVScreen(TVScreen *objScreen)
