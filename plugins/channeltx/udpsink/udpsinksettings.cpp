@@ -30,7 +30,7 @@ UDPSinkSettings::UDPSinkSettings() :
 
 void UDPSinkSettings::resetToDefaults()
 {
-    m_sampleFormat = FormatS16LE;
+    m_sampleFormat = FormatSnLE;
     m_inputSampleRate = 48000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500;

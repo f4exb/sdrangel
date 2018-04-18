@@ -26,7 +26,7 @@ class Serializable;
 struct UDPSinkSettings
 {
     enum SampleFormat {
-        FormatS16LE,
+        FormatSnLE,
         FormatNFM,
         FormatLSB,
         FormatUSB,

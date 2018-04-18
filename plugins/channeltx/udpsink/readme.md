@@ -42,7 +42,7 @@ Sample rate in samples per second of the signal that is recveived on UDP. The ac
 
 Combo box to specify the type of samples that are received and sent in the channel.
 
-  - `S16LE I/Q`: Raw I/Q samples on signed 16 bits integers with Little Endian layout. Use it with software that sends I/Q data as output like GNUradio with the `UDP source` block. The output is interleaved I and Q samples. It can also match the UDP source plugin with the same `S16LE I/Q` format and can be used for linear transposition.
+  - `SnLE I/Q`: Raw I/Q samples on signed 16 or 24 bits integers with Little Endian layout. Use it with software that sends I/Q data as output like GNUradio with the `UDP source` block. The output is interleaved I and Q samples. It can also match the UDP source plugin with the same `S16LE I/Q` format and compiled for the same sample I/Q size and can be used for linear transposition.
   - `S16LE NFM`: receives 16 bits signed integers on 1 (mono) or 2 (stereo) channels with Little Endian layout. It produces a mono signal with narrow bandwidth FM modulation. Stereo input channels are mixed before modulation. There is no DC block so it can be used with modulating signals where the DC component is important like digital signals.
   - `S16LE LSB`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a LSB modulated signal. Stereo input channels are mixed before modulation.
   - `S16LE USB`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a USB modulated signal. Stereo input channels are mixed before modulation.

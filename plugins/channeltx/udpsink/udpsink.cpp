@@ -149,7 +149,7 @@ void UDPSink::pull(Sample& sample)
 
 void UDPSink::modulateSample()
 {
-    if (m_settings.m_sampleFormat == UDPSinkSettings::FormatS16LE) // Linear I/Q transponding
+    if (m_settings.m_sampleFormat == UDPSinkSettings::FormatSnLE) // Linear I/Q transponding
     {
         Sample s;
 

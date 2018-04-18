@@ -825,7 +825,7 @@
         </property>
         <item>
          <property name="text">
-          <string>S16LE I/Q</string>
+          <string>SnLE I/Q</string>
          </property>
         </item>
         <item>

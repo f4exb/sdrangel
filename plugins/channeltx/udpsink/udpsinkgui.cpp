@@ -492,7 +492,7 @@ void UDPSinkGUI::setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampl
 {
     switch(sampleFormat)
     {
-        case UDPSinkSettings::FormatS16LE:
+        case UDPSinkSettings::FormatSnLE:
             ui->sampleFormat->setCurrentIndex(0);
             ui->fmDeviation->setEnabled(false);
             ui->stereoInput->setChecked(true);
@@ -532,7 +532,7 @@ void UDPSinkGUI::setSampleFormat(int index)
     switch(index)
     {
     case 0:
-        m_settings.m_sampleFormat = UDPSinkSettings::FormatS16LE;
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatSnLE;
         ui->fmDeviation->setEnabled(false);
         ui->stereoInput->setChecked(true);
         ui->stereoInput->setEnabled(false);
@@ -558,7 +558,7 @@ void UDPSinkGUI::setSampleFormat(int index)
         ui->stereoInput->setEnabled(true);
         break;
     default:
-        m_settings.m_sampleFormat = UDPSinkSettings::FormatS16LE;
+        m_settings.m_sampleFormat = UDPSinkSettings::FormatSnLE;
         ui->fmDeviation->setEnabled(false);
         ui->stereoInput->setChecked(true);
         ui->stereoInput->setEnabled(false);
