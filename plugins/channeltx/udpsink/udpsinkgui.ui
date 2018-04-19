@@ -609,6 +609,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="channelMute">
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
         <property name="toolTip">
          <string>Mute/Unmute channel (green when on air)</string>
         </property>
@@ -790,6 +793,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
         <property name="toolTip">
          <string>Local UDP address</string>
         </property>
@@ -827,6 +833,9 @@
           <width>50</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
         </property>
         <property name="acceptDrops">
          <bool>false</bool>

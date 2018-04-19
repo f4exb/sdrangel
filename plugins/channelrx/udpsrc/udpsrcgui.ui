@@ -342,6 +342,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
         <property name="toolTip">
          <string>Destinationn UDP address</string>
         </property>
@@ -386,6 +389,9 @@
           <width>50</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
         </property>
         <property name="toolTip">
          <string>Destination UDP port</string>
@@ -525,6 +531,9 @@
           <width>50</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
         </property>
         <property name="toolTip">
          <string>Audio input UDP port</string>
