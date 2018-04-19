@@ -61,7 +61,6 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 	m_udpBuffer16 = new UDPSink<Sample16>(this, udpBlockSize, m_settings.m_udpPort);
 	m_udpBufferMono16 = new UDPSink<int16_t>(this, udpBlockSize, m_settings.m_udpPort);
     m_udpBuffer24 = new UDPSink<Sample24>(this, udpBlockSize, m_settings.m_udpPort);
-    m_udpBufferMono24 = new UDPSink<int32_t>(this, udpBlockSize, m_settings.m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 	m_udpAudioBuf = new char[m_udpAudioPayloadSize];
 
@@ -113,7 +112,6 @@ UDPSrc::~UDPSrc()
 {
 	delete m_audioSocket;
 	delete m_udpBuffer24;
-	delete m_udpBufferMono24;
     delete m_udpBuffer16;
     delete m_udpBufferMono16;
 	delete[] m_udpAudioBuf;
@@ -153,7 +151,8 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
             if ((m_settings.m_agc) &&
                 (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFM) &&
                 (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFMMono) &&
-                (m_settings.m_sampleFormat != UDPSrcSettings::FormatIQ))
+                (m_settings.m_sampleFormat != UDPSrcSettings::FormatIQ16) &&
+                (m_settings.m_sampleFormat != UDPSrcSettings::FormatIQ24))
             {
                 agcFactor = m_agc.feedAndGetValue(ci);
                 inMagSq = m_agc.getMagSq();
@@ -494,7 +493,6 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
             << " m_squelchGate" << settings.m_squelchGate
             << " m_agc" << settings.m_agc
             << " m_sampleFormat: " << settings.m_sampleFormat
-            << " m_sampleSize: " << 16  + settings.m_sampleSize*8
             << " m_outputSampleRate: " << settings.m_outputSampleRate
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
@@ -582,7 +580,6 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
         m_udpBuffer16->setAddress(const_cast<QString&>(settings.m_udpAddress));
         m_udpBufferMono16->setAddress(const_cast<QString&>(settings.m_udpAddress));
         m_udpBuffer24->setAddress(const_cast<QString&>(settings.m_udpAddress));
-        m_udpBufferMono24->setAddress(const_cast<QString&>(settings.m_udpAddress));
     }
 
     if ((settings.m_udpPort != m_settings.m_udpPort) || force)
@@ -590,7 +587,6 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
         m_udpBuffer16->setPort(settings.m_udpPort);
         m_udpBufferMono16->setPort(settings.m_udpPort);
         m_udpBuffer24->setPort(settings.m_udpPort);
-        m_udpBufferMono24->setPort(settings.m_udpPort);
     }
 
     if ((settings.m_audioPort != m_settings.m_audioPort) || force)

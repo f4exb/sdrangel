@@ -251,35 +251,38 @@ void UDPSrcGUI::setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleF
 {
     switch(sampleFormat)
     {
-        case UDPSrcSettings::FormatIQ:
+        case UDPSrcSettings::FormatIQ16:
             ui->sampleFormat->setCurrentIndex(0);
             break;
-        case UDPSrcSettings::FormatNFM:
+        case UDPSrcSettings::FormatIQ24:
             ui->sampleFormat->setCurrentIndex(1);
             break;
-        case UDPSrcSettings::FormatNFMMono:
+        case UDPSrcSettings::FormatNFM:
             ui->sampleFormat->setCurrentIndex(2);
             break;
-        case UDPSrcSettings::FormatLSB:
+        case UDPSrcSettings::FormatNFMMono:
             ui->sampleFormat->setCurrentIndex(3);
             break;
-        case UDPSrcSettings::FormatUSB:
+        case UDPSrcSettings::FormatLSB:
             ui->sampleFormat->setCurrentIndex(4);
             break;
-        case UDPSrcSettings::FormatLSBMono:
+        case UDPSrcSettings::FormatUSB:
             ui->sampleFormat->setCurrentIndex(5);
             break;
-        case UDPSrcSettings::FormatUSBMono:
+        case UDPSrcSettings::FormatLSBMono:
             ui->sampleFormat->setCurrentIndex(6);
             break;
-        case UDPSrcSettings::FormatAMMono:
+        case UDPSrcSettings::FormatUSBMono:
             ui->sampleFormat->setCurrentIndex(7);
             break;
-        case UDPSrcSettings::FormatAMNoDCMono:
+        case UDPSrcSettings::FormatAMMono:
             ui->sampleFormat->setCurrentIndex(8);
             break;
-        case UDPSrcSettings::FormatAMBPFMono:
+        case UDPSrcSettings::FormatAMNoDCMono:
             ui->sampleFormat->setCurrentIndex(9);
+            break;
+        case UDPSrcSettings::FormatAMBPFMono:
+            ui->sampleFormat->setCurrentIndex(10);
             break;
         default:
             ui->sampleFormat->setCurrentIndex(0);
@@ -292,47 +295,51 @@ void UDPSrcGUI::setSampleFormat(int index)
     switch(index)
     {
         case 0:
-            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ;
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ16;
             ui->fmDeviation->setEnabled(false);
             break;
         case 1:
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ24;
+            ui->fmDeviation->setEnabled(false);
+            break;
+        case 2:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatNFM;
             ui->fmDeviation->setEnabled(true);
             break;
-        case 2:
+        case 3:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatNFMMono;
             ui->fmDeviation->setEnabled(true);
             break;
-        case 3:
+        case 4:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatLSB;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 4:
+        case 5:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatUSB;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 5:
+        case 6:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatLSBMono;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 6:
+        case 7:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatUSBMono;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 7:
+        case 8:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatAMMono;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 8:
+        case 9:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatAMNoDCMono;
             ui->fmDeviation->setEnabled(false);
             break;
-        case 9:
+        case 10:
             m_settings.m_sampleFormat = UDPSrcSettings::FormatAMBPFMono;
             ui->fmDeviation->setEnabled(false);
             break;
         default:
-            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ;
+            m_settings.m_sampleFormat = UDPSrcSettings::FormatIQ16;
             ui->fmDeviation->setEnabled(false);
             break;
     }
@@ -382,18 +389,6 @@ void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
-}
-
-void UDPSrcGUI::on_sampleSize_currentIndexChanged(int index)
-{
-    if ((index < 0) || (index >= UDPSrcSettings::SizeNone)) {
-        return;
-    }
-
-    m_settings.m_sampleSize = (UDPSrcSettings::SampleSize) index;
-
-    ui->applyBtn->setEnabled(true);
-    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))

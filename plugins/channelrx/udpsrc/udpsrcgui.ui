@@ -386,7 +386,12 @@
         </property>
         <item>
          <property name="text">
-          <string>I/Q</string>
+          <string>I/Q 16bits</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>I/Q 24bits</string>
          </property>
         </item>
         <item>
@@ -432,23 +437,6 @@
         <item>
          <property name="text">
           <string>AM BPF Mono</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="sampleSize">
-        <property name="toolTip">
-         <string>Samples size</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>16 bits</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>24 bits</string>
          </property>
         </item>
        </widget>

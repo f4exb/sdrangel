@@ -26,7 +26,8 @@ class Serializable;
 struct UDPSrcSettings
 {
     enum SampleFormat {
-        FormatIQ,
+        FormatIQ16,
+        FormatIQ24,
         FormatNFM,
         FormatNFMMono,
         FormatLSB,
@@ -39,15 +40,8 @@ struct UDPSrcSettings
         FormatNone
     };
 
-    enum SampleSize {
-        Size16bits,
-        Size24bits,
-        SizeNone
-    };
-
     float m_outputSampleRate;
     SampleFormat m_sampleFormat;
-    SampleSize m_sampleSize;
     int64_t m_inputFrequencyOffset;
     float m_rfBandwidth;
     int m_fmDeviation;
