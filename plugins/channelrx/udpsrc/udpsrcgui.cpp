@@ -219,10 +219,16 @@ void UDPSrcGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
+    blockApplySettings(true);
+
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->sampleRate->setText(QString("%1").arg(m_settings.m_outputSampleRate, 0));
     setSampleFormatIndex(m_settings.m_sampleFormat);
+
+    ui->outputUDPAddress->setText(m_settings.m_udpAddress);
+    ui->outputUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
+    ui->inputUDPAudioPort->setText(tr("%1").arg(m_settings.m_audioPort));
 
     ui->squelch->setValue(m_settings.m_squelchdB);
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
@@ -243,6 +249,11 @@ void UDPSrcGUI::displaySettings()
 
     ui->gain->setValue(m_settings.m_gain*10.0);
     ui->gainText->setText(tr("%1").arg(ui->gain->value()/10.0, 0, 'f', 1));
+
+    ui->applyBtn->setEnabled(false);
+    ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
+
+    blockApplySettings(false);
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
 }
@@ -389,6 +400,45 @@ void UDPSrcGUI::on_sampleFormat_currentIndexChanged(int index)
 
 	ui->applyBtn->setEnabled(true);
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSrcGUI::on_outputUDPAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->outputUDPAddress->text();
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSrcGUI::on_outputUDPPort_editingFinished()
+{
+    bool ok;
+    quint16 udpPort = ui->outputUDPPort->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024)) {
+        udpPort = 9998;
+    }
+
+    m_settings.m_udpPort = udpPort;
+    ui->outputUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
+
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSrcGUI::on_inputUDPAudioPort_editingFinished()
+{
+    bool ok;
+    quint16 udpPort = ui->inputUDPAudioPort->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024)) {
+        udpPort = 9997;
+    }
+
+    m_settings.m_audioPort = udpPort;
+    ui->inputUDPAudioPort->setText(tr("%1").arg(m_settings.m_audioPort));
+
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void UDPSrcGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))

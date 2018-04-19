@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
+    <width>383</width>
     <height>355</height>
    </rect>
   </property>
@@ -39,13 +39,13 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>350</width>
+     <width>380</width>
      <height>142</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>350</width>
+     <width>380</width>
      <height>0</height>
     </size>
    </property>
@@ -53,16 +53,7 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -331,7 +322,7 @@
     <item row="1" column="0">
      <layout class="QHBoxLayout" name="AddressLayout">
       <item>
-       <widget class="QLabel" name="Addresslabel">
+       <widget class="QLabel" name="outputUDPAddressLabel">
         <property name="maximumSize">
          <size>
           <width>30</width>
@@ -339,23 +330,71 @@
          </size>
         </property>
         <property name="text">
-         <string>Addr</string>
+         <string>Ad</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="addressText">
+       <widget class="QLineEdit" name="outputUDPAddress">
         <property name="minimumSize">
          <size>
-          <width>170</width>
+          <width>120</width>
           <height>0</height>
          </size>
         </property>
-        <property name="statusTip">
-         <string>UDP &lt;address&gt;:&lt;data port&gt;/&lt;audio port&gt;</string>
+        <property name="toolTip">
+         <string>Destinationn UDP address</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000; </string>
         </property>
         <property name="text">
-         <string>00.000.000.000:0000/0000</string>
+         <string>127.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="outputUDPPortLabel">
+        <property name="text">
+         <string>P</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="outputUDPPort">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Destination UDP port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000; </string>
+        </property>
+        <property name="text">
+         <string>9998</string>
         </property>
        </widget>
       </item>
@@ -378,6 +417,18 @@
       </item>
       <item>
        <widget class="QComboBox" name="sampleFormat">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Samples format</string>
         </property>
@@ -439,6 +490,51 @@
           <string>AM BPF Mono</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="inputUDPAudioPortLabel">
+        <property name="text">
+         <string>Au</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="inputUDPAudioPort">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio input UDP port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000; </string>
+        </property>
+        <property name="text">
+         <string>9997</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -721,16 +817,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>

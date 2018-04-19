@@ -145,12 +145,12 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         m_gainIn = s32tmp / 10.0;
 
         d.readString(18, &m_udpAddress, "127.0.0.1");
-        d.readU32(19, &u32tmp, 10);
+        d.readU32(19, &u32tmp, 9998);
 
         if ((u32tmp > 1024) & (u32tmp < 65538)) {
             m_udpPort = u32tmp;
         } else {
-            m_udpPort = 9999;
+            m_udpPort = 9998;
         }
 
         d.readString(20, &m_title, "UDP Sample Sink");

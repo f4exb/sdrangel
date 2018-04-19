@@ -770,7 +770,39 @@
     <item row="2" column="0">
      <layout class="QHBoxLayout" name="AddressLayout">
       <item>
-       <widget class="QLabel" name="addresslabel">
+       <widget class="QLabel" name="localUDPAddressLabel">
+        <property name="text">
+         <string>A</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="localUDPAddress">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>110</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Local UDP address</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000; </string>
+        </property>
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="addressSeparator">
         <property name="maximumSize">
          <size>
           <width>35</width>
@@ -778,25 +810,50 @@
          </size>
         </property>
         <property name="text">
-         <string>Addr</string>
+         <string>:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="addressText">
+       <widget class="QLineEdit" name="localUDPPort">
         <property name="minimumSize">
          <size>
-          <width>150</width>
+          <width>50</width>
           <height>0</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
-         <string>Receiving UDP address and port</string>
+         <string>Local UDP port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000; </string>
         </property>
         <property name="text">
-         <string>000.000.000.000:00000</string>
+         <string>9998</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

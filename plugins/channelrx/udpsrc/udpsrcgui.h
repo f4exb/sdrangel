@@ -94,6 +94,9 @@ private:
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
 	void on_sampleFormat_currentIndexChanged(int index);
+	void on_outputUDPAddress_editingFinished();
+	void on_outputUDPPort_editingFinished();
+	void on_inputUDPAudioPort_editingFinished();
 	void on_sampleRate_textEdited(const QString& arg1);
 	void on_rfBandwidth_textEdited(const QString& arg1);
 	void on_fmDeviation_textEdited(const QString& arg1);

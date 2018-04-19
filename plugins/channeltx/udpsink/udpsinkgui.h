@@ -90,6 +90,8 @@ private slots:
     void handleSourceMessages();
     void on_deltaFrequency_changed(qint64 value);
     void on_sampleFormat_currentIndexChanged(int index);
+    void on_localUDPAddress_editingFinished();
+    void on_localUDPPort_editingFinished();
     void on_sampleRate_textEdited(const QString& arg1);
     void on_rfBandwidth_textEdited(const QString& arg1);
     void on_fmDeviation_textEdited(const QString& arg1);

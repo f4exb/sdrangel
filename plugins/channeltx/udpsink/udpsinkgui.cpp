@@ -243,7 +243,8 @@ void UDPSinkGUI::displaySettings()
     ui->squelchGateText->setText(tr("%1").arg(roundf(m_settings.m_squelchGate * 1000.0), 0, 'f', 0));
     ui->squelchGate->setValue(roundf(m_settings.m_squelchGate * 100.0));
 
-    ui->addressText->setText(tr("%1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
+    ui->localUDPAddress->setText(m_settings.m_udpAddress);
+    ui->localUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
 
     ui->applyBtn->setEnabled(false);
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
@@ -280,6 +281,29 @@ void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
     }
 
     setSampleFormat(index);
+
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSinkGUI::on_localUDPAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->localUDPAddress->text();
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSinkGUI::on_localUDPPort_editingFinished()
+{
+    bool ok;
+    quint16 udpPort = ui->localUDPPort->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024)) {
+        udpPort = 9998;
+    }
+
+    m_settings.m_udpPort = udpPort;
+    ui->localUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
 
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
@@ -445,7 +469,6 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
 
     setWindowTitle(m_channelMarker.getTitle());
     setTitleColor(m_settings.m_rgbColor);
-    ui->addressText->setText(tr("%1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 
     applySettings();
 }

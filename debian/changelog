@@ -1,9 +1,12 @@
 sdrangel (3.14.3-1) unstable; urgency=medium
 
   * LimeSDR: compiled with LimeSuite commit 67dcef1
-  * LimeSDR: implemented transverter dialog
+  * LimeSDR: implemented transverter dialog (issue #157)
+  * UDP source and sink: make sure audio samples are always on 16 bits
+  * UDP source and sink: dialog elements for address and port
+  * Reviewed FFT destruction in many channel sources and sinks (issue #159) 
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 21 Apr 2018 18:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 20 Apr 2018 20:14:18 +0200
 
 sdrangel (3.14.2-1) unstable; urgency=medium
 
