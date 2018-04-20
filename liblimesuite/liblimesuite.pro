@@ -48,14 +48,12 @@ SOURCES = $$LIBLIMESUITESRC/src/Logger.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_BaseCalibrations.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/goert.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/mcu_dc_iq_calibration.cpp\
-    $$LIBLIMESUITESRC/src/lms7002m/CalibrationCache.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_filtersCalibration.cpp\
     $$LIBLIMESUITESRC/src/lms7002m/LMS7002M_gainCalibrations.cpp\
     $$LIBLIMESUITESRC/src/protocols/LMS64CProtocol.cpp\
     $$LIBLIMESUITESRC/src/protocols/Streamer.cpp\
     $$LIBLIMESUITESRC/src/protocols/ConnectionImages.cpp\
     $$LIBLIMESUITESRC/src/Si5351C/Si5351C.cpp\
-    $$LIBLIMESUITESRC/src/kissFFT/kiss_fft.c\
     $$LIBLIMESUITESRC/src/API/lms7_api.cpp\
     $$LIBLIMESUITESRC/src/API/lms7_device.cpp\
     $$LIBLIMESUITESRC/src/API/LmsGeneric.cpp\
@@ -88,8 +86,7 @@ HEADERS = $$LIBLIMESUITESRC/src/API/*.h\
     $$LIBLIMESUITESRC/src/Si5351C/*.h\
     $$LIBLIMESUITESRC/src/lms7002m/*.h\
     $$LIBLIMESUITESRC/src/FPGA_common/*.h\
-    $$LIBLIMESUITESRC/src/HPM7/*.h\
-    $$LIBLIMESUITESRC/src/kissFFT/*.h
+    $$LIBLIMESUITESRC/src/HPM7/*.h
     
 CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
