@@ -17,14 +17,12 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/lms7002m/LMS7002M_BaseCalibrations.cpp
     ${LIBLIMESUITESRC}/src/lms7002m/goert.cpp
     ${LIBLIMESUITESRC}/src/lms7002m/mcu_dc_iq_calibration.cpp
-    ${LIBLIMESUITESRC}/src/lms7002m/CalibrationCache.cpp
     ${LIBLIMESUITESRC}/src/lms7002m/LMS7002M_filtersCalibration.cpp
     ${LIBLIMESUITESRC}/src/lms7002m/LMS7002M_gainCalibrations.cpp
     ${LIBLIMESUITESRC}/src/protocols/LMS64CProtocol.cpp
     ${LIBLIMESUITESRC}/src/protocols/Streamer.cpp
     ${LIBLIMESUITESRC}/src/protocols/ConnectionImages.cpp
     ${LIBLIMESUITESRC}/src/Si5351C/Si5351C.cpp
-    ${LIBLIMESUITESRC}/src/kissFFT/kiss_fft.c
     ${LIBLIMESUITESRC}/src/API/lms7_api.cpp
     ${LIBLIMESUITESRC}/src/API/lms7_device.cpp
     ${LIBLIMESUITESRC}/src/API/LmsGeneric.cpp
@@ -60,7 +58,6 @@ set(limesuite_HEADERS
     ${LIBLIMESUITESRC}/src/lms7002m/*.h
     ${LIBLIMESUITESRC}/src/FPGA_common/*.h
     ${LIBLIMESUITESRC}/src/HPM7/*.h
-    ${LIBLIMESUITESRC}/src/kissFFT/*.h
 )
 
 include_directories(
