@@ -4,6 +4,10 @@
 
 This input sample source plugin gets its samples from a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
+<p>&#9888; Version 18.04.1 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used (2.16 for LimeSDR-USB and 1.24 for LimeSDR-Mini). If you compile from source version 18.04.1 of LimeSuite must be used.</p>
+
+<p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only.</p>
+
 LimeSDR is a 2x2 MIMO device so it has two receiving channels that can run concurrently. To activate the second channel when the first is already active just open a new source tab in the main window (Devices -> Add source device) and select the same LimeSDR device.
 
 <h2>Build</h2>

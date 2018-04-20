@@ -1,6 +1,6 @@
 sdrangel (3.14.3-1) unstable; urgency=medium
 
-  * LimeSDR: compiled with LimeSuite commit 67dcef1
+  * LimeSDR: compiled with LimeSuite release 18.04.1
   * LimeSDR: implemented transverter dialog (issue #157)
   * UDP source and sink: make sure audio samples are always on 16 bits
   * UDP source and sink: dialog elements for address and port

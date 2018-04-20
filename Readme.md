@@ -41,7 +41,7 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
-  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput) not working properly
+  - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
@@ -119,11 +119,9 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 [LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
 
-<p><b>&#9888; The latest version of LimeSuite is used and must be considered experimental. For now only the Rx side is operational.</b></p>
+<p>&#9888; Version 18.04.1 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used (2.16 for LimeSDR-USB and 1.24 for LimeSDR-Mini). If you compile from source version 18.04.1 of LimeSuite must be used.</p>
 
-<p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 2.5 MS/s particularly in Tx mode.</p>
-
-You will need a minimal installation of LimeSuite. Presently commit 90c3991 or later should be used with its corresponding firmware (v4) and gateware (v2.14) installed in the LimeSDR device. LimeSDR Mini gateware v1.24 should be used.
+<p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only.</p>
 
   - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`
