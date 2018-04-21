@@ -34,6 +34,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
+#include "util/doublebufferfifo.h"
 
 #include "nfmdemodsettings.h"
 
@@ -207,6 +208,7 @@ private:
 	MovingAverageUtil<Real, double, 32> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
+	DoubleBufferFIFO<Real> m_squelchDelayLine;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;

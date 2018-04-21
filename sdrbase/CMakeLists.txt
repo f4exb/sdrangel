@@ -170,7 +170,7 @@ set(sdrbase_HEADERS
     util/CRC64.h
     util/db.h
     util/doublebuffer.h
-    #export.h
+    util/doublebufferfifo.h
     util/fixedtraits.h
     util/message.h
     util/messagequeue.h

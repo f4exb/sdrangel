@@ -57,7 +57,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_sampleCount(0),
         m_squelchCount(0),
         m_squelchGate(4800),
-        m_squelchDecay(480),
+        m_squelchDecay(4800),
         m_squelchLevel(-990),
         m_squelchOpen(false),
         m_afSquelchOpen(false),
@@ -66,6 +66,7 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_afSquelch(),
+        m_squelchDelayLine(24000),
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -178,22 +179,29 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_settings.m_deltaSquelch)
             {
-                if (m_afSquelch.analyze(demod * m_discriCompensation)) {
-                    m_afSquelchOpen = m_afSquelch.evaluate() ? m_squelchGate + m_squelchDecay : 0;
+                if (m_afSquelch.analyze(demod * m_discriCompensation))
+                {
+                    m_afSquelchOpen = m_afSquelch.evaluate(); // ? m_squelchGate + m_squelchDecay : 0;
+
+                    if (!m_afSquelchOpen) {
+                        m_squelchDelayLine.zeroBack(m_audioSampleRate/10); // zero out evaluation period
+                    }
                 }
 
                 if (m_afSquelchOpen)
                 {
-                    if (m_squelchCount < m_squelchGate + m_squelchDecay)
-                    {
+                    m_squelchDelayLine.write(demod * m_discriCompensation);
+
+                    if (m_squelchCount < m_squelchGate + m_squelchDecay) {
                         m_squelchCount++;
                     }
                 }
                 else
                 {
-                    if (m_squelchCount > 0)
-                    {
-                        m_squelchCount -= 10;
+                    m_squelchDelayLine.write(0);
+
+                    if (m_squelchCount > 0) {
+                        m_squelchCount--;
                     }
                 }
             }
@@ -201,15 +209,17 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             {
                 if ((Real) m_movingAverage < m_squelchLevel)
                 {
-                    if (m_squelchCount > 0)
-                    {
-                        m_squelchCount -= 10;
+                    m_squelchDelayLine.write(0);
+
+                    if (m_squelchCount > 0) {
+                        m_squelchCount--;
                     }
                 }
                 else
                 {
-                    if (m_squelchCount < m_squelchGate + m_squelchDecay)
-                    {
+                    m_squelchDelayLine.write(demod * m_discriCompensation);
+
+                    if (m_squelchCount < m_squelchGate + m_squelchDecay) {
                         m_squelchCount++;
                     }
                 }
@@ -261,9 +271,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
                 else
                 {
-                    demod = m_bandpass.filter(demod * m_discriCompensation);
-                    Real squelchFactor = StepFunctions::smootherstep((Real) (m_squelchCount - m_squelchGate) / (Real) m_squelchDecay);
-                    sample = demod * m_settings.m_volume * squelchFactor;
+                    sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
                 }
             }
             else
@@ -413,7 +421,7 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_lowpass.create(301, sampleRate, 250.0);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
     m_squelchGate = (sampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
-    m_squelchDecay = (sampleRate / 100); // decay is fixed at 10ms
+    m_squelchDecay = m_squelchGate;
     m_squelchCount = 0; // reset squelch open counter
     m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
 
@@ -429,6 +437,7 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
 
     m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
+    m_squelchDelayLine.resize(sampleRate/2);
 
     m_settingsMutex.unlock();
 
