@@ -19,7 +19,7 @@ You can add `-Wno-dev` on the `cmake` command line to avoid warnings.
 
 ![SDRangel code map](./doc/img/SDRangelFlow.png)
 
-The existing receiving flow is represented with green boxes. The futrue Tx flow with red boxes. Some classes and file paths in the Rx part were renamed to avoid collision with future Tx names in this case the old name appears below the present name in italics.
+The existing receiving flow is represented with green boxes. The future Tx flow with red boxes. Some classes and file paths in the Rx part were renamed to avoid collision with future Tx names in this case the old name appears below the present name in italics.
 
 <h3>Rx path</h3>
 
@@ -33,22 +33,22 @@ The existing receiving flow is represented with green boxes. The futrue Tx flow 
 
 At present the following plugins are available:
 
-  - `AirspyXxx` classes in `plugins/samplesource/airspy`: Inteface with Airspy devices
-  - `BladeRFXxx` classes in `plugins/samplesource/bladerf`: Inteface with BladeRF devices
-  - `BladeRFXxx` classes in `plugins/samplesource/bladerf`: Inteface with BladeRF devices
-  - `FCDProXxx` classes in `plugins/samplesource/fcdpro`: Inteface with Funcube Pro devices
-  - `FCDProPlusXxx` classes in `plugins/samplesource/fcdproplus`: Inteface with Funcube Pro+ devices
-  - `HackRFXxx` classes in `plugins/samplesource/hackrf`: Inteface with HackRF devices
-  - `RTLSDRXxx` classes in `plugins/samplesource/rtlsdr`: Inteface with RTL-SDR devices
-  - `SDRDaemonXxx` classes in `plugins/samplesource/sdrdaemon`: Special inteface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon).
-  - `SDRDaemonFECXxx` classes in `plugins/samplesource/sdrdaemonfec`: Special inteface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon) with FEC protection of blocks.
-  - `FileSource` classes in `plugins/samplesource/filesource`: Special inteface reading I/Q samples from a file directly into the baseband skipping the downsampling block
+  - `AirspyXxx` classes in `plugins/samplesource/airspy`: Interface with Airspy devices
+  - `BladeRFXxx` classes in `plugins/samplesource/bladerf`: Interface with BladeRF devices
+  - `BladeRFXxx` classes in `plugins/samplesource/bladerf`: Interface with BladeRF devices
+  - `FCDProXxx` classes in `plugins/samplesource/fcdpro`: Interface with Funcube Pro devices
+  - `FCDProPlusXxx` classes in `plugins/samplesource/fcdproplus`: Interface with Funcube Pro+ devices
+  - `HackRFXxx` classes in `plugins/samplesource/hackrf`: Interface with HackRF devices
+  - `RTLSDRXxx` classes in `plugins/samplesource/rtlsdr`: Interface with RTL-SDR devices
+  - `SDRDaemonXxx` classes in `plugins/samplesource/sdrdaemon`: Special interface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon).
+  - `SDRDaemonFECXxx` classes in `plugins/samplesource/sdrdaemonfec`: Special interface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon) with FEC protection of blocks.
+  - `FileSource` classes in `plugins/samplesource/filesource`: Special interface reading I/Q samples from a file directly into the baseband skipping the downsampling block
 
 <h3>Device sample sink plugins</h3>
 
 At present the following plugins are available:
 
-  - `FileSink` classes in `plugins/samplesink/filesink`: Special inteface writing baseband I/Q samples to a file skipping the final upsampling block
+  - `FileSink` classes in `plugins/samplesink/filesink`: Special interface writing baseband I/Q samples to a file skipping the final upsampling block
 
 <h3>Channel receiver (Rx) plugins</h3>
 
@@ -105,7 +105,7 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
         - `xxxanalyzer.pro` : Qt .pro file for Windows/Android build
       - `xxxsrc` : Interface to the outside (e.g xxx = udp):
-        - `xxxsrc.h/cpp` : Inteface core
+        - `xxxsrc.h/cpp` : Interface core
         - `xxxsrcgui.h/cpp` : Interface GUI
         - `xxxsrcplugin/h/cpp` : Interface plugin manager
         - `xxxsrc.pro` : Qt .pro file for Windows/Android build
@@ -131,7 +131,7 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxgeneratorplugin.h/cpp` : Generator plugin manager
         - `xxxgenerator.pro` : Qt .pro file for Windows/Android build
       - `xxxsink` : Interface to the outside (e.g xxx = udp):
-        - `xxxsink.h/cpp` : Inteface core
+        - `xxxsink.h/cpp` : Interface core
         - `xxxsinkgui.h/cpp` : Interface GUI
         - `xxxsinklugin/h/cpp` : Interface plugin manager
         - `xxxsink.pro` : Qt .pro file for Windows/Android build
@@ -153,9 +153,9 @@ The lifecycle of the GUI is controlled from the "Sampling Device Control" device
   - Remove the current device API from the relevant buddies lists. Buddies list are effective only for physical devices with SISO or MIMO architecture (more on that later)
   - Create the new device API 
   - Add the new device API to the relevant devices APIs buddies list
-  - creates tne new GUI and hence new device interface. This will always open the physical device unless the physical device has a SISO or MIMO architecture
+  - Creates the new GUI and hence new device interface. This will always open the physical device unless the physical device has a SISO or MIMO architecture
 
-Here is the relevant par ot the code (source side) in the `MainWindow::on_sampleSource_confirmClicked` method:
+Here is the relevant part of the code (source side) in the `MainWindow::on_sampleSource_confirmClicked` method:
 
     deviceUI->m_deviceSourceAPI->stopAcquisition();
     deviceUI->m_deviceSourceAPI->setSampleSourcePluginInstanceUI(0); // deletes old UI and input object
@@ -182,11 +182,11 @@ Note that the following would also work for multiple sample channels Rx or Tx on
   
 In SDRangel there is a complete receiver or transmitter per I/Q sample flow. These transmitters and receivers are visually represented by the Rn and Tn tabs in the main window. They are created and disposed in the way explained in the previous paragraph using the source or sink selection confirmation button. In fact it acts as if each receiver or transmitter was controlled independently. In single input or single output (none at the moment) devices this is a true independence but with SISO or MIMO devices this cannot be the case and although each receiver or transmitter looks like it was handled independently there are things in common that have to be taken into account. For example in all cases the device handle should be unique and opening and closing the device has to be done only once per physical device usage cycle.
 
-This is where the "buddies list" come into play. Receivers exhibit a generic interface in the form of the DeviceSourceAPI class and transmitter have the DeviceSinkAPI with the same role. Through these APIs some information and control can flow between receivers and trasmitters. The point is that all receivers and/or transmitters pertaining to the same physical device must "know" each other in order to be able to exchange information or control each other. For this purpose the DeviceSourceAPI or DeviceSinkAPI maintain a list of DeviceSourceAPI siblings and a list of DeviceSinkAPI siblings called "buddies". Thus any multi flow Rx/Tx configuration can be handled.
+This is where the "buddies list" come into play. Receivers exhibit a generic interface in the form of the DeviceSourceAPI class and transmitter have the DeviceSinkAPI with the same role. Through these APIs some information and control can flow between receivers and transmitters. The point is that all receivers and/or transmitters pertaining to the same physical device must "know" each other in order to be able to exchange information or control each other. For this purpose the DeviceSourceAPI or DeviceSinkAPI maintain a list of DeviceSourceAPI siblings and a list of DeviceSinkAPI siblings called "buddies". Thus any multi flow Rx/Tx configuration can be handled.
 
-The exact behaviour of these coupled receivers and/or transmitters is dependent on the hardware therefore a generic pointer attached to the API can be used to convey any kind of class or structure taylored for the exact hardware use case. Through this structure the state of the receiver or transmitter can be exposed therefore there is one structure per receiver and transmitter in the device interface. This structure may contain pointers to common areas (dynamically allocated) related to the physical device. One such "area" is the device handle which is present in all cases.
+The exact behaviour of these coupled receivers and/or transmitters is dependent on the hardware therefore a generic pointer attached to the API can be used to convey any kind of class or structure tailored for the exact hardware use case. Through this structure the state of the receiver or transmitter can be exposed therefore there is one structure per receiver and transmitter in the device interface. This structure may contain pointers to common areas (dynamically allocated) related to the physical device. One such "area" is the device handle which is present in all cases.
 
-Normally the first buddy would create the common areas (through new) and the last would delete them (through delete) and the indovidual structure (superstructure) would be on the stack of each buddy. Thus by copying this superstructure a buddy would gain access to common areas from another (already present) buddy along with static information from the other buddy (such as which hadrware Rx or Tx channel it uses in a MIMO architecture). Exchange of dynamic information between buddies is done using message passing.
+Normally the first buddy would create the common areas (through new) and the last would delete them (through delete) and the individual structure (superstructure) would be on the stack of each buddy. Thus by copying this superstructure a buddy would gain access to common areas from another (already present) buddy along with static information from the other buddy (such as which hardware Rx or Tx channel it uses in a MIMO architecture). Exchange of dynamic information between buddies is done using message passing.
 
 The degree of entanglement between the different coupled flows in a single hardware can be very different:
 
@@ -194,7 +194,7 @@ The degree of entanglement between the different coupled flows in a single hardw
     - independent Rx and Tx sample rates
     - independent Rx and Tx center frequencies
     - independent Gain, bandwidth, ...
-    - only the device handle and indication of the presence of the XB200 accesory board is common
+    - only the device handle and indication of the presence of the XB200 accessory board is common
     
   - HackRF: this is a half duplex device. Rx and Tx might appear as tightly coupled but since you can use only one or the other then in fact you can control them differently as this is done in sequence. In fact only the common device handle has to be taken care of
   

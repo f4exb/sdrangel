@@ -22,7 +22,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Red square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 <h3>2: Baseband sample rate</h3>
 
@@ -72,7 +72,7 @@ This controls the optional XB-200 add-on when it is fitted to the BladeRF main b
 
 This is the BladeRF device DAC sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>7: Tx filter bandwidth</h3>
 
@@ -84,4 +84,4 @@ The VGA1 (relative) gain can be adjusted from -35 dB to -4 dB in 1 dB steps. The
 
 <h3>9: Variable gain amplifier #2 gain</h3>
 
-The VGA2 gain can be adjusted from 0 dB to 25 dB in 1 dB steps. The VGA2 is inside the LMS6002D chip and is placed after the RF mixer. It can be considered as the PA (Power AMplifier). The maximum output power when both VGA1 and VGA2 are at their maximum is about 4 mW (6 dBm).
+The VGA2 gain can be adjusted from 0 dB to 25 dB in 1 dB steps. The VGA2 is inside the LMS6002D chip and is placed after the RF mixer. It can be considered as the PA (Power Amplifier). The maximum output power when both VGA1 and VGA2 are at their maximum is about 4 mW (6 dBm).

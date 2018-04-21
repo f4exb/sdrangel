@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This intput sample source plugin gets its samples from a [HackRF device](https://greatscottgadgets.com/hackrf/).
+This input sample source plugin gets its samples from a [HackRF device](https://greatscottgadgets.com/hackrf/).
 
 <h2>Build</h2>
 
@@ -28,7 +28,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Red square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Red square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 If you have the Tx open in another tab and it is running then it will be stopped automatically before the Rx starts. In a similar manner the Rx will be stopped before the Tx is started from the Tx tab.
 
@@ -73,7 +73,7 @@ Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an a
 
 This is the HackRF device ADC sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>7: Rx filter bandwidth</h3>
 
@@ -84,11 +84,11 @@ This is the Rx filter bandwidth in kHz. Possible values are: 1750, 2500, 3500, 5
 The device stream from the HackRF is decimated to obtain the baseband stream. Possible values are:
 
   - **1**: no decimation
-  - **2**: divide devcie stream sample rate by 2
-  - **4**: divide devcie stream sample rate by 4
-  - **8**: divide devcie stream sample rate by 8
-  - **16**: divide devcie stream sample rate by 16
-  - **32**: divide devcie stream sample rate by 32
+  - **2**: divide device stream sample rate by 2
+  - **4**: divide device stream sample rate by 4
+  - **8**: divide device stream sample rate by 8
+  - **16**: divide device stream sample rate by 16
+  - **32**: divide device stream sample rate by 32
 
 <h3>10: Internal LNA gain</h3>
 

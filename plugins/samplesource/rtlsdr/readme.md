@@ -28,7 +28,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 <h4>1.3: Record</h4>
 
@@ -61,13 +61,13 @@ Possible values are:
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream trasverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 
 <h4>4a.1: Translating frequency</h4>
 
-You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
 
@@ -96,11 +96,11 @@ When button is off the sample rate can vary from 950 kS/s to 2400 kS/s
 
 This is the device sample rate in samples per second (S/s).
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>7: Decimation factor</h3>
 
-The I/Q stream from the RTLSDR ADC is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
+The I/Q stream from the RTLSDR ADC is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
 <h3>8: Direct sampling mode</h3>
 

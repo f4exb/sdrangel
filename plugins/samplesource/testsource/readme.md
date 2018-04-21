@@ -26,7 +26,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 <h4>1.3: Record</h4>
 
@@ -50,7 +50,7 @@ This combo box control the local DSP auto correction options:
 
 <h4>2.2: Decimation factor</h4>
 
-The I/Q stream from the generator is doensampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32. This exercises the decimation chain.
+The I/Q stream from the generator is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32. This exercises the decimation chain.
 
 This exercises the decimation chain.
 
