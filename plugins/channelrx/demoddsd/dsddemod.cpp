@@ -144,15 +144,15 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_movingAverage.asDouble() > m_squelchLevel)
             {
-                m_squelchDelayLine.write(demod);
-
                 if (m_squelchGate > 0)
                 {
-                    if (m_squelchCount < m_squelchGate) {
+
+                    if (m_squelchCount < m_squelchGate*2) {
                         m_squelchCount++;
                     }
 
-                    m_squelchOpen = m_squelchCount == m_squelchGate;
+                    m_squelchDelayLine.write(demod);
+                    m_squelchOpen = m_squelchCount > m_squelchGate;
                 }
                 else
                 {
@@ -161,17 +161,33 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             }
             else
             {
-                m_squelchDelayLine.write(0);
-                m_squelchCount = 0;
-                m_squelchOpen = false;
+                if (m_squelchGate > 0)
+                {
+                    if (m_squelchCount > 0) {
+                        m_squelchCount--;
+                    }
+
+                    m_squelchDelayLine.write(0);
+                    m_squelchOpen = m_squelchCount > m_squelchGate;
+                }
+                else
+                {
+                    m_squelchOpen = false;
+                }
             }
 
             if (m_squelchOpen)
             {
-                sampleDSD = m_squelchDelayLine.readBack(m_squelchGate) * 32768.0f;   // DSD decoder takes int16 samples
-                sample = m_squelchDelayLine.readBack(m_squelchGate) * SDR_RX_SCALEF; // scale to sample size
-//                sampleDSD = demod * 32768.0f;   // DSD decoder takes int16 samples
-//                sample = demod * SDR_RX_SCALEF; // scale to sample size
+                if (m_squelchGate > 0)
+                {
+                    sampleDSD = m_squelchDelayLine.readBack(m_squelchGate) * 32768.0f;   // DSD decoder takes int16 samples
+                    sample = m_squelchDelayLine.readBack(m_squelchGate) * SDR_RX_SCALEF; // scale to sample size
+                }
+                else
+                {
+                    sampleDSD = demod * 32768.0f;   // DSD decoder takes int16 samples
+                    sample = demod * SDR_RX_SCALEF; // scale to sample size
+                }
             }
             else
             {
