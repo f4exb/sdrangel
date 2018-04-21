@@ -260,7 +260,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Relative postion of device center frequency</string>
+        <string>Relative position of device center frequency</string>
        </property>
        <property name="currentIndex">
         <number>2</number>

@@ -527,7 +527,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Number of uncrecoverable errors since event counts reset</string>
+        <string>Number of unrecoverable errors since event counts reset</string>
        </property>
        <property name="text">
         <string>000</string>

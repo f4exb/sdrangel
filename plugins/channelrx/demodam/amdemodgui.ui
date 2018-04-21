@@ -227,7 +227,7 @@
       <item>
        <widget class="ButtonSwitch" name="bandpassEnable">
         <property name="toolTip">
-         <string>Toggle boxcar bandpass filter with 300 Hz low cuttof</string>
+         <string>Toggle boxcar bandpass filter with 300 Hz low cutoff</string>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
