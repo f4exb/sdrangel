@@ -388,6 +388,7 @@ BFMDemodGUI::~BFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_bfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_spectrumVis;
 	delete ui;
 }
 
