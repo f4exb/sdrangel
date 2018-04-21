@@ -34,6 +34,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/udpsink.h"
+#include "util/doublebufferfifo.h"
 
 #include "dsddemodsettings.h"
 #include "dsddecoder.h"
@@ -172,9 +173,9 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
-
 	double m_squelchLevel;
 	bool m_squelchOpen;
+    DoubleBufferFIFO<Real> m_squelchDelayLine;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
     double m_magsq;

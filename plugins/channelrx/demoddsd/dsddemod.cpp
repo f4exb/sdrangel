@@ -50,6 +50,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         m_squelchGate(0),
         m_squelchLevel(1e-4),
         m_squelchOpen(false),
+        m_squelchDelayLine(24000),
         m_audioFifo1(48000),
         m_audioFifo2(48000),
         m_scopeXY(0),
@@ -143,6 +144,8 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             if (m_movingAverage.asDouble() > m_squelchLevel)
             {
+                m_squelchDelayLine.write(demod);
+
                 if (m_squelchGate > 0)
                 {
                     if (m_squelchCount < m_squelchGate) {
@@ -158,14 +161,17 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             }
             else
             {
+                m_squelchDelayLine.write(0);
                 m_squelchCount = 0;
                 m_squelchOpen = false;
             }
 
             if (m_squelchOpen)
             {
-                sampleDSD = demod * 32768.0f;   // DSD decoder takes int16 samples
-                sample = demod * SDR_RX_SCALEF; // scale to sample size
+                sampleDSD = m_squelchDelayLine.readBack(m_squelchGate) * 32768.0f;   // DSD decoder takes int16 samples
+                sample = m_squelchDelayLine.readBack(m_squelchGate) * SDR_RX_SCALEF; // scale to sample size
+//                sampleDSD = demod * 32768.0f;   // DSD decoder takes int16 samples
+//                sample = demod * SDR_RX_SCALEF; // scale to sample size
             }
             else
             {
