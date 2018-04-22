@@ -1,3 +1,12 @@
+sdrangel (3.14.4-1) unstable; urgency=medium
+
+  * AM demod: squelch buffer to open at start of valid squelch
+  * NFM demod: same as AM with squelch noise tail cut
+  * SSB demod: squelch buffer to cut squelch noise tail
+  * DSD demod: squelch buffer to open at start of valid squelch not loosing any samples
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 22 Apr 2018 17:14:18 +0200
+
 sdrangel (3.14.3-1) unstable; urgency=medium
 
   * LimeSDR: compiled with LimeSuite release 18.04.1
