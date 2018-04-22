@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-By "sink" one should undetstand a sink of samples for the outside of SDRangel application. An external application establishes an UDP connection to the plugin at the given address and port and samples are directed to it. In fact it can also come frome SDRangel itself using the UDP source plugin
+By "sink" one should understand a sink of samples for the outside of SDRangel application. An external application establishes an UDP connection to the plugin at the given address and port and samples are directed to it. In fact it can also come from SDRangel itself using the UDP source plugin
 
 The UDP block size or UDP payload size is optimized for 512 bytes but other sizes are acceptable.
 
@@ -14,11 +14,11 @@ This plugin is available for Linux and Mac O/S only.
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>2: Input channel power</h3>
 
-Total power in dB relative to a +/- 1.0 amplitude signal received fron UDP.
+Total power in dB relative to a +/- 1.0 amplitude signal received from UDP.
 
 <h3>3: Output channel power</h3>
 
@@ -26,7 +26,7 @@ Total power in dB relative to a +/- 1.0 amplitude signal sent in the channel.
 
 <h3>4: Channel mute</h3>
 
-Use this button to switch off the RF on the channel. The background of the button lits in green when a signal can be sent.
+Use this button to switch off the RF on the channel. The background of the button lights in green when a signal can be sent.
 
 <h3>5: UDP address and port</h3>
 
@@ -36,7 +36,7 @@ The display is in the format `address:data port`
 
 <h3>6: Input sample rate</h3>
 
-Sample rate in samples per second of the signal that is recveived on UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
+Sample rate in samples per second of the signal that is received on UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
 
 <h3>7: Type of samples</h3>
 
@@ -62,7 +62,7 @@ This is the maximum FM deviation in Hz for a +/- 1.0 amplitude modulating signal
 
 <h3>11: AM percentage modulation</h3>
 
-this is the AM precentage modulation when a +/- 1.0 amplitude modulating signal is applied. herefore it is active only for `S16LE AM Mono` sample format.
+this is the AM percentage modulation when a +/- 1.0 amplitude modulating signal is applied. Therefore it is active only for `S16LE AM Mono` sample format.
 
 <h3>12: Apply (validation) button</h3>
 
@@ -86,7 +86,7 @@ The button sets the delay after which a signal constantly above the squelch thre
 
 <h3>14: signal amplitude percentage of maximum</h3>
 
-The gain (15) should be adjusted so that the peak amplitude (small red vertical bar) never exceeds 100%. Above 100% the signal is clipper which results in distorsion. 
+The gain (15) should be adjusted so that the peak amplitude (small red vertical bar) never exceeds 100%. Above 100% the signal is clipper which results in distortion. 
 
 <h3>15: Input and output Gains</h3>
 

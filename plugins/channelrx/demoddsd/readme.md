@@ -22,13 +22,13 @@ To enable this plugin at compile time you will need to have DSDcc installed in y
 You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. In order to support DV serial devices in your system you will need two things:
 
   - Compile with [SerialDV](https://github.com/f4exb/serialDV) support Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so`
-  - Enable DV serial devices in your system by checking the option in the Preferences menu. YOu will need to enable the DV serial devices each time you start SDRangel.
+  - Enable DV serial devices in your system by checking the option in the Preferences menu. You will need to enable the DV serial devices each time you start SDRangel.
   
 Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
 
 Note also that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
 
-Altermatively you can use software decoding with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
+Alternatively you can use software decoding with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
 ---
 &#9888; Since kernel 4.4.52 the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
@@ -46,7 +46,7 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
   - For Linux distributions: `plugins/channel/libdemoddsd.so`
   - For Windows distributions: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
 
-For software built fron source if you choose to have `mbelib` support you will need to have DSDcc compiled with `mbelib` support. You will also need to have defines for it on the cmake command. If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
+For software built from source if you choose to have `mbelib` support you will need to have DSDcc compiled with `mbelib` support. You will also need to have defines for it on the cmake command. If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
 
 <h2>Interface</h2>
 
@@ -56,7 +56,7 @@ For software built fron source if you choose to have `mbelib` support you will n
 
 <h4>A.1: Frequency shift from center frequency of reception</h4>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h4>A.2: Channel bandwidth before discriminator</h4>
 
@@ -124,7 +124,7 @@ If you right click on it it will open a dialog to select the audio output device
 
 <h3>A.12: Format specific status display</h3>
 
-When the display is active the background turns from the surrounding gray color to dark green. It shows informatory or status messages that are particular to each format.
+When the display is active the background turns from the surrounding gray color to dark green. It shows informational or status messages that are particular to each format.
 
 <h4>A11.1: D-Star status display</h4>
 
@@ -195,7 +195,7 @@ This is either:
    - `IDL`: data idle block
    - `VLC`: voice Link Control data block
    - `TLC`: terminator with Link Control information data block
-   - `CSB`: CSBK (Control Signalling BlocK) data block
+   - `CSB`: CSBK (Control Signaling BlocK) data block
    - `MBH`: Multi Block Control block header data block
    - `MBC`: Multi Block Control block continuation data block
    - `DAH`: Data header block
@@ -223,7 +223,7 @@ String is in the form: `02223297>G00000222`
 
   - `--`: undetermined
   - `HD`: Header of FS1 type
-  - `PY`: Payload frame of a sitll undetermined type
+  - `PY`: Payload frame of a still undetermined type
   - `VO`: Voice frame
   - `VD`: Voice and data frame
   - `D1`: Data without FEC frame
@@ -277,7 +277,7 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
       - `W`: wide band mode (as in the example)
     - second character is the path type:
       - `I`: Internet path
-      - `L`: local path (as inthe example)
+      - `L`: local path (as in the example)
     - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
     
 <h5>A11.4.2: Origin and destination callsigns</h5>
@@ -303,7 +303,7 @@ This display shows the sampled points of the demodulated FM signal in a XY plane
   - X as the signal at time t and Y the signal at time t minus symbol time if "transitions constellation" is selected by button (B.13)
   - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13) 
 
-The display shows 16 points as yellow crosses that can be used to tune the center frequency (A.1) and FM deviation (B.17) so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers fron 0 to 15 starting at the top left corner and going from left to right and top to bottom.
+The display shows 16 points as yellow crosses that can be used to tune the center frequency (A.1) and FM deviation (B.17) so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers from 0 to 15 starting at the top left corner and going from left to right and top to bottom.
 
 <h5>Transition constellation display</h5>
 
@@ -397,7 +397,7 @@ Normally you would always want to have a matched filter however on some strong D
 
 <h4>B.5: Symbol PLL lock indicator</h4>
 
-Since dsdcc version 1.7.1 the synbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
+Since dsdcc version 1.7.1 the symbol synchronization can be done with a PLL fed by a ringing filter (narrow passband) tuned at the symbol rate and itself fed with the squared magnitude of the discriminator signal. For signals strong enough to lock the PLL this works significantly better than with the ringing filter alone that was the only option in versions <= 1.6.0. Version 1.7.0 had the PLL enabled permanently.
 
 However with marginal signals the ringing filter alone and a few heuristics work better. This is why since DSDcc version 1.7.1 the PLL became optional.
 
@@ -416,7 +416,7 @@ With the PLL engaged the figure should be 100% all the time in presence of a loc
 
 <h4>B.7: Zero crossing shift</h4>
  
-This is the current (at display polling time) zero crosing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
+This is the current (at display polling time) zero crossing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
 
   - `2400 S/s`: +/- 5 inclusive
   - `4800 S/s`: +/- 2 inclusive
@@ -446,7 +446,7 @@ Toggle button to select slot #2 voice output. When on waves appear on the icon. 
 <h5>B.12 (3): TDMA stereo mode toggle</h5>
 
   - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
-  - When on the icon shows a pair of loudspeakers. It sends slot #1 vocie to the left stereo audio channel and slot #2 to the right one
+  - When on the icon shows a pair of loudspeakers. It sends slot #1 voice to the left stereo audio channel and slot #2 to the right one
   
 For FDMA standards you may want to leave this as mono mode.
  

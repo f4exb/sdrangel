@@ -162,7 +162,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>DestinationUDP port</string>
+            <string>Destination UDP port</string>
            </property>
            <property name="inputMask">
             <string>00000; </string>

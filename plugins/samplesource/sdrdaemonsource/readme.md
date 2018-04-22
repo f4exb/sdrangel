@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples over tbe network from a SDRdaemon receiver server using UDP connection. SDRdaemon refers to the SDRdaemon utility `sdrdaemonrx`found in [this](https://github.com/f4exb/sdrdaemon) Github repostory.
+This input sample source plugin gets its samples over tbe network from a SDRdaemon receiver server using UDP connection. SDRdaemon refers to the SDRdaemon utility `sdrdaemonrx`found in [this](https://github.com/f4exb/sdrdaemon) Github repository.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
@@ -33,7 +33,7 @@ Device start / stop button.
   
 <h4>1.3: Record</h4>
 
-Record I/Q stresm toggle button
+Record I/Q stream toggle button
 
 <h4>1.4: Stream sample rate</h4>
 
@@ -74,7 +74,7 @@ There are two gauges separated by a dot in the center. Ideally these gauges shou
   - The left gauge is the negative gauge. It is the value in percent of buffer size from the write pointer position to the read pointer position when this difference is less than half of a buffer distance. It means that the writes are leading or reads are lagging.
   - The right gauge is the positive gauge. It is the value in percent of buffer size of the difference from the read pointer position to the write pointer position when this difference is less than half of a buffer distance. It menas that the writes are lagging or reads are leading.
   
-The system tries to compensate read / write unbalance however at start or when a large stream distruption has occured a delay of a few tens of seconds is necessary before read / write reaches equilibrium.
+The system tries to compensate read / write unbalance however at start or when a large stream disruption has occurred a delay of a few tens of seconds is necessary before read / write reaches equilibrium.
 
 <h3>4: Forward Error Correction setting and status</h3>
 
@@ -102,7 +102,7 @@ The color of the icon indicates stream status:
 
 This is the minimum total number of blocks per frame during the last polling period. If all blocks were received for all frames then this number is the nominal number of original blocks plus FEC blocks (Green lock icon). In our example this is 128+8 = 136.
 
-If this number falls below 128 then some blocks are definitely lost and the lock lits in red.
+If this number falls below 128 then some blocks are definitely lost and the lock lights in red.
 
 <h4>4.5: Maximum number of FEC blocks used by frame</h4>
 
@@ -122,7 +122,7 @@ This counter counts the unrecoverable error conditions found (i.e. 4.4 between 1
 
 <h4>4.9: events counters timer</h4>
 
-This hh:mm:ss time display shows the time since the reset evetnts counters button (4.6) was pushed.
+This hh:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
 
 <h3>5: Network parameters</h3>
 
@@ -148,7 +148,7 @@ When the return key is hit within the address (5.1), data port (5.2) or configur
 
 This is the center frequency sent to the distant device. This becomes reflected in the main frequency dial (1.1) only when it gets acknowledged by the distant server and this frequency is sent back in the frames meta data.
 
-Use the wheels to adjust the frequency. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 0 Hz and the maximum value is 9.9 GHz. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 0 Hz and the maximum value is 9.9 GHz. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>7: Delay between UDP blocks transmission</h3>
 
@@ -167,7 +167,7 @@ Formula: ((127 &#x2715; 127 &#x2715; _d_) / _SR_) / (128 + _F_)
 
 This is the device sample rate sent to the distant device. It will be divided in the distant server by the decimation factor set with (9) to give the actual sample rate over the network. This becomes effective and displayed in (1.4) only when it gets acknowledged by the distant server and this sample rate is sent back in the frames meta data.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 32 kS/s and the maximum value is 9.9 MS/s. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 32 kS/s and the maximum value is 9.9 MS/s. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>9: Desired distant decimation factor</h3>
 
@@ -175,7 +175,7 @@ This is the decimation factor to be set in the distant server downsampler. The h
 
 <h3>10: Center frequency position</h3>
 
-The center frequency in the passband wil be set either:
+The center frequency in the passband will be set either:
 
   - below the local oscillator (NCO) or infradyne. Actually -1/4th the bandwidth.
   - above the local oscillator (NCO) or supradyne. Actually +1/4th the bandwidth.

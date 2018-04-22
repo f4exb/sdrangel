@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-By "source" one should undetstand a source of samples for the outside of SDRangel application. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
+By "source" one should understand a source of samples for the outside of SDRangel application. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
 
 The UDP block size or UDP payload size is fixed at 512 bytes.
 
@@ -16,7 +16,7 @@ This plugin is available for Linux and Mac O/S only.
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>2: Input channel power</h3>
 
@@ -41,13 +41,13 @@ Sample rate in samples per second of the signal that is sent over UDP. The actua
 Left: combo box to specify the type of samples that are sent over UDP:
 
   - `I/Q`: Raw I/Q samples. Use it with software that accepts I/Q data as input like GNUradio with the `UDP source` block. The output is interleaved I and Q samples
-  - `NFM`: AF of FM demodulated signal. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs. The output is a repetition of NFM samples on real part and on imaginary part this facilitates integration wtih software expecting a stereo type of input with the same samples on L and R channels. With GNURadio just use a complex to real block.
+  - `NFM`: AF of FM demodulated signal. Use it with software that takes the FM demodulated audio or the discriminator output of a radio as input. Make sure you specify the appropriate signal bandwidth (see 7) according to the AF bandwidth needs. The output is a repetition of NFM samples on real part and on imaginary part this facilitates integration with software expecting a stereo type of input with the same samples on L and R channels. With GNURadio just use a complex to real block.
   - `NFM Mono`: This is the same as above but only one sample is output for one NFM sample. This can be used with software that accept a mono type of input like `dsd` or `multimon`.
   - `USB`: AF of USB demodulated signal. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
   - `LSB`: AF of LSB demodulated signal. Use it with software that uses a SSB demodulated signal as input i.e. software that is based on the audio output of a SSB radio. The output is the I/Q binaural output of the demodulator.
   - `LSB Mono`: AF of the LSB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
   - `USB Mono`: AF of the USB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
-  - `AM Mono`: AF of the enveloppe demodulated signal i.e. channel magnitude or sqrt(I² + Q²) as "mono" samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
+  - `AM Mono`: AF of the envelope demodulated signal i.e. channel magnitude or sqrt(I² + Q²) as "mono" samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
   - `AM !DC Mono`: Same as above but with a DC block based on magnitude average over a 5 ms period     
   - `AM BPF Mono`: Same as AM Mono but raw magnitude signal is passed through a bandpass filter with lower cutoff at 300 Hz and higher cutoff at RF bandwidth frequency     
   

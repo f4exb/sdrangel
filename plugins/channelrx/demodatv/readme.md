@@ -26,7 +26,7 @@ Each part is detailed next
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>3: Rational downsampler toggle</h3>
 
@@ -42,7 +42,7 @@ N = S / (l &#215; F)
 
 &#9758; The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
 
-When the rational dowsampler is engaged (3) the resulting sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points.
+When the rational downsampler is engaged (3) the resulting sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points.
 
 The example taken in the screenshot is from a 405 lines × 20 FPS video signal:
 
@@ -66,9 +66,9 @@ When single sideband demodulation is selected (USB, LSB) the BFO is phased locke
 
 &#9888; this is experimental.
 
-This allows adjstment of BFO frequency in 1 Hz steps from -2 to +2 kHz. You will have to look for the right value to lock to the carrier. See (6) for the lock indicator. This will work only at relatively low sample rates say below 1 MS/s.
+This allows adjustment of BFO frequency in 1 Hz steps from -2 to +2 kHz. You will have to look for the right value to lock to the carrier. See (6) for the lock indicator. This will work only at relatively low sample rates say below 1 MS/s.
 
-The BFO base frequency in Hz appears on the right. Actual frequency may change acoording to PLL locking to the carrier.
+The BFO base frequency in Hz appears on the right. Actual frequency may change according to PLL locking to the carrier.
 
 <h3>8: Channel power</h3>
 
@@ -138,13 +138,13 @@ This combo lets you set the TV standard type. This sets the number of lines per 
   - PAL405: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
   - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
   - ShNI: this is the same as above but with non interleaved frames.
-  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
+  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
 When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
 
 &#9758; Interleaved mode requires an odd number of lines because the system recognizes the even and odd frames depending on a odd or even number of lines respectively for the half images
 
-&#9758; For non interlaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; For non interleaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
 
 <table>
     <tr>

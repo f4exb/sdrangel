@@ -12,7 +12,7 @@
 
 - master: the production branch
 - dev: the development branch
-- legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
+- legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redesign of the code was carried out and sync was lost.
 
 <h2>Untested plugins</h2>
 
@@ -152,7 +152,7 @@ If you use your own location for libperseus-sdr install directory you need to sp
 
 [PlutoSDR](https://wiki.analog.com/university/tools/pluto) is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
-If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSuse the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
+If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSUSE the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
 
 <h2>RTL-SDR</h2>
 
@@ -182,7 +182,7 @@ These plugins do not use any hardware device connected to your system.
 
 The [File source plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/filesource) allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Click on the record button on the left of the main frequency dial to toggle recording. The file has a fixed name `test_<n>.sdriq` created in the current directory where `<n>` is the device tab index.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSource[0]` even if no physical device is connected.
 
 The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block. It will just produce a short glitch at the beginning corresponding to the header data. 
 
@@ -200,11 +200,11 @@ The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/s
 
 Linux only.
 
-The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hadrware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
+The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiving center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hardware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
 
 The data blocks transmitted via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
-There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second.
+There is an automated skew rate compensation in place. During rate readjustment streaming can be suspended or signal glitches can occur for about one second.
 
 This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
@@ -343,7 +343,7 @@ Install cmake version 3:
 
 <h2>Mint</h2>
 
-Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).
+Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS please follow instructions for this distribution (paragraph just above).
 
 <h2>Debian</h2>
 
@@ -359,7 +359,7 @@ For Debian Jessie or Stretch:
 
 <h2>openSUSE</h2>
 
-This has been tested with the bleeding edge "Thumbleweed" distribution:
+This has been tested with the bleeding edge "Tumbleweed" distribution:
 
 `sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel` 
 
@@ -369,8 +369,8 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
   - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc5-c++` or `gcc6-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6` (for gcc 6) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
   - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg)
-  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
-  - Note4: A package has been created in OpenSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
+  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+  - Note4: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
 
@@ -433,7 +433,7 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
 
 <h2>Changes from SDRangelove</h2>
 
-See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
+See the v1.0.1 first official release [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
 
 <h2>To Do</h2>
 
@@ -449,4 +449,4 @@ Other ideas:
 
 <h1>Developer's notes</h1>
 
-Please check the developper's specific [readme](./ReadmeDeveloper.md)
+Please check the developer's specific [readme](./ReadmeDeveloper.md)

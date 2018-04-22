@@ -209,7 +209,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
     // Init the RTCP packet builder
 
     double timestampunit = sessparams.GetOwnTimestampUnit();
-    uint8_t buf[1024];
+    uint8_t buf[1024] = {0};
     std::size_t buflen = 1024;
     std::string forcedcname = sessparams.GetCNAME();
 

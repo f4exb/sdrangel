@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples over tbe network to a SDRdaemon transmitter server using UDP connection. SDRdaemon refers to the SDRdaemon utility `sdrdaemontx`found in [this](https://github.com/f4exb/sdrdaemon) Github repostory.
+This output sample sink plugin sends its samples over tbe network to a SDRdaemon transmitter server using UDP connection. SDRdaemon refers to the SDRdaemon utility `sdrdaemontx`found in [this](https://github.com/f4exb/sdrdaemon) Github repository.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
@@ -64,7 +64,7 @@ This sets the number of FEC blocks per frame. A frame consists of 128 data block
 
 <h4>6.2: Distant transmitter queue length</h4>
 
-This is the samples queue length reported from the distant transmitter. This is a numnber of vectors of 127 &#x2715; 127 &#x2715; _I_ samples where _I_ is the interpolation factor. This corresponds to a block of 127 &#x2715; 127 samples sent over the network. This numbers serves to thottle the sample generator so that the queue length is close to 8 vectors.
+This is the samples queue length reported from the distant transmitter. This is a number of vectors of 127 &#x2715; 127 &#x2715; _I_ samples where _I_ is the interpolation factor. This corresponds to a block of 127 &#x2715; 127 samples sent over the network. This numbers serves to throttle the sample generator so that the queue length is close to 8 vectors.
 
 <h4>6.3: Stream status</h4>
 
@@ -95,7 +95,7 @@ This counter counts the unrecoverable error conditions found (i.e. 6.4 between 1
 
 <h4>6.8: events counters timer</h4>
 
-This hh:mm:ss time display shows the time since the reset evetnts counters button (4.6) was pushed.
+This hh:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
 
 <h3>7: Network parameters</h3>
 

@@ -119,6 +119,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
 	MainWindow w(logger, parser);
 	w.show();
+	QObject::connect(&a, SIGNAL(aboutToQuit()), &w, SLOT(on_action_Exit_triggered()));
 
 	return a.exec();
 }
