@@ -36,6 +36,7 @@ RDSDemod::RDSDemod()
 	m_srate = 250000;
 
 	m_parms.subcarr_phi = 0;
+	memset(m_parms.subcarr_bb, 0, sizeof(m_parms.subcarr_bb));
 	m_parms.clock_offset = 0;
 	m_parms.clock_phi = 0;
 	m_parms.prev_clock_phi = 0;
@@ -48,6 +49,7 @@ RDSDemod::RDSDemod()
 	m_parms.prev_acc = 0;
 	m_parms.counter = 0;
 	m_parms.reading_frame = 0;
+	memset(m_parms.tot_errs, 0, sizeof(m_parms.tot_errs));
 	m_parms.dbit = 0;
 	m_prev = 0.0f;
 	memset(m_xv, 0, 6*sizeof(Real));

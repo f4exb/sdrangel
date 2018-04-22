@@ -328,8 +328,8 @@ void FileSourceGui::updateWithStreamTime()
 	int t_msec = 0;
 
 	if (m_sampleRate > 0){
-		t_msec = ((m_samplesCount * 1000) / m_sampleRate) % 1000;
 		t_sec = m_samplesCount / m_sampleRate;
+		t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000 / m_sampleRate;
 	}
 
 	QTime t(0, 0, 0, 0);
