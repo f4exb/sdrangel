@@ -1,3 +1,9 @@
+sdrangel (3.14.5-1) unstable; urgency=medium
+
+  * DSD demod: allow audio rates integer multiples of 8k other than 48k
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 29 Apr 2018 17:14:18 +0200
+
 sdrangel (3.14.4-1) unstable; urgency=medium
 
   * AM demod: squelch buffer to open at start of valid squelch

@@ -56,7 +56,7 @@ public:
         int getVolumeIndex() const { return m_volumeIndex; }
         unsigned char getChannels() const { return m_channels % 4; }
         bool getUseHP() const { return m_useHP; }
-        bool getUpsample48k() const { return m_upSample48k; }
+        int getUpsampling() const { return m_upsampling; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
 
         static MsgMbeDecode* create(
@@ -65,10 +65,10 @@ public:
                 int volumeIndex,
                 unsigned char channels,
                 bool useHP,
-                bool upSample48k,
+                int upsampling,
                 AudioFifo *audioFifo)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, upSample48k, audioFifo);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, upsampling, audioFifo);
         }
 
     private:
@@ -77,7 +77,7 @@ public:
         int m_volumeIndex;
         unsigned char m_channels;
         bool m_useHP;
-        bool m_upSample48k;
+        int m_upsampling;
         AudioFifo *m_audioFifo;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
@@ -85,14 +85,14 @@ public:
                 int volumeIndex,
                 unsigned char channels,
                 bool useHP,
-                bool upSample48k,
+                int upsampling,
                 AudioFifo *audioFifo) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
             m_channels(channels),
             m_useHP(useHP),
-            m_upSample48k(upSample48k),
+            m_upsampling(upsampling),
             m_audioFifo(audioFifo)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
@@ -107,7 +107,7 @@ public:
             int mbeVolumeIndex,
             unsigned char channels,
             bool useHP,
-            bool upSample48k,
+            int upsampling,
             AudioFifo *audioFifo);
 
     bool open(const std::string& serialDevice);
@@ -136,6 +136,7 @@ public slots:
 private:
     //void upsample6(short *in, short *out, int nbSamplesIn);
     void upsample6(short *in, int nbSamplesIn, unsigned char channels);
+    void upsample(int upsampling, short *in, int nbSamplesIn, unsigned char channels);
     void noUpsample(short *in, int nbSamplesIn, unsigned char channels);
 
     SerialDV::DVController m_dvController;
