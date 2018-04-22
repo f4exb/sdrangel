@@ -10,7 +10,7 @@ This plugin can be used to listen to a narrowband FM modulated signal. "Narrowba
 
 <h3>1: Frequency shift from center frequency of reception value</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. 
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. 
 
 <h3>2: Channel power</h3>
 
@@ -26,7 +26,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps as 5, 6.25, 8.33, 10, 12.5, 15, 20, 25 and 40 kHz. The expected one side frequency deviation is 0.4 times the bandwidth.
 
-&#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operaton in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth. 
+&#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operation in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth. 
 
 &#9758; The channel sample rate is always the baseband signal rate divided by an integer power of two so depending on the baseband sample rate obtained from the sampling device you could also guarantee a minimal channel bandwidth. For example with a 125 kS/s baseband sample rate and a 8 kS/s audio sample rate the channel sample rate cannot be lower than 125/8 = 15.625 kS/s (125/16 = 7.8125 kS/s is too small) which is still OK for 5 or 6.25 kHz channel bandwidths.
 

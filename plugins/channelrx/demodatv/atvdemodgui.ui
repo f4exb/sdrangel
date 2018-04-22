@@ -377,7 +377,7 @@
       <item>
        <widget class="ButtonSwitch" name="rfFiltering">
         <property name="toolTip">
-         <string>Engage asymmertical bandpass FFT filter</string>
+         <string>Engage asymmetrical bandpass FFT filter</string>
         </property>
         <property name="text">
          <string/>

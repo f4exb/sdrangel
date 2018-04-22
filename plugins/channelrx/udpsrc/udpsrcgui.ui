@@ -346,7 +346,7 @@
          <enum>Qt::ClickFocus</enum>
         </property>
         <property name="toolTip">
-         <string>Destinationn UDP address</string>
+         <string>Destination UDP address</string>
         </property>
         <property name="inputMask">
          <string>000.000.000.000; </string>

@@ -4,7 +4,7 @@
 
 This plugin can be used to generate an analog TV signal mostly used in amateur radio. It is limited to black and white images as only the luminance (256 levels) is supported. 
 
-There is no sound either. You coud imagine using any of the plugins supporting audio to create a mixed signal. This is not working well however for various reasons. It is better to use two physical transmitters and two physical receivers.
+There is no sound either. You could imagine using any of the plugins supporting audio to create a mixed signal. This is not working well however for various reasons. It is better to use two physical transmitters and two physical receivers.
 
 In practice 4 MS/s with about 300 points per line is the lowest sample rate that produces a standard image quality. Lower sample rates and line definition produce low quality images that may still be acceptable for experiments. The plugin offers to go as low as 32 lines and 8 FPS for NBTV experiments. NBTV stands for Narrow Band TeleVision see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
@@ -14,7 +14,7 @@ In practice 4 MS/s with about 300 points per line is the lowest sample rate that
 
 <h2>1: Frequency shift from center frequency of transmission</h2>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h2>3: Sample rate data</h2>
 
@@ -58,7 +58,7 @@ The video signal can modulate the carrier in the following modes:
   - AM: Amplitude modulation. Modulation index is 90%.
   - FM: Frequency modulation. Excursion is a percentage of the bandwidth available given the channel sample rate. This percentage is controlled by button (2). e.g. at 25% for 4 MS/s sample rate this is 1 MHz (&#177;0.5 MHz) 
   - USB: SSB upper side band: video signal is transposed only in positive frequencies including DC component
-  - LSB: SSB lower side band: video signal is transposed only in megative frequencies excluding DC component
+  - LSB: SSB lower side band: video signal is transposed only in negative frequencies excluding DC component
   - VUSB: SSB upper sideband with vestigial lower sideband. The cutoff frequency of the lower sideband is controlled by slider (3)
   - VLSB: SSB lower sideband with vestigial upper sideband. The cutoff frequency of the upper sideband is controlled by slider (3)
   
@@ -66,7 +66,7 @@ The video signal can modulate the carrier in the following modes:
 
 Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g for the sample rate of 2997 kS/s of the screenshot and a percentage of 19% this yields a full deviation of 2997 &#215; 0.19 = 569.43 kHz that is &#177;284.715 kHz
 
-&#9758; You can adjust this value and see the result for yourseelf. A good starting point is half of the signal bandwidth.
+&#9758; You can adjust this value and see the result for yourself. A good starting point is half of the signal bandwidth.
   
 <h3>A.3: Opposite sideband FFT filter cutoff</h3>
 
@@ -90,13 +90,13 @@ The cutoff frequency in kHz is displayed on the right of the slider
 
 <h3>A.5: Modulated signal level before filtering stages</h3>
   
-This button controls the scaling from the +1/-1 modulated signal level to the -32768/+32768 2 bytes samples. This is useful to control the saturation of the FFT or FIR filters. Looking at the output spectrum you can precisely control the limit above which distorsion appears.
+This button controls the scaling from the +1/-1 modulated signal level to the -32768/+32768 2 bytes samples. This is useful to control the saturation of the FFT or FIR filters. Looking at the output spectrum you can precisely control the limit above which distortion appears.
 
 <h3>A.6: Video signal level meter</h3>
 
 This is the level meter fed with the video signal. Units are the percentage of the 0.0 to 1.0 modulating video signal.
 
-<h3>A.7: Nuber of lines</h3>
+<h3>A.7: Number of lines</h3>
 
 This controls the number of lines per full frame. Choice is between 640, 625, 525, 480, 405, 360, 343, 240, 180, 120, 90, 60 and 32 lines.
 
@@ -108,18 +108,18 @@ This controls the number of full frames per second. Choice is between 30, 25, 20
 
 <h3>A.9: TV Standard</h2>
 
-This controls the frame synchronization schem and number of black lines:
+This controls the frame synchronization scheme and number of black lines:
 
   - PAL625: this is the PAL 625 lines standard with 25 FPS. Since only black and white (luminance) is supported this corresponds to any of the B,G,I or L PAL standards
   - PAL525: this is the PAL 525 lines standard with 30 FPS. This corresponds to the PAL M standard.
   - PAL405: this loosely corresponds to the British 405 lines system and is similar to PAL for synchronization. This mode has only 7 black lines.
   - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
   - ShNI: this is the same as above but with non interleaved frames.
-  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pluse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
+  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
 &#9758; Interleaved mode requires an odd number of lines because the system recognizes the even and odd frames depending on a odd or even number of lines respectively for the half images
 
-&#9758; For non interlaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; For non interleaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
 
 <table>
     <tr>
@@ -234,7 +234,7 @@ This is the video file play length in time units
 
 <h2>12. Video file position slider</h2>
 
-This slider can be used to randomly set the currennt position in the file when file play is in pause state (button 16). When video plays the slider moves according to the current position.
+This slider can be used to randomly set the current position in the file when file play is in pause state (button 16). When video plays the slider moves according to the current position.
 
 <h2>23. Play/Pause camera</h2>
 

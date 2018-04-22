@@ -397,7 +397,7 @@
       <item>
        <widget class="QCheckBox" name="ssb">
         <property name="toolTip">
-         <string>SSB/DSB togggle</string>
+         <string>SSB/DSB toggle</string>
         </property>
         <property name="text">
          <string>SSB</string>

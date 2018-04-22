@@ -617,7 +617,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if synchronized</string>
+         <string>Lights if synchronized</string>
         </property>
         <property name="text">
          <string>Dec</string>
@@ -1091,7 +1091,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if PI is updated</string>
+         <string>Lights if PI is updated</string>
         </property>
         <property name="text">
          <string>PI</string>
@@ -1223,7 +1223,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 1 is updated</string>
+         <string>Lights if group 1 is updated</string>
         </property>
         <property name="text">
          <string>G01</string>
@@ -1322,7 +1322,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 0 is updated</string>
+         <string>Lights if group 0 is updated</string>
         </property>
         <property name="text">
          <string>G00</string>
@@ -1446,7 +1446,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Alternalte frequencies (MHz)</string>
+         <string>Alternate frequencies (MHz)</string>
         </property>
        </widget>
       </item>
@@ -1479,7 +1479,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 3 updated is updated</string>
+         <string>Lights if group 3 updated is updated</string>
         </property>
         <property name="text">
          <string>G03</string>
@@ -1525,7 +1525,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 9 is updated</string>
+         <string>Lights if group 9 is updated</string>
         </property>
         <property name="text">
          <string>G09</string>
@@ -1568,7 +1568,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 2 is updated</string>
+         <string>Lights if group 2 is updated</string>
         </property>
         <property name="text">
          <string>G02</string>
@@ -1602,7 +1602,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 4 is updated</string>
+         <string>Lights if group 4 is updated</string>
         </property>
         <property name="text">
          <string>G04</string>
@@ -1670,7 +1670,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 14 is updated</string>
+         <string>Lights if group 14 is updated</string>
         </property>
         <property name="text">
          <string>G14</string>
@@ -1719,7 +1719,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Station altermate freqiuencies</string>
+         <string>Station alternate frequencies</string>
         </property>
        </widget>
       </item>
@@ -1736,7 +1736,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 8 is updated</string>
+         <string>Lights if group 8 is updated</string>
         </property>
         <property name="text">
          <string>G08</string>

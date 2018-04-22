@@ -6,7 +6,7 @@ This plugin supports input from SDRplay RSP1 devices. SDRplay is based on the MS
 
 <b>No Windows support</b> 
 
-Driver is too unstable in Windows randomly stopping the appication and causing BSOD.
+Driver is too unstable in Windows randomly stopping the application and causing BSOD.
 
 <h2>Build</h2>
 

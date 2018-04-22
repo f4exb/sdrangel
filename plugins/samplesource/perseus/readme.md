@@ -39,7 +39,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
   
 <h4>1.3: Record</h4>
 
@@ -59,7 +59,7 @@ This resets the LO ppm correction (zero the value).
 
 <h3>4: Device to hast sample rate</h3>
 
-This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation. Note that at 48 kS/s some slight rate mismatch can appear with the audio that has the same nominal rate. This may cause some occasinal audio samples drops however hardly noticeable.
+This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation. Note that at 48 kS/s some slight rate mismatch can appear with the audio that has the same nominal rate. This may cause some occasional audio samples drops however hardly noticeable.
 
 <h3>5: Wideband mode</h5>
 
@@ -67,19 +67,19 @@ Switch on this button to disable the preselection filters. The corresponding LED
 
 <h3>6: Decimation factor</h3>
 
-The I/Q stream from the Perseus to host is downsampled by a power of two before being sent to the passband. This is normally not needed for most use cases as the Perseus can go as low as 48 kS/s which is the lower limit for audio channel plugins (AM, FM, SSB, Digital voice). So it can be left to `1` most of the time. A software decimation by 2 or 4 is still provided for easier anaysis of very narrowband or slow varying signals. Note that there is no dynamic gain with this decimation as the precision is already limited to 24 significant bits either for integer or floating point (float) processing.
+The I/Q stream from the Perseus to host is downsampled by a power of two before being sent to the passband. This is normally not needed for most use cases as the Perseus can go as low as 48 kS/s which is the lower limit for audio channel plugins (AM, FM, SSB, Digital voice). So it can be left to `1` most of the time. A software decimation by 2 or 4 is still provided for easier analysis of very narrowband or slow varying signals. Note that there is no dynamic gain with this decimation as the precision is already limited to 24 significant bits either for integer or floating point (float) processing.
 
 <h3>7: Transverter mode open dialog</h3>
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream trasverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 
 <h4>7a.1: Translating frequency</h4>
 
-You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
 
@@ -101,7 +101,7 @@ Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
 <h3>8: Attenuators control</h3>
 
-Use this combo box to cotrol the attenuators inside the Perseus:
+Use this combo box to control the attenuators inside the Perseus:
 
   - 0 dB: no attenuation
   - 10 dB: 10 dB attenuator engaged

@@ -35,15 +35,15 @@ Note: the spectrum view (Channel spectrum) is not presented here.
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>3: Toggle the rational downsampler</h3>
 
-The input channel sample rate is given by the source device sample rate possibly downsampled by a power of two in the source device plugin. This input sample rate can be optionnaly downsampled to any value using a rational downsampler. This allows a precise control of the timings independently of the source plugin sample rate. Some devices are flexible on their sample rate some like the Airspy are not.
+The input channel sample rate is given by the source device sample rate possibly downsampled by a power of two in the source device plugin. This input sample rate can be optionally downsampled to any value using a rational downsampler. This allows a precise control of the timings independently of the source plugin sample rate. Some devices are flexible on their sample rate some like the Airspy are not.
 
 <h3>4: Rational downsampler output rate</h3>
 
-Use the wheels to adjust the sample rate that will be used in the rest of the signal processing in the channel. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate that will be used in the rest of the signal processing in the channel. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>5: Downsampler by a power of two</h3>
 
@@ -61,7 +61,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 In SSB mode this filter is a complex filter that can lowpass on either side of the center frequency. It is therefore labeled as "LP". For negative frequencies (LSB) the cut-off frequency is therefore negative. In fact setting a negative frequency in SSB mode automatically turns on the LSB mode processing and the spectrum is reversed.
 
-In normal (DSB) mode this filter is a real filter that lowpass on both sides of the zero (center) frequency symmetrically. Therefore it acts as a badpass filter centered on the zero frequency and therefore it is labeled as "BP". The value displayed in (9) is the full bandwidth of the filter.
+In normal (DSB) mode this filter is a real filter that lowpass on both sides of the zero (center) frequency symmetrically. Therefore it acts as a bandpass filter centered on the zero frequency and therefore it is labeled as "BP". The value displayed in (9) is the full bandwidth of the filter.
 
 <h3>9. Lowpass filter cut-off frequency</h3>
 
@@ -77,11 +77,11 @@ When SSB is off the lowpass filter is actually a bandpass filter around the chan
 
 <h3>11. Select highpass filter cut-off frequency</h3>
 
-In SSB mode this controls the cut-off frequency of the complex highpass filter which is the filter closest to the zero frequency. This cut-off frquency is always at least 0.1 kHz in absolute value below the lowpass filter cut-off frequency (8).
+In SSB mode this controls the cut-off frequency of the complex highpass filter which is the filter closest to the zero frequency. This cut-off frequency is always at least 0.1 kHz in absolute value below the lowpass filter cut-off frequency (8).
 
 In normal (DSB) mode this filter is not active.
 
-<h3>12. Hghpass filter cut-off frequency</h3>
+<h3>12. Highpass filter cut-off frequency</h3>
 
 This is the cut-off frequency of the highpass filter in kHz. It is zero or negative in LSB mode.
 
@@ -173,7 +173,7 @@ To construct a trace which represents real values the incoming complex signal mu
   - Imag: take the imaginary part
   - Mag: calculate magnitude in linear representation. This is just the module of the complex sample
   - MagDB: calculate power in log representation as 10*log10(x) or decibel (dB) representation. This is the squared module of the complex sample expressed in decibels
-  - Phi: instantaneous phase. This is the argument of the comlpex sample.
+  - Phi: instantaneous phase. This is the argument of the complex sample.
   - dPhi: instantaneous derivative of the phase. This is the difference of arguments between successive samples thus represents the instantaneous frequency.
 
 in the MagDB mode when the trace is selected (1) the display overlay on the top right of the trace shows 3 figures. From left to right: peak power in dB, average power in dB and peak to average difference in dB.
@@ -188,7 +188,7 @@ This is for future use when more than one incoming complex signals can be applie
 
 This slider lets you adjust the amplitude scale. The full scale value appears on the left of the slider. The unit depends on the projection.
 
-<h3>7. Offset adjustement</h3>
+<h3>7. Offset adjustment</h3>
 
 This pair of sliders let you offset the trace vertically. The offset value from reference appears on the left of the slider. The reference is either:
 
@@ -196,7 +196,7 @@ This pair of sliders let you offset the trace vertically. The offset value from 
   - bottom zero value for MagLin projection
   - bottom -200 dB value for MagDB projection
   
-The top slider is a coarse adjustement. Each step moves the trace by an amount that depends on the projection type:
+The top slider is a coarse adjustment. Each step moves the trace by an amount that depends on the projection type:
 
   - Real, Imag: 0.01
   - Mag: 0.005
@@ -214,13 +214,13 @@ The bottom slider is a fine adjustment. Each step moves the trace by an amount t
 
 This pair of sliders let you control the time offset of the trace from the global starting point. The time offset value appears on the left of the slider and the corresponding number of samples appears as a tooltip.
 
-The top slider is a coarse adjustement. Each step moves trace by 100 samples
+The top slider is a coarse adjustment. Each step moves trace by 100 samples
 
 The bottom slider is a fine adjustment. Each step moves trace by 1 sample
 
 <h3>9. Trace display enable</h3>
 
-By default the trace display is enabled and this checkbox is checked. You can optionnally "mute" the trace by unchecking this checkbox.
+By default the trace display is enabled and this checkbox is checked. You can optionally "mute" the trace by unchecking this checkbox.
 
 <h3>10. Trace color</h3>
 
@@ -238,9 +238,9 @@ It is the complex signal that is memorized actually so when a trace in memory is
 
 <h3>1. Select trigger</h3>
 
-This button lets you select which triger condition is affected by the controls. The trigger index appears on the left of the button.
+This button lets you select which trigger condition is affected by the controls. The trigger index appears on the left of the button.
 
-Up to 10 triggers (index 0..9) can be chained to give the final trigger top. The first trigger condition (index 0) is tested then if the trigger is raised the next trigger condition (index 1) is activated then when trigger is raised it passes control to the next trigger etc... until the last trigger is raised then the trace process starts. This established to point in time of the trigger. Optionnally the trace can start some time before this point (this is pre-trigger - see 11)
+Up to 10 triggers (index 0..9) can be chained to give the final trigger top. The first trigger condition (index 0) is tested then if the trigger is raised the next trigger condition (index 1) is activated then when trigger is raised it passes control to the next trigger etc... until the last trigger is raised then the trace process starts. This established to point in time of the trigger. Optionally the trace can start some time before this point (this is pre-trigger - see 11)
 
 <h3>2. Add/delete trigger</h3>
 
@@ -260,7 +260,7 @@ Real: take the real part
 Imag: take the imaginary part
 Mag: calculate magnitude in linear representation. This is just the module of the complex sample
 MagDB: calculate power in log representation as 10*log10(x) or decibel (dB) representation. This is the squared module of the complex sample expressed in decibels
-Phi: instantaneous phase. This is the argument of the comlpex sample.
+Phi: instantaneous phase. This is the argument of the complex sample.
 dPhi: instantaneous derivative of the phase. This is the difference of arguments between successive samples thus represents the instantaneous frequency.
 
 <h3>5. Trigger repetition</h3>
@@ -283,7 +283,7 @@ This button selects both signal edges triggering. Trigger is raised if the signa
 
 This pair of sliders let you adjust the trigger level, The level appears on the left of the sliders. 
 
-The top slider is a coarse adjustement. Each step moves the trigger level by an amount that depends on the projection type:
+The top slider is a coarse adjustment. Each step moves the trigger level by an amount that depends on the projection type:
 
   - Real, Imag: 0.01
   - Mag: 0.005
@@ -301,17 +301,17 @@ The bottom slider is a fine adjustment. Each step moves the trigger level by an 
 
 The actual trigger top can be moved forward by a number of samples. This pair of slider lets you adjust this delay. The delay in time units appears at the left of the sliders and the amount of samples as a tooltip
 
-The top slider is a coarse adjustement. Each step moves the delay by a trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples
+The top slider is a coarse adjustment. Each step moves the delay by a trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples
 
 <h3>11. Pre-trigger delay</h3>
 
 The trace can start an amount of time before the trigger top. This pair of sliders let you adjust this amount of time which is displayed at the left of the sliders. The corresponding number of samples appear as a tooltip.
 
-The top slider is a coarse adjustement. Each step moves the delay by a hundreth of the trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples.
+The top slider is a coarse adjustment. Each step moves the delay by a hundreth of the trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples.
 
 <h3>12. Trigger line color</h3>
 
-This area shows the current trigger line color. When clicking on it a color chooser dialog appears that lets you change the color of the current trigger line color. This line appears when the selected trace projection matches the trigger projecion.
+This area shows the current trigger line color. When clicking on it a color chooser dialog appears that lets you change the color of the current trigger line color. This line appears when the selected trace projection matches the trigger projection.
 
 <h3>13. One-shot trigger</h3>
 

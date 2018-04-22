@@ -92,7 +92,7 @@ Use this button to keep only the visible devices in the devices registrations. T
 
 <h3>1.14 Unregister device</h3>
 
-Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` induicator in the list.
+Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` indicator in the list.
 
 <h3>1.15 OK button</h3>
 
@@ -152,7 +152,7 @@ Use this button to keep only the visible devices in the devices registrations. T
 
 <h3>2.9 Unregister device</h3>
 
-Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` induicator in the list.
+Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` indicator in the list.
 
 <h3>2.10 OK button</h3>
 
