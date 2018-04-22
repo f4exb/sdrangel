@@ -49,6 +49,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
         m_inputFrequencyOffset(0),
         m_running(false),
         m_squelchOpen(false),
+        m_squelchDelayLine(12000),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
@@ -231,6 +232,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
     m_audioFifo.setSize(sampleRate);
+    m_squelchDelayLine.resize(sampleRate/4);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;

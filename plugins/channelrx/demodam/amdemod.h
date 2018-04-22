@@ -29,6 +29,8 @@
 #include "dsp/bandpass.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/doublebufferfifo.h"
+
 #include "amdemodsettings.h"
 
 class DeviceSourceAPI;
@@ -155,6 +157,7 @@ private:
 	Real m_squelchLevel;
 	uint32_t m_squelchCount;
 	bool m_squelchOpen;
+	DoubleBufferFIFO<Real> m_squelchDelayLine;
 	double m_magsq;
 	double m_magsqSum;
 	double m_magsqPeak;
@@ -194,26 +197,43 @@ private:
 
         m_magsqCount++;
 
+//        if (m_magsq >= m_squelchLevel)
+//        {
+//            if (m_squelchCount <= m_audioSampleRate / 10)
+//            {
+//                m_squelchCount++;
+//            }
+//        }
+//        else
+//        {
+//            if (m_squelchCount > 1)
+//            {
+//                m_squelchCount -= 2;
+//            }
+//        }
+
         if (m_magsq >= m_squelchLevel)
         {
-            if (m_squelchCount <= m_audioSampleRate / 10)
-            {
+            if (m_squelchCount < m_audioSampleRate / 10) {
                 m_squelchCount++;
             }
+
+            m_squelchDelayLine.write(magsq);
         }
         else
         {
-            if (m_squelchCount > 1)
-            {
-                m_squelchCount -= 2;
+            if (m_squelchCount > 0) {
+                m_squelchCount--;
             }
+
+            m_squelchDelayLine.write(0);
         }
 
         qint16 sample;
 
         if ((m_squelchCount >= m_audioSampleRate / 20) && !m_settings.m_audioMute)
         {
-            Real demod = sqrt(magsq);
+            Real demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate / 20));
             m_volumeAGC.feed(demod);
             demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
 
