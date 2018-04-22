@@ -51,6 +51,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
         m_agcNbSamples(12000),
         m_agcPowerThreshold(1e-2),
         m_agcThresholdGate(0),
+        m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_sampleSink(0),
         m_audioFifo(24000),
@@ -207,8 +208,10 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 m_sum.imag(0.0);
 			}
 
-            double agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
-            m_audioActive = agcVal != 0.0;
+            float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
+            fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
+            m_audioActive = delayedSample.real() != 0.0;
+            m_squelchDelayLine.write(sideband[i]*agcVal);
 
 			if (m_audioMute)
 			{
@@ -217,23 +220,25 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			}
 			else
 			{
+			    fftfilt::cmplx z = delayedSample * m_agc.getStepDownValue();
+
 				if (m_audioBinaual)
 				{
 					if (m_audioFlipChannels)
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].imag() * m_volume * agcVal);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].real() * m_volume * agcVal);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
 					}
 					else
 					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(sideband[i].real() * m_volume * agcVal);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(sideband[i].imag() * m_volume * agcVal);
+						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
+						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
 					}
 				}
 				else
 				{
-					Real demod = (sideband[i].real() + sideband[i].imag()) * 0.7;
-					qint16 sample = (qint16)(demod * m_volume * agcVal);
+					Real demod = (z.real() + z.imag()) * 0.7;
+					qint16 sample = (qint16)(demod * m_volume);
 					m_audioBuffer[m_audioBufferFill].l = sample;
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}

@@ -176,3 +176,15 @@ double MagAGC::feedAndGetValue(const Complex& ci)
         return m_u0;
     }
 }
+
+float MagAGC::getStepDownValue() const
+{
+    if (m_count <  m_stepDownDelay)
+    {
+        return 1.0f;
+    }
+    else
+    {
+        return StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
+    }
+}

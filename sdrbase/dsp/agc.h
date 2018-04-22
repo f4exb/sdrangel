@@ -50,6 +50,9 @@ public:
     void setStepDownDelay(int stepDownDelay) { m_stepDownDelay = stepDownDelay; }
     void setClamping(bool clamping) { m_clamping = clamping; }
     void setClampMax(double clampMax) { m_clampMax = clampMax; }
+    int getStepDownDelay() const { return m_stepDownDelay; }
+    float getStepDownValue() const;
+
 private:
     bool m_squared;        //!< use squared magnitude (power) to compute AGC value
 	double m_magsq;        //!< current squared magnitude (power)

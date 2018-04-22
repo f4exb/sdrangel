@@ -29,6 +29,7 @@
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/doublebufferfifo.h"
 
 #include "ssbdemodsettings.h"
 
@@ -259,6 +260,7 @@ private:
     int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
     double m_agcPowerThreshold; //!< AGC power threshold (linear)
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
+    DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
 	NCOF m_nco;
