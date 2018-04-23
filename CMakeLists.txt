@@ -214,6 +214,7 @@ endif()
 add_subdirectory(sdrbase)
 add_subdirectory(sdrgui)
 add_subdirectory(sdrsrv)
+add_subdirectory(sdrbench)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
 add_subdirectory(qrtplib)
@@ -294,6 +295,29 @@ target_link_libraries(sdrangelsrv
 qt5_use_modules(sdrangelsrv Multimedia)
 
 ##############################################################################
+# main benchmark application
+
+set(sdrangelbench_SOURCES
+    appbench/main.cpp
+)
+
+add_executable(sdrangelbench
+    ${sdrangelbench_SOURCES}
+)
+
+target_include_directories(sdrangelbench
+    PUBLIC ${CMAKE_SOURCE_DIR}/sdrbench
+)
+
+target_link_libraries(sdrangelbench
+    sdrbench
+    logging
+    ${QT_LIBRARIES}
+)
+
+qt5_use_modules(sdrangelbench Multimedia)
+
+##############################################################################
 
 if (BUILD_DEBIAN)
     add_subdirectory(cm256cc)
@@ -325,6 +349,7 @@ endif(LIBUSB_FOUND AND UNIX)
 #install targets
 install(TARGETS sdrangel DESTINATION bin)
 install(TARGETS sdrangelsrv DESTINATION bin)
+install(TARGETS sdrangelbench DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
 #install files and directories

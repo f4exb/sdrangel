@@ -1,0 +1,42 @@
+project (sdrbench)
+
+set(sdrbench_SOURCES
+    mainbench.cpp
+    parserbench.cpp
+)
+
+set(sdrbench_HEADERS
+    mainbench.h
+    parserbench.h
+)
+
+set(sdrbench_SOURCES
+    ${sdrbench_SOURCES}
+    ${sdrbench_HEADERS}
+)
+
+add_definitions(${QT_DEFINITIONS})
+add_definitions(-DQT_SHARED)
+
+add_library(sdrbench SHARED
+    ${sdrbench_SOURCES}
+    ${sdrbench_HEADERS_MOC}
+)
+
+include_directories(
+    .
+    ${CMAKE_SOURCE_DIR}/logging
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(sdrbench
+    ${QT_LIBRARIES}
+    logging
+)
+
+target_compile_features(sdrbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
+
+qt5_use_modules(sdrbench Core Gui)
+
+install(TARGETS sdrbench DESTINATION lib)
+
