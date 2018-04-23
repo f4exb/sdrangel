@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QElapsedTimer>
+
 #include "mainbench.h"
 
 MainBench *MainBench::m_instance = 0;
@@ -31,16 +33,74 @@ MainBench::MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser
     qDebug() << "MainBench::MainBench: end";
 }
 
+MainBench::~MainBench()
+{}
+
 void MainBench::run()
 {
-    qDebug() << "MainBench::run: work in progress";
+    QElapsedTimer timer;
+    qint64 nsecs;
+
     qDebug() << "MainBench::run: parameters:" 
         << " test: " << m_parser.getTest()
         << " nsamples: " << m_parser.getNbSamples()
         << " repet: " << m_parser.getRepetition()
         << " log2f: " << m_parser.getLog2Factor();
+    
+    qDebug() << "MainBench::run: create test data";
+
+    m_buf = new qint16[m_parser.getNbSamples()*2];
+    m_convertBuffer.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
+
+    qDebug() << "MainBench::run: run test";
+    timer.start();
+
+    for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
+    {
+        decimate(m_buf, m_parser.getNbSamples()*2);
+    }
+
+    nsecs = timer.nsecsElapsed();
+    QDebug debug = qDebug();
+    debug.noquote();
+    debug << tr("MainBench::run: ran test in %L1 ns").arg(nsecs);
+
+
+    qDebug() << "MainBench::run: cleanup test data";
+
+    delete[] m_buf;
+
     emit finished();
 }
 
-MainBench::~MainBench()
-{}
+void MainBench::decimate(const qint16* buf, int len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_parser.getLog2Factor())
+    {
+    case 0:
+        m_decimators.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimators.decimate2_cen(&it, buf, len);
+        break;
+    case 2:
+        m_decimators.decimate4_cen(&it, buf, len);
+        break;
+    case 3:
+        m_decimators.decimate8_cen(&it, buf, len);
+        break;
+    case 4:
+        m_decimators.decimate16_cen(&it, buf, len);
+        break;
+    case 5:
+        m_decimators.decimate32_cen(&it, buf, len);
+        break;
+    case 6:
+        m_decimators.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }    
+}

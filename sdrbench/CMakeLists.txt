@@ -25,12 +25,15 @@ add_library(sdrbench SHARED
 
 include_directories(
     .
+    ${CMAKE_SOURCE_DIR}/exports
+    ${CMAKE_SOURCE_DIR}/sdrbase    
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(sdrbench
     ${QT_LIBRARIES}
+    sdrbase
     logging
 )
 
