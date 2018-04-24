@@ -22,6 +22,7 @@
 #include <QObject>
 
 #include "dsp/decimators.h"
+#include "dsp/decimatorsfi.h"
 #include "parserbench.h"
 
 namespace qtwebapp {
@@ -42,19 +43,22 @@ signals:
     void finished();
 
 private:
-    void decimate(const qint16 *buf, int len);
+    void testDecimateII();
+    void testDecimateFI();
+    void decimateII(const qint16 *buf, int len);
+    void decimateFI(const float *buf, int len);
 
     static MainBench *m_instance;
     qtwebapp::LoggerWithFile *m_logger;
     const ParserBench& m_parser;
 
 #ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #else
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #endif
-    
-    qint16 *m_buf;
+	DecimatorsFI m_decimatorsFI;
+
     SampleVector m_convertBuffer;
 };
 

@@ -25,7 +25,7 @@ ParserBench::ParserBench() :
     m_testOption(QStringList() << "t" << "test",
         "Test type.",
         "test",
-        "decimate"),
+        "decimateii"),
     m_nbSamplesOption(QStringList() << "n" << "nb-samples",
         "Number of sample to deal with.",
         "samples",
@@ -39,7 +39,7 @@ ParserBench::ParserBench() :
         "log2",
         "2")
 {
-    m_test = "decimate";
+    m_testStr = "decimateii";
     m_nbSamples = 1048576;
     m_repetition = 1;
     m_log2Factor = 4;
@@ -68,14 +68,14 @@ void ParserBench::parse(const QCoreApplication& app)
 
     QString test = m_parser.value(m_testOption);
 
-    QString testStr = "(decimate)";
+    QString testStr = "([a-z]+)";
     QRegExp ipRegex ("^" + testStr + "$");
     QRegExpValidator ipValidator(ipRegex);
 
     if (ipValidator.validate(test, pos) == QValidator::Acceptable) {
-        m_test = test;
+        m_testStr = test;
     } else {
-        qWarning() << "ParserBench::parse: test type invalid. Defaulting to " << m_test;
+        qWarning() << "ParserBench::parse: test string invalid. Defaulting to " << m_testStr;
     }
 
     // number of samples
@@ -109,5 +109,14 @@ void ParserBench::parse(const QCoreApplication& app)
         m_log2Factor = log2Factor;
     } else {
         qWarning() << "ParserBench::parse: repetilog2 factortion invalid. Defaulting to " << m_log2Factor;
+    }
+}
+
+ParserBench::TestType ParserBench::getTestType() const
+{
+    if (m_testStr == "decimatefi") {
+        return TestDecimatorsFI;
+    } else {
+        return TestDecimatorsII;
     }
 }

@@ -282,6 +282,7 @@ struct TripleByteLE<qint64>
 } __attribute__((__packed__));
 
 
+/** Decimators with integer input and integer output */
 template<typename AccuType, typename T, uint SdrBits, uint InputBits>
 class Decimators
 {

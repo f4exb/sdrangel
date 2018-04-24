@@ -14,15 +14,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_DECIMATORSF_H_
-#define SDRBASE_DSP_DECIMATORSF_H_
+#ifndef SDRBASE_DSP_DECIMATORSFI_H_
+#define SDRBASE_DSP_DECIMATORSFI_H_
 
 #include "dsp/inthalfbandfilterdbf.h"
 #include "export.h"
 
 #define DECIMATORSF_HB_FILTER_ORDER 64
 
-class SDRBASE_API DecimatorsF
+/** Decimators with float input and integer output */
+class SDRBASE_API DecimatorsFI
 {
 public:
     void decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
@@ -55,4 +56,4 @@ public:
 
 
 
-#endif /* SDRBASE_DSP_DECIMATORSF_H_ */
+#endif /* SDRBASE_DSP_DECIMATORSFI_H_ */

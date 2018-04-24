@@ -17,13 +17,13 @@
 #ifndef INCLUDE_AIRSPYHFTHREAD_H
 #define INCLUDE_AIRSPYHFTHREAD_H
 
+#include <dsp/decimatorsfi.h>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
 #include <libairspyhf/airspyhf.h>
 
 #include "dsp/samplesinkfifo.h"
-#include "dsp/decimatorsf.h"
 
 #define AIRSPYHF_BLOCKSIZE (1<<17)
 
@@ -53,7 +53,7 @@ private:
 	unsigned int m_log2Decim;
 	static AirspyHFThread *m_this;
 
-	DecimatorsF m_decimators;
+	DecimatorsFI m_decimators;
 
 	void run();
 	void callback(const float* buf, qint32 len);

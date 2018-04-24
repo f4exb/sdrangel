@@ -24,18 +24,25 @@
 class ParserBench
 {
 public:
+    typedef enum
+    {
+        TestDecimatorsII,
+        TestDecimatorsFI
+    } TestType;
+
     ParserBench();
     ~ParserBench();
 
     void parse(const QCoreApplication& app);
 
-    const QString& getTest() const { return m_test; }
+    const QString& getTestStr() const { return m_testStr; }
+    TestType getTestType() const;
     uint32_t getNbSamples() const { return m_nbSamples; }
     uint32_t getRepetition() const { return m_repetition; }
     uint32_t getLog2Factor() const { return m_log2Factor; }
 
 private:
-    QString  m_test;
+    QString  m_testStr;
     uint32_t m_nbSamples;
     uint32_t m_repetition;
     uint32_t m_log2Factor;
