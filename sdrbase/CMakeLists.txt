@@ -21,6 +21,7 @@ set(sdrbase_SOURCES
     dsp/ctcssdetector.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
+    dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/dspcommands.cpp
     dsp/dspengine.cpp
@@ -104,6 +105,7 @@ set(sdrbase_HEADERS
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
     dsp/decimators.h
+    dsp/decimatorsff.h
     dsp/decimatorsfi.h
     dsp/decimatorsu.h
     dsp/interpolators.h
@@ -125,7 +127,8 @@ set(sdrbase_HEADERS
     dsp/hbfiltertraits.h
     dsp/inthalfbandfilter.h
     dsp/inthalfbandfilterdb.h
-    dsp/inthalfbandfilterdbf.h
+    dsp/inthalfbandfilterdbff.h
+    dsp/inthalfbandfilterdbfi.h
     dsp/inthalfbandfiltereo1.h
     dsp/inthalfbandfiltereo1i.h
     dsp/inthalfbandfilterst.h

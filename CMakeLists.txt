@@ -315,6 +315,7 @@ target_link_libraries(sdrangelbench
     ${QT_LIBRARIES}
 )
 
+target_compile_features(sdrangelbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 qt5_use_modules(sdrangelbench Multimedia)
 
 ##############################################################################

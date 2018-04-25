@@ -64,6 +64,28 @@ struct Sample
 	FixReal m_imag;
 };
 
+struct FSample
+{
+	FSample() : m_real(0), m_imag(0) {}
+	FSample(Real real) : m_real(real), m_imag(0) {}
+	FSample(Real real, Real imag) : m_real(real), m_imag(imag) {}
+	FSample(const FSample& other) : m_real(other.m_real), m_imag(other.m_imag) {}
+	inline FSample& operator=(const FSample& other) { m_real = other.m_real; m_imag = other.m_imag; return *this; }
+
+	inline FSample& operator+=(const FSample& other) { m_real += other.m_real; m_imag += other.m_imag; return *this; }
+	inline FSample& operator-=(const FSample& other) { m_real -= other.m_real; m_imag -= other.m_imag; return *this; }
+	inline FSample& operator/=(const Real& divisor) { m_real /= divisor; m_imag /= divisor; return *this; }
+
+	inline void setReal(Real v) { m_real = v; }
+	inline void setImag(Real v) { m_imag = v; }
+
+	inline Real real() const { return m_real; }
+	inline Real imag() const { return m_imag; }
+
+	Real m_real;
+	Real m_imag;
+};
+
 struct AudioSample {
     qint16 l;
     qint16 r;
@@ -71,6 +93,7 @@ struct AudioSample {
 #pragma pack(pop)
 
 typedef std::vector<Sample> SampleVector;
+typedef std::vector<FSample> FSampleVector;
 typedef std::vector<AudioSample> AudioVector;
 
 #endif // INCLUDE_DSPTYPES_H

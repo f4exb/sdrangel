@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_INTHALFBANDFILTER_DBF_H
-#define INCLUDE_INTHALFBANDFILTER_DBF_H
+#ifndef INCLUDE_INTHALFBANDFILTER_DBFF_H
+#define INCLUDE_INTHALFBANDFILTER_DBFF_H
 
 #include <stdint.h>
 #include "dsp/dsptypes.h"
@@ -27,15 +27,15 @@
 #include "export.h"
 
 template<typename AccuType, typename SampleType, uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterDBF {
+class SDRBASE_API IntHalfbandFilterDBFF {
 public:
-    IntHalfbandFilterDBF();
+    IntHalfbandFilterDBFF();
 
 	// downsample by 2, return center part of original spectrum
-	bool workDecimateCenter(Sample* sample)
+	bool workDecimateCenter(FSample* sample)
 	{
 		// insert sample into ring-buffer
-	    storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
+	    storeSampleReal((Real) sample->real(), (Real) sample->imag());
 
 		switch(m_state)
 		{
@@ -61,13 +61,13 @@ public:
 	}
 
     // upsample by 2, return center part of original spectrum - double buffer variant
-    bool workInterpolateCenterZeroStuffing(Sample* sampleIn, Sample *SampleOut)
+    bool workInterpolateCenterZeroStuffing(FSample* sampleIn, FSample *SampleOut)
     {
         switch(m_state)
         {
             case 0:
                 // insert sample into ring-buffer
-                storeSampleFixReal((FixReal) 0, (FixReal) 0);
+                storeSampleReal((Real) 0, (Real) 0);
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -79,7 +79,7 @@ public:
 
             default:
                 // insert sample into ring-buffer
-                storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+                storeSampleReal((Real) sampleIn->real(), (Real) sampleIn->imag());
                 // save result
                 doFIR(SampleOut);
                 // advance write-pointer
@@ -92,7 +92,7 @@ public:
     }
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    bool workInterpolateCenter(Sample* sampleIn, Sample *SampleOut)
+    bool workInterpolateCenter(FSample* sampleIn, FSample *SampleOut)
     {
         switch(m_state)
         {
@@ -126,13 +126,13 @@ public:
     }
 
 	// downsample by 2, return lower half of original spectrum
-	bool workDecimateLowerHalf(Sample* sample)
+	bool workDecimateLowerHalf(FSample* sample)
 	{
 		switch(m_state)
 		{
 			case 0:
 				// insert sample into ring-buffer
-			    storeSampleFixReal((FixReal) -sample->imag(), (FixReal) sample->real());
+			    storeSampleReal((Real) -sample->imag(), (Real) sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -142,7 +142,7 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) -sample->real(), (FixReal) -sample->imag());
+                storeSampleReal((Real) -sample->real(), (Real) -sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -154,7 +154,7 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) sample->imag(), (FixReal) -sample->real());
+                storeSampleReal((Real) sample->imag(), (Real) -sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -164,7 +164,7 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
+                storeSampleReal((Real) sample->real(), (Real) sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -177,9 +177,9 @@ public:
 	}
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    bool workInterpolateLowerHalf(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateLowerHalf(FSample* sampleIn, FSample *sampleOut)
     {
-        Sample s;
+        FSample s;
 
         switch(m_state)
         {
@@ -244,15 +244,15 @@ public:
     }
 
     // upsample by 2, from lower half of original spectrum - double buffer variant
-    bool workInterpolateLowerHalfZeroStuffing(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateLowerHalfZeroStuffing(FSample* sampleIn, FSample *sampleOut)
     {
-        Sample s;
+        FSample s;
 
         switch(m_state)
         {
         case 0:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) 0, (FixReal) 0);
+            storeSampleReal((Real) 0, (Real) 0);
 
             // save result
             doFIR(&s);
@@ -270,7 +270,7 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleReal((Real) sampleIn->real(), (Real) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -288,7 +288,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) 0, (FixReal) 0);
+            storeSampleReal((Real) 0, (Real) 0);
 
             // save result
             doFIR(&s);
@@ -306,7 +306,7 @@ public:
 
         default:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleReal((Real) sampleIn->real(), (Real) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -325,13 +325,13 @@ public:
     }
 
 	// downsample by 2, return upper half of original spectrum
-	bool workDecimateUpperHalf(Sample* sample)
+	bool workDecimateUpperHalf(FSample* sample)
 	{
 		switch(m_state)
 		{
 			case 0:
 				// insert sample into ring-buffer
-	            storeSampleFixReal((FixReal) sample->imag(), (FixReal) -sample->real());
+	            storeSampleReal((Real) sample->imag(), (Real) -sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -341,7 +341,7 @@ public:
 
 			case 1:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) -sample->real(), (FixReal) -sample->imag());
+                storeSampleReal((Real) -sample->real(), (Real) -sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -353,7 +353,7 @@ public:
 
 			case 2:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) -sample->imag(), (FixReal) sample->real());
+                storeSampleReal((Real) -sample->imag(), (Real) sample->real());
 				// advance write-pointer
                 advancePointer();
 				// next state
@@ -363,7 +363,7 @@ public:
 
 			default:
 				// insert sample into ring-buffer
-                storeSampleFixReal((FixReal) sample->real(), (FixReal) sample->imag());
+                storeSampleReal((Real) sample->real(), (Real) sample->imag());
 				// save result
 				doFIR(sample);
 				// advance write-pointer
@@ -376,9 +376,9 @@ public:
 	}
 
     /** Optimized upsampler by 2 not calculating FIR with inserted null samples */
-    bool workInterpolateUpperHalf(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateUpperHalf(FSample* sampleIn, FSample *sampleOut)
     {
-        Sample s;
+        FSample s;
 
         switch(m_state)
         {
@@ -443,15 +443,15 @@ public:
     }
 
     // upsample by 2, move original spectrum to upper half - double buffer variant
-    bool workInterpolateUpperHalfZeroStuffing(Sample* sampleIn, Sample *sampleOut)
+    bool workInterpolateUpperHalfZeroStuffing(FSample* sampleIn, FSample *sampleOut)
     {
-        Sample s;
+        FSample s;
 
         switch(m_state)
         {
         case 0:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) 0, (FixReal) 0);
+            storeSampleReal((Real) 0, (Real) 0);
 
             // save result
             doFIR(&s);
@@ -469,7 +469,7 @@ public:
 
         case 1:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleReal((Real) sampleIn->real(), (Real) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -487,7 +487,7 @@ public:
 
         case 2:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) 0, (FixReal) 0);
+            storeSampleReal((Real) 0, (Real) 0);
 
             // save result
             doFIR(&s);
@@ -505,7 +505,7 @@ public:
 
         default:
             // insert sample into ring-buffer
-            storeSampleFixReal((FixReal) sampleIn->real(), (FixReal) sampleIn->imag());
+            storeSampleReal((Real) sampleIn->real(), (Real) sampleIn->imag());
 
             // save result
             doFIR(&s);
@@ -523,12 +523,12 @@ public:
         }
     }
 
-    void myDecimate(const Sample* sample1, Sample* sample2)
+    void myDecimate(const FSample* sample1, FSample* sample2)
     {
-        storeSampleFixReal((FixReal) sample1->real(), (FixReal) sample1->imag());
+        storeSampleReal((Real) sample1->real(), (Real) sample1->imag());
         advancePointer();
 
-        storeSampleFixReal((FixReal) sample2->real(), (FixReal) sample2->imag());
+        storeSampleReal((Real) sample2->real(), (Real) sample2->imag());
         doFIR(sample2);
         advancePointer();
     }
@@ -544,13 +544,13 @@ public:
     }
 
     /** Simple zero stuffing and filter */
-    void myInterpolateZeroStuffing(Sample* sample1, Sample* sample2)
+    void myInterpolateZeroStuffing(FSample* sample1, FSample* sample2)
     {
-        storeSampleFixReal((FixReal) sample1->real(), (FixReal) sample1->imag());
+        storeSampleReal((Real) sample1->real(), (Real) sample1->imag());
         doFIR(sample1);
         advancePointer();
 
-        storeSampleFixReal((FixReal) 0, (FixReal) 0);
+        storeSampleReal((Real) 0, (Real) 0);
         doFIR(sample2);
         advancePointer();
     }
@@ -585,12 +585,12 @@ protected:
 	int m_size;
 	int m_state;
 
-    void storeSampleFixReal(const FixReal& sampleI, const FixReal& sampleQ)
+    void storeSampleReal(const Real& sampleI, const Real& sampleQ)
     {
-        m_samplesDB[m_ptr][0] = sampleI / SDR_RX_SCALED;
-        m_samplesDB[m_ptr][1] = sampleQ / SDR_RX_SCALED;
-        m_samplesDB[m_ptr + m_size][0] = sampleI / SDR_RX_SCALED;
-        m_samplesDB[m_ptr + m_size][1] = sampleQ / SDR_RX_SCALED;
+        m_samplesDB[m_ptr][0] = sampleI;
+        m_samplesDB[m_ptr][1] = sampleQ;
+        m_samplesDB[m_ptr + m_size][0] = sampleI;
+        m_samplesDB[m_ptr + m_size][1] = sampleQ;
     }
 
     void storeSampleAccu(AccuType x, AccuType y)
@@ -606,7 +606,7 @@ protected:
         m_ptr = m_ptr + 1 < m_size ? m_ptr + 1: 0;
     }
 
-    void doFIR(Sample* sample)
+    void doFIR(FSample* sample)
     {
         int a = m_ptr + m_size; // tip pointer
         int b = m_ptr + 1; // tail pointer
@@ -624,8 +624,8 @@ protected:
         iAcc += m_samplesDB[b-1][0] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         qAcc += m_samplesDB[b-1][1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
 
-        sample->setReal(iAcc*SDR_RX_SCALED);
-        sample->setImag(qAcc*SDR_RX_SCALED);
+        sample->setReal(iAcc);
+        sample->setImag(qAcc);
     }
 
     void doFIRAccu(AccuType *x, AccuType *y)
@@ -650,7 +650,7 @@ protected:
         *y = qAcc;
     }
 
-    void doInterpolateFIR(Sample* sample)
+    void doInterpolateFIR(FSample* sample)
     {
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -667,11 +667,11 @@ protected:
             b--;
         }
 
-        sample->setReal(iAcc * SDR_RX_SCALED);
-        sample->setImag(qAcc * SDR_RX_SCALED);
+        sample->setReal(iAcc);
+        sample->setImag(qAcc);
     }
 
-    void doInterpolateFIR(qint32 *x, qint32 *y)
+    void doInterpolateFIR(Real *x, Real *y)
     {
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -688,13 +688,13 @@ protected:
             b--;
         }
 
-        *x = iAcc * SDR_RX_SCALED;
-        *y = qAcc * SDR_RX_SCALED;
+        *x = iAcc;
+        *y = qAcc;
     }
 };
 
 template<typename AccuType, typename SampleType, uint32_t HBFilterOrder>
-IntHalfbandFilterDBF<AccuType, SampleType, HBFilterOrder>::IntHalfbandFilterDBF()
+IntHalfbandFilterDBFF<AccuType, SampleType, HBFilterOrder>::IntHalfbandFilterDBFF()
 {
     m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
 
@@ -708,4 +708,4 @@ IntHalfbandFilterDBF<AccuType, SampleType, HBFilterOrder>::IntHalfbandFilterDBF(
     m_state = 0;
 }
 
-#endif // INCLUDE_INTHALFBANDFILTER_DBF_H
+#endif // INCLUDE_INTHALFBANDFILTER_DBFF_H

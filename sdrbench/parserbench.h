@@ -27,7 +27,8 @@ public:
     typedef enum
     {
         TestDecimatorsII,
-        TestDecimatorsFI
+        TestDecimatorsFI,
+        TestDecimatorsFF
     } TestType;
 
     ParserBench();

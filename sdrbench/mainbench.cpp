@@ -26,7 +26,8 @@ MainBench *MainBench::m_instance = 0;
 MainBench::MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser, QObject *parent) :
     QObject(parent),
     m_logger(logger),
-    m_parser(parser)
+    m_parser(parser),
+    m_uniform_distribution(-1.0, 1.0)
 {
     qDebug() << "MainBench::MainBench: start";
     m_instance = this;
@@ -49,6 +50,10 @@ void MainBench::run()
         testDecimateII();
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFI) {
         testDecimateFI();
+    } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFF) {
+        testDecimateFF();
+    } else {
+        qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }
 
     emit finished();
@@ -73,13 +78,9 @@ void MainBench::testDecimateII()
     }
 
     nsecs = timer.nsecsElapsed();
-    QDebug debug = qDebug();
-    debug.noquote();
-    debug << tr("MainBench::testDecimateII: ran test in %L1 ns").arg(nsecs);
-
+    printResults("MainBench::testDecimateII", nsecs);
 
     qDebug() << "MainBench::testDecimateII: cleanup test data";
-
     delete[] buf;
 }
 
@@ -92,6 +93,8 @@ void MainBench::testDecimateFI()
 
     float *buf = new float[m_parser.getNbSamples()*2];
     m_convertBuffer.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
+    auto my_rand = std::bind(m_uniform_distribution, m_generator);
+    std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand); // make sure data is in [-1.0..1.0] range
 
     qDebug() << "MainBench::testDecimateFI: run test";
     timer.start();
@@ -102,13 +105,36 @@ void MainBench::testDecimateFI()
     }
 
     nsecs = timer.nsecsElapsed();
-    QDebug debug = qDebug();
-    debug.noquote();
-    debug << tr("MainBench::testDecimateFI: ran test in %L1 ns").arg(nsecs);
-
+    printResults("MainBench::testDecimateFI", nsecs);
 
     qDebug() << "MainBench::testDecimateFI: cleanup test data";
+    delete[] buf;
+}
 
+void MainBench::testDecimateFF()
+{
+    QElapsedTimer timer;
+    qint64 nsecs;
+
+    qDebug() << "MainBench::testDecimateFF: create test data";
+
+    float *buf = new float[m_parser.getNbSamples()*2];
+    m_convertBufferF.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
+    auto my_rand = std::bind(m_uniform_distribution, m_generator);
+    std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand); // make sure data is in [-1.0..1.0] range
+
+    qDebug() << "MainBench::testDecimateFF: run test";
+    timer.start();
+
+    for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
+    {
+        decimateFF(buf, m_parser.getNbSamples()*2);
+    }
+
+    nsecs = timer.nsecsElapsed();
+    printResults("MainBench::testDecimateFF", nsecs);
+
+    qDebug() << "MainBench::testDecimateFF: cleanup test data";
     delete[] buf;
 }
 
@@ -174,4 +200,44 @@ void MainBench::decimateFI(const float *buf, int len)
     default:
         break;
     }
+}
+
+void MainBench::decimateFF(const float *buf, int len)
+{
+    FSampleVector::iterator it = m_convertBufferF.begin();
+
+    switch (m_parser.getLog2Factor())
+    {
+    case 0:
+        m_decimatorsFF.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsFF.decimate2_cen(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsFF.decimate4_cen(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsFF.decimate8_cen(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsFF.decimate16_cen(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsFF.decimate32_cen(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsFF.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainBench::printResults(const QString& prefix, qint64 nsecs)
+{
+    double ratekSs = (m_parser.getNbSamples()*m_parser.getRepetition() / (double) nsecs) * 1e6;
+    QDebug debug = qDebug();
+    debug.noquote();
+    debug << tr("%1: ran test in %L2 ns - sample rate: %3 kS/s").arg(prefix).arg(nsecs).arg(ratekSs);
 }

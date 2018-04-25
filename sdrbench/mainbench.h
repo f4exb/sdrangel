@@ -20,9 +20,12 @@
 #define SDRBENCH_MAINBENCH_H_
 
 #include <QObject>
+#include <random>
+#include <functional>
 
 #include "dsp/decimators.h"
 #include "dsp/decimatorsfi.h"
+#include "dsp/decimatorsff.h"
 #include "parserbench.h"
 
 namespace qtwebapp {
@@ -45,12 +48,17 @@ signals:
 private:
     void testDecimateII();
     void testDecimateFI();
+    void testDecimateFF();
     void decimateII(const qint16 *buf, int len);
     void decimateFI(const float *buf, int len);
+    void decimateFF(const float *buf, int len);
+    void printResults(const QString& prefix, qint64 nsecs);
 
     static MainBench *m_instance;
     qtwebapp::LoggerWithFile *m_logger;
     const ParserBench& m_parser;
+    std::mt19937 m_generator;
+    std::uniform_real_distribution<float> m_uniform_distribution;
 
 #ifdef SDR_RX_SAMPLE_24BIT
     Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
@@ -58,8 +66,10 @@ private:
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #endif
 	DecimatorsFI m_decimatorsFI;
+    DecimatorsFF m_decimatorsFF;
 
     SampleVector m_convertBuffer;
+    FSampleVector m_convertBufferF;
 };
 
 #endif // SDRBENCH_MAINBENCH_H_
