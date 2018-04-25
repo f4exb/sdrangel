@@ -237,7 +237,7 @@ void MainBench::decimateFF(const float *buf, int len)
 void MainBench::printResults(const QString& prefix, qint64 nsecs)
 {
     double ratekSs = (m_parser.getNbSamples()*m_parser.getRepetition() / (double) nsecs) * 1e6;
-    QDebug debug = qDebug();
-    debug.noquote();
-    debug << tr("%1: ran test in %L2 ns - sample rate: %3 kS/s").arg(prefix).arg(nsecs).arg(ratekSs);
+    QDebug info = qInfo();
+    info.noquote();
+    info << tr("%1: ran test in %L2 ns - sample rate: %3 kS/s").arg(prefix).arg(nsecs).arg(ratekSs);
 }
