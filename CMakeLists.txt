@@ -30,6 +30,7 @@ option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(HOST_RPI "Compiling on RPi" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
+option(NO_DSP_SIMD "Do not ese SIMD instructions for DSP even if available" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -201,6 +202,13 @@ if (SANITIZE_ADDRESS)
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
     set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
+endif()
+
+if (NO_DSP_SIMD)
+    message(STATUS "Not compiling with SIMD instructions for DSP even if available")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_DSP_SIMD")
+else()
+    message(STATUS "Compiling with SIMD instructions for DSP if available")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
