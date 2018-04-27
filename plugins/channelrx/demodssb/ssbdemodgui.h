@@ -70,7 +70,7 @@ private:
 
     bool blockApplySettings(bool block);
 	void applySettings(bool force = false);
-	void applyBandwidths(bool force = false);
+	void applyBandwidths(int spanLog2, bool force = false);
 	void displaySettings();
 
 	void displayAGCPowerThreshold(int value);
