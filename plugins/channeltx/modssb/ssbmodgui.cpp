@@ -84,14 +84,14 @@ bool SSBModGUI::deserialize(const QByteArray& data)
     {
         qDebug("SSBModGUI::deserialize");
         displaySettings();
-        applyBandwidths(true); // does applySettings(true)
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applyBandwidths(true); // does applySettings(true)
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return false;
     }
 }
@@ -115,7 +115,7 @@ bool SSBModGUI::handleMessage(const Message& message)
     else if (DSPConfigureAudio::match(message))
     {
         qDebug("SSBModGUI::handleMessage: DSPConfigureAudio: %d", m_ssbMod->getAudioSampleRate());
-        applyBandwidths(); // will update spectrum details with new sample rate
+        applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
         return true;
     }
     else if (SSBMod::MsgConfigureSSBMod::match(message))
@@ -184,7 +184,7 @@ void SSBModGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
 void SSBModGUI::on_dsb_toggled(bool dsb)
 {
     ui->flipSidebands->setEnabled(!dsb);
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_audioBinaural_toggled(bool checked)
@@ -201,21 +201,21 @@ void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
 
 void SSBModGUI::on_spanLog2_valueChanged(int value)
 {
-    if ((value < 1) || (value > 5)) {
+    if ((value < 0) || (value > 4)) {
         return;
     }
 
-    applyBandwidths();
+    applyBandwidths(5 - value);
 }
 
 void SSBModGUI::on_BW_valueChanged(int value __attribute__((unused)))
 {
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
 {
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_toneFrequency_valueChanged(int value)
@@ -454,7 +454,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
     displaySettings();
-    applyBandwidths(true); // does applySettings(true)
+    applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
 SSBModGUI::~SSBModGUI()
@@ -485,10 +485,9 @@ void SSBModGUI::applySettings(bool force)
 	}
 }
 
-void SSBModGUI::applyBandwidths(bool force)
+void SSBModGUI::applyBandwidths(int spanLog2, bool force)
 {
     bool dsb = ui->dsb->isChecked();
-    int spanLog2 = ui->spanLog2->value();
     m_spectrumRate = m_ssbMod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
@@ -646,7 +645,7 @@ void SSBModGUI::displaySettings()
     ui->BW->blockSignals(true);
 
     ui->dsb->setChecked(m_settings.m_dsb);
-    ui->spanLog2->setValue(m_settings.m_spanLog2);
+    ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
 
     ui->BW->setValue(roundf(m_settings.m_bandwidth/100.0));
     s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
