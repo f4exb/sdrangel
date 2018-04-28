@@ -19,19 +19,11 @@
 
 #include "dsp/dsptypes.h"
 
-#ifdef NO_DSP_SIMD
-#include "dsp/inthalfbandfilterdb.h"
-#else // NO_DSP_SIMD
 #ifdef SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfilterdb.h"
+#include "dsp/inthalfbandfiltereo2.h"
 #else // SDR_RX_SAMPLE_24BIT
-#ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
-#else // USE_SSE4_1
-#include "dsp/inthalfbandfilterdb.h"
-#endif // USE_SSE4_1
 #endif // SDR_RX_SAMPLE_24BIT
-#endif // NO_DSP_SIMD
 
 #define DECIMATORS_HB_FILTER_ORDER 64
 
@@ -336,48 +328,21 @@ public:
     void decimate64_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len);
 
 private:
-#ifdef NO_DSP_SIMD
 #ifdef SDR_RX_SAMPLE_24BIT
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 #else // SDR_RX_SAMPLE_24BIT
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
-#endif // SDR_RX_SAMPLE_24BIT
-#else // NO_DSP_SIMD
-#ifdef SDR_RX_SAMPLE_24BIT
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterDB<qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
-#else // SDR_RX_SAMPLE_24BIT
-#ifdef USE_SSE4_1
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
     IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
-#else // USE_SSE4_1
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterDB<qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
-#endif // USE_SSE4_1
 #endif // SDR_RX_SAMPLE_24BIT
-#endif // NO_DSP_SIMD
 };
 
 template<typename AccuType, typename T, uint SdrBits, uint InputBits>

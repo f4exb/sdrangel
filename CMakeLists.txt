@@ -30,7 +30,7 @@ option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(HOST_RPI "Compiling on RPi" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
-option(NO_DSP_SIMD "Do not ese SIMD instructions for DSP even if available" OFF)
+option(NO_DSP_SIMD "Do not use SIMD instructions for DSP even if available" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 

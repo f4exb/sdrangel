@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2018 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // Integer half-band FIR based interpolator and decimator                        //
@@ -19,20 +19,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO_H_
-#define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
+#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO2_H_
+#define SDRBASE_DSP_INTHALFBANDFILTEREO2_H_
 
 #include <stdint.h>
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "dsp/inthalfbandfiltereo1i.h"
+#include "dsp/inthalfbandfiltereo2i.h"
 #include "export.h"
 
 template<uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterEO1 {
+class SDRBASE_API IntHalfbandFilterEO2 {
 public:
-    IntHalfbandFilterEO1();
+    IntHalfbandFilterEO2();
 
     // downsample by 2, return center part of original spectrum
     bool workDecimateCenter(Sample* sample)
@@ -563,12 +563,12 @@ public:
         advancePointer();
     }
 
-    void myDecimate(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2)
+    void myDecimate(qint64 x1, qint64 y1, qint64 *x2, qint64 *y2)
     {
-        storeSample32(x1, y1);
+        storeSample64(x1, y1);
         advancePointer();
 
-        storeSample32(*x2, *y2);
+        storeSample64(*x2, *y2);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -586,13 +586,13 @@ public:
     }
 
     /** Simple zero stuffing and filter */
-    void myInterpolateZeroStuffing(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
+    void myInterpolateZeroStuffing(qint64 *x1, qint64 *y1, qint64 *x2, qint64 *y2)
     {
-        storeSample32(*x1, *y1);
+        storeSample64(*x1, *y1);
         doFIR(x1, y1);
         advancePointer();
 
-        storeSample32(0, 0);
+        storeSample64(0, 0);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -622,8 +622,8 @@ public:
     }
 
 protected:
-    int32_t m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
-    int32_t m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
+    qint64 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
+    qint64 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
     int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
 
     int m_ptr;
@@ -666,30 +666,43 @@ protected:
         }
     }
 
+    void storeSample64(qint64 x, qint64 y)
+    {
+        if ((m_ptr % 2) == 0)
+        {
+            m_even[0][m_ptr/2] = x;
+            m_even[1][m_ptr/2] = y;
+            m_even[0][m_ptr/2 + m_size] = x;
+            m_even[1][m_ptr/2 + m_size] = y;
+        }
+        else
+        {
+            m_odd[0][m_ptr/2] = x;
+            m_odd[1][m_ptr/2] = y;
+            m_odd[0][m_ptr/2 + m_size] = x;
+            m_odd[1][m_ptr/2 + m_size] = y;
+        }
+    }
+
     void advancePointer()
     {
         m_ptr = m_ptr + 1 < 2*m_size ? m_ptr + 1: 0;
     }
 
-    int32_t rand(int32_t mod)
-    {
-        return (RAND_MAX/2 - std::rand()) % mod;
-    }
-
     void doFIR(Sample* sample)
     {
-        int32_t iAcc = 0;
-        int32_t qAcc = 0;
+        qint64 iAcc = 0;
+        qint64 qAcc = 0;
 
-#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-                m_ptr,
-                m_even,
-                m_odd,
-                iAcc,
-                qAcc
-        );
-#else
+//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
+//        IntHalfbandFilterEO2Intrisics<HBFilterOrder>::work(
+//                m_ptr,
+//                m_even,
+//                m_odd,
+//                iAcc,
+//                qAcc
+//        );
+//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -709,7 +722,7 @@ protected:
             a -= 1;
             b += 1;
         }
-#endif
+//#endif
 
         if ((m_ptr % 2) == 0)
         {
@@ -726,20 +739,20 @@ protected:
         sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
     }
 
-    void doFIR(int32_t *x, int32_t *y)
+    void doFIR(qint64 *x, qint64 *y)
     {
-        int32_t iAcc = 0;
-        int32_t qAcc = 0;
+        qint64 iAcc = 0;
+        qint64 qAcc = 0;
 
-#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-                m_ptr,
-                m_even,
-                m_odd,
-                iAcc,
-                qAcc
-        );
-#else
+//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
+//        IntHalfbandFilterEO2Intrisics<HBFilterOrder>::work(
+//                m_ptr,
+//                m_even,
+//                m_odd,
+//                iAcc,
+//                qAcc
+//        );
+//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -759,7 +772,7 @@ protected:
             a -= 1;
             b += 1;
         }
-#endif
+//#endif
         if ((m_ptr % 2) == 0)
         {
             iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
@@ -777,8 +790,8 @@ protected:
 
     void doInterpolateFIR(Sample* sample)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        qint64 iAcc = 0;
+        qint64 qAcc = 0;
 
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -798,8 +811,8 @@ protected:
 
     void doInterpolateFIR(qint32 *x, qint32 *y)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        qint64 iAcc = 0;
+        qint64 qAcc = 0;
 
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -819,7 +832,7 @@ protected:
 };
 
 template<uint32_t HBFilterOrder>
-IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
+IntHalfbandFilterEO2<HBFilterOrder>::IntHalfbandFilterEO2()
 {
     m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
 
@@ -837,4 +850,4 @@ IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
     m_state = 0;
 }
 
-#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO_H_ */
+#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO2_H_ */
