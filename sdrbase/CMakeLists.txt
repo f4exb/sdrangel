@@ -127,8 +127,7 @@ set(sdrbase_HEADERS
     dsp/hbfiltertraits.h
     dsp/inthalfbandfilter.h
     dsp/inthalfbandfilterdb.h
-    dsp/inthalfbandfilterdbff.h
-    dsp/inthalfbandfilterdbfi.h
+    dsp/inthalfbandfilterdbf.h
     dsp/inthalfbandfiltereo1.h
     dsp/inthalfbandfiltereo1i.h
     dsp/inthalfbandfilterst.h

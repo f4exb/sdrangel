@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <dsp/decimatorsfi.h>
+#include "decimatorsfi.h"
 
 void DecimatorsFI::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
