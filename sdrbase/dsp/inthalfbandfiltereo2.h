@@ -563,12 +563,12 @@ public:
         advancePointer();
     }
 
-    void myDecimate(qint64 x1, qint64 y1, qint64 *x2, qint64 *y2)
+    void myDecimate(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2)
     {
-        storeSample64(x1, y1);
+        storeSample32(x1, y1);
         advancePointer();
 
-        storeSample64(*x2, *y2);
+        storeSample32(*x2, *y2);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -586,13 +586,13 @@ public:
     }
 
     /** Simple zero stuffing and filter */
-    void myInterpolateZeroStuffing(qint64 *x1, qint64 *y1, qint64 *x2, qint64 *y2)
+    void myInterpolateZeroStuffing(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2)
     {
-        storeSample64(*x1, *y1);
+        storeSample32(*x1, *y1);
         doFIR(x1, y1);
         advancePointer();
 
-        storeSample64(0, 0);
+        storeSample32(0, 0);
         doFIR(x2, y2);
         advancePointer();
     }
@@ -622,8 +622,8 @@ public:
     }
 
 protected:
-    qint64 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
-    qint64 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
+    qint64 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];     // double buffer technique (qint32 to activate vectorization)
+    qint64 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];      // double buffer technique
     int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
 
     int m_ptr;
@@ -705,7 +705,6 @@ protected:
 //#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
-
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
             if ((m_ptr % 2) == 0)
@@ -739,7 +738,7 @@ protected:
         sample->setImag(qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
     }
 
-    void doFIR(qint64 *x, qint64 *y)
+    void doFIR(int32_t *x, int32_t *y)
     {
         qint64 iAcc = 0;
         qint64 qAcc = 0;

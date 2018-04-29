@@ -100,9 +100,9 @@ private:
     QMutex m_mutex;
 
 #ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
 #else
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;

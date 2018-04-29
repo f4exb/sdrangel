@@ -52,8 +52,8 @@ private:
 	unsigned int m_log2Decim;
 	static PerseusThread *m_this;
 
-	Decimators<qint64, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24> m_decimators32; // for no decimation (accumulator is int32)
-    Decimators<qint64, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24> m_decimators64; // for actual decimation (accumulator is int64)
+	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24> m_decimators32; // for no decimation (accumulator is int32)
+    Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24> m_decimators64; // for actual decimation (accumulator is int64)
 
 	void run();
 	void callback(const uint8_t* buf, qint32 len); // inner call back

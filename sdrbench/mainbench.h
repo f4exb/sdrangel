@@ -61,7 +61,7 @@ private:
     std::uniform_real_distribution<float> m_uniform_distribution;
 
 #ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #else
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #endif

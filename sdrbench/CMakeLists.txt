@@ -1,5 +1,7 @@
 project (sdrbench)
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopt-info-vec-optimized")
+
 set(sdrbench_SOURCES
     mainbench.cpp
     parserbench.cpp
