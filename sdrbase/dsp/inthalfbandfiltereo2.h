@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "dsp/inthalfbandfiltereo2i.h"
 #include "export.h"
 
 template<uint32_t HBFilterOrder>
@@ -622,7 +621,7 @@ public:
     }
 
 protected:
-    qint64 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];     // double buffer technique (qint32 to activate vectorization)
+    qint64 m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];     // double buffer technique
     qint64 m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];      // double buffer technique
     int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
 
@@ -694,15 +693,6 @@ protected:
         qint64 iAcc = 0;
         qint64 qAcc = 0;
 
-//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-//        IntHalfbandFilterEO2Intrisics<HBFilterOrder>::work(
-//                m_ptr,
-//                m_even,
-//                m_odd,
-//                iAcc,
-//                qAcc
-//        );
-//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
@@ -721,7 +711,6 @@ protected:
             a -= 1;
             b += 1;
         }
-//#endif
 
         if ((m_ptr % 2) == 0)
         {
@@ -743,15 +732,6 @@ protected:
         qint64 iAcc = 0;
         qint64 qAcc = 0;
 
-//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-//        IntHalfbandFilterEO2Intrisics<HBFilterOrder>::work(
-//                m_ptr,
-//                m_even,
-//                m_odd,
-//                iAcc,
-//                qAcc
-//        );
-//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -771,7 +751,7 @@ protected:
             a -= 1;
             b += 1;
         }
-//#endif
+
         if ((m_ptr % 2) == 0)
         {
             iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
