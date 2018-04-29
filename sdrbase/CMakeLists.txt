@@ -130,6 +130,8 @@ set(sdrbase_HEADERS
     dsp/inthalfbandfilterdbf.h
     dsp/inthalfbandfiltereo1.h
     dsp/inthalfbandfiltereo1i.h
+    dsp/inthalfbandfiltereo2.h
+    dsp/inthalfbandfiltereof.h
     dsp/inthalfbandfilterst.h
     dsp/inthalfbandfiltersti.h
     dsp/kissfft.h
