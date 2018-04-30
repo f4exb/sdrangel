@@ -58,7 +58,8 @@ private:
     qtwebapp::LoggerWithFile *m_logger;
     const ParserBench& m_parser;
     std::mt19937 m_generator;
-    std::uniform_real_distribution<float> m_uniform_distribution;
+    std::uniform_real_distribution<float> m_uniform_distribution_f;
+    std::uniform_int_distribution<qint16> m_uniform_distribution_s16;
 
 #ifdef SDR_RX_SAMPLE_24BIT
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;

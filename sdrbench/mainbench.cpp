@@ -27,7 +27,8 @@ MainBench::MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser
     QObject(parent),
     m_logger(logger),
     m_parser(parser),
-    m_uniform_distribution(-1.0, 1.0)
+    m_uniform_distribution_f(-1.0, 1.0),
+    m_uniform_distribution_s16(-32768,32767)
 {
     qDebug() << "MainBench::MainBench: start";
     m_instance = this;
@@ -62,22 +63,24 @@ void MainBench::run()
 void MainBench::testDecimateII()
 {
     QElapsedTimer timer;
-    qint64 nsecs;
+    qint64 nsecs = 0;
 
     qDebug() << "MainBench::testDecimateII: create test data";
 
     qint16 *buf = new qint16[m_parser.getNbSamples()*2];
     m_convertBuffer.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
+    auto my_rand = std::bind(m_uniform_distribution_s16, m_generator);
+    std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand);
 
     qDebug() << "MainBench::testDecimateII: run test";
-    timer.start();
 
     for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
     {
+        timer.start();
         decimateII(buf, m_parser.getNbSamples()*2);
+        nsecs += timer.nsecsElapsed();
     }
 
-    nsecs = timer.nsecsElapsed();
     printResults("MainBench::testDecimateII", nsecs);
 
     qDebug() << "MainBench::testDecimateII: cleanup test data";
@@ -87,24 +90,24 @@ void MainBench::testDecimateII()
 void MainBench::testDecimateFI()
 {
     QElapsedTimer timer;
-    qint64 nsecs;
+    qint64 nsecs = 0;
 
     qDebug() << "MainBench::testDecimateFI: create test data";
 
     float *buf = new float[m_parser.getNbSamples()*2];
     m_convertBuffer.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
-    auto my_rand = std::bind(m_uniform_distribution, m_generator);
+    auto my_rand = std::bind(m_uniform_distribution_f, m_generator);
     std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand); // make sure data is in [-1.0..1.0] range
 
     qDebug() << "MainBench::testDecimateFI: run test";
-    timer.start();
 
     for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
     {
+        timer.start();
         decimateFI(buf, m_parser.getNbSamples()*2);
+        nsecs += timer.nsecsElapsed();
     }
 
-    nsecs = timer.nsecsElapsed();
     printResults("MainBench::testDecimateFI", nsecs);
 
     qDebug() << "MainBench::testDecimateFI: cleanup test data";
@@ -114,24 +117,24 @@ void MainBench::testDecimateFI()
 void MainBench::testDecimateFF()
 {
     QElapsedTimer timer;
-    qint64 nsecs;
+    qint64 nsecs = 0;
 
     qDebug() << "MainBench::testDecimateFF: create test data";
 
     float *buf = new float[m_parser.getNbSamples()*2];
     m_convertBufferF.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
-    auto my_rand = std::bind(m_uniform_distribution, m_generator);
+    auto my_rand = std::bind(m_uniform_distribution_f, m_generator);
     std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand); // make sure data is in [-1.0..1.0] range
 
     qDebug() << "MainBench::testDecimateFF: run test";
-    timer.start();
 
     for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
     {
+        timer.start();
         decimateFF(buf, m_parser.getNbSamples()*2);
+        nsecs += timer.nsecsElapsed();
     }
 
-    nsecs = timer.nsecsElapsed();
     printResults("MainBench::testDecimateFF", nsecs);
 
     qDebug() << "MainBench::testDecimateFF: cleanup test data";

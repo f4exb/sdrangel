@@ -32,7 +32,7 @@ void DecimatorsFF::decimate1(FSampleVector::iterator* it, const float* buf, qint
 
 void DecimatorsFF::decimate2_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[2];
+    float intbuf[2];
 
     for (int pos = 0; pos < nbIAndQ - 3; pos += 4)
     {
@@ -54,7 +54,7 @@ void DecimatorsFF::decimate2_cen(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate2_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal, yimag;
+    float xreal, yimag;
 
     for (int pos = 0; pos < nbIAndQ - 7; pos += 8)
     {
@@ -74,7 +74,7 @@ void DecimatorsFF::decimate2_inf(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate2_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal, yimag;
+    float xreal, yimag;
 
     for (int pos = 0; pos < nbIAndQ - 7; pos += 8)
     {
@@ -94,7 +94,7 @@ void DecimatorsFF::decimate2_sup(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate4_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal, yimag;
+    float xreal, yimag;
 
     for (int pos = 0; pos < nbIAndQ - 7; pos += 8)
     {
@@ -116,7 +116,7 @@ void DecimatorsFF::decimate4_sup(FSampleVector::iterator* it, const float* buf, 
     // Inf (LSB):
     //            x  y   x  y   x   y  x   y  / x -> 0,-3,-4,7 / y -> 1,2,-5,-6
     // [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-    double xreal, yimag;
+    float xreal, yimag;
 
     for (int pos = 0; pos < nbIAndQ - 7; pos += 8)
     {
@@ -132,7 +132,7 @@ void DecimatorsFF::decimate4_sup(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate8_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[2], yimag[2];
+    float xreal[2], yimag[2];
 
     for (int pos = 0; pos < nbIAndQ - 15; pos += 8)
     {
@@ -154,7 +154,7 @@ void DecimatorsFF::decimate8_inf(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate8_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[2], yimag[2];
+    float xreal[2], yimag[2];
 
     for (int pos = 0; pos < nbIAndQ - 15; pos += 8)
     {
@@ -178,7 +178,7 @@ void DecimatorsFF::decimate16_inf(FSampleVector::iterator* it, const float* buf,
 {
     // Offset tuning: 4x downsample and rotate, then
     // downsample 4x more. [ rotate:  0, 1, -3, 2, -4, -5, 7, -6]
-    double xreal[4], yimag[4];
+    float xreal[4], yimag[4];
 
     for (int pos = 0; pos < nbIAndQ - 31; )
     {
@@ -205,7 +205,7 @@ void DecimatorsFF::decimate16_sup(FSampleVector::iterator* it, const float* buf,
 {
     // Offset tuning: 4x downsample and rotate, then
     // downsample 4x more. [ rotate:  1, 0, -2, 3, -5, -4, 6, -7]
-    double xreal[4], yimag[4];
+    float xreal[4], yimag[4];
 
     for (int pos = 0; pos < nbIAndQ - 31; )
     {
@@ -230,7 +230,7 @@ void DecimatorsFF::decimate16_sup(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate32_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[8], yimag[8];
+    float xreal[8], yimag[8];
 
     for (int pos = 0; pos < nbIAndQ - 63; )
     {
@@ -260,7 +260,7 @@ void DecimatorsFF::decimate32_inf(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate32_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[8], yimag[8];
+    float xreal[8], yimag[8];
 
     for (int pos = 0; pos < nbIAndQ - 63; )
     {
@@ -290,7 +290,7 @@ void DecimatorsFF::decimate32_sup(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate64_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[16], yimag[16];
+    float xreal[16], yimag[16];
 
     for (int pos = 0; pos < nbIAndQ - 127; )
     {
@@ -329,7 +329,7 @@ void DecimatorsFF::decimate64_inf(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate64_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double xreal[16], yimag[16];
+    float xreal[16], yimag[16];
 
     for (int pos = 0; pos < nbIAndQ - 127; )
     {
@@ -368,7 +368,7 @@ void DecimatorsFF::decimate64_sup(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate4_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[4];
+    float intbuf[4];
 
     for (int pos = 0; pos < nbIAndQ - 7; pos += 8)
     {
@@ -402,7 +402,7 @@ void DecimatorsFF::decimate4_cen(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate8_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[8];
+    float intbuf[8];
 
     for (int pos = 0; pos < nbIAndQ - 15; pos += 16)
     {
@@ -461,7 +461,7 @@ void DecimatorsFF::decimate8_cen(FSampleVector::iterator* it, const float* buf, 
 
 void DecimatorsFF::decimate16_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[16];
+    float intbuf[16];
 
     for (int pos = 0; pos < nbIAndQ - 31; pos += 32)
     {
@@ -569,7 +569,7 @@ void DecimatorsFF::decimate16_cen(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate32_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[32];
+    float intbuf[32];
 
     for (int pos = 0; pos < nbIAndQ - 63; pos += 64)
     {
@@ -774,7 +774,7 @@ void DecimatorsFF::decimate32_cen(FSampleVector::iterator* it, const float* buf,
 
 void DecimatorsFF::decimate64_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
-    double intbuf[64];
+    float intbuf[64];
 
     for (int pos = 0; pos < nbIAndQ - 127; pos += 128)
     {

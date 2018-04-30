@@ -17,7 +17,7 @@
 #ifndef SDRBASE_DSP_DECIMATORSFF_H_
 #define SDRBASE_DSP_DECIMATORSFF_H_
 
-#include "dsp/inthalfbandfilterdbf.h"
+#include "dsp/inthalfbandfiltereof.h"
 #include "export.h"
 
 #define DECIMATORSFF_HB_FILTER_ORDER 64
@@ -46,12 +46,12 @@ public:
     void decimate64_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate64_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
 
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterDBF<double, float, DECIMATORSFF_HB_FILTER_ORDER> m_decimator64; // 6th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER> m_decimator64; // 6th stages
 };
 
 
