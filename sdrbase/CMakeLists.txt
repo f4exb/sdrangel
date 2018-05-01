@@ -21,6 +21,7 @@ set(sdrbase_SOURCES
     dsp/ctcssdetector.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
+    dsp/decimatorsif.cpp    
     dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/dspcommands.cpp
@@ -105,6 +106,7 @@ set(sdrbase_HEADERS
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
     dsp/decimators.h
+    dsp/decimatorsif.h
     dsp/decimatorsff.h
     dsp/decimatorsfi.h
     dsp/decimatorsu.h

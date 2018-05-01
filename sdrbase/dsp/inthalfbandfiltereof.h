@@ -107,9 +107,9 @@ public:
     }
 
 protected:
-    double m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];    // double buffer technique
-    double m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];     // double buffer technique
-    double m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
+    float m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];    // double buffer technique
+    float m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];     // double buffer technique
+    float m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
 
     int m_ptr;
     int m_size;
@@ -140,8 +140,8 @@ protected:
 
     void doFIR(float *x, float *y)
     {
-        double iAcc = 0;
-        double qAcc = 0;
+        float iAcc = 0;
+        float qAcc = 0;
 
 //#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
 //        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(

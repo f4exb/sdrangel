@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,47 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBENCH_PARSERBENCH_H_
-#define SDRBENCH_PARSERBENCH_H_
+#include "decimatorsif.h"
 
-#include <QCommandLineParser>
-#include <stdint.h>
+const float decimation_scale<8>::scaleIn = 1.0/128.0;
+const float decimation_scale<12>::scaleIn = 1.0/2048.0;
+const float decimation_scale<16>::scaleIn = 1.0/32768.0;
 
-class ParserBench
-{
-public:
-    typedef enum
-    {
-        TestDecimatorsII,
-        TestDecimatorsIF,
-        TestDecimatorsFI,
-        TestDecimatorsFF
-    } TestType;
-
-    ParserBench();
-    ~ParserBench();
-
-    void parse(const QCoreApplication& app);
-
-    const QString& getTestStr() const { return m_testStr; }
-    TestType getTestType() const;
-    uint32_t getNbSamples() const { return m_nbSamples; }
-    uint32_t getRepetition() const { return m_repetition; }
-    uint32_t getLog2Factor() const { return m_log2Factor; }
-
-private:
-    QString  m_testStr;
-    uint32_t m_nbSamples;
-    uint32_t m_repetition;
-    uint32_t m_log2Factor;
-
-    QCommandLineParser m_parser;
-    QCommandLineOption m_testOption;
-    QCommandLineOption m_nbSamplesOption;
-    QCommandLineOption m_repetitionOption;
-    QCommandLineOption m_log2FactorOption;
-};
-
-
-
-#endif /* SDRBENCH_PARSERBENCH_H_ */

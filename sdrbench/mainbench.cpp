@@ -28,7 +28,7 @@ MainBench::MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser
     m_logger(logger),
     m_parser(parser),
     m_uniform_distribution_f(-1.0, 1.0),
-    m_uniform_distribution_s16(-32768,32767)
+    m_uniform_distribution_s16(-2048, 2047)
 {
     qDebug() << "MainBench::MainBench: start";
     m_instance = this;
@@ -49,6 +49,8 @@ void MainBench::run()
 
     if (m_parser.getTestType() == ParserBench::TestDecimatorsII) {
         testDecimateII();
+    } else if (m_parser.getTestType() == ParserBench::TestDecimatorsIF) {
+        testDecimateIF();
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFI) {
         testDecimateFI();
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFF) {
@@ -84,6 +86,33 @@ void MainBench::testDecimateII()
     printResults("MainBench::testDecimateII", nsecs);
 
     qDebug() << "MainBench::testDecimateII: cleanup test data";
+    delete[] buf;
+}
+
+void MainBench::testDecimateIF()
+{
+    QElapsedTimer timer;
+    qint64 nsecs = 0;
+
+    qDebug() << "MainBench::testDecimateIF: create test data";
+
+    qint16 *buf = new qint16[m_parser.getNbSamples()*2];
+    m_convertBufferF.resize(m_parser.getNbSamples()/(1<<m_parser.getLog2Factor()));
+    auto my_rand = std::bind(m_uniform_distribution_s16, m_generator);
+    std::generate(buf, buf + m_parser.getNbSamples()*2 - 1, my_rand);
+
+    qDebug() << "MainBench::testDecimateIF: run test";
+
+    for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
+    {
+        timer.start();
+        decimateIF(buf, m_parser.getNbSamples()*2);
+        nsecs += timer.nsecsElapsed();
+    }
+
+    printResults("MainBench::testDecimateIF", nsecs);
+
+    qDebug() << "MainBench::testDecimateIF: cleanup test data";
     delete[] buf;
 }
 
@@ -167,6 +196,38 @@ void MainBench::decimateII(const qint16* buf, int len)
         break;
     case 6:
         m_decimatorsII.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainBench::decimateIF(const qint16* buf, int len)
+{
+    FSampleVector::iterator it = m_convertBufferF.begin();
+
+    switch (m_parser.getLog2Factor())
+    {
+    case 0:
+        m_decimatorsIF.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsIF.decimate2_cen(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsIF.decimate4_cen(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsIF.decimate8_cen(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsIF.decimate16_cen(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsIF.decimate32_cen(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsIF.decimate64_cen(&it, buf, len);
         break;
     default:
         break;

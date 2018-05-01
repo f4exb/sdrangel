@@ -118,6 +118,8 @@ ParserBench::TestType ParserBench::getTestType() const
         return TestDecimatorsFI;
     } else if (m_testStr == "decimateff") {
         return TestDecimatorsFF;
+    }else if (m_testStr == "decimateif") {
+        return TestDecimatorsIF;
     } else {
         return TestDecimatorsII;
     }

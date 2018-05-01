@@ -170,7 +170,7 @@ const int32_t HBFIRFilterTraits<64>::hbCoeffs[16] = {
 //        (qint32)( 0.317657589850154464805598308885237202048 * (1 << hbShift)),
 };
 
-const double HBFIRFilterTraits<64>::hbCoeffsF[16] = {
+const float HBFIRFilterTraits<64>::hbCoeffsF[16] = {
         -0.0004653050334792540416659067936677729449,
          0.0007120490624526883919470643391491648799,
         -0.0012303473710125558716887983479182366864,

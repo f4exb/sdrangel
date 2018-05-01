@@ -24,6 +24,7 @@
 #include <functional>
 
 #include "dsp/decimators.h"
+#include "dsp/decimatorsif.h"
 #include "dsp/decimatorsfi.h"
 #include "dsp/decimatorsff.h"
 #include "parserbench.h"
@@ -47,9 +48,11 @@ signals:
 
 private:
     void testDecimateII();
+    void testDecimateIF();
     void testDecimateFI();
     void testDecimateFF();
     void decimateII(const qint16 *buf, int len);
+    void decimateIF(const qint16 *buf, int len);
     void decimateFI(const float *buf, int len);
     void decimateFF(const float *buf, int len);
     void printResults(const QString& prefix, qint64 nsecs);
@@ -66,6 +69,7 @@ private:
 #else
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
 #endif
+	DecimatorsIF<qint16, 12> m_decimatorsIF;
 	DecimatorsFI m_decimatorsFI;
     DecimatorsFF m_decimatorsFF;
 

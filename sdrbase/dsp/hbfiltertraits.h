@@ -69,7 +69,7 @@ struct SDRBASE_API HBFIRFilterTraits<64>
     static const int32_t hbShift = 12;
     static const int16_t hbMod[64+6];
     static const int32_t hbCoeffs[16] __attribute__ ((aligned (32)));
-    static const double  hbCoeffsF[16];
+    static const float  hbCoeffsF[16];
 };
 
 template<>
