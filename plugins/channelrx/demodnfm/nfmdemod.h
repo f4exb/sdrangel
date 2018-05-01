@@ -195,7 +195,6 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
-	int m_squelchDecay;
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;

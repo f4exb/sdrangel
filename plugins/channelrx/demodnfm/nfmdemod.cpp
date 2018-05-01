@@ -57,7 +57,6 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
         m_sampleCount(0),
         m_squelchCount(0),
         m_squelchGate(4800),
-        m_squelchDecay(4800),
         m_squelchLevel(-990),
         m_squelchOpen(false),
         m_afSquelchOpen(false),
@@ -192,7 +191,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 {
                     m_squelchDelayLine.write(demod * m_discriCompensation);
 
-                    if (m_squelchCount < m_squelchGate + m_squelchDecay) {
+                    if (m_squelchCount < 2*m_squelchGate) {
                         m_squelchCount++;
                     }
                 }
@@ -219,75 +218,83 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 {
                     m_squelchDelayLine.write(demod * m_discriCompensation);
 
-                    if (m_squelchCount < m_squelchGate + m_squelchDecay) {
+                    if (m_squelchCount < 2*m_squelchGate) {
                         m_squelchCount++;
                     }
                 }
             }
 
-            m_squelchOpen = (m_squelchCount > m_squelchGate);
-
-            if ((m_squelchOpen) && !m_settings.m_audioMute)
+            if (m_settings.m_audioMute)
             {
-                if (m_settings.m_ctcssOn)
+                sample = 0;
+            }
+            else
+            {
+                m_squelchOpen = (m_squelchCount > m_squelchGate);
+
+                if (m_squelchOpen)
                 {
-                    Real ctcss_sample = m_lowpass.filter(demod * m_discriCompensation);
-
-                    if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+                    if (m_settings.m_ctcssOn)
                     {
-                        if (m_ctcssDetector.analyze(&ctcss_sample))
-                        {
-                            int maxToneIndex;
+                        Real ctcss_sample = m_lowpass.filter(demod * m_discriCompensation);
 
-                            if (m_ctcssDetector.getDetectedTone(maxToneIndex))
+                        if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+                        {
+                            if (m_ctcssDetector.analyze(&ctcss_sample))
                             {
-                                if (maxToneIndex+1 != m_ctcssIndex)
+                                int maxToneIndex;
+
+                                if (m_ctcssDetector.getDetectedTone(maxToneIndex))
                                 {
-                                    if (getMessageQueueToGUI()) {
-                                        MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(m_ctcssDetector.getToneSet()[maxToneIndex]);
-                                        getMessageQueueToGUI()->push(msg);
+                                    if (maxToneIndex+1 != m_ctcssIndex)
+                                    {
+                                        if (getMessageQueueToGUI()) {
+                                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(m_ctcssDetector.getToneSet()[maxToneIndex]);
+                                            getMessageQueueToGUI()->push(msg);
+                                        }
+                                        m_ctcssIndex = maxToneIndex+1;
                                     }
-                                    m_ctcssIndex = maxToneIndex+1;
                                 }
-                            }
-                            else
-                            {
-                                if (m_ctcssIndex != 0)
+                                else
                                 {
-                                    if (getMessageQueueToGUI()) {
-                                        MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
-                                        getMessageQueueToGUI()->push(msg);
+                                    if (m_ctcssIndex != 0)
+                                    {
+                                        if (getMessageQueueToGUI()) {
+                                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                                            getMessageQueueToGUI()->push(msg);
+                                        }
+                                        m_ctcssIndex = 0;
                                     }
-                                    m_ctcssIndex = 0;
                                 }
                             }
                         }
                     }
-                }
 
-                if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
-                {
-                    sample = 0;
+                    if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
+                    {
+                        sample = 0;
+                    }
+                    else
+                    {
+                        sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                    }
                 }
                 else
                 {
-                    sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
-                }
-            }
-            else
-            {
-                if (m_ctcssIndex != 0)
-                {
-                    if (getMessageQueueToGUI()) {
-                        MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
-                        getMessageQueueToGUI()->push(msg);
+                    if (m_ctcssIndex != 0)
+                    {
+                        if (getMessageQueueToGUI()) {
+                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                            getMessageQueueToGUI()->push(msg);
+                        }
+
+                        m_ctcssIndex = 0;
                     }
 
-                    m_ctcssIndex = 0;
+                    sample = 0;
                 }
-
-                sample = 0;
             }
+
 
             m_audioBuffer[m_audioBufferFill].l = sample;
             m_audioBuffer[m_audioBufferFill].r = sample;
@@ -421,7 +428,6 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_lowpass.create(301, sampleRate, 250.0);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
     m_squelchGate = (sampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
-    m_squelchDecay = m_squelchGate;
     m_squelchCount = 0; // reset squelch open counter
     m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
 
