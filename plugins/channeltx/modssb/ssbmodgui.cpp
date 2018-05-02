@@ -459,7 +459,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 SSBModGUI::~SSBModGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_ssbMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete m_spectrumVis;
 	delete ui;
