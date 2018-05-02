@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2018 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // Integer half-band FIR based interpolator and decimator                        //
@@ -19,20 +19,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO1_H_
-#define SDRBASE_DSP_INTHALFBANDFILTEREO1_H_
+#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO_H_
+#define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
 
 #include <stdint.h>
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-//#include "dsp/inthalfbandfiltereo1i.h"
 #include "export.h"
 
-template<uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterEO1 {
+template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
+class SDRBASE_API IntHalfbandFilterEO {
 public:
-    IntHalfbandFilterEO1();
+    IntHalfbandFilterEO();
 
     // downsample by 2, return center part of original spectrum
     bool workDecimateCenter(Sample* sample)
@@ -622,9 +621,9 @@ public:
     }
 
 protected:
-    int32_t m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
-    int32_t m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
-    int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2]; // double buffer technique
+    EOStorageType m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];
+    EOStorageType m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];
+    int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2];
 
     int m_ptr;
     int m_size;
@@ -671,25 +670,11 @@ protected:
         m_ptr = m_ptr + 1 < 2*m_size ? m_ptr + 1: 0;
     }
 
-    int32_t rand(int32_t mod)
-    {
-        return (RAND_MAX/2 - std::rand()) % mod;
-    }
-
     void doFIR(Sample* sample)
     {
-        int32_t iAcc = 0;
-        int32_t qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
-//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-//        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-//                m_ptr,
-//                m_even,
-//                m_odd,
-//                iAcc,
-//                qAcc
-//        );
-//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -709,7 +694,6 @@ protected:
             a -= 1;
             b += 1;
         }
-//#endif
 
         if ((m_ptr % 2) == 0)
         {
@@ -728,18 +712,9 @@ protected:
 
     void doFIR(int32_t *x, int32_t *y)
     {
-        int32_t iAcc = 0;
-        int32_t qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
-//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
-//        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-//                m_ptr,
-//                m_even,
-//                m_odd,
-//                iAcc,
-//                qAcc
-//        );
-//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -759,7 +734,7 @@ protected:
             a -= 1;
             b += 1;
         }
-//#endif
+
         if ((m_ptr % 2) == 0)
         {
             iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
@@ -777,8 +752,8 @@ protected:
 
     void doInterpolateFIR(Sample* sample)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -798,8 +773,8 @@ protected:
 
     void doInterpolateFIR(qint32 *x, qint32 *y)
     {
-        qint32 iAcc = 0;
-        qint32 qAcc = 0;
+        AccuType iAcc = 0;
+        AccuType qAcc = 0;
 
         qint16 a = m_ptr;
         qint16 b = m_ptr + (HBFIRFilterTraits<HBFilterOrder>::hbOrder / 2) - 1;
@@ -818,8 +793,8 @@ protected:
     }
 };
 
-template<uint32_t HBFilterOrder>
-IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
+template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
+IntHalfbandFilterEO<EOStorageType, AccuType, HBFilterOrder>::IntHalfbandFilterEO()
 {
     m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
 
@@ -837,4 +812,4 @@ IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
     m_state = 0;
 }
 
-#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO1_H_ */
+#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO_H_ */
