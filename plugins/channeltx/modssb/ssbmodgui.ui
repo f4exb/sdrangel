@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -53,7 +53,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -92,7 +101,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -695,6 +704,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
         </property>
@@ -1239,7 +1253,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>
@@ -1252,7 +1275,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Monospace</family>
+        <family>Liberation Mono</family>
         <pointsize>8</pointsize>
        </font>
       </property>

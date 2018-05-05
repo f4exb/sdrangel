@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -98,7 +98,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -502,6 +502,11 @@
           <width>0</width>
           <height>32</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+         </font>
         </property>
         <property name="toolTip">
          <string>video signal level in % of 0:1 range</string>

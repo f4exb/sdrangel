@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -104,7 +104,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -397,6 +397,11 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+         </font>
         </property>
         <property name="toolTip">
          <string>Level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
