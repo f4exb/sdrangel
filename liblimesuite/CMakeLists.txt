@@ -1,7 +1,6 @@
 project(limesuite)
 
 find_package(LibUSB)
-find_package(SQLite3)
 
 set(limesuite_SOURCES
 	${LIBLIMESUITESRC}/src/Logger.cpp
@@ -89,7 +88,6 @@ add_library(limesuite SHARED
 
 target_link_libraries(limesuite
     ${LIBUSB_LIBRARIES}
-    ${SQLITE3_LIBRARIES}
 )
 
 install(TARGETS limesuite DESTINATION lib)
