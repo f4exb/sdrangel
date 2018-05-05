@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -142,10 +142,8 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>20</pointsize>
-         <weight>50</weight>
-         <bold>false</bold>
         </font>
        </property>
        <property name="cursor">
@@ -533,7 +531,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -590,7 +588,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -654,7 +652,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
         </font>
        </property>
