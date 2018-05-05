@@ -96,11 +96,23 @@
     <addaction name="action_About"/>
    </widget>
    <widget class="QMenu" name="menu_Window">
+    <property name="font">
+     <font>
+      <family>Liberation Sans</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>&amp;Window</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuPreferences">
+    <property name="font">
+     <font>
+      <family>Liberation Sans</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>&amp;Preferences</string>
     </property>
@@ -720,6 +732,12 @@
    <property name="text">
     <string>E&amp;xit</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
    </property>
@@ -753,6 +771,12 @@
    <property name="text">
     <string>&amp;Fullscreen</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>F11</string>
    </property>
@@ -772,6 +796,12 @@
    <property name="text">
     <string>&amp;About SDRangel...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_Preferences">
    <property name="text">
@@ -785,10 +815,22 @@
    <property name="text">
     <string>Loaded &amp;Plugins...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_addSourceDevice">
    <property name="text">
     <string>Add source device set</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_removeLastDevice">
@@ -796,7 +838,10 @@
     <string>Remove last device set</string>
    </property>
    <property name="font">
-    <font/>
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_Audio">
@@ -805,6 +850,12 @@
    </property>
    <property name="toolTip">
     <string>Audio devices setting</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_DV_Serial">
@@ -817,6 +868,12 @@
    <property name="toolTip">
     <string>Toggle AMBE DV serial device usage</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_My_Position">
    <property name="text">
@@ -825,10 +882,22 @@
    <property name="toolTip">
     <string>Set my geo position</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_addSinkDevice">
    <property name="text">
     <string>Add sink device set</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_Logging">
@@ -837,6 +906,12 @@
    </property>
    <property name="toolTip">
     <string>Message logging options</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <zorder>presetDock</zorder>
