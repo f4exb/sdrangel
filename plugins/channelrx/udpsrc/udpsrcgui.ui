@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -53,7 +53,16 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -139,7 +148,7 @@
         </property>
         <property name="font">
          <font>
-          <family>DejaVu Sans Mono</family>
+          <family>Liberation Mono</family>
           <pointsize>12</pointsize>
          </font>
         </property>
@@ -349,7 +358,7 @@
          <string>Destination UDP address</string>
         </property>
         <property name="inputMask">
-         <string>000.000.000.000; </string>
+         <string>000.000.000.000</string>
         </property>
         <property name="text">
          <string>127.0.0.1</string>
@@ -397,7 +406,7 @@
          <string>Destination UDP port</string>
         </property>
         <property name="inputMask">
-         <string>00000; </string>
+         <string>00000</string>
         </property>
         <property name="text">
          <string>9998</string>
@@ -539,7 +548,7 @@
          <string>Audio input UDP port</string>
         </property>
         <property name="inputMask">
-         <string>00000; </string>
+         <string>00000</string>
         </property>
         <property name="text">
          <string>9997</string>
@@ -826,15 +835,24 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
       <property name="font">
        <font>
-        <family>Sans Serif</family>
-        <pointsize>9</pointsize>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
      </widget>

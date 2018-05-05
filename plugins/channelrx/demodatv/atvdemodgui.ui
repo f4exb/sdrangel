@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -86,7 +86,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -1094,6 +1094,12 @@
          <width>0</width>
          <height>312</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>8</pointsize>
+        </font>
        </property>
       </widget>
      </item>

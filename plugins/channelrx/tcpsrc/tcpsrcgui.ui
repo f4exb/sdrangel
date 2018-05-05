@@ -12,7 +12,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -177,7 +177,7 @@
         </property>
         <property name="font">
          <font>
-          <family>DejaVu Sans Mono</family>
+          <family>Liberation Mono</family>
           <pointsize>12</pointsize>
          </font>
         </property>
@@ -375,7 +375,7 @@
      <widget class="GLSpectrum" name="glSpectrum" native="true">
       <property name="font">
        <font>
-        <family>Sans Serif</family>
+        <family>Liberation Mono</family>
         <pointsize>9</pointsize>
        </font>
       </property>

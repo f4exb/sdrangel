@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -80,7 +80,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
             <italic>false</italic>
            </font>
@@ -133,7 +133,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
             <italic>false</italic>
            </font>
@@ -204,7 +204,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="datvTab">
     <attribute name="title">
