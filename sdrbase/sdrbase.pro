@@ -68,7 +68,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/ctcssdetector.cpp\
         dsp/cwkeyer.cpp\
         dsp/cwkeyersettings.cpp\
-        dsp/decimatorsf.cpp\
+        dsp/decimatorsfi.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
@@ -132,6 +132,7 @@ HEADERS  += audio/audiodevicemanager.h\
         device/devicesinkapi.h\
         device/deviceenumerator.h\
         dsp/afsquelch.h\
+        dsp/decimatorsfi.h\
         dsp/downchannelizer.h\
         dsp/upchannelizer.h\
         dsp/channelmarker.h\
@@ -139,7 +140,6 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/cwkeyersettings.h\
         dsp/complex.h\
         dsp/decimators.h\
-        dsp/decimatorsf.h\
         dsp/interpolators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
