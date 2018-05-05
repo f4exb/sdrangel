@@ -12,7 +12,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -43,7 +43,7 @@
        <string>Rate</string>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
     </widget>

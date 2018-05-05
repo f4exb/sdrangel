@@ -12,15 +12,24 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
-    <pointsize>8</pointsize>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
    </font>
   </property>
   <property name="windowTitle">
    <string>CW Keyer</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <property name="spacing">
