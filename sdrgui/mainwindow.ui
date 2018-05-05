@@ -10,6 +10,11 @@
     <height>721</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>SDRangel</string>
   </property>

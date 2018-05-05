@@ -24,8 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
-    <pointsize>9</pointsize>
+    <family>Liberation Sans</family>
    </font>
   </property>
   <property name="focusPolicy">
@@ -98,7 +97,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -204,7 +203,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
