@@ -297,7 +297,7 @@ int ScaleEngine::calcTickTextSize()
 
 	calcMajorTickUnits((m_rangeMax - m_rangeMin) / m_scale, &decimalPlaces);
 
-	return tickLen + decimalPlaces + 1;
+	return tickLen + decimalPlaces + 2;
 }
 
 void ScaleEngine::forceTwoTicks()
