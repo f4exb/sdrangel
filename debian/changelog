@@ -4,8 +4,9 @@ sdrangel (3.14.5-1) unstable; urgency=medium
   * Added a benchmark program testing decimators
   * Optimization of decimators using even/odd technique
   * SSB mod: fixed channel unregistration
+  * AM demod: fixed delayed squelch
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 04 May 2018 20:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 06 May 2018 20:14:18 +0200
 
 sdrangel (3.14.4-1) unstable; urgency=medium
 

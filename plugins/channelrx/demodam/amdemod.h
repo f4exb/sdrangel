@@ -30,7 +30,6 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
-
 #include "amdemodsettings.h"
 
 class DeviceSourceAPI;
@@ -183,8 +182,8 @@ private:
 
 	void processOneSample(Complex &ci)
 	{
-	    Real re = ci.real() / SDR_RX_SCALED;
-	    Real im = ci.imag() / SDR_RX_SCALED;
+	    Real re = ci.real() / SDR_RX_SCALEF;
+	    Real im = ci.imag() / SDR_RX_SCALEF;
         Real magsq = re*re + im*im;
         m_movingAverage(magsq);
         m_magsq = m_movingAverage.asDouble();
@@ -197,43 +196,28 @@ private:
 
         m_magsqCount++;
 
-//        if (m_magsq >= m_squelchLevel)
-//        {
-//            if (m_squelchCount <= m_audioSampleRate / 10)
-//            {
-//                m_squelchCount++;
-//            }
-//        }
-//        else
-//        {
-//            if (m_squelchCount > 1)
-//            {
-//                m_squelchCount -= 2;
-//            }
-//        }
+        m_squelchDelayLine.write(magsq);
 
-        if (m_magsq >= m_squelchLevel)
-        {
-            if (m_squelchCount < m_audioSampleRate / 10) {
-                m_squelchCount++;
-            }
-
-            m_squelchDelayLine.write(magsq);
-        }
-        else
+        if (m_magsq < m_squelchLevel)
         {
             if (m_squelchCount > 0) {
                 m_squelchCount--;
             }
-
-            m_squelchDelayLine.write(0);
+        }
+        else
+        {
+            if (m_squelchCount < m_audioSampleRate / 10) {
+                m_squelchCount++;
+            }
         }
 
         qint16 sample;
 
-        if ((m_squelchCount >= m_audioSampleRate / 20) && !m_settings.m_audioMute)
+        m_squelchOpen = (m_squelchCount >= m_audioSampleRate / 20);
+
+        if (m_squelchOpen && !m_settings.m_audioMute)
         {
-            Real demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate / 20));
+            Real demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate/20));
             m_volumeAGC.feed(demod);
             demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
 
@@ -245,12 +229,10 @@ private:
 
             Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
             sample = demod * attack * (m_audioSampleRate/24) * m_settings.m_volume;
-            m_squelchOpen = true;
         }
         else
         {
             sample = 0;
-            m_squelchOpen = false;
         }
 
         m_audioBuffer[m_audioBufferFill].l = sample;
