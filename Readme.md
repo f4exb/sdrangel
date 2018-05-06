@@ -289,9 +289,12 @@ Since apt-get v 1.1 installation is possible from a local file:
 
   - cd to where the archive has been downloaded
   - `sudo apt-get install ./sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number 
+  - `sudo apt-get -f install` this will install missing dependencies
     
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
+
+**&#9888;** The udev rules are not set by the package installation so you will have to set it manually in order to be able to access the various SDR hardware. The `udev-rules` folder contains the rules file and the `install.sh` script that you can run as sudo to install all rules files. You may also adapt the script to copy only the required files.
   
 <h2>Windows distribution</h2>
 
