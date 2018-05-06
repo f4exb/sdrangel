@@ -53,10 +53,9 @@ DeviceUISet::DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer)
 
     // m_spectrum needs to have its font to be set since it cannot be inherited from the main window
     QFont font;
-    font.setFamily(QStringLiteral("Sans Serif"));
+    font.setFamily(QStringLiteral("Liberation Sans"));
     font.setPointSize(9);
     m_spectrum->setFont(font);
-
 }
 
 DeviceUISet::~DeviceUISet()
