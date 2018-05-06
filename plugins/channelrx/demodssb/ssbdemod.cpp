@@ -220,7 +220,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			}
 			else
 			{
-			    fftfilt::cmplx z = delayedSample * m_agc.getStepDownValue();
+			    fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
 
 				if (m_audioBinaual)
 				{
@@ -405,7 +405,7 @@ void SSBDemod::applyAudioSampleRate(int sampleRate)
 
     if (m_agcNbSamples != agcNbSamples)
     {
-        m_agc.resize(agcNbSamples, agcTarget);
+        m_agc.resize(agcNbSamples, std::min(sampleRate/20, agcNbSamples/2), agcTarget);
         m_agc.setStepDownDelay(agcNbSamples);
         m_agcNbSamples = agcNbSamples;
     }
@@ -503,7 +503,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         if (m_agcNbSamples != agcNbSamples)
         {
             m_settingsMutex.lock();
-            m_agc.resize(agcNbSamples, agcTarget);
+            m_agc.resize(agcNbSamples, std::min((int)m_audioSampleRate/20, agcNbSamples/2), agcTarget);
             m_agc.setStepDownDelay(agcNbSamples);
             m_agcNbSamples = agcNbSamples;
             m_settingsMutex.unlock();

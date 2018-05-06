@@ -309,6 +309,7 @@ private:
     CWKeyer m_cwKeyer;
 
     MagAGC m_inAGC;
+    int m_agcStepLength;
 
     static const int m_levelNbSamples;
 

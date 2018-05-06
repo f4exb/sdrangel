@@ -68,7 +68,8 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-	m_inAGC(9600, 0.2, 1e-4)
+	m_inAGC(9600, 0.2, 1e-4),
+	m_agcStepLength(2400)
 {
 	setObjectName(m_channelId);
 
@@ -690,6 +691,8 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
 
+    m_agcStepLength = std::min(sampleRate/20, m_settings.m_agcTime/2); // 50 ms or half the AGC length whichever is smaller
+
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -796,7 +799,7 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         (settings.m_agcOrder != m_settings.m_agcOrder) || force)
     {
         m_settingsMutex.lock();
-        m_inAGC.resize(settings.m_agcTime, settings.m_agcOrder);
+        m_inAGC.resize(settings.m_agcTime, m_agcStepLength, settings.m_agcOrder);
         m_settingsMutex.unlock();
     }
 

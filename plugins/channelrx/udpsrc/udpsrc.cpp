@@ -524,7 +524,7 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
 
         m_squelchRelease = (settings.m_outputSampleRate * settings.m_squelchGate) / 100;
         initSquelch(m_squelchOpen);
-        m_agc.resize(settings.m_outputSampleRate * 0.2, m_agcTarget); // Fixed 200 ms
+        m_agc.resize(settings.m_outputSampleRate/5, settings.m_outputSampleRate/20, m_agcTarget); // Fixed 200 ms
         int stepDownDelay =  (settings.m_outputSampleRate * (settings.m_squelchGate == 0 ? 1 : settings.m_squelchGate))/100;
         m_agc.setStepDownDelay(stepDownDelay);
         m_agc.setGate(settings.m_outputSampleRate * 0.05);
