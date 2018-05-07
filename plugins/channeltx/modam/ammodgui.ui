@@ -56,16 +56,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -361,6 +352,7 @@
         <property name="font">
          <font>
           <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="toolTip">
