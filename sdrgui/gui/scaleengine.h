@@ -62,7 +62,7 @@ private:
 	void calcCharSize();
 	void calcScaleFactor();
 	double calcMajorTickUnits(double distance, int* retDecimalPlaces);
-	int calcTickTextSize();
+	int calcTickTextSize(double distance);
 	void forceTwoTicks();
 	void reCalc();
 

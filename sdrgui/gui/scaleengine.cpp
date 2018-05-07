@@ -281,7 +281,7 @@ double ScaleEngine::calcMajorTickUnits(double distance, int* retDecimalPlaces)
 	return sign * base * pow(10.0, exponent);
 }
 
-int ScaleEngine::calcTickTextSize()
+int ScaleEngine::calcTickTextSize(double distance)
 {
 	int tmp;
 	int tickLen;
@@ -295,7 +295,7 @@ int ScaleEngine::calcTickTextSize()
 	if(tmp > tickLen)
 		tickLen = tmp;
 
-	calcMajorTickUnits((m_rangeMax - m_rangeMin) / m_scale, &decimalPlaces);
+	calcMajorTickUnits(distance, &decimalPlaces);
 
 	return tickLen + decimalPlaces + 1;
 }
@@ -356,21 +356,24 @@ void ScaleEngine::reCalc()
 	rangeMinScaled = m_rangeMin / m_scale;
 	rangeMaxScaled = m_rangeMax / m_scale;
 
-	if(m_orientation == Qt::Vertical) {
+	if(m_orientation == Qt::Vertical)
+	{
 		maxNumMajorTicks = (int)(m_size / (fontMetrics.lineSpacing() * 1.3f));
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
 	}
 	else
 	{
-		majorTickSize = (calcTickTextSize() + 2) * m_charSize * 1.2f;
+		majorTickSize = (calcTickTextSize((rangeMaxScaled - rangeMinScaled) / 20) + 2) * m_charSize;
 
 		if(majorTickSize != 0.0) {
 		    maxNumMajorTicks = (int)(m_size / majorTickSize);
 		} else {
 		    maxNumMajorTicks = 20;
 		}
+
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
 	}
 
-	m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
 	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
 
 	if(numMajorTicks == 0) {
