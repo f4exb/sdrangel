@@ -297,7 +297,7 @@ int ScaleEngine::calcTickTextSize()
 
 	calcMajorTickUnits((m_rangeMax - m_rangeMin) / m_scale, &decimalPlaces);
 
-	return tickLen + decimalPlaces + 2;
+	return tickLen + decimalPlaces + 1;
 }
 
 void ScaleEngine::forceTwoTicks()
@@ -358,11 +358,16 @@ void ScaleEngine::reCalc()
 
 	if(m_orientation == Qt::Vertical) {
 		maxNumMajorTicks = (int)(m_size / (fontMetrics.lineSpacing() * 1.3f));
-	} else {
-		majorTickSize = (calcTickTextSize() + 2) * m_charSize;
-		if(majorTickSize != 0.0)
-			maxNumMajorTicks = (int)(m_size / majorTickSize);
-			else maxNumMajorTicks = 20;
+	}
+	else
+	{
+		majorTickSize = (calcTickTextSize() + 2) * m_charSize * 1.2f;
+
+		if(majorTickSize != 0.0) {
+		    maxNumMajorTicks = (int)(m_size / majorTickSize);
+		} else {
+		    maxNumMajorTicks = 20;
+		}
 	}
 
 	m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
