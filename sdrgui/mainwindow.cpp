@@ -27,6 +27,7 @@
 #include <QSysInfo>
 #include <QKeyEvent>
 #include <QResource>
+#include <QFontDatabase>
 
 #include <plugin/plugininstancegui.h>
 #include <plugin/plugininstancegui.h>
@@ -100,6 +101,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     m_instance = this;
 	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+
+    QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
+
+    QFont font("Liberation Sans");
+    font.setPointSize(9);
+    qApp->setFont(font);
 
 	ui->setupUi(this);
 	createStatusBar();
