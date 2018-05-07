@@ -201,14 +201,14 @@ void LevelMeterVU::resized()
         {
             if ((tick.textSize > 0) && (tick.textPos > 0))
             {
-                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 2, bar.height()/2), tick.text);
+                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 4, bar.height()/2 - 3), tick.text);
             }
 
             painter.drawLine(shiftx(tick.pos, bar.width()), 0, shiftx(scaleTickList[i].pos, bar.width()), bar.height());
         }
         else
         {
-            painter.drawLine(tick.pos, bar.height()/4, scaleTickList[i].pos, bar.height()/2);
+            painter.drawLine(tick.pos, bar.height()/2 - 2, scaleTickList[i].pos, bar.height()/2);
         }
     }
 }
@@ -324,14 +324,14 @@ void LevelMeterSignalDB::resized()
         {
             if ((tick.textSize > 0) && (tick.textPos > 0))
             {
-                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 4, bar.height()/2 - 1), tick.text);
+                painter.drawText(QPointF(tick.textPos - (tick.textSize/2) - 4, bar.height()/2 - 3), tick.text);
             }
 
             painter.drawLine(shiftx(tick.pos, bar.width()), 0, shiftx(scaleTickList[i].pos,bar.width()), bar.height());
         }
         else
         {
-            painter.drawLine(tick.pos, bar.height()/4, scaleTickList[i].pos, bar.height()/2);
+            painter.drawLine(tick.pos, bar.height()/2 - 2, scaleTickList[i].pos, bar.height()/2);
         }
     }
 }
