@@ -24,12 +24,7 @@
 #define INCLUDE_GPL_DSP_DECIMATORSU_H_
 
 #include "dsp/dsptypes.h"
-
-#ifdef SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfiltereo2.h"
-#else // SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfiltereo1.h"
-#endif // SDR_RX_SAMPLE_24BIT
+#include "dsp/inthalfbandfiltereo.h"
 
 #define DECIMATORS_HB_FILTER_ORDER 64
 
@@ -204,19 +199,19 @@ public:
 
 private:
 #ifdef SDR_RX_SAMPLE_24BIT
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-	IntHalfbandFilterEO2<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+	IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 #else
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
-    IntHalfbandFilterEO1<DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator2;  // 1st stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator16; // 4th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator32; // 5th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER> m_decimator64; // 6th stages
 #endif
 };
 

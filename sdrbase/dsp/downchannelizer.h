@@ -23,12 +23,7 @@
 #include <QMutex>
 #include "export.h"
 #include "util/message.h"
-
-#ifdef SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfiltereo2.h"
-#else // SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfiltereo1.h"
-#endif // SDR_RX_SAMPLE_24BIT
+#include "dsp/inthalfbandfiltereo.h"
 
 #define DOWNCHANNELIZER_HB_FILTER_ORDER 48
 
@@ -81,11 +76,11 @@ protected:
 		};
 
 #ifdef SDR_RX_SAMPLE_24BIT
-        typedef bool (IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-        IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+        IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else
-        typedef bool (IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-        IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+        IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #endif
 
 		WorkFunction m_workFunction;

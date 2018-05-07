@@ -190,43 +190,43 @@ void DownChannelizer::applyConfiguration()
 
 #ifdef SDR_RX_SAMPLE_24BIT
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>),
+    m_filter(new IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),
     m_mode(mode),
     m_sse(true)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterEO2<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
             break;
     }
 }
 #else
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>),
+    m_filter(new IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),
     m_mode(mode),
     m_sse(true)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
             break;
     }
 }
