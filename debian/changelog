@@ -1,3 +1,9 @@
+sdrangel (3.14.6-1) unstable; urgency=medium
+
+  * Fixed keyboard input for negative values on realtive integer value dials
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 May 2018 20:14:18 +0200
+
 sdrangel (3.14.5-1) unstable; urgency=medium
 
   * DSD demod: allow audio rates integer multiples of 8k other than 48k
