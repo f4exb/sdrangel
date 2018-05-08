@@ -49,10 +49,7 @@ FCDProInput::FCDProInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 }
 

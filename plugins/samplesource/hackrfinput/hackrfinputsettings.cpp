@@ -40,6 +40,7 @@ void HackRFInputSettings::resetToDefaults()
 	m_iqCorrection = false;
 	m_devSampleRate = 2400000;
 	m_linkTxFrequency = false;
+	m_fileRecordName = "";
 }
 
 QByteArray HackRFInputSettings::serialize() const

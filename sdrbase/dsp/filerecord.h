@@ -23,12 +23,12 @@ public:
     };
 
 	FileRecord();
-    FileRecord(const std::string& filename);
+    FileRecord(const QString& filename);
 	virtual ~FileRecord();
 
     quint64 getByteCount() const { return m_byteCount; }
 
-    void setFileName(const std::string& filename);
+    void setFileName(const QString& filename);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -39,7 +39,7 @@ public:
     static void readHeader(std::ifstream& samplefile, Header& header);
 
 private:
-	std::string m_fileName;
+	QString m_fileName;
 	qint32 m_sampleRate;
 	quint64 m_centerFrequency;
 	bool m_recordOn;
@@ -47,7 +47,7 @@ private:
     std::ofstream m_sampleFile;
     quint64 m_byteCount;
 
-	void handleConfigure(const std::string& fileName);
+	void handleConfigure(const QString& fileName);
     void writeHeader();
 };
 

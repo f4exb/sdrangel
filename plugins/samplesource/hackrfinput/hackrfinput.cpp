@@ -49,9 +49,7 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
 
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
@@ -260,9 +258,18 @@ bool HackRFInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "HackRFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->setFileName(QString("rec_%1_%2.sdriq").arg(m_deviceAPI->getDeviceUID()).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddThh:mm:ss")));
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
