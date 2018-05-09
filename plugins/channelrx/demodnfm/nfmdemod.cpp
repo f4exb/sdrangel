@@ -224,14 +224,14 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 }
             }
 
+            m_squelchOpen = (m_squelchCount > m_squelchGate);
+
             if (m_settings.m_audioMute)
             {
                 sample = 0;
             }
             else
             {
-                m_squelchOpen = (m_squelchCount > m_squelchGate);
-
                 if (m_squelchOpen)
                 {
                     if (m_settings.m_ctcssOn)
