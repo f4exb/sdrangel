@@ -39,6 +39,7 @@ void RTLSDRSettings::resetToDefaults()
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
 	m_rfBandwidth = 2500 * 1000; // Hz
+	m_fileRecordName = "";
 }
 
 QByteArray RTLSDRSettings::serialize() const

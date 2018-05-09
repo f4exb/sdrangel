@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUTSETTINGS_H_
 
 #include <QByteArray>
+#include <QString>
 #include <stdint.h>
 
 /**
@@ -64,6 +65,7 @@ struct LimeSDRInputSettings
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
+    QString  m_fileRecordName;
 
     LimeSDRInputSettings();
     void resetToDefaults();

@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <QByteArray>
+#include <QString>
 #include <QDebug>
 
 struct SDRPlaySettings {
@@ -43,6 +44,7 @@ struct SDRPlaySettings {
 	bool m_lnaOn;
 	bool m_mixerAmpOn;
 	int  m_basebandGain;
+    QString m_fileRecordName;
 
 	SDRPlaySettings();
 	void resetToDefaults();

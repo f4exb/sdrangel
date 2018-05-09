@@ -18,6 +18,7 @@
 #define _BLADERF_BLADERFINPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
 #include <libbladeRF.h>
 
 struct BladeRFInputSettings {
@@ -40,6 +41,7 @@ struct BladeRFInputSettings {
 	bladerf_xb200_filter m_xb200Filter;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	QString m_fileRecordName;
 
 	BladeRFInputSettings();
 	void resetToDefaults();

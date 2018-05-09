@@ -36,6 +36,7 @@ void SDRdaemonSourceSettings::resetToDefaults()
     m_dcBlock = false;
     m_iqCorrection = false;
     m_fcPos = 2; // center
+    m_fileRecordName = "";
 }
 
 QByteArray SDRdaemonSourceSettings::serialize() const

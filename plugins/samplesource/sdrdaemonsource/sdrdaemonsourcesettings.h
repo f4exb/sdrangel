@@ -33,6 +33,7 @@ struct SDRdaemonSourceSettings {
     bool    m_dcBlock;
     bool    m_iqCorrection;
     quint32 m_fcPos;
+    QString m_fileRecordName;
 
     SDRdaemonSourceSettings();
     void resetToDefaults();

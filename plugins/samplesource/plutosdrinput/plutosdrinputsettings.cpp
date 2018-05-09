@@ -44,6 +44,7 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_gainMode = GAIN_MANUAL;
 	m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
+	m_fileRecordName = "";
 }
 
 QByteArray PlutoSDRInputSettings::serialize() const

@@ -45,6 +45,7 @@ void LimeSDRInputSettings::resetToDefaults()
     m_extClockFreq = 10000000; // 10 MHz
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_fileRecordName = "";
 }
 
 QByteArray LimeSDRInputSettings::serialize() const

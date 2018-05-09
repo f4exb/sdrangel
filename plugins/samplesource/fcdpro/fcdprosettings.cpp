@@ -47,6 +47,7 @@ void FCDProSettings::resetToDefaults()
 	m_gain6Index = 0;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_fileRecordName = "";
 }
 
 QByteArray FCDProSettings::serialize() const

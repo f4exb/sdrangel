@@ -40,6 +40,7 @@ void BladeRFInputSettings::resetToDefaults()
 	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+	m_fileRecordName = "";
 }
 
 QByteArray BladeRFInputSettings::serialize() const

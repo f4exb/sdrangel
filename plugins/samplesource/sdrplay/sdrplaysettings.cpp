@@ -41,6 +41,7 @@ void SDRPlaySettings::resetToDefaults()
     m_lnaOn = false;
     m_mixerAmpOn = false;
     m_basebandGain = 29;
+    m_fileRecordName = "";
 }
 
 QByteArray SDRPlaySettings::serialize() const

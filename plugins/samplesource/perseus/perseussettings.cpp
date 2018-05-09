@@ -35,6 +35,7 @@ void PerseusSettings::resetToDefaults()
     m_adcPreamp = false;
     m_wideBand = false;
     m_attenuator = Attenuator_None;
+    m_fileRecordName = "";
 }
 
 QByteArray PerseusSettings::serialize() const

@@ -17,6 +17,8 @@
 #ifndef _FCDPRO_FCDPROSETTINGS_H_
 #define _FCDPRO_FCDPROSETTINGS_H_
 
+#include <QString>
+
 struct FCDProSettings {
 	quint64 m_centerFrequency;
 	qint32 m_LOppmTenths;
@@ -40,6 +42,7 @@ struct FCDProSettings {
 	bool m_iqCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    QString m_fileRecordName;
 
 	FCDProSettings();
 	void resetToDefaults();

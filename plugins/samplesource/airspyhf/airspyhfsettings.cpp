@@ -33,6 +33,7 @@ void AirspyHFSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_bandIndex = 0;
+    m_fileRecordName = "";
 }
 
 QByteArray AirspyHFSettings::serialize() const

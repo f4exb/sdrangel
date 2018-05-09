@@ -41,6 +41,7 @@ void TestSourceSettings::resetToDefaults()
     m_iFactor = 0.0f;
     m_qFactor = 0.0f;
     m_phaseImbalance = 0.0f;
+    m_fileRecordName = "";
 }
 
 QByteArray TestSourceSettings::serialize() const

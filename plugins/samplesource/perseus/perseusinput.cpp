@@ -192,9 +192,18 @@ bool PerseusInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "PerseusInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->setFileName(QString("rec%1_%2.sdriq").arg(m_deviceAPI->getDeviceUID()).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddThh:mm:ss")));
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
