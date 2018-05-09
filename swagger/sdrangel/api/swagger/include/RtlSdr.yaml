@@ -31,4 +31,6 @@ RtlSdrSettings:
       format: int64      
     rfBandwidth:
       type: integer
+    fileRecordName:
+      type: string
     

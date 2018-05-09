@@ -1337,6 +1337,9 @@ int LimeSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getLimeSdrInputSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getLimeSdrInputSettings()->getFileRecordName();
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1374,6 +1377,12 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getLimeSdrInputSettings()->setTiaGain(settings.m_tiaGain);
     response.getLimeSdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getLimeSdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    if (response.getLimeSdrInputSettings()->getFileRecordName()) {
+        *response.getLimeSdrInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getLimeSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int LimeSDRInput::webapiRunGet(

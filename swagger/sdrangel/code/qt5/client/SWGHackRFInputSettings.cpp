@@ -54,6 +54,8 @@ SWGHackRFInputSettings::SWGHackRFInputSettings() {
     m_iq_correction_isSet = false;
     link_tx_frequency = 0;
     m_link_tx_frequency_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
 }
 
 SWGHackRFInputSettings::~SWGHackRFInputSettings() {
@@ -88,6 +90,8 @@ SWGHackRFInputSettings::init() {
     m_iq_correction_isSet = false;
     link_tx_frequency = 0;
     m_link_tx_frequency_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
 }
 
 void
@@ -105,6 +109,9 @@ SWGHackRFInputSettings::cleanup() {
 
 
 
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
 }
 
 SWGHackRFInputSettings*
@@ -143,6 +150,8 @@ SWGHackRFInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
     ::SWGSDRangel::setValue(&link_tx_frequency, pJson["linkTxFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
 }
 
@@ -198,6 +207,9 @@ SWGHackRFInputSettings::asJsonObject() {
     }
     if(m_link_tx_frequency_isSet){
         obj->insert("linkTxFrequency", QJsonValue(link_tx_frequency));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
 
     return obj;
@@ -333,6 +345,16 @@ SWGHackRFInputSettings::setLinkTxFrequency(qint32 link_tx_frequency) {
     this->m_link_tx_frequency_isSet = true;
 }
 
+QString*
+SWGHackRFInputSettings::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGHackRFInputSettings::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
 
 bool
 SWGHackRFInputSettings::isSet(){
@@ -351,6 +373,7 @@ SWGHackRFInputSettings::isSet(){
         if(m_dc_block_isSet){ isObjectUpdated = true; break;}
         if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
         if(m_link_tx_frequency_isSet){ isObjectUpdated = true; break;}
+        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

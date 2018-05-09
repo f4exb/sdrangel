@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -104,6 +105,9 @@ public:
     qint64 getTransverterDeltaFrequency();
     void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
 
     virtual bool isSet() override;
 
@@ -170,6 +174,9 @@ private:
 
     qint64 transverter_delta_frequency;
     bool m_transverter_delta_frequency_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
 };
 

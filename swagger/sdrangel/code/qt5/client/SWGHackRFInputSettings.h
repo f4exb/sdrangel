@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -80,6 +81,9 @@ public:
     qint32 getLinkTxFrequency();
     void setLinkTxFrequency(qint32 link_tx_frequency);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
 
     virtual bool isSet() override;
 
@@ -122,6 +126,9 @@ private:
 
     qint32 link_tx_frequency;
     bool m_link_tx_frequency_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
 };
 

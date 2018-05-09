@@ -527,6 +527,9 @@ int AirspyHFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("bandIndex")) {
         settings.m_bandIndex = response.getAirspyHfSettings()->getBandIndex() != 0;
     }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getAirspyHfSettings()->getFileRecordName();
+    }
 
     MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -550,6 +553,12 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getAirspyHfSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAirspyHfSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getAirspyHfSettings()->setBandIndex(settings.m_bandIndex ? 1 : 0);
+
+    if (response.getAirspyHfSettings()->getFileRecordName()) {
+        *response.getAirspyHfSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getAirspyHfSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int AirspyHFInput::webapiRunGet(

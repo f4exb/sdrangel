@@ -602,6 +602,9 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("linkTxFrequency")) {
         settings.m_linkTxFrequency = response.getHackRfInputSettings()->getLinkTxFrequency() != 0;
     }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getHackRfInputSettings()->getFileRecordName();
+    }
 
     MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -631,6 +634,12 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getHackRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getHackRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getHackRfInputSettings()->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
+
+    if (response.getHackRfInputSettings()->getFileRecordName()) {
+        *response.getHackRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getHackRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int HackRFInput::webapiRunGet(

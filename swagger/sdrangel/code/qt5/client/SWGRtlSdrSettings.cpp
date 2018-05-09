@@ -56,6 +56,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_transverter_delta_frequency_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
 }
 
 SWGRtlSdrSettings::~SWGRtlSdrSettings() {
@@ -92,6 +94,8 @@ SWGRtlSdrSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
 }
 
 void
@@ -110,6 +114,9 @@ SWGRtlSdrSettings::cleanup() {
 
 
 
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
 }
 
 SWGRtlSdrSettings*
@@ -150,6 +157,8 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
 }
 
@@ -208,6 +217,9 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
 
     return obj;
@@ -353,6 +365,16 @@ SWGRtlSdrSettings::setRfBandwidth(qint32 rf_bandwidth) {
     this->m_rf_bandwidth_isSet = true;
 }
 
+QString*
+SWGRtlSdrSettings::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGRtlSdrSettings::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
 
 bool
 SWGRtlSdrSettings::isSet(){
@@ -372,6 +394,7 @@ SWGRtlSdrSettings::isSet(){
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
+        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

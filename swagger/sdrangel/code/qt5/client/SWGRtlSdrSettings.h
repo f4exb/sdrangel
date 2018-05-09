@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -83,6 +84,9 @@ public:
     qint32 getRfBandwidth();
     void setRfBandwidth(qint32 rf_bandwidth);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
 
     virtual bool isSet() override;
 
@@ -128,6 +132,9 @@ private:
 
     qint32 rf_bandwidth;
     bool m_rf_bandwidth_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
 };
 

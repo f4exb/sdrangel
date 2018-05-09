@@ -639,6 +639,12 @@ void BladerfInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getBladeRfInputSettings()->setXb200Filter((int) settings.m_xb200Filter);
     response.getBladeRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getBladeRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+
+    if (response.getBladeRfInputSettings()->getFileRecordName()) {
+        *response.getBladeRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getBladeRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int BladerfInput::webapiSettingsPutPatch(
@@ -687,6 +693,9 @@ int BladerfInput::webapiSettingsPutPatch(
     }
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getBladeRfInputSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getBladeRfInputSettings()->getFileRecordName();
     }
 
     MsgConfigureBladerf *msg = MsgConfigureBladerf::create(settings, force);

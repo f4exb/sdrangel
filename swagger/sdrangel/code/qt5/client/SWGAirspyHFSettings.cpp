@@ -42,6 +42,8 @@ SWGAirspyHFSettings::SWGAirspyHFSettings() {
     m_transverter_delta_frequency_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
 }
 
 SWGAirspyHFSettings::~SWGAirspyHFSettings() {
@@ -64,6 +66,8 @@ SWGAirspyHFSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
 }
 
 void
@@ -75,6 +79,9 @@ SWGAirspyHFSettings::cleanup() {
 
 
 
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
 }
 
 SWGAirspyHFSettings*
@@ -101,6 +108,8 @@ SWGAirspyHFSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&band_index, pJson["bandIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
 }
 
@@ -138,6 +147,9 @@ SWGAirspyHFSettings::asJsonObject() {
     }
     if(m_band_index_isSet){
         obj->insert("bandIndex", QJsonValue(band_index));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
 
     return obj;
@@ -213,6 +225,16 @@ SWGAirspyHFSettings::setBandIndex(qint32 band_index) {
     this->m_band_index_isSet = true;
 }
 
+QString*
+SWGAirspyHFSettings::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGAirspyHFSettings::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
 
 bool
 SWGAirspyHFSettings::isSet(){
@@ -225,6 +247,7 @@ SWGAirspyHFSettings::isSet(){
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_band_index_isSet){ isObjectUpdated = true; break;}
+        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

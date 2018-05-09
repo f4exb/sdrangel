@@ -70,6 +70,8 @@ SWGLimeSdrInputSettings::SWGLimeSdrInputSettings() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
 }
 
 SWGLimeSdrInputSettings::~SWGLimeSdrInputSettings() {
@@ -120,6 +122,8 @@ SWGLimeSdrInputSettings::init() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
 }
 
 void
@@ -145,6 +149,9 @@ SWGLimeSdrInputSettings::cleanup() {
 
 
 
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
 }
 
 SWGLimeSdrInputSettings*
@@ -199,6 +206,8 @@ SWGLimeSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
 }
 
@@ -278,6 +287,9 @@ SWGLimeSdrInputSettings::asJsonObject() {
     }
     if(m_transverter_delta_frequency_isSet){
         obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
 
     return obj;
@@ -493,6 +505,16 @@ SWGLimeSdrInputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_f
     this->m_transverter_delta_frequency_isSet = true;
 }
 
+QString*
+SWGLimeSdrInputSettings::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGLimeSdrInputSettings::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
 
 bool
 SWGLimeSdrInputSettings::isSet(){
@@ -519,6 +541,7 @@ SWGLimeSdrInputSettings::isSet(){
         if(m_ext_clock_freq_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
+        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

@@ -54,6 +54,8 @@ SWGBladeRFInputSettings::SWGBladeRFInputSettings() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
 }
 
 SWGBladeRFInputSettings::~SWGBladeRFInputSettings() {
@@ -88,6 +90,8 @@ SWGBladeRFInputSettings::init() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
 }
 
 void
@@ -105,6 +109,9 @@ SWGBladeRFInputSettings::cleanup() {
 
 
 
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
 }
 
 SWGBladeRFInputSettings*
@@ -143,6 +150,8 @@ SWGBladeRFInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
 }
 
@@ -198,6 +207,9 @@ SWGBladeRFInputSettings::asJsonObject() {
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
 
     return obj;
@@ -333,6 +345,16 @@ SWGBladeRFInputSettings::setIqCorrection(qint32 iq_correction) {
     this->m_iq_correction_isSet = true;
 }
 
+QString*
+SWGBladeRFInputSettings::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGBladeRFInputSettings::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
 
 bool
 SWGBladeRFInputSettings::isSet(){
@@ -351,6 +373,7 @@ SWGBladeRFInputSettings::isSet(){
         if(m_xb200_filter_isSet){ isObjectUpdated = true; break;}
         if(m_dc_block_isSet){ isObjectUpdated = true; break;}
         if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
+        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

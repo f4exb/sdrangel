@@ -608,6 +608,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getRtlSdrSettings()->getRfBandwidth() != 0;
     }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
+    }
 
     MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -638,6 +641,12 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
+
+    if (response.getRtlSdrSettings()->getFileRecordName()) {
+        *response.getRtlSdrSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getRtlSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int RTLSDRInput::webapiRunGet(

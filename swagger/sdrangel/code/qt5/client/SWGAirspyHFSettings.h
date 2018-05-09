@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -62,6 +63,9 @@ public:
     qint32 getBandIndex();
     void setBandIndex(qint32 band_index);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
 
     virtual bool isSet() override;
 
@@ -86,6 +90,9 @@ private:
 
     qint32 band_index;
     bool m_band_index_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
 };
 

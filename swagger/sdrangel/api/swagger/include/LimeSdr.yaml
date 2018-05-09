@@ -45,6 +45,8 @@ LimeSdrInputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64      
+    fileRecordName:
+      type: string
       
 LimeSdrOutputSettings:
   description: LimeSDR
