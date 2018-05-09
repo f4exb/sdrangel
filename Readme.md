@@ -295,6 +295,10 @@ The software is installed in `/opt/sdrangel` you can start it from the command l
   - `/opt/sdrangel/bin/sdrangel`
 
 **&#9888;** The udev rules are not set by the package installation so you will have to set it manually in order to be able to access the various SDR hardware. The `udev-rules` folder contains the rules file and the `install.sh` script that you can run as sudo to install all rules files. You may also adapt the script to copy only the required files.
+ 
+<h3>Ubuntu 18.04</h2>
+
+The default CPU governor is now `powersave` which exhibits excessive CPU usage when running SDRangel. In the case of benchmarking and maybe high throughput usage it is recommended to switch to `performance` before running SDRangel by running the command: `sudo cpupower frequency-set --governor performance`. You can turn it back to `powersave` any time by running: `sudo cpupower frequency-set --governor powersave`. It is normal that with a lower CPU frequency the relative CPU usage rises for the same actual load. If not impairing operation this is normal and overall beneficial for heat and power consumption.
   
 <h2>Windows distribution</h2>
 
