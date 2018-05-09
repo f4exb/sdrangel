@@ -49,6 +49,10 @@ void MainBench::run()
 
     if (m_parser.getTestType() == ParserBench::TestDecimatorsII) {
         testDecimateII();
+    } else if (m_parser.getTestType() == ParserBench::TestDecimatorsInfII) {
+        testDecimateII(ParserBench::TestDecimatorsInfII);
+    } else if (m_parser.getTestType() == ParserBench::TestDecimatorsSupII) {
+        testDecimateII(ParserBench::TestDecimatorsSupII);
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsIF) {
         testDecimateIF();
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFI) {
@@ -62,7 +66,7 @@ void MainBench::run()
     emit finished();
 }
 
-void MainBench::testDecimateII()
+void MainBench::testDecimateII(ParserBench::TestType testType)
 {
     QElapsedTimer timer;
     qint64 nsecs = 0;
@@ -78,9 +82,25 @@ void MainBench::testDecimateII()
 
     for (uint32_t i = 0; i < m_parser.getRepetition(); i++)
     {
-        timer.start();
-        decimateII(buf, m_parser.getNbSamples()*2);
-        nsecs += timer.nsecsElapsed();
+        switch (testType)
+        {
+        case ParserBench::TestDecimatorsInfII:
+            timer.start();
+            decimateInfII(buf, m_parser.getNbSamples()*2);
+            nsecs += timer.nsecsElapsed();
+            break;
+        case ParserBench::TestDecimatorsSupII:
+            timer.start();
+            decimateSupII(buf, m_parser.getNbSamples()*2);
+            nsecs += timer.nsecsElapsed();
+            break;
+        case ParserBench::TestDecimatorsII:
+        default:
+            timer.start();
+            decimateII(buf, m_parser.getNbSamples()*2);
+            nsecs += timer.nsecsElapsed();
+            break;
+        }
     }
 
     printResults("MainBench::testDecimateII", nsecs);
@@ -196,6 +216,70 @@ void MainBench::decimateII(const qint16* buf, int len)
         break;
     case 6:
         m_decimatorsII.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainBench::decimateInfII(const qint16* buf, int len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_parser.getLog2Factor())
+    {
+    case 0:
+        m_decimatorsII.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsII.decimate2_inf(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsII.decimate4_inf(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsII.decimate8_inf(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsII.decimate16_inf(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsII.decimate32_inf(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsII.decimate64_inf(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainBench::decimateSupII(const qint16* buf, int len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_parser.getLog2Factor())
+    {
+    case 0:
+        m_decimatorsII.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsII.decimate2_sup(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsII.decimate4_sup(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsII.decimate8_sup(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsII.decimate16_sup(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsII.decimate32_sup(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsII.decimate64_sup(&it, buf, len);
         break;
     default:
         break;

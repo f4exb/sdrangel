@@ -77,7 +77,7 @@ bool NFMDemodGUI::handleMessage(const Message& message)
 {
     if (NFMDemod::MsgReportCTCSSFreq::match(message))
     {
-        qDebug("NFMDemodGUI::handleMessage: NFMDemod::MsgReportCTCSSFreq");
+        //qDebug("NFMDemodGUI::handleMessage: NFMDemod::MsgReportCTCSSFreq");
         NFMDemod::MsgReportCTCSSFreq& report = (NFMDemod::MsgReportCTCSSFreq&) message;
         setCtcssFreq(report.getFrequency());
         //qDebug("NFMDemodGUI::handleMessage: MsgReportCTCSSFreq: %f", report.getFrequency());

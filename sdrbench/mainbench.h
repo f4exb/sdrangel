@@ -47,11 +47,13 @@ signals:
     void finished();
 
 private:
-    void testDecimateII();
+    void testDecimateII(ParserBench::TestType testType = ParserBench::TestDecimatorsII);
     void testDecimateIF();
     void testDecimateFI();
     void testDecimateFF();
     void decimateII(const qint16 *buf, int len);
+    void decimateInfII(const qint16 *buf, int len);
+    void decimateSupII(const qint16 *buf, int len);
     void decimateIF(const qint16 *buf, int len);
     void decimateFI(const float *buf, int len);
     void decimateFF(const float *buf, int len);

@@ -29,7 +29,9 @@ public:
         TestDecimatorsII,
         TestDecimatorsIF,
         TestDecimatorsFI,
-        TestDecimatorsFF
+        TestDecimatorsFF,
+        TestDecimatorsInfII,
+        TestDecimatorsSupII
     } TestType;
 
     ParserBench();
