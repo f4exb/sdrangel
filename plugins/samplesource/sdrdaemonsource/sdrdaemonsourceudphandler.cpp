@@ -96,7 +96,7 @@ void SDRdaemonSourceUDPHandler::start()
 
     if (!m_dataConnected)
 	{
-        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
+        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); //, Qt::QueuedConnection);
 
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
