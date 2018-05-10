@@ -24,7 +24,6 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-#include <QFileDialog>
 
 #ifdef _WIN32
 #include <nn.h>

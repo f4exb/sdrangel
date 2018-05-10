@@ -251,7 +251,7 @@ void AMModGUI::on_navTimeSlider_valueChanged(int value)
 void AMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {

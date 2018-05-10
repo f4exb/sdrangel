@@ -1260,7 +1260,7 @@ void MainWindow::on_presetExport_clicked()
 			const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
 			QString base64Str = preset->serialize().toBase64();
 			QString fileName = QFileDialog::getSaveFileName(this,
-			    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"));
+			    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
 
 			if (fileName != "")
 			{
@@ -1304,7 +1304,7 @@ void MainWindow::on_presetImport_clicked()
 		}
 
 		QString fileName = QFileDialog::getOpenFileName(this,
-		    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"));
+		    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
 
 		if (fileName != "")
 		{

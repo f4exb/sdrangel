@@ -287,7 +287,7 @@ void FileSinkGui::on_startStop_toggled(bool checked)
 void FileSinkGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+        tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName != "")
 	{

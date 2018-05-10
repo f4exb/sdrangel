@@ -285,7 +285,7 @@ void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName != "")
 	{

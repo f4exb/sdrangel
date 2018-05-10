@@ -19,7 +19,6 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-#include <QFileDialog>
 #include <QMessageBox>
 
 #include "ui_testsourcegui.h"

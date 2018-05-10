@@ -497,7 +497,7 @@ void ATVModGUI::on_forceDecimator_toggled(bool checked)
 void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"));
+        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -510,7 +510,7 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
 void ATVModGUI::on_videoFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"));
+        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {

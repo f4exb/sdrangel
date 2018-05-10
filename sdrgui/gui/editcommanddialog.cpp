@@ -142,7 +142,7 @@ void EditCommandDialog::on_showFileDialog_clicked(bool checked __attribute__((un
             this,
             tr("Select command"),
             dirStr,
-            tr("All (*);;Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe)"));
+            tr("All (*);;Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "") {
         ui->command->setText(fileName);

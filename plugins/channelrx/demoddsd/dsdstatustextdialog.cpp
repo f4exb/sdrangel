@@ -60,7 +60,7 @@ void DSDStatusTextDialog::on_clear_clicked()
 void DSDStatusTextDialog::on_saveLog_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                    tr("Open log file"), ".", tr("Log files (*.log)"));
+                    tr("Open log file"), ".", tr("Log files (*.log)"),  0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
