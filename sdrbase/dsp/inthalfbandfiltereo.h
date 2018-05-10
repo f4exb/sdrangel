@@ -572,6 +572,23 @@ public:
         advancePointer();
     }
 
+    void myDecimateCen(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2, int32_t x3, int32_t y3, int32_t *x4, int32_t *y4)
+    {
+        storeSample32(x1, y1);
+        advancePointer();
+
+        storeSample32(*x2, *y2);
+        doFIR(x2, y2);
+        advancePointer();
+
+        storeSample32(x3, y3);
+        advancePointer();
+
+        storeSample32(*x4, *y4);
+        doFIR(x4, y4);
+        advancePointer();
+    }
+
     void myDecimateInf(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2, int32_t x3, int32_t y3, int32_t *x4, int32_t *y4)
     {
         storeSample32(-y1, x1);
