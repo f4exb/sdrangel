@@ -532,44 +532,24 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex));
+
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         m_settings.m_LOppmTenths = settings.m_LOppmTenths;
         m_settings.m_fcPos = settings.m_fcPos;
         m_settings.m_log2Decim = settings.m_log2Decim;
-        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-        qint64 f_img = deviceCenterFrequency;
-        quint32 devSampleRate = SDRPlaySampleRates::getRate(m_settings.m_devSampleRateIndex);
 
         forwardChange = true;
 
-        if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == SDRPlaySettings::FC_POS_CENTER))
-        {
-            deviceCenterFrequency = m_settings.m_centerFrequency;
-            f_img = deviceCenterFrequency;
-        }
-        else
-        {
-            if (settings.m_fcPos == SDRPlaySettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency = m_settings.m_centerFrequency + (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
-            }
-            else if (settings.m_fcPos == SDRPlaySettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency = m_settings.m_centerFrequency - (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
-            }
-        }
-
         if(m_dev != 0)
         {
-            if (setDeviceCenterFrequency(deviceCenterFrequency))
-            {
-                qDebug() << "SDRPlayInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-                        << " device center freq: " << deviceCenterFrequency << " Hz"
-                        << " device sample rate: " << devSampleRate << "Hz"
-                        << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
-                        << " img: " << f_img << "Hz";
+            if (setDeviceCenterFrequency(deviceCenterFrequency)) {
+                qDebug() << "SDRPlayInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz";
             }
         }
     }
