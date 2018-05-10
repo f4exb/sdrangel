@@ -54,23 +54,8 @@ qint64 DeviceSampleSource::calculateDeviceCenterFrequency(
     deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
     qint64 f_img = deviceCenterFrequency;
 
-    if ((log2Decim == 0) || (fcPos == FC_POS_CENTER))
-    {
-        f_img = deviceCenterFrequency;
-    }
-    else
-    {
-        if (fcPos == FC_POS_INFRA)
-        {
-            deviceCenterFrequency += (devSampleRate / 4);
-            f_img = deviceCenterFrequency + devSampleRate/2;
-        }
-        else if (fcPos == FC_POS_SUPRA)
-        {
-            deviceCenterFrequency -= (devSampleRate / 4);
-            f_img = deviceCenterFrequency - devSampleRate/2;
-        }
-    }
+    deviceCenterFrequency -= calculateFrequencyShift(log2Decim, fcPos, devSampleRate);
+    f_img -= 2*calculateFrequencyShift(log2Decim, fcPos, devSampleRate);
 
     qDebug() << "DeviceSampleSource::calculateDeviceCenterFrequency:"
             << " desired center freq: " << centerFrequency << " Hz"
@@ -81,4 +66,45 @@ qint64 DeviceSampleSource::calculateDeviceCenterFrequency(
             << " image frequency: " << f_img << "Hz";
 
     return deviceCenterFrequency;
+}
+
+/**
+ * log2Decim = 0:  no shift
+ *
+ * n = log2Decim <= 2: fc = +/- 1/2^(n-1)
+ *      center
+ *  |     ^     |
+ *  | inf | sup |
+ *     ^     ^
+ *
+ * n = log2Decim > 2: fc = +/- 1/2^n
+ *         center
+ *  |         ^         |
+ *  |  |inf|  |  |sup|  |
+ *       ^         ^
+ */
+qint32 DeviceSampleSource::calculateFrequencyShift(
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate)
+{
+    if (log2Decim == 0) { // no shift at all
+        return 0;
+    } else if (log2Decim < 3) {
+        if (fcPos == FC_POS_INFRA) { // shift in the square next to center frequency
+            return -(devSampleRate / (1<<(log2Decim+1)));
+        } else if (fcPos == FC_POS_SUPRA) {
+            return devSampleRate / (1<<(log2Decim+1));
+        } else {
+            return 0;
+        }
+    } else {
+        if (fcPos == FC_POS_INFRA) { // shift centered in the square next to center frequency
+            return -(devSampleRate / (1<<(log2Decim)));
+        } else if (fcPos == FC_POS_SUPRA) {
+            return devSampleRate / (1<<(log2Decim));
+        } else {
+            return 0;
+        }
+    }
 }

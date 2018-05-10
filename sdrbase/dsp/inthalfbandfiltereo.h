@@ -623,23 +623,6 @@ public:
         advancePointer();
     }
 
-    void myDecimateInf(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2, int32_t x3, int32_t y3, int32_t *x4, int32_t *y4)
-    {
-        storeSample32(-y1, x1);
-        advancePointer();
-
-        storeSample32(-*x2, -*y2);
-        doFIR(x2, y2);
-        advancePointer();
-
-        storeSample32(y3, -x3);
-        advancePointer();
-
-        storeSample32(*x4, *y4);
-        doFIR(x4, y4);
-        advancePointer();
-    }
-
     void myDecimateInf(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, int32_t x4, int32_t y4, int32_t *out)
     {
         storeSample32(-y1, x1);
@@ -657,20 +640,20 @@ public:
         advancePointer();
     }
 
-    void myDecimateSup(int32_t x1, int32_t y1, int32_t *x2, int32_t *y2, int32_t x3, int32_t y3, int32_t *x4, int32_t *y4)
+    void myDecimateInf(int32_t *in, int32_t *out)
     {
-        storeSample32(y1, -x1);
+        storeSample32(-in[1], in[0]);
         advancePointer();
 
-        storeSample32(-*x2, -*y2);
-        doFIR(x2, y2);
+        storeSample32(-in[2], -in[3]);
+        doFIR(&out[0], &out[1]);
         advancePointer();
 
-        storeSample32(-y3, x3);
+        storeSample32(in[5], -in[4]);
         advancePointer();
 
-        storeSample32(*x4, *y4);
-        doFIR(x4, y4);
+        storeSample32(in[6], in[7]);
+        doFIR(&out[2], &out[3]);
         advancePointer();
     }
 
@@ -687,6 +670,23 @@ public:
         advancePointer();
 
         storeSample32(x4, y4);
+        doFIR(&out[2], &out[3]);
+        advancePointer();
+    }
+
+    void myDecimateSup(int32_t *in, int32_t *out)
+    {
+        storeSample32(in[1], -in[0]);
+        advancePointer();
+
+        storeSample32(-in[2], -in[3]);
+        doFIR(&out[0], &out[1]);
+        advancePointer();
+
+        storeSample32(-in[5], in[4]);
+        advancePointer();
+
+        storeSample32(in[6], in[7]);
         doFIR(&out[2], &out[3]);
         advancePointer();
     }

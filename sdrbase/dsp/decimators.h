@@ -463,31 +463,27 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_u(SampleVector::i
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-    StorageType xreal[2], yimag[2];
+    StorageType buf2[4];
 
     for (int pos = 0; pos < len - 7; pos += 8)
     {
-        xreal[0] = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag[0] = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2;
-        xreal[1] = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag[1] = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2;
-
         m_decimator2.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre2,
-                &xreal[0],
-                &yimag[0],
+                buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre2,
-                &xreal[1],
-                &yimag[1]);
+                buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &buf2[0]);
 
-        (**it).setReal(xreal[0] >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(buf2[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(buf2[1] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
 
-        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(buf2[2] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(buf2[3] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
     }
 }
@@ -495,31 +491,27 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector:
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-    StorageType xreal[2], yimag[2];
+    StorageType buf2[4];
 
     for (int pos = 0; pos < len - 7; pos += 8)
     {
-        xreal[0] = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag[0] = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2;
-        xreal[1] = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag[1] = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2;
-
         m_decimator2.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre2,
-                &xreal[0],
-                &yimag[0],
+                buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre2,
                 buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre2,
-                &xreal[1],
-                &yimag[1]);
+                buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &buf2[0]);
 
-        (**it).setReal(xreal[0] >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(buf2[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(buf2[1] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
 
-        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(buf2[2] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(buf2[3] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
     }
 }
@@ -549,114 +541,99 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector:
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-    StorageType xreal[4], yimag[4];
+    StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        xreal[0]  = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[0]  = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre4;
-        xreal[1]  = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[1]  = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4;
-
         m_decimator2.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[0],
-                &yimag[0],
+                buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[1],
-                &yimag[1]);
-
-        xreal[2]  = buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[2]  = buf[pos+11] << decimation_shifts<SdrBits, InputBits>::pre4;
-        xreal[3]  = buf[pos+14] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[3]  = buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre4;
+                buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
+                &buf2[0]);
 
         m_decimator2.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[2],
-                &yimag[2],
+                buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+11] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+12] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+13] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[3],
-                &yimag[3]);
+                buf[pos+14] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre4,
+                &buf2[4]);
 
-        m_decimator4.myDecimateCen(
-                xreal[0],
-                yimag[0],
-                &xreal[1],
-                &yimag[1],
-                xreal[2],
-                yimag[2],
-                &xreal[3],
-                &yimag[3]);
+        m_decimator4.myDecimateSup(
+                buf2[0],
+                buf2[1],
+                buf2[2],
+                buf2[3],
+                buf2[4],
+                buf2[5],
+                buf2[6],
+                buf2[7],
+                &buf4[0]);
 
-        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(xreal[3] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(yimag[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
 
-
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate4_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-    StorageType xreal[4], yimag[4];
+    StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        xreal[0]  = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[0]  = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre4;
-        xreal[1]  = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[1]  = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4;
-
         m_decimator2.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[0],
-                &yimag[0],
+                buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[1],
-                &yimag[1]);
-
-        xreal[2]  = buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[2]  = buf[pos+11] << decimation_shifts<SdrBits, InputBits>::pre4;
-        xreal[3]  = buf[pos+14] << decimation_shifts<SdrBits, InputBits>::pre4;
-        yimag[3]  = buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre4;
+                buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
+                &buf2[0]);
 
         m_decimator2.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[2],
-                &yimag[2],
+                buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+11] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+12] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+13] << decimation_shifts<SdrBits, InputBits>::pre4,
-                &xreal[3],
-                &yimag[3]);
+                buf[pos+14] << decimation_shifts<SdrBits, InputBits>::pre4,
+                buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre4,
+                &buf2[4]);
 
-        m_decimator4.myDecimateCen(
-                xreal[0],
-                yimag[0],
-                &xreal[1],
-                &yimag[1],
-                xreal[2],
-                yimag[2],
-                &xreal[3],
-                &yimag[3]);
+        m_decimator4.myDecimateInf(
+                buf2[0],
+                buf2[1],
+                buf2[2],
+                buf2[3],
+                buf2[4],
+                buf2[5],
+                buf2[6],
+                buf2[7],
+                &buf4[0]);
 
-        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(xreal[3] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(yimag[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
@@ -752,11 +729,11 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate8_inf(SampleVector:
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[8],
                 &buf4[4]);
 
@@ -825,11 +802,11 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate8_sup(SampleVector:
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[8],
                 &buf4[4]);
 
@@ -942,27 +919,27 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate16_inf(SampleVector
                 buf[pos+63] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[28]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[8],
                 &buf8[4]);
 
@@ -1075,27 +1052,27 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate16_sup(SampleVector
                 buf[pos+63] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[28]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[8],
                 &buf8[4]);
 
@@ -1296,59 +1273,59 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate32_inf(SampleVector
                 buf[pos+127] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[60]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[32],
                 &buf4[16]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[40],
                 &buf4[20]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[48],
                 &buf4[24]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[56],
                 &buf4[28]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[8],
                 &buf8[4]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[16],
                 &buf8[8]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[24],
                 &buf8[12]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[0],
                 &buf16[0]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[8],
                 &buf16[4]);
 
@@ -1549,59 +1526,59 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate32_sup(SampleVector
                 buf[pos+127] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[60]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[32],
                 &buf4[16]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[40],
                 &buf4[20]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[48],
                 &buf4[24]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[56],
                 &buf4[28]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[8],
                 &buf8[4]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[16],
                 &buf8[8]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[24],
                 &buf8[12]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[0],
                 &buf16[0]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[8],
                 &buf16[4]);
 
@@ -1978,123 +1955,123 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate64_inf(SampleVector
                 buf[pos+255] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[124]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[32],
                 &buf4[16]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[40],
                 &buf4[20]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[48],
                 &buf4[24]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[56],
                 &buf4[28]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[64],
                 &buf4[32]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[72],
                 &buf4[36]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[80],
                 &buf4[40]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[88],
                 &buf4[44]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[96],
                 &buf4[48]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[104],
                 &buf4[52]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[112],
                 &buf4[56]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateSup(
                 &buf2[120],
                 &buf4[60]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[8],
                 &buf8[4]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[16],
                 &buf8[8]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[24],
                 &buf8[12]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[32],
                 &buf8[16]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[40],
                 &buf8[20]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[48],
                 &buf8[24]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateSup(
                 &buf4[56],
                 &buf8[28]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[0],
                 &buf16[0]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[8],
                 &buf16[4]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[16],
                 &buf16[8]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateSup(
                 &buf8[24],
                 &buf16[12]);
 
-        m_decimator32.myDecimateCen(
+        m_decimator32.myDecimateSup(
                 &buf16[0],
                 &buf32[0]);
 
-        m_decimator32.myDecimateCen(
+        m_decimator32.myDecimateSup(
                 &buf16[8],
                 &buf32[4]);
 
@@ -2471,123 +2448,123 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate64_sup(SampleVector
                 buf[pos+255] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[124]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[0],
                 &buf4[0]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[8],
                 &buf4[4]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[16],
                 &buf4[8]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[24],
                 &buf4[12]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[32],
                 &buf4[16]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[40],
                 &buf4[20]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[48],
                 &buf4[24]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[56],
                 &buf4[28]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[64],
                 &buf4[32]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[72],
                 &buf4[36]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[80],
                 &buf4[40]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[88],
                 &buf4[44]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[96],
                 &buf4[48]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[104],
                 &buf4[52]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[112],
                 &buf4[56]);
 
-        m_decimator4.myDecimateCen(
+        m_decimator4.myDecimateInf(
                 &buf2[120],
                 &buf4[60]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[0],
                 &buf8[0]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[8],
                 &buf8[4]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[16],
                 &buf8[8]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[24],
                 &buf8[12]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[32],
                 &buf8[16]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[40],
                 &buf8[20]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[48],
                 &buf8[24]);
 
-        m_decimator8.myDecimateCen(
+        m_decimator8.myDecimateInf(
                 &buf4[56],
                 &buf8[28]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[0],
                 &buf16[0]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[8],
                 &buf16[4]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[16],
                 &buf16[8]);
 
-        m_decimator16.myDecimateCen(
+        m_decimator16.myDecimateInf(
                 &buf8[24],
                 &buf16[12]);
 
-        m_decimator32.myDecimateCen(
+        m_decimator32.myDecimateInf(
                 &buf16[0],
                 &buf32[0]);
 
-        m_decimator32.myDecimateCen(
+        m_decimator32.myDecimateInf(
                 &buf16[8],
                 &buf32[4]);
 

@@ -106,11 +106,16 @@ Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
 The I/Q stream from the PlutoSDR is downsampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
-<h3>6: Decimated bandpass center frequency placement</h3>
+<h3>6: Decimated bandpass center frequency position relative the the PlutoSDR Rx center frequency</h3>
 
-  - **Inf**: Infradyne: the decimation takes place in the lower sideband
-  - **Sup**: Supradyne: the decimation takes place in the lower sideband
-  - **Cen**: Centered: the decimation takes place around the center
+  - **Cen**: the decimation operation takes place around the PlutoSDR Rx center frequency Fs
+  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Sup**: the decimation operation takes place around Fs + Fc.
+  
+With SR as the sample rate before decimation Fc is calculated as: 
+
+  - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
+  - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
   
 <h3>7: Antenna (input) connection</h3>
 

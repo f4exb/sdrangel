@@ -274,11 +274,10 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
         if (settings.m_log2Decim != 0)
         {
-            if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA) {
-                frequencyShift -= (devSampleRate / 4);
-            } else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA) {
-                frequencyShift += (devSampleRate / 4);
-            }
+            frequencyShift += DeviceSampleSource::calculateFrequencyShift(
+                    settings.m_log2Decim,
+                    (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                    settings.m_sampleRate);
         }
 
         if (m_testSourceThread != 0)

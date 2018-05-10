@@ -94,6 +94,11 @@ public:
             quint32 devSampleRate,
             bool transverterMode = false);
 
+    static qint32 calculateFrequencyShift(
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate);
+
 protected slots:
 	void handleInputMessages();
 

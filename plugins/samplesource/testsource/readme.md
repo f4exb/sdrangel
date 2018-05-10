@@ -56,11 +56,14 @@ This exercises the decimation chain.
 
 <h4>2.3: Baseband center frequency position relative the center frequency</h4>
 
-Possible values are:
+  - **Cen**: the decimation operation takes place around the center frequency Fs
+  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Sup**: the decimation operation takes place around Fs + Fc.
+  
+With SR as the sample rate before decimation Fc is calculated as: 
 
-  - **Cen**: the decimation operation takes place around the BladeRF Rx center frequency
-  - **Inf**: the decimation operation takes place around the center of the lower half of the BladeRF Rx passband. 
-  - **Sup**: the decimation operation takes place around the center of the upper half of the BladeRF Rx passband. 
+  - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
+  - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
 
 <h3>2.4: Sample size</h3>
 
