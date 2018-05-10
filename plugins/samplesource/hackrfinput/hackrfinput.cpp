@@ -366,10 +366,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	qint64 deviceCenterFrequency = settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate = settings.m_devSampleRate;
-
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
 	{
 	    if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
@@ -389,38 +385,20 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	}
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
+	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
         (m_settings.m_log2Decim != settings.m_log2Decim) ||
         (m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		if ((settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
-		{
-			deviceCenterFrequency = settings.m_centerFrequency;
-			f_img = deviceCenterFrequency;
-		}
-		else
-		{
-			if (settings.m_fcPos == HackRFInputSettings::FC_POS_INFRA)
-			{
-				deviceCenterFrequency = settings.m_centerFrequency + (devSampleRate / 4);
-				f_img = deviceCenterFrequency + devSampleRate/2;
-			}
-			else if (settings.m_fcPos == HackRFInputSettings::FC_POS_SUPRA)
-			{
-				deviceCenterFrequency = settings.m_centerFrequency - (devSampleRate / 4);
-				f_img = deviceCenterFrequency - devSampleRate/2;
-			}
-		}
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate);
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			setDeviceCenterFrequency(deviceCenterFrequency);
-
-			qDebug() << "HackRFInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
-					<< " device center freq: " << deviceCenterFrequency << " Hz"
-					<< " device sample rate: " << devSampleRate << "Hz"
-					<< " Actual sample rate: " << devSampleRate/(1<<settings.m_log2Decim) << "Hz"
-					<< " img: " << f_img << "Hz";
 		}
 
 		forwardChange = true;
@@ -523,7 +501,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if (forwardChange)
 	{
-		int sampleRate = devSampleRate/(1<<settings.m_log2Decim);
+		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
