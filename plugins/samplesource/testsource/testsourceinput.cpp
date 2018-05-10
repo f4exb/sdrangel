@@ -259,26 +259,25 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_frequencyShift != settings.m_frequencyShift)
+        || (m_settings.m_sampleRate != settings.m_sampleRate)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        qint64 deviceCenterFrequency = settings.m_centerFrequency;
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0, // no transverter mode
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_sampleRate);
+
         int frequencyShift = settings.m_frequencyShift;
-        qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = settings.m_sampleRate;
 
         if (settings.m_log2Decim != 0)
         {
-            if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency += (devSampleRate / 4);
+            if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA) {
                 frequencyShift -= (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
-            }
-            else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency -= (devSampleRate / 4);
+            } else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA) {
                 frequencyShift += (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
             }
         }
 
@@ -291,7 +290,6 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
                     << " device center freq: " << deviceCenterFrequency << " Hz"
                     << " device sample rate: " << devSampleRate << "Hz"
                     << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
-                    << " fc shift: " << f_img << "Hz"
                     << " f shift: " << settings.m_frequencyShift;
         }
     }
