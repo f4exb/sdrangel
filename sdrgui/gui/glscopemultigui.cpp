@@ -721,7 +721,7 @@ void GLScopeMultiGUI::on_traceView_toggled(bool checked __attribute__((unused)))
 
 void GLScopeMultiGUI::on_traceColor_clicked()
 {
-    QColor newColor = QColorDialog::getColor(m_focusedTraceColor);
+    QColor newColor = QColorDialog::getColor(m_focusedTraceColor, this, tr("Select Color for trace"), QColorDialog::DontUseNativeDialog);
 
     if (newColor.isValid()) // user clicked OK and selected a color
     {
@@ -822,7 +822,7 @@ void GLScopeMultiGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
 
 void GLScopeMultiGUI::on_trigColor_clicked()
 {
-    QColor newColor = QColorDialog::getColor(m_focusedTriggerColor);
+    QColor newColor = QColorDialog::getColor(m_focusedTriggerColor, this, tr("Select Color for trigger line"), QColorDialog::DontUseNativeDialog);
 
     if (newColor.isValid()) // user clicked "OK"
     {

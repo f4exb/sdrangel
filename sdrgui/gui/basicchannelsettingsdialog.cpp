@@ -37,7 +37,7 @@ void BasicChannelSettingsDialog::paintColor()
 void BasicChannelSettingsDialog::on_colorBtn_clicked()
 {
     QColor c = m_color;
-    c = QColorDialog::getColor(c, this, tr("Select Color for Channel"));
+    c = QColorDialog::getColor(c, this, tr("Select Color for Channel"), QColorDialog::DontUseNativeDialog);
     if(c.isValid()) {
         m_color = c;
         paintColor();
