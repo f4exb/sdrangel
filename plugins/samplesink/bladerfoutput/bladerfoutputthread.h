@@ -49,7 +49,6 @@ private:
     SampleSourceFifo* m_sampleFifo;
 
 	unsigned int m_log2Interp;
-	int m_fcPos;
 
 	Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 

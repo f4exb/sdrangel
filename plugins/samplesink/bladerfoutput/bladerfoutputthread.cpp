@@ -26,8 +26,7 @@ BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* 
 	m_running(false),
 	m_dev(dev),
 	m_sampleFifo(sampleFifo),
-	m_log2Interp(0),
-	m_fcPos(0)
+	m_log2Interp(0)
 {
     std::fill(m_buf, m_buf + 2*BLADERFOUTPUT_BLOCKSIZE, 0);
 }
