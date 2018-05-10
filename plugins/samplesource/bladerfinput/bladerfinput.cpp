@@ -534,55 +534,29 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate);
+
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         m_settings.m_log2Decim = settings.m_log2Decim;
         m_settings.m_fcPos = settings.m_fcPos;
 
-        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-        qint64 f_img = deviceCenterFrequency;
-        qint64 f_cut = deviceCenterFrequency + m_settings.m_bandwidth/2;
-        quint32 devSampleRate = m_settings.m_devSampleRate;
-
         forwardChange = true;
-
-        if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == BladeRFInputSettings::FC_POS_CENTER))
-        {
-            f_img = deviceCenterFrequency;
-        }
-        else
-        {
-            if (settings.m_fcPos == BladeRFInputSettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency += (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
-            }
-            else if (settings.m_fcPos == BladeRFInputSettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency -= (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
-            }
-        }
 
         if (m_dev != 0)
         {
-            if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0)
-            {
-                qDebug("BladerfInput::applySettings: bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
-            }
-            else
-            {
-                qDebug() << "BladerfInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-                        << " device center freq: " << deviceCenterFrequency << " Hz"
-                        << " device sample rate: " << m_settings.m_devSampleRate << "S/s"
-                        << " Actual sample rate: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim) << "S/s"
-                        << " BW: " << m_settings.m_bandwidth << "Hz"
-                        << " img: " << f_img << "Hz"
-                        << " cut: " << f_cut << "Hz"
-                        << " img - cut: " << f_img - f_cut;
+            if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0) {
+                qWarning("BladerfInput::applySettings: bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
+            } else {
+                qDebug("BladerfInput::applySettings: bladerf_set_frequency(%lld)", m_settings.m_centerFrequency);
             }
         }
     }
