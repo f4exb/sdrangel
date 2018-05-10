@@ -407,45 +407,22 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
         || (m_settings.m_transverterMode != settings.m_transverterMode)
         || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
 	{
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                settings.m_transverterDeltaFrequency,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                m_sampleRates[m_settings.m_devSampleRateIndex],
+                settings.m_transverterMode);
+
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         m_settings.m_log2Decim = settings.m_log2Decim;
         m_settings.m_transverterMode = settings.m_transverterMode;
         m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
         m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-        deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-        qint64 f_img = deviceCenterFrequency;
-        quint32 devSampleRate = m_sampleRates[m_settings.m_devSampleRateIndex];
-
-		if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == AirspySettings::FC_POS_CENTER))
-		{
-			f_img = deviceCenterFrequency;
-		}
-		else
-		{
-			if (settings.m_fcPos == AirspySettings::FC_POS_INFRA)
-			{
-				deviceCenterFrequency += (devSampleRate / 4);
-				f_img = deviceCenterFrequency + devSampleRate/2;
-			}
-			else if (settings.m_fcPos == AirspySettings::FC_POS_SUPRA)
-			{
-				deviceCenterFrequency -= (devSampleRate / 4);
-				f_img = deviceCenterFrequency - devSampleRate/2;
-			}
-		}
-
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			setDeviceCenterFrequency(deviceCenterFrequency);
-
-			qDebug() << "AirspyInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-					<< " device center freq: " << deviceCenterFrequency << " Hz"
-					<< " device sample rate: " << devSampleRate << "Hz"
-					<< " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
-					<< " img: " << f_img << "Hz";
 		}
 
 		forwardChange = true;
