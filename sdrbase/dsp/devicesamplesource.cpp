@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include <dsp/devicesamplesource.h>
 
 DeviceSampleSource::DeviceSampleSource() :
@@ -38,4 +39,46 @@ void DeviceSampleSource::handleInputMessages()
 			delete message;
 		}
 	}
+}
+
+qint64 DeviceSampleSource::calculateDeviceCenterFrequency(
+            quint64 centerFrequency,
+            qint64 transverterDeltaFrequency,
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate,
+            bool transverterMode)
+{
+    qint64 deviceCenterFrequency = centerFrequency;
+    deviceCenterFrequency -= transverterMode ? transverterDeltaFrequency : 0;
+    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+    qint64 f_img = deviceCenterFrequency;
+
+    if ((log2Decim == 0) || (fcPos == FC_POS_CENTER))
+    {
+        f_img = deviceCenterFrequency;
+    }
+    else
+    {
+        if (fcPos == FC_POS_INFRA)
+        {
+            deviceCenterFrequency += (devSampleRate / 4);
+            f_img = deviceCenterFrequency + devSampleRate/2;
+        }
+        else if (fcPos == FC_POS_SUPRA)
+        {
+            deviceCenterFrequency -= (devSampleRate / 4);
+            f_img = deviceCenterFrequency - devSampleRate/2;
+        }
+    }
+
+    qDebug() << "DeviceSampleSource::calculateDeviceCenterFrequency:"
+            << " desired center freq: " << centerFrequency << " Hz"
+            << " device center freq: " << deviceCenterFrequency << " Hz"
+            << " device sample rate: " << devSampleRate << "S/s"
+            << " Actual sample rate: " << devSampleRate/(1<<log2Decim) << "S/s"
+            << " center freq position code: " << fcPos
+            << " image frequency: " << f_img << "Hz";
+
+    return deviceCenterFrequency;
 }
