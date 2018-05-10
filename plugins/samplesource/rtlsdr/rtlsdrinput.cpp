@@ -440,72 +440,51 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
         || (m_settings.m_transverterMode != settings.m_transverterMode)
         || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                settings.m_transverterDeltaFrequency,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate,
+                settings.m_transverterMode);
+
         m_settings.m_centerFrequency = settings.m_centerFrequency;
+        m_settings.m_log2Decim = settings.m_log2Decim;
+        m_settings.m_devSampleRate = settings.m_devSampleRate;
         m_settings.m_transverterMode = settings.m_transverterMode;
         m_settings.m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
-        m_settings.m_log2Decim = settings.m_log2Decim;
-        qint64 deviceCenterFrequency = m_settings.m_centerFrequency;
-        deviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-        qint64 f_img = deviceCenterFrequency;
-        quint32 devSampleRate = m_settings.m_devSampleRate;
 
         forwardChange = true;
 
-        if ((m_settings.m_log2Decim == 0) || (settings.m_fcPos == RTLSDRSettings::FC_POS_CENTER))
+        if ((m_settings.m_fcPos != settings.m_fcPos) || force)
         {
-            f_img = deviceCenterFrequency;
-        }
-        else
-        {
-            if (settings.m_fcPos == RTLSDRSettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency += (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
+            m_settings.m_fcPos = settings.m_fcPos;
+
+            if (m_rtlSDRThread != 0) {
+                m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
             }
-            else if (settings.m_fcPos == RTLSDRSettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency -= (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
-            }
+
+            qDebug() << "RTLSDRInput::applySettings: set fc pos (enum) to " << (int) m_settings.m_fcPos;
         }
 
         if (m_dev != 0)
         {
-            if (rtlsdr_set_center_freq( m_dev, deviceCenterFrequency ) != 0)
-            {
-                qDebug("rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
-            }
-            else
-            {
-                qDebug() << "RTLSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-                        << " device center freq: " << deviceCenterFrequency << " Hz"
-                        << " device sample rate: " << devSampleRate << "S/s"
-                        << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "S/s"
-                        << " img: " << f_img << "Hz";
+            if (rtlsdr_set_center_freq( m_dev, deviceCenterFrequency ) != 0) {
+                qWarning("RTLSDRInput::applySettings: rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+            } else {
+                qDebug("RTLSDRInput::applySettings: rtlsdr_set_center_freq(%lld)", deviceCenterFrequency);
             }
         }
-    }
-
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-    {
-        m_settings.m_fcPos = settings.m_fcPos;
-
-        if (m_rtlSDRThread != 0)
-        {
-            m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
-        }
-
-        qDebug() << "RTLSDRInput: set fc pos (enum) to " << (int) m_settings.m_fcPos;
     }
 
     if ((m_settings.m_noModMode != settings.m_noModMode) || force)
     {
         m_settings.m_noModMode = settings.m_noModMode;
-        qDebug() << "RTLSDRInput: set noModMode to " << m_settings.m_noModMode;
+        qDebug() << "RTLSDRInput::applySettings: set noModMode to " << m_settings.m_noModMode;
 
         // Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
         if (m_settings.m_noModMode) {
