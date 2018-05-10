@@ -282,7 +282,8 @@ public:
     // interleaved I/Q input buffer
 	void decimate1(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_u(SampleVector::iterator* it, const T* buf, qint32 len);
-	void decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len);
+	void decimate2_inf_raw(SampleVector::iterator* it, const T* buf, qint32 len);
+    void decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len);
@@ -414,90 +415,156 @@ void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_u(SampleVector::i
     }
 }
 
+// No filtering: bad for Rx OK for signal tracking
+//template<typename StorageType, typename T, uint SdrBits, uint InputBits>
+//void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+//{
+//	StorageType xreal, yimag;
+//
+//	for (int pos = 0; pos < len - 7; pos += 8)
+//	{
+//		xreal = (buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		yimag = (buf[pos+1] + buf[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//		++(*it);
+//
+//		xreal = (buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		yimag = (- buf[pos+5] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//		++(*it);
+//	}
+//}
+
+//template<typename StorageType, typename T, uint SdrBits, uint InputBits>
+//void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+//{
+//    StorageType xreal, yimag;
+//
+//    for (int pos = 0; pos < len - 3; pos += 4)
+//    {
+//        // 0: I[0] 1: Q[0] 2: I[1] 3: Q[1]
+//        xreal = (bufI[pos] - bufQ[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        yimag = (bufQ[pos] + bufI[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//        ++(*it);
+//
+//        // 4: I[2] 5: Q[2] 6: I[3] 7: Q[3]
+//        xreal = (bufQ[pos+3] - bufI[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        yimag = (- bufQ[pos+2] - bufI[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//        ++(*it);
+//    }
+//}
+
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	StorageType xreal, yimag;
+    StorageType xreal[2], yimag[2];
 
-	for (int pos = 0; pos < len - 7; pos += 8)
-	{
-		xreal = (buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = (buf[pos+1] + buf[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
-		++(*it);
-
-		xreal = (buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = (- buf[pos+5] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
-		++(*it);
-	}
-}
-
-template<typename StorageType, typename T, uint SdrBits, uint InputBits>
-void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_inf(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
-{
-    StorageType xreal, yimag;
-
-    for (int pos = 0; pos < len - 3; pos += 4)
+    for (int pos = 0; pos < len - 7; pos += 8)
     {
-        // 0: I[0] 1: Q[0] 2: I[1] 3: Q[1]
-        xreal = (bufI[pos] - bufQ[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag = (bufQ[pos] + bufI[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        xreal[0] = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2;
+        yimag[0] = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2;
+        xreal[1] = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2;
+        yimag[1] = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2;
+
+        m_decimator2.myDecimateInf(
+                buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &xreal[0],
+                &yimag[0],
+                buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &xreal[1],
+                &yimag[1]);
+
+        (**it).setReal(xreal[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(yimag[0] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
 
-        // 4: I[2] 5: Q[2] 6: I[3] 7: Q[3]
-        xreal = (bufQ[pos+3] - bufI[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag = (- bufQ[pos+2] - bufI[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
     }
 }
 
+// No filtering: bad for Rx OK for signal tracking
+//template<typename StorageType, typename T, uint SdrBits, uint InputBits>
+//void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+//{
+//	StorageType xreal, yimag;
+//
+//	for (int pos = 0; pos < len - 7; pos += 8)
+//	{
+//		xreal = (buf[pos+1] - buf[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		yimag = (- buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//		++(*it);
+//
+//		xreal = (buf[pos+6] - buf[pos+5]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		yimag = (buf[pos+4] + buf[pos+7]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//		++(*it);
+//	}
+//}
+//
+//template<typename StorageType, typename T, uint SdrBits, uint InputBits>
+//void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+//{
+//    StorageType xreal, yimag;
+//
+//    for (int pos = 0; pos < len - 3; pos += 4)
+//    {
+//        // 0: I[0] 1: Q[0] 2: I[1] 3: Q[1]
+//        xreal = (bufQ[pos] - bufI[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        yimag = (- bufI[pos] - bufQ[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//        ++(*it);
+//
+//        // 4: I[2] 5: Q[2] 6: I[3] 7: Q[3]
+//        xreal = (bufI[pos+3] - bufQ[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        yimag = (bufI[pos+2] + bufQ[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
+//        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
+//        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+//        ++(*it);
+//    }
+//}
+
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>
 void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
-	StorageType xreal, yimag;
+    StorageType xreal[2], yimag[2];
 
-	for (int pos = 0; pos < len - 7; pos += 8)
-	{
-		xreal = (buf[pos+1] - buf[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = (- buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
-		++(*it);
-
-		xreal = (buf[pos+6] - buf[pos+5]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = (buf[pos+4] + buf[pos+7]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
-		++(*it);
-	}
-}
-
-template<typename StorageType, typename T, uint SdrBits, uint InputBits>
-void Decimators<StorageType, T, SdrBits, InputBits>::decimate2_sup(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
-{
-    StorageType xreal, yimag;
-
-    for (int pos = 0; pos < len - 3; pos += 4)
+    for (int pos = 0; pos < len - 7; pos += 8)
     {
-        // 0: I[0] 1: Q[0] 2: I[1] 3: Q[1]
-        xreal = (bufQ[pos] - bufI[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag = (- bufI[pos] - bufQ[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        xreal[0] = buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre2;
+        yimag[0] = buf[pos+3] << decimation_shifts<SdrBits, InputBits>::pre2;
+        xreal[1] = buf[pos+6] << decimation_shifts<SdrBits, InputBits>::pre2;
+        yimag[1] = buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre2;
+
+        m_decimator2.myDecimateSup(
+                buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &xreal[0],
+                &yimag[0],
+                buf[pos+4] << decimation_shifts<SdrBits, InputBits>::pre2,
+                buf[pos+5] << decimation_shifts<SdrBits, InputBits>::pre2,
+                &xreal[1],
+                &yimag[1]);
+
+        (**it).setReal(xreal[0] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(yimag[0] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
 
-        // 4: I[2] 5: Q[2] 6: I[3] 7: Q[3]
-        xreal = (bufI[pos+3] - bufQ[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        yimag = (bufI[pos+2] + bufQ[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal(xreal[1] >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag(yimag[1] >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
     }
 }
