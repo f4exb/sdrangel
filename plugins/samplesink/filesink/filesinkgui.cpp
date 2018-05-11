@@ -322,7 +322,7 @@ void FileSinkGui::updateWithStreamTime()
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("hh:mm:ss.zzz");
+	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 }
 

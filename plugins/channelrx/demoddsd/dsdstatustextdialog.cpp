@@ -41,7 +41,7 @@ void DSDStatusTextDialog::addLine(const QString& line)
     if ((line.size() > 0) && (line != m_lastLine))
     {
         QDateTime dt = QDateTime::currentDateTime();
-        QString dateStr = dt.toString("hh:mm:ss");
+        QString dateStr = dt.toString("HH:mm:ss");
         QTextCursor cursor = ui->logEdit->textCursor();
         cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         cursor.insertText(tr("%1 %2\n").arg(dateStr).arg(line));

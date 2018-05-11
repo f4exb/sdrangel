@@ -95,7 +95,7 @@ This counter counts the unrecoverable error conditions found (i.e. 6.4 between 1
 
 <h4>6.8: events counters timer</h4>
 
-This hh:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
+This HH:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
 
 <h3>7: Network parameters</h3>
 

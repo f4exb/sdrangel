@@ -70,7 +70,7 @@ Log message will appear as follows:
 (1)                     (2) (3)
 ```
 
-  - 1: Timestamp in `dd.MM.yyyy hh:mm:ss.zzz` format
+  - 1: Timestamp in `yyyy-MM-dd HH:mm:ss.zzz` format
   - 2: Message level: `(D)`: debug, `(I)`: info, `(W)`: warning, `(C)`: critical, `(F)`: fatal
   - 3: Message text
 

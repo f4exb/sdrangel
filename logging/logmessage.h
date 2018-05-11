@@ -56,7 +56,7 @@ public:
       Returns the log message as decorated string.
       @param msgFormat Format of the decoration. May contain variables and static text,
           e.g. "{timestamp} {type} thread={thread}: {msg}".
-      @param timestampFormat Format of timestamp, e.g. "dd.MM.yyyy hh:mm:ss.zzz", see QDateTime::toString().
+      @param timestampFormat Format of timestamp, e.g. "yyyy-MM-dd HH:mm:ss.zzz", see QDateTime::toString().
       @see QDatetime for a description of the timestamp format pattern
     */
     QString toString(const QString& msgFormat, const QString& timestampFormat) const;
