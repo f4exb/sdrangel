@@ -63,7 +63,8 @@ SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
     $$LIBBLADERFSRC/fpga_common/src/lms.c\
     $$LIBBLADERFCOMMONSRC/src/conversions.c\
     $$LIBBLADERFCOMMONSRC/src/devcfg.c\
-    $$LIBBLADERFCOMMONSRC/src/sha256.c
+    $$LIBBLADERFCOMMONSRC/src/sha256.c\
+    $$LIBBLADERFCOMMONSRC/src/parse.c
 
 HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$LIBBLADERFLIBSRC/src/capabilities.h\
@@ -96,6 +97,7 @@ HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$LIBBLADERFSRC/fpga_common/include/band_select.h\
     $$LIBBLADERFSRC/fpga_common/include/lms.h\
     $$LIBBLADERFCOMMONSRC/include/sha256.h\
+    $$LIBBLADERFCOMMONSRC/include/parse.h\
     $$PWD/include/host_config.h\
     $$PWD/include/backend/backend_config.h\
     $$PWD/include/version.h
