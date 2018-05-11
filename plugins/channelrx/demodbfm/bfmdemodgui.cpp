@@ -671,8 +671,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	{
 		ui->g04Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g04CountText->setNum((int) m_bfmDemod->getRDSParser().m_g4_count);
-		std::string time = str(boost::format("%02i.%02i.%4i, %02i:%02i (%+.1fh)")\
-			% m_bfmDemod->getRDSParser().m_g4_day % m_bfmDemod->getRDSParser().m_g4_month % (1900 + m_bfmDemod->getRDSParser().m_g4_year) % m_bfmDemod->getRDSParser().m_g4_hours % m_bfmDemod->getRDSParser().m_g4_minutes % m_bfmDemod->getRDSParser().m_g4_local_time_offset);
+		std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
+			% (1900 + m_bfmDemod->getRDSParser().m_g4_year) % m_bfmDemod->getRDSParser().m_g4_month % m_bfmDemod->getRDSParser().m_g4_day % m_bfmDemod->getRDSParser().m_g4_hours % m_bfmDemod->getRDSParser().m_g4_minutes % m_bfmDemod->getRDSParser().m_g4_local_time_offset);
 	    ui->g04Time->setText(QString(time.c_str()));
 	}
 	else
