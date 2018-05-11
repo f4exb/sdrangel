@@ -4,6 +4,7 @@
 #include "util/message.h"
 
 #include <QDebug>
+#include <QDateTime>
 
 FileRecord::FileRecord() :
 	BasebandSampleSink(),
@@ -40,6 +41,11 @@ void FileRecord::setFileName(const QString& filename)
     {
         m_fileName = filename;
     }
+}
+
+void FileRecord::genUniqueFileName(uint deviceUID)
+{
+    setFileName(QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz")));
 }
 
 void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
