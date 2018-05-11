@@ -29,6 +29,7 @@ public:
     quint64 getByteCount() const { return m_byteCount; }
 
     void setFileName(const QString& filename);
+    void genUniqueFileName(uint deviceUID);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
