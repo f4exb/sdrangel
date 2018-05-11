@@ -30,7 +30,7 @@ namespace qtwebapp {
   maxBackups=2
   minLevel=0
   msgformat={timestamp} {typeNr} {type} thread={thread}: {msg}
-  timestampFormat=dd.MM.yyyy hh:mm:ss.zzz
+  timestampFormat=yyyy-MM-dd HH:mm:ss.zzz
   bufferSize=0
   </pre></code>
 
@@ -43,7 +43,7 @@ namespace qtwebapp {
   - maxBackups defines the number of backup files to keep. Default is 0=unlimited.
   - minLevel defines the minimum type of messages that are written (together with buffered messages) into the file. Defaults is 0=debug.
   - msgFormat defines the decoration of log messages, see LogMessage class. Default is "{timestamp} {type} {msg}".
-  - timestampFormat defines the format of timestamps, see QDateTime::toString(). Default is "yyyy-MM-dd hh:mm:ss.zzz".
+  - timestampFormat defines the format of timestamps, see QDateTime::toString(). Default is "yyyy-MM-dd HH:mm:ss.zzz".
   - bufferSize defines the size of the buffer. Default is 0=disabled.
 
   @see set() describes how to set logger variables

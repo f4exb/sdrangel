@@ -46,7 +46,7 @@ void CommandOutputDialog::refresh()
     {
         struct timeval tv = m_command.getLastProcessStartTimestamp();
         QDateTime dt = QDateTime::fromMSecsSinceEpoch(tv.tv_sec * 1000LL + tv.tv_usec / 1000LL);
-        QString dateStr = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
+        QString dateStr = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
         ui->startTime->setText(dateStr);
     }
 
@@ -57,7 +57,7 @@ void CommandOutputDialog::refresh()
     {
         struct timeval tv = m_command.getLastProcessFinishTimestamp();
         QDateTime dt = QDateTime::fromMSecsSinceEpoch(tv.tv_sec * 1000LL + tv.tv_usec / 1000LL);
-        QString dateStr = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
+        QString dateStr = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
         ui->endTime->setText(dateStr);
     }
 

@@ -519,7 +519,7 @@ void SDRdaemonSourceGui::displayEventTimer()
     int elapsedTimeMillis = m_eventsTime.elapsed();
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->eventCountsTimeText->setText(s_time);
 }
 
@@ -532,7 +532,7 @@ void SDRdaemonSourceGui::updateWithStreamTime()
 	bool updateEventCounts = false;
     quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    QString s_date = dt.toString("yyyy-MM-dd  hh:mm:ss.zzz");
+    QString s_date = dt.toString("yyyy-MM-dd  HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
 	if (m_framesDecodingStatus == 2)

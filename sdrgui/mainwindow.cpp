@@ -1726,7 +1726,7 @@ void MainWindow::tabInputViewIndexChanged()
 
 void MainWindow::updateStatus()
 {
-    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss t"));
+    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss t"));
 }
 
 void MainWindow::setLoggingOptions()

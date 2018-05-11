@@ -317,7 +317,7 @@ void FileSourceGui::updateWithStreamData()
 	ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addSecs(m_recordLength);
-	QString s_time = recordLength.toString("hh:mm:ss");
+	QString s_time = recordLength.toString("HH:mm:ss");
 	ui->recordLengthText->setText(s_time);
 	updateWithStreamTime(); // TODO: remove when time data is implemented
 }
@@ -335,15 +335,15 @@ void FileSourceGui::updateWithStreamTime()
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("hh:mm:ss.zzz");
-	QString s_time = t.toString("hh:mm:ss");
+	QString s_timems = t.toString("HH:mm:ss.zzz");
+	QString s_time = t.toString("HH:mm:ss");
 	ui->relTimeText->setText(s_timems);
 
     quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs((quint64) t_sec);
     dt = dt.addMSecs((quint64) t_msec);
-	QString s_date = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
 	if (!m_enableNavTime)

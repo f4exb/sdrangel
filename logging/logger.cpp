@@ -25,7 +25,7 @@ QMutex Logger::mutex;
 Logger::Logger(QObject* parent)
     : QObject(parent),
     msgFormat("{timestamp} {type} {msg}"),
-    timestampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    timestampFormat("yyyy-MM-dd HH:mm:ss.zzz"),
     minLevel(QtDebugMsg),
     bufferSize(0)
     {}

@@ -483,7 +483,7 @@ void WFMModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -502,8 +502,8 @@ void WFMModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

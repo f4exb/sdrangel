@@ -65,13 +65,13 @@ public:
     /**
       Constructor.
       @param msgFormat Format of the decoration, e.g. "{timestamp} {type} thread={thread}: {msg}"
-      @param timestampFormat Format of timestamp, e.g. "dd.MM.yyyy hh:mm:ss.zzz"
+      @param timestampFormat Format of timestamp, e.g. "yyyy-MM-dd HH:mm:ss.zzz"
       @param minLevel Minimum severity that genertes an output (0=debug, 1=warning, 2=critical, 3=fatal).
       @param bufferSize Size of the backtrace buffer, number of messages per thread. 0=disabled.
       @param parent Parent object
       @see LogMessage for a description of the message decoration.
     */
-    Logger(const QString msgFormat="{timestamp} {type} {msg}", const QString timestampFormat="dd.MM.yyyy hh:mm:ss.zzz", const QtMsgType minLevel=QtDebugMsg, const int bufferSize=0, QObject* parent = 0);
+    Logger(const QString msgFormat="{timestamp} {type} {msg}", const QString timestampFormat="yyyy-MM-dd HH:mm:ss.zzz", const QtMsgType minLevel=QtDebugMsg, const int bufferSize=0, QObject* parent = 0);
 
     /** Destructor */
     virtual ~Logger();
