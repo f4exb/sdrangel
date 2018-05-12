@@ -237,6 +237,12 @@ void ChannelAnalyzerNGGUI::tick()
 	double powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg((Real) m_channelPowerDbAvg, 0, 'f', 1));
+
+	if (m_channelAnalyzer->isPllLocked()) {
+	    ui->pll->setStyleSheet("QToolButton { background-color : green; }");
+	} else {
+	    ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+	}
 }
 
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
@@ -249,6 +255,11 @@ void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
         setNewFinalRate(m_spanLog2);
         applySettings();
     }
+}
+
+void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked __attribute__((unused)))
+{
+    applySettings();
 }
 
 void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked __attribute__((unused)))
@@ -578,7 +589,8 @@ void ChannelAnalyzerNGGUI::applySettings()
 			ui->BW->value() * 100.0,
 			ui->lowCut->value() * 100.0,
 			m_spanLog2,
-			ui->ssb->isChecked());
+			ui->ssb->isChecked(),
+			ui->pll->isChecked());
 	}
 }
 

@@ -73,6 +73,7 @@ public:
      * This is the in flow version
      */
     void process(const Real& sample_in, Real *samples_out);
+    void process(const Real& real_in, const Real& imag_in, Real *samples_out);
 
     /** Return true if the phase-locked loop is locked. */
     bool locked() const
@@ -111,6 +112,8 @@ private:
     quint64 m_pps_cnt;
     quint64 m_sample_cnt;
     std::vector<PpsEvent> m_pps_events;
+
+    void process_phasor(Real& phasor_i, Real& phasor_q);
 };
 
 class SimplePhaseLock : public PhaseLock

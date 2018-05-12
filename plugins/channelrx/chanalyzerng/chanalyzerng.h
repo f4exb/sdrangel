@@ -25,6 +25,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
+#include "dsp/phaselock.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -45,20 +46,23 @@ public:
         Real getLoCutoff() const { return m_LowCutoff; }
         int  getSpanLog2() const { return m_spanLog2; }
         bool getSSB() const { return m_ssb; }
+        bool getPLL() const { return m_pll; }
 
         static MsgConfigureChannelAnalyzer* create(
                 int channelSampleRate,
                 Real Bandwidth,
                 Real LowCutoff,
                 int spanLog2,
-                bool ssb)
+                bool ssb,
+                bool pll)
         {
             return new MsgConfigureChannelAnalyzer(
                     channelSampleRate,
                     Bandwidth,
                     LowCutoff,
                     spanLog2,
-                    ssb);
+                    ssb,
+                    pll);
         }
 
     private:
@@ -67,19 +71,22 @@ public:
         Real m_LowCutoff;
         int  m_spanLog2;
         bool m_ssb;
+        bool m_pll;
 
         MsgConfigureChannelAnalyzer(
                 int channelSampleRate,
                 Real Bandwidth,
                 Real LowCutoff,
                 int spanLog2,
-                bool ssb) :
+                bool ssb,
+                bool pll) :
             Message(),
             m_channelSampleRate(channelSampleRate),
             m_Bandwidth(Bandwidth),
             m_LowCutoff(LowCutoff),
             m_spanLog2(spanLog2),
-            m_ssb(ssb)
+            m_ssb(ssb),
+            m_pll(pll)
         { }
     };
 
@@ -133,12 +140,14 @@ public:
 			Real Bandwidth,
 			Real LowCutoff,
 			int spanLog2,
-			bool ssb);
+			bool ssb,
+			bool pll);
 
 	DownChannelizer *getChannelizer() { return m_channelizer; }
 	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
     int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
+	bool isPllLocked() const { return m_running.m_pll && m_pll.locked(); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -166,6 +175,7 @@ private:
 	    Real m_LowCutoff;
 	    int m_spanLog2;
 	    bool m_ssb;
+	    bool m_pll;
 
 	    Config() :
 	        m_frequency(0),
@@ -174,7 +184,8 @@ private:
 	        m_Bandwidth(5000),
 	        m_LowCutoff(300),
 	        m_spanLog2(3),
-	        m_ssb(false)
+	        m_ssb(false),
+	        m_pll(false)
 	    {}
 	};
 
@@ -192,6 +203,7 @@ private:
 	bool m_useInterpolator;
 
 	NCOF m_nco;
+	SimplePhaseLock m_pll;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
@@ -233,13 +245,33 @@ private:
                 Real im = m_sum.imag() / SDR_RX_SCALED;
                 m_magsq = re*re + im*im;
 
-                if (m_running.m_ssb & !m_usb)
-                { // invert spectrum for LSB
-                    m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
+                if (m_running.m_pll)
+                {
+                    Real ncopll[2];
+                    m_pll.process(re, im, ncopll);
+
+                    Real mixI = m_sum.real() * ncopll[0] - m_sum.imag() * ncopll[1];
+                    Real mixQ = m_sum.real() * ncopll[1] + m_sum.imag() * ncopll[0];
+
+                    if (m_running.m_ssb & !m_usb)
+                    { // invert spectrum for LSB
+                        m_sampleBuffer.push_back(Sample(mixQ, mixI));
+                    }
+                    else
+                    {
+                        m_sampleBuffer.push_back(Sample(mixI, mixQ));
+                    }
                 }
                 else
                 {
-                    m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
+                    if (m_running.m_ssb & !m_usb)
+                    { // invert spectrum for LSB
+                        m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
+                    }
+                    else
+                    {
+                        m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
+                    }
                 }
 
                 m_sum = 0;

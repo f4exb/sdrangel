@@ -1,3 +1,9 @@
+sdrangel (3.14.7-1) unstable; urgency=medium
+
+  * ChanelAnalyzerNG: added PLL option
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 May 2018 20:14:18 +0200
+
 sdrangel (3.14.6-1) unstable; urgency=medium
 
   * Fixed keyboard input for negative values on realtive integer value dials
