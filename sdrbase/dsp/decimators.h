@@ -282,7 +282,6 @@ public:
     // interleaved I/Q input buffer
 	void decimate1(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_u(SampleVector::iterator* it, const T* buf, qint32 len);
-	void decimate2_inf_raw(SampleVector::iterator* it, const T* buf, qint32 len);
     void decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len);
 	void decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len);
