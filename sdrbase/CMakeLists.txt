@@ -40,6 +40,7 @@ set(sdrbase_SOURCES
     dsp/nco.cpp
     dsp/ncof.cpp
     dsp/phaselock.cpp
+    dsp/phaselockcomplex.cpp
     dsp/projector.cpp
     dsp/samplesinkfifo.cpp
     dsp/samplesourcefifo.cpp
@@ -146,6 +147,7 @@ set(sdrbase_HEADERS
     dsp/ncof.h
     dsp/phasediscri.h
     dsp/phaselock.h
+    dsp/phaselockcomplex.h
     dsp/projector.h
     dsp/recursivefilters.h
     dsp/samplesinkfifo.h
