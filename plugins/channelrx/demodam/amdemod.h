@@ -33,6 +33,8 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
+#include "util/stepfunctions.h"
+
 #include "amdemodsettings.h"
 
 class DeviceSourceAPI;
@@ -175,6 +177,7 @@ private:
     fftfilt* SSBFilter;
     Real m_syncAMBuff[2*1024];
     uint32_t m_syncAMBuffIndex;
+    MagAGC m_syncAMAGC;
 
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
@@ -249,21 +252,33 @@ private:
 
                 for (int i = 0; i < n_out; i++)
                 {
+                    float agcVal = m_syncAMAGC.feedAndGetValue(sideband[i]);
+                    fftfilt::cmplx z = sideband[i] * agcVal; // * m_syncAMAGC.getStepValue();
+
                     if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
-                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag())/2.0f;
+                        m_syncAMBuff[i] = (z.real() + z.imag())/2.0f;
                     } else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB) {
-                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                        m_syncAMBuff[i] = (z.real() + z.imag());
                     } else {
-                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                        m_syncAMBuff[i] = (z.real() + z.imag());
                     }
+
+//                    if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
+//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag())/2.0f;
+//                    } else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB) {
+//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+//                    } else {
+//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+//                    }
 
                     m_syncAMBuffIndex = 0;
                 }
 
                 m_syncAMBuffIndex = m_syncAMBuffIndex < 2*1024 ? m_syncAMBuffIndex : 0;
-                demod = m_syncAMBuff[m_syncAMBuffIndex++]*(SDR_RX_SCALEF/602.0f);
-                m_volumeAGC.feed(demod);
-                demod /= (10.0*m_volumeAGC.getValue());
+                demod = m_syncAMBuff[m_syncAMBuffIndex++]*4.0f; // mos pifometrico
+//                demod = m_syncAMBuff[m_syncAMBuffIndex++]*(SDR_RX_SCALEF/602.0f);
+//                m_volumeAGC.feed(demod);
+//                demod /= (10.0*m_volumeAGC.getValue());
             }
             else
             {
@@ -279,7 +294,7 @@ private:
             }
 
             Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
-            sample = demod * attack * (m_audioSampleRate/24) * m_settings.m_volume;
+            sample = demod * StepFunctions::smootherstep(attack) * (m_audioSampleRate/24) * m_settings.m_volume;
         }
         else
         {

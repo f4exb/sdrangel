@@ -54,6 +54,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_volumeAGC(0.003),
+        m_syncAMAGC(12000, 0.1, 1e-2),
         m_audioFifo(48000),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -68,6 +69,8 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
     DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_audioSampleRate, 2 * 1024);
     SSBFilter = new fftfilt(0.0f, m_settings.m_rfBandwidth / m_audioSampleRate, 1024);
+    m_syncAMAGC.setThresholdEnable(false);
+    m_syncAMAGC.resize(12000, 6000, 0.1);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -251,6 +254,8 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
         m_volumeAGC.resizeNew(sampleRate/10, 0.003);
     }
 
+    m_syncAMAGC.resize(sampleRate/4, sampleRate/8, 0.1);
+
     m_settingsMutex.unlock();
     m_audioSampleRate = sampleRate;
 }
@@ -308,7 +313,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 
     if ((m_settings.m_squelch != settings.m_squelch) || force)
     {
-        m_squelchLevel = pow(10.0, settings.m_squelch / 10.0);
+        m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
