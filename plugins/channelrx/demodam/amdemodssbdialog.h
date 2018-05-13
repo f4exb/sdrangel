@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,42 +14,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSSBDIALOG_H_
+#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSSBDIALOG_H_
 
-#include <QByteArray>
+#include <QDialog>
 
-class Serializable;
+namespace Ui {
+    class AMDemodSSBDialog;
+}
 
-struct AMDemodSettings
+class AMDemodSSBDialog : public QDialog
 {
-    enum SyncAMOperation
-    {
-        SyncAMDSB,
-        SyncAMUSB,
-        SyncAMLSB
-    };
+    Q_OBJECT
+public:
+    explicit AMDemodSSBDialog(bool usb, QWidget* parent = 0);
+    ~AMDemodSSBDialog();
 
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
-    QString m_audioDeviceName;
-    bool m_pll;
-    SyncAMOperation m_syncAMOperation;
+    bool isUsb() const { return m_usb; }
 
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+private:
+    Ui::AMDemodSSBDialog* ui;
+    bool m_usb;
+
+private slots:
+    void accept();
 };
 
-
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */
+#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSSBDIALOG_H_ */

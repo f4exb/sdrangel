@@ -18,6 +18,7 @@
 #include <QMainWindow>
 
 #include "amdemodgui.h"
+#include "amdemodssbdialog.h"
 
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
@@ -149,6 +150,12 @@ void AMDemodGUI::on_pll_toggled(bool checked)
     applySettings();
 }
 
+void AMDemodGUI::on_ssb_toggled(bool checked)
+{
+    m_settings.m_syncAMOperation = checked ? m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB : AMDemodSettings::SyncAMDSB;
+    applySettings();
+}
+
 void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
 {
     m_settings.m_bandpassEnable = checked;
@@ -215,6 +222,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
+	m_samUSB(true),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -229,6 +237,9 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
+	CRightClickEnabler *samSidebandRightClickEnabler = new CRightClickEnabler(ui->ssb);
+    connect(samSidebandRightClickEnabler, SIGNAL(rightClick()), this, SLOT(samSSBSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -253,6 +264,11 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::Off);
+    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::Off);
+    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::On);
 
 	displaySettings();
 	applySettings(true);
@@ -314,6 +330,20 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->pll->setChecked(m_settings.m_pll);
 
+    if (m_settings.m_pll) {
+        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB) {
+            m_samUSB = false;
+            ui->ssb->setIcon(m_iconDSBLSB);
+        } else {
+            m_samUSB = true;
+            ui->ssb->setIcon(m_iconDSBUSB);
+        }
+    }
+    else
+    {
+        ui->ssb->setIcon(m_iconDSBUSB);
+    }
+
     blockApplySettings(false);
 }
 
@@ -337,6 +367,26 @@ void AMDemodGUI::audioSelect()
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
         applySettings();
+    }
+}
+
+void AMDemodGUI::samSSBSelect()
+{
+    AMDemodSSBDialog ssbSelect(m_samUSB);
+    ssbSelect.exec();
+
+    ui->ssb->setIcon(ssbSelect.isUsb() ? m_iconDSBUSB : m_iconDSBLSB);
+
+    if (ssbSelect.isUsb() != m_samUSB)
+    {
+        qDebug("AMDemodGUI::samSSBSelect: %s", ssbSelect.isUsb() ? "usb" : "lsb");
+        m_samUSB = ssbSelect.isUsb();
+
+        if (m_settings.m_syncAMOperation != AMDemodSettings::SyncAMDSB)
+        {
+            m_settings.m_syncAMOperation = m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB;
+            applySettings();
+        }
     }
 }
 

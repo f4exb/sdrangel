@@ -35,7 +35,6 @@ const QString ChannelAnalyzerNG::m_channelId = "ChannelAnalyzerNG";
 ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_pll(0,0.05,0.01),
         m_sampleSink(0),
         m_settingsMutex(QMutex::Recursive)
 {
@@ -50,6 +49,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
+	m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
 
     apply(true);
 
@@ -247,6 +247,13 @@ void ChannelAnalyzerNG::apply(bool force)
         DSBFilter->create_dsb_filter(bandwidth / m_config.m_channelSampleRate);
 
         m_settingsMutex.unlock();
+    }
+
+    if (m_running.m_pll != m_config.m_pll || force)
+    {
+        if (m_config.m_pll) {
+            m_pll.reset();
+        }
     }
 
     m_running.m_frequency = m_config.m_frequency;

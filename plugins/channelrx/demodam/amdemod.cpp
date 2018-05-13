@@ -67,6 +67,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
     DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_audioSampleRate, 2 * 1024);
+    SSBFilter = new fftfilt(0.0f, m_settings.m_rfBandwidth / m_audioSampleRate, 1024);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -89,6 +90,7 @@ AMDemod::~AMDemod()
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete DSBFilter;
+    delete SSBFilter;
 }
 
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -233,6 +235,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_inputMessageQueue.push(channelConfigMsg);
 
     m_settingsMutex.lock();
+
     m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
@@ -241,8 +244,14 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_squelchDelayLine.resize(sampleRate/5);
     DSBFilter->create_dsb_filter((2.0f * m_settings.m_rfBandwidth) / (float) sampleRate);
     m_pllFilt.create(101, sampleRate, 500.0);
-    m_settingsMutex.unlock();
 
+    if (m_settings.m_pll) {
+        m_volumeAGC.resizeNew(sampleRate, 0.003);
+    } else {
+        m_volumeAGC.resizeNew(sampleRate/10, 0.003);
+    }
+
+    m_settingsMutex.unlock();
     m_audioSampleRate = sampleRate;
 }
 
@@ -282,6 +291,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_bandpassEnable: " << settings.m_bandpassEnable
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
+            << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
             << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
@@ -312,6 +322,23 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if ((m_settings.m_pll != settings.m_pll) || force)
+    {
+        if (settings.m_pll)
+        {
+            m_volumeAGC.resizeNew(m_audioSampleRate/4, 0.003);
+            m_syncAMBuffIndex = 0;
+        }
+        else
+        {
+            m_volumeAGC.resizeNew(m_audioSampleRate/10, 0.003);
+        }
+    }
+
+    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force) {
+        m_syncAMBuffIndex = 0;
     }
 
     m_settings = settings;

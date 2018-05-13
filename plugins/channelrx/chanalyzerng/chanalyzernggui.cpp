@@ -243,6 +243,15 @@ void ChannelAnalyzerNGGUI::tick()
 	} else {
 	    ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
+
+	if (ui->pll->isChecked())
+	{
+	    int fHz = round(m_channelAnalyzer->getPllFrequency()*m_rate);
+	    ui->pll->setToolTip(tr("PLL lock (f:%1 Hz e:%2 rad p:%3 rad)")
+	            .arg(fHz)
+	            .arg(m_channelAnalyzer->getPllDeltaPhase())
+	            .arg(m_channelAnalyzer->getPllPhase()));
+	}
 }
 
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
@@ -257,8 +266,13 @@ void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
     }
 }
 
-void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked __attribute__((unused)))
+void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked)
 {
+    if (!checked && m_usePll) {
+        ui->pll->setToolTip("PLL lock");
+    }
+
+    m_usePll = checked;
     applySettings();
 }
 
@@ -399,7 +413,8 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(0)
+	m_spanLog2(0),
+	m_usePll(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);

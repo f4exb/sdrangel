@@ -167,11 +167,12 @@ private:
 	int  m_magsqCount;
 
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
-	SimpleAGC<4096> m_volumeAGC;
+	SimpleAGC<4800> m_volumeAGC;
     Bandpass<Real> m_bandpass;
     Lowpass<std::complex<float> > m_pllFilt;
     PhaseLockComplex m_pll;
     fftfilt* DSBFilter;
+    fftfilt* SSBFilter;
     Real m_syncAMBuff[2*1024];
     uint32_t m_syncAMBuffIndex;
 
@@ -238,16 +239,29 @@ private:
 
                 fftfilt::cmplx *sideband;
                 std::complex<float> cs(yr, yi);
-                int n_out = DSBFilter->runDSB(cs, &sideband, false);
+                int n_out;
+
+                if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
+                    n_out = DSBFilter->runDSB(cs, &sideband, false);
+                } else {
+                    n_out = SSBFilter->runSSB(cs, &sideband, m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB, false);
+                }
 
                 for (int i = 0; i < n_out; i++)
                 {
-                    m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                    if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
+                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag())/2.0f;
+                    } else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB) {
+                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                    } else {
+                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                    }
+
                     m_syncAMBuffIndex = 0;
                 }
 
                 m_syncAMBuffIndex = m_syncAMBuffIndex < 2*1024 ? m_syncAMBuffIndex : 0;
-                demod = m_syncAMBuff[m_syncAMBuffIndex++]*0.7*(SDR_RX_SCALEF/602.0f);
+                demod = m_syncAMBuff[m_syncAMBuffIndex++]*(SDR_RX_SCALEF/602.0f);
                 m_volumeAGC.feed(demod);
                 demod /= (10.0*m_volumeAGC.getValue());
             }

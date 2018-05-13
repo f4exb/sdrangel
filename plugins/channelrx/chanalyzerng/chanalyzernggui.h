@@ -66,6 +66,7 @@ private:
 	bool m_doApplySettings;
 	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
 	int m_spanLog2;
+	bool m_usePll;
 	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
 
 	ChannelAnalyzerNG* m_channelAnalyzer;

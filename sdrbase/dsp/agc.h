@@ -89,6 +89,13 @@ public:
         m_moving_average.resize(AvgSize, initial);
 	}
 
+    void resizeNew(uint32_t newSize, Real initial, Real cutoff=0, Real clip=0)
+    {
+        m_cutoff = cutoff;
+        m_clip = clip;
+        m_moving_average.resize(newSize, initial);
+    }
+
     void fill(double value)
     {
         m_moving_average.fill(value);

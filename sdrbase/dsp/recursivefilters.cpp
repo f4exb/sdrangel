@@ -18,11 +18,12 @@
 #include "recursivefilters.h"
 
 #undef M_PI
-#define M_PI		3.14159265358979323846
+#define M_PI 3.14159265358979323846
 
 SecondOrderRecursiveFilter::SecondOrderRecursiveFilter(float samplingFrequency, float centerFrequency, float r) :
         m_r(r),
-        m_frequencyRatio(centerFrequency/samplingFrequency)
+        m_frequencyRatio(centerFrequency/samplingFrequency),
+        m_f(cos(2.0*M_PI*(m_frequencyRatio)))
 {
     init();
 }
@@ -33,6 +34,7 @@ SecondOrderRecursiveFilter::~SecondOrderRecursiveFilter()
 void SecondOrderRecursiveFilter::setFrequencies(float samplingFrequency, float centerFrequency)
 {
     m_frequencyRatio = centerFrequency / samplingFrequency;
+    m_f = cos(2.0*M_PI*m_frequencyRatio);
     init();
 }
 
@@ -44,7 +46,7 @@ void SecondOrderRecursiveFilter::setR(float r)
 
 short SecondOrderRecursiveFilter::run(short sample)
 {
-    m_v[0] = ((1.0f - m_r) * (float) sample) + (2.0f * m_r * cos(2.0*M_PI*m_frequencyRatio) * m_v[1]) - (m_r * m_r * m_v[2]);
+    m_v[0] = ((1.0f - m_r) * (float) sample) + (2.0f * m_r * m_f * m_v[1]) - (m_r * m_r * m_v[2]);
     float y = m_v[0] - m_v[2];
     m_v[2] = m_v[1];
     m_v[1] = m_v[0];
@@ -54,7 +56,7 @@ short SecondOrderRecursiveFilter::run(short sample)
 
 float SecondOrderRecursiveFilter::run(float sample)
 {
-    m_v[0] = ((1.0f - m_r) * sample) + (2.0f * m_r * cos(2.0*M_PI*m_frequencyRatio) * m_v[1]) - (m_r * m_r * m_v[2]);
+    m_v[0] = ((1.0f - m_r) * sample) + (2.0f * m_r * m_f * m_v[1]) - (m_r * m_r * m_v[2]);
     float y = m_v[0] - m_v[2];
     m_v[2] = m_v[1];
     m_v[1] = m_v[0];

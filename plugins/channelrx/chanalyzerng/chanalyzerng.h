@@ -25,7 +25,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
-#include "dsp/phaselock.h"
+#include "dsp/phaselockcomplex.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -148,6 +148,9 @@ public:
     int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool isPllLocked() const { return m_running.m_pll && m_pll.locked(); }
+	Real getPllFrequency() const { return m_pll.getFrequency(); }
+	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
+    Real getPllPhase() const { return m_pll.getPhiHat(); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -203,7 +206,7 @@ private:
 	bool m_useInterpolator;
 
 	NCOF m_nco;
-	SimplePhaseLock m_pll;
+	PhaseLockComplex m_pll;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
@@ -247,11 +250,13 @@ private:
 
                 if (m_running.m_pll)
                 {
-                    Real ncopll[2];
-                    m_pll.process(re, im, ncopll);
+                    m_pll.feed(re, im);
 
-                    Real mixI = m_sum.real() * ncopll[0] - m_sum.imag() * ncopll[1];
-                    Real mixQ = m_sum.real() * ncopll[1] + m_sum.imag() * ncopll[0];
+                    // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+                    Real mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
+                    Real mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
+//                    Real mixI = m_pll.getReal() * SDR_RX_SCALED;
+//                    Real mixQ = m_pll.getImag() * SDR_RX_SCALED;
 
                     if (m_running.m_ssb & !m_usb)
                     { // invert spectrum for LSB

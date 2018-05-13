@@ -39,6 +39,7 @@ private:
 
     float m_r;
     float m_frequencyRatio;
+    float m_f;
     float m_v[3];
 };
 

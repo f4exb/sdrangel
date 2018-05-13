@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,42 +14,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
+#include "amdemodssbdialog.h"
+#include "ui_amdemodssb.h"
 
-#include <QByteArray>
-
-class Serializable;
-
-struct AMDemodSettings
+AMDemodSSBDialog::AMDemodSSBDialog(bool usb, QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::AMDemodSSBDialog),
+    m_usb(usb)
 {
-    enum SyncAMOperation
-    {
-        SyncAMDSB,
-        SyncAMUSB,
-        SyncAMLSB
-    };
+    ui->setupUi(this);
+    ui->usb->setChecked(usb);
+    ui->lsb->setChecked(!usb);
+}
 
-    qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_squelch;
-    Real m_volume;
-    bool m_audioMute;
-    bool m_bandpassEnable;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
-    QString m_audioDeviceName;
-    bool m_pll;
-    SyncAMOperation m_syncAMOperation;
+AMDemodSSBDialog::~AMDemodSSBDialog()
+{
+    delete ui;
+}
 
-    AMDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-};
+void AMDemodSSBDialog::accept()
+{
+    m_usb = ui->usb->isChecked();
+    QDialog::accept();
+}
 
 
-
-#endif /* PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_ */

@@ -7,6 +7,7 @@ set(am_SOURCES
 	amdemodgui.cpp
 	amdemodsettings.cpp
 	amdemodplugin.cpp
+	amdemodssbdialog.cpp
 )
 
 set(am_HEADERS
@@ -14,10 +15,12 @@ set(am_HEADERS
 	amdemodgui.h
 	amdemodsettings.h
 	amdemodplugin.h
+	amdemodssbdialog.h
 )
 
 set(am_FORMS
 	amdemodgui.ui
+	amdemodssb.ui
 )
 
 include_directories(
