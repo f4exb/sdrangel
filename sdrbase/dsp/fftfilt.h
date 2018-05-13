@@ -32,7 +32,7 @@ public:
 	int noFilt(const cmplx& in, cmplx **out);
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb, bool getDC = true);
-	int runDSB(const cmplx& in, cmplx **out);
+	int runDSB(const cmplx& in, cmplx **out, bool getDC = true);
 	int runAsym(const cmplx & in, cmplx **out, bool usb); //!< Asymmetrical fitering can be used for vestigial sideband
 
 protected:

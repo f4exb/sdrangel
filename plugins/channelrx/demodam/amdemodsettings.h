@@ -33,6 +33,7 @@ struct AMDemodSettings
     QString m_title;
     Serializable *m_channelMarker;
     QString m_audioDeviceName;
+    bool m_pll;
 
     AMDemodSettings();
     void resetToDefaults();

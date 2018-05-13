@@ -130,6 +130,31 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="pll">
+          <property name="toolTip">
+           <string>PLL for synchronous AM</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/unlocked.png</normaloff>
+            <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

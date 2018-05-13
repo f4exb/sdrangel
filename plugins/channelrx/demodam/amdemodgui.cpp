@@ -139,6 +139,16 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
+void AMDemodGUI::on_pll_toggled(bool checked)
+{
+    if (!checked) {
+        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
+
+    m_settings.m_pll = checked;
+    applySettings();
+}
+
 void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
 {
     m_settings.m_bandpassEnable = checked;
@@ -302,6 +312,7 @@ void AMDemodGUI::displaySettings()
 
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
+    ui->pll->setChecked(m_settings.m_pll);
 
     blockApplySettings(false);
 }
@@ -357,6 +368,15 @@ void AMDemodGUI::tick()
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+	}
+
+	if (m_settings.m_pll)
+	{
+	    if (m_amDemod->getPllLocked()) {
+	        ui->pll->setStyleSheet("QToolButton { background-color : green; }");
+	    } else {
+	        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+	    }
 	}
 
 	m_tickCount++;

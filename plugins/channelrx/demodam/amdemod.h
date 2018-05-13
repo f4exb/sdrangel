@@ -27,6 +27,9 @@
 #include "util/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
+#include "dsp/lowpass.h"
+#include "dsp/phaselockcomplex.h"
+#include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
@@ -118,6 +121,7 @@ public:
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
+	bool getPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
 
 	void getMagSqLevels(double& avg, double& peak, int& nbSamples)
 	{
@@ -165,6 +169,11 @@ private:
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	SimpleAGC<4096> m_volumeAGC;
     Bandpass<Real> m_bandpass;
+    Lowpass<std::complex<float> > m_pllFilt;
+    PhaseLockComplex m_pll;
+    fftfilt* DSBFilter;
+    Real m_syncAMBuff[2*1024];
+    uint32_t m_syncAMBuffIndex;
 
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
@@ -217,9 +226,37 @@ private:
 
         if (m_squelchOpen && !m_settings.m_audioMute)
         {
-            Real demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate/20));
-            m_volumeAGC.feed(demod);
-            demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
+            Real demod;
+
+            if (m_settings.m_pll)
+            {
+                std::complex<float> s(re, im);
+                s = m_pllFilt.filter(s);
+                m_pll.feed(s.real(), s.imag());
+                float yr = re * m_pll.getImag() - im * m_pll.getReal();
+                float yi = re * m_pll.getReal() + im * m_pll.getImag();
+
+                fftfilt::cmplx *sideband;
+                std::complex<float> cs(yr, yi);
+                int n_out = DSBFilter->runDSB(cs, &sideband, false);
+
+                for (int i = 0; i < n_out; i++)
+                {
+                    m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
+                    m_syncAMBuffIndex = 0;
+                }
+
+                m_syncAMBuffIndex = m_syncAMBuffIndex < 2*1024 ? m_syncAMBuffIndex : 0;
+                demod = m_syncAMBuff[m_syncAMBuffIndex++]*0.7*(SDR_RX_SCALEF/602.0f);
+                m_volumeAGC.feed(demod);
+                demod /= (10.0*m_volumeAGC.getValue());
+            }
+            else
+            {
+                demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate/20));
+                m_volumeAGC.feed(demod);
+                demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
+            }
 
             if (m_settings.m_bandpassEnable)
             {

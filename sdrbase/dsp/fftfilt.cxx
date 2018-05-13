@@ -298,7 +298,7 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb, bool getDC)
 }
 
 // Version for double sideband. You have to double the FFT size used for SSB.
-int fftfilt::runDSB(const cmplx & in, cmplx **out)
+int fftfilt::runDSB(const cmplx & in, cmplx **out, bool getDC)
 {
 	data[inptr++] = in;
 	if (inptr < flen2)
@@ -311,6 +311,9 @@ int fftfilt::runDSB(const cmplx & in, cmplx **out)
 		data[i] *= filter[i];
 		data[flen2 + i] *= filter[flen2 + i];
 	}
+
+    // get or reject DC component
+    data[0] = getDC ? data[0] : 0;
 
 	// in-place FFT: freqdata overwritten with filtered timedata
 	fft->InverseComplexFFT(data);

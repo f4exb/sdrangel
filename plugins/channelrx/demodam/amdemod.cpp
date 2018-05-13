@@ -66,6 +66,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_audioSampleRate, 2 * 1024);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -74,6 +75,10 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_pllFilt.create(101, m_audioSampleRate, 500.0);
+    m_pll.computeCoefficients(0.05, 0.707, 1000);
+    m_syncAMBuffIndex = 0;
 }
 
 AMDemod::~AMDemod()
@@ -83,6 +88,7 @@ AMDemod::~AMDemod()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete DSBFilter;
 }
 
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
@@ -233,6 +239,8 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);
+    DSBFilter->create_dsb_filter((2.0f * m_settings.m_rfBandwidth) / (float) sampleRate);
+    m_pllFilt.create(101, sampleRate, 500.0);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -273,6 +281,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioMute: " << settings.m_audioMute
             << " m_bandpassEnable: " << settings.m_bandpassEnable
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_pll: " << settings.m_pll
             << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
@@ -283,6 +292,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
+        DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 

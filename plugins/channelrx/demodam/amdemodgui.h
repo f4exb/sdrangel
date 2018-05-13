@@ -65,6 +65,7 @@ private:
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
+	void on_pll_toggled(bool checked);
 	void on_bandpassEnable_toggled(bool checked);
 	void on_rfBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
