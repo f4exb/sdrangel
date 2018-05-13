@@ -29,17 +29,16 @@
 #include "dsp/bandpass.h"
 #include "dsp/lowpass.h"
 #include "dsp/phaselockcomplex.h"
-#include "dsp/fftfilt.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
-#include "util/stepfunctions.h"
 
 #include "amdemodsettings.h"
 
 class DeviceSourceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
+class fftfilt;
 
 class AMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
@@ -193,132 +192,7 @@ private:
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
-	void processOneSample(Complex &ci)
-	{
-	    Real re = ci.real() / SDR_RX_SCALEF;
-	    Real im = ci.imag() / SDR_RX_SCALEF;
-        Real magsq = re*re + im*im;
-        m_movingAverage(magsq);
-        m_magsq = m_movingAverage.asDouble();
-        m_magsqSum += magsq;
-
-        if (magsq > m_magsqPeak)
-        {
-            m_magsqPeak = magsq;
-        }
-
-        m_magsqCount++;
-
-        m_squelchDelayLine.write(magsq);
-
-        if (m_magsq < m_squelchLevel)
-        {
-            if (m_squelchCount > 0) {
-                m_squelchCount--;
-            }
-        }
-        else
-        {
-            if (m_squelchCount < m_audioSampleRate / 10) {
-                m_squelchCount++;
-            }
-        }
-
-        qint16 sample;
-
-        m_squelchOpen = (m_squelchCount >= m_audioSampleRate / 20);
-
-        if (m_squelchOpen && !m_settings.m_audioMute)
-        {
-            Real demod;
-
-            if (m_settings.m_pll)
-            {
-                std::complex<float> s(re, im);
-                s = m_pllFilt.filter(s);
-                m_pll.feed(s.real(), s.imag());
-                float yr = re * m_pll.getImag() - im * m_pll.getReal();
-                float yi = re * m_pll.getReal() + im * m_pll.getImag();
-
-                fftfilt::cmplx *sideband;
-                std::complex<float> cs(yr, yi);
-                int n_out;
-
-                if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
-                    n_out = DSBFilter->runDSB(cs, &sideband, false);
-                } else {
-                    n_out = SSBFilter->runSSB(cs, &sideband, m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB, false);
-                }
-
-                for (int i = 0; i < n_out; i++)
-                {
-                    float agcVal = m_syncAMAGC.feedAndGetValue(sideband[i]);
-                    fftfilt::cmplx z = sideband[i] * agcVal; // * m_syncAMAGC.getStepValue();
-
-                    if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
-                        m_syncAMBuff[i] = (z.real() + z.imag())/2.0f;
-                    } else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB) {
-                        m_syncAMBuff[i] = (z.real() + z.imag());
-                    } else {
-                        m_syncAMBuff[i] = (z.real() + z.imag());
-                    }
-
-//                    if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMDSB) {
-//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag())/2.0f;
-//                    } else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB) {
-//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
-//                    } else {
-//                        m_syncAMBuff[i] = (sideband[i].real() + sideband[i].imag());
-//                    }
-
-                    m_syncAMBuffIndex = 0;
-                }
-
-                m_syncAMBuffIndex = m_syncAMBuffIndex < 2*1024 ? m_syncAMBuffIndex : 0;
-                demod = m_syncAMBuff[m_syncAMBuffIndex++]*4.0f; // mos pifometrico
-//                demod = m_syncAMBuff[m_syncAMBuffIndex++]*(SDR_RX_SCALEF/602.0f);
-//                m_volumeAGC.feed(demod);
-//                demod /= (10.0*m_volumeAGC.getValue());
-            }
-            else
-            {
-                demod = sqrt(m_squelchDelayLine.readBack(m_audioSampleRate/20));
-                m_volumeAGC.feed(demod);
-                demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
-            }
-
-            if (m_settings.m_bandpassEnable)
-            {
-                demod = m_bandpass.filter(demod);
-                demod /= 301.0f;
-            }
-
-            Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
-            sample = demod * StepFunctions::smootherstep(attack) * (m_audioSampleRate/24) * m_settings.m_volume;
-        }
-        else
-        {
-            sample = 0;
-        }
-
-        m_audioBuffer[m_audioBufferFill].l = sample;
-        m_audioBuffer[m_audioBufferFill].r = sample;
-        ++m_audioBufferFill;
-
-        if (m_audioBufferFill >= m_audioBuffer.size())
-        {
-            uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-            if (res != m_audioBufferFill)
-            {
-                qDebug("AMDemod::processOneSample: %u/%u audio samples written", res, m_audioBufferFill);
-                m_audioFifo.clear();
-            }
-
-            m_audioBufferFill = 0;
-        }
-	}
-
+    void processOneSample(Complex &ci);
 };
 
 #endif // INCLUDE_AMDEMOD_H
