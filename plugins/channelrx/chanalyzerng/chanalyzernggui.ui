@@ -198,6 +198,44 @@
          </widget>
         </item>
         <item>
+         <widget class="QComboBox" name="pllPskOrder">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>PLL PSK order (1 for CW)</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
          <widget class="ButtonSwitch" name="useRationalDownsampler">
           <property name="toolTip">
            <string>Use rational downsampler</string>

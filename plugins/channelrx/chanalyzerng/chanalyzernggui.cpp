@@ -276,6 +276,11 @@ void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked)
     applySettings();
 }
 
+void ChannelAnalyzerNGGUI::on_pllPskOrder_currentIndexChanged(int index __attribute__((unused)))
+{
+	applySettings();
+}
+
 void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked __attribute__((unused)))
 {
     setNewFinalRate(m_spanLog2);
@@ -605,7 +610,8 @@ void ChannelAnalyzerNGGUI::applySettings()
 			ui->lowCut->value() * 100.0,
 			m_spanLog2,
 			ui->ssb->isChecked(),
-			ui->pll->isChecked());
+			ui->pll->isChecked(),
+			1<<ui->pllPskOrder->currentIndex());
 	}
 }
 

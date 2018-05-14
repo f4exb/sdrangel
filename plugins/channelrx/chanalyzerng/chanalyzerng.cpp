@@ -75,9 +75,10 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 		Real LowCutoff,
 		int  spanLog2,
 		bool ssb,
-		bool pll)
+		bool pll,
+		unsigned int pllPskOrder)
 {
-    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll);
+    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, pllPskOrder);
 	messageQueue->push(cmd);
 }
 
@@ -168,6 +169,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		m_config.m_spanLog2 = cfg.getSpanLog2();
 		m_config.m_ssb = cfg.getSSB();
 		m_config.m_pll = cfg.getPLL();
+		m_config.m_pllPskOrder = cfg.getPLLPSKOrder();
 
         qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
                 << " m_channelSampleRate: " << m_config.m_channelSampleRate
@@ -175,7 +177,8 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
                 << " m_LowCutoff: " << m_config.m_LowCutoff
                 << " m_spanLog2: " << m_config.m_spanLog2
                 << " m_ssb: " << m_config.m_ssb
-                << " m_pll: " << m_config.m_pll;
+                << " m_pll: " << m_config.m_pll
+				<< " m_pllPskOrder: " << m_config.m_pllPskOrder;
 
         apply();
 		return true;
@@ -256,6 +259,11 @@ void ChannelAnalyzerNG::apply(bool force)
         }
     }
 
+    if (m_running.m_pll != m_config.m_pll || force)
+    {
+    	m_pll.setPskOrder(m_config.m_pllPskOrder);
+    }
+
     m_running.m_frequency = m_config.m_frequency;
     m_running.m_channelSampleRate = m_config.m_channelSampleRate;
     m_running.m_inputSampleRate = m_config.m_inputSampleRate;
@@ -266,5 +274,6 @@ void ChannelAnalyzerNG::apply(bool force)
     m_running.m_spanLog2 = m_config.m_spanLog2;
     m_running.m_ssb = m_config.m_ssb;
     m_running.m_pll = m_config.m_pll;
+    m_running.m_pllPskOrder = m_config.m_pllPskOrder;
     //m_settingsMutex.unlock();
 }

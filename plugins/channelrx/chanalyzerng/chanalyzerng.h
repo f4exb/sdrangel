@@ -47,6 +47,7 @@ public:
         int  getSpanLog2() const { return m_spanLog2; }
         bool getSSB() const { return m_ssb; }
         bool getPLL() const { return m_pll; }
+        unsigned int getPLLPSKOrder() const { return m_pllPskOrder; }
 
         static MsgConfigureChannelAnalyzer* create(
                 int channelSampleRate,
@@ -54,7 +55,8 @@ public:
                 Real LowCutoff,
                 int spanLog2,
                 bool ssb,
-                bool pll)
+                bool pll,
+				unsigned int pllPskOrder)
         {
             return new MsgConfigureChannelAnalyzer(
                     channelSampleRate,
@@ -62,7 +64,8 @@ public:
                     LowCutoff,
                     spanLog2,
                     ssb,
-                    pll);
+                    pll,
+					pllPskOrder);
         }
 
     private:
@@ -72,6 +75,7 @@ public:
         int  m_spanLog2;
         bool m_ssb;
         bool m_pll;
+        unsigned int m_pllPskOrder;
 
         MsgConfigureChannelAnalyzer(
                 int channelSampleRate,
@@ -79,14 +83,16 @@ public:
                 Real LowCutoff,
                 int spanLog2,
                 bool ssb,
-                bool pll) :
+                bool pll,
+				unsigned int pllPskOrder) :
             Message(),
             m_channelSampleRate(channelSampleRate),
             m_Bandwidth(Bandwidth),
             m_LowCutoff(LowCutoff),
             m_spanLog2(spanLog2),
             m_ssb(ssb),
-            m_pll(pll)
+            m_pll(pll),
+			m_pllPskOrder(pllPskOrder)
         { }
     };
 
@@ -141,7 +147,8 @@ public:
 			Real LowCutoff,
 			int spanLog2,
 			bool ssb,
-			bool pll);
+			bool pll,
+			unsigned int pllPskOrder);
 
 	DownChannelizer *getChannelizer() { return m_channelizer; }
 	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
@@ -179,6 +186,7 @@ private:
 	    int m_spanLog2;
 	    bool m_ssb;
 	    bool m_pll;
+	    unsigned int m_pllPskOrder;
 
 	    Config() :
 	        m_frequency(0),
@@ -188,7 +196,8 @@ private:
 	        m_LowCutoff(300),
 	        m_spanLog2(3),
 	        m_ssb(false),
-	        m_pll(false)
+	        m_pll(false),
+			m_pllPskOrder(1)
 	    {}
 	};
 

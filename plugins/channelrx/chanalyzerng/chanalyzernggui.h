@@ -94,6 +94,7 @@ private slots:
 	void on_deltaFrequency_changed(qint64 value);
     void on_channelSampleRate_changed(quint64 value);
     void on_pll_toggled(bool checked);
+    void on_pllPskOrder_currentIndexChanged(int index);
     void on_useRationalDownsampler_toggled(bool checked);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
