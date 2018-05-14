@@ -3,7 +3,9 @@
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // See: http://liquidsdr.org/blog/pll-howto/                                     //
-// Fixes filter registers saturation                                             //
+// Fixed filter registers saturation                                             //
+// Added order for PSK locking. This brilliant idea actually comes from this     //
+// post: https://www.dsprelated.com/showthread/comp.dsp/36356-1.php              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -37,7 +39,8 @@ PhaseLockComplex::PhaseLockComplex() :
     m_y(1.0, 0.0),
     m_yRe(1.0),
     m_yIm(0.0),
-    m_freq(0.0)
+    m_freq(0.0),
+    m_pskOrder(1)
 {
 }
 
@@ -71,6 +74,11 @@ void PhaseLockComplex::computeCoefficients(Real wn, Real zeta, Real K)
     reset();
 }
 
+void PhaseLockComplex::setPskOrder(unsigned int order)
+{
+    m_pskOrder = order > 0 ? order : 1;
+}
+
 void PhaseLockComplex::reset()
 {
     // reset filter accumulators and phase
@@ -95,6 +103,11 @@ void PhaseLockComplex::feed(float re, float im)
     m_y.imag(m_yIm);
     std::complex<float> x(re, im);
     m_deltaPhi = std::arg(x * std::conj(m_y));
+
+    // bring phase 0 on any of the PSK symbols
+    if (m_pskOrder > 1) {
+        m_deltaPhi = normalizeAngle(m_pskOrder*m_deltaPhi);
+    }
 
     // advance buffer
     m_v2 = m_v1;  // shift center register to upper register
@@ -134,4 +147,13 @@ void PhaseLockComplex::feed(float re, float im)
     m_phiHatLast = m_phiHat;
 }
 
-
+float PhaseLockComplex::normalizeAngle(float angle)
+{
+    while (angle <= -M_PI) {
+        angle += 2.0*M_PI;
+    }
+    while (angle > M_PI) {
+        angle -= 2.0*M_PI;
+    }
+    return angle;
+}

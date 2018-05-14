@@ -3,7 +3,9 @@
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // See: http://liquidsdr.org/blog/pll-howto/                                     //
-// Fixes filter registers saturation                                             //
+// Fixed filter registers saturation                                             //
+// Added order for PSK locking. This brilliant idea actually comes from this     //
+// post: https://www.dsprelated.com/showthread/comp.dsp/36356-1.php              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -35,6 +37,10 @@ public:
      * \param K    PLL loop gain
      * */
     void computeCoefficients(Real wn, Real zeta, Real K);
+    /** Set the PSK order for the phase comparator
+     * \param order 0,1: no PSK (CW), 2: BPSK, 4: QPSK, 8: 8-PSK, ... use powers of two for real cases
+     */
+    void setPskOrder(unsigned int order);
     void reset();
     void feed(float re, float im);
     const std::complex<float>& getComplex() const { return m_y; }
@@ -46,6 +52,9 @@ public:
     float getPhiHat() const { return m_phiHat; }
 
 private:
+    /** Normalize angle in radians into the [-pi,+pi] region */
+    static float normalizeAngle(float angle);
+
     // a0 = 1 is implied
     float m_a1;
     float m_a2;
@@ -62,7 +71,7 @@ private:
     float m_yRe;
     float m_yIm;
     float m_freq;
-
+    unsigned int m_pskOrder;
 };
 
 
