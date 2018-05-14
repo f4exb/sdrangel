@@ -42,7 +42,8 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     m_timeOffset(0),
     m_focusedTraceIndex(0),
     m_displayGridIntensity(10),
-    m_displayTraceIntensity(50)
+    m_displayTraceIntensity(50),
+    m_displayXYPoints(false)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -910,7 +911,11 @@ void GLScopeNG::paintGL()
                 mat.setToIdentity();
                 mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
                 mat.scale(2.0f * rectW, -2.0f * rectH);
-                m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
+                if (m_displayXYPoints) {
+                    m_glShaderSimple.drawPoints(mat, color, q3, end -start);
+                } else {
+                    m_glShaderSimple.drawPolyline(mat, color, q3, end -start);
+                }
             } // XY polar display
         } // trace length > 0
     } // XY mixed + polar display

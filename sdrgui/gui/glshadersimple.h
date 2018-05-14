@@ -34,6 +34,7 @@ public:
 	~GLShaderSimple();
 
 	void initializeGL();
+    void drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);

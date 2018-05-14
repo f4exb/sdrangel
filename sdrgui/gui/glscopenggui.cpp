@@ -422,6 +422,12 @@ void GLScopeNGGUI::on_onlyX_toggled(bool checked)
         ui->polar->setChecked(false);
         m_glScope->setDisplayMode(GLScopeNG::DisplayX);
     }
+    else
+    {
+        if (!ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
+            ui->polar->setChecked(true);
+        }
+    }
 }
 
 void GLScopeNGGUI::on_onlyY_toggled(bool checked)
@@ -433,6 +439,12 @@ void GLScopeNGGUI::on_onlyY_toggled(bool checked)
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
         m_glScope->setDisplayMode(GLScopeNG::DisplayY);
+    }
+    else
+    {
+        if (!ui->onlyX->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
+            ui->polar->setChecked(true);
+        }
     }
 }
 
@@ -446,6 +458,12 @@ void GLScopeNGGUI::on_horizontalXY_toggled(bool checked)
         ui->polar->setChecked(false);
         m_glScope->setDisplayMode(GLScopeNG::DisplayXYH);
     }
+    else
+    {
+        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
+            ui->polar->setChecked(true);
+        }
+    }
 }
 
 void GLScopeNGGUI::on_verticalXY_toggled(bool checked)
@@ -457,6 +475,12 @@ void GLScopeNGGUI::on_verticalXY_toggled(bool checked)
         ui->horizontalXY->setChecked(false);
         ui->polar->setChecked(false);
         m_glScope->setDisplayMode(GLScopeNG::DisplayXYV);
+    }
+    else
+    {
+        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->polar->isChecked()) {
+            ui->polar->setChecked(true);
+        }
     }
 }
 
@@ -470,6 +494,17 @@ void GLScopeNGGUI::on_polar_toggled(bool checked)
         ui->verticalXY->setChecked(false);
         m_glScope->setDisplayMode(GLScopeNG::DisplayPol);
     }
+    else
+    {
+        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked()) {
+            ui->polar->setChecked(true);
+        }
+    }
+}
+
+void GLScopeNGGUI::on_polarPoints_toggled(bool checked)
+{
+    m_glScope->setDisplayXYPoints(checked);
 }
 
 void GLScopeNGGUI::on_traceIntensity_valueChanged(int value)

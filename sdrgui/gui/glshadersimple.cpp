@@ -59,6 +59,11 @@ void GLShaderSimple::initializeGL()
 	m_program->release();
 }
 
+void GLShaderSimple::drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+{
+    draw(GL_POINTS, transformMatrix, color, vertices, nbVertices);
+}
+
 void GLShaderSimple::drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
 {
 	draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices);

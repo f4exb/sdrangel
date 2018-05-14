@@ -74,6 +74,7 @@ public:
 
     bool getDataChanged() const { return m_dataChanged; }
     DisplayMode getDisplayMode() const { return m_displayMode; }
+    void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
 
 signals:
     void sampleRateChanged(int);
@@ -117,6 +118,7 @@ private:
 
     int m_displayGridIntensity;
     int m_displayTraceIntensity;
+    bool m_displayXYPoints;
 
     ScaleEngine m_x1Scale; //!< Display #1 X scale. Time scale
     ScaleEngine m_x2Scale; //!< Display #2 X scale. Time scale
