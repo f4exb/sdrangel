@@ -66,4 +66,56 @@ class MovingAverageUtil
     Total m_total;
 };
 
+
+template <typename T, typename Total>
+class MovingAverageUtilVar
+{
+  public:
+    MovingAverageUtilVar(unsigned int size)
+      : m_num_samples(0), m_index(0), m_total(0)
+    {
+        m_samples.resize(size);
+    }
+
+    void reset()
+    {
+        m_num_samples = 0;
+        m_index = 0;
+        m_total = 0;
+    }
+
+    void resize(unsigned int size)
+    {
+        reset();
+        m_samples.resize(size);
+    }
+
+    void operator()(T sample)
+    {
+        if (m_num_samples < m_samples.size()) // fill up
+        {
+            m_samples[m_num_samples++] = sample;
+            m_total += sample;
+        }
+        else // roll
+        {
+            T& oldest = m_samples[m_index];
+            m_total += sample - oldest;
+            oldest = sample;
+            m_index = (m_index + 1) % m_samples.size();
+        }
+    }
+
+    double asDouble() const { return ((double)m_total) / m_samples.size(); }
+    float asFloat() const { return ((float)m_total) / m_samples.size(); }
+    operator T() const { return  m_total / m_samples.size(); }
+
+  private:
+    std::vector<T> m_samples;
+    unsigned int m_num_samples;
+    unsigned int m_index;
+    Total m_total;
+};
+
+
 #endif /* GR_SDRDAEMONFEC_LIB_MOVINGAVERAGE_H_ */
