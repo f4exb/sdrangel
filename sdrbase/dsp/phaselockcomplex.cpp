@@ -34,12 +34,18 @@ PhaseLockComplex::PhaseLockComplex() :
     m_v1(0.0),
     m_v2(0.0),
     m_deltaPhi(0.0),
-    m_phiHatLast(0.0),
     m_phiHat(0.0),
+    m_phiHatPrev(0.0),
+    m_phiHat1(0.0),
+    m_phiHat2(0.0),
+    m_dPhiHatAccum(0.0),
+    m_phiHatCount(0),
     m_y(1.0, 0.0),
     m_yRe(1.0),
     m_yIm(0.0),
     m_freq(0.0),
+    m_lock(0.0),
+    m_lockCount(0),
     m_pskOrder(1)
 {
 }
@@ -86,13 +92,19 @@ void PhaseLockComplex::reset()
     m_v1 = 0.0f;
     m_v2 = 0.0f;
     m_deltaPhi = 0.0f;
-    m_phiHatLast = 0.0f;
     m_phiHat = 0.0f;
+    m_phiHatPrev = 0.0f;
+    m_phiHat1 = 0.0f;
+    m_phiHat2 = 0.0f;
+    m_dPhiHatAccum = 0.0f;
+    m_phiHatCount = 0;
     m_y.real(1.0);
     m_y.real(0.0);
     m_yRe = 1.0f;
     m_yIm = 0.0f;
     m_freq = 0.0f;
+    m_lock = 0.0f;
+    m_lockCount = 0;
 }
 
 void PhaseLockComplex::feed(float re, float im)
@@ -136,15 +148,40 @@ void PhaseLockComplex::feed(float re, float im)
         m_phiHat += 2.0*M_PI;
     }
 
-    m_freq = (m_phiHat - m_phiHatLast) / (2.0*M_PI);
+    float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
+    m_phiHatPrev = m_phiHat;
 
-    if (m_freq < -1.0f) {
-        m_freq += 2.0f;
-    } else if (m_freq > 1.0f) {
-        m_freq -= 2.0f;
+    if (m_phiHatCount < 9)
+    {
+        m_dPhiHatAccum += dPhi;
+    }
+    else
+    {
+        float dPhi1 = (m_phiHat1 - m_dPhiHatAccum) / 10.0f;
+        float dPhi1Prev = (m_phiHat2 - m_phiHat1) / 10.0f;
+        m_lock = dPhi1 - dPhi1Prev; // second derivative of phase
+
+        if ((m_lock > -0.01) && (m_lock < 0.01))
+        {
+            if (m_lockCount < 1000) {
+                m_lockCount++;
+            }
+        }
+        else
+        {
+            if (m_lockCount > 0) {
+                m_lockCount--;
+            }
+        }
+
+        m_freq = dPhi1 / 2.0*M_PI; // first derivative of phase
+        m_phiHat2 = m_phiHat1; 
+        m_phiHat1 = m_dPhiHatAccum;
+        m_dPhiHatAccum = 0.0f;
+        m_phiHatCount = 0;
     }
 
-    m_phiHatLast = m_phiHat;
+    m_dPhiHatAccum += dPhi;
 }
 
 float PhaseLockComplex::normalizeAngle(float angle)

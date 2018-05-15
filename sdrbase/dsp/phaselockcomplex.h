@@ -46,7 +46,7 @@ public:
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
-    bool locked() const { return (m_deltaPhi > -0.1) && (m_deltaPhi < 0.1); }
+    bool locked() const { return m_lockCount > 500; }
     float getFrequency() const { return m_freq; }
     float getDeltaPhi() const { return m_deltaPhi; }
     float getPhiHat() const { return m_phiHat; }
@@ -65,12 +65,18 @@ private:
     float m_v1;
     float m_v2;
     float m_deltaPhi;
-    float m_phiHatLast;
     float m_phiHat;
+    float m_phiHatPrev;
+    float m_phiHat1;
+    float m_phiHat2;
+    float m_dPhiHatAccum;
+    int m_phiHatCount;
     std::complex<float> m_y;
     float m_yRe;
     float m_yIm;
     float m_freq;
+    float m_lock;
+    int m_lockCount;
     unsigned int m_pskOrder;
 };
 
