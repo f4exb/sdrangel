@@ -120,6 +120,7 @@ bool ChannelAnalyzerNGGUI::deserialize(const QByteArray& data)
 
 		d.readS32(1, &tmp, 0);
 		m_channelMarker.setCenterFrequency(tmp);
+		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 		d.readS32(2, &bw, 30);
 		d.readBlob(3, &bytetmp);
 		ui->spectrumGUI->deserialize(bytetmp);
