@@ -49,7 +49,8 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
-	m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
+	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
+	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
     apply(true);
 
