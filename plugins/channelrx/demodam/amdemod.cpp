@@ -82,7 +82,7 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
-    m_pllFilt.create(101, m_audioSampleRate, 500.0);
+    m_pllFilt.create(101, m_audioSampleRate, 200.0);
     m_pll.computeCoefficients(0.05, 0.707, 1000);
     m_syncAMBuffIndex = 0;
 }
@@ -374,7 +374,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);
     DSBFilter->create_dsb_filter((2.0f * m_settings.m_rfBandwidth) / (float) sampleRate);
-    m_pllFilt.create(101, sampleRate, 500.0);
+    m_pllFilt.create(101, sampleRate, 200.0);
 
     if (m_settings.m_pll) {
         m_volumeAGC.resizeNew(sampleRate, 0.003);
@@ -383,6 +383,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     }
 
     m_syncAMAGC.resize(sampleRate/4, sampleRate/8, 0.1);
+    m_pll.setSampleRate(sampleRate);
 
     m_settingsMutex.unlock();
     m_audioSampleRate = sampleRate;

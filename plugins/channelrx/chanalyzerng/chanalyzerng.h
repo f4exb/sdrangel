@@ -155,7 +155,6 @@ public:
     int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool isPllLocked() const { return m_running.m_pll && m_pll.locked(); }
-	Real getPllFrequency() const { return m_pll.getFrequency(); }
 	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
     Real getPllPhase() const { return m_pll.getPhiHat(); }
 
@@ -262,10 +261,10 @@ private:
                     m_pll.feed(re, im);
 
                     // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                    // Real mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
-                    // Real mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
-                    Real mixI = m_pll.getReal() * SDR_RX_SCALED;
-                    Real mixQ = m_pll.getImag() * SDR_RX_SCALED;
+                    Real mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
+                    Real mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
+//                    Real mixI = m_pll.getReal() * SDR_RX_SCALED;
+//                    Real mixQ = m_pll.getImag() * SDR_RX_SCALED;
 
                     if (m_running.m_ssb & !m_usb)
                     { // invert spectrum for LSB

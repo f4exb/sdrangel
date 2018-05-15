@@ -41,13 +41,14 @@ public:
      * \param order 0,1: no PSK (CW), 2: BPSK, 4: QPSK, 8: 8-PSK, ... use powers of two for real cases
      */
     void setPskOrder(unsigned int order);
+    /** Set sample rate information only for frequency and lock condition calculation */
+    void setSampleRate(unsigned int sampleRate);
     void reset();
     void feed(float re, float im);
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
-    bool locked() const { return m_lockCount > 500; }
-    float getFrequency() const { return m_freq; }
+    bool locked() const { return m_lockCount > (m_pskOrder > 1 ? 15 : (m_lockTime1-2)); } // 6
     float getDeltaPhi() const { return m_deltaPhi; }
     float getPhiHat() const { return m_phiHat; }
 
@@ -75,9 +76,14 @@ private:
     float m_yRe;
     float m_yIm;
     float m_freq;
+    float m_freqPrev;
     float m_lock;
     int m_lockCount;
     unsigned int m_pskOrder;
+    int m_lockTime1;
+    int m_lockTime;
+    float m_lockTimef;
+    float m_lockThreshold;
 };
 
 

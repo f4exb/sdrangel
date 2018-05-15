@@ -197,8 +197,6 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	}
 }
 
-
-
 void ChannelAnalyzerNG::apply(bool force)
 {
     if ((m_running.m_frequency != m_config.m_frequency) ||
@@ -251,6 +249,12 @@ void ChannelAnalyzerNG::apply(bool force)
         DSBFilter->create_dsb_filter(bandwidth / m_config.m_channelSampleRate);
 
         m_settingsMutex.unlock();
+    }
+
+    if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
+        (m_running.m_spanLog2 != m_config.m_spanLog2) || force)
+    {
+        m_pll.setSampleRate(m_running.m_channelSampleRate / (1<<m_running.m_spanLog2));
     }
 
     if (m_running.m_pll != m_config.m_pll || force)
