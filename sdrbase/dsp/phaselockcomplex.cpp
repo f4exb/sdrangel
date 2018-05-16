@@ -52,7 +52,7 @@ PhaseLockComplex::PhaseLockComplex() :
     m_lockTime(2400),
     m_lockTimef(2400.0f),
     m_lockThreshold(4.8f),
-    m_avgPhi(240)
+    m_avgF(2400)
 {
 }
 
@@ -97,8 +97,8 @@ void PhaseLockComplex::setSampleRate(unsigned int sampleRate)
     m_lockTime1 = sampleRate / 100; // 10ms for order 1
     m_lockTime = sampleRate / 20; // 50ms for order > 1
     m_lockTimef = (float) m_lockTime;
-    m_lockThreshold = m_lockTime * 0.002f; // threshold of 0.002 taking division by lock time into account
-    m_avgPhi.resize(sampleRate / 200);
+    m_lockThreshold = m_lockTime * 0.00015f; // threshold of 0.002 taking division by lock time into account
+    m_avgF.resize(m_lockTime);
     reset();
 }
 
@@ -123,6 +123,44 @@ void PhaseLockComplex::reset()
     m_freqPrev = 0.0f;
     m_lock = 0.0f;
     m_lockCount = 0;
+}
+
+void PhaseLockComplex::feedFLL(float re, float im)
+{
+    std::complex<float> x(re, im);
+    m_phiHat1 = std::arg(x);
+    float dPhi = normalizeAngle(m_phiHat1 - m_phiHat2); // instantanoeus radian valued signal frequency in [-pi..pi] range
+    m_phiHat2 = m_phiHat1;
+
+    // advance buffer
+    m_v2 = m_v1;  // shift center register to upper register
+    m_v1 = m_v0;  // shift lower register to center register
+
+    // compute new lower register
+    m_v0 = dPhi - m_v1*m_a1 - m_v2*m_a2;
+
+    // compute new output
+    float freqHat = m_v0*m_b0 + m_v1*m_b1 + m_v2*m_b2;
+
+    // prevent saturation
+    if (freqHat > 2.0*M_PI)
+    {
+        m_v0 *= (freqHat - 2.0*M_PI) / freqHat;
+        m_v1 *= (freqHat - 2.0*M_PI) / freqHat;
+        m_v2 *= (freqHat - 2.0*M_PI) / freqHat;
+        freqHat -= 2.0*M_PI;
+    }
+
+    if (freqHat < -2.0*M_PI)
+    {
+        m_v0 *= (freqHat + 2.0*M_PI) / freqHat;
+        m_v1 *= (freqHat + 2.0*M_PI) / freqHat;
+        m_v2 *= (freqHat + 2.0*M_PI) / freqHat;
+        freqHat += 2.0*M_PI;
+    }
+    
+    m_phiHat += freqHat; // advance phase estimate with filtered signal frequency
+    m_freq = freqHat / 2.0*M_PI;
 }
 
 void PhaseLockComplex::feed(float re, float im)
@@ -169,6 +207,35 @@ void PhaseLockComplex::feed(float re, float im)
     // lock estimation
     if (m_pskOrder > 1)
     {
+        float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
+
+        m_avgF(dPhi);
+
+        if (m_phiHatCount < (m_lockTime-1))
+        {
+            m_phiHatCount++;
+        }
+        else
+        {
+            m_freq = m_avgF.asFloat();
+            float dFreq = m_freq - m_freqPrev;
+
+            if ((dFreq > -m_lockThreshold) && (dFreq < m_lockThreshold))
+            {
+                if (m_lockCount < 20) {
+                    m_lockCount++;
+                }
+            }
+            else{
+                if (m_lockCount > 0) {
+                    m_lockCount--;
+                }                
+            }
+
+            m_freqPrev = m_freq;
+            m_phiHatCount = 0;
+        }
+
 //        m_avgPhi(m_phiHat);
 //        float vPhi = normalizeAngle(m_phiHat - m_avgPhi.asFloat());
 //
@@ -183,39 +250,38 @@ void PhaseLockComplex::feed(float re, float im)
 //            m_lockCount = 0;
 //        }
 
-        float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
 
-        if (m_phiHatCount < (m_lockTime-1))
-        {
-            m_dPhiHatAccum += dPhi; // re-accumulate phase for differential calculation
-            m_phiHatCount++;
-        }
-        else
-        {
-            float dPhi11 = (m_dPhiHatAccum - m_phiHat1); // optimized out division by lock time
-            float dPhi12 = (m_phiHat1 - m_phiHat2);
-            m_lock = dPhi11 - dPhi12; // second derivative of phase to get lock status
+        // if (m_phiHatCount < (m_lockTime-1))
+        // {
+        //     m_dPhiHatAccum += dPhi; // re-accumulate phase for differential calculation
+        //     m_phiHatCount++;
+        // }
+        // else
+        // {
+        //     float dPhi11 = (m_dPhiHatAccum - m_phiHat1); // optimized out division by lock time
+        //     float dPhi12 = (m_phiHat1 - m_phiHat2);
+        //     m_lock = dPhi11 - dPhi12; // second derivative of phase to get lock status
 
-            if ((m_lock > -m_lockThreshold) && (m_lock < m_lockThreshold)) // includes re-multiplication by lock time
-            {
-                if (m_lockCount < 20) { // [0..20]
-                    m_lockCount++;
-                }
-            }
-            else
-            {
-                if (m_lockCount > 0) {
-                    m_lockCount -= 2;
-                }
-            }
+        //     if ((m_lock > -m_lockThreshold) && (m_lock < m_lockThreshold)) // includes re-multiplication by lock time
+        //     {
+        //         if (m_lockCount < 20) { // [0..20]
+        //             m_lockCount++;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if (m_lockCount > 0) {
+        //             m_lockCount -= 2;
+        //         }
+        //     }
 
-            m_phiHat2 = m_phiHat1;
-            m_phiHat1 = m_dPhiHatAccum;
-            m_dPhiHatAccum = 0.0f;
-            m_phiHatCount = 0;
-        }
+        //     m_phiHat2 = m_phiHat1;
+        //     m_phiHat1 = m_dPhiHatAccum;
+        //     m_dPhiHatAccum = 0.0f;
+        //     m_phiHatCount = 0;
+        // }
 
-        m_phiHatPrev = m_phiHat;
+        // m_phiHatPrev = m_phiHat;
     }
     else
     {

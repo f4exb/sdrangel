@@ -45,7 +45,10 @@ public:
     /** Set sample rate information only for frequency and lock condition calculation */
     void setSampleRate(unsigned int sampleRate);
     void reset();
+    /** Feed PLL with a new signa sample */
     void feed(float re, float im);
+    /** Same but turns into a FLL using the same filtering structure and NCO output. No lock condition. */
+    void feedFLL(float re, float im);
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
@@ -85,7 +88,7 @@ private:
     int m_lockTime;
     float m_lockTimef;
     float m_lockThreshold;
-    MovingAverageUtilVar<float, float> m_avgPhi;
+    MovingAverageUtilVar<float, float> m_avgF;
 };
 
 
