@@ -77,6 +77,7 @@ private:
     float m_dPhiHatAccum;
     int m_phiHatCount;
     std::complex<float> m_y;
+    std::complex<float> m_p;
     float m_yRe;
     float m_yIm;
     float m_freq;

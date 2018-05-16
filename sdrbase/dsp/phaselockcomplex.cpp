@@ -41,6 +41,7 @@ PhaseLockComplex::PhaseLockComplex() :
     m_dPhiHatAccum(0.0),
     m_phiHatCount(0),
     m_y(1.0, 0.0),
+    m_p(1.0, 0.0),
     m_yRe(1.0),
     m_yIm(0.0),
     m_freq(0.0),
@@ -116,7 +117,9 @@ void PhaseLockComplex::reset()
     m_dPhiHatAccum = 0.0f;
     m_phiHatCount = 0;
     m_y.real(1.0);
-    m_y.real(0.0);
+    m_y.imag(0.0);
+    m_p.real(1.0);
+    m_p.imag(0.0);
     m_yRe = 1.0f;
     m_yIm = 0.0f;
     m_freq = 0.0f;
@@ -127,40 +130,18 @@ void PhaseLockComplex::reset()
 
 void PhaseLockComplex::feedFLL(float re, float im)
 {
+    m_yRe = cos(m_phiHat);
+    m_yIm = sin(m_phiHat);
+    std::complex<float> y(m_yRe, m_yIm);
     std::complex<float> x(re, im);
-    m_phiHat1 = std::arg(x);
-    float dPhi = normalizeAngle(m_phiHat1 - m_phiHat2); // instantanoeus radian valued signal frequency in [-pi..pi] range
-    m_phiHat2 = m_phiHat1;
+    std::complex<float> p = x * m_y;
+    float cross = m_p.real()*p.imag() - p.real()*m_p.imag();
+    float dot = m_p.real()*p.real() + m_p.imag()*p.imag();
+    float eF = cross * (dot < 0 ? -1 : 1); // frequency error
 
-    // advance buffer
-    m_v2 = m_v1;  // shift center register to upper register
-    m_v1 = m_v0;  // shift lower register to center register
-
-    // compute new lower register
-    m_v0 = dPhi - m_v1*m_a1 - m_v2*m_a2;
-
-    // compute new output
-    float freqHat = m_v0*m_b0 + m_v1*m_b1 + m_v2*m_b2;
-
-    // prevent saturation
-    if (freqHat > 2.0*M_PI)
-    {
-        m_v0 *= (freqHat - 2.0*M_PI) / freqHat;
-        m_v1 *= (freqHat - 2.0*M_PI) / freqHat;
-        m_v2 *= (freqHat - 2.0*M_PI) / freqHat;
-        freqHat -= 2.0*M_PI;
-    }
-
-    if (freqHat < -2.0*M_PI)
-    {
-        m_v0 *= (freqHat + 2.0*M_PI) / freqHat;
-        m_v1 *= (freqHat + 2.0*M_PI) / freqHat;
-        m_v2 *= (freqHat + 2.0*M_PI) / freqHat;
-        freqHat += 2.0*M_PI;
-    }
-    
-    m_phiHat += freqHat; // advance phase estimate with filtered signal frequency
-    m_freq = freqHat / 2.0*M_PI;
+    m_freq += eF;       // correct instantaneous frequency
+    m_phiHat += eF;     // advance phase with instantaneous frequency
+    m_p = p;            // store previous product
 }
 
 void PhaseLockComplex::feed(float re, float im)
@@ -235,21 +216,6 @@ void PhaseLockComplex::feed(float re, float im)
             m_freqPrev = m_freq;
             m_phiHatCount = 0;
         }
-
-//        m_avgPhi(m_phiHat);
-//        float vPhi = normalizeAngle(m_phiHat - m_avgPhi.asFloat());
-//
-//        if ((vPhi > -0.2) && (vPhi < 0.2)) // locked condition
-//        {
-//            if (m_lockCount < 20) { // [0..20]
-//                m_lockCount++;
-//            }
-//        }
-//        else // unlocked condition
-//        {
-//            m_lockCount = 0;
-//        }
-
 
         // if (m_phiHatCount < (m_lockTime-1))
         // {
