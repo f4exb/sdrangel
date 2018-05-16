@@ -128,22 +128,6 @@ void PhaseLockComplex::reset()
     m_lockCount = 0;
 }
 
-void PhaseLockComplex::feedFLL(float re, float im)
-{
-    m_yRe = cos(m_phiHat);
-    m_yIm = sin(m_phiHat);
-    std::complex<float> y(m_yRe, m_yIm);
-    std::complex<float> x(re, im);
-    std::complex<float> p = x * m_y;
-    float cross = m_p.real()*p.imag() - p.real()*m_p.imag();
-    float dot = m_p.real()*p.real() + m_p.imag()*p.imag();
-    float eF = cross * (dot < 0 ? -1 : 1); // frequency error
-
-    m_freq += eF;       // correct instantaneous frequency
-    m_phiHat += eF;     // advance phase with instantaneous frequency
-    m_p = p;            // store previous product
-}
-
 void PhaseLockComplex::feed(float re, float im)
 {
     m_yRe = cos(m_phiHat);
@@ -210,7 +194,7 @@ void PhaseLockComplex::feed(float re, float im)
             else{
                 if (m_lockCount > 0) {
                     m_lockCount--;
-                }                
+                }
             }
 
             m_freqPrev = m_freq;

@@ -219,6 +219,7 @@ endif()
 
 ##############################################################################
 # base libraries
+add_subdirectory(kitiirfir)
 add_subdirectory(sdrbase)
 add_subdirectory(sdrgui)
 add_subdirectory(sdrsrv)
