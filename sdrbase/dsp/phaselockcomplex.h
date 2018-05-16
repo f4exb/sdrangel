@@ -24,6 +24,7 @@
 #define SDRBASE_DSP_PHASELOCKCOMPLEX_H_
 
 #include "dsp/dsptypes.h"
+#include "util/movingaverage.h"
 #include "export.h"
 
 /** General purpose Phase-locked loop using complex analytic signal input. */
@@ -84,6 +85,7 @@ private:
     int m_lockTime;
     float m_lockTimef;
     float m_lockThreshold;
+    MovingAverageUtilVar<float, float> m_avgPhi;
 };
 
 

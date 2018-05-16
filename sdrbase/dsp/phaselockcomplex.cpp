@@ -51,7 +51,8 @@ PhaseLockComplex::PhaseLockComplex() :
     m_lockTime1(480),
     m_lockTime(2400),
     m_lockTimef(2400.0f),
-    m_lockThreshold(4.8f)
+    m_lockThreshold(4.8f),
+    m_avgPhi(240)
 {
 }
 
@@ -97,6 +98,7 @@ void PhaseLockComplex::setSampleRate(unsigned int sampleRate)
     m_lockTime = sampleRate / 20; // 50ms for order > 1
     m_lockTimef = (float) m_lockTime;
     m_lockThreshold = m_lockTime * 0.002f; // threshold of 0.002 taking division by lock time into account
+    m_avgPhi.resize(sampleRate / 200);
     reset();
 }
 
@@ -167,6 +169,20 @@ void PhaseLockComplex::feed(float re, float im)
     // lock estimation
     if (m_pskOrder > 1)
     {
+//        m_avgPhi(m_phiHat);
+//        float vPhi = normalizeAngle(m_phiHat - m_avgPhi.asFloat());
+//
+//        if ((vPhi > -0.2) && (vPhi < 0.2)) // locked condition
+//        {
+//            if (m_lockCount < 20) { // [0..20]
+//                m_lockCount++;
+//            }
+//        }
+//        else // unlocked condition
+//        {
+//            m_lockCount = 0;
+//        }
+
         float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
 
         if (m_phiHatCount < (m_lockTime-1))
