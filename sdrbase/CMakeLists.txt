@@ -34,6 +34,7 @@ set(sdrbase_SOURCES
     dsp/filterrc.cpp
     dsp/filtermbe.cpp
     dsp/filerecord.cpp
+    dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
     dsp/hbfiltertraits.cpp
     dsp/lowpass.cpp
@@ -124,6 +125,7 @@ set(sdrbase_HEADERS
     dsp/filterrc.h
     dsp/filtermbe.h
     dsp/filerecord.h
+    dsp/freqlockcomplex.h
     dsp/gfft.h
     dsp/iirfilter.h
     dsp/interpolator.h
@@ -271,6 +273,7 @@ include_directories(
     .
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
+    ${CMAKE_SOURCE_DIR}/kitiirfir
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
@@ -278,6 +281,7 @@ include_directories(
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
     httpserver
+    kitiirfir
     qrtplib
     swagger
 )
