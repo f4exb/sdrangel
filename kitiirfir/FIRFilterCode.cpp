@@ -117,7 +117,7 @@ void FIRFilterWindow(double *FIRCoeff, int N, TWindowType WindowType,
         Beta = 10.0;
 
     WinCoeff = new double[N + 2];
-    if (WinCoeff == NULL) {
+    if (WinCoeff == 0) {
         // ShowMessage("Failed to allocate memory in WindowData() ");
         return;
     }
@@ -365,7 +365,7 @@ void AdjustDelay(double *FirCoeff, int NumTaps, double Delay) {
 
     FFTInputR = new double[FFTSize];  // Real part
     FFTInputI = new double[FFTSize];  // Imag part
-    if (FFTInputR == NULL || FFTInputI == NULL) {
+    if (FFTInputR == 0 || FFTInputI == 0) {
         //ShowMessage("Unable to allocate memory in AdjustDelay");
         return;
     }

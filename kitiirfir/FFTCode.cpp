@@ -63,8 +63,8 @@ void FFT(double *InputR, double *InputI, int N, TTransFormType Type) {
     TwiddleI = new double[N / 2];
     RevBits = new int[N];
 
-    if (BufferR == NULL || BufferI == NULL || TwiddleR == NULL
-            || TwiddleI == NULL || RevBits == NULL) {
+    if (BufferR == 0 || BufferI == 0 || TwiddleR == 0
+            || TwiddleI == 0 || RevBits == 0) {
         // ShowMessage("FFT Memory Allocation Error");
         return;
     }
@@ -339,8 +339,8 @@ void DFT(double *InputR, double *InputI, int N, int Type) {
     TwiddleReal = new double[N];
     TwiddleImag = new double[N];
 
-    if (SumR == NULL || SumI == NULL || TwiddleReal == NULL
-            || TwiddleImag == NULL || (Type != FORWARD && Type != INVERSE)) {
+    if (SumR == 0 || SumI == 0 || TwiddleReal == 0
+            || TwiddleImag == 0 || (Type != FORWARD && Type != INVERSE)) {
         // ShowMessage("Incorrect DFT Type or unable to allocate memory");
         return;
     }
@@ -398,7 +398,7 @@ void RealSigDFT(double *Samples, double *OutputR, double *OutputI, int N) {
 
     TwiddleReal = new double[N];
     TwiddleImag = new double[N];
-    if (TwiddleReal == NULL || TwiddleImag == NULL) {
+    if (TwiddleReal == 0 || TwiddleImag == 0) {
         // ShowMessage("Failed to allocate memory in RealSigDFT");
         return;
     }
@@ -579,7 +579,7 @@ void WindowData(double *Data, int N, TWindowType WindowType, double Alpha,
         Beta = 10.0;
 
     WinCoeff = new double[N + 2];
-    if (WinCoeff == NULL) {
+    if (WinCoeff == 0) {
         // ShowMessage("Failed to allocate memory in WindowData() ");
         return;
     }

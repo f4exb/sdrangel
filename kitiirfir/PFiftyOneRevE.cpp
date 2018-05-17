@@ -87,8 +87,8 @@ int PFiftyOne(long double *Coeff, int Degree, long double *RealRoot,
     QuadK = new (std::nothrow) long double[N + 2];
     RealK = new (std::nothrow) long double[N + 2];
     QK = new (std::nothrow) long double[N + 2];
-    if (P == NULL || QuadQP == NULL || RealQP == NULL || QuadK == NULL
-            || RealK == NULL || QK == NULL) {
+    if (P == 0 || QuadQP == 0 || RealQP == 0 || QuadK == 0
+            || RealK == 0 || QK == 0) {
         //ShowMessage("Memory not Allocated in PFiftyOne root finder.");
         return (0);
     }
@@ -606,7 +606,7 @@ void SetTUVandK(long double *P, int N, long double *TUV, long double *RealK,
     if (TypeOfQuadK == 0)  // Init QuadK 2nd derivative of P
             {
         long double *Temp = new (std::nothrow) long double[N + 2];
-        if (Temp == NULL) {
+        if (Temp == 0) {
             //ShowMessage("Memory not Allocated in PFiftyOne SetTUVandK.");
             return;
         }
