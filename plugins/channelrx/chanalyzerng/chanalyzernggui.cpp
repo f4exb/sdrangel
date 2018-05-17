@@ -251,9 +251,8 @@ void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
     }
 }
 
-void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked)
+void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked __attribute__((unused)))
 {
-    m_usePll = checked;
     applySettings();
 }
 
@@ -399,8 +398,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_rate(6000),
-	m_spanLog2(0),
-	m_usePll(false)
+	m_spanLog2(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -592,6 +590,7 @@ void ChannelAnalyzerNGGUI::applySettings()
 			m_spanLog2,
 			ui->ssb->isChecked(),
 			ui->pll->isChecked(),
+			ui->pllPskOrder->currentIndex() == 5,
 			1<<ui->pllPskOrder->currentIndex());
 	}
 }

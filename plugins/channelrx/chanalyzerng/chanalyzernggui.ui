@@ -233,6 +233,11 @@
             <string>16</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>F</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>

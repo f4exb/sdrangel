@@ -51,6 +51,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
 	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
+	m_fll.computeCoefficients(0.004f); // ~100Hz @ 48 kHz
 
     apply(true);
 
@@ -77,9 +78,10 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 		int  spanLog2,
 		bool ssb,
 		bool pll,
+		bool fll,
 		unsigned int pllPskOrder)
 {
-    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, pllPskOrder);
+    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, fll, pllPskOrder);
 	messageQueue->push(cmd);
 }
 
@@ -170,6 +172,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 		m_config.m_spanLog2 = cfg.getSpanLog2();
 		m_config.m_ssb = cfg.getSSB();
 		m_config.m_pll = cfg.getPLL();
+		m_config.m_fll = cfg.getFLL();
 		m_config.m_pllPskOrder = cfg.getPLLPSKOrder();
 
         qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
@@ -179,6 +182,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
                 << " m_spanLog2: " << m_config.m_spanLog2
                 << " m_ssb: " << m_config.m_ssb
                 << " m_pll: " << m_config.m_pll
+                << " m_fll: " << m_config.m_fll
 				<< " m_pllPskOrder: " << m_config.m_pllPskOrder;
 
         apply();
@@ -254,7 +258,9 @@ void ChannelAnalyzerNG::apply(bool force)
     if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
         (m_running.m_spanLog2 != m_config.m_spanLog2) || force)
     {
-        m_pll.setSampleRate(m_running.m_channelSampleRate / (1<<m_running.m_spanLog2));
+        int sampleRate = m_running.m_channelSampleRate / (1<<m_running.m_spanLog2);
+        m_pll.setSampleRate(sampleRate);
+        m_fll.computeCoefficients(200.0f/sampleRate); // 100 Hz
     }
 
     if (m_running.m_pll != m_config.m_pll || force)
@@ -264,9 +270,18 @@ void ChannelAnalyzerNG::apply(bool force)
         }
     }
 
-    if (m_running.m_pll != m_config.m_pll || force)
+    if (m_running.m_fll != m_config.m_fll || force)
     {
-    	m_pll.setPskOrder(m_config.m_pllPskOrder);
+        if (m_config.m_fll) {
+            m_fll.reset();
+        }
+    }
+
+    if (m_running.m_pllPskOrder != m_config.m_pllPskOrder || force)
+    {
+        if (m_config.m_pllPskOrder < 5) {
+            m_pll.setPskOrder(m_config.m_pllPskOrder);
+        }
     }
 
     m_running.m_frequency = m_config.m_frequency;

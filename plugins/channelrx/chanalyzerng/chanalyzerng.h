@@ -26,6 +26,7 @@
 #include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
+#include "dsp/freqlockcomplex.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
@@ -47,6 +48,7 @@ public:
         int  getSpanLog2() const { return m_spanLog2; }
         bool getSSB() const { return m_ssb; }
         bool getPLL() const { return m_pll; }
+        bool getFLL() const { return m_fll; }
         unsigned int getPLLPSKOrder() const { return m_pllPskOrder; }
 
         static MsgConfigureChannelAnalyzer* create(
@@ -56,6 +58,7 @@ public:
                 int spanLog2,
                 bool ssb,
                 bool pll,
+                bool fll,
 				unsigned int pllPskOrder)
         {
             return new MsgConfigureChannelAnalyzer(
@@ -65,6 +68,7 @@ public:
                     spanLog2,
                     ssb,
                     pll,
+                    fll,
 					pllPskOrder);
         }
 
@@ -75,6 +79,7 @@ public:
         int  m_spanLog2;
         bool m_ssb;
         bool m_pll;
+        bool m_fll;
         unsigned int m_pllPskOrder;
 
         MsgConfigureChannelAnalyzer(
@@ -84,6 +89,7 @@ public:
                 int spanLog2,
                 bool ssb,
                 bool pll,
+                bool fll,
 				unsigned int pllPskOrder) :
             Message(),
             m_channelSampleRate(channelSampleRate),
@@ -92,6 +98,7 @@ public:
             m_spanLog2(spanLog2),
             m_ssb(ssb),
             m_pll(pll),
+            m_fll(fll),
 			m_pllPskOrder(pllPskOrder)
         { }
     };
@@ -148,6 +155,7 @@ public:
 			int spanLog2,
 			bool ssb,
 			bool pll,
+			bool fll,
 			unsigned int pllPskOrder);
 
 	DownChannelizer *getChannelizer() { return m_channelizer; }
@@ -185,6 +193,7 @@ private:
 	    int m_spanLog2;
 	    bool m_ssb;
 	    bool m_pll;
+	    bool m_fll;
 	    unsigned int m_pllPskOrder;
 
 	    Config() :
@@ -196,6 +205,7 @@ private:
 	        m_spanLog2(3),
 	        m_ssb(false),
 	        m_pll(false),
+	        m_fll(false),
 			m_pllPskOrder(1)
 	    {}
 	};
@@ -215,6 +225,7 @@ private:
 
 	NCOF m_nco;
 	PhaseLockComplex m_pll;
+	FreqLockComplex m_fll;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
@@ -258,7 +269,11 @@ private:
 
                 if (m_running.m_pll)
                 {
-                    m_pll.feed(re, im);
+                    if (m_running.m_fll) {
+                        m_fll.feed(re, im);
+                    } else {
+                        m_pll.feed(re, im);
+                    }
 
                     // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
                     Real mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
