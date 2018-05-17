@@ -24,7 +24,6 @@
 #define SDRBASE_DSP_PHASELOCKCOMPLEX_H_
 
 #include "dsp/dsptypes.h"
-#include "util/movingaverage.h"
 #include "export.h"
 
 /** General purpose Phase-locked loop using complex analytic signal input. */
@@ -50,7 +49,7 @@ public:
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
-    bool locked() const { return m_lockCount > (m_pskOrder > 1 ? 15 : (m_lockTime1-2)); } // 6
+    bool locked() const { return m_pskOrder > 1 ? false : m_lockCount > m_lockTime-2; }
     float getDeltaPhi() const { return m_deltaPhi; }
     float getPhiHat() const { return m_phiHat; }
 
@@ -70,26 +69,15 @@ private:
     float m_deltaPhi;
     float m_phiHat;
     float m_phiHatPrev;
-    float m_phiHat1;
-    float m_phiHat2;
-    float m_dPhiHatAccum;
-    int m_phiHatCount;
     std::complex<float> m_y;
     std::complex<float> m_p;
     float m_yRe;
     float m_yIm;
     float m_freq;
     float m_freqPrev;
-    float m_lock;
     int m_lockCount;
     unsigned int m_pskOrder;
-    int m_lockTime1;
     int m_lockTime;
-    float m_lockTimef;
-    float m_lockThreshold;
-    MovingAverageUtilVar<float, float> m_avgF;
 };
-
-
 
 #endif /* SDRBASE_DSP_PHASELOCKCOMPLEX_H_ */
