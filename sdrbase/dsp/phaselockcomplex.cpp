@@ -43,8 +43,10 @@ PhaseLockComplex::PhaseLockComplex() :
     m_freq(0.0),
     m_freqPrev(0.0),
     m_lockCount(0),
+    m_lockFreq(0.026f),
     m_pskOrder(1),
-    m_lockTime(480)
+    m_lockTime(480),
+    m_lockTimeCount(0)
 {
 }
 
@@ -87,6 +89,7 @@ void PhaseLockComplex::setPskOrder(unsigned int order)
 void PhaseLockComplex::setSampleRate(unsigned int sampleRate)
 {
     m_lockTime = sampleRate / 100; // 10ms for order 1
+    m_lockFreq = (2.0*M_PI*5.0) / sampleRate; // +/- 5 Hz frequency swing
     reset();
 }
 
@@ -108,6 +111,7 @@ void PhaseLockComplex::reset()
     m_freq = 0.0f;
     m_freqPrev = 0.0f;
     m_lockCount = 0;
+    m_lockTimeCount = 0;
 }
 
 void PhaseLockComplex::feed(float re, float im)
@@ -151,8 +155,41 @@ void PhaseLockComplex::feed(float re, float im)
         m_phiHat += 2.0*M_PI;
     }
 
-    // lock estimation
-    if (m_pskOrder <= 1)
+    // lock and frequency estimation
+    if (m_pskOrder > 1)
+    {
+        float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
+        m_freq = 0.001*dPhi + 0.999*m_freqPrev;
+
+        if (m_lockTimeCount < m_lockTime-1)
+        {
+            m_lockTimeCount++;
+        }
+        else
+        {
+            float dF = m_freq - m_freqTest;
+
+            if ((dF > -m_lockFreq) && (dF < m_lockFreq)) 
+            {
+                if (m_lockCount < 20) {
+                    m_lockCount++;
+                }
+            } 
+            else 
+            {
+                if (m_lockCount > 0) {
+                    m_lockCount--;
+                }
+            }
+
+            m_freqTest = m_freq;
+            m_lockTimeCount = 0;
+        }
+
+        m_freqPrev = m_freq;
+        m_phiHatPrev = m_phiHat;        
+    }
+    else
     {
         m_freq = (m_phiHat - m_phiHatPrev) / (2.0*M_PI);
 

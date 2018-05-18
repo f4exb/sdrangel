@@ -90,6 +90,11 @@ class MovingAverageUtilVar
         m_samples.resize(size);
     }
 
+    unsigned int size() const
+    {
+        return m_samples.size();
+    }
+
     void operator()(T sample)
     {
         if (m_num_samples < m_samples.size()) // fill up

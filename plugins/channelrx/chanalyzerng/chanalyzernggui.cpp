@@ -237,6 +237,12 @@ void ChannelAnalyzerNGGUI::tick()
 	} else {
 	    ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	}
+
+	if (ui->pll->isChecked()) 
+	{
+		int freq = (m_channelAnalyzer->getPllFrequency() * m_channelAnalyzer->getChannelSampleRate()) / (2.0*M_PI);
+		ui->pll->setToolTip(tr("PLL lock. Freq = %1 Hz").arg(freq));
+	}
 }
 
 void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
@@ -251,8 +257,12 @@ void ChannelAnalyzerNGGUI::on_channelSampleRate_changed(quint64 value)
     }
 }
 
-void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked __attribute__((unused)))
+void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked)
 {
+	if (!checked) {
+		ui->pll->setToolTip(tr("PLL lock"));
+	}
+
     applySettings();
 }
 

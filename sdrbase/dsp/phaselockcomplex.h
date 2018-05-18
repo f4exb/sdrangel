@@ -49,7 +49,8 @@ public:
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
-    bool locked() const { return m_pskOrder > 1 ? false : m_lockCount > m_lockTime-2; }
+    bool locked() const { return m_pskOrder > 1 ? m_lockCount > 16 : m_lockCount > m_lockTime-2; }
+    float getFreq() const { return m_freq; }
     float getDeltaPhi() const { return m_deltaPhi; }
     float getPhiHat() const { return m_phiHat; }
 
@@ -75,9 +76,12 @@ private:
     float m_yIm;
     float m_freq;
     float m_freqPrev;
+    float m_freqTest;
     int m_lockCount;
+    float m_lockFreq;
     unsigned int m_pskOrder;
     int m_lockTime;
+    int m_lockTimeCount;
 };
 
 #endif /* SDRBASE_DSP_PHASELOCKCOMPLEX_H_ */

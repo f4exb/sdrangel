@@ -163,6 +163,7 @@ public:
     int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool isPllLocked() const { return m_running.m_pll && m_pll.locked(); }
+    Real getPllFrequency() const { return m_pll.getFreq(); }
 	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
     Real getPllPhase() const { return m_pll.getPhiHat(); }
 
