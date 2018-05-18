@@ -273,7 +273,6 @@ include_directories(
     .
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
-    ${CMAKE_SOURCE_DIR}/kitiirfir
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
@@ -281,7 +280,6 @@ include_directories(
 target_link_libraries(sdrbase
     ${QT_LIBRARIES}
     httpserver
-    kitiirfir
     qrtplib
     swagger
 )

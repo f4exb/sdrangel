@@ -51,7 +51,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
 	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
-	m_fll.computeCoefficients(0.004f); // ~100Hz @ 48 kHz
+	m_fll.setSampleRate(48000);
 
     apply(true);
 
@@ -260,13 +260,15 @@ void ChannelAnalyzerNG::apply(bool force)
     {
         int sampleRate = m_running.m_channelSampleRate / (1<<m_running.m_spanLog2);
         m_pll.setSampleRate(sampleRate);
-        m_fll.computeCoefficients(200.0f/sampleRate); // 100 Hz
+        m_fll.setSampleRate(sampleRate);
     }
 
     if (m_running.m_pll != m_config.m_pll || force)
     {
-        if (m_config.m_pll) {
+        if (m_config.m_pll)
+        {
             m_pll.reset();
+            m_fll.reset();
         }
     }
 
@@ -294,6 +296,7 @@ void ChannelAnalyzerNG::apply(bool force)
     m_running.m_spanLog2 = m_config.m_spanLog2;
     m_running.m_ssb = m_config.m_ssb;
     m_running.m_pll = m_config.m_pll;
+    m_running.m_fll = m_config.m_fll;
     m_running.m_pllPskOrder = m_config.m_pllPskOrder;
     //m_settingsMutex.unlock();
 }

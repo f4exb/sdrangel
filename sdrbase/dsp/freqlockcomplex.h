@@ -24,7 +24,6 @@
 #define SDRBASE_DSP_FREQLOCKCOMPLEX_H_
 
 #include "dsp/dsptypes.h"
-#include "iirfilter.h"
 #include "export.h"
 
 /** General purpose Phase-locked loop using complex analytic signal input. */
@@ -35,27 +34,27 @@ public:
     ~FreqLockComplex();
 
     void reset();
-    void computeCoefficients(float wn);
+    void setSampleRate(unsigned int sampleRate);
     /** Feed PLL with a new signa sample */
     void feed(float re, float im);
+    const std::complex<float>& getComplex() const { return m_y; }
+    float getReal() const { return m_yRe; }
+    float getImag() const { return m_yIm; }
 
 private:
+    /** Normalize angle in radians into the [-pi,+pi] region */
+    static float normalizeAngle(float angle);
+
     float m_a0;
     float m_a1;
-    float m_a2;
-    float m_b0;
-    float m_b1;
-    float m_b2;
-    float m_v0;
-    float m_v1;
-    float m_v2;
     std::complex<float> m_y;
-    std::complex<float> m_prod;
     float m_yRe;
     float m_yIm;
     float m_freq;
     float m_phi;
-    IIRFilter<float, 2> *m_iir;
+    float m_phiX0;
+    float m_phiX1;
+    float m_y1;
 };
 
 

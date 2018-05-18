@@ -266,20 +266,27 @@ private:
                 Real re = m_sum.real() / SDR_RX_SCALED;
                 Real im = m_sum.imag() / SDR_RX_SCALED;
                 m_magsq = re*re + im*im;
+                Real mixI = 1.0f;
+                Real mixQ = 0.0f;
 
                 if (m_running.m_pll)
                 {
-                    if (m_running.m_fll) {
+                    if (m_running.m_fll)
+                    {
                         m_fll.feed(re, im);
-                    } else {
-                        m_pll.feed(re, im);
+                        // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+                        mixI = m_sum.real() * m_fll.getImag() - m_sum.imag() * m_fll.getReal();
+                        mixQ = m_sum.real() * m_fll.getReal() + m_sum.imag() * m_fll.getImag();
+//                        mixI = m_fll.getReal() * SDR_RX_SCALED;
+//                        mixQ = m_fll.getImag() * SDR_RX_SCALED;
                     }
-
-                    // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                    Real mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
-                    Real mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
-//                    Real mixI = m_pll.getReal() * SDR_RX_SCALED;
-//                    Real mixQ = m_pll.getImag() * SDR_RX_SCALED;
+                    else
+                    {
+                        m_pll.feed(re, im);
+                        // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+                        mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
+                        mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
+                    }
 
                     if (m_running.m_ssb & !m_usb)
                     { // invert spectrum for LSB
