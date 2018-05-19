@@ -372,16 +372,13 @@ void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings,
 
     if ((settings.m_downSample != m_settings.m_downSample) || force)
     {
+        int sampleRate = settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate;
+
         m_settingsMutex.lock();
         m_useInterpolator = settings.m_downSample;
-
-        if (settings.m_downSample)
-        {
-            setFilters(settings.m_downSampleRate, settings.m_bandwidth, settings.m_lowCutoff);
-            m_pll.setSampleRate(settings.m_downSampleRate / (1<<settings.m_spanLog2));
-            m_fll.setSampleRate(settings.m_downSampleRate / (1<<settings.m_spanLog2));
-        }
-
+        setFilters(sampleRate, settings.m_bandwidth, settings.m_lowCutoff);
+        m_pll.setSampleRate(sampleRate / (1<<settings.m_spanLog2));
+        m_fll.setSampleRate(sampleRate / (1<<settings.m_spanLog2));
         m_settingsMutex.unlock();
     }
 
