@@ -4,12 +4,14 @@ set(chanalyzerng_SOURCES
 	chanalyzerng.cpp
 	chanalyzernggui.cpp
 	chanalyzerngplugin.cpp
+	chanalyzerngsettings.cpp
 )
 
 set(chanalyzerng_HEADERS
 	chanalyzerng.h
 	chanalyzernggui.h
 	chanalyzerngplugin.h
+	chanalyzerngsettings.h
 )
 
 set(chanalyzerng_FORMS

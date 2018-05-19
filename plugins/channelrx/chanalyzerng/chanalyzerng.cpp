@@ -26,6 +26,7 @@
 #include "dsp/downchannelizer.h"
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzerOld, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgReportChannelSampleRateChanged, Message)
 
@@ -81,7 +82,7 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 		bool fll,
 		unsigned int pllPskOrder)
 {
-    Message* cmd = MsgConfigureChannelAnalyzer::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, fll, pllPskOrder);
+    Message* cmd = MsgConfigureChannelAnalyzerOld::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, fll, pllPskOrder);
 	messageQueue->push(cmd);
 }
 
@@ -162,9 +163,9 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
         cfg.getCenterFrequency());
         return true;
     }
-	else if (MsgConfigureChannelAnalyzer::match(cmd))
+	else if (MsgConfigureChannelAnalyzerOld::match(cmd))
 	{
-		MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
+		MsgConfigureChannelAnalyzerOld& cfg = (MsgConfigureChannelAnalyzerOld&) cmd;
 
         m_config.m_channelSampleRate = cfg.getChannelSampleRate();
 		m_config.m_Bandwidth = cfg.getBandwidth();
@@ -299,4 +300,128 @@ void ChannelAnalyzerNG::apply(bool force)
     m_running.m_fll = m_config.m_fll;
     m_running.m_pllPskOrder = m_config.m_pllPskOrder;
     //m_settingsMutex.unlock();
+}
+
+void ChannelAnalyzerNG::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
+{
+    qDebug() << "ChannelAnalyzerNG::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
+        (m_inputSampleRate != inputSampleRate) || force)
+    {
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
+    }
+
+    if ((m_inputSampleRate != inputSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+
+        m_interpolator.create(16, inputSampleRate, inputSampleRate / 2.2f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_settings.m_downSampleRate;
+
+        if (!m_settings.m_downSample)
+        {
+            setFilters(inputSampleRate, m_settings.m_bandwidth, m_settings.m_lowCutoff);
+            m_pll.setSampleRate(inputSampleRate / (1<<m_settings.m_spanLog2));
+            m_fll.setSampleRate(inputSampleRate / (1<<m_settings.m_spanLog2));
+        }
+
+        m_settingsMutex.unlock();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
+}
+
+void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCutoff)
+{
+    if (bandwidth < 0)
+    {
+        bandwidth = -bandwidth;
+        lowCutoff = -lowCutoff;
+        m_usb = false;
+    }
+    else
+    {
+        m_usb = true;
+    }
+
+    if (bandwidth < 100.0f)
+    {
+        bandwidth = 100.0f;
+        lowCutoff = 0;
+    }
+
+    SSBFilter->create_filter(lowCutoff / sampleRate, bandwidth / sampleRate);
+    DSBFilter->create_dsb_filter(bandwidth / sampleRate);
+}
+
+void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings, bool force)
+{
+    if ((settings.m_downSampleRate != m_settings.m_downSampleRate) || force)
+    {
+        m_settingsMutex.lock();
+        m_interpolator.create(16, m_inputSampleRate, m_inputSampleRate / 2.2);
+        m_interpolatorDistanceRemain = 0.0f;
+        m_interpolatorDistance =  (Real) m_inputSampleRate / (Real) settings.m_downSampleRate;
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_downSample != m_settings.m_downSample) || force)
+    {
+        m_settingsMutex.lock();
+        m_useInterpolator = settings.m_downSample;
+
+        if (settings.m_downSample)
+        {
+            setFilters(settings.m_downSampleRate, settings.m_bandwidth, settings.m_lowCutoff);
+            m_pll.setSampleRate(settings.m_downSampleRate / (1<<settings.m_spanLog2));
+            m_fll.setSampleRate(settings.m_downSampleRate / (1<<settings.m_spanLog2));
+        }
+
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
+        (settings.m_lowCutoff != m_settings.m_lowCutoff)|| force)
+    {
+        m_settingsMutex.lock();
+        setFilters(settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate, settings.m_bandwidth, settings.m_lowCutoff);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        int sampleRate = (settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate) / (1<<m_running.m_spanLog2);
+        m_pll.setSampleRate(sampleRate);
+        m_fll.setSampleRate(sampleRate);
+    }
+
+    if (settings.m_pll != m_settings.m_pll || force)
+    {
+        if (settings.m_pll)
+        {
+            m_pll.reset();
+            m_fll.reset();
+        }
+    }
+
+    if (settings.m_fll != m_settings.m_fll || force)
+    {
+        if (settings.m_fll) {
+            m_fll.reset();
+        }
+    }
+
+    if (settings.m_pllPskOrder != m_settings.m_pllPskOrder || force)
+    {
+        if (settings.m_pllPskOrder < 32) {
+            m_pll.setPskOrder(settings.m_pllPskOrder);
+        }
+    }
+
+    m_settings = settings;
 }

@@ -30,6 +30,8 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
+#include "chanalyzerngsettings.h"
+
 #define ssbFftLen 1024
 
 class DeviceSourceAPI;
@@ -42,6 +44,29 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
+        const ChannelAnalyzerNGSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureChannelAnalyzer* create(const ChannelAnalyzerNGSettings& settings, bool force)
+        {
+            return new MsgConfigureChannelAnalyzer(settings, force);
+        }
+
+    private:
+        ChannelAnalyzerNGSettings m_settings;
+        bool m_force;
+
+        MsgConfigureChannelAnalyzer(const ChannelAnalyzerNGSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgConfigureChannelAnalyzerOld : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
         int  getChannelSampleRate() const { return m_channelSampleRate; }
         Real getBandwidth() const { return m_Bandwidth; }
         Real getLoCutoff() const { return m_LowCutoff; }
@@ -51,7 +76,7 @@ public:
         bool getFLL() const { return m_fll; }
         unsigned int getPLLPSKOrder() const { return m_pllPskOrder; }
 
-        static MsgConfigureChannelAnalyzer* create(
+        static MsgConfigureChannelAnalyzerOld* create(
                 int channelSampleRate,
                 Real Bandwidth,
                 Real LowCutoff,
@@ -61,7 +86,7 @@ public:
                 bool fll,
 				unsigned int pllPskOrder)
         {
-            return new MsgConfigureChannelAnalyzer(
+            return new MsgConfigureChannelAnalyzerOld(
                     channelSampleRate,
                     Bandwidth,
                     LowCutoff,
@@ -82,7 +107,7 @@ public:
         bool m_fll;
         unsigned int m_pllPskOrder;
 
-        MsgConfigureChannelAnalyzer(
+        MsgConfigureChannelAnalyzerOld(
                 int channelSampleRate,
                 Real Bandwidth,
                 Real LowCutoff,
@@ -217,7 +242,10 @@ private:
 	DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
+    ChannelAnalyzerNGSettings m_settings;
 
+    int m_inputSampleRate;
+    int m_inputFrequencyOffset;
 	int m_undersampleCount;
 	fftfilt::cmplx m_sum;
 	bool m_usb;
@@ -239,6 +267,9 @@ private:
 	QMutex m_settingsMutex;
 
 	void apply(bool force = false);
+	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force);
+	void applySettings(const ChannelAnalyzerNGSettings& settings, bool force = false);
+	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
 
 	void processOneSample(Complex& c, fftfilt::cmplx *sideband)
 	{
