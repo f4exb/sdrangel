@@ -17,12 +17,14 @@
 #ifndef INCLUDE_CHANNELANALYZERNGGUI_H
 #define INCLUDE_CHANNELANALYZERNGGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include "plugin/plugininstancegui.h"
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/dsptypes.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+
+#include "chanalyzerngsettings.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -63,9 +65,9 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	ChannelAnalyzerNGSettings m_settings;
 	bool m_doApplySettings;
 	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
-	int m_spanLog2;
 	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
 
 	ChannelAnalyzerNG* m_channelAnalyzer;
@@ -78,13 +80,13 @@ private:
 	virtual ~ChannelAnalyzerNGGUI();
 
 	int  getRequestedChannelSampleRate();
-	int  getEffectiveLowCutoff(int lowCutoff);
-	bool setNewFinalRate(int spanLog2); //!< set sample rate after final in-channel decimation
+	void setNewFinalRate(); //!< set sample rate after final in-channel decimation
 	void setFiltersUIBoundaries();
 
 	void blockApplySettings(bool block);
-	void applySettings();
-	void displayBandwidth();
+	void applySettings(bool force = false);
+	void displaySettings();
+	void setSpectrumDisplay();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -100,6 +102,7 @@ private slots:
 	void on_spanLog2_currentIndexChanged(int index);
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
 	void tick();
 };

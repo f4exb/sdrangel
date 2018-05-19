@@ -184,10 +184,10 @@ public:
 			unsigned int pllPskOrder);
 
 	DownChannelizer *getChannelizer() { return m_channelizer; }
-	int getInputSampleRate() const { return m_running.m_inputSampleRate; }
-    int getChannelSampleRate() const { return m_running.m_channelSampleRate; }
+	int getInputSampleRate() const { return m_inputSampleRate; }
+    int getChannelSampleRate() const { return m_settings.m_downSample ? m_settings.m_downSampleRate : m_inputSampleRate; }
 	double getMagSq() const { return m_magsq; }
-	bool isPllLocked() const { return m_running.m_pll && m_pll.locked(); }
+	bool isPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
     Real getPllFrequency() const { return m_pll.getFreq(); }
 	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
     Real getPllPhase() const { return m_pll.getPhiHat(); }
@@ -199,7 +199,7 @@ public:
 
 	virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
-    virtual qint64 getCenterFrequency() const { return m_running.m_frequency; }
+    virtual qint64 getCenterFrequency() const { return m_settings.m_frequency; }
 
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
@@ -208,37 +208,6 @@ public:
     static const QString m_channelId;
 
 private:
-
-	struct Config
-	{
-	    int m_frequency;
-	    int m_inputSampleRate;
-	    int m_channelSampleRate;
-	    Real m_Bandwidth;
-	    Real m_LowCutoff;
-	    int m_spanLog2;
-	    bool m_ssb;
-	    bool m_pll;
-	    bool m_fll;
-	    unsigned int m_pllPskOrder;
-
-	    Config() :
-	        m_frequency(0),
-	        m_inputSampleRate(96000),
-	        m_channelSampleRate(96000),
-	        m_Bandwidth(5000),
-	        m_LowCutoff(300),
-	        m_spanLog2(3),
-	        m_ssb(false),
-	        m_pll(false),
-	        m_fll(false),
-			m_pllPskOrder(1)
-	    {}
-	};
-
-	Config m_config;
-	Config m_running;
-
 	DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
@@ -266,85 +235,11 @@ private:
 	SampleVector m_sampleBuffer;
 	QMutex m_settingsMutex;
 
-	void apply(bool force = false);
-	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force);
+//	void apply(bool force = false);
+	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const ChannelAnalyzerNGSettings& settings, bool force = false);
 	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
-
-	void processOneSample(Complex& c, fftfilt::cmplx *sideband)
-	{
-	    int n_out;
-	    int decim = 1<<m_running.m_spanLog2;
-
-        if (m_running.m_ssb)
-        {
-            n_out = SSBFilter->runSSB(c, &sideband, m_usb);
-        }
-        else
-        {
-            n_out = DSBFilter->runDSB(c, &sideband);
-        }
-
-        for (int i = 0; i < n_out; i++)
-        {
-            // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-            // smart decimation with bit gain using float arithmetic (23 bits significand)
-
-            m_sum += sideband[i];
-
-            if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
-            {
-                m_sum /= decim;
-                Real re = m_sum.real() / SDR_RX_SCALED;
-                Real im = m_sum.imag() / SDR_RX_SCALED;
-                m_magsq = re*re + im*im;
-                Real mixI = 1.0f;
-                Real mixQ = 0.0f;
-
-                if (m_running.m_pll)
-                {
-                    if (m_running.m_fll)
-                    {
-                        m_fll.feed(re, im);
-                        // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                        mixI = m_sum.real() * m_fll.getImag() - m_sum.imag() * m_fll.getReal();
-                        mixQ = m_sum.real() * m_fll.getReal() + m_sum.imag() * m_fll.getImag();
-//                        mixI = m_fll.getReal() * SDR_RX_SCALED;
-//                        mixQ = m_fll.getImag() * SDR_RX_SCALED;
-                    }
-                    else
-                    {
-                        m_pll.feed(re, im);
-                        // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                        mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
-                        mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
-                    }
-
-                    if (m_running.m_ssb & !m_usb)
-                    { // invert spectrum for LSB
-                        m_sampleBuffer.push_back(Sample(mixQ, mixI));
-                    }
-                    else
-                    {
-                        m_sampleBuffer.push_back(Sample(mixI, mixQ));
-                    }
-                }
-                else
-                {
-                    if (m_running.m_ssb & !m_usb)
-                    { // invert spectrum for LSB
-                        m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
-                    }
-                    else
-                    {
-                        m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
-                    }
-                }
-
-                m_sum = 0;
-            }
-        }
-	}
+	void processOneSample(Complex& c, fftfilt::cmplx *sideband);
 };
 
 #endif // INCLUDE_CHANALYZERNG_H

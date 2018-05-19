@@ -48,13 +48,15 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_useInterpolator = false;
 	m_interpolatorDistance = 1.0f;
 	m_interpolatorDistanceRemain = 0.0f;
-	SSBFilter = new fftfilt(m_config.m_LowCutoff / m_config.m_inputSampleRate, m_config.m_Bandwidth / m_config.m_inputSampleRate, ssbFftLen);
-	DSBFilter = new fftfilt(m_config.m_Bandwidth / m_config.m_inputSampleRate, 2*ssbFftLen);
+	m_inputSampleRate = 48000;
+	m_inputFrequencyOffset = 0;
+	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
+	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
 	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
-	m_fll.setSampleRate(48000);
 
-    apply(true);
+	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+	applySettings(m_settings, true);
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
@@ -114,7 +116,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 
 	if(m_sampleSink != 0)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_running.m_ssb); // m_ssb = positive only
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_settings.m_ssb); // m_ssb = positive only
 	}
 
 	m_sampleBuffer.clear();
@@ -122,8 +124,81 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 	m_settingsMutex.unlock();
 }
 
+void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
+{
+    int n_out;
+    int decim = 1<<m_settings.m_spanLog2;
+
+    if (m_settings.m_ssb) {
+        n_out = SSBFilter->runSSB(c, &sideband, m_usb);
+    } else {
+        n_out = DSBFilter->runDSB(c, &sideband);
+    }
+
+    for (int i = 0; i < n_out; i++)
+    {
+        // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+        // smart decimation with bit gain using float arithmetic (23 bits significand)
+
+        m_sum += sideband[i];
+
+        if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+        {
+            m_sum /= decim;
+            Real re = m_sum.real() / SDR_RX_SCALED;
+            Real im = m_sum.imag() / SDR_RX_SCALED;
+            m_magsq = re*re + im*im;
+            Real mixI = 1.0f;
+            Real mixQ = 0.0f;
+
+            if (m_settings.m_pll)
+            {
+                if (m_settings.m_fll)
+                {
+                    m_fll.feed(re, im);
+                    // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+                    mixI = m_sum.real() * m_fll.getImag() - m_sum.imag() * m_fll.getReal();
+                    mixQ = m_sum.real() * m_fll.getReal() + m_sum.imag() * m_fll.getImag();
+//                        mixI = m_fll.getReal() * SDR_RX_SCALED;
+//                        mixQ = m_fll.getImag() * SDR_RX_SCALED;
+                }
+                else
+                {
+                    m_pll.feed(re, im);
+                    // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+                    mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
+                    mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
+                }
+
+                if (m_settings.m_ssb & !m_usb)
+                { // invert spectrum for LSB
+                    m_sampleBuffer.push_back(Sample(mixQ, mixI));
+                }
+                else
+                {
+                    m_sampleBuffer.push_back(Sample(mixI, mixQ));
+                }
+            }
+            else
+            {
+                if (m_settings.m_ssb & !m_usb)
+                { // invert spectrum for LSB
+                    m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
+                }
+                else
+                {
+                    m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
+                }
+            }
+
+            m_sum = 0;
+        }
+    }
+}
+
 void ChannelAnalyzerNG::start()
 {
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 void ChannelAnalyzerNG::stop()
@@ -132,20 +207,14 @@ void ChannelAnalyzerNG::stop()
 
 bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 {
-	qDebug() << "ChannelAnalyzerNG::handleMessage: " << cmd.getIdentifier();
-
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+	    qDebug() << "ChannelAnalyzerNG::handleMessage: DownChannelizer::MsgChannelizerNotification:"
+	            << " sampleRate: " << notif.getSampleRate()
+	            << " frequencyOffset: " << notif.getFrequencyOffset();
 
-		m_config.m_inputSampleRate = notif.getSampleRate();
-		m_config.m_frequency = notif.getFrequencyOffset();
-
-        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgChannelizerNotification:"
-                << " m_sampleRate: " << m_config.m_inputSampleRate
-                << " frequencyOffset: " << m_config.m_frequency;
-
-		apply();
+        applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
 
 		if (getMessageQueueToGUI())
 		{
@@ -158,37 +227,25 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelizer:"
+                << " sampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
+
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-        cfg.getSampleRate(),
-        cfg.getCenterFrequency());
+                cfg.getSampleRate(),
+                cfg.getCenterFrequency());
+
         return true;
     }
-	else if (MsgConfigureChannelAnalyzerOld::match(cmd))
-	{
-		MsgConfigureChannelAnalyzerOld& cfg = (MsgConfigureChannelAnalyzerOld&) cmd;
+    else if (MsgConfigureChannelAnalyzer::match(cmd))
+    {
+        qDebug("ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer");
+        MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
-        m_config.m_channelSampleRate = cfg.getChannelSampleRate();
-		m_config.m_Bandwidth = cfg.getBandwidth();
-		m_config.m_LowCutoff = cfg.getLoCutoff();
-		m_config.m_spanLog2 = cfg.getSpanLog2();
-		m_config.m_ssb = cfg.getSSB();
-		m_config.m_pll = cfg.getPLL();
-		m_config.m_fll = cfg.getFLL();
-		m_config.m_pllPskOrder = cfg.getPLLPSKOrder();
+        applySettings(cfg.getSettings(), cfg.getForce());
 
-        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer:"
-                << " m_channelSampleRate: " << m_config.m_channelSampleRate
-                << " m_Bandwidth: " << m_config.m_Bandwidth
-                << " m_LowCutoff: " << m_config.m_LowCutoff
-                << " m_spanLog2: " << m_config.m_spanLog2
-                << " m_ssb: " << m_config.m_ssb
-                << " m_pll: " << m_config.m_pll
-                << " m_fll: " << m_config.m_fll
-				<< " m_pllPskOrder: " << m_config.m_pllPskOrder;
-
-        apply();
-		return true;
-	}
+        return true;
+    }
 	else
 	{
 		if (m_sampleSink != 0)
@@ -200,106 +257,6 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 			return false;
 		}
 	}
-}
-
-void ChannelAnalyzerNG::apply(bool force)
-{
-    if ((m_running.m_frequency != m_config.m_frequency) ||
-        (m_running.m_inputSampleRate != m_config.m_inputSampleRate) ||
-        force)
-    {
-        m_nco.setFreq(-m_config.m_frequency, m_config.m_inputSampleRate);
-    }
-
-    if ((m_running.m_inputSampleRate != m_config.m_inputSampleRate) ||
-        (m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
-        force)
-    {
-        m_settingsMutex.lock();
-        m_interpolator.create(16, m_config.m_inputSampleRate, m_config.m_inputSampleRate / 2.2);
-        m_interpolatorDistanceRemain = 0.0f;
-        m_interpolatorDistance =  (Real) m_config.m_inputSampleRate / (Real) m_config.m_channelSampleRate;
-        m_useInterpolator = (m_config.m_inputSampleRate != m_config.m_channelSampleRate); // optim
-        m_settingsMutex.unlock();
-    }
-
-    if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
-        (m_running.m_Bandwidth != m_config.m_Bandwidth) ||
-        (m_running.m_LowCutoff != m_config.m_LowCutoff) ||
-         force)
-    {
-        float bandwidth = m_config.m_Bandwidth;
-        float lowCutoff = m_config.m_LowCutoff;
-
-        if (bandwidth < 0)
-        {
-            bandwidth = -bandwidth;
-            lowCutoff = -lowCutoff;
-            m_usb = false;
-        }
-        else
-        {
-            m_usb = true;
-        }
-
-        if (bandwidth < 100.0f)
-        {
-            bandwidth = 100.0f;
-            lowCutoff = 0;
-        }
-
-        m_settingsMutex.lock();
-
-        SSBFilter->create_filter(lowCutoff / m_config.m_channelSampleRate, bandwidth / m_config.m_channelSampleRate);
-        DSBFilter->create_dsb_filter(bandwidth / m_config.m_channelSampleRate);
-
-        m_settingsMutex.unlock();
-    }
-
-    if ((m_running.m_channelSampleRate != m_config.m_channelSampleRate) ||
-        (m_running.m_spanLog2 != m_config.m_spanLog2) || force)
-    {
-        int sampleRate = m_running.m_channelSampleRate / (1<<m_running.m_spanLog2);
-        m_pll.setSampleRate(sampleRate);
-        m_fll.setSampleRate(sampleRate);
-    }
-
-    if (m_running.m_pll != m_config.m_pll || force)
-    {
-        if (m_config.m_pll)
-        {
-            m_pll.reset();
-            m_fll.reset();
-        }
-    }
-
-    if (m_running.m_fll != m_config.m_fll || force)
-    {
-        if (m_config.m_fll) {
-            m_fll.reset();
-        }
-    }
-
-    if (m_running.m_pllPskOrder != m_config.m_pllPskOrder || force)
-    {
-        if (m_config.m_pllPskOrder < 5) {
-            m_pll.setPskOrder(m_config.m_pllPskOrder);
-        }
-    }
-
-    m_running.m_frequency = m_config.m_frequency;
-    m_running.m_channelSampleRate = m_config.m_channelSampleRate;
-    m_running.m_inputSampleRate = m_config.m_inputSampleRate;
-    m_running.m_Bandwidth = m_config.m_Bandwidth;
-    m_running.m_LowCutoff = m_config.m_LowCutoff;
-
-    //m_settingsMutex.lock();
-    m_running.m_spanLog2 = m_config.m_spanLog2;
-    m_running.m_ssb = m_config.m_ssb;
-    m_running.m_pll = m_config.m_pll;
-    m_running.m_fll = m_config.m_fll;
-    m_running.m_pllPskOrder = m_config.m_pllPskOrder;
-    //m_settingsMutex.unlock();
 }
 
 void ChannelAnalyzerNG::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
@@ -338,6 +295,9 @@ void ChannelAnalyzerNG::applyChannelSettings(int inputSampleRate, int inputFrequ
 
 void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCutoff)
 {
+    qDebug("ChannelAnalyzerNG::setFilters: sampleRate: %d bandwidth: %f lowCutoff: %f",
+            sampleRate, bandwidth, lowCutoff);
+
     if (bandwidth < 0)
     {
         bandwidth = -bandwidth;
@@ -361,6 +321,17 @@ void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCut
 
 void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings, bool force)
 {
+    qDebug() << "ChannelAnalyzerNG::applySettings:"
+            << " m_downSample: " << settings.m_downSample
+            << " m_downSampleRate: " << settings.m_downSampleRate
+            << " m_bandwidth: " << settings.m_bandwidth
+            << " m_lowCutoff: " << settings.m_lowCutoff
+            << " m_spanLog2: " << settings.m_spanLog2
+            << " m_ssb: " << settings.m_ssb
+            << " m_pll: " << settings.m_pll
+            << " m_fll: " << settings.m_fll
+            << " m_pllPskOrder: " << settings.m_pllPskOrder;
+
     if ((settings.m_downSampleRate != m_settings.m_downSampleRate) || force)
     {
         m_settingsMutex.lock();
@@ -392,7 +363,7 @@ void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings,
 
     if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
     {
-        int sampleRate = (settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate) / (1<<m_running.m_spanLog2);
+        int sampleRate = (settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate) / (1<<m_settings.m_spanLog2);
         m_pll.setSampleRate(sampleRate);
         m_fll.setSampleRate(sampleRate);
     }

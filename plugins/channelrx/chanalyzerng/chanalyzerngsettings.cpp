@@ -22,7 +22,9 @@
 #include "chanalyzerngsettings.h"
 
 ChannelAnalyzerNGSettings::ChannelAnalyzerNGSettings() :
-    m_channelMarker(0)
+    m_channelMarker(0),
+    m_spectrumGUI(0),
+    m_scopeGUI(0)
 {
     resetToDefaults();
 }
@@ -34,11 +36,12 @@ void ChannelAnalyzerNGSettings::resetToDefaults()
     m_downSampleRate = 0;
     m_bandwidth = 5000;
     m_lowCutoff = 300;
-    m_spanLog2 = 3;
+    m_spanLog2 = 0;
     m_ssb = false;
     m_pll = false;
     m_fll = false;
     m_pllPskOrder = 1;
+    m_rgbColor = QColor(128, 128, 128).rgb();
 }
 
 QByteArray ChannelAnalyzerNGSettings::serialize() const
@@ -86,7 +89,7 @@ bool ChannelAnalyzerNGSettings::deserialize(const QByteArray& data)
 
         d.readU32(4, &m_rgbColor);
         d.readS32(5, &m_lowCutoff, 3);
-        d.readS32(6, &m_spanLog2, 3);
+        d.readS32(6, &m_spanLog2, 0);
         d.readBool(7, &m_ssb, false);
 
         if (m_scopeGUI) {
