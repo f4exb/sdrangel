@@ -277,6 +277,12 @@ int ChannelAnalyzerNGGUI::getRequestedChannelSampleRate()
     }
 }
 
+void ChannelAnalyzerNGGUI::on_signalSelect_currentIndexChanged(int index)
+{
+    m_settings.m_inputType = (ChannelAnalyzerNGSettings::InputType) index;
+    applySettings();
+}
+
 void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);

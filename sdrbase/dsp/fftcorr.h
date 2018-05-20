@@ -36,6 +36,7 @@ public:
     ~fftcorr();
 
     int run(const cmplx& inA, const cmplx* inB, cmplx **out); //!< if inB = 0 then run auto-correlation
+    const cmplx& run(const cmplx& inA, const cmplx* inB);
 
 private:
     void init_fft();
@@ -51,6 +52,7 @@ private:
     cmplx *output;
     int inptrA;
     int inptrB;
+    int outptr;
 };
 
 

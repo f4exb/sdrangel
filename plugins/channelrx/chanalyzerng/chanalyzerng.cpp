@@ -52,6 +52,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_inputFrequencyOffset = 0;
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
+	m_corr = new fftcorr(4*ssbFftLen);
 	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
@@ -145,8 +146,8 @@ void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
         if (!(m_undersampleCount++ & (decim - 1))) // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
         {
             m_sum /= decim;
-            Real re = m_sum.real() / SDR_RX_SCALED;
-            Real im = m_sum.imag() / SDR_RX_SCALED;
+            Real re = m_sum.real() / SDR_RX_SCALEF;
+            Real im = m_sum.imag() / SDR_RX_SCALEF;
             m_magsq = re*re + im*im;
             std::complex<float> mix;
 
@@ -306,7 +307,8 @@ void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings,
             << " m_ssb: " << settings.m_ssb
             << " m_pll: " << settings.m_pll
             << " m_fll: " << settings.m_fll
-            << " m_pllPskOrder: " << settings.m_pllPskOrder;
+            << " m_pllPskOrder: " << settings.m_pllPskOrder
+            << " m_inputType: " << (int) settings.m_inputType;
 
     if ((settings.m_downSampleRate != m_settings.m_downSampleRate) || force)
     {

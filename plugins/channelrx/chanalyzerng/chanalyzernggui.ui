@@ -356,6 +356,28 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QComboBox" name="signalSelect">
+          <property name="toolTip">
+           <string>Select input signal</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sig</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lock</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ACorr</string>
+           </property>
+          </item>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>

@@ -45,6 +45,7 @@ void fftcorr::init_fft()
 
     inptrA = 0;
     inptrB = 0;
+    outptr = 0;
 }
 
 fftcorr::fftcorr(int len) : flen(len), flen2(len>>1)
@@ -109,4 +110,15 @@ int fftcorr::run(const cmplx& inA, const cmplx* inB, cmplx **out)
 
     *out = output;
     return flen2;
+}
+
+const fftcorr::cmplx& fftcorr::run(const cmplx& inA, const cmplx* inB)
+{
+    cmplx *dummy;
+
+    if (run(inA, inB, &dummy)) {
+        outptr = 0;
+    }
+
+    return output[outptr++];
 }

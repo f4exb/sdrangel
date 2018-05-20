@@ -24,6 +24,7 @@
 #include "channel/channelsinkapi.h"
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
+#include "dsp/fftcorr.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
@@ -230,6 +231,7 @@ private:
 
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
+	fftcorr* m_corr;
 
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
@@ -248,11 +250,22 @@ private:
 	        case ChannelAnalyzerNGSettings::InputPLL:
             {
                 if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
-                    m_sampleBuffer.push_back(Sample(pll.imag(), pll.real()));
+                    m_sampleBuffer.push_back(Sample(pll.imag()*SDR_RX_SCALEF, pll.real()*SDR_RX_SCALEF));
                 } else {
-                    m_sampleBuffer.push_back(Sample(pll.real(), pll.imag()));
+                    m_sampleBuffer.push_back(Sample(pll.real()*SDR_RX_SCALEF, pll.imag()*SDR_RX_SCALEF));
                 }
             }
+	            break;
+	        case ChannelAnalyzerNGSettings::InputAutoCorr:
+	        {
+	            std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/1024.0f), 0);
+
+                if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
+                    m_sampleBuffer.push_back(Sample(a.imag(), a.real()));
+                } else {
+                    m_sampleBuffer.push_back(Sample(a.real(), a.imag()));
+                }
+	        }
 	            break;
             case ChannelAnalyzerNGSettings::InputSignal:
             default:
