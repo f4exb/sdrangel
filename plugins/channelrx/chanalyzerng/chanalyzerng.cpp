@@ -52,8 +52,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_inputFrequencyOffset = 0;
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
-	m_corr = new fftcorr(4*ssbFftLen);
-	//m_pll.computeCoefficients(0.05f, 0.707f, 1000.0f); // bandwidth, damping factor, loop gain
+	m_corr = new fftcorr(8*ssbFftLen); // 8k for 4k effective samples
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
 	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

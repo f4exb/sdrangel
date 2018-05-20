@@ -43,7 +43,7 @@ void fftcorr::init_fft()
     outptr = 0;
 }
 
-fftcorr::fftcorr(int len) : flen(len)
+fftcorr::fftcorr(int len) : flen(len), flen2(len>>1)
 {
     init_fft();
 }
@@ -66,7 +66,7 @@ int fftcorr::run(const cmplx& inA, const cmplx* inB, cmplx **out)
         dataB[inptrB++] = *inB;
     }
 
-    if (inptrA < flen) {
+    if (inptrA < flen2) {
         return 0;
     }
 
@@ -83,6 +83,7 @@ int fftcorr::run(const cmplx& inA, const cmplx* inB, cmplx **out)
     }
 
     std::transform(dataA, dataA+flen, dataBj, dataP, [](const cmplx& a, const cmplx& b) -> cmplx { return a*b; });
+
     fftA->InverseComplexFFT(dataP);
 
     std::fill(dataA, dataA+flen, 0);
@@ -95,7 +96,7 @@ int fftcorr::run(const cmplx& inA, const cmplx* inB, cmplx **out)
     }
 
     *out = dataP;
-    return flen;
+    return flen2;
 }
 
 const fftcorr::cmplx& fftcorr::run(const cmplx& inA, const cmplx* inB)

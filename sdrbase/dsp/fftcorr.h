@@ -41,6 +41,7 @@ public:
 private:
     void init_fft();
     int flen;  //!< FFT length
+    int flen2; //!< half FFT length
     g_fft<float> *fftA;
     g_fft<float> *fftB;
     cmplx *dataA;  // from A input
