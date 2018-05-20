@@ -86,6 +86,7 @@ private:
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
+	void displayPLLSettings();
 	void setSpectrumDisplay();
 
 	void leaveEvent(QEvent*);

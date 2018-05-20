@@ -106,14 +106,31 @@ void ChannelAnalyzerNGGUI::displaySettings()
     blockApplySettings(true);
 
     ui->useRationalDownsampler->setChecked(m_settings.m_downSample);
+    ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
+    setNewFinalRate();
     ui->BW->setValue(m_settings.m_bandwidth/100);
     ui->lowCut->setValue(m_settings.m_lowCutoff/100);
     ui->deltaFrequency->setValue(m_settings.m_frequency);
     ui->spanLog2->setCurrentIndex(m_settings.m_spanLog2);
+    displayPLLSettings();
 
     blockApplySettings(false);
+}
 
-    setNewFinalRate();
+void ChannelAnalyzerNGGUI::displayPLLSettings()
+{
+    if (m_settings.m_fll)
+    {
+        ui->pllPskOrder->setCurrentIndex(5);
+    }
+    else
+    {
+        int i = 0;
+        for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);
+        ui->pllPskOrder->setCurrentIndex(i);
+    }
+
+    ui->pll->setChecked(m_settings.m_pll);
 }
 
 void ChannelAnalyzerNGGUI::setSpectrumDisplay()
@@ -163,6 +180,7 @@ bool ChannelAnalyzerNGGUI::handleMessage(const Message& message)
     {
         qDebug() << "ChannelAnalyzerNGGUI::handleMessage: MsgReportChannelSampleRateChanged";
         ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
+        ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
         setNewFinalRate();
 
         return true;
@@ -229,16 +247,18 @@ void ChannelAnalyzerNGGUI::on_pll_toggled(bool checked)
 		ui->pll->setToolTip(tr("PLL lock"));
 	}
 
+	m_settings.m_pll = checked;
     applySettings();
 }
 
 void ChannelAnalyzerNGGUI::on_pllPskOrder_currentIndexChanged(int index)
 {
-    if (index < 5)
-    {
+    if (index < 5) {
         m_settings.m_pllPskOrder = (1<<index);
-        applySettings();
     }
+
+    m_settings.m_fll = (index == 5);
+    applySettings();
 }
 
 void ChannelAnalyzerNGGUI::on_useRationalDownsampler_toggled(bool checked)

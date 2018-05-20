@@ -42,6 +42,7 @@ PhaseLockComplex::PhaseLockComplex() :
     m_yIm(0.0),
     m_freq(0.0),
     m_freqPrev(0.0),
+    m_freqTest(0.0),
     m_lockCount(0),
     m_lockFreq(0.026f),
     m_pskOrder(1),
@@ -110,6 +111,7 @@ void PhaseLockComplex::reset()
     m_yIm = 0.0f;
     m_freq = 0.0f;
     m_freqPrev = 0.0f;
+    m_freqTest = 0.0f;
     m_lockCount = 0;
     m_lockTimeCount = 0;
 }
@@ -169,13 +171,13 @@ void PhaseLockComplex::feed(float re, float im)
         {
             float dF = m_freq - m_freqTest;
 
-            if ((dF > -m_lockFreq) && (dF < m_lockFreq)) 
+            if ((dF > -m_lockFreq) && (dF < m_lockFreq))
             {
                 if (m_lockCount < 20) {
                     m_lockCount++;
                 }
-            } 
-            else 
+            }
+            else
             {
                 if (m_lockCount > 0) {
                     m_lockCount--;
@@ -187,7 +189,7 @@ void PhaseLockComplex::feed(float re, float im)
         }
 
         m_freqPrev = m_freq;
-        m_phiHatPrev = m_phiHat;        
+        m_phiHatPrev = m_phiHat;
     }
     else
     {
