@@ -148,8 +148,7 @@ void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
             Real re = m_sum.real() / SDR_RX_SCALED;
             Real im = m_sum.imag() / SDR_RX_SCALED;
             m_magsq = re*re + im*im;
-            Real mixI = 1.0f;
-            Real mixQ = 0.0f;
+            std::complex<float> mix;
 
             if (m_settings.m_pll)
             {
@@ -157,40 +156,17 @@ void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
                 {
                     m_fll.feed(re, im);
                     // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                    mixI = m_sum.real() * m_fll.getImag() - m_sum.imag() * m_fll.getReal();
-                    mixQ = m_sum.real() * m_fll.getReal() + m_sum.imag() * m_fll.getImag();
-//                        mixI = m_fll.getReal() * SDR_RX_SCALED;
-//                        mixQ = m_fll.getImag() * SDR_RX_SCALED;
+                    mix = m_sum * std::conj(m_fll.getComplex());
                 }
                 else
                 {
                     m_pll.feed(re, im);
                     // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
-                    mixI = m_sum.real() * m_pll.getImag() - m_sum.imag() * m_pll.getReal();
-                    mixQ = m_sum.real() * m_pll.getReal() + m_sum.imag() * m_pll.getImag();
-                }
-
-                if (m_settings.m_ssb & !m_usb)
-                { // invert spectrum for LSB
-                    m_sampleBuffer.push_back(Sample(mixQ, mixI));
-                }
-                else
-                {
-                    m_sampleBuffer.push_back(Sample(mixI, mixQ));
-                }
-            }
-            else
-            {
-                if (m_settings.m_ssb & !m_usb)
-                { // invert spectrum for LSB
-                    m_sampleBuffer.push_back(Sample(m_sum.imag(), m_sum.real()));
-                }
-                else
-                {
-                    m_sampleBuffer.push_back(Sample(m_sum.real(), m_sum.imag()));
+                    mix = m_sum * std::conj(m_pll.getComplex());
                 }
             }
 
+            feedOneSample(m_settings.m_pll ? mix : m_sum, m_settings.m_fll ? m_fll.getComplex() : m_pll.getComplex());
             m_sum = 0;
         }
     }

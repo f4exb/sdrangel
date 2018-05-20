@@ -240,6 +240,32 @@ private:
 	void applySettings(const ChannelAnalyzerNGSettings& settings, bool force = false);
 	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
 	void processOneSample(Complex& c, fftfilt::cmplx *sideband);
+
+	inline void feedOneSample(const fftfilt::cmplx& s, const fftfilt::cmplx& pll)
+	{
+	    switch (m_settings.m_inputType)
+	    {
+	        case ChannelAnalyzerNGSettings::InputPLL:
+            {
+                if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
+                    m_sampleBuffer.push_back(Sample(pll.imag(), pll.real()));
+                } else {
+                    m_sampleBuffer.push_back(Sample(pll.real(), pll.imag()));
+                }
+            }
+	            break;
+            case ChannelAnalyzerNGSettings::InputSignal:
+            default:
+            {
+                if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
+                    m_sampleBuffer.push_back(Sample(s.imag(), s.real()));
+                } else {
+                    m_sampleBuffer.push_back(Sample(s.real(), s.imag()));
+                }
+            }
+                break;
+	    }
+	}
 };
 
 #endif // INCLUDE_CHANALYZERNG_H

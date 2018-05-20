@@ -23,6 +23,13 @@ class Serializable;
 
 struct ChannelAnalyzerNGSettings
 {
+    enum InputType
+    {
+        InputSignal,
+        InputPLL,
+        InputAutoCorr
+    };
+
     int m_frequency;
     bool m_downSample;
     quint32 m_downSampleRate;
@@ -33,6 +40,7 @@ struct ChannelAnalyzerNGSettings
     bool m_pll;
     bool m_fll;
     unsigned int m_pllPskOrder;
+    InputType m_inputType;
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
