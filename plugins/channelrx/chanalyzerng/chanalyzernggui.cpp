@@ -390,6 +390,7 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	m_channelMarker.setBandwidth(m_rate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setTitle("Channel Analyzer NG");
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 	setTitleColor(m_channelMarker.getColor());
