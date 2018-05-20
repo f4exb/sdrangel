@@ -41,15 +41,12 @@ public:
 private:
     void init_fft();
     int flen;  //!< FFT length
-    int flen2; //!< half FFT length
     g_fft<float> *fftA;
     g_fft<float> *fftB;
     cmplx *dataA;  // from A input
     cmplx *dataB;  // from B input
     cmplx *dataBj; // conjugate of B
     cmplx *dataP;  // product of A with conjugate of B
-    cmplx *ovlbuf;
-    cmplx *output;
     int inptrA;
     int inptrB;
     int outptr;

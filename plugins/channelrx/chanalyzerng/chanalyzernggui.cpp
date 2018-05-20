@@ -113,6 +113,7 @@ void ChannelAnalyzerNGGUI::displaySettings()
     ui->deltaFrequency->setValue(m_settings.m_frequency);
     ui->spanLog2->setCurrentIndex(m_settings.m_spanLog2);
     displayPLLSettings();
+    ui->signalSelect->setCurrentIndex((int) m_settings.m_inputType);
 
     blockApplySettings(false);
 }

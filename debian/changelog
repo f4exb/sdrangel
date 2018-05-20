@@ -1,6 +1,6 @@
 sdrangel (3.14.7-1) unstable; urgency=medium
 
-  * ChanelAnalyzerNG: added PLL option
+  * ChanelAnalyzerNG: added PLL option and source selection with auto correlation
   * RTL-SDR: fixed inf/sup decimators
   * AM demod: syncrhronous AM detection option
 
