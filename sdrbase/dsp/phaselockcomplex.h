@@ -49,12 +49,34 @@ public:
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
-    bool locked() const { return m_pskOrder > 1 ? m_lockCount > 16 : m_lockCount > m_lockTime-2; }
+    bool locked() const { return m_pskOrder > 1 ? m_lockCount > 10 : m_lockCount > m_lockTime-2; }
     float getFreq() const { return m_freq; }
     float getDeltaPhi() const { return m_deltaPhi; }
     float getPhiHat() const { return m_phiHat; }
 
 private:
+    class ExpAvg
+    {
+    public:
+        ExpAvg() : m_a0(0.999), m_a1(0.001), m_y1(0.0f)
+        {}
+        void setAlpha(const float& alpha)
+        {
+            m_a0 = alpha;
+            m_a1 = 1.0 - alpha;
+        }
+        float feed(const float& x)
+        {
+            float y = m_a1*x + m_a0*m_y1;
+            m_y1 = y;
+            return y;
+        }
+    private:
+        float m_a0; //!< alpha
+        float m_a1; //!< 1 - alpha
+        float m_y1;
+    };
+
     /** Normalize angle in radians into the [-pi,+pi] region */
     static float normalizeAngle(float angle);
 
@@ -82,6 +104,7 @@ private:
     unsigned int m_pskOrder;
     int m_lockTime;
     int m_lockTimeCount;
+    ExpAvg m_expAvg;
 };
 
 #endif /* SDRBASE_DSP_PHASELOCKCOMPLEX_H_ */

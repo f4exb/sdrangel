@@ -142,8 +142,10 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void AMDemodGUI::on_pll_toggled(bool checked)
 {
-    if (!checked) {
+    if (!checked)
+    {
         ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->pll->setToolTip(tr("PLL for synchronous AM"));
     }
 
     m_settings.m_pll = checked;
@@ -427,6 +429,9 @@ void AMDemodGUI::tick()
 	    } else {
 	        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	    }
+
+        int freq = (m_amDemod->getPllFrequency() * m_amDemod->getAudioSampleRate()) / (2.0*M_PI);
+        ui->pll->setToolTip(tr("PLL for synchronous AM. Freq = %1 Hz").arg(freq));
 	}
 
 	m_tickCount++;

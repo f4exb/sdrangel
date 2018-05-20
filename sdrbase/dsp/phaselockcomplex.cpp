@@ -90,7 +90,7 @@ void PhaseLockComplex::setPskOrder(unsigned int order)
 void PhaseLockComplex::setSampleRate(unsigned int sampleRate)
 {
     m_lockTime = sampleRate / 100; // 10ms for order 1
-    m_lockFreq = (2.0*M_PI*5.0) / sampleRate; // +/- 5 Hz frequency swing
+    m_lockFreq = (2.0*M_PI*(m_pskOrder > 1 ? 6.0 : 1.0)) / sampleRate; // +/- 6 Hz frequency swing
     reset();
 }
 
@@ -161,7 +161,7 @@ void PhaseLockComplex::feed(float re, float im)
     if (m_pskOrder > 1)
     {
         float dPhi = normalizeAngle(m_phiHat - m_phiHatPrev);
-        m_freq = 0.001*dPhi + 0.999*m_freqPrev;
+        m_freq = m_expAvg.feed(dPhi);
 
         if (m_lockTimeCount < m_lockTime-1)
         {
@@ -188,20 +188,14 @@ void PhaseLockComplex::feed(float re, float im)
             m_lockTimeCount = 0;
         }
 
-        m_freqPrev = m_freq;
         m_phiHatPrev = m_phiHat;
     }
     else
     {
-        m_freq = (m_phiHat - m_phiHatPrev) / (2.0*M_PI);
+        m_freqTest = normalizeAngle(m_phiHat - m_phiHatPrev);
+        m_freq = m_expAvg.feed(m_freqTest);
 
-        if (m_freq < -1.0f) {
-            m_freq += 2.0f;
-        } else if (m_freq > 1.0f) {
-            m_freq -= 2.0f;
-        }
-
-        float dFreq = m_freq - m_freqPrev;
+        float dFreq = m_freqTest - m_freqPrev;
 
         if ((dFreq > -0.01) && (dFreq < 0.01))
         {
@@ -215,7 +209,7 @@ void PhaseLockComplex::feed(float re, float im)
         }
 
         m_phiHatPrev = m_phiHat;
-        m_freqPrev = m_freq;
+        m_freqPrev = m_freqTest;
     }
 }
 
