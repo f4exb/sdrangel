@@ -30,7 +30,7 @@ set(sdrbase_SOURCES
     dsp/dspdevicesinkengine.cpp
     dsp/fftcorr.cpp
     dsp/fftengine.cpp
-    dsp/fftfilt.cxx
+    dsp/fftfilt.cpp
     dsp/fftwindow.cpp
     dsp/filterrc.cpp
     dsp/filtermbe.cpp
