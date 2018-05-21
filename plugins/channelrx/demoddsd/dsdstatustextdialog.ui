@@ -108,7 +108,7 @@
      </property>
      <property name="font">
       <font>
-       <family>Monospace</family>
+       <family>Liberation Mono</family>
       </font>
      </property>
      <property name="toolTip">
