@@ -258,7 +258,7 @@ private:
 	            break;
 	        case ChannelAnalyzerNGSettings::InputAutoCorr:
 	        {
-	            std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/512.0f), 0);
+	            std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/768.0f), 0);
 
                 if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
                     m_sampleBuffer.push_back(Sample(a.imag(), a.real()));

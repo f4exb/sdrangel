@@ -41,6 +41,8 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 Locks a PLL or FLL (depends on control 3) on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imagiary part as Y. 
 
+When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range. The FLL has no indicator.
+ 
 <h3>3: Locked loop mode</h3>
 
 Use this combo to control the locked loop type:
