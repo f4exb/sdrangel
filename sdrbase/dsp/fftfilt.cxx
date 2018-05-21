@@ -28,6 +28,7 @@
 // ----------------------------------------------------------------------------
 
 #include <memory.h>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -130,7 +131,7 @@ void fftfilt::create_filter(float f1, float f2)
 	for (int i = 0; i < flen2; i++)
 		filter[i] *= _blackman(i, flen2);
 
-	fft->ComplexFFT(filter);
+	fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
 	// normalize the output filter for unity gain
 	float scale = 0, mag;
@@ -155,7 +156,7 @@ void fftfilt::create_dsb_filter(float f2)
 		filter[i] *= _blackman(i, flen2);
 	}
 
-	fft->ComplexFFT(filter);
+	fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
 	// normalize the output filter for unity gain
 	float scale = 0, mag;
@@ -182,7 +183,7 @@ void fftfilt::create_asym_filter(float fopp, float fin)
         filter[i] *= _blackman(i, flen2);
     }
 
-    fft->ComplexFFT(filter);
+    fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
     // normalize the output filter for unity gain
     float scale = 0, mag;
@@ -204,7 +205,7 @@ void fftfilt::create_asym_filter(float fopp, float fin)
         filterOpp[i] *= _blackman(i, flen2);
     }
 
-    fft->ComplexFFT(filterOpp);
+    fft->ComplexFFT(filterOpp); // filter was expressed in the time domain (impulse response)
 
     // normalize the output filter for unity gain
     scale = 0;
@@ -215,6 +216,32 @@ void fftfilt::create_asym_filter(float fopp, float fin)
     if (scale != 0) {
         for (int i = 0; i < flen; i++)
             filterOpp[i] /= scale;
+    }
+}
+
+// This filter is constructed directly from frequency domain response. Run with runFilt.
+void fftfilt::create_rrc_filter(float fb, float a)
+{
+    std::fill(filter, filter+flen, 0);
+
+    for (int i = 0; i < flen; i++) {
+        filter[i] = frrc(fb, a, i, flen);
+    }
+
+    // normalize the output filter for unity gain
+    float scale = 0, mag;
+    for (int i = 0; i < flen; i++)
+    {
+        mag = abs(filter[i]);
+        if (mag > scale) {
+            scale = mag;
+        }
+    }
+    if (scale != 0)
+    {
+        for (int i = 0; i < flen; i++) {
+            filter[i] /= scale;
+        }
     }
 }
 
