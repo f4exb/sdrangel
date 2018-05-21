@@ -546,8 +546,6 @@ void ScopeVisNG::stop()
 
 bool ScopeVisNG::handleMessage(const Message& message)
 {
-    qDebug() << "ScopeVisNG::handleMessage" << message.getIdentifier();
-
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
@@ -624,6 +622,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGAddTrigger::match(message))
     {
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGAddTrigger";
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
         m_triggerConditions.push_back(new TriggerCondition(conf.getTriggerData()));
@@ -635,6 +634,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGChangeTrigger: " << triggerIndex;
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -655,6 +655,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGRemoveTrigger: " << triggerIndex;
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -670,6 +671,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGMoveTrigger& conf = (MsgScopeVisNGMoveTrigger&) message;
         int triggerIndex = conf.getTriggerIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGMoveTrigger: " << triggerIndex;
 
         if (!conf.getMoveUp() && (triggerIndex == 0)) {
             return true;
@@ -691,6 +693,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGFocusOnTrigger: " << triggerIndex;
 
         if (triggerIndex < m_triggerConditions.size())
         {
@@ -704,6 +707,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGAddTrace::match(message))
     {
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGAddTrace";
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
         m_traces.addTrace(conf.getTraceData(), m_traceSize);
@@ -718,7 +722,9 @@ bool ScopeVisNG::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
         bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
-        m_traces.changeTrace(conf.getTraceData(), conf.getTraceIndex());
+        uint32_t traceIndex = conf.getTraceIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGChangeTrace: " << traceIndex;
+        m_traces.changeTrace(conf.getTraceData(), traceIndex);
         updateMaxTraceDelay();
         if (doComputeTriggerLevelsOnDisplay) computeDisplayTriggerLevels();
         updateGLScopeDisplay();
@@ -728,7 +734,9 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
-        m_traces.removeTrace(conf.getTraceIndex());
+        uint32_t traceIndex = conf.getTraceIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGRemoveTrace: " << traceIndex;
+        m_traces.removeTrace(traceIndex);
         updateMaxTraceDelay();
         computeDisplayTriggerLevels();
         updateGLScopeDisplay();
@@ -738,7 +746,9 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGMoveTrace& conf = (MsgScopeVisNGMoveTrace&) message;
-        m_traces.moveTrace(conf.getTraceIndex(), conf.getMoveUp());
+        uint32_t traceIndex = conf.getTraceIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGMoveTrace: " << traceIndex;
+        m_traces.moveTrace(traceIndex, conf.getMoveUp());
         //updateMaxTraceDelay();
         computeDisplayTriggerLevels();
         updateGLScopeDisplay();
@@ -748,6 +758,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGFocusOnTrace& conf = (MsgScopeVisNGFocusOnTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGFocusOnTrace: " << traceIndex;
 
         if (traceIndex < m_traces.m_tracesData.size())
         {
@@ -761,6 +772,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGOneShot::match(message))
     {
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGOneShot";
         MsgScopeVisNGOneShot& conf = (MsgScopeVisNGOneShot&) message;
         bool oneShot = conf.getOneShot();
         m_triggerOneShot = oneShot;
@@ -771,6 +783,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     {
         MsgScopeVisNGMemoryTrace& conf = (MsgScopeVisNGMemoryTrace&) message;
         uint32_t memoryIndex = conf.getMemoryIndex();
+        qDebug() << "ScopeVisNG::handleMessage: MsgScopeVisNGMemoryTrace: " << memoryIndex;
 
         if (memoryIndex != m_currentTraceMemoryIndex)
         {
@@ -784,6 +797,7 @@ bool ScopeVisNG::handleMessage(const Message& message)
     }
     else
     {
+        qDebug() << "ScopeVisNG::handleMessage" << message.getIdentifier() << " not handled";
         return false;
     }
 }

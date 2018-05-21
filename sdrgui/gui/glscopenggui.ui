@@ -248,7 +248,7 @@
           </colorrole>
          </disabled>
         </palette>
-       </property>       
+       </property>
        <property name="toolTip">
         <string>Display XY traces and polar trace</string>
        </property>
@@ -1131,7 +1131,7 @@ kS/s</string>
         <string>Select trace memory (0 is live)</string>
        </property>
        <property name="maximum">
-        <number>15</number>
+        <number>49</number>
        </property>
        <property name="pageStep">
         <number>1</number>

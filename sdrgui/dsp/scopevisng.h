@@ -145,7 +145,7 @@ public:
     static const uint32_t m_traceChunkSize;
     static const uint32_t m_maxNbTriggers = 10;
     static const uint32_t m_maxNbTraces = 10;
-    static const uint32_t m_nbTraceMemories = 16;
+    static const uint32_t m_nbTraceMemories = 50;
 
     ScopeVisNG(GLScopeNG* glScope = 0);
     virtual ~ScopeVisNG();
