@@ -32,11 +32,14 @@ CONFIG(Debug):build_subdir = debug
 
 SOURCES += chanalyzerng.cpp\
 	chanalyzernggui.cpp\
-	chanalyzerngplugin.cpp
+        chanalyzerngplugin.cpp\
+        chanalyzerngsettings.cpp\
 
 HEADERS += chanalyzerng.h\
-chanalyzernggui.h\
-chanalyzerngplugin.h
+        chanalyzernggui.h\
+        chanalyzerngplugin.h\
+        chanalyzerngplugin.h
+
 
 FORMS += chanalyzernggui.ui
 

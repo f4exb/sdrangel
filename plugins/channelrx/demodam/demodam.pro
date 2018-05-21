@@ -29,14 +29,17 @@ CONFIG(Debug):build_subdir = debug
 SOURCES += amdemod.cpp\
 	amdemodgui.cpp\
 	amdemodplugin.cpp\
-	amdemodsettings.cpp
+        amdemodsettings.cpp\
+        amdemodssbdialog.cpp
 
 HEADERS += amdemod.h\
 	amdemodgui.h\
 	amdemodplugin.h\
-	amdemodsettings.h
+        amdemodsettings.h\
+        amdemodssbdialog.h
 
-FORMS += amdemodgui.ui
+FORMS += amdemodgui.ui\
+      amdemodssb.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

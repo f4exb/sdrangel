@@ -75,17 +75,20 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/dspdevicesinkengine.cpp\
         dsp/fftengine.cpp\
         dsp/kissengine.cpp\
+        dsp/fftcorr.cpp\
         dsp/fftfilt.cxx\
         dsp/fftwindow.cpp\
         dsp/filterrc.cpp\
         dsp/filtermbe.cpp\
         dsp/filerecord.cpp\
+        dsp/freqlockcomplex.cpp\
         dsp/interpolator.cpp\
         dsp/hbfiltertraits.cpp\
         dsp/lowpass.cpp\
         dsp/nco.cpp\
         dsp/ncof.cpp\
         dsp/phaselock.cpp\
+        dsp/phaselockcomplex.cpp\
         dsp/projector.cpp\
         dsp/recursivefilters.cpp\
         dsp/samplesinkfifo.cpp\
@@ -146,6 +149,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/dspdevicesourceengine.h\
         dsp/dspdevicesinkengine.h\
         dsp/dsptypes.h\
+        dsp/fftcorr.h\
         dsp/fftengine.h\
         dsp/fftfilt.h\
         dsp/fftwengine.h\
@@ -153,6 +157,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/filterrc.h\
         dsp/filtermbe.h\
         dsp/filerecord.h\
+        dsp/freqlockcomplex.h\
         dsp/gfft.h\
         dsp/hbfiltertraits.h\
         dsp/iirfilter.h\
@@ -172,6 +177,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/ncof.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
+        dsp/phaselockcomplex.h\
         dsp/projector.h\
         dsp/recursivefilters.h\
         dsp/samplesinkfifo.h\
