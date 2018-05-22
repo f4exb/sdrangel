@@ -69,7 +69,7 @@ protected:
 	{
         float x = i/(float)len; // normalize to [0..1]
         x = 0.5-fabs(x-0.5); // apply symmetry: now both halves overlap near 0
-        float tr = (fb*a)/2.0; // half the transition zone
+        float tr = fb*a; // half the transition zone
 
         if (x < fb-tr)
         {

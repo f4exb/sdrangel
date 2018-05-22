@@ -420,6 +420,58 @@
     <item>
      <layout class="QHBoxLayout" name="BWLayout">
       <item>
+       <widget class="ButtonSwitch" name="rrcFilter">
+        <property name="toolTip">
+         <string>Toggle RRC filter</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="rrcRolloff">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tune RRC filter rolloff factor</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>30</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rrcRolloffText">
+        <property name="toolTip">
+         <string>RRC filter rolloff factor value</string>
+        </property>
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="BWLabel">
         <property name="minimumSize">
          <size>

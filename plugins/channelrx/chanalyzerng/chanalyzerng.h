@@ -231,6 +231,7 @@ private:
 
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
+	fftfilt* RRCFilter;
 	fftcorr* m_corr;
 
 	BasebandSampleSink* m_sampleSink;

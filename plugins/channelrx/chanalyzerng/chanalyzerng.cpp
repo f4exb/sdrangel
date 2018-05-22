@@ -52,6 +52,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
 	m_inputFrequencyOffset = 0;
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
+	RRCFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
 	m_corr = new fftcorr(8*ssbFftLen); // 8k for 4k effective samples
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
@@ -72,6 +73,7 @@ ChannelAnalyzerNG::~ChannelAnalyzerNG()
     delete m_channelizer;
     delete SSBFilter;
     delete DSBFilter;
+    delete RRCFilter;
 }
 
 void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
@@ -129,10 +131,17 @@ void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
     int n_out;
     int decim = 1<<m_settings.m_spanLog2;
 
-    if (m_settings.m_ssb) {
+    if (m_settings.m_ssb)
+    {
         n_out = SSBFilter->runSSB(c, &sideband, m_usb);
-    } else {
-        n_out = DSBFilter->runDSB(c, &sideband);
+    }
+    else
+    {
+        if (m_settings.m_rrc) {
+            n_out = RRCFilter->runFilt(c, &sideband);
+        } else {
+            n_out = DSBFilter->runDSB(c, &sideband);
+        }
     }
 
     for (int i = 0; i < n_out; i++)
@@ -293,6 +302,7 @@ void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCut
 
     SSBFilter->create_filter(lowCutoff / sampleRate, bandwidth / sampleRate);
     DSBFilter->create_dsb_filter(bandwidth / sampleRate);
+    RRCFilter->create_rrc_filter(bandwidth / sampleRate, m_settings.m_rrcRolloff / 100.0);
 }
 
 void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings, bool force)
@@ -300,6 +310,8 @@ void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings,
     qDebug() << "ChannelAnalyzerNG::applySettings:"
             << " m_downSample: " << settings.m_downSample
             << " m_downSampleRate: " << settings.m_downSampleRate
+            << " m_rcc: " << settings.m_rrc
+            << " m_rrcRolloff: " << settings.m_rrcRolloff / 100.0
             << " m_bandwidth: " << settings.m_bandwidth
             << " m_lowCutoff: " << settings.m_lowCutoff
             << " m_spanLog2: " << settings.m_spanLog2
@@ -335,6 +347,14 @@ void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings,
     {
         m_settingsMutex.lock();
         setFilters(settings.m_downSample ? settings.m_downSampleRate : m_inputSampleRate, settings.m_bandwidth, settings.m_lowCutoff);
+        m_settingsMutex.unlock();
+    }
+
+    if ((settings.m_rrcRolloff != m_settings.m_rrcRolloff) || force)
+    {
+        float sampleRate = settings.m_downSample ? (float) settings.m_downSampleRate : (float) m_inputSampleRate;
+        m_settingsMutex.lock();
+        RRCFilter->create_rrc_filter(settings.m_bandwidth / sampleRate, settings.m_rrcRolloff / 100.0);
         m_settingsMutex.unlock();
     }
 

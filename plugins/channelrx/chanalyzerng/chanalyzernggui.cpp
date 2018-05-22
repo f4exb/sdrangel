@@ -114,6 +114,9 @@ void ChannelAnalyzerNGGUI::displaySettings()
     ui->spanLog2->setCurrentIndex(m_settings.m_spanLog2);
     displayPLLSettings();
     ui->signalSelect->setCurrentIndex((int) m_settings.m_inputType);
+    ui->rrcFilter->setChecked(m_settings.m_rrc);
+    QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
+    ui->rrcRolloffText->setText(rolloffStr);
 
     blockApplySettings(false);
 }
@@ -288,6 +291,20 @@ void ChannelAnalyzerNGGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_frequency = m_channelMarker.getCenterFrequency();
+    applySettings();
+}
+
+void ChannelAnalyzerNGGUI::on_rrcFilter_toggled(bool checked)
+{
+    m_settings.m_rrc = checked;
+    applySettings();
+}
+
+void ChannelAnalyzerNGGUI::on_rrcRolloff_valueChanged(int value)
+{
+    m_settings.m_rrcRolloff = value;
+    QString rolloffStr = QString::number(value/100.0, 'f', 2);
+    ui->rrcRolloffText->setText(rolloffStr);
     applySettings();
 }
 

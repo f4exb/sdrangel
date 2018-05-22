@@ -99,6 +99,8 @@ private slots:
     void on_pllPskOrder_currentIndexChanged(int index);
     void on_useRationalDownsampler_toggled(bool checked);
     void on_signalSelect_currentIndexChanged(int index);
+    void on_rrcFilter_toggled(bool checked);
+    void on_rrcRolloff_valueChanged(int value);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
 	void on_spanLog2_currentIndexChanged(int index);
