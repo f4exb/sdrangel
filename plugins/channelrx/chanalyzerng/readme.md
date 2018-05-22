@@ -84,31 +84,39 @@ Use this combo to select which (complex) signal to use as the display source:
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>10. Select lowpass filter cut-off frequency</h3>
+<h3>10. Toggle root raised cosine filter</h3>
+
+Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bnadpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
+
+<h3>11. Tune RRC filter rolloff factor</h3>
+
+This button tunes the rolloff factor (a.k.a alpha) of the RRC filter in 0.01 steps between 0.1 and 0.7. Default is 0.35. 
+
+<h3>12. Select lowpass filter cut-off frequency</h3>
 
 In SSB mode this filter is a complex filter that can lowpass on either side of the center frequency. It is therefore labeled as "LP". For negative frequencies (LSB) the cut-off frequency is therefore negative. In fact setting a negative frequency in SSB mode automatically turns on the LSB mode processing and the spectrum is reversed.
 
 In normal (DSB) mode this filter is a real filter that lowpass on both sides of the zero (center) frequency symmetrically. Therefore it acts as a bandpass filter centered on the zero frequency and therefore it is labeled as "BP". The value displayed in (9) is the full bandwidth of the filter.
 
-<h3>11. Lowpass filter cut-off frequency</h3>
+<h3>13. Lowpass filter cut-off frequency</h3>
 
 In SSB mode this is the complex cut-off frequency and is negative for LSB.
 
 In normal (DSB) mode this is the full bandwidth of the real lowpass filter centered around zero frequency.
 
-<h3>12. SSB filtering</h3>
+<h3>14. SSB filtering</h3>
 
 When this toggle is engaged the signal is filtered either above (USB) or below (LSB) the channel center frequency. The sideband is selected according to the sign of the lowpass filter cut-off frequency (8): if positive the USB is selected else the LSB. In LSB mode the spectrum is reversed.
 
 When SSB is off the lowpass filter is actually a bandpass filter around the channel center frequency. 
 
-<h3>13. Select highpass filter cut-off frequency</h3>
+<h3>15. Select highpass filter cut-off frequency</h3>
 
 In SSB mode this controls the cut-off frequency of the complex highpass filter which is the filter closest to the zero frequency. This cut-off frequency is always at least 0.1 kHz in absolute value below the lowpass filter cut-off frequency (8).
 
 In normal (DSB) mode this filter is not active.
 
-<h3>14. Highpass filter cut-off frequency</h3>
+<h3>16. Highpass filter cut-off frequency</h3>
 
 This is the cut-off frequency of the highpass filter in kHz. It is zero or negative in LSB mode.
 
@@ -148,27 +156,31 @@ This button selects the display of "X" and "Yn" traces on top of each other with
 
 This button selects the display of all traces on the left side of the screen and the polar display of the "Yn" traces using the "X" trace as the x coordinates.
 
-<h3>6. Select trace intensity</h3>
+<h3>6. Line or points only display on the 2D XY display (right)</h3>
+
+Use this button to toggle points display (on) or line display (off) for the 2D XY display on the right. The points display may yield a more visible graph when the distinct artifact is an aggregation of points.
+
+<h3>7. Select trace intensity</h3>
 
 This button lets you adjust the traces intensity. The value in percent of the maximum intensity appears as a tooltip
 
-<h3>7. Select grid intensity</h3>
+<h3>8. Select grid intensity</h3>
 
 This button lets you adjust the grid intensity. The value in percent of the maximum intensity appears as a tooltip
 
-<h3>8. Displayed trace length</h3>
+<h3>9. Displayed trace length</h3>
 
 This slider lets you adjust the length of the traces on display. Each step further divides the length of the full trace controlled by (10). The duration of the full length shown on display appears on the left of the slider and the corresponding number of samples appears as a tooltip. 
 
-<h3>9. Trace offset</h3>
+<h3>10. Trace offset</h3>
 
 This slider lets you move the start of traces on display. Each step moves the trace by an amount of time corresponding to 1/100 of the length of the full trace controlled by (10). The time offset from the start of the traces appears on the left of the slider and the corresponding number of samples appears as a tooltip. 
 
-<h3>10. Trace length</h3>
+<h3>11. Trace length</h3>
 
 This slider lets you control the full length of the trace. Each step increases the corresponding amount of samples by 4800 samples with a minimum of 4800 samples and a maximum of 20*4800 = 96000 samples. The duration of a full trace appears on the left of the slider and he corresponding number of samples appears as a tooltip.
 
-<h3>11. Trace sample rate</h3>
+<h3>12. Trace sample rate</h3>
 
 This is the sample rate used by the scope and corresponds to the final sample rate after the whole decimation chain. It should be the same amount as the one displayed on the plugin control (C.6)
 
@@ -202,8 +214,52 @@ To construct a trace which represents real values the incoming complex signal mu
   - MagDB: calculate power in log representation as 10*log10(x) or decibel (dB) representation. This is the squared module of the complex sample expressed in decibels
   - Phi: instantaneous phase. This is the argument of the complex sample.
   - dPhi: instantaneous derivative of the phase. This is the difference of arguments between successive samples thus represents the instantaneous frequency.
+  - BPSK: maps -&#960; to &#960; phase into two &#960; wide sectors centered on 0 and &#960; on the -1 to +1 range (sector is 1.0 wide): 
+    - 0 &rarr; 0.5, 
+    - &#960; &rarr; -0.5
+  - QPSK: maps -&#960; to &#960; phase into four &#960;/2 wide sectors centered on 0, &#960;/2, &#960;, -&#960;/2 on the -1 to +1 range (sector is 0.5 wide): 
+    - 0 &rarr; 0.25
+    - &#960;/2 &rarr; 0.75
+    - &#960; &rarr; -0.75
+    - -&#960;/2 &rarr; -0.25 
+  - 8PSK: maps -&#960; to &#960; phase into eight &#960;/4 wide sectors centered on 0, &#960;/4, &#960;/2, 3&#960;/4, &#960;, -3&#960;/4, -&#960;/2, -&#960;/4 on the -1 to +1 range (sector is 0.25 wide): 
+    - 0 &rarr; 0.125 
+    - &#960;/4 &rarr; 0.375 
+    - &#960;/2 &rarr; 0.625 
+    - 3&#960;/4 &rarr; 0.875 
+    - &#960; &rarr; -0.875
+    - -3&#960;/4 &rarr; -0.625 
+    - -&#960;/2 &rarr; -0.375 
+    - -&#960;/4 &rarr; -0.125 
+  - 16PSK: maps -&#960; to &#960; phase into sixteen &#960;/8 wide sectors centered on 0, &#960;/8, &#960;/4, 3&#960;/8, &#960;/2, 5&#960;/8, 3&#960;/4, 7&#960;/8, &#960;, -7&#960;/8, -3&#960;/4, -5&#960;/8, -&#960;/2, -3&#960;/8, -&#960;/4, -&#960;/8 on the -1 to +1 range (sector is 0.125 wide): 
+    - 0 &rarr; 0.0625
+    - &#960;/8 &rarr; 0.1875 
+    - &#960;/4 &rarr; 0.3125 
+    - 3&#960;/8 &rarr; 0.4375 
+    - &#960;/2 &rarr; 0.5625
+    - 5&#960;/8 &rarr; 0.6875 
+    - 3&#960;/4 &rarr; 0.8125 
+    - 7&#960;/8 &rarr; 0.9375
+    - &#960; &rarr; -0.9375  
+    - -7&#960;/8 &rarr; -0.8125
+    - -3&#960;/4 &rarr; -0.6875 
+    - -5&#960;/8 &rarr; -0.5625 
+    - -&#960;/2 &rarr; -0.4375
+    - -3&#960;/8 &rarr; -0.3125 
+    - -&#960;/4 &rarr; -0.1875 
+    - -&#960;/8 &rarr; -0.0625 
+  
+**Note1**: example of QPSK projection on a synchronized Tetra signal:
 
-in the MagDB mode when the trace is selected (1) the display overlay on the top right of the trace shows 3 figures. From left to right: peak power in dB, average power in dB and peak to average difference in dB.
+![Channel Analyzer NG plugin tetra example](../../../doc/img/ChAnalyzerNG_plugin_tetra.png)
+
+The signal is synchronized with the PLL in 4 phase mode (locker icon is green). 
+ - A Tetra signal is QPSK modulated at 18 kSym/s therefore the sample rate is set at 90 kS/s thus we have an integer number of samples per symbol (5 samples per symbol). See green square. 
+ - We have set two traces (X and Y1) with QPSK projection. The Y1 trace is delayed by two symbols (10 samples) which makes a 111.11 &#956;s delay. See blue square
+ - In XY mode on the XY display (right) we can see an accumulation of points around the 16 possible symbol transitions. In two places the same symbol is repeated several times which results in a stronger aggregation. One is with the symbol at 0 (see red circle and square) and the other is with the symbol at &#960; (see yellow circle and square).
+ - On the left panel of the XY mode display we can see that the 4 possible symbols mark 4 vertical stronger areas centered on 0.25, 0.75, -0.25 and -0.75.
+
+**Note2**: in the MagDB mode when the trace is selected (1) the display overlay on the top right of the trace shows 3 figures. From left to right: peak power in dB, average power in dB and peak to average difference in dB.
   
 ![Channel Analyzer NG plugin scope1 controls](../../../doc/img/ChAnalyzerNG_plugin_overlay_dB.png)
 

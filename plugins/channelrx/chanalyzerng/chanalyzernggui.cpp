@@ -108,6 +108,12 @@ void ChannelAnalyzerNGGUI::displaySettings()
     ui->useRationalDownsampler->setChecked(m_settings.m_downSample);
     ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
     setNewFinalRate();
+    if (m_settings.m_ssb) {
+        ui->BWLabel->setText("LP");
+    } else {
+        ui->BWLabel->setText("BP");
+    }
+    ui->ssb->setChecked(m_settings.m_ssb);
     ui->BW->setValue(m_settings.m_bandwidth/100);
     ui->lowCut->setValue(m_settings.m_lowCutoff/100);
     ui->deltaFrequency->setValue(m_settings.m_frequency);
@@ -338,6 +344,11 @@ void ChannelAnalyzerNGGUI::on_spanLog2_currentIndexChanged(int index)
 void ChannelAnalyzerNGGUI::on_ssb_toggled(bool checked)
 {
 	m_settings.m_ssb = checked;
+	if (checked) {
+	    ui->BWLabel->setText("LP");
+	} else {
+	    ui->BWLabel->setText("BP");
+	}
     setFiltersUIBoundaries();
     applySettings();
 }
@@ -396,7 +407,6 @@ ChannelAnalyzerNGGUI::ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *de
 	ui->glSpectrum->setDisplayMaxHold(true);
 	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
-	ui->BWLabel->setText("BP");
 
 	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
 	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());

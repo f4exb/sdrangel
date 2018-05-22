@@ -41,7 +41,7 @@ void ChannelAnalyzerNGSettings::resetToDefaults()
     m_pll = false;
     m_fll = false;
     m_rrc = false;
-    m_rrcRolloff = 30; // 0.3
+    m_rrcRolloff = 35; // 0.35
     m_pllPskOrder = 1;
     m_inputType = InputSignal;
     m_rgbColor = QColor(128, 128, 128).rgb();
@@ -115,7 +115,7 @@ bool ChannelAnalyzerNGSettings::deserialize(const QByteArray& data)
         m_inputType = (InputType) tmp;
         d.readString(15, &m_title, "Channel Analyzer NG");
         d.readBool(16, &m_rrc, false);
-        d.readU32(17, &m_rrcRolloff, 30);
+        d.readU32(17, &m_rrcRolloff, 35);
 
         return true;
     }
