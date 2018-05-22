@@ -76,7 +76,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/fftengine.cpp\
         dsp/kissengine.cpp\
         dsp/fftcorr.cpp\
-        dsp/fftfilt.cxx\
+        dsp/fftfilt.cpp\
         dsp/fftwindow.cpp\
         dsp/filterrc.cpp\
         dsp/filtermbe.cpp\
