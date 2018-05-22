@@ -28,6 +28,10 @@ public:
         ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
         ProjectionPhase,    //!< Calculate phase
         ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
+        ProjectionBPSK,     //!< Phase comparator BPSK evaluation
+        ProjectionQPSK,     //!< Phase comparator QPSK evaluation
+        Projection8PSK,     //!< Phase comparator 8-PSK evaluation
+        Projection16PSK,    //!< Phase comparator 16-PSK evaluation
 		nbProjectionTypes   //!< Gives the number of projections in the enum
     };
 
@@ -42,6 +46,7 @@ public:
     Real run(const Sample& s);
 
 private:
+    static Real normalizeAngle(Real angle);
     ProjectionType m_projectionType;
     Real m_prevArg;
     Real *m_cache;
