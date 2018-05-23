@@ -25,6 +25,7 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGATVModSettings.h"
+#include "SWGBFMDemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
 #include "SWGSSBModSettings.h"
@@ -65,6 +66,9 @@ public:
     SWGATVModSettings* getAtvModSettings();
     void setAtvModSettings(SWGATVModSettings* atv_mod_settings);
 
+    SWGBFMDemodSettings* getBfmDemodSettings();
+    void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
+
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
 
@@ -98,6 +102,9 @@ private:
 
     SWGATVModSettings* atv_mod_settings;
     bool m_atv_mod_settings_isSet;
+
+    SWGBFMDemodSettings* bfm_demod_settings;
+    bool m_bfm_demod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

@@ -43,6 +43,10 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
+namespace SWGSDRangel {
+    class SWGRDSReport;
+}
+
 class BFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureBFMDemod : public Message {
@@ -153,6 +157,20 @@ public:
 
     RDSParser& getRDSParser() { return m_rdsParser; }
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -227,6 +245,10 @@ private:
 	void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
+
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const BFMDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report);
 };
 
 #endif // INCLUDE_BFMDEMOD_H

@@ -24,6 +24,8 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
+#include "SWGBFMDemodReport.h"
+#include "SWGBFMDemodSettings.h"
 #include "SWGBladeRFInputSettings.h"
 #include "SWGBladeRFOutputSettings.h"
 #include "SWGCWKeyerSettings.h"
@@ -61,6 +63,8 @@
 #include "SWGPresetItem.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
+#include "SWGRDSReport.h"
+#include "SWGRDSReport_altFrequencies.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSSBModReport.h"
 #include "SWGSSBModSettings.h"
@@ -103,6 +107,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAudioOutputDevice").compare(type) == 0) {
       return new SWGAudioOutputDevice();
+    }
+    if(QString("SWGBFMDemodReport").compare(type) == 0) {
+      return new SWGBFMDemodReport();
+    }
+    if(QString("SWGBFMDemodSettings").compare(type) == 0) {
+      return new SWGBFMDemodSettings();
     }
     if(QString("SWGBladeRFInputSettings").compare(type) == 0) {
       return new SWGBladeRFInputSettings();
@@ -214,6 +224,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPresets").compare(type) == 0) {
       return new SWGPresets();
+    }
+    if(QString("SWGRDSReport").compare(type) == 0) {
+      return new SWGRDSReport();
+    }
+    if(QString("SWGRDSReport_altFrequencies").compare(type) == 0) {
+      return new SWGRDSReport_altFrequencies();
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();

@@ -17,4 +17,6 @@ AirspyHFSettings:
       format: int64      
     bandIndex:
       type: integer
+    fileRecordName:
+      type: string
     

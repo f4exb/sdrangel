@@ -28,6 +28,8 @@ BladeRFInputSettings:
       type: integer
     iqCorrection:
       type: integer
+    fileRecordName:
+      type: string      
       
 BladeRFOutputSettings:
   description: BladeRF

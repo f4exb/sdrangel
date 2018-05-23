@@ -119,6 +119,16 @@ bool BFMDemodGUI::handleMessage(const Message& message)
         ui->glSpectrum->setSampleRate(m_rate / 2);
         return true;
     }
+    else if (BFMDemod::MsgConfigureBFMDemod::match(message))
+    {
+        qDebug("BFMDemodGUI::handleMessage: BFMDemod::MsgConfigureBFMDemod");
+        const BFMDemod::MsgConfigureBFMDemod& cfg = (BFMDemod::MsgConfigureBFMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
     else
     {
         return false;

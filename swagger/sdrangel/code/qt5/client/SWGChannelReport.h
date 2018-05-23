@@ -25,6 +25,7 @@
 #include "SWGAMDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
+#include "SWGBFMDemodReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGSSBModReport.h"
@@ -65,6 +66,9 @@ public:
     SWGATVModReport* getAtvModReport();
     void setAtvModReport(SWGATVModReport* atv_mod_report);
 
+    SWGBFMDemodReport* getBfmDemodReport();
+    void setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report);
+
     SWGNFMDemodReport* getNfmDemodReport();
     void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
 
@@ -98,6 +102,9 @@ private:
 
     SWGATVModReport* atv_mod_report;
     bool m_atv_mod_report_isSet;
+
+    SWGBFMDemodReport* bfm_demod_report;
+    bool m_bfm_demod_report_isSet;
 
     SWGNFMDemodReport* nfm_demod_report;
     bool m_nfm_demod_report_isSet;

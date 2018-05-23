@@ -1751,6 +1751,8 @@ definitions:
         $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
       ATVModSettings:
         $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
+      BFMDemodSettings:
+        $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       NFMDemodSettings:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1778,6 +1780,8 @@ definitions:
         $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
       ATVModReport:
         $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
+      BFMDemodReport:
+        $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       NFMDemodReport:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

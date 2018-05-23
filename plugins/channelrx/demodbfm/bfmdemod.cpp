@@ -17,8 +17,15 @@
 
 #include <QTime>
 #include <QDebug>
+#include "boost/format.hpp"
 #include <stdio.h>
 #include <complex.h>
+
+#include "SWGChannelSettings.h"
+#include "SWGBFMDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGBFMDemodReport.h"
+#include "SWGRDSReport.h"
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
@@ -26,6 +33,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
+#include "util/db.h"
 
 #include "rdsparser.h"
 #include "bfmdemod.h"
@@ -536,3 +544,166 @@ bool BFMDemod::deserialize(const QByteArray& data)
     }
 }
 
+int BFMDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+    response.getBfmDemodSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int BFMDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    BFMDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getBfmDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getBfmDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getBfmDemodSettings()->getAfBandwidth();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getBfmDemodSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("squelch")) {
+        settings.m_squelch = response.getBfmDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("audioStereo")) {
+        settings.m_audioStereo = response.getBfmDemodSettings()->getAudioStereo() != 0;
+    }
+    if (channelSettingsKeys.contains("lsbStereo")) {
+        settings.m_lsbStereo = response.getBfmDemodSettings()->getLsbStereo() != 0;
+    }
+    if (channelSettingsKeys.contains("showPilot")) {
+        settings.m_showPilot = response.getBfmDemodSettings()->getShowPilot() != 0;
+    }
+    if (channelSettingsKeys.contains("rdsActive")) {
+        settings.m_rdsActive = response.getBfmDemodSettings()->getRdsActive() != 0;
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAmDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("BFMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int BFMDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setBfmDemodReport(new SWGSDRangel::SWGBFMDemodReport());
+    response.getBfmDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void BFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const BFMDemodSettings& settings)
+{
+    response.getBfmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getBfmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getBfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getBfmDemodSettings()->setVolume(settings.m_volume);
+    response.getBfmDemodSettings()->setSquelch(settings.m_squelch);
+    response.getBfmDemodSettings()->setAudioStereo(settings.m_audioStereo ? 1 : 0);
+    response.getBfmDemodSettings()->setLsbStereo(settings.m_lsbStereo ? 1 : 0);
+    response.getBfmDemodSettings()->setShowPilot(settings.m_showPilot ? 1 : 0);
+    response.getBfmDemodSettings()->setRdsActive(settings.m_rdsActive ? 1 : 0);
+    response.getBfmDemodSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getBfmDemodSettings()->getTitle()) {
+        *response.getBfmDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getBfmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getBfmDemodSettings()->getAudioDeviceName()) {
+        *response.getBfmDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getBfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getBfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getBfmDemodReport()->setSquelch(m_squelchState > 0 ? 1 : 0);
+    response.getBfmDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getBfmDemodReport()->setChannelSampleRate(m_inputSampleRate);
+    response.getBfmDemodReport()->setPilotLocked(getPilotLock() ? 1 : 0);
+    response.getBfmDemodReport()->setPilotPowerDb(CalcDb::dbPower(getPilotLevel()));
+
+    if (m_settings.m_rdsActive)
+    {
+        response.getBfmDemodReport()->setRdsReport(new SWGSDRangel::SWGRDSReport());
+        webapiFormatRDSReport(response.getBfmDemodReport()->getRdsReport());
+    }
+}
+
+void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
+{
+    report->setDemodStatus(round(getDemodQua()));
+    report->setDecodStatus(round(getDecoderQua()));
+    report->setRdsDemodAccumDb(CalcDb::dbPower(std::fabs(getDemodAcc())));
+    report->setRdsDemodFrequency(getDemodFclk());
+    report->setPid(new QString(str(boost::format("%04X") % getRDSParser().m_pi_program_identification).c_str()));
+    report->setPiType(new QString(getRDSParser().pty_table[getRDSParser().m_pi_program_type].c_str()));
+    report->setPiCoverage(new QString(getRDSParser().coverage_area_codes[getRDSParser().m_pi_area_coverage_index].c_str()));
+    report->setProgServiceName(new QString(getRDSParser().m_g0_program_service_name));
+    report->setMusicSpeech(new QString((getRDSParser().m_g0_music_speech ? "Music" : "Speech")));
+    report->setMonoStereo(new QString((getRDSParser().m_g0_mono_stereo ? "Mono" : "Stereo")));
+    report->setRadioText(new QString(getRDSParser().m_g2_radiotext));
+    std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
+        % (1900 + getRDSParser().m_g4_year) % getRDSParser().m_g4_month % getRDSParser().m_g4_day % getRDSParser().m_g4_hours % getRDSParser().m_g4_minutes % getRDSParser().m_g4_local_time_offset);
+    report->setTime(new QString(time.c_str()));
+    report->setAltFrequencies(new QList<SWGSDRangel::SWGRDSReport_altFrequencies*>);
+
+    for (std::set<double>::iterator it = getRDSParser().m_g0_alt_freq.begin(); it != getRDSParser().m_g0_alt_freq.end(); ++it)
+    {
+        if (*it > 76.0)
+        {
+            report->getAltFrequencies()->append(new SWGSDRangel::SWGRDSReport_altFrequencies);
+            report->getAltFrequencies()->back()->setFrequency(*it);
+        }
+    }
+}

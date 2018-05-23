@@ -1875,6 +1875,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "BFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject bfmDemodSettingsJsonObject = jsonObject["BFMDemodSettings"].toObject();
+            channelSettingsKeys = bfmDemodSettingsJsonObject.keys();
+            channelSettings.setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+            channelSettings.getBfmDemodSettings()->fromJsonObject(bfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)

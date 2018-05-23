@@ -936,6 +936,9 @@ margin-bottom: 20px;
     },
     "bandIndex" : {
       "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
     }
   },
   "description" : "AirspyHF"
@@ -1043,6 +1046,84 @@ margin-bottom: 20px;
   },
   "description" : "Audio output device"
 };
+            defs.BFMDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "pilotLocked" : {
+      "type" : "integer",
+      "description" : "pilot locked status (1 if open else 0)"
+    },
+    "pilotPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power of stereo pilot (dB)"
+    },
+    "rdsReport" : {
+      "$ref" : "#/definitions/RDSReport"
+    }
+  },
+  "description" : "BFMDemod"
+};
+            defs.BFMDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "afBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioStereo" : {
+      "type" : "integer"
+    },
+    "lsbStereo" : {
+      "type" : "integer"
+    },
+    "showPilot" : {
+      "type" : "integer"
+    },
+    "rdsActive" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "BFMDemod"
+};
             defs.BladeRFInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1084,6 +1165,9 @@ margin-bottom: 20px;
     },
     "iqCorrection" : {
       "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
     }
   },
   "description" : "BladeRF"
@@ -1220,6 +1304,9 @@ margin-bottom: 20px;
     "ATVModReport" : {
       "$ref" : "#/definitions/ATVModReport"
     },
+    "BFMDemodReport" : {
+      "$ref" : "#/definitions/BFMDemodReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1258,6 +1345,9 @@ margin-bottom: 20px;
     },
     "ATVModSettings" : {
       "$ref" : "#/definitions/ATVModSettings"
+    },
+    "BFMDemodSettings" : {
+      "$ref" : "#/definitions/BFMDemodSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -1512,6 +1602,9 @@ margin-bottom: 20px;
     },
     "linkTxFrequency" : {
       "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
     }
   },
   "description" : "HackRF"
@@ -1688,6 +1781,9 @@ margin-bottom: 20px;
     "transverterDeltaFrequency" : {
       "type" : "integer",
       "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
     }
   },
   "description" : "LimeSDR"
@@ -2056,6 +2152,75 @@ margin-bottom: 20px;
   },
   "description" : "Settings presets"
 };
+            defs.RDSReport = {
+  "properties" : {
+    "demodStatus" : {
+      "type" : "integer",
+      "description" : "Demodulation success  (%)"
+    },
+    "decodStatus" : {
+      "type" : "integer",
+      "description" : "Decoding success  (%)"
+    },
+    "rdsDemodAccumDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RDS demodulator accumulator level (dB)"
+    },
+    "rdsDemodFrequency" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RDS demodulator clock frequency"
+    },
+    "pid" : {
+      "type" : "string",
+      "description" : "Program information (PI) ID in string format (hex)"
+    },
+    "piType" : {
+      "type" : "string",
+      "description" : "Program information (PI) type information"
+    },
+    "piCoverage" : {
+      "type" : "string",
+      "description" : "Program information (PI) coverage information"
+    },
+    "progServiceName" : {
+      "type" : "string",
+      "description" : "Program service name"
+    },
+    "musicSpeech" : {
+      "type" : "string",
+      "description" : "Music or speech"
+    },
+    "monoStereo" : {
+      "type" : "string",
+      "description" : "Mono or stereo"
+    },
+    "radioText" : {
+      "type" : "string",
+      "description" : "Freeflow text"
+    },
+    "time" : {
+      "type" : "string",
+      "description" : "Timestamp in string format ~ISO"
+    },
+    "altFrequencies" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RDSReport_altFrequencies"
+      }
+    }
+  },
+  "description" : "RDS information"
+};
+            defs.RDSReport_altFrequencies = {
+  "properties" : {
+    "frequency" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  }
+};
             defs.RtlSdrSettings = {
   "properties" : {
     "devSampleRate" : {
@@ -2101,6 +2266,9 @@ margin-bottom: 20px;
     },
     "rfBandwidth" : {
       "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
     }
   },
   "description" : "RTLSDR"
@@ -20643,7 +20811,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-04-17T00:43:20.797+02:00
+              Generated 2018-05-23T14:44:33.513+02:00
             </div>
           </div>
       </div>
