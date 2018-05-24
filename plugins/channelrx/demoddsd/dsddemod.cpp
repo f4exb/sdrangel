@@ -787,13 +787,13 @@ int DSDDemod::webapiSettingsPutPatch(
         settings.m_pllLock = response.getDsdDemodSettings()->getPllLock() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getDsdDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getAmDemodSettings()->getTitle();
+        settings.m_title = *response.getDsdDemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
+        settings.m_audioDeviceName = *response.getDsdDemodSettings()->getAudioDeviceName();
     }
     if (channelSettingsKeys.contains("highPassFilter")) {
         settings.m_highPassFilter = response.getDsdDemodSettings()->getHighPassFilter() != 0;

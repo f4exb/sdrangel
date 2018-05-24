@@ -65,6 +65,8 @@ def getInputOptions():
     parser.add_option("-t", "--settling-time", dest="settling_time", help="Scan step settling time in seconds", metavar="SECONDS", type="float", default=1.0)
     parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
     parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
+    parser.add_option("--baud-rate", dest="baud_rate", help="Baud rate for digial modulation (DV)", metavar="RATE", type="int", default=4800)
+    parser.add_option("--fm-dev", dest="fm_dev", help="FM deviation for FM digial modulation (DV)", metavar="FREQUENCY", type="int", default=5400)
     parser.add_option("--re-run", dest="rerun", help="re run with given parameters without setting up device and channels", metavar="BOOLEAN", action="store_true", default=False)
     parser.add_option("-x", "--excl-list", dest="excl_fstr", help="frequencies (in Hz) exclusion comma separated list", metavar="LIST", type="string")
     parser.add_option("--excl-tol", dest="excl_tol", help="match tolerance interval (in Hz) for exclusion frequencies", metavar="FREQUENCY", type="float", default=10.0) 
@@ -167,11 +169,11 @@ def changeDeviceFrequency(fc, options):
 def setupChannels(scan_control, options):
     i = 0
     for shift in scan_control.channel_shifts:
-        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create NFM demod")
+        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create demod")
         if settings is None:
             exit(-1)
 
-        settings = callAPI(deviceset_url + "/channel/%d/settings" % i, "GET", None, None, "Get NFM demod settings")
+        settings = callAPI(deviceset_url + "/channel/%d/settings" % i, "GET", None, None, "Get demod settings")
         if settings is None:
             exit(-1)
 
@@ -190,6 +192,14 @@ def setupChannels(scan_control, options):
             settings["AMDemodSettings"]["squelch"] = options.squelch_db
             settings["AMDemodSettings"]["title"] = "Channel %d" % i
             settings["AMDemodSettings"]["bandpassEnable"] = 1 # bandpass filter
+        elif options.channel_id == "DSDDemod":
+            settings["DSDDemodSettings"]["inputFrequencyOffset"] = int(shift)
+            settings["DSDDemodSettings"]["rfBandwidth"] = options.rf_bw
+            settings["DSDDemodSettings"]["volume"] = options.volume
+            settings["DSDDemodSettings"]["squelch"] = options.squelch_db
+            settings["DSDDemodSettings"]["baudRate"] = options.baud_rate
+            settings["DSDDemodSettings"]["fmDeviation"] = options.fm_dev
+            settings["DSDDemodSettings"]["title"] = "Channel %d" % i
         
         r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
         if r is None:
@@ -207,7 +217,11 @@ def checkScanning(fc, options, display_message):
         channel = reports["channels"][i]
         if "report" in channel:
             if reportKey in channel["report"]:
-                if channel["report"][reportKey]["squelch"] == 1:
+                if options.channel_id == "DSDDemod": # DSD is special because it only stops on voice
+                    stopCondition = channel["report"][reportKey]["slot1On"] == 1 or channel["report"][reportKey]["slot2On"] == 1
+                else:
+                    stopCondition = channel["report"][reportKey]["squelch"] == 1
+                if stopCondition:
                     f_channel = channel["deltaFrequency"]+fc
                     f_frac = round(f_channel/options.excl_tol)
                     if f_frac not in options.excl_flist:

@@ -105,9 +105,35 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DSDDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool DSDDemodGUI::handleMessage(const Message& message)
 {
-	return false;
+    if (DSDDemod::MsgConfigureDSDDemod::match(message))
+    {
+        qDebug("DSDDemodGUI::handleMessage: DSDDemod::MsgConfigureDSDDemod");
+        const DSDDemod::MsgConfigureDSDDemod& cfg = (DSDDemod::MsgConfigureDSDDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void DSDDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -290,6 +316,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));

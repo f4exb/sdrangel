@@ -593,13 +593,13 @@ int BFMDemod::webapiSettingsPutPatch(
         settings.m_rdsActive = response.getBfmDemodSettings()->getRdsActive() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getBfmDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getAmDemodSettings()->getTitle();
+        settings.m_title = *response.getBfmDemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
+        settings.m_audioDeviceName = *response.getBfmDemodSettings()->getAudioDeviceName();
     }
 
     if (frequencyOffsetChanged)

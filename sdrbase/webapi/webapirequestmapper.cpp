@@ -1889,6 +1889,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "DSDDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject dsdDemodSettingsJsonObject = jsonObject["DSDDemodSettings"].toObject();
+            channelSettingsKeys = dsdDemodSettingsJsonObject.keys();
+            channelSettings.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+            channelSettings.getDsdDemodSettings()->fromJsonObject(dsdDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)
