@@ -26,6 +26,7 @@
 #include "SWGAMModSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGDSDDemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
 #include "SWGSSBModSettings.h"
@@ -69,6 +70,9 @@ public:
     SWGBFMDemodSettings* getBfmDemodSettings();
     void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
 
+    SWGDSDDemodSettings* getDsdDemodSettings();
+    void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
 
@@ -105,6 +109,9 @@ private:
 
     SWGBFMDemodSettings* bfm_demod_settings;
     bool m_bfm_demod_settings_isSet;
+
+    SWGDSDDemodSettings* dsd_demod_settings;
+    bool m_dsd_demod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

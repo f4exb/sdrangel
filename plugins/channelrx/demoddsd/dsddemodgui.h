@@ -64,14 +64,14 @@ public slots:
     void channelMarkerHighlightedByCursor();
 
 private:
-	typedef enum
-	{
-	    signalFormatNone,
-	    signalFormatDMR,
-	    signalFormatDStar,
-	    signalFormatDPMR,
-		signalFormatYSF
-	} SignalFormat;
+//	typedef enum
+//	{
+//	    signalFormatNone,
+//	    signalFormatDMR,
+//	    signalFormatDStar,
+//	    signalFormatDPMR,
+//		signalFormatYSF
+//	} SignalFormat;
 
 	Ui::DSDDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
@@ -79,8 +79,6 @@ private:
 	ChannelMarker m_channelMarker;
 	DSDDemodSettings m_settings;
 	bool m_doApplySettings;
-	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
-	SignalFormat m_signalFormat;
 
     ScopeVisXY* m_scopeVisXY;
 
@@ -113,7 +111,6 @@ private:
 	void enterEvent(QEvent*);
 
 private slots:
-    void formatStatusText();
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
     void on_demodGain_valueChanged(int value);

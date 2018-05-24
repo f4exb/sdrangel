@@ -34,6 +34,8 @@
 #include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelsDetail.h"
+#include "SWGDSDDemodReport.h"
+#include "SWGDSDDemodSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGDeviceListItem.h"
@@ -137,6 +139,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGChannelsDetail").compare(type) == 0) {
       return new SWGChannelsDetail();
+    }
+    if(QString("SWGDSDDemodReport").compare(type) == 0) {
+      return new SWGDSDDemodReport();
+    }
+    if(QString("SWGDSDDemodSettings").compare(type) == 0) {
+      return new SWGDSDDemodSettings();
     }
     if(QString("SWGDVSeralDevices").compare(type) == 0) {
       return new SWGDVSeralDevices();

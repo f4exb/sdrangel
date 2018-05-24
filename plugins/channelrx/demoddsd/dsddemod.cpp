@@ -21,12 +21,19 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGDSDDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGDSDDemodReport.h"
+#include "SWGRDSReport.h"
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
+#include "util/db.h"
 
 #include "dsddemod.h"
 
@@ -56,6 +63,7 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
         m_scopeXY(0),
         m_scopeEnabled(true),
         m_dsdDecoder(),
+        m_signalFormat(signalFormatNone),
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -467,8 +475,6 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_slot2On: " << m_settings.m_slot2On
             << " m_tdmaStereo: " << m_settings.m_tdmaStereo
             << " m_pllLock: " << m_settings.m_pllLock
-            << " m_udpAddress: " << m_settings.m_udpAddress
-            << " m_udpPort: " << m_settings.m_udpPort
             << " m_highPassFilter: "<< m_settings.m_highPassFilter
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
@@ -567,4 +573,327 @@ bool DSDDemod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+const char *DSDDemod::updateAndGetStatusText()
+{
+    formatStatusText();
+    return m_formatStatusText;
+}
+
+void DSDDemod::formatStatusText()
+{
+    switch (getDecoder().getSyncType())
+    {
+    case DSDcc::DSDDecoder::DSDSyncDMRDataMS:
+    case DSDcc::DSDDecoder::DSDSyncDMRDataP:
+    case DSDcc::DSDDecoder::DSDSyncDMRVoiceMS:
+    case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
+        if (m_signalFormat != signalFormatDMR)
+        {
+            strcpy(m_formatStatusText, "Sta: __ S1: __________________________ S2: __________________________");
+        }
+
+        switch (getDecoder().getStationType())
+        {
+        case DSDcc::DSDDecoder::DSDBaseStation:
+            memcpy(&m_formatStatusText[5], "BS ", 3);
+            break;
+        case DSDcc::DSDDecoder::DSDMobileStation:
+            memcpy(&m_formatStatusText[5], "MS ", 3);
+            break;
+        default:
+            memcpy(&m_formatStatusText[5], "NA ", 3);
+            break;
+        }
+
+        memcpy(&m_formatStatusText[12], getDecoder().getDMRDecoder().getSlot0Text(), 26);
+        memcpy(&m_formatStatusText[43], getDecoder().getDMRDecoder().getSlot1Text(), 26);
+        m_signalFormat = signalFormatDMR;
+        break;
+    case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
+    case DSDcc::DSDDecoder::DSDSyncDStarHeaderP:
+    case DSDcc::DSDDecoder::DSDSyncDStarN:
+    case DSDcc::DSDDecoder::DSDSyncDStarP:
+        if (m_signalFormat != signalFormatDStar)
+        {
+                                     //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______:___/_____._");
+                                     // MY            UR       RPT1     RPT2     Info                 Loc    Target
+        }
+
+        {
+            const std::string& rpt1 = getDecoder().getDStarDecoder().getRpt1();
+            const std::string& rpt2 = getDecoder().getDStarDecoder().getRpt2();
+            const std::string& mySign = getDecoder().getDStarDecoder().getMySign();
+            const std::string& yrSign = getDecoder().getDStarDecoder().getYourSign();
+
+            if (rpt1.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[23], rpt1.c_str(), 8);
+            }
+            if (rpt2.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[32], rpt2.c_str(), 8);
+            }
+            if (yrSign.length() > 0) { // 0 or 8
+                memcpy(&m_formatStatusText[14], yrSign.c_str(), 8);
+            }
+            if (mySign.length() > 0) { // 0 or 13
+                memcpy(&m_formatStatusText[0], mySign.c_str(), 13);
+            }
+            memcpy(&m_formatStatusText[41], getDecoder().getDStarDecoder().getInfoText(), 20);
+            memcpy(&m_formatStatusText[62], getDecoder().getDStarDecoder().getLocator(), 6);
+            snprintf(&m_formatStatusText[69], 82-69, "%03d/%07.1f",
+                    getDecoder().getDStarDecoder().getBearing(),
+                    getDecoder().getDStarDecoder().getDistance());
+        }
+
+        m_formatStatusText[82] = '\0';
+        m_signalFormat = signalFormatDStar;
+        break;
+    case DSDcc::DSDDecoder::DSDSyncDPMR:
+        snprintf(m_formatStatusText, 82, "%s CC: %04d OI: %08d CI: %08d",
+                DSDcc::DSDdPMR::dpmrFrameTypes[(int) getDecoder().getDPMRDecoder().getFrameType()],
+                getDecoder().getDPMRDecoder().getColorCode(),
+                getDecoder().getDPMRDecoder().getOwnId(),
+                getDecoder().getDPMRDecoder().getCalledId());
+        m_signalFormat = signalFormatDPMR;
+        break;
+    case DSDcc::DSDDecoder::DSDSyncYSF:
+        //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+        // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
+        if (getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
+        {
+            snprintf(m_formatStatusText, 82, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
+        }
+        else
+        {
+            snprintf(m_formatStatusText, 82, "%d ", (int) getDecoder().getYSFDecoder().getFICHError());
+        }
+
+        snprintf(&m_formatStatusText[2], 80, "%s %s %d:%d %c%c",
+                DSDcc::DSDYSF::ysfDataTypeText[(int) getDecoder().getYSFDecoder().getFICH().getDataType()],
+                DSDcc::DSDYSF::ysfCallModeText[(int) getDecoder().getYSFDecoder().getFICH().getCallMode()],
+                getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
+                getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
+                (getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),
+                (getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
+
+        if (getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
+        {
+            snprintf(&m_formatStatusText[14], 82-14, "%03d", getDecoder().getYSFDecoder().getFICH().getSquelchCode());
+        }
+        else
+        {
+            strncpy(&m_formatStatusText[14], "---", 82-14);
+        }
+
+        char dest[13];
+
+        if (getDecoder().getYSFDecoder().radioIdMode())
+        {
+            snprintf(dest, 12, "%-5s:%-5s",
+                    getDecoder().getYSFDecoder().getDestId(),
+                    getDecoder().getYSFDecoder().getSrcId());
+        }
+        else
+        {
+            snprintf(dest, 11, "%-10s", getDecoder().getYSFDecoder().getDest());
+        }
+
+        snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
+                getDecoder().getYSFDecoder().getSrc(),
+                dest,
+                getDecoder().getYSFDecoder().getUplink(),
+                getDecoder().getYSFDecoder().getDownlink(),
+                getDecoder().getYSFDecoder().getRem4());
+
+        m_signalFormat = signalFormatYSF;
+        break;
+    default:
+        m_signalFormat = signalFormatNone;
+        m_formatStatusText[0] = '\0';
+        break;
+    }
+
+    m_formatStatusText[82] = '\0'; // guard
+}
+
+int DSDDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+    response.getDsdDemodSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DSDDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    DSDDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getDsdDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getDsdDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getDsdDemodSettings()->getFmDeviation();
+    }
+    if (channelSettingsKeys.contains("demodGain")) {
+        settings.m_demodGain = response.getDsdDemodSettings()->getDemodGain();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getDsdDemodSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("baudRate")) {
+        settings.m_baudRate = response.getDsdDemodSettings()->getBaudRate();
+    }
+    if (channelSettingsKeys.contains("squelchGate")) {
+        settings.m_squelchGate = response.getDsdDemodSettings()->getSquelchGate();
+    }
+    if (channelSettingsKeys.contains("squelch")) {
+        settings.m_squelch = response.getDsdDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getDsdDemodSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("enableCosineFiltering")) {
+        settings.m_enableCosineFiltering = response.getDsdDemodSettings()->getEnableCosineFiltering() != 0;
+    }
+    if (channelSettingsKeys.contains("syncOrConstellation")) {
+        settings.m_syncOrConstellation = response.getDsdDemodSettings()->getSyncOrConstellation() != 0;
+    }
+    if (channelSettingsKeys.contains("slot1On")) {
+        settings.m_slot1On = response.getDsdDemodSettings()->getSlot1On() != 0;
+    }
+    if (channelSettingsKeys.contains("slot2On")) {
+        settings.m_slot2On = response.getDsdDemodSettings()->getSlot2On() != 0;
+    }
+    if (channelSettingsKeys.contains("tdmaStereo")) {
+        settings.m_tdmaStereo = response.getDsdDemodSettings()->getTdmaStereo() != 0;
+    }
+    if (channelSettingsKeys.contains("pllLock")) {
+        settings.m_pllLock = response.getDsdDemodSettings()->getPllLock() != 0;
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAmDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
+    }
+    if (channelSettingsKeys.contains("highPassFilter")) {
+        settings.m_highPassFilter = response.getDsdDemodSettings()->getHighPassFilter() != 0;
+    }
+    if (channelSettingsKeys.contains("traceLengthMutliplier")) {
+        settings.m_traceLengthMutliplier = response.getDsdDemodSettings()->getTraceLengthMutliplier();
+    }
+    if (channelSettingsKeys.contains("traceStroke")) {
+        settings.m_traceStroke = response.getDsdDemodSettings()->getTraceStroke();
+    }
+    if (channelSettingsKeys.contains("traceDecay")) {
+        settings.m_traceDecay = response.getDsdDemodSettings()->getTraceDecay();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureDSDDemod *msg = MsgConfigureDSDDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("DSDDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureDSDDemod *msgToGUI = MsgConfigureDSDDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int DSDDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setDsdDemodReport(new SWGSDRangel::SWGDSDDemodReport());
+    response.getDsdDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DSDDemodSettings& settings)
+{
+    response.getDsdDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getDsdDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getDsdDemodSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getDsdDemodSettings()->setDemodGain(settings.m_demodGain);
+    response.getDsdDemodSettings()->setVolume(settings.m_volume);
+    response.getDsdDemodSettings()->setBaudRate(settings.m_baudRate);
+    response.getDsdDemodSettings()->setSquelchGate(settings.m_squelchGate);
+    response.getDsdDemodSettings()->setSquelch(settings.m_squelch);
+    response.getDsdDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getDsdDemodSettings()->setEnableCosineFiltering(settings.m_enableCosineFiltering ? 1 : 0);
+    response.getDsdDemodSettings()->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
+    response.getDsdDemodSettings()->setSlot1On(settings.m_slot1On ? 1 : 0);
+    response.getDsdDemodSettings()->setSlot2On(settings.m_slot2On ? 1 : 0);
+    response.getDsdDemodSettings()->setTdmaStereo(settings.m_tdmaStereo ? 1 : 0);
+    response.getDsdDemodSettings()->setPllLock(settings.m_pllLock ? 1 : 0);
+    response.getDsdDemodSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getDsdDemodSettings()->getTitle()) {
+        *response.getDsdDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getDsdDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getDsdDemodSettings()->getAudioDeviceName()) {
+        *response.getDsdDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getDsdDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    response.getDsdDemodSettings()->setHighPassFilter(settings.m_highPassFilter ? 1 : 0);
+    response.getDsdDemodSettings()->setTraceLengthMutliplier(settings.m_traceLengthMutliplier);
+    response.getDsdDemodSettings()->setTraceStroke(settings.m_traceStroke);
+    response.getDsdDemodSettings()->setTraceDecay(settings.m_traceDecay);
+}
+
+void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getDsdDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getDsdDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getDsdDemodReport()->setChannelSampleRate(m_inputSampleRate);
+    response.getDsdDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
+    response.getDsdDemodReport()->setPllLocked(getDecoder().getSymbolPLLLocked() ? 1 : 0);
+    response.getDsdDemodReport()->setSlot1On(getDecoder().getVoice1On() ? 1 : 0);
+    response.getDsdDemodReport()->setSlot2On(getDecoder().getVoice2On() ? 1 : 0);
+    response.getDsdDemodReport()->setSyncType(new QString(getDecoder().getFrameTypeText()));
+    response.getDsdDemodReport()->setInLevel(getDecoder().getInLevel());
+    response.getDsdDemodReport()->setCarierPosition(getDecoder().getCarrierPos());
+    response.getDsdDemodReport()->setZeroCrossingPosition(getDecoder().getZeroCrossingPos());
+    response.getDsdDemodReport()->setSyncRate(getDecoder().getSymbolSyncQuality());
+    response.getDsdDemodReport()->setStatusText(new QString(updateAndGetStatusText()));
 }

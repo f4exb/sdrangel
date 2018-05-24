@@ -242,10 +242,6 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
 
 void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
-	/*
-	if((widget == ui->spectrumContainer) && (DSDDemodGUI != NULL))
-		m_dsdDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
-	*/
 }
 
 void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -278,7 +274,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
-	m_signalFormat(signalFormatNone),
 	m_enableCosineFiltering(false),
 	m_syncOrConstellation(false),
 	m_slot1On(false),
@@ -460,145 +455,6 @@ void DSDDemodGUI::blockApplySettings(bool block)
 	m_doApplySettings = !block;
 }
 
-void DSDDemodGUI::formatStatusText()
-{
-    switch (m_dsdDemod->getDecoder().getSyncType())
-    {
-    case DSDcc::DSDDecoder::DSDSyncDMRDataMS:
-    case DSDcc::DSDDecoder::DSDSyncDMRDataP:
-    case DSDcc::DSDDecoder::DSDSyncDMRVoiceMS:
-    case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
-        if (m_signalFormat != signalFormatDMR)
-        {
-            strcpy(m_formatStatusText, "Sta: __ S1: __________________________ S2: __________________________");
-        }
-
-        switch (m_dsdDemod->getDecoder().getStationType())
-        {
-        case DSDcc::DSDDecoder::DSDBaseStation:
-            memcpy(&m_formatStatusText[5], "BS ", 3);
-            break;
-        case DSDcc::DSDDecoder::DSDMobileStation:
-            memcpy(&m_formatStatusText[5], "MS ", 3);
-            break;
-        default:
-            memcpy(&m_formatStatusText[5], "NA ", 3);
-            break;
-        }
-
-        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getDMRDecoder().getSlot0Text(), 26);
-        memcpy(&m_formatStatusText[43], m_dsdDemod->getDecoder().getDMRDecoder().getSlot1Text(), 26);
-        m_signalFormat = signalFormatDMR;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
-    case DSDcc::DSDDecoder::DSDSyncDStarHeaderP:
-    case DSDcc::DSDDecoder::DSDSyncDStarN:
-    case DSDcc::DSDDecoder::DSDSyncDStarP:
-        if (m_signalFormat != signalFormatDStar)
-        {
-                                     //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______:___/_____._");
-                                     // MY            UR       RPT1     RPT2     Info                 Loc    Target
-        }
-
-        {
-            const std::string& rpt1 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt1();
-            const std::string& rpt2 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt2();
-            const std::string& mySign = m_dsdDemod->getDecoder().getDStarDecoder().getMySign();
-            const std::string& yrSign = m_dsdDemod->getDecoder().getDStarDecoder().getYourSign();
-
-            if (rpt1.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[23], rpt1.c_str(), 8);
-            }
-            if (rpt2.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[32], rpt2.c_str(), 8);
-            }
-            if (yrSign.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[14], yrSign.c_str(), 8);
-            }
-            if (mySign.length() > 0) { // 0 or 13
-                memcpy(&m_formatStatusText[0], mySign.c_str(), 13);
-            }
-            memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
-            memcpy(&m_formatStatusText[62], m_dsdDemod->getDecoder().getDStarDecoder().getLocator(), 6);
-            snprintf(&m_formatStatusText[69], 82-69, "%03d/%07.1f",
-                    m_dsdDemod->getDecoder().getDStarDecoder().getBearing(),
-                    m_dsdDemod->getDecoder().getDStarDecoder().getDistance());
-        }
-
-        m_formatStatusText[82] = '\0';
-        m_signalFormat = signalFormatDStar;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncDPMR:
-        snprintf(m_formatStatusText, 82, "%s CC: %04d OI: %08d CI: %08d",
-                DSDcc::DSDdPMR::dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
-                m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode(),
-                m_dsdDemod->getDecoder().getDPMRDecoder().getOwnId(),
-                m_dsdDemod->getDecoder().getDPMRDecoder().getCalledId());
-        m_signalFormat = signalFormatDPMR;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncYSF:
-        //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-        // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
-    	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
-    	{
-            snprintf(m_formatStatusText, 82, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
-    	}
-    	else
-    	{
-            snprintf(m_formatStatusText, 82, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
-    	}
-
-        snprintf(&m_formatStatusText[2], 80, "%s %s %d:%d %c%c",
-                DSDcc::DSDYSF::ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
-                DSDcc::DSDYSF::ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
-				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
-				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
-				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),
-				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
-
-        if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
-    	{
-            snprintf(&m_formatStatusText[14], 82-14, "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
-    	}
-    	else
-    	{
-            strncpy(&m_formatStatusText[14], "---", 82-14);
-    	}
-
-        char dest[13];
-
-        if ( m_dsdDemod->getDecoder().getYSFDecoder().radioIdMode())
-        {
-            snprintf(dest, 12, "%-5s:%-5s",
-                    m_dsdDemod->getDecoder().getYSFDecoder().getDestId(),
-                    m_dsdDemod->getDecoder().getYSFDecoder().getSrcId());
-        }
-        else
-        {
-            snprintf(dest, 11, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
-        }
-
-        snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
-                m_dsdDemod->getDecoder().getYSFDecoder().getSrc(),
-                dest,
-                m_dsdDemod->getDecoder().getYSFDecoder().getUplink(),
-                m_dsdDemod->getDecoder().getYSFDecoder().getDownlink(),
-                m_dsdDemod->getDecoder().getYSFDecoder().getRem4());
-
-        m_signalFormat = signalFormatYSF;
-    	break;
-    default:
-        m_signalFormat = signalFormatNone;
-        m_formatStatusText[0] = '\0';
-        break;
-    }
-
-    m_formatStatusText[82] = '\0'; // guard
-}
-
 void DSDDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -685,14 +541,14 @@ void DSDDemodGUI::tick()
 
 	    ui->syncText->setText(QString(frameTypeText));
 
-	    formatStatusText();
-	    ui->formatStatusText->setText(QString(m_formatStatusText));
+	    const char *formatStatusText = m_dsdDemod->updateAndGetStatusText();
+	    ui->formatStatusText->setText(QString(formatStatusText));
 
 	    if (ui->activateStatusLog->isChecked()) {
-	        m_dsdStatusTextDialog.addLine(QString(m_formatStatusText));
+	        m_dsdStatusTextDialog.addLine(QString(formatStatusText));
 	    }
 
-	    if (m_formatStatusText[0] == '\0') {
+	    if (formatStatusText[0] == '\0') {
 	        ui->formatStatusText->setStyleSheet("QLabel { background:rgb(53,53,53); }"); // turn off background
 	    } else {
             ui->formatStatusText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background

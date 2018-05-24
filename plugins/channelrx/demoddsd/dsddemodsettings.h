@@ -38,8 +38,6 @@ struct DSDDemodSettings
     bool m_slot2On;
     bool m_tdmaStereo;
     bool m_pllLock;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
     bool m_highPassFilter;

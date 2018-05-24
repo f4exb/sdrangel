@@ -1307,6 +1307,9 @@ margin-bottom: 20px;
     "BFMDemodReport" : {
       "$ref" : "#/definitions/BFMDemodReport"
     },
+    "DSDDemodReport" : {
+      "$ref" : "#/definitions/DSDDemodReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1349,6 +1352,9 @@ margin-bottom: 20px;
     "BFMDemodSettings" : {
       "$ref" : "#/definitions/BFMDemodSettings"
     },
+    "DSDDemodSettings" : {
+      "$ref" : "#/definitions/DSDDemodSettings"
+    },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
     },
@@ -1383,6 +1389,142 @@ margin-bottom: 20px;
     }
   },
   "description" : "All channels detailed information"
+};
+            defs.DSDDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "pllLocked" : {
+      "type" : "integer",
+      "description" : "symbol PLL status (1 if locked else 0)"
+    },
+    "slot1On" : {
+      "type" : "integer",
+      "description" : "slot 1 status (1 if active else 0)"
+    },
+    "slot2On" : {
+      "type" : "integer",
+      "description" : "slot 2 status (1 if active else 0)"
+    },
+    "syncType" : {
+      "type" : "string",
+      "description" : "type of frame synchronized"
+    },
+    "inLevel" : {
+      "type" : "integer",
+      "description" : "decoder input level after discriminator. Percent of mid scale (aim 100)."
+    },
+    "carierPosition" : {
+      "type" : "integer",
+      "description" : "position of carrier relative to discriminator center. Percent of scale (aim 0)."
+    },
+    "zeroCrossingPosition" : {
+      "type" : "integer",
+      "description" : "position of symbol synchronizer zero crossing in number of samples (aim 0)."
+    },
+    "syncRate" : {
+      "type" : "integer",
+      "description" : "successful synchronization rate. Percent of expected symbols (aim 100)."
+    },
+    "statusText" : {
+      "type" : "string",
+      "description" : "mode dependent status messages (ref UI documentation)"
+    }
+  },
+  "description" : "DSDDemod"
+};
+            defs.DSDDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "demodGain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "baudRate" : {
+      "type" : "integer"
+    },
+    "squelchGate" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "enableCosineFiltering" : {
+      "type" : "integer"
+    },
+    "syncOrConstellation" : {
+      "type" : "integer"
+    },
+    "slot1On" : {
+      "type" : "integer"
+    },
+    "slot2On" : {
+      "type" : "integer"
+    },
+    "tdmaStereo" : {
+      "type" : "integer"
+    },
+    "pllLock" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "highPassFilter" : {
+      "type" : "integer"
+    },
+    "traceLengthMutliplier" : {
+      "type" : "integer",
+      "description" : "multiply by 50ms"
+    },
+    "traceStroke" : {
+      "type" : "integer",
+      "description" : "0 to 255"
+    },
+    "traceDecay" : {
+      "type" : "integer",
+      "description" : "0 to 255"
+    }
+  },
+  "description" : "DSDDemod"
 };
             defs.DVSeralDevices = {
   "required" : [ "nbDevices" ],
@@ -20811,7 +20953,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-23T14:44:33.513+02:00
+              Generated 2018-05-24T10:19:21.195+02:00
             </div>
           </div>
       </div>
