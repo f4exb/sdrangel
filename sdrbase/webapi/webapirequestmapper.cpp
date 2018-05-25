@@ -1681,6 +1681,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "Airspy") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("airspySettings") && jsonObject["airspySettings"].isObject())
+        {
+            QJsonObject airspySettingsJsonObject = jsonObject["airspySettings"].toObject();
+            deviceSettingsKeys = airspySettingsJsonObject.keys();
+            deviceSettings.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
+            deviceSettings.getAirspySettings()->fromJsonObject(airspySettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("airspyHFSettings") && jsonObject["airspyHFSettings"].isObject())

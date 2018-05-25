@@ -97,7 +97,19 @@ def setupDevice(deviceset_url, options):
         if settings is None:
             exit(-1)
 
-        if options.device_hwid == "AirspyHF":
+        if options.device_hwid == "Airspy":
+            settings["airspySettings"]["centerFrequency"] = options.device_freq*1000
+            settings["airspySettings"]["devSampleRateIndex"] = 1
+            settings['airspySettings']['log2Decim'] = options.log2_decim
+            settings['airspySettings']['fcPos'] = options.fc_pos
+            settings['airspySettings']['dcBlock'] = options.fc_pos == 2
+            settings['airspySettings']['iqImbalance'] = options.fc_pos == 2
+            settings['airspySettings']['lnaGain'] = 14
+            settings['airspySettings']['mixerGain'] = 15
+            settings['airspySettings']['vgaGain'] = 4
+            settings['airspySettings']['lnaAGC'] = 1
+            settings['airspySettings']['mixerAGC'] = 1
+        elif options.device_hwid == "AirspyHF":
             if options.device_freq > 30000:
                 settings["airspyHFSettings"]["bandIndex"] = 1
             else:
