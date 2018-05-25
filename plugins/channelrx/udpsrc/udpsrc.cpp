@@ -18,6 +18,11 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 
+#include "SWGChannelSettings.h"
+#include "SWGUDPSrcSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGUDPSrcReport.h"
+
 #include "dsp/dspengine.h"
 #include "util/db.h"
 #include "dsp/downchannelizer.h"
@@ -636,4 +641,45 @@ bool UDPSrc::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+void UDPSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSrcSettings& settings)
+{
+    response.getUdpSrcSettings()->setOutputSampleRate(settings.m_outputSampleRate);
+    response.getUdpSrcSettings()->setSampleFormat((int) settings.m_sampleFormat);
+    response.getUdpSrcSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getUdpSrcSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getUdpSrcSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getUdpSrcSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getUdpSrcSettings()->setGain(settings.m_gain);
+    response.getUdpSrcSettings()->setSquelchDb(settings.m_squelchdB);
+    response.getUdpSrcSettings()->setSquelchGate(settings.m_squelchGate);
+    response.getUdpSrcSettings()->setSquelchEnabled(settings.m_squelchEnabled ? 1 : 0);
+    response.getUdpSrcSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getUdpSrcSettings()->setAudioActive(settings.m_audioActive ? 1 : 0);
+    response.getUdpSrcSettings()->setAudioStereo(settings.m_audioStereo ? 1 : 0);
+    response.getUdpSrcSettings()->setVolume(settings.m_volume);
+
+    if (response.getUdpSrcSettings()->getUdpAddress()) {
+        *response.getUdpSrcSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getUdpSrcSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+
+    response.getUdpSrcSettings()->setUdpPort(settings.m_udpPort);
+    response.getUdpSrcSettings()->setAudioPort(settings.m_audioPort);
+    response.getUdpSrcSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getUdpSrcSettings()->getTitle()) {
+        *response.getUdpSrcSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getUdpSrcSettings()->setTitle(new QString(settings.m_title));
+    }
+}
+
+void UDPSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getUdpSrcReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getUdpSrcReport()->setSquelch(m_squelchOpen ? 1 : 0);
+    response.getUdpSrcReport()->setInputSampleRate(m_inputSampleRate);
 }

@@ -1,0 +1,71 @@
+UDPSrcSettings:
+  description: UDPSrc
+  properties:
+    outputSampleRate:
+      type: number
+      format: float
+    sampleFormat:
+      type: integer
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: integer
+    channelMute:
+      description: channel mute (1 if muted else 0)
+      type: integer      
+    gain:
+      type: number
+      format: float
+    squelchDB:
+      description: power dB
+      type: integer
+    squelchGate:
+      description: 100ths seconds
+      type: integer
+    squelchEnabled:
+      description: squelch enable (1 if enabled else 0)
+      type: integer      
+    agc:
+      description: AGC enable (1 if enabled else 0)
+      type: integer      
+    audioActive:
+      description: Audio return enable (1 if enabled else 0)
+      type: integer      
+    audioStereo:
+      description: Audio return stereo (1 if stereo else 0)
+      type: integer      
+    volume:
+      type: integer      
+    udpAddress:
+      description: destination UDP address (remote)
+      type: string
+    udpPort:
+      description: destination UDP port (remote)
+      type: integer
+      format: uint16            
+    audioPort:
+      description: audio return UDP port (local)
+      type: integer
+      format: uint16            
+    rgbColor:
+      type: integer            
+    title:
+      type: string
+      
+UDPSrcReport:
+  description: UDPSink
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    inputSampleRate:
+      type: integer
+      

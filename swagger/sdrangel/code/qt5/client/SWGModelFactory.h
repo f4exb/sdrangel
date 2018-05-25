@@ -74,6 +74,8 @@
 #include "SWGSuccessResponse.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSinkSettings.h"
+#include "SWGUDPSrcReport.h"
+#include "SWGUDPSrcSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
@@ -261,6 +263,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGUDPSinkSettings").compare(type) == 0) {
       return new SWGUDPSinkSettings();
+    }
+    if(QString("SWGUDPSrcReport").compare(type) == 0) {
+      return new SWGUDPSrcReport();
+    }
+    if(QString("SWGUDPSrcSettings").compare(type) == 0) {
+      return new SWGUDPSrcSettings();
     }
     if(QString("SWGWFMDemodReport").compare(type) == 0) {
       return new SWGWFMDemodReport();

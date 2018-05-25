@@ -1322,6 +1322,9 @@ margin-bottom: 20px;
     "UDPSinkReport" : {
       "$ref" : "#/definitions/UDPSinkReport"
     },
+    "UDPSrcReport" : {
+      "$ref" : "#/definitions/UDPSrcReport"
+    },
     "WFMDemodReport" : {
       "$ref" : "#/definitions/WFMDemodReport"
     },
@@ -1369,6 +1372,9 @@ margin-bottom: 20px;
     },
     "UDPSinkSettings" : {
       "$ref" : "#/definitions/UDPSinkSettings"
+    },
+    "UDPSrcSettings" : {
+      "$ref" : "#/definitions/UDPSrcSettings"
     },
     "WFMDemodSettings" : {
       "$ref" : "#/definitions/WFMDemodSettings"
@@ -2659,6 +2665,101 @@ margin-bottom: 20px;
     }
   },
   "description" : "UDPSink"
+};
+            defs.UDPSrcReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "inputSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "UDPSink"
+};
+            defs.UDPSrcSettings = {
+  "properties" : {
+    "outputSampleRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sampleFormat" : {
+      "type" : "integer"
+    },
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "description" : "channel mute (1 if muted else 0)"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelchDB" : {
+      "type" : "integer",
+      "description" : "power dB"
+    },
+    "squelchGate" : {
+      "type" : "integer",
+      "description" : "100ths seconds"
+    },
+    "squelchEnabled" : {
+      "type" : "integer",
+      "description" : "squelch enable (1 if enabled else 0)"
+    },
+    "agc" : {
+      "type" : "integer",
+      "description" : "AGC enable (1 if enabled else 0)"
+    },
+    "audioActive" : {
+      "type" : "integer",
+      "description" : "Audio return enable (1 if enabled else 0)"
+    },
+    "audioStereo" : {
+      "type" : "integer",
+      "description" : "Audio return stereo (1 if stereo else 0)"
+    },
+    "volume" : {
+      "type" : "integer"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "destination UDP address (remote)"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "format" : "uint16",
+      "description" : "destination UDP port (remote)"
+    },
+    "audioPort" : {
+      "type" : "integer",
+      "format" : "uint16",
+      "description" : "audio return UDP port (local)"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  },
+  "description" : "UDPSrc"
 };
             defs.WFMDemodReport = {
   "properties" : {
@@ -21017,7 +21118,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-25T09:35:58.275+02:00
+              Generated 2018-05-25T10:44:21.402+02:00
             </div>
           </div>
       </div>

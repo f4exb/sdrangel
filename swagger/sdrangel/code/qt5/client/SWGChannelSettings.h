@@ -31,6 +31,7 @@
 #include "SWGNFMModSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGUDPSinkSettings.h"
+#include "SWGUDPSrcSettings.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModSettings.h"
 #include <QString>
@@ -86,6 +87,9 @@ public:
     SWGUDPSinkSettings* getUdpSinkSettings();
     void setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings);
 
+    SWGUDPSrcSettings* getUdpSrcSettings();
+    void setUdpSrcSettings(SWGUDPSrcSettings* udp_src_settings);
+
     SWGWFMDemodSettings* getWfmDemodSettings();
     void setWfmDemodSettings(SWGWFMDemodSettings* wfm_demod_settings);
 
@@ -128,6 +132,9 @@ private:
 
     SWGUDPSinkSettings* udp_sink_settings;
     bool m_udp_sink_settings_isSet;
+
+    SWGUDPSrcSettings* udp_src_settings;
+    bool m_udp_src_settings_isSet;
 
     SWGWFMDemodSettings* wfm_demod_settings;
     bool m_wfm_demod_settings_isSet;

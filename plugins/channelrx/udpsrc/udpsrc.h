@@ -218,6 +218,9 @@ protected:
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = true);
     void applySettings(const UDPSrcSettings& settings, bool force = false);
 
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSrcSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+
     inline void calculateSquelch(double value)
     {
         if ((!m_settings.m_squelchEnabled) || (value > m_squelch))
@@ -295,7 +298,7 @@ protected:
             } else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatIQ24) {
                 m_udpBuffer24->write(Sample24(real, imag));
             } else {
-                m_udpBuffer16->write(Sample16(real>>8, imag>>8));                
+                m_udpBuffer16->write(Sample16(real>>8, imag>>8));
             }
         }
     }
