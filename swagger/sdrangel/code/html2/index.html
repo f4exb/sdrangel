@@ -1322,6 +1322,9 @@ margin-bottom: 20px;
     "UDPSinkReport" : {
       "$ref" : "#/definitions/UDPSinkReport"
     },
+    "WFMDemodReport" : {
+      "$ref" : "#/definitions/WFMDemodReport"
+    },
     "WFMModReport" : {
       "$ref" : "#/definitions/WFMModReport"
     }
@@ -1366,6 +1369,9 @@ margin-bottom: 20px;
     },
     "UDPSinkSettings" : {
       "$ref" : "#/definitions/UDPSinkSettings"
+    },
+    "WFMDemodSettings" : {
+      "$ref" : "#/definitions/WFMDemodSettings"
     },
     "WFMModSettings" : {
       "$ref" : "#/definitions/WFMModSettings"
@@ -1413,11 +1419,11 @@ margin-bottom: 20px;
     },
     "slot1On" : {
       "type" : "integer",
-      "description" : "slot 1 status (1 if active else 0)"
+      "description" : "slot 1 status (1 if voice active else 0)"
     },
     "slot2On" : {
       "type" : "integer",
-      "description" : "slot 2 status (1 if active else 0)"
+      "description" : "slot 2 status (1 if voice active else 0)"
     },
     "syncType" : {
       "type" : "string",
@@ -2653,6 +2659,64 @@ margin-bottom: 20px;
     }
   },
   "description" : "UDPSink"
+};
+            defs.WFMDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "WFMDemod"
+};
+            defs.WFMDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "afBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "audio mute (1 if muted else 0)"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "WFMDemod"
 };
             defs.WFMModReport = {
   "properties" : {
@@ -20953,7 +21017,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-24T10:19:21.195+02:00
+              Generated 2018-05-25T09:35:58.275+02:00
             </div>
           </div>
       </div>

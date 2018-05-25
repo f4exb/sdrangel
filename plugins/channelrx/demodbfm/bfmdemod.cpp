@@ -605,7 +605,7 @@ int BFMDemod::webapiSettingsPutPatch(
     if (frequencyOffsetChanged)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset); // FIXME
+                requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(channelConfigMsg);
     }
 

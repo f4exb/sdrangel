@@ -31,6 +31,7 @@
 #include "SWGNFMModReport.h"
 #include "SWGSSBModReport.h"
 #include "SWGUDPSinkReport.h"
+#include "SWGWFMDemodReport.h"
 #include "SWGWFMModReport.h"
 #include <QString>
 
@@ -85,6 +86,9 @@ public:
     SWGUDPSinkReport* getUdpSinkReport();
     void setUdpSinkReport(SWGUDPSinkReport* udp_sink_report);
 
+    SWGWFMDemodReport* getWfmDemodReport();
+    void setWfmDemodReport(SWGWFMDemodReport* wfm_demod_report);
+
     SWGWFMModReport* getWfmModReport();
     void setWfmModReport(SWGWFMModReport* wfm_mod_report);
 
@@ -124,6 +128,9 @@ private:
 
     SWGUDPSinkReport* udp_sink_report;
     bool m_udp_sink_report_isSet;
+
+    SWGWFMDemodReport* wfm_demod_report;
+    bool m_wfm_demod_report_isSet;
 
     SWGWFMModReport* wfm_mod_report;
     bool m_wfm_mod_report_isSet;

@@ -174,6 +174,14 @@ def setupChannel(deviceset_url, options):
         settings["BFMDemodSettings"]["lsbStereo"] = 1 if options.lsb_stereo else 0
         settings["BFMDemodSettings"]["rdsActive"] = 1 if options.rds else 0
         settings["BFMDemodSettings"]["title"] = "Channel %d" % i
+    elif options.channel_id == "WFMDemod":
+        settings["WFMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["WFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
+        settings["WFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["WFMDemodSettings"]["volume"] = options.volume
+        settings["WFMDemodSettings"]["squelch"] = options.squelch_db # dB
+        settings["WFMDemodSettings"]["audioMute"] = 0
+        settings["WFMDemodSettings"]["title"] = "Channel %d" % i
     elif options.channel_id == "AMDemod":
         settings["AMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
         settings["AMDemodSettings"]["rfBandwidth"] = options.rf_bw

@@ -77,7 +77,33 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 
 bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
-	return false;
+    if (WFMDemod::MsgConfigureWFMDemod::match(message))
+    {
+        qDebug("WFMDemodGUI::handleMessage: WFMDemod::MsgConfigureWFMDemod");
+        const WFMDemod::MsgConfigureWFMDemod& cfg = (WFMDemod::MsgConfigureWFMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void WFMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void WFMDemodGUI::channelMarkerChangedByCursor()
@@ -165,8 +191,10 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	m_wfmDemod = (WFMDemod*) rxChannel; //new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_wfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -226,7 +254,7 @@ void WFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
         WFMDemod::MsgConfigureChannelizer *msgChan = WFMDemod::MsgConfigureChannelizer::create(
-                requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())),
+                WFMDemod::requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())),
                 m_channelMarker.getCenterFrequency());
         m_wfmDemod->getInputMessageQueue()->push(msgChan);
 

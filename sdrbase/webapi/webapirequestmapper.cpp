@@ -1973,6 +1973,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "WFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject wfmDemodSettingsJsonObject = jsonObject["WFMDemodSettings"].toObject();
+            channelSettingsKeys = wfmDemodSettingsJsonObject.keys();
+            channelSettings.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+            channelSettings.getWfmDemodSettings()->fromJsonObject(wfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "WFMMod")
     {
         if (channelSettings.getTx() != 0)

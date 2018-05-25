@@ -21,12 +21,18 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGWFMDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGWFMDemodReport.h"
+
 #include <dsp/downchannelizer.h>
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/devicesourceapi.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 
 #include "wfmdemod.h"
 
@@ -373,5 +379,121 @@ bool WFMDemod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+int WFMDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+    response.getWfmDemodSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int WFMDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    WFMDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getWfmDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getWfmDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getWfmDemodSettings()->getAfBandwidth();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getWfmDemodSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("squelch")) {
+        settings.m_squelch = response.getWfmDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getWfmDemodSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getWfmDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getWfmDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getWfmDemodSettings()->getAudioDeviceName();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("WFMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int WFMDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setWfmDemodReport(new SWGSDRangel::SWGWFMDemodReport());
+    response.getWfmDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void WFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMDemodSettings& settings)
+{
+    response.getWfmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getWfmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getWfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getWfmDemodSettings()->setVolume(settings.m_volume);
+    response.getWfmDemodSettings()->setSquelch(settings.m_squelch);
+    response.getWfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getWfmDemodSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getWfmDemodSettings()->getTitle()) {
+        *response.getWfmDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getWfmDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getWfmDemodSettings()->getAudioDeviceName()) {
+        *response.getWfmDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getWfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getWfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getWfmDemodReport()->setSquelch(m_squelchState > 0 ? 1 : 0);
+    response.getWfmDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getWfmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 

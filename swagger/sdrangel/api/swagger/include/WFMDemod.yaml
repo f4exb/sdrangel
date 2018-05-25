@@ -1,0 +1,42 @@
+WFMDemodSettings:
+  description: WFMDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    afBandwidth:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    squelch:
+      type: number
+      format: float
+    audioMute:
+      description: audio mute (1 if muted else 0)
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+
+WFMDemodReport:
+  description: WFMDemod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

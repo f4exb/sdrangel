@@ -63,15 +63,6 @@ private:
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 
-	static int requiredBW(int rfBW)
-	{
-	    if (rfBW <= 48000) {
-	        return 48000;
-	    } else {
-	        return (3*rfBW)/2;
-	    }
-	}
-
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_currentIndexChanged(int index);
@@ -81,6 +72,7 @@ private slots:
     void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
     void audioSelect();
 	void tick();
 };

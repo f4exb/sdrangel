@@ -73,10 +73,10 @@ DSDDemodReport:
       description: symbol PLL status (1 if locked else 0)
       type: integer
     slot1On:
-      description: slot 1 status (1 if active else 0)
+      description: slot 1 status (1 if voice active else 0)
       type: integer
     slot2On:
-      description: slot 2 status (1 if active else 0)
+      description: slot 2 status (1 if voice active else 0)
       type: integer
     syncType:
       description: type of frame synchronized
