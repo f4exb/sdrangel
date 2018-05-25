@@ -1973,6 +1973,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "UDPSrc")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject udpSrcSettingsJsonObject = jsonObject["UDPSrcSettings"].toObject();
+            channelSettingsKeys = udpSrcSettingsJsonObject.keys();
+            channelSettings.setUdpSrcSettings(new SWGSDRangel::SWGUDPSrcSettings());
+            channelSettings.getUdpSrcSettings()->fromJsonObject(udpSrcSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "WFMDemod")
     {
         if (channelSettings.getTx() == 0)

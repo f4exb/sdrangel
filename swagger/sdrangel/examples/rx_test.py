@@ -199,6 +199,13 @@ def setupChannel(deviceset_url, options):
         settings["DSDDemodSettings"]["enableCosineFiltering"] = 1
         settings["DSDDemodSettings"]["pllLock"] = 1
         settings["DSDDemodSettings"]["title"] = "Channel %d" % i
+    elif options.channel_id == "UDPSrc":
+        settings["UDPSrcSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["UDPSrcSettings"]["rfBandwidth"] = options.rf_bw
+        settings["UDPSrcSettings"]["volume"] = options.volume
+        settings["UDPSrcSettings"]["squelchDB"] = options.squelch_db
+        settings["UDPSrcSettings"]["channelMute"] = 0
+        settings["UDPSrcSettings"]["title"] = "Channel %d" % i
     
     r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
     if r is None:

@@ -92,6 +92,7 @@ private:
 	void enterEvent(QEvent*);
 
 private slots:
+    void handleSourceMessages();
 	void on_deltaFrequency_changed(qint64 value);
 	void on_sampleFormat_currentIndexChanged(int index);
 	void on_outputUDPAddress_editingFinished();

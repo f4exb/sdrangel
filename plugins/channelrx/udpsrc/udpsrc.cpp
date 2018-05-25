@@ -643,6 +643,118 @@ bool UDPSrc::deserialize(const QByteArray& data)
     }
 }
 
+int UDPSrc::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setUdpSrcSettings(new SWGSDRangel::SWGUDPSrcSettings());
+    response.getUdpSrcSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int UDPSrc::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    UDPSrcSettings settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("outputSampleRate")) {
+        settings.m_outputSampleRate = response.getUdpSrcSettings()->getOutputSampleRate();
+    }
+    if (channelSettingsKeys.contains("sampleFormat")) {
+        settings.m_sampleFormat = (UDPSrcSettings::SampleFormat) response.getUdpSrcSettings()->getSampleFormat();
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getUdpSrcSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getUdpSrcSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getUdpSrcSettings()->getFmDeviation();
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getUdpSrcSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getUdpSrcSettings()->getGain();
+    }
+    if (channelSettingsKeys.contains("squelchDB")) {
+        settings.m_squelchdB = response.getUdpSrcSettings()->getSquelchDb();
+    }
+    if (channelSettingsKeys.contains("squelchGate")) {
+        settings.m_squelchGate = response.getUdpSrcSettings()->getSquelchGate();
+    }
+    if (channelSettingsKeys.contains("squelchEnabled")) {
+        settings.m_squelchEnabled = response.getUdpSrcSettings()->getSquelchEnabled() != 0;
+    }
+    if (channelSettingsKeys.contains("agc")) {
+        settings.m_agc = response.getUdpSrcSettings()->getAgc() != 0;
+    }
+    if (channelSettingsKeys.contains("audioActive")) {
+        settings.m_audioActive = response.getUdpSrcSettings()->getAudioActive() != 0;
+    }
+    if (channelSettingsKeys.contains("audioStereo")) {
+        settings.m_audioStereo = response.getUdpSrcSettings()->getAudioStereo() != 0;
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getUdpSrcSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getUdpSrcSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getUdpSrcSettings()->getUdpPort();
+    }
+    if (channelSettingsKeys.contains("audioPort")) {
+        settings.m_audioPort = response.getUdpSrcSettings()->getAudioPort();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getUdpSrcSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getUdpSrcSettings()->getTitle();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        UDPSrc::MsgConfigureChannelizer *msgChan = UDPSrc::MsgConfigureChannelizer::create(
+                (int) settings.m_outputSampleRate,
+                (int) settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("UDPSrc::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureUDPSrc *msgToGUI = MsgConfigureUDPSrc::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int UDPSrc::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setUdpSrcReport(new SWGSDRangel::SWGUDPSrcReport());
+    response.getUdpSrcReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void UDPSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSrcSettings& settings)
 {
     response.getUdpSrcSettings()->setOutputSampleRate(settings.m_outputSampleRate);

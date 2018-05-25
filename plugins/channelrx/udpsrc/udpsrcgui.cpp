@@ -89,10 +89,34 @@ bool UDPSrcGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool UDPSrcGUI::handleMessage(const Message& message __attribute__((unused)))
+bool UDPSrcGUI::handleMessage(const Message& message )
 {
-	qDebug() << "UDPSrcGUI::handleMessage";
-	return false;
+    if (UDPSrc::MsgConfigureUDPSrc::match(message))
+    {
+        const UDPSrc::MsgConfigureUDPSrc& cfg = (UDPSrc::MsgConfigureUDPSrc&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void UDPSrcGUI::handleSourceMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void UDPSrcGUI::channelMarkerChangedByCursor()
@@ -150,6 +174,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_udpSrc = (UDPSrc*) rxChannel; //new UDPSrc(m_deviceUISet->m_deviceSourceAPI);
 	m_udpSrc->setSpectrum(m_spectrumVis);
+	m_udpSrc->setMessageQueueToGUI(getInputMessageQueue());
 
 	ui->fmDeviation->setEnabled(false);
 
@@ -186,6 +211,7 @@ UDPSrcGUI::UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 

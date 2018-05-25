@@ -83,7 +83,7 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool UDPSinkGUI::handleMessage(const Message& message __attribute__((unused)))
+bool UDPSinkGUI::handleMessage(const Message& message)
 {
     if (UDPSink::MsgConfigureUDPSink::match(message))
     {
