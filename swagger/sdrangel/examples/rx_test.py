@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import requests, json, traceback, sys
+import requests, json, traceback, sys, time
 from optparse import OptionParser
 
 base_url = "http://127.0.0.1:8091/sdrangel"
@@ -20,12 +20,24 @@ def getInputOptions():
     parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
     parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int") 
     parser.add_option("-D", "--device-hwid", dest="device_hwid", help="device hardware id", metavar="HWID", type="string") 
+    parser.add_option("-C", "--channel-id", dest="channel_id", help="channel id", metavar="ID", type="string", default="NFMDemod")     
     parser.add_option("-F", "--device-freq", dest="device_freq", help="device center frequency (kHz)", metavar="FREQ", type="int") 
     parser.add_option("-f", "--channel-freq", dest="channel_freq", help="channel center frequency (Hz)", metavar="FREQ", type="int")
     parser.add_option("-U", "--copy-to-udp", dest="udp_copy", help="UDP audio copy to <address>[:<port>]", metavar="IP:PORT", type="string") 
     parser.add_option("-A", "--antenna-path", dest="antenna_path", help="antenna path index", metavar="INDEX", type="int")    
     parser.add_option("-s", "--sample-rate", dest="sample_rate", help="device to host sample rate (kS/s)", metavar="RATE", type="int")
+    parser.add_option("-l", "--log2-decim", dest="log2_decim", help="log2 of the desired software decimation factor", metavar="LOG2", type="int", default=4)     
+    parser.add_option("-b", "--af-bw", dest="af_bw", help="audio babdwidth (kHz)", metavar="FREQUENCY_KHZ", type="int" ,default=3) 
+    parser.add_option("-r", "--rf-bw", dest="rf_bw", help="RF babdwidth (Hz). Sets to nearest available", metavar="FREQUENCY", type="int", default=10000)
+    parser.add_option("--vol", dest="volume", help="audio volume", metavar="VOLUME", type="float", default=1.0)
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
+    parser.add_option("--ppm", dest="lo_ppm", help="LO correction in PPM", metavar="PPM", type="float", default=0.0)    
+    parser.add_option("--fc-pos", dest="fc_pos", help="Center frequency position 0:inf 1:sup 2:cen", metavar="ENUM", default=2) 
+    parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
+    parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
+    parser.add_option("--stereo", dest="stereo", help="Broadcast FM stereo", metavar="BOOL", action="store_true", default=False)
+    parser.add_option("--lsb-stereo", dest="lsb_stereo", help="Broadcast FM LSB stereo", metavar="BOOL", action="store_true", default=False)
+    parser.add_option("--rds", dest="rds", help="Broadcast FM RDS", metavar="BOOL", action="store_true", default=False)
 
     (options, args) = parser.parse_args()
     
@@ -76,20 +88,7 @@ def callAPI(url, method, params, json, text):
             return None
 
 # ======================================================================
-def main():
-    try:
-        options = getInputOptions()
-        
-        global base_url
-        base_url = "http://%s/sdrangel" % options.address
-        
-        if options.create:
-            r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
-            if r is None:
-                exit(-1)
-            
-        deviceset_url = "/deviceset/%d" % options.device_index
-        
+def setupDevice(deviceset_url, options):
         r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 0}, "setup device on Rx device set")
         if r is None:
             exit(-1)
@@ -98,11 +97,20 @@ def main():
         if settings is None:
             exit(-1)
 
-        if options.device_hwid == "LimeSDR":
+        if options.device_hwid == "AirspyHF":
+            if options.device_freq > 30000:
+                settings["airspyHFSettings"]["bandIndex"] = 1
+            else:
+                settings["airspyHFSettings"]["bandIndex"] = 0
+            settings["airspyHFSettings"]["centerFrequency"] = options.device_freq*1000
+            settings["airspyHFSettings"]["devSampleRateIndex"] = 0
+            settings['airspyHFSettings']['log2Decim'] = options.log2_decim
+            settings['airspyHFSettings']['LOppmTenths'] = int(options.lo_ppm * 10)  # in tenths of PPM
+        elif options.device_hwid == "LimeSDR":
             settings["limeSdrInputSettings"]["antennaPath"] = options.antenna_path
             settings["limeSdrInputSettings"]["devSampleRate"] = options.sample_rate*1000
             settings["limeSdrInputSettings"]["log2HardDecim"] = 4
-            settings["limeSdrInputSettings"]["log2SoftDecim"] = 3
+            settings["limeSdrInputSettings"]["log2SoftDecim"] = options.log2_decim
             settings["limeSdrInputSettings"]["centerFrequency"] = options.device_freq*1000 + 500000
             settings["limeSdrInputSettings"]["ncoEnable"] = 1
             settings["limeSdrInputSettings"]["ncoFrequency"] = -500000
@@ -114,51 +122,98 @@ def main():
             settings['rtlSdrSettings']['devSampleRate'] = options.sample_rate*1000
             settings['rtlSdrSettings']['centerFrequency'] = options.device_freq*1000
             settings['rtlSdrSettings']['gain'] = 496
-            settings['rtlSdrSettings']['log2Decim'] = 4
-            settings['rtlSdrSettings']['dcBlock'] = 1
+            settings['rtlSdrSettings']['log2Decim'] = options.log2_decim
+            settings['rtlSdrSettings']['fcPos'] = options.fc_pos
+            settings['rtlSdrSettings']['dcBlock'] = options.fc_pos == 2
+            settings['rtlSdrSettings']['iqImbalance'] = options.fc_pos == 2
             settings['rtlSdrSettings']['agc'] = 1
+            settings['rtlSdrSettings']['loPpmCorrection'] = int(options.lo_ppm)
         elif options.device_hwid == "HackRF":
-            settings['hackRFInputSettings']['LOppmTenths'] = -51
+            settings['hackRFInputSettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
             settings['hackRFInputSettings']['centerFrequency'] = options.device_freq*1000
-            settings['hackRFInputSettings']['dcBlock'] = 1
+            settings['hackRFInputSettings']['fcPos'] = options.fc_pos            
+            settings['hackRFInputSettings']['dcBlock'] = options.fc_pos == 2
+            settings['hackRFInputSettings']['iqImbalance'] = options.fc_pos == 2
             settings['hackRFInputSettings']['devSampleRate'] = options.sample_rate*1000
             settings['hackRFInputSettings']['lnaExt'] = 1
             settings['hackRFInputSettings']['lnaGain'] = 32
-            settings['hackRFInputSettings']['log2Decim'] = 4
+            settings['hackRFInputSettings']['log2Decim'] = options.log2_decim
             settings['hackRFInputSettings']['vgaGain'] = 24
         
         r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch device settings")
         if r is None:
             exit(-1)
-            
-        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMDemod", "tx": 0}, "Create NFM demod")
-        if r is None:
-            exit(-1)
-        
-        settings = callAPI(deviceset_url + "/channel/0/settings", "GET", None, None, "Get NFM demod settings")
-        if settings is None:
-            exit(-1)
-        
-        settings["NFMDemodSettings"]["title"] = "Test NFM"
+
+# ======================================================================
+def setupChannel(deviceset_url, options):
+    i = 0
+    
+    settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create demod")
+    if settings is None:
+        exit(-1)
+
+    settings = callAPI(deviceset_url + "/channel/%d/settings" % i, "GET", None, None, "Get demod settings")
+    if settings is None:
+        exit(-1)
+
+    if options.channel_id == "NFMDemod":
         settings["NFMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
-        settings["NFMDemodSettings"]["rfBandwidth"] = 12500
-        settings["NFMDemodSettings"]["fmDeviation"] = 3000
-        settings["NFMDemodSettings"]["afBandwidth"] = 4000
-        settings["NFMDemodSettings"]["squelch"] = -700
-        settings["NFMDemodSettings"]["volume"] = 2.0
+        settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
+        settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["NFMDemodSettings"]["volume"] = options.volume
+        settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10 # centi-Bels
+        settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10 # 10's of ms
+        settings["NFMDemodSettings"]["title"] = "Channel %d" % i
+    elif options.channel_id == "BFMDemod":
+        settings["BFMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["BFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
+        settings["BFMDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["BFMDemodSettings"]["volume"] = options.volume
+        settings["BFMDemodSettings"]["squelch"] = options.squelch_db # dB
+        settings["BFMDemodSettings"]["audioStereo"] = 1 if options.stereo else 0
+        settings["BFMDemodSettings"]["lsbStereo"] = 1 if options.lsb_stereo else 0
+        settings["BFMDemodSettings"]["rdsActive"] = 1 if options.rds else 0
+        settings["BFMDemodSettings"]["title"] = "Channel %d" % i
+    elif options.channel_id == "AMDemod":
+        settings["AMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["AMDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["AMDemodSettings"]["volume"] = options.volume
+        settings["AMDemodSettings"]["squelch"] = options.squelch_db
+        settings["AMDemodSettings"]["title"] = "Channel %d" % i
+        settings["AMDemodSettings"]["bandpassEnable"] = 1 # bandpass filter
+    elif options.channel_id == "DSDDemod":
+        settings["DSDDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["DSDDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["DSDDemodSettings"]["volume"] = options.volume
+        settings["DSDDemodSettings"]["squelch"] = options.squelch_db
+        settings["DSDDemodSettings"]["baudRate"] = options.baud_rate
+        settings["DSDDemodSettings"]["fmDeviation"] = options.fm_dev
+        settings["DSDDemodSettings"]["enableCosineFiltering"] = 1
+        settings["DSDDemodSettings"]["pllLock"] = 1
+        settings["DSDDemodSettings"]["title"] = "Channel %d" % i
+    
+    r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
+    if r is None:
+        exit(-1)
+
+
+# ======================================================================
+def main():
+    try:
+        options = getInputOptions()
         
-        if options.udp_copy is not None:
-            address_port = options.udp_copy.split(':')
-            if len(address_port) > 1:
-                settings["NFMDemodSettings"]["udpPort"] = address_port[1]
-            if len(address_port) > 0:
-                settings["NFMDemodSettings"]["udpAddress"] = address_port[0]
-            settings["NFMDemodSettings"]["copyAudioToUDP"] = 1
+        global base_url
+        base_url = "http://%s/sdrangel" % options.address
+        deviceset_url = "/deviceset/%d" % options.device_index
         
-        r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change NFM demod")
-        if r is None:
-            exit(-1)
+        if options.create:
+            r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
+            if r is None:
+                exit(-1)
             
+        setupDevice(deviceset_url, options)    
+        setupChannel(deviceset_url, options)
+                        
         r = callAPI(deviceset_url + "/device/run", "POST", None, None, "Start running device")
         if r is None:
             exit(-1)

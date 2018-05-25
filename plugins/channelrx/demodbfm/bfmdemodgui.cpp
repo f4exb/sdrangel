@@ -412,7 +412,7 @@ void BFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 	    BFMDemod::MsgConfigureChannelizer *msgChan = BFMDemod::MsgConfigureChannelizer::create(
-	            requiredBW(m_settings.m_rfBandwidth),
+	            BFMDemod::requiredBW(m_settings.m_rfBandwidth),
 	            m_settings.m_inputFrequencyOffset);
 	    m_bfmDemod->getInputMessageQueue()->push(msgChan);
 

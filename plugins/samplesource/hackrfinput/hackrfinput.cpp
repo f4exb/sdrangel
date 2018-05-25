@@ -562,6 +562,12 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getHackRfInputSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("fcPos"))
+    {
+        int fcPos = response.getHackRfInputSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (HackRFInputSettings::fcPos_t) fcPos;
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getHackRfInputSettings()->getDevSampleRate();
     }

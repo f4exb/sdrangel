@@ -447,6 +447,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     qDebug() << "BFMDemod::applySettings: MsgConfigureBFMDemod:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_afBandwidth: " << settings.m_afBandwidth
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioStereo: " << settings.m_audioStereo
@@ -480,8 +481,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_settingsMutex.unlock();
     }
 
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-       (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_settingsMutex.lock();
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
@@ -605,7 +605,7 @@ int BFMDemod::webapiSettingsPutPatch(
     if (frequencyOffsetChanged)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
+                requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset); // FIXME
         m_inputMessageQueue.push(channelConfigMsg);
     }
 

@@ -62,6 +62,7 @@ def getInputOptions():
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="BOOLEAN", action="store_true", default=False)
     parser.add_option("-m", "--mock", dest="mock", help="just print calculated values and exit", metavar="BOOLEAN", action="store_true", default=False)
     parser.add_option("--ppm", dest="lo_ppm", help="LO correction in PPM", metavar="PPM", type="float", default=0.0)
+    parser.add_option("--fc-pos", dest="fc_pos", help="Center frequency position 0:inf 1:sup 2:cen", metavar="ENUM", default=2) 
     parser.add_option("-t", "--settling-time", dest="settling_time", help="Scan step settling time in seconds", metavar="SECONDS", type="float", default=1.0)
     parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
     parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
@@ -126,16 +127,18 @@ def setupDevice(scan_control, options):
         settings['rtlSdrSettings']['centerFrequency'] = scan_control.device_start_freq
         settings['rtlSdrSettings']['gain'] = 496
         settings['rtlSdrSettings']['log2Decim'] = options.log2_decim
-        settings['rtlSdrSettings']['dcBlock'] = 1
-        settings['rtlSdrSettings']['iqImbalance'] = 1
+        settings['rtlSdrSettings']['fcPos'] = options.fc_pos
+        settings['rtlSdrSettings']['dcBlock'] = options.fc_pos == 2
+        settings['rtlSdrSettings']['iqImbalance'] = options.fc_pos == 2
         settings['rtlSdrSettings']['agc'] = 1
         settings['rtlSdrSettings']['loPpmCorrection'] = int(options.lo_ppm)
         settings['rtlSdrSettings']['rfBandwidth'] = scan_control.device_step_freq + 100000
     elif options.device_hwid == "HackRF":
         settings['hackRFInputSettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
         settings['hackRFInputSettings']['centerFrequency'] = scan_control.device_start_freq
-        settings['hackRFInputSettings']['dcBlock'] = 1
-        settings['hackRFInputSettings']['iqImbalance'] = 1
+        settings['hackRFInputSettings']['fcPos'] = options.fc_pos
+        settings['hackRFInputSettings']['dcBlock'] = options.fc_pos == 2
+        settings['hackRFInputSettings']['iqImbalance'] = options.fc_pos == 2
         settings['hackRFInputSettings']['devSampleRate'] = scan_control.device_sample_rate
         settings['hackRFInputSettings']['lnaExt'] = 1
         settings['hackRFInputSettings']['lnaGain'] = 32
@@ -199,6 +202,8 @@ def setupChannels(scan_control, options):
             settings["DSDDemodSettings"]["squelch"] = options.squelch_db
             settings["DSDDemodSettings"]["baudRate"] = options.baud_rate
             settings["DSDDemodSettings"]["fmDeviation"] = options.fm_dev
+            settings["DSDDemodSettings"]["enableCosineFiltering"] = 1
+            settings["DSDDemodSettings"]["pllLock"] = 1
             settings["DSDDemodSettings"]["title"] = "Channel %d" % i
         
         r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
