@@ -1713,6 +1713,8 @@ definitions:
       tx:
         description: Not zero if it is a tx device else it is a rx device
         type: integer
+      airspySettings:
+        $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
       airspyHFSettings:
         $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
       bladeRFInputSettings:

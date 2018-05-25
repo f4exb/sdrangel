@@ -616,3 +616,110 @@ int AirspyInput::webapiRun(
     return 200;
 }
 
+int AirspyInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
+    response.getAirspySettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int AirspyInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    AirspySettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getAirspySettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getAirspySettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex")) {
+        settings.m_devSampleRateIndex = response.getAirspySettings()->getDevSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("lnaGain")) {
+        settings.m_lnaGain = response.getAirspySettings()->getLnaGain();
+    }
+    if (deviceSettingsKeys.contains("mixerGain")) {
+        settings.m_mixerGain = response.getAirspySettings()->getMixerGain();
+    }
+    if (deviceSettingsKeys.contains("vgaGain")) {
+        settings.m_vgaGain = response.getAirspySettings()->getVgaGain();
+    }
+    if (deviceSettingsKeys.contains("vgaGain")) {
+        settings.m_vgaGain = response.getAirspySettings()->getVgaGain();
+    }
+    if (deviceSettingsKeys.contains("lnaAGC")) {
+        settings.m_lnaAGC = response.getAirspySettings()->getLnaAgc() != 0;
+    }
+    if (deviceSettingsKeys.contains("mixerAGC")) {
+        settings.m_mixerAGC = response.getAirspySettings()->getMixerAgc() != 0;
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getAirspySettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = (AirspySettings::fcPos_t) response.getAirspySettings()->getFcPos();
+    }
+    if (deviceSettingsKeys.contains("biasT")) {
+        settings.m_biasT = response.getAirspySettings()->getBiasT() != 0;
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getAirspySettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getAirspySettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getAirspySettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getAirspySettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getAirspySettings()->getFileRecordName();
+    }
+
+    MsgConfigureAirspy *msg = MsgConfigureAirspy::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAirspy *msgToGUI = MsgConfigureAirspy::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings)
+{
+    response.getAirspySettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getAirspySettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getAirspySettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    response.getAirspySettings()->setLnaGain(settings.m_lnaGain);
+    response.getAirspySettings()->setMixerGain(settings.m_mixerGain);
+    response.getAirspySettings()->setVgaGain(settings.m_vgaGain);
+    response.getAirspySettings()->setLnaAgc(settings.m_lnaAGC ? 1 : 0);
+    response.getAirspySettings()->setMixerAgc(settings.m_mixerAGC ? 1 : 0);
+    response.getAirspySettings()->setLog2Decim(settings.m_log2Decim);
+    response.getAirspySettings()->setFcPos((int) settings.m_fcPos);
+    response.getAirspySettings()->setBiasT(settings.m_biasT ? 1 : 0);
+    response.getAirspySettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getAirspySettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getAirspySettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getAirspySettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    if (response.getAirspySettings()->getFileRecordName()) {
+        *response.getAirspySettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getAirspySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}

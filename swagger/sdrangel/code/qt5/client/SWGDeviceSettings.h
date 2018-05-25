@@ -23,6 +23,7 @@
 
 
 #include "SWGAirspyHFSettings.h"
+#include "SWGAirspySettings.h"
 #include "SWGBladeRFInputSettings.h"
 #include "SWGBladeRFOutputSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -56,6 +57,9 @@ public:
 
     qint32 getTx();
     void setTx(qint32 tx);
+
+    SWGAirspySettings* getAirspySettings();
+    void setAirspySettings(SWGAirspySettings* airspy_settings);
 
     SWGAirspyHFSettings* getAirspyHfSettings();
     void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
@@ -93,6 +97,9 @@ private:
 
     qint32 tx;
     bool m_tx_isSet;
+
+    SWGAirspySettings* airspy_settings;
+    bool m_airspy_settings_isSet;
 
     SWGAirspyHFSettings* airspy_hf_settings;
     bool m_airspy_hf_settings_isSet;

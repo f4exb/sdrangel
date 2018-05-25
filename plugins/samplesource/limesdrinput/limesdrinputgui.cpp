@@ -76,6 +76,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     displaySettings();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_limeSDRInput->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
 LimeSDRInputGUI::~LimeSDRInputGUI()

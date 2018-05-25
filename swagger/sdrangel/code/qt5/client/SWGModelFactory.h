@@ -21,6 +21,7 @@
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
 #include "SWGAirspyHFSettings.h"
+#include "SWGAirspySettings.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
@@ -104,6 +105,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
       return new SWGAirspyHFSettings();
+    }
+    if(QString("SWGAirspySettings").compare(type) == 0) {
+      return new SWGAirspySettings();
     }
     if(QString("SWGAudioDevices").compare(type) == 0) {
       return new SWGAudioDevices();

@@ -32,6 +32,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_device_hw_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    airspy_settings = nullptr;
+    m_airspy_settings_isSet = false;
     airspy_hf_settings = nullptr;
     m_airspy_hf_settings_isSet = false;
     blade_rf_input_settings = nullptr;
@@ -62,6 +64,8 @@ SWGDeviceSettings::init() {
     m_device_hw_type_isSet = false;
     tx = 0;
     m_tx_isSet = false;
+    airspy_settings = new SWGAirspySettings();
+    m_airspy_settings_isSet = false;
     airspy_hf_settings = new SWGAirspyHFSettings();
     m_airspy_hf_settings_isSet = false;
     blade_rf_input_settings = new SWGBladeRFInputSettings();
@@ -88,6 +92,9 @@ SWGDeviceSettings::cleanup() {
         delete device_hw_type;
     }
 
+    if(airspy_settings != nullptr) { 
+        delete airspy_settings;
+    }
     if(airspy_hf_settings != nullptr) { 
         delete airspy_hf_settings;
     }
@@ -132,6 +139,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&airspy_settings, pJson["airspySettings"], "SWGAirspySettings", "SWGAirspySettings");
+    
     ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
     
     ::SWGSDRangel::setValue(&blade_rf_input_settings, pJson["bladeRFInputSettings"], "SWGBladeRFInputSettings", "SWGBladeRFInputSettings");
@@ -171,6 +180,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if(m_tx_isSet){
         obj->insert("tx", QJsonValue(tx));
+    }
+    if((airspy_settings != nullptr) && (airspy_settings->isSet())){
+        toJsonValue(QString("airspySettings"), airspy_settings, obj, QString("SWGAirspySettings"));
     }
     if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
         toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
@@ -221,6 +233,16 @@ void
 SWGDeviceSettings::setTx(qint32 tx) {
     this->tx = tx;
     this->m_tx_isSet = true;
+}
+
+SWGAirspySettings*
+SWGDeviceSettings::getAirspySettings() {
+    return airspy_settings;
+}
+void
+SWGDeviceSettings::setAirspySettings(SWGAirspySettings* airspy_settings) {
+    this->airspy_settings = airspy_settings;
+    this->m_airspy_settings_isSet = true;
 }
 
 SWGAirspyHFSettings*
@@ -320,6 +342,7 @@ SWGDeviceSettings::isSet(){
     do{
         if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
+        if(airspy_settings != nullptr && airspy_settings->isSet()){ isObjectUpdated = true; break;}
         if(airspy_hf_settings != nullptr && airspy_hf_settings->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf_input_settings != nullptr && blade_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf_output_settings != nullptr && blade_rf_output_settings->isSet()){ isObjectUpdated = true; break;}
