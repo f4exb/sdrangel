@@ -30,6 +30,7 @@ namespace SWGSDRangel
 {
     class SWGDeviceSettings;
     class SWGDeviceState;
+    class SWGDeviceReport;
 }
 
 class SDRBASE_API DeviceSampleSource : public QObject {
@@ -78,6 +79,11 @@ public:
 
     virtual int webapiRun(bool run __attribute__((unused)),
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 

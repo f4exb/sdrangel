@@ -40,3 +40,15 @@ AirspySettings:
     fileRecordName:
       type: string
       
+AirspyReport:
+  description: Airspy
+  properties:
+    sampleRates:
+      type: array
+      items:
+        properties:
+          sampleRate:
+            description: sample rate in S/s
+            type: integer
+  
+      

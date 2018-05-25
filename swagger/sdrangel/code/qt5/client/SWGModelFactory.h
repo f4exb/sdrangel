@@ -21,6 +21,8 @@
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
 #include "SWGAirspyHFSettings.h"
+#include "SWGAirspyReport.h"
+#include "SWGAirspyReport_sampleRates.h"
 #include "SWGAirspySettings.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
@@ -40,6 +42,7 @@
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGDeviceListItem.h"
+#include "SWGDeviceReport.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
 #include "SWGDeviceSettings.h"
@@ -106,6 +109,12 @@ namespace SWGSDRangel {
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
       return new SWGAirspyHFSettings();
     }
+    if(QString("SWGAirspyReport").compare(type) == 0) {
+      return new SWGAirspyReport();
+    }
+    if(QString("SWGAirspyReport_sampleRates").compare(type) == 0) {
+      return new SWGAirspyReport_sampleRates();
+    }
     if(QString("SWGAirspySettings").compare(type) == 0) {
       return new SWGAirspySettings();
     }
@@ -162,6 +171,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDeviceListItem").compare(type) == 0) {
       return new SWGDeviceListItem();
+    }
+    if(QString("SWGDeviceReport").compare(type) == 0) {
+      return new SWGDeviceReport();
     }
     if(QString("SWGDeviceSet").compare(type) == 0) {
       return new SWGDeviceSet();

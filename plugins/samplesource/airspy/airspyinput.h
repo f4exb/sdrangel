@@ -130,6 +130,10 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     static const qint64 loLowLimitFreq;
 	static const qint64 loHighLimitFreq;
 
@@ -140,6 +144,7 @@ private:
 	struct airspy_device *open_airspy_from_sequence(int sequence);
 	void setDeviceCenterFrequency(quint64 freq);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;

@@ -17,9 +17,12 @@
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
+#include <QList>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGAirspyReport.h"
 
 #include "airspygui.h"
 #include "airspyinput.h"
@@ -699,6 +702,17 @@ int AirspyInput::webapiSettingsPutPatch(
     return 200;
 }
 
+int AirspyInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspyReport(new SWGSDRangel::SWGAirspyReport());
+    response.getAirspyReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+
 void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings)
 {
     response.getAirspySettings()->setCenterFrequency(settings.m_centerFrequency);
@@ -721,5 +735,17 @@ void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
         *response.getAirspySettings()->getFileRecordName() = settings.m_fileRecordName;
     } else {
         response.getAirspySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+void AirspyInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.setAirspyReport(new SWGSDRangel::SWGAirspyReport());
+    response.getAirspyReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
+
+    for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
+    {
+        response.getAirspyReport()->getSampleRates()->append(new SWGSDRangel::SWGAirspyReport_sampleRates);
+        response.getAirspyReport()->getSampleRates()->back()->setSampleRate(*it);
     }
 }

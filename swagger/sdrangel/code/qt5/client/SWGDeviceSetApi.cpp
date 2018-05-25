@@ -483,6 +483,60 @@ SWGDeviceSetApi::devicesetDevicePutCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGDeviceSetApi::devicesetDeviceReportGet(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/report");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetDeviceReportGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceReportGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGDeviceReport* output = static_cast<SWGDeviceReport*>(create(json, QString("SWGDeviceReport")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetDeviceReportGetSignal(output);
+    } else {
+        emit devicesetDeviceReportGetSignalE(output, error_type, error_str);
+        emit devicesetDeviceReportGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetDeviceRunDelete(qint32 device_set_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/run");
