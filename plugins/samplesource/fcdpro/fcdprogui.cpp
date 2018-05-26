@@ -211,9 +211,9 @@ bool FCDProGui::deserialize(const QByteArray& data)
 
 bool FCDProGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (FCDProInput::MsgConfigureFCD::match(message))
+    if (FCDProInput::MsgConfigureFCDPro::match(message))
     {
-        const FCDProInput::MsgConfigureFCD& cfg = (FCDProInput::MsgConfigureFCD&) message;
+        const FCDProInput::MsgConfigureFCDPro& cfg = (FCDProInput::MsgConfigureFCDPro&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -517,7 +517,7 @@ void FCDProGui::updateStatus()
 
 void FCDProGui::updateHardware()
 {
-	FCDProInput::MsgConfigureFCD* message = FCDProInput::MsgConfigureFCD::create(m_settings, m_forceSettings);
+	FCDProInput::MsgConfigureFCDPro* message = FCDProInput::MsgConfigureFCDPro::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
 	m_updateTimer.stop();

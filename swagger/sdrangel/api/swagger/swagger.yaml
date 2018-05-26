@@ -1753,6 +1753,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFInputSettings"
       bladeRFOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFOutputSettings"
+      fcdProSettings:
+        $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
       fileSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
       hackRFInputSettings:

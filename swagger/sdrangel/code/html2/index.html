@@ -1779,6 +1779,9 @@ margin-bottom: 20px;
     "bladeRFOutputSettings" : {
       "$ref" : "#/definitions/BladeRFOutputSettings"
     },
+    "fcdProSettings" : {
+      "$ref" : "#/definitions/FCDProSettings"
+    },
     "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
     },
@@ -1818,6 +1821,82 @@ margin-bottom: 20px;
       "example" : "KO"
     }
   }
+};
+            defs.FCDProSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "lnaGainIndex" : {
+      "type" : "integer"
+    },
+    "rfFilterIndex" : {
+      "type" : "integer"
+    },
+    "lnaEnhanceIndex" : {
+      "type" : "integer"
+    },
+    "bandIndex" : {
+      "type" : "integer"
+    },
+    "mixerGainIndex" : {
+      "type" : "integer"
+    },
+    "mixerFilterIndex" : {
+      "type" : "integer"
+    },
+    "biasCurrentIndex" : {
+      "type" : "integer"
+    },
+    "modeIndex" : {
+      "type" : "integer"
+    },
+    "gain1Index" : {
+      "type" : "integer"
+    },
+    "rcFilterIndex" : {
+      "type" : "integer"
+    },
+    "gain2Index" : {
+      "type" : "integer"
+    },
+    "gain3Index" : {
+      "type" : "integer"
+    },
+    "gain4Index" : {
+      "type" : "integer"
+    },
+    "ifFilterIndex" : {
+      "type" : "integer"
+    },
+    "gain5Index" : {
+      "type" : "integer"
+    },
+    "gain6Index" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "FCDPro"
 };
             defs.FileSourceSettings = {
   "properties" : {
@@ -21695,7 +21774,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T02:22:55.108+02:00
+              Generated 2018-05-26T10:03:22.430+02:00
             </div>
           </div>
       </div>

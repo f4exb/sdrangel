@@ -37,23 +37,23 @@ class FileRecord;
 
 class FCDProInput : public DeviceSampleSource {
 public:
-	class MsgConfigureFCD : public Message {
+	class MsgConfigureFCDPro : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const FCDProSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFCD* create(const FCDProSettings& settings, bool force)
+		static MsgConfigureFCDPro* create(const FCDProSettings& settings, bool force)
 		{
-			return new MsgConfigureFCD(settings, force);
+			return new MsgConfigureFCDPro(settings, force);
 		}
 
 	private:
 		FCDProSettings m_settings;
 		bool m_force;
 
-		MsgConfigureFCD(const FCDProSettings& settings, bool force) :
+		MsgConfigureFCDPro(const FCDProSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -117,6 +117,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -150,6 +160,8 @@ private:
     void closeDevice();
 	void applySettings(const FCDProSettings& settings, bool force);
 	void set_lo_ppm();
+
+	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;

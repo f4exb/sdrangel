@@ -26,6 +26,7 @@
 #include "SWGAirspySettings.h"
 #include "SWGBladeRFInputSettings.h"
 #include "SWGBladeRFOutputSettings.h"
+#include "SWGFCDProSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -70,6 +71,9 @@ public:
     SWGBladeRFOutputSettings* getBladeRfOutputSettings();
     void setBladeRfOutputSettings(SWGBladeRFOutputSettings* blade_rf_output_settings);
 
+    SWGFCDProSettings* getFcdProSettings();
+    void setFcdProSettings(SWGFCDProSettings* fcd_pro_settings);
+
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
 
@@ -109,6 +113,9 @@ private:
 
     SWGBladeRFOutputSettings* blade_rf_output_settings;
     bool m_blade_rf_output_settings_isSet;
+
+    SWGFCDProSettings* fcd_pro_settings;
+    bool m_fcd_pro_settings_isSet;
 
     SWGFileSourceSettings* file_source_settings;
     bool m_file_source_settings_isSet;
