@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGSSBModReport.h
+ * SWGSSBDemodReport.h
  *
- * SSBMod
+ * SSBDemod
  */
 
-#ifndef SWGSSBModReport_H_
-#define SWGSSBModReport_H_
+#ifndef SWGSSBDemodReport_H_
+#define SWGSSBDemodReport_H_
 
 #include <QJsonObject>
 
@@ -28,21 +28,24 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGSSBModReport: public SWGObject {
+class SWG_API SWGSSBDemodReport: public SWGObject {
 public:
-    SWGSSBModReport();
-    SWGSSBModReport(QString* json);
-    virtual ~SWGSSBModReport();
+    SWGSSBDemodReport();
+    SWGSSBDemodReport(QString* json);
+    virtual ~SWGSSBDemodReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGSSBModReport* fromJson(QString &jsonString) override;
+    virtual SWGSSBDemodReport* fromJson(QString &jsonString) override;
 
     float getChannelPowerDb();
     void setChannelPowerDb(float channel_power_db);
+
+    qint32 getSquelch();
+    void setSquelch(qint32 squelch);
 
     qint32 getAudioSampleRate();
     void setAudioSampleRate(qint32 audio_sample_rate);
@@ -57,6 +60,9 @@ private:
     float channel_power_db;
     bool m_channel_power_db_isSet;
 
+    qint32 squelch;
+    bool m_squelch_isSet;
+
     qint32 audio_sample_rate;
     bool m_audio_sample_rate_isSet;
 
@@ -67,4 +73,4 @@ private:
 
 }
 
-#endif /* SWGSSBModReport_H_ */
+#endif /* SWGSSBDemodReport_H_ */

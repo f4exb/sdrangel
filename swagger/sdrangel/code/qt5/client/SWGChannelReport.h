@@ -29,6 +29,7 @@
 #include "SWGDSDDemodReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
+#include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSrcReport.h"
@@ -81,6 +82,9 @@ public:
     SWGNFMModReport* getNfmModReport();
     void setNfmModReport(SWGNFMModReport* nfm_mod_report);
 
+    SWGSSBDemodReport* getSsbDemodReport();
+    void setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report);
+
     SWGSSBModReport* getSsbModReport();
     void setSsbModReport(SWGSSBModReport* ssb_mod_report);
 
@@ -126,6 +130,9 @@ private:
 
     SWGNFMModReport* nfm_mod_report;
     bool m_nfm_mod_report_isSet;
+
+    SWGSSBDemodReport* ssb_demod_report;
+    bool m_ssb_demod_report_isSet;
 
     SWGSSBModReport* ssb_mod_report;
     bool m_ssb_mod_report_isSet;

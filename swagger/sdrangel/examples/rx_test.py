@@ -211,6 +211,21 @@ def setupChannel(deviceset_url, options):
         settings["AMDemodSettings"]["squelch"] = options.squelch_db
         settings["AMDemodSettings"]["title"] = "Channel %d" % i
         settings["AMDemodSettings"]["bandpassEnable"] = 1 # bandpass filter
+    elif options.channel_id == "SSBDemod":
+        settings["SSBDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["SSBDemodSettings"]["rfBandwidth"] = options.rf_bw
+        settings["SSBDemodSettings"]["lowCutoff"] = -300 if options.rf_bw < 0 else 300
+        settings["SSBDemodSettings"]["audioBinaural"] = 1
+        settings["SSBDemodSettings"]["audioFlipChannels"] = 0
+        settings["SSBDemodSettings"]["dsb"] = 0
+        settings["SSBDemodSettings"]["audioMute"] = 0
+        settings["SSBDemodSettings"]["agc"] = 1
+        settings["SSBDemodSettings"]["agcClamping"] = 0
+        settings["SSBDemodSettings"]["agcTimeLog2"] = 8
+        settings["SSBDemodSettings"]["agcPowerThreshold"] = options.squelch_db
+        settings["SSBDemodSettings"]["agcThresholdGate"] = 4
+        settings["SSBDemodSettings"]["volume"] = options.volume
+        settings["SSBDemodSettings"]["title"] = "Channel %d" % i
     elif options.channel_id == "DSDDemod":
         settings["DSDDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
         settings["DSDDemodSettings"]["rfBandwidth"] = options.rf_bw

@@ -82,7 +82,17 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 
 bool SSBDemodGUI::handleMessage(const Message& message)
 {
-    if (DSPConfigureAudio::match(message))
+    if (SSBDemod::MsgConfigureSSBDemod::match(message))
+    {
+        qDebug("SSBDemodGUI::handleMessage: SSBDemod::MsgConfigureSSBDemod");
+        const SSBDemod::MsgConfigureSSBDemod& cfg = (SSBDemod::MsgConfigureSSBDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (DSPConfigureAudio::match(message))
     {
         qDebug("SSBDemodGUI::handleMessage: DSPConfigureAudio: %d", m_ssbDemod->getAudioSampleRate());
         applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate

@@ -80,6 +80,8 @@
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrReport_gains.h"
 #include "SWGRtlSdrSettings.h"
+#include "SWGSSBDemodReport.h"
+#include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
 #include "SWGSSBModSettings.h"
 #include "SWGSamplingDevice.h"
@@ -293,6 +295,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
+    }
+    if(QString("SWGSSBDemodReport").compare(type) == 0) {
+      return new SWGSSBDemodReport();
+    }
+    if(QString("SWGSSBDemodSettings").compare(type) == 0) {
+      return new SWGSSBDemodSettings();
     }
     if(QString("SWGSSBModReport").compare(type) == 0) {
       return new SWGSSBModReport();

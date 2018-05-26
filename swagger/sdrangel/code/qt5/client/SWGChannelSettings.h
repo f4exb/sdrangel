@@ -29,6 +29,7 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
+#include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSrcSettings.h"
@@ -84,6 +85,9 @@ public:
     SWGSSBModSettings* getSsbModSettings();
     void setSsbModSettings(SWGSSBModSettings* ssb_mod_settings);
 
+    SWGSSBDemodSettings* getSsbDemodSettings();
+    void setSsbDemodSettings(SWGSSBDemodSettings* ssb_demod_settings);
+
     SWGUDPSinkSettings* getUdpSinkSettings();
     void setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings);
 
@@ -129,6 +133,9 @@ private:
 
     SWGSSBModSettings* ssb_mod_settings;
     bool m_ssb_mod_settings_isSet;
+
+    SWGSSBDemodSettings* ssb_demod_settings;
+    bool m_ssb_demod_settings_isSet;
 
     SWGUDPSinkSettings* udp_sink_settings;
     bool m_udp_sink_settings_isSet;

@@ -57,7 +57,7 @@ SSBModSettings:
       $ref: "http://localhost:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
       
 SSBModReport:
-  description: AMMod
+  description: SSBMod
   properties:
     channelPowerDB:
       description: power transmitted in channel (dB)

@@ -1405,6 +1405,9 @@ margin-bottom: 20px;
     "NFMModReport" : {
       "$ref" : "#/definitions/NFMModReport"
     },
+    "SSBDemodReport" : {
+      "$ref" : "#/definitions/SSBDemodReport"
+    },
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
     },
@@ -1458,6 +1461,9 @@ margin-bottom: 20px;
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
+    },
+    "SSBDemodSettings" : {
+      "$ref" : "#/definitions/SSBDemodSettings"
     },
     "UDPSinkSettings" : {
       "$ref" : "#/definitions/UDPSinkSettings"
@@ -2789,6 +2795,95 @@ margin-bottom: 20px;
   },
   "description" : "RTLSDR"
 };
+            defs.SSBDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "Audio squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "SSBDemod"
+};
+            defs.SSBDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "lowCutoff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "spanLog2" : {
+      "type" : "integer"
+    },
+    "audioBinaural" : {
+      "type" : "integer",
+      "description" : "Audio binaural mode (1 if active else 0)"
+    },
+    "audioFlipChannels" : {
+      "type" : "integer",
+      "description" : "Flip audio channels (1 if flipped else 0)"
+    },
+    "dsb" : {
+      "type" : "integer",
+      "description" : "Double sidebands mode (1 if DSB else 0)"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "Mute audio (1 if muted else 0)"
+    },
+    "agc" : {
+      "type" : "integer",
+      "description" : "AGC (1 if AGC active else 0)"
+    },
+    "agcClamping" : {
+      "type" : "integer",
+      "description" : "AGC clamping (1 if AGC clampingactive else 0)"
+    },
+    "agcTimeLog2" : {
+      "type" : "integer",
+      "description" : "AGC averaging time log2 in milliseconds"
+    },
+    "agcPowerThreshold" : {
+      "type" : "integer",
+      "description" : "Audio open RF threshold (dB)"
+    },
+    "agcThresholdGate" : {
+      "type" : "integer",
+      "description" : "Audio squelch gate in ms"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "SSBDemod"
+};
             defs.SSBModReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -2803,7 +2898,7 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "AMMod"
+  "description" : "SSBMod"
 };
             defs.SSBModSettings = {
   "properties" : {
@@ -21944,7 +22039,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T14:09:06.509+02:00
+              Generated 2018-05-26T14:52:58.621+02:00
             </div>
           </div>
       </div>

@@ -21,6 +21,11 @@
 #include <QDebug>
 #include <stdio.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGSSBDemodSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGSSBDemodReport.h"
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/downchannelizer.h"
@@ -577,3 +582,153 @@ bool SSBDemod::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+int SSBDemod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+    response.getSsbDemodSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int SSBDemod::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    SSBDemodSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getSsbDemodSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("lowCutoff")) {
+        settings.m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
+    }
+    if (channelSettingsKeys.contains("volume")) {
+        settings.m_volume = response.getSsbDemodSettings()->getVolume();
+    }
+    if (channelSettingsKeys.contains("spanLog2")) {
+        settings.m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
+    }
+    if (channelSettingsKeys.contains("audioBinaural")) {
+        settings.m_audioBinaural = response.getSsbDemodSettings()->getAudioBinaural() != 0;
+    }
+    if (channelSettingsKeys.contains("audioFlipChannels")) {
+        settings.m_audioFlipChannels = response.getSsbDemodSettings()->getAudioFlipChannels() != 0;
+    }
+    if (channelSettingsKeys.contains("dsb")) {
+        settings.m_dsb = response.getSsbDemodSettings()->getDsb() != 0;
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getSsbDemodSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("agc")) {
+        settings.m_agc = response.getSsbDemodSettings()->getAgc() != 0;
+    }
+    if (channelSettingsKeys.contains("agcClamping")) {
+        settings.m_agcClamping = response.getSsbDemodSettings()->getAgcClamping() != 0;
+    }
+    if (channelSettingsKeys.contains("agcTimeLog2")) {
+        settings.m_agcTimeLog2 = response.getSsbDemodSettings()->getAgcTimeLog2();
+    }
+    if (channelSettingsKeys.contains("agcPowerThreshold")) {
+        settings.m_agcPowerThreshold = response.getSsbDemodSettings()->getAgcPowerThreshold();
+    }
+    if (channelSettingsKeys.contains("agcThresholdGate")) {
+        settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getSsbDemodSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSsbDemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getSsbDemodSettings()->getAudioDeviceName();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int SSBDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSsbDemodReport(new SWGSDRangel::SWGSSBDemodReport());
+    response.getSsbDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void SSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBDemodSettings& settings)
+{
+    response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getSsbDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getSsbDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getSsbDemodSettings()->setLowCutoff(settings.m_lowCutoff);
+    response.getSsbDemodSettings()->setVolume(settings.m_volume);
+    response.getSsbDemodSettings()->setSpanLog2(settings.m_spanLog2);
+    response.getSsbDemodSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
+    response.getSsbDemodSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
+    response.getSsbDemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
+    response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getSsbDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getSsbDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
+    response.getSsbDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
+    response.getSsbDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
+    response.getSsbDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
+    response.getSsbDemodSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getSsbDemodSettings()->getTitle()) {
+        *response.getSsbDemodSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSsbDemodSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getSsbDemodSettings()->getAudioDeviceName()) {
+        *response.getSsbDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getSsbDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void SSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getSsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getSsbDemodReport()->setSquelch(m_audioActive ? 1 : 0);
+    response.getSsbDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getSsbDemodReport()->setChannelSampleRate(m_inputSampleRate);
+}
+

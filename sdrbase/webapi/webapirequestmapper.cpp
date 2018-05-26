@@ -2038,6 +2038,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "SSBDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject ssbDemodSettingsJsonObject = jsonObject["SSBDemodSettings"].toObject();
+            channelSettingsKeys = ssbDemodSettingsJsonObject.keys();
+            channelSettings.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+            channelSettings.getSsbDemodSettings()->fromJsonObject(ssbDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "SSBMod")
     {
         if (channelSettings.getTx() != 0)
