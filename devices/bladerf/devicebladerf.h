@@ -30,16 +30,6 @@ private:
     static struct bladerf *open_bladerf_from_serial(const char *serial);
 };
 
-class BladerfSampleRates {
-public:
-    static unsigned int getRate(unsigned int rate_index);
-    static unsigned int getRateIndex(unsigned int rate);
-    static unsigned int getNbRates();
-private:
-    static const unsigned int m_nb_rates;
-    static const unsigned int m_rates[];
-};
-
 class BladerfBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
