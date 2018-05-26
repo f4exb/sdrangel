@@ -3,3 +3,25 @@ FileSourceSettings:
   properties:
     fileName:
       type: string
+      
+FileSourceReport:
+  description: FileSource
+  properties:
+    fileName:
+      type: string
+    sampleRate:
+      description: Record sample rate in S/s
+      type: integer
+    sampleSize:
+      description: Record sample size in number of bits
+      type: integer
+    absoluteTime:
+      description: Absolute record time string representation
+      type: string
+    elapsedTime:
+      description: Elapsed time since beginning string representation
+      type: string
+    durationTime:
+      description: Duration time string representation
+      type: string
+      

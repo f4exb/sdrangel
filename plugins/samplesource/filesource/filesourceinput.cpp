@@ -21,6 +21,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGFileSourceSettings.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -375,4 +377,51 @@ int FileSourceInput::webapiRun(
 
     return 200;
 }
+
+int FileSourceInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setFileSourceReport(new SWGSDRangel::SWGFileSourceReport());
+    response.getFileSourceReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    int t_sec = 0;
+    int t_msec = 0;
+    std::size_t samplesCount = 0;
+
+    if (m_fileSourceThread) {
+        samplesCount = m_fileSourceThread->getSamplesCount();
+    }
+
+    if (m_sampleRate > 0)
+    {
+        t_sec = samplesCount / m_sampleRate;
+        t_msec = (samplesCount - (t_sec * m_sampleRate)) * 1000 / m_sampleRate;
+    }
+
+    QTime t(0, 0, 0, 0);
+    t = t.addSecs(t_sec);
+    t = t.addMSecs(t_msec);
+    response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+
+    quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    dt = dt.addSecs((quint64) t_sec);
+    dt = dt.addMSecs((quint64) t_msec);
+    response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(m_recordLength);
+    response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+
+    response.getFileSourceReport()->setFileName(new QString(m_fileName));
+    response.getFileSourceReport()->setSampleRate(m_sampleRate);
+    response.getFileSourceReport()->setSampleSize(m_sampleSize);
+}
+
 

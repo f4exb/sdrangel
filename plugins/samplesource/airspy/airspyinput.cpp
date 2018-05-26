@@ -714,7 +714,6 @@ int AirspyInput::webapiReportGet(
     return 200;
 }
 
-
 void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings)
 {
     response.getAirspySettings()->setCenterFrequency(settings.m_centerFrequency);

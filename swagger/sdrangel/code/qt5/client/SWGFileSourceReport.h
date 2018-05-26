@@ -11,20 +11,17 @@
  */
 
 /*
- * SWGDeviceReport.h
+ * SWGFileSourceReport.h
  *
- * Base device report. The specific device report present depeds on deviceHwType
+ * FileSource
  */
 
-#ifndef SWGDeviceReport_H_
-#define SWGDeviceReport_H_
+#ifndef SWGFileSourceReport_H_
+#define SWGFileSourceReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAirspyHFReport.h"
-#include "SWGAirspyReport.h"
-#include "SWGFileSourceReport.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -32,55 +29,61 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceReport: public SWGObject {
+class SWG_API SWGFileSourceReport: public SWGObject {
 public:
-    SWGDeviceReport();
-    SWGDeviceReport(QString* json);
-    virtual ~SWGDeviceReport();
+    SWGFileSourceReport();
+    SWGFileSourceReport(QString* json);
+    virtual ~SWGFileSourceReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceReport* fromJson(QString &jsonString) override;
+    virtual SWGFileSourceReport* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
+    QString* getFileName();
+    void setFileName(QString* file_name);
 
-    qint32 getTx();
-    void setTx(qint32 tx);
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
 
-    SWGAirspyReport* getAirspyReport();
-    void setAirspyReport(SWGAirspyReport* airspy_report);
+    qint32 getSampleSize();
+    void setSampleSize(qint32 sample_size);
 
-    SWGAirspyHFReport* getAirspyHfReport();
-    void setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report);
+    QString* getAbsoluteTime();
+    void setAbsoluteTime(QString* absolute_time);
 
-    SWGFileSourceReport* getFileSourceReport();
-    void setFileSourceReport(SWGFileSourceReport* file_source_report);
+    QString* getElapsedTime();
+    void setElapsedTime(QString* elapsed_time);
+
+    QString* getDurationTime();
+    void setDurationTime(QString* duration_time);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
+    QString* file_name;
+    bool m_file_name_isSet;
 
-    qint32 tx;
-    bool m_tx_isSet;
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
-    SWGAirspyReport* airspy_report;
-    bool m_airspy_report_isSet;
+    qint32 sample_size;
+    bool m_sample_size_isSet;
 
-    SWGAirspyHFReport* airspy_hf_report;
-    bool m_airspy_hf_report_isSet;
+    QString* absolute_time;
+    bool m_absolute_time_isSet;
 
-    SWGFileSourceReport* file_source_report;
-    bool m_file_source_report_isSet;
+    QString* elapsed_time;
+    bool m_elapsed_time_isSet;
+
+    QString* duration_time;
+    bool m_duration_time_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceReport_H_ */
+#endif /* SWGFileSourceReport_H_ */

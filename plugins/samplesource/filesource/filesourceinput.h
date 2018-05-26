@@ -261,6 +261,10 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
 	private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -279,6 +283,7 @@ public:
 	void openFileStream();
 	void seekFileStream(int seekPercentage);
 	bool applySettings(const FileSourceSettings& settings, bool force = false);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif // INCLUDE_FILESOURCEINPUT_H

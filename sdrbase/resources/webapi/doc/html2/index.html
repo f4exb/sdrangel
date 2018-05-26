@@ -1711,6 +1711,9 @@ margin-bottom: 20px;
     },
     "airspyHFReport" : {
       "$ref" : "#/definitions/AirspyHFReport"
+    },
+    "fileSourceReport" : {
+      "$ref" : "#/definitions/FileSourceReport"
     }
   },
   "description" : "Base device report. The specific device report present depeds on deviceHwType"
@@ -1953,6 +1956,34 @@ margin-bottom: 20px;
     }
   },
   "description" : "FCDPro"
+};
+            defs.FileSourceReport = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Record sample rate in S/s"
+    },
+    "sampleSize" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bits"
+    },
+    "absoluteTime" : {
+      "type" : "string",
+      "description" : "Absolute record time string representation"
+    },
+    "elapsedTime" : {
+      "type" : "string",
+      "description" : "Elapsed time since beginning string representation"
+    },
+    "durationTime" : {
+      "type" : "string",
+      "description" : "Duration time string representation"
+    }
+  },
+  "description" : "FileSource"
 };
             defs.FileSourceSettings = {
   "properties" : {
@@ -21830,7 +21861,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T10:50:36.916+02:00
+              Generated 2018-05-26T11:35:33.686+02:00
             </div>
           </div>
       </div>

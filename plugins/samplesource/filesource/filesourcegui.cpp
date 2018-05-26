@@ -337,7 +337,6 @@ void FileSourceGui::updateWithStreamTime()
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
 	QString s_timems = t.toString("HH:mm:ss.zzz");
-	QString s_time = t.toString("HH:mm:ss");
 	ui->relTimeText->setText(s_timems);
 
     quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;

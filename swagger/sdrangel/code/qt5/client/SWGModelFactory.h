@@ -51,6 +51,7 @@
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
+#include "SWGFileSourceReport.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -201,6 +202,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       return new SWGFCDProSettings();
+    }
+    if(QString("SWGFileSourceReport").compare(type) == 0) {
+      return new SWGFileSourceReport();
     }
     if(QString("SWGFileSourceSettings").compare(type) == 0) {
       return new SWGFileSourceSettings();
