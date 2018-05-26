@@ -1795,6 +1795,10 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
       fileSourceReport:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
+      limeSdrInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      limeSdrOutputReport:
+        $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
       perseusReport:
         $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
       plutoSdrInputReport:

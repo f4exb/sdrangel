@@ -25,6 +25,8 @@
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
 #include "SWGFileSourceReport.h"
+#include "SWGLimeSdrInputReport.h"
+#include "SWGLimeSdrOutputReport.h"
 #include "SWGPerseusReport.h"
 #include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrOutputReport.h"
@@ -64,6 +66,12 @@ public:
     SWGFileSourceReport* getFileSourceReport();
     void setFileSourceReport(SWGFileSourceReport* file_source_report);
 
+    SWGLimeSdrInputReport* getLimeSdrInputReport();
+    void setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report);
+
+    SWGLimeSdrOutputReport* getLimeSdrOutputReport();
+    void setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report);
+
     SWGPerseusReport* getPerseusReport();
     void setPerseusReport(SWGPerseusReport* perseus_report);
 
@@ -94,6 +102,12 @@ private:
 
     SWGFileSourceReport* file_source_report;
     bool m_file_source_report_isSet;
+
+    SWGLimeSdrInputReport* lime_sdr_input_report;
+    bool m_lime_sdr_input_report_isSet;
+
+    SWGLimeSdrOutputReport* lime_sdr_output_report;
+    bool m_lime_sdr_output_report_isSet;
 
     SWGPerseusReport* perseus_report;
     bool m_perseus_report_isSet;

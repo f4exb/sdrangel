@@ -58,7 +58,9 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
+#include "SWGLimeSdrOutputReport.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
@@ -234,8 +236,14 @@ namespace SWGSDRangel {
     if(QString("SWGInstanceSummaryResponse").compare(type) == 0) {
       return new SWGInstanceSummaryResponse();
     }
+    if(QString("SWGLimeSdrInputReport").compare(type) == 0) {
+      return new SWGLimeSdrInputReport();
+    }
     if(QString("SWGLimeSdrInputSettings").compare(type) == 0) {
       return new SWGLimeSdrInputSettings();
+    }
+    if(QString("SWGLimeSdrOutputReport").compare(type) == 0) {
+      return new SWGLimeSdrOutputReport();
     }
     if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
       return new SWGLimeSdrOutputSettings();

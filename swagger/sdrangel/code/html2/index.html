@@ -1721,6 +1721,12 @@ margin-bottom: 20px;
     "fileSourceReport" : {
       "$ref" : "#/definitions/FileSourceReport"
     },
+    "limeSdrInputReport" : {
+      "$ref" : "#/definitions/LimeSdrInputReport"
+    },
+    "limeSdrOutputReport" : {
+      "$ref" : "#/definitions/LimeSdrOutputReport"
+    },
     "perseusReport" : {
       "$ref" : "#/definitions/PerseusReport"
     },
@@ -2175,6 +2181,47 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about this SDRangel instance"
 };
+            defs.LimeSdrInputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfullt retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "underrunCount" : {
+      "type" : "integer"
+    },
+    "overrunCount" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCount" : {
+      "type" : "integer"
+    },
+    "linkRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "hwTimestamp" : {
+      "type" : "integer",
+      "format" : "uint64",
+      "description" : "Hardware timestamp"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "LimeSDR"
+};
             defs.LimeSdrInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -2244,6 +2291,47 @@ margin-bottom: 20px;
     },
     "fileRecordName" : {
       "type" : "string"
+    }
+  },
+  "description" : "LimeSDR"
+};
+            defs.LimeSdrOutputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfullt retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "underrunCount" : {
+      "type" : "integer"
+    },
+    "overrunCount" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCount" : {
+      "type" : "integer"
+    },
+    "linkRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "hwTimestamp" : {
+      "type" : "integer",
+      "format" : "uint64",
+      "description" : "Hardware timestamp"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "LimeSDR"
@@ -22204,7 +22292,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T20:31:05.824+02:00
+              Generated 2018-05-26T22:09:48.356+02:00
             </div>
           </div>
       </div>

@@ -207,6 +207,10 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -244,6 +248,7 @@ private:
     void resumeTxBuddies();
     bool applySettings(const LimeSDROutputSettings& settings, bool force = false, bool forceNCOFrequency = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDROutputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUT_H_ */

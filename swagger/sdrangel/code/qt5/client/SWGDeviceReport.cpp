@@ -38,6 +38,10 @@ SWGDeviceReport::SWGDeviceReport() {
     m_airspy_hf_report_isSet = false;
     file_source_report = nullptr;
     m_file_source_report_isSet = false;
+    lime_sdr_input_report = nullptr;
+    m_lime_sdr_input_report_isSet = false;
+    lime_sdr_output_report = nullptr;
+    m_lime_sdr_output_report_isSet = false;
     perseus_report = nullptr;
     m_perseus_report_isSet = false;
     pluto_sdr_input_report = nullptr;
@@ -64,6 +68,10 @@ SWGDeviceReport::init() {
     m_airspy_hf_report_isSet = false;
     file_source_report = new SWGFileSourceReport();
     m_file_source_report_isSet = false;
+    lime_sdr_input_report = new SWGLimeSdrInputReport();
+    m_lime_sdr_input_report_isSet = false;
+    lime_sdr_output_report = new SWGLimeSdrOutputReport();
+    m_lime_sdr_output_report_isSet = false;
     perseus_report = new SWGPerseusReport();
     m_perseus_report_isSet = false;
     pluto_sdr_input_report = new SWGPlutoSdrInputReport();
@@ -88,6 +96,12 @@ SWGDeviceReport::cleanup() {
     }
     if(file_source_report != nullptr) { 
         delete file_source_report;
+    }
+    if(lime_sdr_input_report != nullptr) { 
+        delete lime_sdr_input_report;
+    }
+    if(lime_sdr_output_report != nullptr) { 
+        delete lime_sdr_output_report;
     }
     if(perseus_report != nullptr) { 
         delete perseus_report;
@@ -123,6 +137,10 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&airspy_hf_report, pJson["airspyHFReport"], "SWGAirspyHFReport", "SWGAirspyHFReport");
     
     ::SWGSDRangel::setValue(&file_source_report, pJson["fileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
+    
+    ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
+    
+    ::SWGSDRangel::setValue(&lime_sdr_output_report, pJson["limeSdrOutputReport"], "SWGLimeSdrOutputReport", "SWGLimeSdrOutputReport");
     
     ::SWGSDRangel::setValue(&perseus_report, pJson["perseusReport"], "SWGPerseusReport", "SWGPerseusReport");
     
@@ -162,6 +180,12 @@ SWGDeviceReport::asJsonObject() {
     }
     if((file_source_report != nullptr) && (file_source_report->isSet())){
         toJsonValue(QString("fileSourceReport"), file_source_report, obj, QString("SWGFileSourceReport"));
+    }
+    if((lime_sdr_input_report != nullptr) && (lime_sdr_input_report->isSet())){
+        toJsonValue(QString("limeSdrInputReport"), lime_sdr_input_report, obj, QString("SWGLimeSdrInputReport"));
+    }
+    if((lime_sdr_output_report != nullptr) && (lime_sdr_output_report->isSet())){
+        toJsonValue(QString("limeSdrOutputReport"), lime_sdr_output_report, obj, QString("SWGLimeSdrOutputReport"));
     }
     if((perseus_report != nullptr) && (perseus_report->isSet())){
         toJsonValue(QString("perseusReport"), perseus_report, obj, QString("SWGPerseusReport"));
@@ -229,6 +253,26 @@ SWGDeviceReport::setFileSourceReport(SWGFileSourceReport* file_source_report) {
     this->m_file_source_report_isSet = true;
 }
 
+SWGLimeSdrInputReport*
+SWGDeviceReport::getLimeSdrInputReport() {
+    return lime_sdr_input_report;
+}
+void
+SWGDeviceReport::setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report) {
+    this->lime_sdr_input_report = lime_sdr_input_report;
+    this->m_lime_sdr_input_report_isSet = true;
+}
+
+SWGLimeSdrOutputReport*
+SWGDeviceReport::getLimeSdrOutputReport() {
+    return lime_sdr_output_report;
+}
+void
+SWGDeviceReport::setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report) {
+    this->lime_sdr_output_report = lime_sdr_output_report;
+    this->m_lime_sdr_output_report_isSet = true;
+}
+
 SWGPerseusReport*
 SWGDeviceReport::getPerseusReport() {
     return perseus_report;
@@ -279,6 +323,8 @@ SWGDeviceReport::isSet(){
         if(airspy_report != nullptr && airspy_report->isSet()){ isObjectUpdated = true; break;}
         if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
         if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
+        if(lime_sdr_input_report != nullptr && lime_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
+        if(lime_sdr_output_report != nullptr && lime_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(perseus_report != nullptr && perseus_report->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_input_report != nullptr && pluto_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}

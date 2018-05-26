@@ -23,6 +23,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGLimeSdrInputReport.h"
 
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
@@ -1385,6 +1387,16 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     }
 }
 
+int LimeSDRInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setLimeSdrInputReport(new SWGSDRangel::SWGLimeSdrInputReport());
+    response.getLimeSdrInputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
 int LimeSDRInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
@@ -1411,3 +1423,35 @@ int LimeSDRInput::webapiRun(
     return 200;
 }
 
+void LimeSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    bool success = false;
+    double temp = 0.0;
+    lms_stream_status_t status;
+    status.active = false;
+    status.fifoFilledCount = 0;
+    status.fifoSize = 1;
+    status.underrun = 0;
+    status.overrun = 0;
+    status.droppedPackets = 0;
+    status.linkRate = 0.0;
+    status.timestamp = 0;
+
+    success = (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) == 0));
+
+    response.getLimeSdrInputReport()->setSuccess(success ? 1 : 0);
+    response.getLimeSdrInputReport()->setStreamActive(status.active ? 1 : 0);
+    response.getLimeSdrInputReport()->setFifoSize(status.fifoSize);
+    response.getLimeSdrInputReport()->setFifoFill(status.fifoFilledCount);
+    response.getLimeSdrInputReport()->setUnderrunCount(status.underrun);
+    response.getLimeSdrInputReport()->setOverrunCount(status.overrun);
+    response.getLimeSdrInputReport()->setDroppedPacketsCount(status.droppedPackets);
+    response.getLimeSdrInputReport()->setLinkRate(status.linkRate);
+    response.getLimeSdrInputReport()->setHwTimestamp(status.timestamp);
+
+    if (m_deviceShared.m_deviceParams->getDevice()) {
+        LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp);
+    }
+
+    response.getLimeSdrInputReport()->setTemperature(temp);
+}
