@@ -32,7 +32,7 @@ def getInputOptions():
     parser.add_option("--vol", dest="volume", help="audio volume", metavar="VOLUME", type="float", default=1.0)
     parser.add_option("-c", "--create", dest="create", help="create a new device set", metavar="CREATE", action="store_true", default=False)
     parser.add_option("--ppm", dest="lo_ppm", help="LO correction in PPM", metavar="PPM", type="float", default=0.0)    
-    parser.add_option("--fc-pos", dest="fc_pos", help="Center frequency position 0:inf 1:sup 2:cen", metavar="ENUM", default=2) 
+    parser.add_option("--fc-pos", dest="fc_pos", help="Center frequency position 0:inf 1:sup 2:cen", metavar="ENUM", type="int", default=2) 
     parser.add_option("--sq", dest="squelch_db", help="Squelsch threshold in dB", metavar="DECIBEL", type="float", default=-50.0)
     parser.add_option("--sq-gate", dest="squelch_gate", help="Squelsch gate in ms", metavar="MILLISECONDS", type="int", default=50)
     parser.add_option("--stereo", dest="stereo", help="Broadcast FM stereo", metavar="BOOL", action="store_true", default=False)
@@ -98,6 +98,7 @@ def setupDevice(deviceset_url, options):
             exit(-1)
 
         if options.device_hwid == "Airspy":
+            settings['airspySettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
             settings["airspySettings"]["centerFrequency"] = options.device_freq*1000
             settings["airspySettings"]["devSampleRateIndex"] = 1
             settings['airspySettings']['log2Decim'] = options.log2_decim

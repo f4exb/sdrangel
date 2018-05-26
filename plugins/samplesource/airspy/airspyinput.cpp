@@ -668,7 +668,9 @@ int AirspyInput::webapiSettingsPutPatch(
         settings.m_log2Decim = response.getAirspySettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("fcPos")) {
-        settings.m_fcPos = (AirspySettings::fcPos_t) response.getAirspySettings()->getFcPos();
+        int fcPos = response.getAirspySettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (AirspySettings::fcPos_t) fcPos;
     }
     if (deviceSettingsKeys.contains("biasT")) {
         settings.m_biasT = response.getAirspySettings()->getBiasT() != 0;
