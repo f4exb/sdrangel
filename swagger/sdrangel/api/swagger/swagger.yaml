@@ -1767,6 +1767,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      perseusSettings:
+        $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
       rtlSdrSettings:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
         
@@ -1789,6 +1791,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
       fileSourceReport:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
+      perseusReport:
+        $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
         
   ChannelSettings:
     description: Base channel settings. The specific channel settings present depends on channelType.

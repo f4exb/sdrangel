@@ -11,83 +11,50 @@
  */
 
 /*
- * SWGDeviceReport.h
+ * SWGPerseusReport.h
  *
- * Base device report. The specific device report present depeds on deviceHwType
+ * Perseus
  */
 
-#ifndef SWGDeviceReport_H_
-#define SWGDeviceReport_H_
+#ifndef SWGPerseusReport_H_
+#define SWGPerseusReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAirspyHFReport.h"
-#include "SWGAirspyReport.h"
-#include "SWGFileSourceReport.h"
-#include "SWGPerseusReport.h"
-#include <QString>
+#include "SWGAirspyReport_sampleRates.h"
+#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceReport: public SWGObject {
+class SWG_API SWGPerseusReport: public SWGObject {
 public:
-    SWGDeviceReport();
-    SWGDeviceReport(QString* json);
-    virtual ~SWGDeviceReport();
+    SWGPerseusReport();
+    SWGPerseusReport(QString* json);
+    virtual ~SWGPerseusReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceReport* fromJson(QString &jsonString) override;
+    virtual SWGPerseusReport* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
-
-    qint32 getTx();
-    void setTx(qint32 tx);
-
-    SWGAirspyReport* getAirspyReport();
-    void setAirspyReport(SWGAirspyReport* airspy_report);
-
-    SWGAirspyHFReport* getAirspyHfReport();
-    void setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report);
-
-    SWGFileSourceReport* getFileSourceReport();
-    void setFileSourceReport(SWGFileSourceReport* file_source_report);
-
-    SWGPerseusReport* getPerseusReport();
-    void setPerseusReport(SWGPerseusReport* perseus_report);
+    QList<SWGAirspyReport_sampleRates*>* getSampleRates();
+    void setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
-
-    qint32 tx;
-    bool m_tx_isSet;
-
-    SWGAirspyReport* airspy_report;
-    bool m_airspy_report_isSet;
-
-    SWGAirspyHFReport* airspy_hf_report;
-    bool m_airspy_hf_report_isSet;
-
-    SWGFileSourceReport* file_source_report;
-    bool m_file_source_report_isSet;
-
-    SWGPerseusReport* perseus_report;
-    bool m_perseus_report_isSet;
+    QList<SWGAirspyReport_sampleRates*>* sample_rates;
+    bool m_sample_rates_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceReport_H_ */
+#endif /* SWGPerseusReport_H_ */

@@ -33,6 +33,7 @@
 #include "SWGHackRFOutputSettings.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
+#include "SWGPerseusSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include <QString>
 
@@ -93,6 +94,9 @@ public:
     SWGLimeSdrOutputSettings* getLimeSdrOutputSettings();
     void setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_output_settings);
 
+    SWGPerseusSettings* getPerseusSettings();
+    void setPerseusSettings(SWGPerseusSettings* perseus_settings);
+
     SWGRtlSdrSettings* getRtlSdrSettings();
     void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
 
@@ -138,6 +142,9 @@ private:
 
     SWGLimeSdrOutputSettings* lime_sdr_output_settings;
     bool m_lime_sdr_output_settings_isSet;
+
+    SWGPerseusSettings* perseus_settings;
+    bool m_perseus_settings_isSet;
 
     SWGRtlSdrSettings* rtl_sdr_settings;
     bool m_rtl_sdr_settings_isSet;

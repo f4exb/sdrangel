@@ -54,6 +54,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = nullptr;
     m_lime_sdr_output_settings_isSet = false;
+    perseus_settings = nullptr;
+    m_perseus_settings_isSet = false;
     rtl_sdr_settings = nullptr;
     m_rtl_sdr_settings_isSet = false;
 }
@@ -90,6 +92,8 @@ SWGDeviceSettings::init() {
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = new SWGLimeSdrOutputSettings();
     m_lime_sdr_output_settings_isSet = false;
+    perseus_settings = new SWGPerseusSettings();
+    m_perseus_settings_isSet = false;
     rtl_sdr_settings = new SWGRtlSdrSettings();
     m_rtl_sdr_settings_isSet = false;
 }
@@ -133,6 +137,9 @@ SWGDeviceSettings::cleanup() {
     if(lime_sdr_output_settings != nullptr) { 
         delete lime_sdr_output_settings;
     }
+    if(perseus_settings != nullptr) { 
+        delete perseus_settings;
+    }
     if(rtl_sdr_settings != nullptr) { 
         delete rtl_sdr_settings;
     }
@@ -174,6 +181,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_sdr_input_settings, pJson["limeSdrInputSettings"], "SWGLimeSdrInputSettings", "SWGLimeSdrInputSettings");
     
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
+    
+    ::SWGSDRangel::setValue(&perseus_settings, pJson["perseusSettings"], "SWGPerseusSettings", "SWGPerseusSettings");
     
     ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
     
@@ -231,6 +240,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((lime_sdr_output_settings != nullptr) && (lime_sdr_output_settings->isSet())){
         toJsonValue(QString("limeSdrOutputSettings"), lime_sdr_output_settings, obj, QString("SWGLimeSdrOutputSettings"));
+    }
+    if((perseus_settings != nullptr) && (perseus_settings->isSet())){
+        toJsonValue(QString("perseusSettings"), perseus_settings, obj, QString("SWGPerseusSettings"));
     }
     if((rtl_sdr_settings != nullptr) && (rtl_sdr_settings->isSet())){
         toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
@@ -369,6 +381,16 @@ SWGDeviceSettings::setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_o
     this->m_lime_sdr_output_settings_isSet = true;
 }
 
+SWGPerseusSettings*
+SWGDeviceSettings::getPerseusSettings() {
+    return perseus_settings;
+}
+void
+SWGDeviceSettings::setPerseusSettings(SWGPerseusSettings* perseus_settings) {
+    this->perseus_settings = perseus_settings;
+    this->m_perseus_settings_isSet = true;
+}
+
 SWGRtlSdrSettings*
 SWGDeviceSettings::getRtlSdrSettings() {
     return rtl_sdr_settings;
@@ -397,6 +419,7 @@ SWGDeviceSettings::isSet(){
         if(hack_rf_output_settings != nullptr && hack_rf_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_input_settings != nullptr && lime_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_settings != nullptr && lime_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
+        if(perseus_settings != nullptr && perseus_settings->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

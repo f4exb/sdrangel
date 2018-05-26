@@ -152,6 +152,15 @@ def setupDevice(deviceset_url, options):
             settings['hackRFInputSettings']['lnaGain'] = 32
             settings['hackRFInputSettings']['log2Decim'] = options.log2_decim
             settings['hackRFInputSettings']['vgaGain'] = 24
+        elif options.device_hwid == "Perseus":
+            settings['perseusSettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
+            settings['perseusSettings']['centerFrequency'] = options.device_freq*1000
+            settings["perseusSettings"]["devSampleRateIndex"] = 0
+            settings['perseusSettings']['log2Decim'] = options.log2_decim
+            settings['perseusSettings']['adcDither'] = 0
+            settings['perseusSettings']['adcPreamp'] = 0
+            settings['perseusSettings']['wideBand'] = 0
+            settings['perseusSettings']['attenuator'] = 0
         
         r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch device settings")
         if r is None:

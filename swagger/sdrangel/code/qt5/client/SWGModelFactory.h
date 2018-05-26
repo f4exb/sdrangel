@@ -66,6 +66,8 @@
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
+#include "SWGPerseusReport.h"
+#include "SWGPerseusSettings.h"
 #include "SWGPresetExport.h"
 #include "SWGPresetGroup.h"
 #include "SWGPresetIdentifier.h"
@@ -247,6 +249,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNFMModSettings").compare(type) == 0) {
       return new SWGNFMModSettings();
+    }
+    if(QString("SWGPerseusReport").compare(type) == 0) {
+      return new SWGPerseusReport();
+    }
+    if(QString("SWGPerseusSettings").compare(type) == 0) {
+      return new SWGPerseusSettings();
     }
     if(QString("SWGPresetExport").compare(type) == 0) {
       return new SWGPresetExport();

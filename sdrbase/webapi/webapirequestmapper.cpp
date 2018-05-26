@@ -1706,22 +1706,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
 
     QString *deviceHwType = deviceSettings.getDeviceHwType();
 
-    if (*deviceHwType == "FileSource")
-    {
-        if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
-        {
-            QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
-            deviceSettingsKeys = fileSourceSettingsJsonObject.keys();
-            deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
-            deviceSettings.getFileSourceSettings()->fromJsonObject(fileSourceSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "Airspy") && (deviceSettings.getTx() == 0))
+    if ((*deviceHwType == "Airspy") && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("airspySettings") && jsonObject["airspySettings"].isObject())
         {
@@ -1774,6 +1759,51 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             deviceSettingsKeys = bladeRFOutputSettingsJsonObject.keys();
             deviceSettings.setBladeRfOutputSettings(new SWGSDRangel::SWGBladeRFOutputSettings());
             deviceSettings.getBladeRfOutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FCDPro")
+    {
+        if (jsonObject.contains("fcdProSettings") && jsonObject["fcdProSettings"].isObject())
+        {
+            QJsonObject fcdProSettingsJsonObject = jsonObject["fcdProSettings"].toObject();
+            deviceSettingsKeys = fcdProSettingsJsonObject.keys();
+            deviceSettings.setFcdProSettings(new SWGSDRangel::SWGFCDProSettings());
+            deviceSettings.getFcdProSettings()->fromJsonObject(fcdProSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FCDProPlus")
+    {
+        if (jsonObject.contains("fcdProPlusSettings") && jsonObject["fcdProPlusSettings"].isObject())
+        {
+            QJsonObject fcdProPlusSettingsJsonObject = jsonObject["fcdProPlusSettings"].toObject();
+            deviceSettingsKeys = fcdProPlusSettingsJsonObject.keys();
+            deviceSettings.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+            deviceSettings.getFcdProPlusSettings()->fromJsonObject(fcdProPlusSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FileSource")
+    {
+        if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
+        {
+            QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
+            deviceSettingsKeys = fileSourceSettingsJsonObject.keys();
+            deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+            deviceSettings.getFileSourceSettings()->fromJsonObject(fileSourceSettingsJsonObject);
             return true;
         }
         else
@@ -1834,6 +1864,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             deviceSettingsKeys = limeSdrOutputSettingsJsonObject.keys();
             deviceSettings.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
             deviceSettings.getLimeSdrOutputSettings()->fromJsonObject(limeSdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "Perseus")
+    {
+        if (jsonObject.contains("perseusSettings") && jsonObject["perseusSettings"].isObject())
+        {
+            QJsonObject perseusSettingsJsonObject = jsonObject["perseusSettings"].toObject();
+            deviceSettingsKeys = perseusSettingsJsonObject.keys();
+            deviceSettings.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+            deviceSettings.getPerseusSettings()->fromJsonObject(perseusSettingsJsonObject);
             return true;
         }
         else

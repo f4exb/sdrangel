@@ -1714,6 +1714,9 @@ margin-bottom: 20px;
     },
     "fileSourceReport" : {
       "$ref" : "#/definitions/FileSourceReport"
+    },
+    "perseusReport" : {
+      "$ref" : "#/definitions/PerseusReport"
     }
   },
   "description" : "Base device report. The specific device report present depeds on deviceHwType"
@@ -1802,6 +1805,9 @@ margin-bottom: 20px;
     },
     "limeSdrOutputSettings" : {
       "$ref" : "#/definitions/LimeSdrOutputSettings"
+    },
+    "perseusSettings" : {
+      "$ref" : "#/definitions/PerseusSettings"
     },
     "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
@@ -2463,6 +2469,61 @@ margin-bottom: 20px;
     }
   },
   "description" : "NFMMod"
+};
+            defs.PerseusReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/AirspyReport_sampleRates"
+      }
+    }
+  },
+  "description" : "Perseus"
+};
+            defs.PerseusSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "devSampleRateIndex" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "adcDither" : {
+      "type" : "integer",
+      "description" : "ADC dithering (1 if active else 0)"
+    },
+    "adcPreamp" : {
+      "type" : "integer",
+      "description" : "ADC preamplifier (1 if active else 0)"
+    },
+    "wideBand" : {
+      "type" : "integer",
+      "description" : "Wideband mode i.e. bypass automatic RF filter (1 if active else 0)"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "attenuator" : {
+      "type" : "integer",
+      "description" : "Attenuator setting in Bels (0, 10, 20 30 dB)"
+    }
+  },
+  "description" : "Perseus"
 };
             defs.PresetExport = {
   "properties" : {
@@ -21861,7 +21922,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T11:35:33.686+02:00
+              Generated 2018-05-26T12:32:33.813+02:00
             </div>
           </div>
       </div>
