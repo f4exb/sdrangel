@@ -47,14 +47,8 @@ public:
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
-    qint32 getLog2HardInterp();
-    void setLog2HardInterp(qint32 log2_hard_interp);
-
-    qint32 getLog2SoftInterp();
-    void setLog2SoftInterp(qint32 log2_soft_interp);
-
-    qint32 getLpfBw();
-    void setLpfBw(qint32 lpf_bw);
+    qint32 getLOppmTenths();
+    void setLOppmTenths(qint32 l_oppm_tenths);
 
     qint32 getLpfFirEnable();
     void setLpfFirEnable(qint32 lpf_fir_enable);
@@ -62,8 +56,23 @@ public:
     qint32 getLpfFirbw();
     void setLpfFirbw(qint32 lpf_firbw);
 
-    qint32 getGain();
-    void setGain(qint32 gain);
+    qint32 getLpfFiRlog2Interp();
+    void setLpfFiRlog2Interp(qint32 lpf_fi_rlog2_interp);
+
+    qint32 getLpfFirGain();
+    void setLpfFirGain(qint32 lpf_fir_gain);
+
+    qint32 getLog2Interp();
+    void setLog2Interp(qint32 log2_interp);
+
+    qint32 getLpfBw();
+    void setLpfBw(qint32 lpf_bw);
+
+    qint32 getAtt();
+    void setAtt(qint32 att);
+
+    qint32 getAntennaPath();
+    void setAntennaPath(qint32 antenna_path);
 
     qint32 getTransverterMode();
     void setTransverterMode(qint32 transverter_mode);
@@ -81,14 +90,8 @@ private:
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;
 
-    qint32 log2_hard_interp;
-    bool m_log2_hard_interp_isSet;
-
-    qint32 log2_soft_interp;
-    bool m_log2_soft_interp_isSet;
-
-    qint32 lpf_bw;
-    bool m_lpf_bw_isSet;
+    qint32 l_oppm_tenths;
+    bool m_l_oppm_tenths_isSet;
 
     qint32 lpf_fir_enable;
     bool m_lpf_fir_enable_isSet;
@@ -96,8 +99,23 @@ private:
     qint32 lpf_firbw;
     bool m_lpf_firbw_isSet;
 
-    qint32 gain;
-    bool m_gain_isSet;
+    qint32 lpf_fi_rlog2_interp;
+    bool m_lpf_fi_rlog2_interp_isSet;
+
+    qint32 lpf_fir_gain;
+    bool m_lpf_fir_gain_isSet;
+
+    qint32 log2_interp;
+    bool m_log2_interp_isSet;
+
+    qint32 lpf_bw;
+    bool m_lpf_bw_isSet;
+
+    qint32 att;
+    bool m_att_isSet;
+
+    qint32 antenna_path;
+    bool m_antenna_path_isSet;
 
     qint32 transverter_mode;
     bool m_transverter_mode_isSet;

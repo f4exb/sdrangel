@@ -2656,22 +2656,37 @@ margin-bottom: 20px;
     "devSampleRate" : {
       "type" : "integer"
     },
-    "log2HardInterp" : {
-      "type" : "integer"
-    },
-    "log2SoftInterp" : {
-      "type" : "integer"
-    },
-    "lpfBW" : {
+    "LOppmTenths" : {
       "type" : "integer"
     },
     "lpfFIREnable" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Low pass FIR filter enable (1 if enabled else 0)"
     },
     "lpfFIRBW" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter bandwidth (Hz)"
+    },
+    "lpfFIRlog2Interp" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)"
+    },
+    "lpfFIRGain" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter gain (dB)"
+    },
+    "log2Interp" : {
       "type" : "integer"
     },
-    "gain" : {
+    "lpfBW" : {
+      "type" : "integer",
+      "description" : "Analog lowpass filter bandwidth (Hz)"
+    },
+    "att" : {
+      "type" : "integer",
+      "description" : "Hardware attenuator gain in decibel fourths (negative)"
+    },
+    "antennaPath" : {
       "type" : "integer"
     },
     "transverterMode" : {
@@ -22189,7 +22204,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T16:46:01.765+02:00
+              Generated 2018-05-26T20:31:05.824+02:00
             </div>
           </div>
       </div>

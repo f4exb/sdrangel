@@ -55,17 +55,29 @@ PlutoSdrOutputSettings:
       format: int64
     devSampleRate:
       type: integer
-    log2HardInterp:
+    LOppmTenths:
       type: integer
-    log2SoftInterp:
+    lpfFIREnable:
+      description: Low pass FIR filter enable (1 if enabled else 0)
       type: integer
-    lpfBW:        
+    lpfFIRBW:      
+      description: digital lowpass FIR filter bandwidth (Hz)
       type: integer
-    lpfFIREnable: 
+    lpfFIRlog2Interp:
+      description: digital lowpass FIR filter log2 of interpolation factor (0..2)
       type: integer
-    lpfFIRBW:     
+    lpfFIRGain:
+      description: digital lowpass FIR filter gain (dB)
       type: integer
-    gain:         
+    log2Interp:
+      type: integer
+    lpfBW:
+      description: Analog lowpass filter bandwidth (Hz)      
+      type: integer
+    att:
+      description: Hardware attenuator gain in decibel fourths (negative)
+      type: integer
+    antennaPath:
       type: integer
     transverterMode:
       type: integer

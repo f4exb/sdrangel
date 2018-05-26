@@ -91,6 +91,20 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -122,6 +136,8 @@ public:
     void suspendBuddies();
     void resumeBuddies();
     bool applySettings(const PlutoSDROutputSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDROutputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 

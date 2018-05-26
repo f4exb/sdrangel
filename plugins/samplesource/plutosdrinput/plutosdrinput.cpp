@@ -351,6 +351,23 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    QLocale loc;
+
+    qDebug().noquote() << "PlutoSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_devSampleRate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
+            << " m_lpfFIRBW: " << loc.toString(m_settings.m_lpfFIRBW)
+            << " m_lpfFIRlog2Decim: " << m_settings.m_lpfFIRlog2Decim
+            << " m_lpfFIRGain: " << m_settings.m_lpfFIRGain
+            << " m_log2Decim: " << loc.toString(1<<m_settings.m_log2Decim)
+            << " m_lpfBW: " << loc.toString(m_settings.m_lpfBW)
+            << " m_gain: " << m_settings.m_gain
+            << " m_antennaPath: " << (int) m_settings.m_antennaPath
+            << " m_gainMode: " << (int) m_settings.m_gainMode
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " force: " << force;
 
     // determine if buddies threads or own thread need to be suspended
 

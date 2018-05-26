@@ -32,18 +32,24 @@ SWGPlutoSdrOutputSettings::SWGPlutoSdrOutputSettings() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
-    log2_hard_interp = 0;
-    m_log2_hard_interp_isSet = false;
-    log2_soft_interp = 0;
-    m_log2_soft_interp_isSet = false;
-    lpf_bw = 0;
-    m_lpf_bw_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     lpf_fir_enable = 0;
     m_lpf_fir_enable_isSet = false;
     lpf_firbw = 0;
     m_lpf_firbw_isSet = false;
-    gain = 0;
-    m_gain_isSet = false;
+    lpf_fi_rlog2_interp = 0;
+    m_lpf_fi_rlog2_interp_isSet = false;
+    lpf_fir_gain = 0;
+    m_lpf_fir_gain_isSet = false;
+    log2_interp = 0;
+    m_log2_interp_isSet = false;
+    lpf_bw = 0;
+    m_lpf_bw_isSet = false;
+    att = 0;
+    m_att_isSet = false;
+    antenna_path = 0;
+    m_antenna_path_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -60,18 +66,24 @@ SWGPlutoSdrOutputSettings::init() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
-    log2_hard_interp = 0;
-    m_log2_hard_interp_isSet = false;
-    log2_soft_interp = 0;
-    m_log2_soft_interp_isSet = false;
-    lpf_bw = 0;
-    m_lpf_bw_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     lpf_fir_enable = 0;
     m_lpf_fir_enable_isSet = false;
     lpf_firbw = 0;
     m_lpf_firbw_isSet = false;
-    gain = 0;
-    m_gain_isSet = false;
+    lpf_fi_rlog2_interp = 0;
+    m_lpf_fi_rlog2_interp_isSet = false;
+    lpf_fir_gain = 0;
+    m_lpf_fir_gain_isSet = false;
+    log2_interp = 0;
+    m_log2_interp_isSet = false;
+    lpf_bw = 0;
+    m_lpf_bw_isSet = false;
+    att = 0;
+    m_att_isSet = false;
+    antenna_path = 0;
+    m_antenna_path_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -80,6 +92,9 @@ SWGPlutoSdrOutputSettings::init() {
 
 void
 SWGPlutoSdrOutputSettings::cleanup() {
+
+
+
 
 
 
@@ -107,17 +122,23 @@ SWGPlutoSdrOutputSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&log2_hard_interp, pJson["log2HardInterp"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&log2_soft_interp, pJson["log2SoftInterp"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&lpf_bw, pJson["lpfBW"], "qint32", "");
+    ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lpf_fir_enable, pJson["lpfFIREnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lpf_firbw, pJson["lpfFIRBW"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
+    ::SWGSDRangel::setValue(&lpf_fi_rlog2_interp, pJson["lpfFIRlog2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lpf_fir_gain, pJson["lpfFIRGain"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lpf_bw, pJson["lpfBW"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&att, pJson["att"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&antenna_path, pJson["antennaPath"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
@@ -145,14 +166,8 @@ SWGPlutoSdrOutputSettings::asJsonObject() {
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
-    if(m_log2_hard_interp_isSet){
-        obj->insert("log2HardInterp", QJsonValue(log2_hard_interp));
-    }
-    if(m_log2_soft_interp_isSet){
-        obj->insert("log2SoftInterp", QJsonValue(log2_soft_interp));
-    }
-    if(m_lpf_bw_isSet){
-        obj->insert("lpfBW", QJsonValue(lpf_bw));
+    if(m_l_oppm_tenths_isSet){
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
     }
     if(m_lpf_fir_enable_isSet){
         obj->insert("lpfFIREnable", QJsonValue(lpf_fir_enable));
@@ -160,8 +175,23 @@ SWGPlutoSdrOutputSettings::asJsonObject() {
     if(m_lpf_firbw_isSet){
         obj->insert("lpfFIRBW", QJsonValue(lpf_firbw));
     }
-    if(m_gain_isSet){
-        obj->insert("gain", QJsonValue(gain));
+    if(m_lpf_fi_rlog2_interp_isSet){
+        obj->insert("lpfFIRlog2Interp", QJsonValue(lpf_fi_rlog2_interp));
+    }
+    if(m_lpf_fir_gain_isSet){
+        obj->insert("lpfFIRGain", QJsonValue(lpf_fir_gain));
+    }
+    if(m_log2_interp_isSet){
+        obj->insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_lpf_bw_isSet){
+        obj->insert("lpfBW", QJsonValue(lpf_bw));
+    }
+    if(m_att_isSet){
+        obj->insert("att", QJsonValue(att));
+    }
+    if(m_antenna_path_isSet){
+        obj->insert("antennaPath", QJsonValue(antenna_path));
     }
     if(m_transverter_mode_isSet){
         obj->insert("transverterMode", QJsonValue(transverter_mode));
@@ -194,33 +224,13 @@ SWGPlutoSdrOutputSettings::setDevSampleRate(qint32 dev_sample_rate) {
 }
 
 qint32
-SWGPlutoSdrOutputSettings::getLog2HardInterp() {
-    return log2_hard_interp;
+SWGPlutoSdrOutputSettings::getLOppmTenths() {
+    return l_oppm_tenths;
 }
 void
-SWGPlutoSdrOutputSettings::setLog2HardInterp(qint32 log2_hard_interp) {
-    this->log2_hard_interp = log2_hard_interp;
-    this->m_log2_hard_interp_isSet = true;
-}
-
-qint32
-SWGPlutoSdrOutputSettings::getLog2SoftInterp() {
-    return log2_soft_interp;
-}
-void
-SWGPlutoSdrOutputSettings::setLog2SoftInterp(qint32 log2_soft_interp) {
-    this->log2_soft_interp = log2_soft_interp;
-    this->m_log2_soft_interp_isSet = true;
-}
-
-qint32
-SWGPlutoSdrOutputSettings::getLpfBw() {
-    return lpf_bw;
-}
-void
-SWGPlutoSdrOutputSettings::setLpfBw(qint32 lpf_bw) {
-    this->lpf_bw = lpf_bw;
-    this->m_lpf_bw_isSet = true;
+SWGPlutoSdrOutputSettings::setLOppmTenths(qint32 l_oppm_tenths) {
+    this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
 }
 
 qint32
@@ -244,13 +254,63 @@ SWGPlutoSdrOutputSettings::setLpfFirbw(qint32 lpf_firbw) {
 }
 
 qint32
-SWGPlutoSdrOutputSettings::getGain() {
-    return gain;
+SWGPlutoSdrOutputSettings::getLpfFiRlog2Interp() {
+    return lpf_fi_rlog2_interp;
 }
 void
-SWGPlutoSdrOutputSettings::setGain(qint32 gain) {
-    this->gain = gain;
-    this->m_gain_isSet = true;
+SWGPlutoSdrOutputSettings::setLpfFiRlog2Interp(qint32 lpf_fi_rlog2_interp) {
+    this->lpf_fi_rlog2_interp = lpf_fi_rlog2_interp;
+    this->m_lpf_fi_rlog2_interp_isSet = true;
+}
+
+qint32
+SWGPlutoSdrOutputSettings::getLpfFirGain() {
+    return lpf_fir_gain;
+}
+void
+SWGPlutoSdrOutputSettings::setLpfFirGain(qint32 lpf_fir_gain) {
+    this->lpf_fir_gain = lpf_fir_gain;
+    this->m_lpf_fir_gain_isSet = true;
+}
+
+qint32
+SWGPlutoSdrOutputSettings::getLog2Interp() {
+    return log2_interp;
+}
+void
+SWGPlutoSdrOutputSettings::setLog2Interp(qint32 log2_interp) {
+    this->log2_interp = log2_interp;
+    this->m_log2_interp_isSet = true;
+}
+
+qint32
+SWGPlutoSdrOutputSettings::getLpfBw() {
+    return lpf_bw;
+}
+void
+SWGPlutoSdrOutputSettings::setLpfBw(qint32 lpf_bw) {
+    this->lpf_bw = lpf_bw;
+    this->m_lpf_bw_isSet = true;
+}
+
+qint32
+SWGPlutoSdrOutputSettings::getAtt() {
+    return att;
+}
+void
+SWGPlutoSdrOutputSettings::setAtt(qint32 att) {
+    this->att = att;
+    this->m_att_isSet = true;
+}
+
+qint32
+SWGPlutoSdrOutputSettings::getAntennaPath() {
+    return antenna_path;
+}
+void
+SWGPlutoSdrOutputSettings::setAntennaPath(qint32 antenna_path) {
+    this->antenna_path = antenna_path;
+    this->m_antenna_path_isSet = true;
 }
 
 qint32
@@ -280,12 +340,15 @@ SWGPlutoSdrOutputSettings::isSet(){
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_hard_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_soft_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_bw_isSet){ isObjectUpdated = true; break;}
+        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
         if(m_lpf_fir_enable_isSet){ isObjectUpdated = true; break;}
         if(m_lpf_firbw_isSet){ isObjectUpdated = true; break;}
-        if(m_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_lpf_fi_rlog2_interp_isSet){ isObjectUpdated = true; break;}
+        if(m_lpf_fir_gain_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
+        if(m_lpf_bw_isSet){ isObjectUpdated = true; break;}
+        if(m_att_isSet){ isObjectUpdated = true; break;}
+        if(m_antenna_path_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
     }while(false);

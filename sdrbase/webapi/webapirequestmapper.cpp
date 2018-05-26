@@ -1901,6 +1901,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("plutoSdrOutputSettings") && jsonObject["plutoSdrOutputSettings"].isObject())
+        {
+            QJsonObject plutoSdrOutputSettingsJsonObject = jsonObject["plutoSdrOutputSettings"].toObject();
+            deviceSettingsKeys = plutoSdrOutputSettingsJsonObject.keys();
+            deviceSettings.setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
+            deviceSettings.getPlutoSdrOutputSettings()->fromJsonObject(plutoSdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if (*deviceHwType == "RTLSDR")
     {
         if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
