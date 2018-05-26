@@ -110,8 +110,6 @@ def setupDevice(options):
     if settings is None:
         exit(-1)
 
-    print(options.sample_rate)
-
     # calculate RF analog and FIR optimal bandpass filters bandwidths
     lpFIRBW = options.sample_rate / (1<<options.log2_interp)
     lpfBW = lpFIRBW * 1.2
@@ -129,13 +127,15 @@ def setupDevice(options):
     elif options.device_hwid == "LimeSDR":
         settings["limeSdrOutputSettings"]["antennaPath"] = options.antenna_path
         settings["limeSdrOutputSettings"]["devSampleRate"] = options.sample_rate
-        settings["limeSdrOutputSettings"]["lpfFIRlog2Interp"] = options.log2_interp_hard
-        settings["limeSdrOutputSettings"]["log2Interp"] = options.log2_interp
-        settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq*1000
+        settings["limeSdrOutputSettings"]["log2HardInterp"] = options.log2_interp_hard
+        settings["limeSdrOutputSettings"]["log2SoftInterp"] = options.log2_interp
+        settings["limeSdrOutputSettings"]["centerFrequency"] = options.device_freq*1000  + 500000
+        settings["limeSdrOutputSettings"]["ncoEnable"] = 1
+        settings["limeSdrOutputSettings"]["ncoFrequency"] = -500000        
         settings["limeSdrOutputSettings"]["lpfBW"] = 4050000
         settings["limeSdrOutputSettings"]["lpfFIRBW"] = 100000
         settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1
-        settings["limeSdrOutputSettings"]["gain"] = 17
+        settings["limeSdrOutputSettings"]["gain"] = 30
     elif options.device_hwid == "PlutoSDR":
         settings["plutoSdrOutputSettings"]["antennaPath"] = options.antenna_path
         settings["plutoSdrOutputSettings"]["devSampleRate"] = options.sample_rate
