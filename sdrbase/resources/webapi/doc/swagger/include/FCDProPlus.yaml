@@ -1,0 +1,37 @@
+FCDProPlusSettings:
+  description: FCDProPlus
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    rangeLow:
+      description: Range select (1 if low else 0)
+      type: integer
+    lnaGain:
+      description: LNA select (1 if selected else 0)
+      type: integer
+    mixGain:
+      description: Mixer amplifier select (1 if selected else 0)
+      type: integer
+    biasT:
+      description: Bias tee select (1 if selected else 0)
+      type: integer
+    ifGain:
+      type: integer
+    ifFilterIndex:
+      type: integer
+    rfFilterIndex:
+      type: integer
+    LOppmTenths:
+      type: integer
+    dcBlock:
+      type: integer
+    iqImbalance:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string

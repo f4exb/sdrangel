@@ -26,8 +26,6 @@ FCDProSettings:
       type: integer
     rcFilterIndex:
       type: integer
-    rcFilterIndex:
-      type: integer
     gain2Index:
       type: integer
     gain3Index:

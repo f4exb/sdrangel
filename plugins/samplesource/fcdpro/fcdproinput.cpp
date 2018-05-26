@@ -880,7 +880,7 @@ void FCDProInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getFcdProSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getFcdProSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getFcdProSettings()->setLnaGainIndex(settings.m_lnaGainIndex);
-    response.getFcdProSettings()->setRfFilterIndex(settings.m_lnaGainIndex);
+    response.getFcdProSettings()->setRfFilterIndex(settings.m_rfFilterIndex);
     response.getFcdProSettings()->setLnaEnhanceIndex(settings.m_lnaEnhanceIndex);
     response.getFcdProSettings()->setBandIndex(settings.m_bandIndex);
     response.getFcdProSettings()->setMixerGainIndex(settings.m_mixerGainIndex);

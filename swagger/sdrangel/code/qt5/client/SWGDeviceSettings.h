@@ -26,6 +26,7 @@
 #include "SWGAirspySettings.h"
 #include "SWGBladeRFInputSettings.h"
 #include "SWGBladeRFOutputSettings.h"
+#include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
@@ -74,6 +75,9 @@ public:
     SWGFCDProSettings* getFcdProSettings();
     void setFcdProSettings(SWGFCDProSettings* fcd_pro_settings);
 
+    SWGFCDProPlusSettings* getFcdProPlusSettings();
+    void setFcdProPlusSettings(SWGFCDProPlusSettings* fcd_pro_plus_settings);
+
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
 
@@ -116,6 +120,9 @@ private:
 
     SWGFCDProSettings* fcd_pro_settings;
     bool m_fcd_pro_settings_isSet;
+
+    SWGFCDProPlusSettings* fcd_pro_plus_settings;
+    bool m_fcd_pro_plus_settings_isSet;
 
     SWGFileSourceSettings* file_source_settings;
     bool m_file_source_settings_isSet;

@@ -1782,6 +1782,9 @@ margin-bottom: 20px;
     "fcdProSettings" : {
       "$ref" : "#/definitions/FCDProSettings"
     },
+    "fcdProPlusSettings" : {
+      "$ref" : "#/definitions/FCDProPlusSettings"
+    },
     "fileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
     },
@@ -1821,6 +1824,59 @@ margin-bottom: 20px;
       "example" : "KO"
     }
   }
+};
+            defs.FCDProPlusSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rangeLow" : {
+      "type" : "integer",
+      "description" : "Range select (1 if low else 0)"
+    },
+    "lnaGain" : {
+      "type" : "integer",
+      "description" : "LNA select (1 if selected else 0)"
+    },
+    "mixGain" : {
+      "type" : "integer",
+      "description" : "Mixer amplifier select (1 if selected else 0)"
+    },
+    "biasT" : {
+      "type" : "integer",
+      "description" : "Bias tee select (1 if selected else 0)"
+    },
+    "ifGain" : {
+      "type" : "integer"
+    },
+    "ifFilterIndex" : {
+      "type" : "integer"
+    },
+    "rfFilterIndex" : {
+      "type" : "integer"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqImbalance" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "FCDProPlus"
 };
             defs.FCDProSettings = {
   "properties" : {
@@ -21774,7 +21830,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T10:03:22.430+02:00
+              Generated 2018-05-26T10:50:36.916+02:00
             </div>
           </div>
       </div>

@@ -49,6 +49,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
+#include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
@@ -194,6 +195,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGErrorResponse").compare(type) == 0) {
       return new SWGErrorResponse();
+    }
+    if(QString("SWGFCDProPlusSettings").compare(type) == 0) {
+      return new SWGFCDProPlusSettings();
     }
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       return new SWGFCDProSettings();

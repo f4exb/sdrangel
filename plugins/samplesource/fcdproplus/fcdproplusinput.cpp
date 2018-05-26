@@ -35,7 +35,7 @@
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
 
-MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
+MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCDProPlus, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 
@@ -164,12 +164,12 @@ bool FCDProPlusInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFCD* message = MsgConfigureFCD::create(m_settings, true);
+    MsgConfigureFCDProPlus* message = MsgConfigureFCDProPlus::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFCD* messageToGUI = MsgConfigureFCD::create(m_settings, true);
+        MsgConfigureFCDProPlus* messageToGUI = MsgConfigureFCDProPlus::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -196,22 +196,22 @@ void FCDProPlusInput::setCenterFrequency(qint64 centerFrequency)
     FCDProPlusSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFCD* message = MsgConfigureFCD::create(settings, false);
+    MsgConfigureFCDProPlus* message = MsgConfigureFCDProPlus::create(settings, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFCD* messageToGUI = MsgConfigureFCD::create(settings, false);
+        MsgConfigureFCDProPlus* messageToGUI = MsgConfigureFCDProPlus::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
 
 bool FCDProPlusInput::handleMessage(const Message& message)
 {
-	if(MsgConfigureFCD::match(message))
+	if(MsgConfigureFCDProPlus::match(message))
 	{
 		qDebug() << "FCDProPlusInput::handleMessage: MsgConfigureFCD";
-		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
+		MsgConfigureFCDProPlus& conf = (MsgConfigureFCDProPlus&) message;
 		applySettings(conf.getSettings(), conf.getForce());
 		return true;
 	}
@@ -485,5 +485,101 @@ int FCDProPlusInput::webapiRun(
     return 200;
 }
 
+int FCDProPlusInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+    response.getFcdProPlusSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int FCDProPlusInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    FCDProPlusSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getFcdProPlusSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rangeLow")) {
+        settings.m_rangeLow = response.getFcdProPlusSettings()->getRangeLow() != 0;
+    }
+    if (deviceSettingsKeys.contains("lnaGain")) {
+        settings.m_lnaGain = response.getFcdProPlusSettings()->getLnaGain() != 0;
+    }
+    if (deviceSettingsKeys.contains("mixGain")) {
+        settings.m_mixGain = response.getFcdProPlusSettings()->getMixGain() != 0;
+    }
+    if (deviceSettingsKeys.contains("biasT")) {
+        settings.m_biasT = response.getFcdProPlusSettings()->getBiasT() != 0;
+    }
+    if (deviceSettingsKeys.contains("ifGain")) {
+        settings.m_ifGain = response.getFcdProPlusSettings()->getIfGain();
+    }
+    if (deviceSettingsKeys.contains("ifFilterIndex")) {
+        settings.m_ifFilterIndex = response.getFcdProPlusSettings()->getIfFilterIndex();
+    }
+    if (deviceSettingsKeys.contains("rfFilterIndex")) {
+        settings.m_rfFilterIndex = response.getFcdProPlusSettings()->getRfFilterIndex();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getFcdProPlusSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getFcdProPlusSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqImbalance")) {
+        settings.m_iqImbalance = response.getFcdProPlusSettings()->getIqImbalance() != 0;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getFcdProPlusSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getFcdProPlusSettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getFcdProPlusSettings()->getFileRecordName();
+    }
+
+    MsgConfigureFCDProPlus *msg = MsgConfigureFCDProPlus::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFCDProPlus *msgToGUI = MsgConfigureFCDProPlus::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings)
+{
+    response.getFcdProPlusSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getFcdProPlusSettings()->setRangeLow(settings.m_rangeLow ? 1 : 0);
+    response.getFcdProPlusSettings()->setLnaGain(settings.m_lnaGain ? 1 : 0);
+    response.getFcdProPlusSettings()->setMixGain(settings.m_mixGain ? 1 : 0);
+    response.getFcdProPlusSettings()->setBiasT(settings.m_biasT ? 1 : 0);
+    response.getFcdProPlusSettings()->setIfGain(settings.m_ifGain);
+    response.getFcdProPlusSettings()->setIfFilterIndex(settings.m_ifFilterIndex);
+    response.getFcdProPlusSettings()->setRfFilterIndex(settings.m_rfFilterIndex);
+    response.getFcdProPlusSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getFcdProPlusSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getFcdProPlusSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
+    response.getFcdProPlusSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getFcdProPlusSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    if (response.getFcdProPlusSettings()->getFileRecordName()) {
+        *response.getFcdProPlusSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getFcdProPlusSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
 
 

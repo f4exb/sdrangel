@@ -1755,6 +1755,8 @@ definitions:
         $ref: "/doc/swagger/include/BladeRF.yaml#/BladeRFOutputSettings"
       fcdProSettings:
         $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
+      fcdProPlusSettings:
+        $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
       fileSourceSettings:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
       hackRFInputSettings:
