@@ -311,6 +311,7 @@ void PlutoSDRInputGui::displaySettings()
     ui->loPPMText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 

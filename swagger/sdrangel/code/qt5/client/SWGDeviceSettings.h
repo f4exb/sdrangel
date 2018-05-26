@@ -34,6 +34,8 @@
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGPerseusSettings.h"
+#include "SWGPlutoSdrInputSettings.h"
+#include "SWGPlutoSdrOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include <QString>
 
@@ -97,6 +99,12 @@ public:
     SWGPerseusSettings* getPerseusSettings();
     void setPerseusSettings(SWGPerseusSettings* perseus_settings);
 
+    SWGPlutoSdrInputSettings* getPlutoSdrInputSettings();
+    void setPlutoSdrInputSettings(SWGPlutoSdrInputSettings* pluto_sdr_input_settings);
+
+    SWGPlutoSdrOutputSettings* getPlutoSdrOutputSettings();
+    void setPlutoSdrOutputSettings(SWGPlutoSdrOutputSettings* pluto_sdr_output_settings);
+
     SWGRtlSdrSettings* getRtlSdrSettings();
     void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
 
@@ -145,6 +153,12 @@ private:
 
     SWGPerseusSettings* perseus_settings;
     bool m_perseus_settings_isSet;
+
+    SWGPlutoSdrInputSettings* pluto_sdr_input_settings;
+    bool m_pluto_sdr_input_settings_isSet;
+
+    SWGPlutoSdrOutputSettings* pluto_sdr_output_settings;
+    bool m_pluto_sdr_output_settings_isSet;
 
     SWGRtlSdrSettings* rtl_sdr_settings;
     bool m_rtl_sdr_settings_isSet;

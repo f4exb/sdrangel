@@ -97,6 +97,20 @@ def setupDevice(deviceset_url, options):
         if settings is None:
             exit(-1)
 
+        # calculate RF analog and FIR optimal bandpass filters bandwidths
+        lpFIRBW = options.sample_rate*1000 / (1<<options.log2_decim)
+        if options.fc_pos == 2: # center of passband
+            lpfBW = options.sample_rate*1000 / (1<<options.log2_decim)
+        else: # side of passband
+            if options.log2_decim == 0:
+                lpfBW = options.sample_rate*1000
+            elif options.log2_decim == 1:
+                lpfBW = options.sample_rate*1000
+            elif options.log2_decim == 2:
+                lpfBW = options.sample_rate*500
+            else:
+                lpfBW = options.sample_rate*750
+
         if options.device_hwid == "Airspy":
             settings['airspySettings']['LOppmTenths'] = int(options.lo_ppm * 10) # in tenths of PPM
             settings["airspySettings"]["centerFrequency"] = options.device_freq*1000
@@ -127,10 +141,22 @@ def setupDevice(deviceset_url, options):
             settings["limeSdrInputSettings"]["centerFrequency"] = options.device_freq*1000 + 500000
             settings["limeSdrInputSettings"]["ncoEnable"] = 1
             settings["limeSdrInputSettings"]["ncoFrequency"] = -500000
-            settings["limeSdrInputSettings"]["lpfBW"] = 1450000
-            settings["limeSdrInputSettings"]["lpfFIRBW"] = 100000
+            settings["limeSdrInputSettings"]["lpfBW"] = lpfBW
+            settings["limeSdrInputSettings"]["lpfFIRBW"] = lpFIRBW
             settings["limeSdrInputSettings"]["lpfFIREnable"] = 1
             settings['limeSdrInputSettings']['dcBlock'] = 1
+        elif options.device_hwid == "PlutoSDR":
+            settings["plutoSdrInputSettings"]["antennaPath"] = options.antenna_path
+            settings["plutoSdrInputSettings"]["devSampleRate"] = options.sample_rate*1000
+            settings["plutoSdrInputSettings"]["lpfFIRlog2Decim"] = 1
+            settings["plutoSdrInputSettings"]["log2Decim"] = options.log2_decim
+            settings["plutoSdrInputSettings"]["centerFrequency"] = options.device_freq*1000
+            settings["plutoSdrInputSettings"]["lpfBW"] = lpfBW
+            settings["plutoSdrInputSettings"]["lpfFIRBW"] = lpFIRBW
+            settings["plutoSdrInputSettings"]["lpfFIREnable"] = 1
+            settings['plutoSdrInputSettings']['fcPos'] = options.fc_pos
+            settings['plutoSdrInputSettings']['dcBlock'] = options.fc_pos == 2
+            settings['plutoSdrInputSettings']['iqImbalance'] = options.fc_pos == 2
         elif options.device_hwid == "RTLSDR":
             settings['rtlSdrSettings']['devSampleRate'] = options.sample_rate*1000
             settings['rtlSdrSettings']['centerFrequency'] = options.device_freq*1000

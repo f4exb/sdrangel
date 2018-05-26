@@ -13,7 +13,7 @@
 /*
  * SWGDeviceReport.h
  *
- * Base device report. The specific device report present depeds on deviceHwType
+ * Base device report. The specific device report present depends on deviceHwType
  */
 
 #ifndef SWGDeviceReport_H_
@@ -26,6 +26,8 @@
 #include "SWGAirspyReport.h"
 #include "SWGFileSourceReport.h"
 #include "SWGPerseusReport.h"
+#include "SWGPlutoSdrInputReport.h"
+#include "SWGPlutoSdrOutputReport.h"
 #include "SWGRtlSdrReport.h"
 #include <QString>
 
@@ -65,6 +67,12 @@ public:
     SWGPerseusReport* getPerseusReport();
     void setPerseusReport(SWGPerseusReport* perseus_report);
 
+    SWGPlutoSdrInputReport* getPlutoSdrInputReport();
+    void setPlutoSdrInputReport(SWGPlutoSdrInputReport* pluto_sdr_input_report);
+
+    SWGPlutoSdrOutputReport* getPlutoSdrOutputReport();
+    void setPlutoSdrOutputReport(SWGPlutoSdrOutputReport* pluto_sdr_output_report);
+
     SWGRtlSdrReport* getRtlSdrReport();
     void setRtlSdrReport(SWGRtlSdrReport* rtl_sdr_report);
 
@@ -89,6 +97,12 @@ private:
 
     SWGPerseusReport* perseus_report;
     bool m_perseus_report_isSet;
+
+    SWGPlutoSdrInputReport* pluto_sdr_input_report;
+    bool m_pluto_sdr_input_report_isSet;
+
+    SWGPlutoSdrOutputReport* pluto_sdr_output_report;
+    bool m_pluto_sdr_output_report_isSet;
 
     SWGRtlSdrReport* rtl_sdr_report;
     bool m_rtl_sdr_report_isSet;

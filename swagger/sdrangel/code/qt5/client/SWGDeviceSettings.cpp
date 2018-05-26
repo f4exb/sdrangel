@@ -56,6 +56,10 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_lime_sdr_output_settings_isSet = false;
     perseus_settings = nullptr;
     m_perseus_settings_isSet = false;
+    pluto_sdr_input_settings = nullptr;
+    m_pluto_sdr_input_settings_isSet = false;
+    pluto_sdr_output_settings = nullptr;
+    m_pluto_sdr_output_settings_isSet = false;
     rtl_sdr_settings = nullptr;
     m_rtl_sdr_settings_isSet = false;
 }
@@ -94,6 +98,10 @@ SWGDeviceSettings::init() {
     m_lime_sdr_output_settings_isSet = false;
     perseus_settings = new SWGPerseusSettings();
     m_perseus_settings_isSet = false;
+    pluto_sdr_input_settings = new SWGPlutoSdrInputSettings();
+    m_pluto_sdr_input_settings_isSet = false;
+    pluto_sdr_output_settings = new SWGPlutoSdrOutputSettings();
+    m_pluto_sdr_output_settings_isSet = false;
     rtl_sdr_settings = new SWGRtlSdrSettings();
     m_rtl_sdr_settings_isSet = false;
 }
@@ -140,6 +148,12 @@ SWGDeviceSettings::cleanup() {
     if(perseus_settings != nullptr) { 
         delete perseus_settings;
     }
+    if(pluto_sdr_input_settings != nullptr) { 
+        delete pluto_sdr_input_settings;
+    }
+    if(pluto_sdr_output_settings != nullptr) { 
+        delete pluto_sdr_output_settings;
+    }
     if(rtl_sdr_settings != nullptr) { 
         delete rtl_sdr_settings;
     }
@@ -183,6 +197,10 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
     
     ::SWGSDRangel::setValue(&perseus_settings, pJson["perseusSettings"], "SWGPerseusSettings", "SWGPerseusSettings");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_input_settings, pJson["plutoSdrInputSettings"], "SWGPlutoSdrInputSettings", "SWGPlutoSdrInputSettings");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_output_settings, pJson["plutoSdrOutputSettings"], "SWGPlutoSdrOutputSettings", "SWGPlutoSdrOutputSettings");
     
     ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
     
@@ -243,6 +261,12 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((perseus_settings != nullptr) && (perseus_settings->isSet())){
         toJsonValue(QString("perseusSettings"), perseus_settings, obj, QString("SWGPerseusSettings"));
+    }
+    if((pluto_sdr_input_settings != nullptr) && (pluto_sdr_input_settings->isSet())){
+        toJsonValue(QString("plutoSdrInputSettings"), pluto_sdr_input_settings, obj, QString("SWGPlutoSdrInputSettings"));
+    }
+    if((pluto_sdr_output_settings != nullptr) && (pluto_sdr_output_settings->isSet())){
+        toJsonValue(QString("plutoSdrOutputSettings"), pluto_sdr_output_settings, obj, QString("SWGPlutoSdrOutputSettings"));
     }
     if((rtl_sdr_settings != nullptr) && (rtl_sdr_settings->isSet())){
         toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
@@ -391,6 +415,26 @@ SWGDeviceSettings::setPerseusSettings(SWGPerseusSettings* perseus_settings) {
     this->m_perseus_settings_isSet = true;
 }
 
+SWGPlutoSdrInputSettings*
+SWGDeviceSettings::getPlutoSdrInputSettings() {
+    return pluto_sdr_input_settings;
+}
+void
+SWGDeviceSettings::setPlutoSdrInputSettings(SWGPlutoSdrInputSettings* pluto_sdr_input_settings) {
+    this->pluto_sdr_input_settings = pluto_sdr_input_settings;
+    this->m_pluto_sdr_input_settings_isSet = true;
+}
+
+SWGPlutoSdrOutputSettings*
+SWGDeviceSettings::getPlutoSdrOutputSettings() {
+    return pluto_sdr_output_settings;
+}
+void
+SWGDeviceSettings::setPlutoSdrOutputSettings(SWGPlutoSdrOutputSettings* pluto_sdr_output_settings) {
+    this->pluto_sdr_output_settings = pluto_sdr_output_settings;
+    this->m_pluto_sdr_output_settings_isSet = true;
+}
+
 SWGRtlSdrSettings*
 SWGDeviceSettings::getRtlSdrSettings() {
     return rtl_sdr_settings;
@@ -420,6 +464,8 @@ SWGDeviceSettings::isSet(){
         if(lime_sdr_input_settings != nullptr && lime_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_settings != nullptr && lime_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(perseus_settings != nullptr && perseus_settings->isSet()){ isObjectUpdated = true; break;}
+        if(pluto_sdr_input_settings != nullptr && pluto_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
+        if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

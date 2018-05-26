@@ -40,6 +40,10 @@ SWGDeviceReport::SWGDeviceReport() {
     m_file_source_report_isSet = false;
     perseus_report = nullptr;
     m_perseus_report_isSet = false;
+    pluto_sdr_input_report = nullptr;
+    m_pluto_sdr_input_report_isSet = false;
+    pluto_sdr_output_report = nullptr;
+    m_pluto_sdr_output_report_isSet = false;
     rtl_sdr_report = nullptr;
     m_rtl_sdr_report_isSet = false;
 }
@@ -62,6 +66,10 @@ SWGDeviceReport::init() {
     m_file_source_report_isSet = false;
     perseus_report = new SWGPerseusReport();
     m_perseus_report_isSet = false;
+    pluto_sdr_input_report = new SWGPlutoSdrInputReport();
+    m_pluto_sdr_input_report_isSet = false;
+    pluto_sdr_output_report = new SWGPlutoSdrOutputReport();
+    m_pluto_sdr_output_report_isSet = false;
     rtl_sdr_report = new SWGRtlSdrReport();
     m_rtl_sdr_report_isSet = false;
 }
@@ -83,6 +91,12 @@ SWGDeviceReport::cleanup() {
     }
     if(perseus_report != nullptr) { 
         delete perseus_report;
+    }
+    if(pluto_sdr_input_report != nullptr) { 
+        delete pluto_sdr_input_report;
+    }
+    if(pluto_sdr_output_report != nullptr) { 
+        delete pluto_sdr_output_report;
     }
     if(rtl_sdr_report != nullptr) { 
         delete rtl_sdr_report;
@@ -111,6 +125,10 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_source_report, pJson["fileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
     
     ::SWGSDRangel::setValue(&perseus_report, pJson["perseusReport"], "SWGPerseusReport", "SWGPerseusReport");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_input_report, pJson["plutoSdrInputReport"], "SWGPlutoSdrInputReport", "SWGPlutoSdrInputReport");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_output_report, pJson["plutoSdrOutputReport"], "SWGPlutoSdrOutputReport", "SWGPlutoSdrOutputReport");
     
     ::SWGSDRangel::setValue(&rtl_sdr_report, pJson["rtlSdrReport"], "SWGRtlSdrReport", "SWGRtlSdrReport");
     
@@ -147,6 +165,12 @@ SWGDeviceReport::asJsonObject() {
     }
     if((perseus_report != nullptr) && (perseus_report->isSet())){
         toJsonValue(QString("perseusReport"), perseus_report, obj, QString("SWGPerseusReport"));
+    }
+    if((pluto_sdr_input_report != nullptr) && (pluto_sdr_input_report->isSet())){
+        toJsonValue(QString("plutoSdrInputReport"), pluto_sdr_input_report, obj, QString("SWGPlutoSdrInputReport"));
+    }
+    if((pluto_sdr_output_report != nullptr) && (pluto_sdr_output_report->isSet())){
+        toJsonValue(QString("plutoSdrOutputReport"), pluto_sdr_output_report, obj, QString("SWGPlutoSdrOutputReport"));
     }
     if((rtl_sdr_report != nullptr) && (rtl_sdr_report->isSet())){
         toJsonValue(QString("rtlSdrReport"), rtl_sdr_report, obj, QString("SWGRtlSdrReport"));
@@ -215,6 +239,26 @@ SWGDeviceReport::setPerseusReport(SWGPerseusReport* perseus_report) {
     this->m_perseus_report_isSet = true;
 }
 
+SWGPlutoSdrInputReport*
+SWGDeviceReport::getPlutoSdrInputReport() {
+    return pluto_sdr_input_report;
+}
+void
+SWGDeviceReport::setPlutoSdrInputReport(SWGPlutoSdrInputReport* pluto_sdr_input_report) {
+    this->pluto_sdr_input_report = pluto_sdr_input_report;
+    this->m_pluto_sdr_input_report_isSet = true;
+}
+
+SWGPlutoSdrOutputReport*
+SWGDeviceReport::getPlutoSdrOutputReport() {
+    return pluto_sdr_output_report;
+}
+void
+SWGDeviceReport::setPlutoSdrOutputReport(SWGPlutoSdrOutputReport* pluto_sdr_output_report) {
+    this->pluto_sdr_output_report = pluto_sdr_output_report;
+    this->m_pluto_sdr_output_report_isSet = true;
+}
+
 SWGRtlSdrReport*
 SWGDeviceReport::getRtlSdrReport() {
     return rtl_sdr_report;
@@ -236,6 +280,8 @@ SWGDeviceReport::isSet(){
         if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
         if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
         if(perseus_report != nullptr && perseus_report->isSet()){ isObjectUpdated = true; break;}
+        if(pluto_sdr_input_report != nullptr && pluto_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
+        if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_report != nullptr && rtl_sdr_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

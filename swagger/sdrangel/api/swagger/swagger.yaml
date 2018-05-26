@@ -1769,11 +1769,15 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
       perseusSettings:
         $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
+      plutoSdrInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+      plutoSdrOutputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
       rtlSdrSettings:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
         
   DeviceReport:
-    description: Base device report. The specific device report present depeds on deviceHwType
+    description: Base device report. The specific device report present depends on deviceHwType
     discriminator: deviceHwType
     required:
       - deviceHwType
@@ -1793,6 +1797,10 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
       perseusReport:
         $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
+      plutoSdrInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+      plutoSdrOutputReport:
+        $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
       rtlSdrReport:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
         

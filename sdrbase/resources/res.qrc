@@ -19,6 +19,7 @@
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
+        <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>

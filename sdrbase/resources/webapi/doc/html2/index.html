@@ -1724,11 +1724,17 @@ margin-bottom: 20px;
     "perseusReport" : {
       "$ref" : "#/definitions/PerseusReport"
     },
+    "plutoSdrInputReport" : {
+      "$ref" : "#/definitions/PlutoSdrInputReport"
+    },
+    "plutoSdrOutputReport" : {
+      "$ref" : "#/definitions/PlutoSdrOutputReport"
+    },
     "rtlSdrReport" : {
       "$ref" : "#/definitions/RtlSdrReport"
     }
   },
-  "description" : "Base device report. The specific device report present depeds on deviceHwType"
+  "description" : "Base device report. The specific device report present depends on deviceHwType"
 };
             defs.DeviceSet = {
   "required" : [ "channelcount", "samplingDevice" ],
@@ -1817,6 +1823,12 @@ margin-bottom: 20px;
     },
     "perseusSettings" : {
       "$ref" : "#/definitions/PerseusSettings"
+    },
+    "plutoSdrInputSettings" : {
+      "$ref" : "#/definitions/PlutoSdrInputSettings"
+    },
+    "plutoSdrOutputSettings" : {
+      "$ref" : "#/definitions/PlutoSdrOutputSettings"
     },
     "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
@@ -2533,6 +2545,144 @@ margin-bottom: 20px;
     }
   },
   "description" : "Perseus"
+};
+            defs.PlutoSdrInputReport = {
+  "properties" : {
+    "adcRate" : {
+      "type" : "integer"
+    },
+    "rssi" : {
+      "type" : "string"
+    },
+    "gainDB" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "lpfFIREnable" : {
+      "type" : "integer",
+      "description" : "Low pass FIR filter enable (1 if enabled else 0)"
+    },
+    "lpfFIRBW" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter bandwidth (Hz)"
+    },
+    "lpfFIRlog2Decim" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)"
+    },
+    "lpfFIRGain" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter gain (dB)"
+    },
+    "fcPos" : {
+      "type" : "integer",
+      "description" : "0=Infra 1=Supra 2=Center"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer",
+      "description" : "Analog lowpass filter bandwidth (Hz)"
+    },
+    "gain" : {
+      "type" : "integer",
+      "description" : "Hardware gain"
+    },
+    "antennaPath" : {
+      "type" : "integer"
+    },
+    "gainMode" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrOutputReport = {
+  "properties" : {
+    "dacRate" : {
+      "type" : "integer"
+    },
+    "rssi" : {
+      "type" : "string"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2HardInterp" : {
+      "type" : "integer"
+    },
+    "log2SoftInterp" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer"
+    },
+    "lpfFIREnable" : {
+      "type" : "integer"
+    },
+    "lpfFIRBW" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    }
+  },
+  "description" : "PlutoSDR"
 };
             defs.PresetExport = {
   "properties" : {
@@ -22039,7 +22189,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T14:52:58.621+02:00
+              Generated 2018-05-26T16:46:01.765+02:00
             </div>
           </div>
       </div>

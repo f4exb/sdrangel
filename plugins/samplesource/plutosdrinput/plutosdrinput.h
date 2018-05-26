@@ -121,6 +121,20 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     uint32_t getADCSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
     uint32_t getFIRSampleRate() const { return m_deviceSampleRates.m_hb1Rate; }
     void getRSSI(std::string& rssiStr);
@@ -145,6 +159,8 @@ public:
     void suspendBuddies();
     void resumeBuddies();
     bool applySettings(const PlutoSDRInputSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDRInputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 

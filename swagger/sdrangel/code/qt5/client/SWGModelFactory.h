@@ -68,6 +68,10 @@
 #include "SWGNFMModSettings.h"
 #include "SWGPerseusReport.h"
 #include "SWGPerseusSettings.h"
+#include "SWGPlutoSdrInputReport.h"
+#include "SWGPlutoSdrInputSettings.h"
+#include "SWGPlutoSdrOutputReport.h"
+#include "SWGPlutoSdrOutputSettings.h"
 #include "SWGPresetExport.h"
 #include "SWGPresetGroup.h"
 #include "SWGPresetIdentifier.h"
@@ -259,6 +263,18 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPerseusSettings").compare(type) == 0) {
       return new SWGPerseusSettings();
+    }
+    if(QString("SWGPlutoSdrInputReport").compare(type) == 0) {
+      return new SWGPlutoSdrInputReport();
+    }
+    if(QString("SWGPlutoSdrInputSettings").compare(type) == 0) {
+      return new SWGPlutoSdrInputSettings();
+    }
+    if(QString("SWGPlutoSdrOutputReport").compare(type) == 0) {
+      return new SWGPlutoSdrOutputReport();
+    }
+    if(QString("SWGPlutoSdrOutputSettings").compare(type) == 0) {
+      return new SWGPlutoSdrOutputSettings();
     }
     if(QString("SWGPresetExport").compare(type) == 0) {
       return new SWGPresetExport();
