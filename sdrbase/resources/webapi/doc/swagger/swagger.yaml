@@ -1793,6 +1793,8 @@ definitions:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
       perseusReport:
         $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
+      rtlSdrReport:
+        $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
         
   ChannelSettings:
     description: Base channel settings. The specific channel settings present depends on channelType.

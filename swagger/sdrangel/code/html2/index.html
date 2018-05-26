@@ -1717,6 +1717,9 @@ margin-bottom: 20px;
     },
     "perseusReport" : {
       "$ref" : "#/definitions/PerseusReport"
+    },
+    "rtlSdrReport" : {
+      "$ref" : "#/definitions/RtlSdrReport"
     }
   },
   "description" : "Base device report. The specific device report present depeds on deviceHwType"
@@ -2712,6 +2715,25 @@ margin-bottom: 20px;
     "frequency" : {
       "type" : "number",
       "format" : "float"
+    }
+  }
+};
+            defs.RtlSdrReport = {
+  "properties" : {
+    "gains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RtlSdrReport_gains"
+      }
+    }
+  },
+  "description" : "RTLSDR"
+};
+            defs.RtlSdrReport_gains = {
+  "properties" : {
+    "gain" : {
+      "type" : "integer",
+      "description" : "gain in centi Bels"
     }
   }
 };
@@ -21922,7 +21944,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T12:32:33.813+02:00
+              Generated 2018-05-26T14:09:06.509+02:00
             </div>
           </div>
       </div>

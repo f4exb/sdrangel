@@ -22,6 +22,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGRtlSdrReport.h"
 
 #include "rtlsdrinput.h"
 #include "device/devicesourceapi.h"
@@ -653,3 +655,26 @@ int RTLSDRInput::webapiRun(
 
     return 200;
 }
+
+int RTLSDRInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setRtlSdrReport(new SWGSDRangel::SWGRtlSdrReport());
+    response.getRtlSdrReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getRtlSdrReport()->setGains(new QList<SWGSDRangel::SWGRtlSdrReport_gains*>);
+
+    for (std::vector<int>::const_iterator it = getGains().begin(); it != getGains().end(); ++it)
+    {
+        response.getRtlSdrReport()->getGains()->append(new SWGSDRangel::SWGRtlSdrReport_gains);
+        response.getRtlSdrReport()->getGains()->back()->setGain(*it);
+    }
+}
+
+

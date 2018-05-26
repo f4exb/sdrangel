@@ -33,4 +33,14 @@ RtlSdrSettings:
       type: integer
     fileRecordName:
       type: string
-    
+
+RtlSdrReport:
+  description: RTLSDR
+  properties:
+    gains:
+      type: array
+      items:
+        properties:
+          gain:
+            description: gain in centi Bels
+            type: integer

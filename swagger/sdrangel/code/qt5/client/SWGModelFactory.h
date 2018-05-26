@@ -77,6 +77,8 @@
 #include "SWGPresets.h"
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
+#include "SWGRtlSdrReport.h"
+#include "SWGRtlSdrReport_gains.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSSBModReport.h"
 #include "SWGSSBModSettings.h"
@@ -282,6 +284,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRDSReport_altFrequencies").compare(type) == 0) {
       return new SWGRDSReport_altFrequencies();
+    }
+    if(QString("SWGRtlSdrReport").compare(type) == 0) {
+      return new SWGRtlSdrReport();
+    }
+    if(QString("SWGRtlSdrReport_gains").compare(type) == 0) {
+      return new SWGRtlSdrReport_gains();
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();

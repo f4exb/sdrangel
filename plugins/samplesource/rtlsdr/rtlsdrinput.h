@@ -121,6 +121,10 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -157,6 +161,7 @@ private:
 	void closeDevice();
 	bool applySettings(const RTLSDRSettings& settings, bool force);
 	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif // INCLUDE_RTLSDRINPUT_H

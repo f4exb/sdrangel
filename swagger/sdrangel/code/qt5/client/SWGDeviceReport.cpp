@@ -40,6 +40,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_file_source_report_isSet = false;
     perseus_report = nullptr;
     m_perseus_report_isSet = false;
+    rtl_sdr_report = nullptr;
+    m_rtl_sdr_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -60,6 +62,8 @@ SWGDeviceReport::init() {
     m_file_source_report_isSet = false;
     perseus_report = new SWGPerseusReport();
     m_perseus_report_isSet = false;
+    rtl_sdr_report = new SWGRtlSdrReport();
+    m_rtl_sdr_report_isSet = false;
 }
 
 void
@@ -79,6 +83,9 @@ SWGDeviceReport::cleanup() {
     }
     if(perseus_report != nullptr) { 
         delete perseus_report;
+    }
+    if(rtl_sdr_report != nullptr) { 
+        delete rtl_sdr_report;
     }
 }
 
@@ -104,6 +111,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_source_report, pJson["fileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
     
     ::SWGSDRangel::setValue(&perseus_report, pJson["perseusReport"], "SWGPerseusReport", "SWGPerseusReport");
+    
+    ::SWGSDRangel::setValue(&rtl_sdr_report, pJson["rtlSdrReport"], "SWGRtlSdrReport", "SWGRtlSdrReport");
     
 }
 
@@ -138,6 +147,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((perseus_report != nullptr) && (perseus_report->isSet())){
         toJsonValue(QString("perseusReport"), perseus_report, obj, QString("SWGPerseusReport"));
+    }
+    if((rtl_sdr_report != nullptr) && (rtl_sdr_report->isSet())){
+        toJsonValue(QString("rtlSdrReport"), rtl_sdr_report, obj, QString("SWGRtlSdrReport"));
     }
 
     return obj;
@@ -203,6 +215,16 @@ SWGDeviceReport::setPerseusReport(SWGPerseusReport* perseus_report) {
     this->m_perseus_report_isSet = true;
 }
 
+SWGRtlSdrReport*
+SWGDeviceReport::getRtlSdrReport() {
+    return rtl_sdr_report;
+}
+void
+SWGDeviceReport::setRtlSdrReport(SWGRtlSdrReport* rtl_sdr_report) {
+    this->rtl_sdr_report = rtl_sdr_report;
+    this->m_rtl_sdr_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -214,6 +236,7 @@ SWGDeviceReport::isSet(){
         if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
         if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
         if(perseus_report != nullptr && perseus_report->isSet()){ isObjectUpdated = true; break;}
+        if(rtl_sdr_report != nullptr && rtl_sdr_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
