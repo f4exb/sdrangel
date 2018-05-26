@@ -19,4 +19,16 @@ AirspyHFSettings:
       type: integer
     fileRecordName:
       type: string
-    
+       
+AirspyHFReport:
+  description: AirspyHF
+  properties:
+    sampleRates:
+      type: array
+      items:
+        properties:
+          sampleRate:
+            description: sample rate in S/s
+            type: integer
+  
+ 

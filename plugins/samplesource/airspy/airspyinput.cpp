@@ -742,7 +742,6 @@ void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
 
 void AirspyInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.setAirspyReport(new SWGSDRangel::SWGAirspyReport());
     response.getAirspyReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
 
     for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)

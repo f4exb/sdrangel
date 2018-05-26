@@ -1781,6 +1781,8 @@ definitions:
         type: integer
       airspyReport:
         $ref: "http://localhost:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
+      airspyHFReport:
+        $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
         
   ChannelSettings:
     description: Base channel settings. The specific channel settings present depends on channelType.

@@ -11,69 +11,50 @@
  */
 
 /*
- * SWGDeviceReport.h
+ * SWGAirspyHFReport.h
  *
- * Base device report. The specific device report present depeds on deviceHwType
+ * AirspyHF
  */
 
-#ifndef SWGDeviceReport_H_
-#define SWGDeviceReport_H_
+#ifndef SWGAirspyHFReport_H_
+#define SWGAirspyHFReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAirspyHFReport.h"
-#include "SWGAirspyReport.h"
-#include <QString>
+#include "SWGAirspyReport_sampleRates.h"
+#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceReport: public SWGObject {
+class SWG_API SWGAirspyHFReport: public SWGObject {
 public:
-    SWGDeviceReport();
-    SWGDeviceReport(QString* json);
-    virtual ~SWGDeviceReport();
+    SWGAirspyHFReport();
+    SWGAirspyHFReport(QString* json);
+    virtual ~SWGAirspyHFReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceReport* fromJson(QString &jsonString) override;
+    virtual SWGAirspyHFReport* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
-
-    qint32 getTx();
-    void setTx(qint32 tx);
-
-    SWGAirspyReport* getAirspyReport();
-    void setAirspyReport(SWGAirspyReport* airspy_report);
-
-    SWGAirspyHFReport* getAirspyHfReport();
-    void setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report);
+    QList<SWGAirspyReport_sampleRates*>* getSampleRates();
+    void setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
-
-    qint32 tx;
-    bool m_tx_isSet;
-
-    SWGAirspyReport* airspy_report;
-    bool m_airspy_report_isSet;
-
-    SWGAirspyHFReport* airspy_hf_report;
-    bool m_airspy_hf_report_isSet;
+    QList<SWGAirspyReport_sampleRates*>* sample_rates;
+    bool m_sample_rates_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceReport_H_ */
+#endif /* SWGAirspyHFReport_H_ */

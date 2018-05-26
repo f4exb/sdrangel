@@ -20,6 +20,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGAirspyHFReport.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
@@ -559,6 +561,27 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     } else {
         response.getAirspyHfSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+}
+
+void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getAirspyHfReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
+
+    for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
+    {
+        response.getAirspyHfReport()->getSampleRates()->append(new SWGSDRangel::SWGAirspyReport_sampleRates);
+        response.getAirspyHfReport()->getSampleRates()->back()->setSampleRate(*it);
+    }
+}
+
+int AirspyHFInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspyHfReport(new SWGSDRangel::SWGAirspyHFReport());
+    response.getAirspyHfReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
 }
 
 int AirspyHFInput::webapiRunGet(

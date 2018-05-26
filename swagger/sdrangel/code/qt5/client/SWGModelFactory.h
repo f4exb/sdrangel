@@ -20,6 +20,7 @@
 #include "SWGAMModSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
+#include "SWGAirspyHFReport.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspyReport.h"
 #include "SWGAirspyReport_sampleRates.h"
@@ -105,6 +106,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGATVModSettings").compare(type) == 0) {
       return new SWGATVModSettings();
+    }
+    if(QString("SWGAirspyHFReport").compare(type) == 0) {
+      return new SWGAirspyHFReport();
     }
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
       return new SWGAirspyHFSettings();

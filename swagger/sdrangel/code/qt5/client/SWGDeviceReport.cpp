@@ -34,6 +34,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_tx_isSet = false;
     airspy_report = nullptr;
     m_airspy_report_isSet = false;
+    airspy_hf_report = nullptr;
+    m_airspy_hf_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -48,6 +50,8 @@ SWGDeviceReport::init() {
     m_tx_isSet = false;
     airspy_report = new SWGAirspyReport();
     m_airspy_report_isSet = false;
+    airspy_hf_report = new SWGAirspyHFReport();
+    m_airspy_hf_report_isSet = false;
 }
 
 void
@@ -58,6 +62,9 @@ SWGDeviceReport::cleanup() {
 
     if(airspy_report != nullptr) { 
         delete airspy_report;
+    }
+    if(airspy_hf_report != nullptr) { 
+        delete airspy_hf_report;
     }
 }
 
@@ -77,6 +84,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
     
     ::SWGSDRangel::setValue(&airspy_report, pJson["airspyReport"], "SWGAirspyReport", "SWGAirspyReport");
+    
+    ::SWGSDRangel::setValue(&airspy_hf_report, pJson["airspyHFReport"], "SWGAirspyHFReport", "SWGAirspyHFReport");
     
 }
 
@@ -102,6 +111,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((airspy_report != nullptr) && (airspy_report->isSet())){
         toJsonValue(QString("airspyReport"), airspy_report, obj, QString("SWGAirspyReport"));
+    }
+    if((airspy_hf_report != nullptr) && (airspy_hf_report->isSet())){
+        toJsonValue(QString("airspyHFReport"), airspy_hf_report, obj, QString("SWGAirspyHFReport"));
     }
 
     return obj;
@@ -137,6 +149,16 @@ SWGDeviceReport::setAirspyReport(SWGAirspyReport* airspy_report) {
     this->m_airspy_report_isSet = true;
 }
 
+SWGAirspyHFReport*
+SWGDeviceReport::getAirspyHfReport() {
+    return airspy_hf_report;
+}
+void
+SWGDeviceReport::setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report) {
+    this->airspy_hf_report = airspy_hf_report;
+    this->m_airspy_hf_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -145,6 +167,7 @@ SWGDeviceReport::isSet(){
         if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
         if(m_tx_isSet){ isObjectUpdated = true; break;}
         if(airspy_report != nullptr && airspy_report->isSet()){ isObjectUpdated = true; break;}
+        if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

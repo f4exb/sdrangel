@@ -912,6 +912,17 @@ margin-bottom: 20px;
   },
   "description" : "ATVMod"
 };
+            defs.AirspyHFReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/AirspyReport_sampleRates"
+      }
+    }
+  },
+  "description" : "AirspyHF"
+};
             defs.AirspyHFSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1697,6 +1708,9 @@ margin-bottom: 20px;
     },
     "airspyReport" : {
       "$ref" : "#/definitions/AirspyReport"
+    },
+    "airspyHFReport" : {
+      "$ref" : "#/definitions/AirspyHFReport"
     }
   },
   "description" : "Base device report. The specific device report present depeds on deviceHwType"
@@ -21681,7 +21695,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T00:44:20.967+02:00
+              Generated 2018-05-26T02:22:55.108+02:00
             </div>
           </div>
       </div>
