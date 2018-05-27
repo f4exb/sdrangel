@@ -1779,6 +1779,8 @@ definitions:
         $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
       sdrPlaySettings:
         $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      testSourceSettings:
+        $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
         
 
   DeviceReport:

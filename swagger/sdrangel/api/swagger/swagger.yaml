@@ -1779,6 +1779,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
       sdrPlaySettings:
         $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      testSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
         
 
   DeviceReport:

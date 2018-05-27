@@ -1850,6 +1850,9 @@ margin-bottom: 20px;
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "testSourceSettings" : {
+      "$ref" : "#/definitions/TestSourceSettings"
     }
   },
   "description" : "Base device settings. The specific device settings present depends on deviceHwType."
@@ -3492,6 +3495,67 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.TestSourceSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "sampleSizeIndex" : {
+      "type" : "integer"
+    },
+    "amplitudeBits" : {
+      "type" : "integer"
+    },
+    "autoCorrOptions" : {
+      "type" : "integer"
+    },
+    "modulation" : {
+      "type" : "integer"
+    },
+    "modulationTone" : {
+      "type" : "integer"
+    },
+    "amModulation" : {
+      "type" : "integer"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "dcFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "iFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "qFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "phaseImbalance" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "TestSource"
 };
             defs.UDPSinkReport = {
   "properties" : {
@@ -22494,7 +22558,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-27T13:20:33.079+02:00
+              Generated 2018-05-27T20:33:10.219+02:00
             </div>
           </div>
       </div>

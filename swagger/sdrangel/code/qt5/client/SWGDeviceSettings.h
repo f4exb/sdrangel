@@ -39,6 +39,7 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSourceSettings.h"
+#include "SWGTestSourceSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -116,6 +117,9 @@ public:
     SWGSDRPlaySettings* getSdrPlaySettings();
     void setSdrPlaySettings(SWGSDRPlaySettings* sdr_play_settings);
 
+    SWGTestSourceSettings* getTestSourceSettings();
+    void setTestSourceSettings(SWGTestSourceSettings* test_source_settings);
+
 
     virtual bool isSet() override;
 
@@ -176,6 +180,9 @@ private:
 
     SWGSDRPlaySettings* sdr_play_settings;
     bool m_sdr_play_settings_isSet;
+
+    SWGTestSourceSettings* test_source_settings;
+    bool m_test_source_settings_isSet;
 
 };
 

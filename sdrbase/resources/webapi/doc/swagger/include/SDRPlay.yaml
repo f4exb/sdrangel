@@ -33,8 +33,6 @@ SDRPlaySettings:
       type: integer
     basebandGain:
       type: integer
-    iqCorrection:
-      type: integer
     fileRecordName:
       type: string
 

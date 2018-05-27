@@ -403,3 +403,121 @@ int TestSourceInput::webapiRun(
 
     return 200;
 }
+
+int TestSourceInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+    response.getTestSourceSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int TestSourceInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    TestSourceSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getTestSourceSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("frequencyShift")) {
+        settings.m_frequencyShift = response.getTestSourceSettings()->getFrequencyShift();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getTestSourceSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getTestSourceSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        int fcPos = response.getTestSourceSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (TestSourceSettings::fcPos_t) fcPos;
+    }
+    if (deviceSettingsKeys.contains("sampleSizeIndex")) {
+        int sampleSizeIndex = response.getTestSourceSettings()->getSampleSizeIndex();
+        sampleSizeIndex = sampleSizeIndex < 0 ? 0 : sampleSizeIndex > 1 ? 2 : sampleSizeIndex;
+        settings.m_sampleSizeIndex = sampleSizeIndex;
+    }
+    if (deviceSettingsKeys.contains("amplitudeBits")) {
+        settings.m_amplitudeBits = response.getTestSourceSettings()->getAmplitudeBits();
+    }
+    if (deviceSettingsKeys.contains("autoCorrOptions")) {
+        int autoCorrOptions = response.getTestSourceSettings()->getAutoCorrOptions();
+        autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestSourceSettings::AutoCorrLast ? TestSourceSettings::AutoCorrLast-1 : autoCorrOptions;
+        settings.m_sampleSizeIndex = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
+    }
+    if (deviceSettingsKeys.contains("modulation")) {
+        int modulation = response.getTestSourceSettings()->getModulation();
+        modulation = modulation < 0 ? 0 : modulation >= TestSourceSettings::ModulationLast ? TestSourceSettings::ModulationLast-1 : modulation;
+        settings.m_modulation = (TestSourceSettings::Modulation) modulation;
+    }
+    if (deviceSettingsKeys.contains("modulationTone")) {
+        settings.m_modulationTone = response.getTestSourceSettings()->getModulationTone();
+    }
+    if (deviceSettingsKeys.contains("amModulation")) {
+        settings.m_amModulation = response.getTestSourceSettings()->getAmModulation();
+    };
+    if (deviceSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getTestSourceSettings()->getFmDeviation();
+    };
+    if (deviceSettingsKeys.contains("dcFactor")) {
+        settings.m_dcFactor = response.getTestSourceSettings()->getDcFactor();
+    };
+    if (deviceSettingsKeys.contains("iFactor")) {
+        settings.m_iFactor = response.getTestSourceSettings()->getIFactor();
+    };
+    if (deviceSettingsKeys.contains("qFactor")) {
+        settings.m_qFactor = response.getTestSourceSettings()->getQFactor();
+    };
+    if (deviceSettingsKeys.contains("phaseImbalance")) {
+        settings.m_phaseImbalance = response.getTestSourceSettings()->getPhaseImbalance();
+    };
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getTestSourceSettings()->getFileRecordName();
+    }
+
+    MsgConfigureTestSource *msg = MsgConfigureTestSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureTestSource *msgToGUI = MsgConfigureTestSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestSourceSettings& settings)
+{
+    response.getTestSourceSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getTestSourceSettings()->setFrequencyShift(settings.m_frequencyShift);
+    response.getTestSourceSettings()->setSampleRate(settings.m_sampleRate);
+    response.getTestSourceSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getTestSourceSettings()->setFcPos((int) settings.m_fcPos);
+    response.getTestSourceSettings()->setSampleSizeIndex((int) settings.m_sampleSizeIndex);
+    response.getTestSourceSettings()->setAmplitudeBits(settings.m_amplitudeBits);
+    response.getTestSourceSettings()->setAutoCorrOptions((int) settings.m_autoCorrOptions);
+    response.getTestSourceSettings()->setModulation((int) settings.m_modulation);
+    response.getTestSourceSettings()->setModulationTone(settings.m_modulationTone);
+    response.getTestSourceSettings()->setAmModulation(settings.m_amModulation);
+    response.getTestSourceSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getTestSourceSettings()->setDcFactor(settings.m_dcFactor);
+    response.getTestSourceSettings()->setIFactor(settings.m_iFactor);
+    response.getTestSourceSettings()->setQFactor(settings.m_qFactor);
+    response.getTestSourceSettings()->setPhaseImbalance(settings.m_phaseImbalance);
+
+    if (response.getTestSourceSettings()->getFileRecordName()) {
+        *response.getTestSourceSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getTestSourceSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+

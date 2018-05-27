@@ -99,6 +99,7 @@
 #include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
+#include "SWGTestSourceSettings.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSrcReport.h"
@@ -365,6 +366,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
+    }
+    if(QString("SWGTestSourceSettings").compare(type) == 0) {
+      return new SWGTestSourceSettings();
     }
     if(QString("SWGUDPSinkReport").compare(type) == 0) {
       return new SWGUDPSinkReport();
