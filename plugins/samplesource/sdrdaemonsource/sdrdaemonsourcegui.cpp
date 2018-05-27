@@ -90,7 +90,6 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
-	connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
     m_sampleSource = (SDRdaemonSourceInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
@@ -631,12 +630,4 @@ void SDRdaemonSourceGui::updateStatus()
         ui->startStop->setChecked(false);
         ui->startStop->setEnabled(false);
     }
-}
-
-void SDRdaemonSourceGui::tick() // FIXME: needed?
-{
-	if ((++m_tickCount & 0xf) == 0) {
-		SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming::create();
-		m_sampleSource->getInputMessageQueue()->push(message);
-	}
 }

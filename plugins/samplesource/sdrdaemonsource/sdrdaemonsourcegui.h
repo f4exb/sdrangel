@@ -130,7 +130,6 @@ private slots:
     void on_nbFECBlocks_valueChanged(int value);
     void updateHardware();
 	void updateStatus();
-	void tick();
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEGUI_H

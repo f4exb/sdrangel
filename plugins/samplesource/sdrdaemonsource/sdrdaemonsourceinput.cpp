@@ -232,30 +232,6 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
-	else if (MsgConfigureSDRdaemonStreamTiming::match(message)) // FIXME: really needed? UDP handler is connected to timer
-	{
-		return true;
-	}
-	else if (MsgReportSDRdaemonSourceStreamData::match(message)) // FIXME: really needed? UDP handler sends it to GUI already
-	{
-	    // Forward message to the GUI if it is present
-	    if (getMessageQueueToGUI()) {
-	        getMessageQueueToGUI()->push(const_cast<Message*>(&message));
-	        return false; // deletion of message is handled by the GUI
-	    } else {
-	        return true; // delete the unused message
-	    }
-	}
-	else if (MsgReportSDRdaemonSourceStreamTiming::match(message)) // FIXME: really needed? UDP handler sends it to GUI already
-	{
-        // Forward message to the GUI if it is present
-        if (getMessageQueueToGUI()) {
-            getMessageQueueToGUI()->push(const_cast<Message*>(&message));
-            return false; // deletion of message is handled by the GUI
-        } else {
-            return true; // delete the unused message
-        }
-	}
 	else
 	{
 		return false;
