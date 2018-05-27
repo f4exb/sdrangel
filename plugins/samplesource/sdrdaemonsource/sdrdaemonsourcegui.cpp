@@ -633,7 +633,7 @@ void SDRdaemonSourceGui::updateStatus()
     }
 }
 
-void SDRdaemonSourceGui::tick()
+void SDRdaemonSourceGui::tick() // FIXME: needed?
 {
 	if ((++m_tickCount & 0xf) == 0) {
 		SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming* message = SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming::create();

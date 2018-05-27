@@ -47,6 +47,11 @@ public:
     bool isStreaming() const { return m_masterTimerConnected; }
     int getSampleRate() const { return m_samplerate; }
     int getCenterFrequency() const { return m_centerFrequency * 1000; }
+    int getBufferGauge() const { return m_sdrDaemonBuffer.getBufferGauge(); }
+    uint32_t getTVSec() const { return m_tv_sec; }
+    uint32_t getTVuSec() const { return m_tv_usec; }
+    int getMinNbBlocks() { return m_sdrDaemonBuffer.getMinNbBlocks(); }
+    int getMaxNbRecovery() { return m_sdrDaemonBuffer.getMaxNbRecovery(); }
 public slots:
 	void dataReadyRead();
 

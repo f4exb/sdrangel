@@ -1775,6 +1775,8 @@ definitions:
         $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
       rtlSdrSettings:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+      sdrDaemonSourceSettings:
+        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
         
   DeviceReport:
     description: Base device report. The specific device report present depends on deviceHwType
@@ -1807,6 +1809,8 @@ definitions:
         $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
       rtlSdrReport:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+      sdrDaemonSourceReport:
+        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
         
   ChannelSettings:
     description: Base channel settings. The specific channel settings present depends on channelType.

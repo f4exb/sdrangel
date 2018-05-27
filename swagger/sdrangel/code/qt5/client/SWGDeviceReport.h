@@ -31,6 +31,7 @@
 #include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrOutputReport.h"
 #include "SWGRtlSdrReport.h"
+#include "SWGSDRdaemonSourceReport.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -84,6 +85,9 @@ public:
     SWGRtlSdrReport* getRtlSdrReport();
     void setRtlSdrReport(SWGRtlSdrReport* rtl_sdr_report);
 
+    SWGSDRdaemonSourceReport* getSdrDaemonSourceReport();
+    void setSdrDaemonSourceReport(SWGSDRdaemonSourceReport* sdr_daemon_source_report);
+
 
     virtual bool isSet() override;
 
@@ -120,6 +124,9 @@ private:
 
     SWGRtlSdrReport* rtl_sdr_report;
     bool m_rtl_sdr_report_isSet;
+
+    SWGSDRdaemonSourceReport* sdr_daemon_source_report;
+    bool m_sdr_daemon_source_report_isSet;
 
 };
 

@@ -1,0 +1,55 @@
+SDRdaemonSourceSettings:
+  description: SDRdaemonSource
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    sampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    txDelay:
+      description: minimum delay in ms between two consecutive packets sending
+      type: number
+      format: float
+    nbFECBlocks:
+      type: integer
+    address:
+      type: string
+    dataPort:
+      type: integer
+    controlPort:
+      type: integer
+    specificParameters:
+      type: string
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    fcPos:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    fileRecordName:
+      type: string
+
+SDRdaemonSourceReport:
+  description: SDRdaemonSource
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    sampleRate:
+      type: integer
+    bufferRWBalance:
+      description: percentage off the mid buffer (positive read leads)
+      type: integer
+    daemonTimestamp:
+      description: string representation of timestamp as sent by the SDRdaemon instance
+      type: string
+    minNbBlocks:
+      description: Minimum number of blocks retrieved per frame
+      type: integer
+    maxNbRecovery:
+      description: Maximum number of recovery blocks used per frame
+      type: integer
+ 

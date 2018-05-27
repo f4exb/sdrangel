@@ -1738,6 +1738,9 @@ margin-bottom: 20px;
     },
     "rtlSdrReport" : {
       "$ref" : "#/definitions/RtlSdrReport"
+    },
+    "sdrDaemonSourceReport" : {
+      "$ref" : "#/definitions/SDRdaemonSourceReport"
     }
   },
   "description" : "Base device report. The specific device report present depends on deviceHwType"
@@ -1838,6 +1841,9 @@ margin-bottom: 20px;
     },
     "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
+    },
+    "sdrDaemonSourceSettings" : {
+      "$ref" : "#/definitions/SDRdaemonSourceSettings"
     }
   },
   "description" : "Base device settings. The specific device settings present depends on deviceHwType."
@@ -3047,6 +3053,82 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
+};
+            defs.SDRdaemonSourceReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "bufferRWBalance" : {
+      "type" : "integer",
+      "description" : "percentage off the mid buffer (positive read leads)"
+    },
+    "daemonTimestamp" : {
+      "type" : "string",
+      "description" : "string representation of timestamp as sent by the SDRdaemon instance"
+    },
+    "minNbBlocks" : {
+      "type" : "integer",
+      "description" : "Minimum number of blocks retrieved per frame"
+    },
+    "maxNbRecovery" : {
+      "type" : "integer",
+      "description" : "Maximum number of recovery blocks used per frame"
+    }
+  },
+  "description" : "SDRdaemonSource"
+};
+            defs.SDRdaemonSourceSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "txDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "minimum delay in ms between two consecutive packets sending"
+    },
+    "nbFECBlocks" : {
+      "type" : "integer"
+    },
+    "address" : {
+      "type" : "string"
+    },
+    "dataPort" : {
+      "type" : "integer"
+    },
+    "controlPort" : {
+      "type" : "integer"
+    },
+    "specificParameters" : {
+      "type" : "string"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer",
+      "description" : "0=Infra 1=Supra 2=Center"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "SDRdaemonSource"
 };
             defs.SSBDemodReport = {
   "properties" : {
@@ -22292,7 +22374,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T22:09:48.356+02:00
+              Generated 2018-05-26T23:41:15.758+02:00
             </div>
           </div>
       </div>

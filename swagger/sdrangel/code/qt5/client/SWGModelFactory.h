@@ -86,6 +86,8 @@
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrReport_gains.h"
 #include "SWGRtlSdrSettings.h"
+#include "SWGSDRdaemonSourceReport.h"
+#include "SWGSDRdaemonSourceSettings.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
@@ -319,6 +321,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
+    }
+    if(QString("SWGSDRdaemonSourceReport").compare(type) == 0) {
+      return new SWGSDRdaemonSourceReport();
+    }
+    if(QString("SWGSDRdaemonSourceSettings").compare(type) == 0) {
+      return new SWGSDRdaemonSourceSettings();
     }
     if(QString("SWGSSBDemodReport").compare(type) == 0) {
       return new SWGSSBDemodReport();

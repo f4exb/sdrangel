@@ -16,7 +16,9 @@
 
 #include <string.h>
 #include <errno.h>
+#include <sys/time.h>
 #include <QDebug>
+
 
 #ifdef _WIN32
 #include <nn.h>
@@ -28,6 +30,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGSDRdaemonSourceReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -228,11 +232,11 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
-	else if (MsgConfigureSDRdaemonStreamTiming::match(message))
+	else if (MsgConfigureSDRdaemonStreamTiming::match(message)) // FIXME: really needed? UDP handler is connected to timer
 	{
 		return true;
 	}
-	else if (MsgReportSDRdaemonSourceStreamData::match(message))
+	else if (MsgReportSDRdaemonSourceStreamData::match(message)) // FIXME: really needed? UDP handler sends it to GUI already
 	{
 	    // Forward message to the GUI if it is present
 	    if (getMessageQueueToGUI()) {
@@ -242,7 +246,7 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 	        return true; // delete the unused message
 	    }
 	}
-	else if (MsgReportSDRdaemonSourceStreamTiming::match(message))
+	else if (MsgReportSDRdaemonSourceStreamTiming::match(message)) // FIXME: really needed? UDP handler sends it to GUI already
 	{
         // Forward message to the GUI if it is present
         if (getMessageQueueToGUI()) {
@@ -432,3 +436,120 @@ int SDRdaemonSourceInput::webapiRun(
     return 200;
 }
 
+int SDRdaemonSourceInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
+    response.getSdrDaemonSourceSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int SDRdaemonSourceInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    SDRdaemonSourceSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getSdrDaemonSourceSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getSdrDaemonSourceSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getSdrDaemonSourceSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("txDelay")) {
+        settings.m_txDelay = response.getSdrDaemonSourceSettings()->getTxDelay();
+    }
+    if (deviceSettingsKeys.contains("nbFECBlocks")) {
+        settings.m_txDelay = response.getSdrDaemonSourceSettings()->getNbFecBlocks();
+    }
+    if (deviceSettingsKeys.contains("address")) {
+        settings.m_address = *response.getSdrDaemonSourceSettings()->getAddress();
+    }
+    if (deviceSettingsKeys.contains("dataPort")) {
+        settings.m_dataPort = response.getSdrDaemonSourceSettings()->getDataPort();
+    }
+    if (deviceSettingsKeys.contains("controlPort")) {
+        settings.m_controlPort = response.getSdrDaemonSourceSettings()->getControlPort();
+    }
+    if (deviceSettingsKeys.contains("specificParameters")) {
+        settings.m_specificParameters = *response.getSdrDaemonSourceSettings()->getSpecificParameters();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getSdrDaemonSourceSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getSdrDaemonSourceSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        int fcPos = response.getSdrDaemonSourceSettings()->getFcPos();
+        settings.m_fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getSdrDaemonSourceSettings()->getFileRecordName();
+    }
+
+    MsgConfigureSDRdaemonSource *msg = MsgConfigureSDRdaemonSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRdaemonSource *msgToGUI = MsgConfigureSDRdaemonSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings)
+{
+    response.getSdrDaemonSourceSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getSdrDaemonSourceSettings()->setSampleRate(settings.m_sampleRate);
+    response.getSdrDaemonSourceSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getSdrDaemonSourceSettings()->setTxDelay(settings.m_txDelay);
+    response.getSdrDaemonSourceSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getSdrDaemonSourceSettings()->setAddress(new QString(settings.m_address));
+    response.getSdrDaemonSourceSettings()->setDataPort(settings.m_dataPort);
+    response.getSdrDaemonSourceSettings()->setControlPort(settings.m_controlPort);
+    response.getSdrDaemonSourceSettings()->setSpecificParameters(new QString(settings.m_specificParameters));
+    response.getSdrDaemonSourceSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getSdrDaemonSourceSettings()->setIqCorrection(settings.m_iqCorrection);
+    response.getSdrDaemonSourceSettings()->setFcPos((int) settings.m_fcPos);
+
+    if (response.getSdrDaemonSourceSettings()->getFileRecordName()) {
+        *response.getSdrDaemonSourceSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getSdrDaemonSourceSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+int SDRdaemonSourceInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSourceReport(new SWGSDRangel::SWGSDRdaemonSourceReport());
+    response.getSdrDaemonSourceReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void SDRdaemonSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getSdrDaemonSourceReport()->setCenterFrequency(m_SDRdaemonUDPHandler->getCenterFrequency());
+    response.getSdrDaemonSourceReport()->setSampleRate(m_SDRdaemonUDPHandler->getSampleRate());
+    response.getSdrDaemonSourceReport()->setBufferRwBalance(m_SDRdaemonUDPHandler->getBufferGauge());
+
+    quint64 startingTimeStampMsec = ((quint64) m_SDRdaemonUDPHandler->getTVSec() * 1000LL) + ((quint64) m_SDRdaemonUDPHandler->getTVuSec() / 1000LL);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    response.getSdrDaemonSourceReport()->setDaemonTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
+
+    response.getSdrDaemonSourceReport()->setMinNbBlocks(m_SDRdaemonUDPHandler->getMinNbBlocks());
+    response.getSdrDaemonSourceReport()->setMaxNbRecovery(m_SDRdaemonUDPHandler->getMaxNbRecovery());
+}
