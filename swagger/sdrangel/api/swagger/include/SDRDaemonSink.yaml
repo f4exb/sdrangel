@@ -1,0 +1,36 @@
+SDRdaemonSinkSettings:
+  description: SDRdaemonSink
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    sampleRate:
+      type: integer
+    log2Interp:
+      type: integer
+    txDelay:
+      description: minimum delay in ms between two consecutive packets sending
+      type: number
+      format: float
+    nbFECBlocks:
+      type: integer
+    address:
+      type: string
+    dataPort:
+      type: integer
+    controlPort:
+      type: integer
+    specificParameters:
+      type: string
+
+SDRdaemonSinkReport:
+  description: SDRdaemonSource
+  properties:
+    bufferRWBalance:
+      description: ratio off the mid buffer (positive read leads)
+      type: number
+      format: float
+    sampleCount:
+      description: count of samples that have been sent
+      type: integer
+ 

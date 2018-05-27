@@ -50,6 +50,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_pluto_sdr_output_report_isSet = false;
     rtl_sdr_report = nullptr;
     m_rtl_sdr_report_isSet = false;
+    sdr_daemon_sink_report = nullptr;
+    m_sdr_daemon_sink_report_isSet = false;
     sdr_daemon_source_report = nullptr;
     m_sdr_daemon_source_report_isSet = false;
     sdr_play_report = nullptr;
@@ -84,6 +86,8 @@ SWGDeviceReport::init() {
     m_pluto_sdr_output_report_isSet = false;
     rtl_sdr_report = new SWGRtlSdrReport();
     m_rtl_sdr_report_isSet = false;
+    sdr_daemon_sink_report = new SWGSDRdaemonSinkReport();
+    m_sdr_daemon_sink_report_isSet = false;
     sdr_daemon_source_report = new SWGSDRdaemonSourceReport();
     m_sdr_daemon_source_report_isSet = false;
     sdr_play_report = new SWGSDRPlayReport();
@@ -122,6 +126,9 @@ SWGDeviceReport::cleanup() {
     }
     if(rtl_sdr_report != nullptr) { 
         delete rtl_sdr_report;
+    }
+    if(sdr_daemon_sink_report != nullptr) { 
+        delete sdr_daemon_sink_report;
     }
     if(sdr_daemon_source_report != nullptr) { 
         delete sdr_daemon_source_report;
@@ -163,6 +170,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pluto_sdr_output_report, pJson["plutoSdrOutputReport"], "SWGPlutoSdrOutputReport", "SWGPlutoSdrOutputReport");
     
     ::SWGSDRangel::setValue(&rtl_sdr_report, pJson["rtlSdrReport"], "SWGRtlSdrReport", "SWGRtlSdrReport");
+    
+    ::SWGSDRangel::setValue(&sdr_daemon_sink_report, pJson["sdrDaemonSinkReport"], "SWGSDRdaemonSinkReport", "SWGSDRdaemonSinkReport");
     
     ::SWGSDRangel::setValue(&sdr_daemon_source_report, pJson["sdrDaemonSourceReport"], "SWGSDRdaemonSourceReport", "SWGSDRdaemonSourceReport");
     
@@ -216,6 +225,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((rtl_sdr_report != nullptr) && (rtl_sdr_report->isSet())){
         toJsonValue(QString("rtlSdrReport"), rtl_sdr_report, obj, QString("SWGRtlSdrReport"));
+    }
+    if((sdr_daemon_sink_report != nullptr) && (sdr_daemon_sink_report->isSet())){
+        toJsonValue(QString("sdrDaemonSinkReport"), sdr_daemon_sink_report, obj, QString("SWGSDRdaemonSinkReport"));
     }
     if((sdr_daemon_source_report != nullptr) && (sdr_daemon_source_report->isSet())){
         toJsonValue(QString("sdrDaemonSourceReport"), sdr_daemon_source_report, obj, QString("SWGSDRdaemonSourceReport"));
@@ -337,6 +349,16 @@ SWGDeviceReport::setRtlSdrReport(SWGRtlSdrReport* rtl_sdr_report) {
     this->m_rtl_sdr_report_isSet = true;
 }
 
+SWGSDRdaemonSinkReport*
+SWGDeviceReport::getSdrDaemonSinkReport() {
+    return sdr_daemon_sink_report;
+}
+void
+SWGDeviceReport::setSdrDaemonSinkReport(SWGSDRdaemonSinkReport* sdr_daemon_sink_report) {
+    this->sdr_daemon_sink_report = sdr_daemon_sink_report;
+    this->m_sdr_daemon_sink_report_isSet = true;
+}
+
 SWGSDRdaemonSourceReport*
 SWGDeviceReport::getSdrDaemonSourceReport() {
     return sdr_daemon_source_report;
@@ -373,6 +395,7 @@ SWGDeviceReport::isSet(){
         if(pluto_sdr_input_report != nullptr && pluto_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_report != nullptr && rtl_sdr_report->isSet()){ isObjectUpdated = true; break;}
+        if(sdr_daemon_sink_report != nullptr && sdr_daemon_sink_report->isSet()){ isObjectUpdated = true; break;}
         if(sdr_daemon_source_report != nullptr && sdr_daemon_source_report->isSet()){ isObjectUpdated = true; break;}
         if(sdr_play_report != nullptr && sdr_play_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);

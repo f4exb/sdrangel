@@ -62,6 +62,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_pluto_sdr_output_settings_isSet = false;
     rtl_sdr_settings = nullptr;
     m_rtl_sdr_settings_isSet = false;
+    sdr_daemon_sink_settings = nullptr;
+    m_sdr_daemon_sink_settings_isSet = false;
     sdr_daemon_source_settings = nullptr;
     m_sdr_daemon_source_settings_isSet = false;
     sdr_play_settings = nullptr;
@@ -110,6 +112,8 @@ SWGDeviceSettings::init() {
     m_pluto_sdr_output_settings_isSet = false;
     rtl_sdr_settings = new SWGRtlSdrSettings();
     m_rtl_sdr_settings_isSet = false;
+    sdr_daemon_sink_settings = new SWGSDRdaemonSinkSettings();
+    m_sdr_daemon_sink_settings_isSet = false;
     sdr_daemon_source_settings = new SWGSDRdaemonSourceSettings();
     m_sdr_daemon_source_settings_isSet = false;
     sdr_play_settings = new SWGSDRPlaySettings();
@@ -169,6 +173,9 @@ SWGDeviceSettings::cleanup() {
     if(rtl_sdr_settings != nullptr) { 
         delete rtl_sdr_settings;
     }
+    if(sdr_daemon_sink_settings != nullptr) { 
+        delete sdr_daemon_sink_settings;
+    }
     if(sdr_daemon_source_settings != nullptr) { 
         delete sdr_daemon_source_settings;
     }
@@ -224,6 +231,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pluto_sdr_output_settings, pJson["plutoSdrOutputSettings"], "SWGPlutoSdrOutputSettings", "SWGPlutoSdrOutputSettings");
     
     ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
+    
+    ::SWGSDRangel::setValue(&sdr_daemon_sink_settings, pJson["sdrDaemonSinkSettings"], "SWGSDRdaemonSinkSettings", "SWGSDRdaemonSinkSettings");
     
     ::SWGSDRangel::setValue(&sdr_daemon_source_settings, pJson["sdrDaemonSourceSettings"], "SWGSDRdaemonSourceSettings", "SWGSDRdaemonSourceSettings");
     
@@ -297,6 +306,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((rtl_sdr_settings != nullptr) && (rtl_sdr_settings->isSet())){
         toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
+    }
+    if((sdr_daemon_sink_settings != nullptr) && (sdr_daemon_sink_settings->isSet())){
+        toJsonValue(QString("sdrDaemonSinkSettings"), sdr_daemon_sink_settings, obj, QString("SWGSDRdaemonSinkSettings"));
     }
     if((sdr_daemon_source_settings != nullptr) && (sdr_daemon_source_settings->isSet())){
         toJsonValue(QString("sdrDaemonSourceSettings"), sdr_daemon_source_settings, obj, QString("SWGSDRdaemonSourceSettings"));
@@ -481,6 +493,16 @@ SWGDeviceSettings::setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings) {
     this->m_rtl_sdr_settings_isSet = true;
 }
 
+SWGSDRdaemonSinkSettings*
+SWGDeviceSettings::getSdrDaemonSinkSettings() {
+    return sdr_daemon_sink_settings;
+}
+void
+SWGDeviceSettings::setSdrDaemonSinkSettings(SWGSDRdaemonSinkSettings* sdr_daemon_sink_settings) {
+    this->sdr_daemon_sink_settings = sdr_daemon_sink_settings;
+    this->m_sdr_daemon_sink_settings_isSet = true;
+}
+
 SWGSDRdaemonSourceSettings*
 SWGDeviceSettings::getSdrDaemonSourceSettings() {
     return sdr_daemon_source_settings;
@@ -533,6 +555,7 @@ SWGDeviceSettings::isSet(){
         if(pluto_sdr_input_settings != nullptr && pluto_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
+        if(sdr_daemon_sink_settings != nullptr && sdr_daemon_sink_settings->isSet()){ isObjectUpdated = true; break;}
         if(sdr_daemon_source_settings != nullptr && sdr_daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(sdr_play_settings != nullptr && sdr_play_settings->isSet()){ isObjectUpdated = true; break;}
         if(test_source_settings != nullptr && test_source_settings->isSet()){ isObjectUpdated = true; break;}

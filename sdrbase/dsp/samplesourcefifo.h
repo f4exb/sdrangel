@@ -43,6 +43,18 @@ public:
 
     void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
 
+    /** returns ratio of off center over buffer size with sign: negative real lags and positive read leads */
+    float getRWBalance() const
+    {
+        int delta;
+        if (m_iw > m_ir) {
+            delta = (m_size/2) - (m_iw - m_ir);
+        } else {
+            delta = (m_ir - m_iw) - (m_size/2);
+        }
+        return delta / (float) m_size;
+    }
+
 private:
     uint32_t m_size;
     SampleVector m_data;

@@ -171,6 +171,20 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -190,6 +204,8 @@ private:
 	const QTimer& m_masterTimer;
 
 	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif // INCLUDE_SDRDAEMONSINKOUTPUT_H

@@ -38,6 +38,7 @@
 #include "SWGPlutoSdrOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlaySettings.h"
+#include "SWGSDRdaemonSinkSettings.h"
 #include "SWGSDRdaemonSourceSettings.h"
 #include "SWGTestSourceSettings.h"
 #include <QString>
@@ -111,6 +112,9 @@ public:
     SWGRtlSdrSettings* getRtlSdrSettings();
     void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
 
+    SWGSDRdaemonSinkSettings* getSdrDaemonSinkSettings();
+    void setSdrDaemonSinkSettings(SWGSDRdaemonSinkSettings* sdr_daemon_sink_settings);
+
     SWGSDRdaemonSourceSettings* getSdrDaemonSourceSettings();
     void setSdrDaemonSourceSettings(SWGSDRdaemonSourceSettings* sdr_daemon_source_settings);
 
@@ -174,6 +178,9 @@ private:
 
     SWGRtlSdrSettings* rtl_sdr_settings;
     bool m_rtl_sdr_settings_isSet;
+
+    SWGSDRdaemonSinkSettings* sdr_daemon_sink_settings;
+    bool m_sdr_daemon_sink_settings_isSet;
 
     SWGSDRdaemonSourceSettings* sdr_daemon_source_settings;
     bool m_sdr_daemon_source_settings_isSet;

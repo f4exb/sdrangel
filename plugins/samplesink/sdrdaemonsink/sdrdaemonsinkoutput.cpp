@@ -20,6 +20,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGSDRdaemonSinkReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -361,6 +363,94 @@ int SDRdaemonSinkOutput::webapiRun(
     }
 
     return 200;
+}
+
+int SDRdaemonSinkOutput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
+    response.getSdrDaemonSinkSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int SDRdaemonSinkOutput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    SDRdaemonSinkSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getSdrDaemonSinkSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getSdrDaemonSinkSettings()->getLog2Interp();
+    }
+    if (deviceSettingsKeys.contains("txDelay")) {
+        settings.m_txDelay = response.getSdrDaemonSinkSettings()->getTxDelay();
+    }
+    if (deviceSettingsKeys.contains("nbFECBlocks")) {
+        settings.m_nbFECBlocks = response.getSdrDaemonSinkSettings()->getNbFecBlocks();
+    }
+    if (deviceSettingsKeys.contains("address")) {
+        settings.m_address = *response.getSdrDaemonSinkSettings()->getAddress();
+    }
+    if (deviceSettingsKeys.contains("dataPort")) {
+        settings.m_dataPort = response.getSdrDaemonSinkSettings()->getDataPort();
+    }
+    if (deviceSettingsKeys.contains("controlPort")) {
+        settings.m_controlPort = response.getSdrDaemonSinkSettings()->getControlPort();
+    }
+    if (deviceSettingsKeys.contains("specificParameters")) {
+        settings.m_specificParameters = *response.getSdrDaemonSinkSettings()->getSpecificParameters();
+    }
+
+    MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRdaemonSink *msgToGUI = MsgConfigureSDRdaemonSink::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int SDRdaemonSinkOutput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSinkReport(new SWGSDRangel::SWGSDRdaemonSinkReport());
+    response.getSdrDaemonSinkReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings)
+{
+    response.getSdrDaemonSinkSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
+    response.getSdrDaemonSinkSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getSdrDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
+    response.getSdrDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getSdrDaemonSinkSettings()->setAddress(new QString(settings.m_address));
+    response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getSdrDaemonSinkSettings()->setControlPort(settings.m_controlPort);
+    response.getSdrDaemonSinkSettings()->setSpecificParameters(new QString(settings.m_specificParameters));
+}
+
+void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getSdrDaemonSinkReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
+    response.getSdrDaemonSinkReport()->setSampleCount(m_sdrDaemonSinkThread ? (int) m_sdrDaemonSinkThread->getSamplesCount() : 0);
 }
 
 
