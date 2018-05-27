@@ -44,13 +44,13 @@ SWGSDRPlayReport::~SWGSDRPlayReport() {
 
 void
 SWGSDRPlayReport::init() {
-    sample_rates = new QList<SWGAirspyReport_sampleRates*>();
+    sample_rates = new QList<SWGSampleRate*>();
     m_sample_rates_isSet = false;
-    bandwidths = new QList<SWGSDRPlayReport_bandwidths*>();
+    bandwidths = new QList<SWGBandwidth*>();
     m_bandwidths_isSet = false;
-    intermediate_frequencies = new QList<SWGSDRPlayReport_intermediateFrequencies*>();
+    intermediate_frequencies = new QList<SWGFrequency*>();
     m_intermediate_frequencies_isSet = false;
-    frequency_bands = new QList<SWGSDRPlayReport_frequencyBands*>();
+    frequency_bands = new QList<SWGFrequencyBand*>();
     m_frequency_bands_isSet = false;
 }
 
@@ -98,13 +98,13 @@ SWGSDRPlayReport::fromJson(QString &json) {
 void
 SWGSDRPlayReport::fromJsonObject(QJsonObject &pJson) {
     
-    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGAirspyReport_sampleRates");
+    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGSampleRate");
     
-    ::SWGSDRangel::setValue(&bandwidths, pJson["bandwidths"], "QList", "SWGSDRPlayReport_bandwidths");
+    ::SWGSDRangel::setValue(&bandwidths, pJson["bandwidths"], "QList", "SWGBandwidth");
     
-    ::SWGSDRangel::setValue(&intermediate_frequencies, pJson["intermediateFrequencies"], "QList", "SWGSDRPlayReport_intermediateFrequencies");
+    ::SWGSDRangel::setValue(&intermediate_frequencies, pJson["intermediateFrequencies"], "QList", "SWGFrequency");
     
-    ::SWGSDRangel::setValue(&frequency_bands, pJson["frequencyBands"], "QList", "SWGSDRPlayReport_frequencyBands");
+    ::SWGSDRangel::setValue(&frequency_bands, pJson["frequencyBands"], "QList", "SWGFrequencyBand");
 }
 
 QString
@@ -122,57 +122,57 @@ QJsonObject*
 SWGSDRPlayReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(sample_rates->size() > 0){
-        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGAirspyReport_sampleRates");
+        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
     }
     if(bandwidths->size() > 0){
-        toJsonArray((QList<void*>*)bandwidths, obj, "bandwidths", "SWGSDRPlayReport_bandwidths");
+        toJsonArray((QList<void*>*)bandwidths, obj, "bandwidths", "SWGBandwidth");
     }
     if(intermediate_frequencies->size() > 0){
-        toJsonArray((QList<void*>*)intermediate_frequencies, obj, "intermediateFrequencies", "SWGSDRPlayReport_intermediateFrequencies");
+        toJsonArray((QList<void*>*)intermediate_frequencies, obj, "intermediateFrequencies", "SWGFrequency");
     }
     if(frequency_bands->size() > 0){
-        toJsonArray((QList<void*>*)frequency_bands, obj, "frequencyBands", "SWGSDRPlayReport_frequencyBands");
+        toJsonArray((QList<void*>*)frequency_bands, obj, "frequencyBands", "SWGFrequencyBand");
     }
 
     return obj;
 }
 
-QList<SWGAirspyReport_sampleRates*>*
+QList<SWGSampleRate*>*
 SWGSDRPlayReport::getSampleRates() {
     return sample_rates;
 }
 void
-SWGSDRPlayReport::setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates) {
+SWGSDRPlayReport::setSampleRates(QList<SWGSampleRate*>* sample_rates) {
     this->sample_rates = sample_rates;
     this->m_sample_rates_isSet = true;
 }
 
-QList<SWGSDRPlayReport_bandwidths*>*
+QList<SWGBandwidth*>*
 SWGSDRPlayReport::getBandwidths() {
     return bandwidths;
 }
 void
-SWGSDRPlayReport::setBandwidths(QList<SWGSDRPlayReport_bandwidths*>* bandwidths) {
+SWGSDRPlayReport::setBandwidths(QList<SWGBandwidth*>* bandwidths) {
     this->bandwidths = bandwidths;
     this->m_bandwidths_isSet = true;
 }
 
-QList<SWGSDRPlayReport_intermediateFrequencies*>*
+QList<SWGFrequency*>*
 SWGSDRPlayReport::getIntermediateFrequencies() {
     return intermediate_frequencies;
 }
 void
-SWGSDRPlayReport::setIntermediateFrequencies(QList<SWGSDRPlayReport_intermediateFrequencies*>* intermediate_frequencies) {
+SWGSDRPlayReport::setIntermediateFrequencies(QList<SWGFrequency*>* intermediate_frequencies) {
     this->intermediate_frequencies = intermediate_frequencies;
     this->m_intermediate_frequencies_isSet = true;
 }
 
-QList<SWGSDRPlayReport_frequencyBands*>*
+QList<SWGFrequencyBand*>*
 SWGSDRPlayReport::getFrequencyBands() {
     return frequency_bands;
 }
 void
-SWGSDRPlayReport::setFrequencyBands(QList<SWGSDRPlayReport_frequencyBands*>* frequency_bands) {
+SWGSDRPlayReport::setFrequencyBands(QList<SWGFrequencyBand*>* frequency_bands) {
     this->frequency_bands = frequency_bands;
     this->m_frequency_bands_isSet = true;
 }

@@ -668,12 +668,12 @@ int RTLSDRInput::webapiReportGet(
 
 void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getRtlSdrReport()->setGains(new QList<SWGSDRangel::SWGRtlSdrReport_gains*>);
+    response.getRtlSdrReport()->setGains(new QList<SWGSDRangel::SWGGain*>);
 
     for (std::vector<int>::const_iterator it = getGains().begin(); it != getGains().end(); ++it)
     {
-        response.getRtlSdrReport()->getGains()->append(new SWGSDRangel::SWGRtlSdrReport_gains);
-        response.getRtlSdrReport()->getGains()->back()->setGain(*it);
+        response.getRtlSdrReport()->getGains()->append(new SWGSDRangel::SWGGain);
+        response.getRtlSdrReport()->getGains()->back()->setGainCb(*it);
     }
 }
 

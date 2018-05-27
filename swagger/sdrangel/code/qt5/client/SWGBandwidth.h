@@ -11,50 +11,48 @@
  */
 
 /*
- * SWGAirspyReport.h
+ * SWGBandwidth.h
  *
- * Airspy
+ * A bandwidth expressed in Hertz (Hz)
  */
 
-#ifndef SWGAirspyReport_H_
-#define SWGAirspyReport_H_
+#ifndef SWGBandwidth_H_
+#define SWGBandwidth_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSampleRate.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAirspyReport: public SWGObject {
+class SWG_API SWGBandwidth: public SWGObject {
 public:
-    SWGAirspyReport();
-    SWGAirspyReport(QString* json);
-    virtual ~SWGAirspyReport();
+    SWGBandwidth();
+    SWGBandwidth(QString* json);
+    virtual ~SWGBandwidth();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAirspyReport* fromJson(QString &jsonString) override;
+    virtual SWGBandwidth* fromJson(QString &jsonString) override;
 
-    QList<SWGSampleRate*>* getSampleRates();
-    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
+    qint32 getBandwidth();
+    void setBandwidth(qint32 bandwidth);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGSampleRate*>* sample_rates;
-    bool m_sample_rates_isSet;
+    qint32 bandwidth;
+    bool m_bandwidth_isSet;
 
 };
 
 }
 
-#endif /* SWGAirspyReport_H_ */
+#endif /* SWGBandwidth_H_ */

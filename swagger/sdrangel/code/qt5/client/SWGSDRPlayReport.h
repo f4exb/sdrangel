@@ -22,10 +22,10 @@
 #include <QJsonObject>
 
 
-#include "SWGAirspyReport_sampleRates.h"
-#include "SWGSDRPlayReport_bandwidths.h"
-#include "SWGSDRPlayReport_frequencyBands.h"
-#include "SWGSDRPlayReport_intermediateFrequencies.h"
+#include "SWGBandwidth.h"
+#include "SWGFrequency.h"
+#include "SWGFrequencyBand.h"
+#include "SWGSampleRate.h"
 #include <QList>
 
 #include "SWGObject.h"
@@ -46,32 +46,32 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGSDRPlayReport* fromJson(QString &jsonString) override;
 
-    QList<SWGAirspyReport_sampleRates*>* getSampleRates();
-    void setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates);
+    QList<SWGSampleRate*>* getSampleRates();
+    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
 
-    QList<SWGSDRPlayReport_bandwidths*>* getBandwidths();
-    void setBandwidths(QList<SWGSDRPlayReport_bandwidths*>* bandwidths);
+    QList<SWGBandwidth*>* getBandwidths();
+    void setBandwidths(QList<SWGBandwidth*>* bandwidths);
 
-    QList<SWGSDRPlayReport_intermediateFrequencies*>* getIntermediateFrequencies();
-    void setIntermediateFrequencies(QList<SWGSDRPlayReport_intermediateFrequencies*>* intermediate_frequencies);
+    QList<SWGFrequency*>* getIntermediateFrequencies();
+    void setIntermediateFrequencies(QList<SWGFrequency*>* intermediate_frequencies);
 
-    QList<SWGSDRPlayReport_frequencyBands*>* getFrequencyBands();
-    void setFrequencyBands(QList<SWGSDRPlayReport_frequencyBands*>* frequency_bands);
+    QList<SWGFrequencyBand*>* getFrequencyBands();
+    void setFrequencyBands(QList<SWGFrequencyBand*>* frequency_bands);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGAirspyReport_sampleRates*>* sample_rates;
+    QList<SWGSampleRate*>* sample_rates;
     bool m_sample_rates_isSet;
 
-    QList<SWGSDRPlayReport_bandwidths*>* bandwidths;
+    QList<SWGBandwidth*>* bandwidths;
     bool m_bandwidths_isSet;
 
-    QList<SWGSDRPlayReport_intermediateFrequencies*>* intermediate_frequencies;
+    QList<SWGFrequency*>* intermediate_frequencies;
     bool m_intermediate_frequencies_isSet;
 
-    QList<SWGSDRPlayReport_frequencyBands*>* frequency_bands;
+    QList<SWGFrequencyBand*>* frequency_bands;
     bool m_frequency_bands_isSet;
 
 };

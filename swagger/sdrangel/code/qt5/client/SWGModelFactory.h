@@ -23,13 +23,13 @@
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspyReport.h"
-#include "SWGAirspyReport_sampleRates.h"
 #include "SWGAirspySettings.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGBandwidth.h"
 #include "SWGBladeRFInputSettings.h"
 #include "SWGBladeRFOutputSettings.h"
 #include "SWGCWKeyerSettings.h"
@@ -53,6 +53,9 @@
 #include "SWGFCDProSettings.h"
 #include "SWGFileSourceReport.h"
 #include "SWGFileSourceSettings.h"
+#include "SWGFrequency.h"
+#include "SWGFrequencyBand.h"
+#include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
 #include "SWGInstanceChannelsResponse.h"
@@ -84,12 +87,8 @@
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
 #include "SWGRtlSdrReport.h"
-#include "SWGRtlSdrReport_gains.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
-#include "SWGSDRPlayReport_bandwidths.h"
-#include "SWGSDRPlayReport_frequencyBands.h"
-#include "SWGSDRPlayReport_intermediateFrequencies.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSourceReport.h"
 #include "SWGSDRdaemonSourceSettings.h"
@@ -97,6 +96,7 @@
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
 #include "SWGSSBModSettings.h"
+#include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
 #include "SWGUDPSinkReport.h"
@@ -138,9 +138,6 @@ namespace SWGSDRangel {
     if(QString("SWGAirspyReport").compare(type) == 0) {
       return new SWGAirspyReport();
     }
-    if(QString("SWGAirspyReport_sampleRates").compare(type) == 0) {
-      return new SWGAirspyReport_sampleRates();
-    }
     if(QString("SWGAirspySettings").compare(type) == 0) {
       return new SWGAirspySettings();
     }
@@ -158,6 +155,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGBFMDemodSettings").compare(type) == 0) {
       return new SWGBFMDemodSettings();
+    }
+    if(QString("SWGBandwidth").compare(type) == 0) {
+      return new SWGBandwidth();
     }
     if(QString("SWGBladeRFInputSettings").compare(type) == 0) {
       return new SWGBladeRFInputSettings();
@@ -227,6 +227,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileSourceSettings").compare(type) == 0) {
       return new SWGFileSourceSettings();
+    }
+    if(QString("SWGFrequency").compare(type) == 0) {
+      return new SWGFrequency();
+    }
+    if(QString("SWGFrequencyBand").compare(type) == 0) {
+      return new SWGFrequencyBand();
+    }
+    if(QString("SWGGain").compare(type) == 0) {
+      return new SWGGain();
     }
     if(QString("SWGHackRFInputSettings").compare(type) == 0) {
       return new SWGHackRFInputSettings();
@@ -321,23 +330,11 @@ namespace SWGSDRangel {
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();
     }
-    if(QString("SWGRtlSdrReport_gains").compare(type) == 0) {
-      return new SWGRtlSdrReport_gains();
-    }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
     }
     if(QString("SWGSDRPlayReport").compare(type) == 0) {
       return new SWGSDRPlayReport();
-    }
-    if(QString("SWGSDRPlayReport_bandwidths").compare(type) == 0) {
-      return new SWGSDRPlayReport_bandwidths();
-    }
-    if(QString("SWGSDRPlayReport_frequencyBands").compare(type) == 0) {
-      return new SWGSDRPlayReport_frequencyBands();
-    }
-    if(QString("SWGSDRPlayReport_intermediateFrequencies").compare(type) == 0) {
-      return new SWGSDRPlayReport_intermediateFrequencies();
     }
     if(QString("SWGSDRPlaySettings").compare(type) == 0) {
       return new SWGSDRPlaySettings();
@@ -359,6 +356,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSSBModSettings").compare(type) == 0) {
       return new SWGSSBModSettings();
+    }
+    if(QString("SWGSampleRate").compare(type) == 0) {
+      return new SWGSampleRate();
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();

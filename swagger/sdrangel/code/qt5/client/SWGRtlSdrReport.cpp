@@ -38,7 +38,7 @@ SWGRtlSdrReport::~SWGRtlSdrReport() {
 
 void
 SWGRtlSdrReport::init() {
-    gains = new QList<SWGRtlSdrReport_gains*>();
+    gains = new QList<SWGGain*>();
     m_gains_isSet = false;
 }
 
@@ -65,7 +65,7 @@ SWGRtlSdrReport::fromJson(QString &json) {
 void
 SWGRtlSdrReport::fromJsonObject(QJsonObject &pJson) {
     
-    ::SWGSDRangel::setValue(&gains, pJson["gains"], "QList", "SWGRtlSdrReport_gains");
+    ::SWGSDRangel::setValue(&gains, pJson["gains"], "QList", "SWGGain");
 }
 
 QString
@@ -83,18 +83,18 @@ QJsonObject*
 SWGRtlSdrReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(gains->size() > 0){
-        toJsonArray((QList<void*>*)gains, obj, "gains", "SWGRtlSdrReport_gains");
+        toJsonArray((QList<void*>*)gains, obj, "gains", "SWGGain");
     }
 
     return obj;
 }
 
-QList<SWGRtlSdrReport_gains*>*
+QList<SWGGain*>*
 SWGRtlSdrReport::getGains() {
     return gains;
 }
 void
-SWGRtlSdrReport::setGains(QList<SWGRtlSdrReport_gains*>* gains) {
+SWGRtlSdrReport::setGains(QList<SWGGain*>* gains) {
     this->gains = gains;
     this->m_gains_isSet = true;
 }

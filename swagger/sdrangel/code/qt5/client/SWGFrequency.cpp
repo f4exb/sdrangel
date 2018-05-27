@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGAirspyHFReport.h"
+#include "SWGFrequency.h"
 
 #include "SWGHelpers.h"
 
@@ -22,39 +22,33 @@
 
 namespace SWGSDRangel {
 
-SWGAirspyHFReport::SWGAirspyHFReport(QString* json) {
+SWGFrequency::SWGFrequency(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGAirspyHFReport::SWGAirspyHFReport() {
-    sample_rates = nullptr;
-    m_sample_rates_isSet = false;
+SWGFrequency::SWGFrequency() {
+    frequency = 0;
+    m_frequency_isSet = false;
 }
 
-SWGAirspyHFReport::~SWGAirspyHFReport() {
+SWGFrequency::~SWGFrequency() {
     this->cleanup();
 }
 
 void
-SWGAirspyHFReport::init() {
-    sample_rates = new QList<SWGSampleRate*>();
-    m_sample_rates_isSet = false;
+SWGFrequency::init() {
+    frequency = 0;
+    m_frequency_isSet = false;
 }
 
 void
-SWGAirspyHFReport::cleanup() {
-    if(sample_rates != nullptr) { 
-        auto arr = sample_rates;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete sample_rates;
-    }
+SWGFrequency::cleanup() {
+
 }
 
-SWGAirspyHFReport*
-SWGAirspyHFReport::fromJson(QString &json) {
+SWGFrequency*
+SWGFrequency::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -63,13 +57,13 @@ SWGAirspyHFReport::fromJson(QString &json) {
 }
 
 void
-SWGAirspyHFReport::fromJsonObject(QJsonObject &pJson) {
+SWGFrequency::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&frequency, pJson["frequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGSampleRate");
 }
 
 QString
-SWGAirspyHFReport::asJson ()
+SWGFrequency::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -80,31 +74,31 @@ SWGAirspyHFReport::asJson ()
 }
 
 QJsonObject*
-SWGAirspyHFReport::asJsonObject() {
+SWGFrequency::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(sample_rates->size() > 0){
-        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
+    if(m_frequency_isSet){
+        obj->insert("frequency", QJsonValue(frequency));
     }
 
     return obj;
 }
 
-QList<SWGSampleRate*>*
-SWGAirspyHFReport::getSampleRates() {
-    return sample_rates;
+qint32
+SWGFrequency::getFrequency() {
+    return frequency;
 }
 void
-SWGAirspyHFReport::setSampleRates(QList<SWGSampleRate*>* sample_rates) {
-    this->sample_rates = sample_rates;
-    this->m_sample_rates_isSet = true;
+SWGFrequency::setFrequency(qint32 frequency) {
+    this->frequency = frequency;
+    this->m_frequency_isSet = true;
 }
 
 
 bool
-SWGAirspyHFReport::isSet(){
+SWGFrequency::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(sample_rates->size() > 0){ isObjectUpdated = true; break;}
+        if(m_frequency_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

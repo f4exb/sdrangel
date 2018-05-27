@@ -917,7 +917,7 @@ margin-bottom: 20px;
     "sampleRates" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/AirspyReport_sampleRates"
+        "$ref" : "#/definitions/SampleRate"
       }
     }
   },
@@ -959,19 +959,11 @@ margin-bottom: 20px;
     "sampleRates" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/AirspyReport_sampleRates"
+        "$ref" : "#/definitions/SampleRate"
       }
     }
   },
   "description" : "Airspy"
-};
-            defs.AirspyReport_sampleRates = {
-  "properties" : {
-    "sampleRate" : {
-      "type" : "integer",
-      "description" : "sample rate in S/s"
-    }
-  }
 };
             defs.AirspySettings = {
   "properties" : {
@@ -1212,6 +1204,14 @@ margin-bottom: 20px;
     }
   },
   "description" : "BFMDemod"
+};
+            defs.Bandwidth = {
+  "properties" : {
+    "bandwidth" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A bandwidth expressed in Hertz (Hz)"
 };
             defs.BladeRFInputSettings = {
   "properties" : {
@@ -2038,6 +2038,36 @@ margin-bottom: 20px;
   },
   "description" : "FileSource"
 };
+            defs.Frequency = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A frequency expressed in Hertz (Hz)"
+};
+            defs.FrequencyBand = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "lowerBound" : {
+      "type" : "integer"
+    },
+    "higherBound" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A band of frequencies given its boudaries in Hertz (Hz)"
+};
+            defs.Gain = {
+  "properties" : {
+    "gainCB" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A gain expressed in centi-Bels (tenths of dB)"
+};
             defs.HackRFInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -2596,7 +2626,7 @@ margin-bottom: 20px;
     "sampleRates" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/AirspyReport_sampleRates"
+        "$ref" : "#/definitions/SampleRate"
       }
     }
   },
@@ -2994,19 +3024,11 @@ margin-bottom: 20px;
     "gains" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/RtlSdrReport_gains"
+        "$ref" : "#/definitions/Gain"
       }
     }
   },
   "description" : "RTLSDR"
-};
-            defs.RtlSdrReport_gains = {
-  "properties" : {
-    "gain" : {
-      "type" : "integer",
-      "description" : "gain in centi Bels"
-    }
-  }
 };
             defs.RtlSdrSettings = {
   "properties" : {
@@ -3065,60 +3087,29 @@ margin-bottom: 20px;
     "sampleRates" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/AirspyReport_sampleRates"
+        "$ref" : "#/definitions/SampleRate"
       }
     },
     "bandwidths" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/SDRPlayReport_bandwidths"
+        "$ref" : "#/definitions/Bandwidth"
       }
     },
     "intermediateFrequencies" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/SDRPlayReport_intermediateFrequencies"
+        "$ref" : "#/definitions/Frequency"
       }
     },
     "frequencyBands" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/SDRPlayReport_frequencyBands"
+        "$ref" : "#/definitions/FrequencyBand"
       }
     }
   },
   "description" : "SDRplay1"
-};
-            defs.SDRPlayReport_bandwidths = {
-  "properties" : {
-    "bandwidth" : {
-      "type" : "integer",
-      "description" : "bandwidth in Hz"
-    }
-  }
-};
-            defs.SDRPlayReport_frequencyBands = {
-  "properties" : {
-    "bandName" : {
-      "type" : "string"
-    },
-    "bandLow" : {
-      "type" : "integer",
-      "description" : "lower frequency bound in Hz"
-    },
-    "bandHigh" : {
-      "type" : "integer",
-      "description" : "higher frequency bound in Hz"
-    }
-  }
-};
-            defs.SDRPlayReport_intermediateFrequencies = {
-  "properties" : {
-    "intermediateFrequency" : {
-      "type" : "integer",
-      "description" : "frequency in Hz"
-    }
-  }
 };
             defs.SDRPlaySettings = {
   "properties" : {
@@ -3438,6 +3429,14 @@ margin-bottom: 20px;
     }
   },
   "description" : "SSBMod"
+};
+            defs.SampleRate = {
+  "properties" : {
+    "rate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A sample rate expressed in samples per second (S/s)"
 };
             defs.SamplingDevice = {
   "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state", "streamIndex" ],
@@ -22495,7 +22494,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-27T11:38:07.698+02:00
+              Generated 2018-05-27T13:20:33.079+02:00
             </div>
           </div>
       </div>

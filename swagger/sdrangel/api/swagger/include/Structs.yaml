@@ -1,0 +1,34 @@
+SampleRate:
+  description: A sample rate expressed in samples per second (S/s)
+  properties:
+    rate:
+      type: integer
+      
+Bandwidth:
+  description: A bandwidth expressed in Hertz (Hz)
+  properties:
+    bandwidth:
+      type: integer
+      
+Frequency:
+  description: A frequency expressed in Hertz (Hz)
+  properties:
+    frequency:
+      type: integer
+      
+FrequencyBand:
+  description: A band of frequencies given its boudaries in Hertz (Hz)
+  properties:
+    name:
+      type: string
+    lowerBound:
+      type: integer
+    higherBound:
+      type: integer
+
+Gain:
+  description: A gain expressed in centi-Bels (tenths of dB)
+  properties:
+    gainCB:
+      type: integer
+  

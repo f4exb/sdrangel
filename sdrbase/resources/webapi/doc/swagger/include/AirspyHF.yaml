@@ -26,9 +26,5 @@ AirspyHFReport:
     sampleRates:
       type: array
       items:
-        properties:
-          sampleRate:
-            description: sample rate in S/s
-            type: integer
-  
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"  
  

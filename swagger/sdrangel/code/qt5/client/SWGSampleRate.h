@@ -11,50 +11,48 @@
  */
 
 /*
- * SWGAirspyReport.h
+ * SWGSampleRate.h
  *
- * Airspy
+ * A sample rate expressed in samples per second (S/s)
  */
 
-#ifndef SWGAirspyReport_H_
-#define SWGAirspyReport_H_
+#ifndef SWGSampleRate_H_
+#define SWGSampleRate_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSampleRate.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAirspyReport: public SWGObject {
+class SWG_API SWGSampleRate: public SWGObject {
 public:
-    SWGAirspyReport();
-    SWGAirspyReport(QString* json);
-    virtual ~SWGAirspyReport();
+    SWGSampleRate();
+    SWGSampleRate(QString* json);
+    virtual ~SWGSampleRate();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAirspyReport* fromJson(QString &jsonString) override;
+    virtual SWGSampleRate* fromJson(QString &jsonString) override;
 
-    QList<SWGSampleRate*>* getSampleRates();
-    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
+    qint32 getRate();
+    void setRate(qint32 rate);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGSampleRate*>* sample_rates;
-    bool m_sample_rates_isSet;
+    qint32 rate;
+    bool m_rate_isSet;
 
 };
 
 }
 
-#endif /* SWGAirspyReport_H_ */
+#endif /* SWGSampleRate_H_ */

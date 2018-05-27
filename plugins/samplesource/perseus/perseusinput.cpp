@@ -525,12 +525,12 @@ void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getPerseusReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
+    response.getPerseusReport()->setSampleRates(new QList<SWGSDRangel::SWGSampleRate*>);
 
     for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
     {
-        response.getPerseusReport()->getSampleRates()->append(new SWGSDRangel::SWGAirspyReport_sampleRates);
-        response.getPerseusReport()->getSampleRates()->back()->setSampleRate(*it);
+        response.getPerseusReport()->getSampleRates()->append(new SWGSDRangel::SWGSampleRate);
+        response.getPerseusReport()->getSampleRates()->back()->setRate(*it);
     }
 }
 

@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGAirspyReport_sampleRates.h"
+#include "SWGSampleRate.h"
 #include <QList>
 
 #include "SWGObject.h"
@@ -43,14 +43,14 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAirspyHFReport* fromJson(QString &jsonString) override;
 
-    QList<SWGAirspyReport_sampleRates*>* getSampleRates();
-    void setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates);
+    QList<SWGSampleRate*>* getSampleRates();
+    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGAirspyReport_sampleRates*>* sample_rates;
+    QList<SWGSampleRate*>* sample_rates;
     bool m_sample_rates_isSet;
 
 };

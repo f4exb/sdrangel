@@ -38,7 +38,7 @@ SWGAirspyReport::~SWGAirspyReport() {
 
 void
 SWGAirspyReport::init() {
-    sample_rates = new QList<SWGAirspyReport_sampleRates*>();
+    sample_rates = new QList<SWGSampleRate*>();
     m_sample_rates_isSet = false;
 }
 
@@ -65,7 +65,7 @@ SWGAirspyReport::fromJson(QString &json) {
 void
 SWGAirspyReport::fromJsonObject(QJsonObject &pJson) {
     
-    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGAirspyReport_sampleRates");
+    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGSampleRate");
 }
 
 QString
@@ -83,18 +83,18 @@ QJsonObject*
 SWGAirspyReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(sample_rates->size() > 0){
-        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGAirspyReport_sampleRates");
+        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
     }
 
     return obj;
 }
 
-QList<SWGAirspyReport_sampleRates*>*
+QList<SWGSampleRate*>*
 SWGAirspyReport::getSampleRates() {
     return sample_rates;
 }
 void
-SWGAirspyReport::setSampleRates(QList<SWGAirspyReport_sampleRates*>* sample_rates) {
+SWGAirspyReport::setSampleRates(QList<SWGSampleRate*>* sample_rates) {
     this->sample_rates = sample_rates;
     this->m_sample_rates_isSet = true;
 }

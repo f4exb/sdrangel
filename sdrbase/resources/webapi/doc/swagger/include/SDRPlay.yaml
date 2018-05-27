@@ -44,34 +44,16 @@ SDRPlayReport:
     sampleRates:
       type: array
       items:
-        properties:
-          sampleRate:
-            description: sample rate in S/s
-            type: integer
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
     bandwidths:
       type: array
       items:
-        properties:
-          bandwidth:
-            description: bandwidth in Hz
-            type: integer
+        $ref: "/doc/swagger/include/Structs.yaml#/Bandwidth"
     intermediateFrequencies:
       type: array
       items:
-        properties:
-          intermediateFrequency:
-            description: frequency in Hz
-            type: integer
+        $ref: "/doc/swagger/include/Structs.yaml#/Frequency"
     frequencyBands:
       type: array
       items:
-        properties:
-          bandName:
-            type: string
-          bandLow:
-            description: lower frequency bound in Hz
-            type: integer
-          bandHigh:
-            description: higher frequency bound in Hz
-            type: integer
- 
+        $ref: "/doc/swagger/include/Structs.yaml#/FrequencyBand"

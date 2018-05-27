@@ -11,50 +11,61 @@
  */
 
 /*
- * SWGAirspyReport.h
+ * SWGFrequencyBand.h
  *
- * Airspy
+ * A band of frequencies given its boudaries in Hertz (Hz)
  */
 
-#ifndef SWGAirspyReport_H_
-#define SWGAirspyReport_H_
+#ifndef SWGFrequencyBand_H_
+#define SWGFrequencyBand_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSampleRate.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAirspyReport: public SWGObject {
+class SWG_API SWGFrequencyBand: public SWGObject {
 public:
-    SWGAirspyReport();
-    SWGAirspyReport(QString* json);
-    virtual ~SWGAirspyReport();
+    SWGFrequencyBand();
+    SWGFrequencyBand(QString* json);
+    virtual ~SWGFrequencyBand();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAirspyReport* fromJson(QString &jsonString) override;
+    virtual SWGFrequencyBand* fromJson(QString &jsonString) override;
 
-    QList<SWGSampleRate*>* getSampleRates();
-    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
+    QString* getName();
+    void setName(QString* name);
+
+    qint32 getLowerBound();
+    void setLowerBound(qint32 lower_bound);
+
+    qint32 getHigherBound();
+    void setHigherBound(qint32 higher_bound);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGSampleRate*>* sample_rates;
-    bool m_sample_rates_isSet;
+    QString* name;
+    bool m_name_isSet;
+
+    qint32 lower_bound;
+    bool m_lower_bound_isSet;
+
+    qint32 higher_bound;
+    bool m_higher_bound_isSet;
 
 };
 
 }
 
-#endif /* SWGAirspyReport_H_ */
+#endif /* SWGFrequencyBand_H_ */

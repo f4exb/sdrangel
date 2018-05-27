@@ -565,12 +565,12 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
 
 void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getAirspyHfReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
+    response.getAirspyHfReport()->setSampleRates(new QList<SWGSDRangel::SWGSampleRate*>);
 
     for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
     {
-        response.getAirspyHfReport()->getSampleRates()->append(new SWGSDRangel::SWGAirspyReport_sampleRates);
-        response.getAirspyHfReport()->getSampleRates()->back()->setSampleRate(*it);
+        response.getAirspyHfReport()->getSampleRates()->append(new SWGSDRangel::SWGSampleRate);
+        response.getAirspyHfReport()->getSampleRates()->back()->setRate(*it);
     }
 }
 

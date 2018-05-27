@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGRtlSdrReport_gains.h"
+#include "SWGGain.h"
 #include <QList>
 
 #include "SWGObject.h"
@@ -43,14 +43,14 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRtlSdrReport* fromJson(QString &jsonString) override;
 
-    QList<SWGRtlSdrReport_gains*>* getGains();
-    void setGains(QList<SWGRtlSdrReport_gains*>* gains);
+    QList<SWGGain*>* getGains();
+    void setGains(QList<SWGGain*>* gains);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGRtlSdrReport_gains*>* gains;
+    QList<SWGGain*>* gains;
     bool m_gains_isSet;
 
 };

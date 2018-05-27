@@ -11,50 +11,48 @@
  */
 
 /*
- * SWGAirspyReport.h
+ * SWGGain.h
  *
- * Airspy
+ * A gain expressed in centi-Bels (tenths of dB)
  */
 
-#ifndef SWGAirspyReport_H_
-#define SWGAirspyReport_H_
+#ifndef SWGGain_H_
+#define SWGGain_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSampleRate.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAirspyReport: public SWGObject {
+class SWG_API SWGGain: public SWGObject {
 public:
-    SWGAirspyReport();
-    SWGAirspyReport(QString* json);
-    virtual ~SWGAirspyReport();
+    SWGGain();
+    SWGGain(QString* json);
+    virtual ~SWGGain();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAirspyReport* fromJson(QString &jsonString) override;
+    virtual SWGGain* fromJson(QString &jsonString) override;
 
-    QList<SWGSampleRate*>* getSampleRates();
-    void setSampleRates(QList<SWGSampleRate*>* sample_rates);
+    qint32 getGainCb();
+    void setGainCb(qint32 gain_cb);
 
 
     virtual bool isSet() override;
 
 private:
-    QList<SWGSampleRate*>* sample_rates;
-    bool m_sample_rates_isSet;
+    qint32 gain_cb;
+    bool m_gain_cb_isSet;
 
 };
 
 }
 
-#endif /* SWGAirspyReport_H_ */
+#endif /* SWGGain_H_ */

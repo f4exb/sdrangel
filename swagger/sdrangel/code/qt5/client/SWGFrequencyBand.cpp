@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGAirspyHFReport.h"
+#include "SWGFrequencyBand.h"
 
 #include "SWGHelpers.h"
 
@@ -22,39 +22,45 @@
 
 namespace SWGSDRangel {
 
-SWGAirspyHFReport::SWGAirspyHFReport(QString* json) {
+SWGFrequencyBand::SWGFrequencyBand(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGAirspyHFReport::SWGAirspyHFReport() {
-    sample_rates = nullptr;
-    m_sample_rates_isSet = false;
+SWGFrequencyBand::SWGFrequencyBand() {
+    name = nullptr;
+    m_name_isSet = false;
+    lower_bound = 0;
+    m_lower_bound_isSet = false;
+    higher_bound = 0;
+    m_higher_bound_isSet = false;
 }
 
-SWGAirspyHFReport::~SWGAirspyHFReport() {
+SWGFrequencyBand::~SWGFrequencyBand() {
     this->cleanup();
 }
 
 void
-SWGAirspyHFReport::init() {
-    sample_rates = new QList<SWGSampleRate*>();
-    m_sample_rates_isSet = false;
+SWGFrequencyBand::init() {
+    name = new QString("");
+    m_name_isSet = false;
+    lower_bound = 0;
+    m_lower_bound_isSet = false;
+    higher_bound = 0;
+    m_higher_bound_isSet = false;
 }
 
 void
-SWGAirspyHFReport::cleanup() {
-    if(sample_rates != nullptr) { 
-        auto arr = sample_rates;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete sample_rates;
+SWGFrequencyBand::cleanup() {
+    if(name != nullptr) { 
+        delete name;
     }
+
+
 }
 
-SWGAirspyHFReport*
-SWGAirspyHFReport::fromJson(QString &json) {
+SWGFrequencyBand*
+SWGFrequencyBand::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -63,13 +69,17 @@ SWGAirspyHFReport::fromJson(QString &json) {
 }
 
 void
-SWGAirspyHFReport::fromJsonObject(QJsonObject &pJson) {
+SWGFrequencyBand::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&sample_rates, pJson["sampleRates"], "QList", "SWGSampleRate");
+    ::SWGSDRangel::setValue(&lower_bound, pJson["lowerBound"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&higher_bound, pJson["higherBound"], "qint32", "");
+    
 }
 
 QString
-SWGAirspyHFReport::asJson ()
+SWGFrequencyBand::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -80,31 +90,59 @@ SWGAirspyHFReport::asJson ()
 }
 
 QJsonObject*
-SWGAirspyHFReport::asJsonObject() {
+SWGFrequencyBand::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(sample_rates->size() > 0){
-        toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
+    }
+    if(m_lower_bound_isSet){
+        obj->insert("lowerBound", QJsonValue(lower_bound));
+    }
+    if(m_higher_bound_isSet){
+        obj->insert("higherBound", QJsonValue(higher_bound));
     }
 
     return obj;
 }
 
-QList<SWGSampleRate*>*
-SWGAirspyHFReport::getSampleRates() {
-    return sample_rates;
+QString*
+SWGFrequencyBand::getName() {
+    return name;
 }
 void
-SWGAirspyHFReport::setSampleRates(QList<SWGSampleRate*>* sample_rates) {
-    this->sample_rates = sample_rates;
-    this->m_sample_rates_isSet = true;
+SWGFrequencyBand::setName(QString* name) {
+    this->name = name;
+    this->m_name_isSet = true;
+}
+
+qint32
+SWGFrequencyBand::getLowerBound() {
+    return lower_bound;
+}
+void
+SWGFrequencyBand::setLowerBound(qint32 lower_bound) {
+    this->lower_bound = lower_bound;
+    this->m_lower_bound_isSet = true;
+}
+
+qint32
+SWGFrequencyBand::getHigherBound() {
+    return higher_bound;
+}
+void
+SWGFrequencyBand::setHigherBound(qint32 higher_bound) {
+    this->higher_bound = higher_bound;
+    this->m_higher_bound_isSet = true;
 }
 
 
 bool
-SWGAirspyHFReport::isSet(){
+SWGFrequencyBand::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(sample_rates->size() > 0){ isObjectUpdated = true; break;}
+        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+        if(m_lower_bound_isSet){ isObjectUpdated = true; break;}
+        if(m_higher_bound_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

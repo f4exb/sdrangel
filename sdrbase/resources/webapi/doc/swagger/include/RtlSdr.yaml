@@ -40,7 +40,4 @@ RtlSdrReport:
     gains:
       type: array
       items:
-        properties:
-          gain:
-            description: gain in centi Bels
-            type: integer
+        $ref: "/doc/swagger/include/Structs.yaml#/Gain"

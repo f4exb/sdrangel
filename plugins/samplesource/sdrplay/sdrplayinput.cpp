@@ -662,38 +662,38 @@ int SDRPlayInput::webapiReportGet(
 
 void SDRPlayInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getSdrPlayReport()->setSampleRates(new QList<SWGSDRangel::SWGAirspyReport_sampleRates*>);
+    response.getSdrPlayReport()->setSampleRates(new QList<SWGSDRangel::SWGSampleRate*>);
 
     for (unsigned int i = 0; i < SDRPlaySampleRates::getNbRates(); i++)
     {
-        response.getSdrPlayReport()->getSampleRates()->append(new SWGSDRangel::SWGAirspyReport_sampleRates);
-        response.getSdrPlayReport()->getSampleRates()->back()->setSampleRate(SDRPlaySampleRates::getRate(i));
+        response.getSdrPlayReport()->getSampleRates()->append(new SWGSDRangel::SWGSampleRate);
+        response.getSdrPlayReport()->getSampleRates()->back()->setRate(SDRPlaySampleRates::getRate(i));
     }
 
-    response.getSdrPlayReport()->setIntermediateFrequencies(new QList<SWGSDRangel::SWGSDRPlayReport_intermediateFrequencies*>);
+    response.getSdrPlayReport()->setIntermediateFrequencies(new QList<SWGSDRangel::SWGFrequency*>);
 
     for (unsigned int i = 0; i < SDRPlayIF::getNbIFs(); i++)
     {
-        response.getSdrPlayReport()->getIntermediateFrequencies()->append(new SWGSDRangel::SWGSDRPlayReport_intermediateFrequencies);
-        response.getSdrPlayReport()->getIntermediateFrequencies()->back()->setIntermediateFrequency(SDRPlayIF::getIF(i));
+        response.getSdrPlayReport()->getIntermediateFrequencies()->append(new SWGSDRangel::SWGFrequency);
+        response.getSdrPlayReport()->getIntermediateFrequencies()->back()->setFrequency(SDRPlayIF::getIF(i));
     }
 
-    response.getSdrPlayReport()->setBandwidths(new QList<SWGSDRangel::SWGSDRPlayReport_bandwidths*>);
+    response.getSdrPlayReport()->setBandwidths(new QList<SWGSDRangel::SWGBandwidth*>);
 
     for (unsigned int i = 0; i < SDRPlayBandwidths::getNbBandwidths(); i++)
     {
-        response.getSdrPlayReport()->getBandwidths()->append(new SWGSDRangel::SWGSDRPlayReport_bandwidths);
+        response.getSdrPlayReport()->getBandwidths()->append(new SWGSDRangel::SWGBandwidth);
         response.getSdrPlayReport()->getBandwidths()->back()->setBandwidth(SDRPlayBandwidths::getBandwidth(i));
     }
 
-    response.getSdrPlayReport()->setFrequencyBands(new QList<SWGSDRangel::SWGSDRPlayReport_frequencyBands*>);
+    response.getSdrPlayReport()->setFrequencyBands(new QList<SWGSDRangel::SWGFrequencyBand*>);
 
     for (unsigned int i = 0; i < SDRPlayBands::getNbBands(); i++)
     {
-        response.getSdrPlayReport()->getFrequencyBands()->append(new SWGSDRangel::SWGSDRPlayReport_frequencyBands);
-        response.getSdrPlayReport()->getFrequencyBands()->back()->setBandName(new QString(SDRPlayBands::getBandName(i)));
-        response.getSdrPlayReport()->getFrequencyBands()->back()->setBandLow(SDRPlayBands::getBandLow(i));
-        response.getSdrPlayReport()->getFrequencyBands()->back()->setBandHigh(SDRPlayBands::getBandHigh(i));
+        response.getSdrPlayReport()->getFrequencyBands()->append(new SWGSDRangel::SWGFrequencyBand);
+        response.getSdrPlayReport()->getFrequencyBands()->back()->setName(new QString(SDRPlayBands::getBandName(i)));
+        response.getSdrPlayReport()->getFrequencyBands()->back()->setLowerBound(SDRPlayBands::getBandLow(i));
+        response.getSdrPlayReport()->getFrequencyBands()->back()->setHigherBound(SDRPlayBands::getBandHigh(i));
     }
 }
 
