@@ -1777,7 +1777,10 @@ definitions:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
       sdrDaemonSourceSettings:
         $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
+      sdrPlaySettings:
+        $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
         
+
   DeviceReport:
     description: Base device report. The specific device report present depends on deviceHwType
     discriminator: deviceHwType
@@ -1811,7 +1814,9 @@ definitions:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
       sdrDaemonSourceReport:
         $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
-        
+      sdrPlayReport:
+        $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+
   ChannelSettings:
     description: Base channel settings. The specific channel settings present depends on channelType.
     discriminator: channelType

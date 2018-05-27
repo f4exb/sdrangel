@@ -64,6 +64,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_rtl_sdr_settings_isSet = false;
     sdr_daemon_source_settings = nullptr;
     m_sdr_daemon_source_settings_isSet = false;
+    sdr_play_settings = nullptr;
+    m_sdr_play_settings_isSet = false;
 }
 
 SWGDeviceSettings::~SWGDeviceSettings() {
@@ -108,6 +110,8 @@ SWGDeviceSettings::init() {
     m_rtl_sdr_settings_isSet = false;
     sdr_daemon_source_settings = new SWGSDRdaemonSourceSettings();
     m_sdr_daemon_source_settings_isSet = false;
+    sdr_play_settings = new SWGSDRPlaySettings();
+    m_sdr_play_settings_isSet = false;
 }
 
 void
@@ -164,6 +168,9 @@ SWGDeviceSettings::cleanup() {
     if(sdr_daemon_source_settings != nullptr) { 
         delete sdr_daemon_source_settings;
     }
+    if(sdr_play_settings != nullptr) { 
+        delete sdr_play_settings;
+    }
 }
 
 SWGDeviceSettings*
@@ -212,6 +219,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
     
     ::SWGSDRangel::setValue(&sdr_daemon_source_settings, pJson["sdrDaemonSourceSettings"], "SWGSDRdaemonSourceSettings", "SWGSDRdaemonSourceSettings");
+    
+    ::SWGSDRangel::setValue(&sdr_play_settings, pJson["sdrPlaySettings"], "SWGSDRPlaySettings", "SWGSDRPlaySettings");
     
 }
 
@@ -282,6 +291,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((sdr_daemon_source_settings != nullptr) && (sdr_daemon_source_settings->isSet())){
         toJsonValue(QString("sdrDaemonSourceSettings"), sdr_daemon_source_settings, obj, QString("SWGSDRdaemonSourceSettings"));
+    }
+    if((sdr_play_settings != nullptr) && (sdr_play_settings->isSet())){
+        toJsonValue(QString("sdrPlaySettings"), sdr_play_settings, obj, QString("SWGSDRPlaySettings"));
     }
 
     return obj;
@@ -467,6 +479,16 @@ SWGDeviceSettings::setSdrDaemonSourceSettings(SWGSDRdaemonSourceSettings* sdr_da
     this->m_sdr_daemon_source_settings_isSet = true;
 }
 
+SWGSDRPlaySettings*
+SWGDeviceSettings::getSdrPlaySettings() {
+    return sdr_play_settings;
+}
+void
+SWGDeviceSettings::setSdrPlaySettings(SWGSDRPlaySettings* sdr_play_settings) {
+    this->sdr_play_settings = sdr_play_settings;
+    this->m_sdr_play_settings_isSet = true;
+}
+
 
 bool
 SWGDeviceSettings::isSet(){
@@ -490,6 +512,7 @@ SWGDeviceSettings::isSet(){
         if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
         if(sdr_daemon_source_settings != nullptr && sdr_daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
+        if(sdr_play_settings != nullptr && sdr_play_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

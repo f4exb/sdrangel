@@ -86,6 +86,11 @@
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrReport_gains.h"
 #include "SWGRtlSdrSettings.h"
+#include "SWGSDRPlayReport.h"
+#include "SWGSDRPlayReport_bandwidths.h"
+#include "SWGSDRPlayReport_frequencyBands.h"
+#include "SWGSDRPlayReport_intermediateFrequencies.h"
+#include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSourceReport.h"
 #include "SWGSDRdaemonSourceSettings.h"
 #include "SWGSSBDemodReport.h"
@@ -321,6 +326,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
+    }
+    if(QString("SWGSDRPlayReport").compare(type) == 0) {
+      return new SWGSDRPlayReport();
+    }
+    if(QString("SWGSDRPlayReport_bandwidths").compare(type) == 0) {
+      return new SWGSDRPlayReport_bandwidths();
+    }
+    if(QString("SWGSDRPlayReport_frequencyBands").compare(type) == 0) {
+      return new SWGSDRPlayReport_frequencyBands();
+    }
+    if(QString("SWGSDRPlayReport_intermediateFrequencies").compare(type) == 0) {
+      return new SWGSDRPlayReport_intermediateFrequencies();
+    }
+    if(QString("SWGSDRPlaySettings").compare(type) == 0) {
+      return new SWGSDRPlaySettings();
     }
     if(QString("SWGSDRdaemonSourceReport").compare(type) == 0) {
       return new SWGSDRdaemonSourceReport();

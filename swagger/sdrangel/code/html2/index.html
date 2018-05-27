@@ -1741,6 +1741,9 @@ margin-bottom: 20px;
     },
     "sdrDaemonSourceReport" : {
       "$ref" : "#/definitions/SDRdaemonSourceReport"
+    },
+    "sdrPlayReport" : {
+      "$ref" : "#/definitions/SDRPlayReport"
     }
   },
   "description" : "Base device report. The specific device report present depends on deviceHwType"
@@ -1844,6 +1847,9 @@ margin-bottom: 20px;
     },
     "sdrDaemonSourceSettings" : {
       "$ref" : "#/definitions/SDRdaemonSourceSettings"
+    },
+    "sdrPlaySettings" : {
+      "$ref" : "#/definitions/SDRPlaySettings"
     }
   },
   "description" : "Base device settings. The specific device settings present depends on deviceHwType."
@@ -3053,6 +3059,121 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
+};
+            defs.SDRPlayReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/AirspyReport_sampleRates"
+      }
+    },
+    "bandwidths" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SDRPlayReport_bandwidths"
+      }
+    },
+    "intermediateFrequencies" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SDRPlayReport_intermediateFrequencies"
+      }
+    },
+    "frequencyBands" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SDRPlayReport_frequencyBands"
+      }
+    }
+  },
+  "description" : "SDRplay1"
+};
+            defs.SDRPlayReport_bandwidths = {
+  "properties" : {
+    "bandwidth" : {
+      "type" : "integer",
+      "description" : "bandwidth in Hz"
+    }
+  }
+};
+            defs.SDRPlayReport_frequencyBands = {
+  "properties" : {
+    "bandName" : {
+      "type" : "string"
+    },
+    "bandLow" : {
+      "type" : "integer",
+      "description" : "lower frequency bound in Hz"
+    },
+    "bandHigh" : {
+      "type" : "integer",
+      "description" : "higher frequency bound in Hz"
+    }
+  }
+};
+            defs.SDRPlayReport_intermediateFrequencies = {
+  "properties" : {
+    "intermediateFrequency" : {
+      "type" : "integer",
+      "description" : "frequency in Hz"
+    }
+  }
+};
+            defs.SDRPlaySettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "tunerGain" : {
+      "type" : "integer"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "frequencyBandIndex" : {
+      "type" : "integer"
+    },
+    "ifFrequencyIndex" : {
+      "type" : "integer"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer"
+    },
+    "devSampleRateIndex" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "tunerGainMode" : {
+      "type" : "integer",
+      "description" : "1 tuner (table) gain, 0 manual (LNA, Mixer, BB) gain"
+    },
+    "lnaOn" : {
+      "type" : "integer"
+    },
+    "mixerAmpOn" : {
+      "type" : "integer"
+    },
+    "basebandGain" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "SDRplay1"
 };
             defs.SDRdaemonSourceReport = {
   "properties" : {
@@ -22374,7 +22495,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-26T23:41:15.758+02:00
+              Generated 2018-05-27T11:38:07.698+02:00
             </div>
           </div>
       </div>
