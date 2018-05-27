@@ -650,6 +650,114 @@ int SDRPlayInput::webapiRun(
     return 200;
 }
 
+int SDRPlayInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
+    response.getSdrPlaySettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int SDRPlayInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    SDRPlaySettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getSdrPlaySettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("tunerGain")) {
+        settings.m_tunerGain = response.getSdrPlaySettings()->getTunerGain();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getSdrPlaySettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("frequencyBandIndex")) {
+        settings.m_frequencyBandIndex = response.getSdrPlaySettings()->getFrequencyBandIndex();
+    }
+    if (deviceSettingsKeys.contains("ifFrequencyIndex")) {
+        settings.m_ifFrequencyIndex = response.getSdrPlaySettings()->getIfFrequencyIndex();
+    }
+    if (deviceSettingsKeys.contains("bandwidthIndex")) {
+        settings.m_bandwidthIndex = response.getSdrPlaySettings()->getBandwidthIndex();
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex")) {
+        settings.m_devSampleRateIndex = response.getSdrPlaySettings()->getDevSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getSdrPlaySettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos"))
+    {
+        int fcPos = response.getSdrPlaySettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (SDRPlaySettings::fcPos_t) fcPos;
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getSdrPlaySettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getSdrPlaySettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("tunerGainMode")) {
+        settings.m_tunerGainMode = response.getSdrPlaySettings()->getTunerGainMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("lnaOn")) {
+        settings.m_lnaOn = response.getSdrPlaySettings()->getLnaOn() != 0;
+    }
+    if (deviceSettingsKeys.contains("mixerAmpOn")) {
+        settings.m_mixerAmpOn = response.getSdrPlaySettings()->getMixerAmpOn() != 0;
+    }
+    if (deviceSettingsKeys.contains("basebandGain")) {
+        settings.m_basebandGain = response.getSdrPlaySettings()->getBasebandGain();
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
+    }
+
+    MsgConfigureSDRPlay *msg = MsgConfigureSDRPlay::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRPlay *msgToGUI = MsgConfigureSDRPlay::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void SDRPlayInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlaySettings& settings)
+{
+    response.getSdrPlaySettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getSdrPlaySettings()->setTunerGain(settings.m_tunerGain);
+    response.getSdrPlaySettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getSdrPlaySettings()->setFrequencyBandIndex(settings.m_frequencyBandIndex);
+    response.getSdrPlaySettings()->setIfFrequencyIndex(settings.m_ifFrequencyIndex);
+    response.getSdrPlaySettings()->setBandwidthIndex(settings.m_bandwidthIndex);
+    response.getSdrPlaySettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    response.getSdrPlaySettings()->setLog2Decim(settings.m_log2Decim);
+    response.getSdrPlaySettings()->setFcPos((int) settings.m_fcPos);
+    response.getSdrPlaySettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getSdrPlaySettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getSdrPlaySettings()->setTunerGainMode((int) settings.m_tunerGainMode);
+    response.getSdrPlaySettings()->setLnaOn(settings.m_lnaOn ? 1 : 0);
+    response.getSdrPlaySettings()->setMixerAmpOn(settings.m_mixerAmpOn ? 1 : 0);
+    response.getSdrPlaySettings()->setBasebandGain(settings.m_basebandGain);
+
+    if (response.getSdrPlaySettings()->getFileRecordName()) {
+        *response.getSdrPlaySettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getSdrPlaySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
 int SDRPlayInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         QString& errorMessage __attribute__((unused)))
