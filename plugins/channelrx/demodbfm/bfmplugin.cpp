@@ -20,7 +20,9 @@
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "bfmdemodgui.h"
+#endif
 #include "bfmdemod.h"
 
 const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
@@ -51,11 +53,19 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(BFMDemod::m_channelIdURI, BFMDemod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* BFMPlugin::createRxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSink *rxChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
 	return BFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
-
+#endif
 
 BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {

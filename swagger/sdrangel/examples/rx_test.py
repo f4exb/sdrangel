@@ -38,6 +38,12 @@ def getInputOptions():
     parser.add_option("--stereo", dest="stereo", help="Broadcast FM stereo", metavar="BOOL", action="store_true", default=False)
     parser.add_option("--lsb-stereo", dest="lsb_stereo", help="Broadcast FM LSB stereo", metavar="BOOL", action="store_true", default=False)
     parser.add_option("--rds", dest="rds", help="Broadcast FM RDS", metavar="BOOL", action="store_true", default=False)
+    parser.add_option("--audio-name", dest="audio_name", help="Audio: audio device name", metavar="STRING", type="string")
+    parser.add_option("--audio-udp", dest="audio_udp", help="Audio: set copy to UDP", metavar="BOOL_INT", type="int")
+    parser.add_option("--audio-rtp", dest="audio_rtp", help="Audio: use RTP over UDP", metavar="BOOL_INT", type="int")
+    parser.add_option("--audio-address", dest="audio_address", help="Audio: UDP destination address", metavar="IP_ADDRESS", type="string")
+    parser.add_option("--audio-port", dest="audio_port", help="Audio: UDP destination port", metavar="IP_PORT", type="int")
+    parser.add_option("--audio-channels", dest="audio_channels", help="Audio: UDP mode (0: L only 1: R only 2: L+R mono 3: LR stereo)", metavar="ENUM_INT", type="int")
 
     (options, args) = parser.parse_args()
     
@@ -77,6 +83,7 @@ def printResponse(response):
 def callAPI(url, method, params, json, text):
     request_method = requests_methods.get(method, None)
     if request_method is not None:
+        #print(base_url, url, json)
         r = request_method(url=base_url+url, params=params, json=json)
         if r.status_code / 100 == 2:
             print(text + " succeeded")
@@ -86,6 +93,26 @@ def callAPI(url, method, params, json, text):
             print(text + " failed")
             printResponse(r)
             return None
+
+# ======================================================================
+def setup_audio(options):
+    audio_dict = {}
+    if options.audio_name: # must not be None and reference a valid audio device
+        audio_dict["name"] = options.audio_name
+    if options.audio_udp:
+        audio_dict["copyToUDP"] = 0 if options.audio_udp == 0 else 1
+    if options.audio_rtp:
+        audio_dict["udpUsesRTP"] = 0 if options.audio_rtp == 0 else 1
+    if options.audio_address:
+        audio_dict["udpAddress"] = options.audio_address
+    if options.audio_port:
+        audio_dict["udpPort"] = options.audio_port
+    if options.audio_channels:
+        audio_dict["udpChannelMode"] =  0 if options.audio_channels < 0 else 3 if options.audio_channels > 3 else options.audio_channels
+    
+    r = callAPI('/audio/output/parameters', "PATCH", None, audio_dict, "setup audio {}".format(options.audio_name))
+    if r is None:
+        exit(-1)
 
 # ======================================================================
 def setupDevice(deviceset_url, options):
@@ -283,6 +310,9 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         deviceset_url = "/deviceset/%d" % options.device_index
+        
+        if options.audio_name:
+            setup_audio(options)
         
         if options.create:
             r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
