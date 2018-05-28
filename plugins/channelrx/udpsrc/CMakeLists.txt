@@ -1,5 +1,7 @@
 project(udpsrc)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(udpsrc_SOURCES
 	udpsrc.cpp
 	udpsrcgui.cpp
