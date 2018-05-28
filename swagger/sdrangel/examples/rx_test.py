@@ -301,6 +301,10 @@ def setupChannel(deviceset_url, options):
     if r is None:
         exit(-1)
 
+# ======================================================================
+def channelsReport(deviceset_url):
+    report = callAPI(deviceset_url + "/channels/report", "GET", None, None, "Get channels report")
+
 
 # ======================================================================
 def main():
@@ -310,9 +314,6 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         deviceset_url = "/deviceset/%d" % options.device_index
-        
-        if options.audio_name:
-            setup_audio(options)
         
         if options.create:
             r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
@@ -325,6 +326,13 @@ def main():
         r = callAPI(deviceset_url + "/device/run", "POST", None, None, "Start running device")
         if r is None:
             exit(-1)
+        
+        if options.audio_name:
+            time.sleep(1)
+            setup_audio(options)
+        
+#         if options.channel_id == "BFMDemod":
+#             channelsReport(deviceset_url)
         
     except Exception, msg:
         tb = traceback.format_exc()

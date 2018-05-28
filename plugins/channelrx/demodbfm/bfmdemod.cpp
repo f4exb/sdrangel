@@ -145,26 +145,26 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
             m_magsqCount++;
 
-//			m_movingAverage.feed(msq);
-
-			if(m_magsq >= m_squelchLevel) {
-				m_squelchState = m_settings.m_rfBandwidth / 20; // decay rate
-			}
-
-			if(m_squelchState > 0)
+			if (msq >= m_squelchLevel)
 			{
-				m_squelchState--;
-
-				//demod = phaseDiscriminator2(rf[i], msq);
-				demod = m_phaseDiscri.phaseDiscriminator(rf[i]);
+			    if (m_squelchState < m_settings.m_rfBandwidth / 10) { // twice attack and decay rate
+			        m_squelchState++;
+			    }
 			}
 			else
 			{
+			    if (m_squelchState > 0) {
+			        m_squelchState--;
+			    }
+			}
+
+			if (m_squelchState > m_settings.m_rfBandwidth / 20) { // squelch open
+				demod = m_phaseDiscri.phaseDiscriminator(rf[i]);
+			} else {
 				demod = 0;
 			}
 
-			if (!m_settings.m_showPilot)
-			{
+			if (!m_settings.m_showPilot) {
 				m_sampleBuffer.push_back(Sample(demod * SDR_RX_SCALEF, 0.0));
 			}
 
@@ -179,8 +179,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 					if (m_rdsDemod.process(cr.real(), bit))
 					{
-						if (m_rdsDecoder.frameSync(bit))
-						{
+						if (m_rdsDecoder.frameSync(bit)) {
 						    m_rdsParser.parseGroup(m_rdsDecoder.getGroup());
 						}
 					}
@@ -197,8 +196,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 			{
 				m_pilotPLL.process(demod, m_pilotPLLSamples);
 
-				if (m_settings.m_showPilot)
-				{
+				if (m_settings.m_showPilot) {
 					m_sampleBuffer.push_back(Sample(m_pilotPLLSamples[1] * SDR_RX_SCALEF, 0.0)); // debug 38 kHz pilot
 				}
 

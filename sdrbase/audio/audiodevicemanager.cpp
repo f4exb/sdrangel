@@ -543,12 +543,15 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
 
     if (!getOutputDeviceInfo(deviceName, oldDeviceInfo))
     {
-        qDebug("AudioDeviceManager::setOutputDeviceInfo: unknown device %s", qPrintable(deviceName));
+        qInfo("AudioDeviceManager::setOutputDeviceInfo: unknown device %s", qPrintable(deviceName));
     }
 
     m_audioOutputInfos[deviceName] = deviceInfo;
 
-    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) { // no FIFO registered yet hence no audio output has been allocated yet
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end())
+    {
+        qWarning("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s no FIFO registered yet hence no audio output has been allocated yet",
+                outputDeviceIndex, qPrintable(deviceName));
         return;
     }
 
@@ -575,6 +578,9 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
     audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
     audioOutput->setUdpChannelFormat(deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
+
+    qDebug("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s updated",
+            outputDeviceIndex, qPrintable(deviceName));
 }
 
 void AudioDeviceManager::unsetOutputDeviceInfo(int outputDeviceIndex)
