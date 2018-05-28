@@ -460,22 +460,22 @@ void DSDDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
 void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
 {
     qDebug() << "DSDDemod::applySettings: "
-            << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << m_settings.m_rfBandwidth
-            << " m_fmDeviation: " << m_settings.m_fmDeviation
-            << " m_demodGain: " << m_settings.m_demodGain
-            << " m_volume: " << m_settings.m_volume
-            << " m_baudRate: " << m_settings.m_baudRate
-            << " m_squelchGate" << m_settings.m_squelchGate
-            << " m_squelch: " << m_settings.m_squelch
-            << " m_audioMute: " << m_settings.m_audioMute
-            << " m_enableCosineFiltering: " << m_settings.m_enableCosineFiltering
-            << " m_syncOrConstellation: " << m_settings.m_syncOrConstellation
-            << " m_slot1On: " << m_settings.m_slot1On
-            << " m_slot2On: " << m_settings.m_slot2On
-            << " m_tdmaStereo: " << m_settings.m_tdmaStereo
-            << " m_pllLock: " << m_settings.m_pllLock
-            << " m_highPassFilter: "<< m_settings.m_highPassFilter
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_fmDeviation: " << settings.m_fmDeviation
+            << " m_demodGain: " << settings.m_demodGain
+            << " m_volume: " << settings.m_volume
+            << " m_baudRate: " << settings.m_baudRate
+            << " m_squelchGate" << settings.m_squelchGate
+            << " m_squelch: " << settings.m_squelch
+            << " m_audioMute: " << settings.m_audioMute
+            << " m_enableCosineFiltering: " << settings.m_enableCosineFiltering
+            << " m_syncOrConstellation: " << settings.m_syncOrConstellation
+            << " m_slot1On: " << settings.m_slot1On
+            << " m_slot2On: " << settings.m_slot2On
+            << " m_tdmaStereo: " << settings.m_tdmaStereo
+            << " m_pllLock: " << settings.m_pllLock
+            << " m_highPassFilter: "<< settings.m_highPassFilter
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
