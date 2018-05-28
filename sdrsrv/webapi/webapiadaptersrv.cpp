@@ -42,6 +42,7 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
 
 #include "maincore.h"
 #include "loggerwithfile.h"
@@ -1260,6 +1261,44 @@ int WebAPIAdapterSrv::devicesetDeviceRunDelete(
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
             response.init();
             return sink->webapiRun(false, response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceReport& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
+            response.setTx(0);
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiReportGet(response, *error.getMessage());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
+            response.setTx(1);
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiReportGet(response, *error.getMessage());
         }
         else
         {
