@@ -104,25 +104,19 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     {
         if (m_squared)
         {
-            double u0 = m_R / m_moving_average.average();
-            double du = (u0*m_magsq) - (m_clampMax/4.0);
-            if (du > 0) {
-                m_u0 = (m_clampMax/4.0)*(1.0 + (log10(1+du)/8.0)); // experimental clipping limiter
+            if (m_magsq > m_clampMax) {
+                m_u0 = m_clampMax / m_magsq;
             } else {
-                m_u0 = u0;
+                m_u0 = m_R / m_moving_average.average();
             }
-            //m_u0 = (u0 * m_magsq > m_clampMax) ? m_clampMax / m_magsq : u0;
         }
         else
         {
-            double u02 = m_R2 / m_moving_average.average();
-            double du = (u02*m_magsq) - (m_clampMax/4.0);
-            if (du > 0) {
-                m_u0 = (m_clampMax/4.0)*(1.0 + (log10(1+du)/8.0)); // experimental clipping limiter
+            if (sqrt(m_magsq) > m_clampMax) {
+                m_u0 = m_clampMax / sqrt(m_magsq);
             } else {
-                m_u0 = sqrt(u02);
+                m_u0 = m_R / sqrt(m_moving_average.average());
             }
-            //m_u0 = (u02 * m_magsq > m_clampMax) ? sqrt(m_clampMax / m_magsq) : sqrt(u02);
         }
     }
     else

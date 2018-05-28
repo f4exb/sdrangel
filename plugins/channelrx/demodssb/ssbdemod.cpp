@@ -85,7 +85,7 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
 	m_magsqPeak = 0.0f;
 	m_magsqCount = 0;
 
-	m_agc.setClampMax(SDR_RX_SCALED*SDR_RX_SCALED);
+	m_agc.setClampMax(SDR_RX_SCALED/100.0);
 	m_agc.setClamping(m_agcClamping);
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
