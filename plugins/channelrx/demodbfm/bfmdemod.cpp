@@ -678,6 +678,10 @@ void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
         response.getBfmDemodReport()->setRdsReport(new SWGSDRangel::SWGRDSReport());
         webapiFormatRDSReport(response.getBfmDemodReport()->getRdsReport());
     }
+    else
+    {
+        response.getBfmDemodReport()->setRdsReport(0);
+    }
 }
 
 void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
