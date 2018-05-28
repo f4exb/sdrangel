@@ -94,6 +94,7 @@ private:
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
+    void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
     void resetChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings);
     void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
     void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);

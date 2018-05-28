@@ -1254,6 +1254,7 @@ void WebAPIRequestMapper::devicesetDeviceReportService(const std::string& indexS
         try
         {
             SWGSDRangel::SWGDeviceReport normalResponse;
+            resetDeviceReport(normalResponse);
             int deviceSetIndex = boost::lexical_cast<int>(indexStr);
             int status = m_adapter->devicesetDeviceReportGet(deviceSetIndex, normalResponse, errorResponse);
             response.setStatus(status);
@@ -2256,28 +2257,81 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
 {
     deviceSettings.cleanup();
     deviceSettings.setDeviceHwType(0);
+    deviceSettings.setAirspySettings(0);
+    deviceSettings.setAirspyHfSettings(0);
+    deviceSettings.setBladeRfInputSettings(0);
+    deviceSettings.setBladeRfOutputSettings(0);
+    deviceSettings.setFcdProPlusSettings(0);
+    deviceSettings.setFcdProSettings(0);
     deviceSettings.setFileSourceSettings(0);
     deviceSettings.setHackRfInputSettings(0);
     deviceSettings.setHackRfOutputSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
     deviceSettings.setLimeSdrOutputSettings(0);
+    deviceSettings.setPerseusSettings(0);
+    deviceSettings.setPlutoSdrInputSettings(0);
+    deviceSettings.setPlutoSdrOutputSettings(0);
     deviceSettings.setRtlSdrSettings(0);
+    deviceSettings.setSdrDaemonSinkSettings(0);
+    deviceSettings.setSdrDaemonSourceSettings(0);
+    deviceSettings.setSdrPlaySettings(0);
+    deviceSettings.setTestSourceSettings(0);
+}
+
+void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport)
+{
+    deviceReport.cleanup();
+    deviceReport.setDeviceHwType(0);
+    deviceReport.setAirspyHfReport(0);
+    deviceReport.setAirspyReport(0);
+    deviceReport.setFileSourceReport(0);
+    deviceReport.setLimeSdrInputReport(0);
+    deviceReport.setLimeSdrOutputReport(0);
+    deviceReport.setPerseusReport(0);
+    deviceReport.setPlutoSdrInputReport(0);
+    deviceReport.setPlutoSdrOutputReport(0);
+    deviceReport.setRtlSdrReport(0);
+    deviceReport.setSdrDaemonSinkReport(0);
+    deviceReport.setSdrDaemonSourceReport(0);
+    deviceReport.setSdrPlayReport(0);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
 {
     channelSettings.cleanup();
     channelSettings.setChannelType(0);
+    channelSettings.setAmDemodSettings(0);
+    channelSettings.setAmModSettings(0);
+    channelSettings.setAtvModSettings(0);
+    channelSettings.setBfmDemodSettings(0);
+    channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
+    channelSettings.setSsbDemodSettings(0);
+    channelSettings.setSsbModSettings(0);
+    channelSettings.setUdpSinkSettings(0);
+    channelSettings.setUdpSrcSettings(0);
+    channelSettings.setWfmDemodSettings(0);
+    channelSettings.setWfmModSettings(0);
 }
 
 void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport)
 {
     channelReport.cleanup();
     channelReport.setChannelType(0);
+    channelReport.setAmDemodReport(0);
+    channelReport.setAmModReport(0);
+    channelReport.setAtvModReport(0);
+    channelReport.setBfmDemodReport(0);
+    channelReport.setDsdDemodReport(0);
     channelReport.setNfmDemodReport(0);
     channelReport.setNfmModReport(0);
+    channelReport.setSsbDemodReport(0);
+    channelReport.setSsbModReport(0);
+    channelReport.setUdpSinkReport(0);
+    channelReport.setUdpSrcReport(0);
+    channelReport.setWfmDemodReport(0);
+    channelReport.setWfmModReport(0);
 }
 
 void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)
