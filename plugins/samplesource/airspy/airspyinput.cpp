@@ -24,7 +24,6 @@
 #include "SWGDeviceReport.h"
 #include "SWGAirspyReport.h"
 
-#include "airspygui.h"
 #include "airspyinput.h"
 #include "airspyplugin.h"
 
