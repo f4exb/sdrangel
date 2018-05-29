@@ -39,7 +39,6 @@
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
 
-#include "sdrdaemonsourcegui.h"
 #include "sdrdaemonsourceinput.h"
 #include "sdrdaemonsourceudphandler.h"
 
