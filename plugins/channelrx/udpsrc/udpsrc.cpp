@@ -30,7 +30,6 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
-#include "udpsrcgui.h"
 #include "udpsrc.h"
 
 const Real UDPSrc::m_agcTarget = 16384.0f;
