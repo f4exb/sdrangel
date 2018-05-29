@@ -27,7 +27,6 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include <dsp/filerecord.h>
-#include "sdrplaygui.h"
 #include "sdrplayinput.h"
 
 #include <device/devicesourceapi.h>
