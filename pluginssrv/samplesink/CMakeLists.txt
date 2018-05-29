@@ -17,9 +17,16 @@ if(LIBUSB_FOUND AND LIMESUITE_FOUND)
     add_subdirectory(limesdroutput)
 endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
 
+find_package(LibIIO)
+if(LIBUSB_FOUND AND LIBIIO_FOUND)
+    add_subdirectory(plutosdroutput)
+endif(LIBUSB_FOUND AND LIBIIO_FOUND)
+
 if (BUILD_DEBIAN)
-    add_subdirectory(limesdroutput)
+    add_subdirectory(bladerfoutput)
     add_subdirectory(hackrfoutput)
+    add_subdirectory(limesdroutput)
+    add_subdirectory(bladerfoutput)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesink)

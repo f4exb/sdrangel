@@ -17,13 +17,14 @@
 #ifndef PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_
 
-#include <plugin/plugininstancegui.h>
 #include <QObject>
 #include <QWidget>
 #include <QTimer>
 
 #include "util/messagequeue.h"
+#include "plugin/plugininstancegui.h"
 
+#include "plutosdroutput.h"
 #include "plutosdroutputsettings.h"
 
 class DeviceSampleSink;

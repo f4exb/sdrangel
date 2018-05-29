@@ -23,6 +23,7 @@
 #include <dsp/devicesamplesink.h>
 #include "util/message.h"
 #include "plutosdr/deviceplutosdrshared.h"
+#include "plutosdr/deviceplutosdrbox.h"
 #include "plutosdroutputsettings.h"
 
 class DeviceSinkAPI;
