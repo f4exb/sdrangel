@@ -135,11 +135,9 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		for (int i =0 ; i  <rf_out; i++)
 		{
 			msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
-
             m_magsqSum += msq;
 
-            if (msq > m_magsqPeak)
-            {
+            if (msq > m_magsqPeak) {
                 m_magsqPeak = msq;
             }
 
@@ -246,12 +244,11 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				++m_audioBufferFill;
 
-				if(m_audioBufferFill >= m_audioBuffer.size())
+				if (m_audioBufferFill >= m_audioBuffer.size())
 				{
 					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-					if(res != m_audioBufferFill)
-					{
+					if(res != m_audioBufferFill) {
 						qDebug("BFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
 					}
 
@@ -263,20 +260,18 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		}
 	}
 
-	if(m_audioBufferFill > 0)
+	if (m_audioBufferFill > 0)
 	{
 		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-		if(res != m_audioBufferFill)
-		{
+		if (res != m_audioBufferFill) {
 			qDebug("BFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
 		}
 
 		m_audioBufferFill = 0;
 	}
 
-	if(m_sampleSink != 0)
-	{
+	if (m_sampleSink != 0) {
 		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	}
 
