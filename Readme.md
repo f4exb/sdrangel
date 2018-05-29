@@ -46,6 +46,14 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
 
+<h2>REST API</h2>
+
+From version 4 a REST API is available to interact with the SDRangel application. More details are provided in the server instance documentation in the `sdrsrv` folder.
+
+<h2>Server instance</h2>
+
+From version 4 the `sdrangelsrv` binary launches a server mode SDRangel instance that runs wihout the GUI. More information is provided in the Readme file of the `sdrsrv` folder. 
+
 <h1>Notes on pulseaudio setup</h1>
 
 The audio devices with Qt are supported through pulseaudio and unless you are using a single sound chip (or card) with a single output port or you are an expert with pulseaudio config files you may get into trouble when trying to route the audio to a different output port. These notes are a follow-up of issue #31 with my own experiments with HDMI audio output on the Udoo x86 board. So using this example of HDMI output you can do the following:

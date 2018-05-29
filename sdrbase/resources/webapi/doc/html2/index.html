@@ -1424,7 +1424,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/WFMModReport"
     }
   },
-  "description" : "Base channel report. The specific channel report present depends on channelType or paremt context."
+  "description" : "Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present."
 };
             defs.ChannelSettings = {
   "required" : [ "channelType", "tx" ],
@@ -1478,7 +1478,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/WFMModSettings"
     }
   },
-  "description" : "Base channel settings. The specific channel settings present depends on channelType."
+  "description" : "Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present."
 };
             defs.ChannelsDetail = {
   "required" : [ "channelcount" ],
@@ -1749,7 +1749,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/SDRPlayReport"
     }
   },
-  "description" : "Base device report. The specific device report present depends on deviceHwType"
+  "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
 };
             defs.DeviceSet = {
   "required" : [ "channelcount", "samplingDevice" ],
@@ -1861,7 +1861,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/TestSourceSettings"
     }
   },
-  "description" : "Base device settings. The specific device settings present depends on deviceHwType."
+  "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
 };
             defs.DeviceState = {
   "required" : [ "state" ],
@@ -4083,15 +4083,11 @@ margin-bottom: 20px;
 <p>Limitations and specifcities:</p>
 <ul>
 <li>In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.</li>
-<li>Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.</li>
 <li>Preset import and export from/to file is a server only feature.</li>
 <li>Device set focus is a GUI only feature.</li>
-<li>The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source</li>
-<li>The content type returned is always application/json except in the following cases:
-<ul>
-<li>An incorrect URL was specified: this document is returned as text/html with a status 400</li>
-</ul>
-</li>
+<li>The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator</li>
+<li>The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time</li>
+<li>The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time</li>
 </ul>
 <hr />
 </div>
@@ -22613,7 +22609,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-05-28T00:22:45.302+02:00
+              Generated 2018-05-30T00:50:44.029+02:00
             </div>
           </div>
       </div>
