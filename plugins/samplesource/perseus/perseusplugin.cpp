@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "perseus-sdr.h"
 
 #include <device/devicesourceapi.h>
@@ -23,11 +22,15 @@
 #include "util/simpleserializer.h"
 #include "perseus/deviceperseus.h"
 #include "perseusplugin.h"
+#ifdef SERVER_MODE
+#include "perseusinput.h"
+#else
 #include "perseusgui.h"
+#endif
 
 const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
 	QString("Perseus Input"),
-	QString("3.14.6"),
+	QString("4.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -84,6 +87,15 @@ PluginInterface::SamplingDevices PerseusPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -100,6 +112,7 @@ PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *PerseusPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
