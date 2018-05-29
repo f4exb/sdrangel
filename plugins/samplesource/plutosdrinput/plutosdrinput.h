@@ -24,6 +24,7 @@
 #include <dsp/devicesamplesource.h>
 #include "util/message.h"
 #include "plutosdr/deviceplutosdrshared.h"
+#include "plutosdr/deviceplutosdrbox.h"
 #include "plutosdrinputsettings.h"
 
 class DeviceSourceAPI;

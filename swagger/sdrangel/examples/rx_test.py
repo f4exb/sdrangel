@@ -186,6 +186,7 @@ def setupDevice(deviceset_url, options):
             settings['plutoSdrInputSettings']['fcPos'] = options.fc_pos
             settings['plutoSdrInputSettings']['dcBlock'] = options.fc_pos == 2
             settings['plutoSdrInputSettings']['iqImbalance'] = options.fc_pos == 2
+            settings['plutoSdrInputSettings']['LOppmTenths'] = int(options.lo_ppm * 10)  # in tenths of PPM
         elif options.device_hwid == "RTLSDR":
             settings['rtlSdrSettings']['devSampleRate'] = options.sample_rate*1000
             settings['rtlSdrSettings']['centerFrequency'] = options.device_freq*1000
