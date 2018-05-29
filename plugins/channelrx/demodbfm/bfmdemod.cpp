@@ -495,8 +495,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     if ((settings.m_squelch != m_settings.m_squelch) || force)
     {
         qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
-        m_squelchLevel = std::pow(10.0, settings.m_squelch / 20.0);
-        m_squelchLevel *= m_squelchLevel;
+        m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)

@@ -107,41 +107,41 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		for (int i = 0 ; i < rf_out; i++)
 		{
-		    demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
+		    msq = rf[i].real()*rf[i].real() + rf[i].imag()*rf[i].imag();
 		    Real magsq = msq / (SDR_RX_SCALED*SDR_RX_SCALED);
+		    m_magsqSum += magsq;
+		    m_movingAverage(magsq);
 
-			m_movingAverage(magsq);
-            m_magsqSum += magsq;
-
-            if (magsq > m_magsqPeak)
-            {
+            if (magsq > m_magsqPeak) {
                 m_magsqPeak = magsq;
             }
 
             m_magsqCount++;
 
-			if((Real) m_movingAverage >= m_squelchLevel)
-				m_squelchState = m_settings.m_rfBandwidth / 20; // decay rate
-
-			if (m_squelchState > 0)
-			{
-				m_squelchState--;
-				m_squelchOpen = true;
-			}
-			else
-			{
-				demod = 0;
-                m_squelchOpen = false;
-			}
-
-            if (m_settings.m_audioMute)
+            if (magsq >= m_squelchLevel)
             {
+                if (m_squelchState < m_settings.m_rfBandwidth / 10) { // twice attack and decay rate
+                    m_squelchState++;
+                }
+            }
+            else
+            {
+                if (m_squelchState > 0) {
+                    m_squelchState--;
+                }
+            }
+
+			m_squelchOpen = (m_squelchState > (m_settings.m_rfBandwidth / 20));
+
+			if (m_squelchOpen && !m_settings.m_audioMute) { // squelch open and not mute
+                demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
+            } else {
                 demod = 0;
             }
 
             Complex e(demod, 0);
 
-			if(m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
+			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				qint16 sample = (qint16)(ci.real() * 3276.8f * m_settings.m_volume);
 				m_sampleBuffer.push_back(Sample(sample, sample));
@@ -154,8 +154,7 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 				{
 					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-					if(res != m_audioBufferFill)
-					{
+					if (res != m_audioBufferFill) {
 						qDebug("WFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
 					}
 
@@ -167,12 +166,11 @@ void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		}
 	}
 
-	if(m_audioBufferFill > 0)
+	if (m_audioBufferFill > 0)
 	{
 		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
 
-		if(res != m_audioBufferFill)
-		{
+		if (res != m_audioBufferFill) {
 			qDebug("WFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
 		}
 
@@ -339,8 +337,7 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
     if ((settings.m_squelch != m_settings.m_squelch) || force)
     {
         qDebug() << "WFMDemod::applySettings: set m_squelchLevel";
-        m_squelchLevel = pow(10.0, settings.m_squelch / 20.0);
-        m_squelchLevel *= m_squelchLevel;
+        m_squelchLevel = pow(10.0, settings.m_squelch / 10.0);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
