@@ -30,7 +30,6 @@
 
 #include <device/devicesourceapi.h>
 
-#include "fcdproplusgui.h"
 #include "fcdproplusthread.h"
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"

@@ -15,14 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "fcdproplusplugin.h"
 
 #include <device/devicesourceapi.h>
 
+#ifdef SERVER_MODE
+#include "fcdproplusinput.h"
+#else
 #include "fcdproplusgui.h"
+#endif
 #include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlusPlugin::m_pluginDescriptor = {
@@ -80,6 +83,15 @@ PluginInterface::SamplingDevices FCDProPlusPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* FCDProPlusPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* FCDProPlusPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -96,6 +108,7 @@ PluginInstanceGUI* FCDProPlusPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *FCDProPlusPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
