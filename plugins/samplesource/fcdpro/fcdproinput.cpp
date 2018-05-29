@@ -31,7 +31,6 @@
 
 #include <device/devicesourceapi.h>
 
-#include "fcdprogui.h"
 #include "fcdprothread.h"
 #include "fcdtraits.h"
 #include "fcdproconst.h"
