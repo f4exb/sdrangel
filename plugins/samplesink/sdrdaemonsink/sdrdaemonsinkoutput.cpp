@@ -30,7 +30,6 @@
 
 #include "device/devicesinkapi.h"
 
-#include "sdrdaemonsinkgui.h"
 #include "sdrdaemonsinkoutput.h"
 #include "sdrdaemonsinkthread.h"
 
