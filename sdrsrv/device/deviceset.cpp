@@ -152,18 +152,19 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 
         qDebug("DeviceSet::loadChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
-        for(int i = 0; i < preset->getChannelCount(); i++)
+        for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
             ChannelInstanceRegistration reg;
 
             // if we have one instance available already, use it
 
-            for(int i = 0; i < openChannels.count(); i++)
+            for (int i = 0; i < openChannels.count(); i++)
             {
                 qDebug("DeviceSet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
-                if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
+                //if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
+                if (compareRxChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
                 {
                     qDebug("DeviceSet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
@@ -174,13 +175,16 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 
             // if we haven't one already, create one
 
-            if(reg.m_channelSinkAPI == 0)
+            if (reg.m_channelSinkAPI == 0)
             {
-                for(int i = 0; i < channelRegistrations->count(); i++)
+                for (int i = 0; i < channelRegistrations->count(); i++)
                 {
-                    if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                    //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                    if (compareRxChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
                     {
-                        qDebug("DeviceSet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                        qDebug("DeviceSet::loadChannelSettings: creating new channel [%s] from config [%s]",
+                                qPrintable((*channelRegistrations)[i].m_channelIdURI),
+                                qPrintable(channelConfig.m_channelIdURI));
                         ChannelSinkAPI *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannelCS(m_deviceSourceAPI);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannel);
                         m_rxChannelInstanceRegistrations.append(reg);
@@ -189,7 +193,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 }
             }
 
-            if(reg.m_channelSinkAPI != 0)
+            if (reg.m_channelSinkAPI != 0)
             {
                 qDebug("DeviceSet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                 reg.m_channelSinkAPI->deserialize(channelConfig.m_config);
@@ -197,7 +201,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         }
 
         // everything, that is still "available" is not needed anymore
-        for(int i = 0; i < openChannels.count(); i++)
+        for (int i = 0; i < openChannels.count(); i++)
         {
             qDebug("DeviceSet::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
             openChannels[i].m_channelSinkAPI->destroy();
@@ -368,3 +372,11 @@ bool DeviceSet::ChannelInstanceRegistration::operator<(const ChannelInstanceRegi
     }
 }
 
+bool DeviceSet::compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI)
+{
+    if ((xChannelURI == "sdrangel.channel.chanalyzerng") || (xChannelURI == "sdrangel.channel.chanalyzer")) { // renamed ChanalyzerNG to Chanalyzer in 4.0.0
+        return registerdChannelURI == "sdrangel.channel.chanalyzer";
+    } else {
+        return registerdChannelURI == xChannelURI;
+    }
+}

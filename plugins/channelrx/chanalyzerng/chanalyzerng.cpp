@@ -30,8 +30,8 @@ MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzerOld, Mess
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgReportChannelSampleRateChanged, Message)
 
-const QString ChannelAnalyzerNG::m_channelIdURI = "sdrangel.channel.chanalyzerng";
-const QString ChannelAnalyzerNG::m_channelId = "ChannelAnalyzerNG";
+const QString ChannelAnalyzerNG::m_channelIdURI = "sdrangel.channel.chanalyzer";
+const QString ChannelAnalyzerNG::m_channelId = "ChannelAnalyzer";
 
 ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),

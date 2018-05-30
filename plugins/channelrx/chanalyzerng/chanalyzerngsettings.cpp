@@ -45,7 +45,7 @@ void ChannelAnalyzerNGSettings::resetToDefaults()
     m_pllPskOrder = 1;
     m_inputType = InputSignal;
     m_rgbColor = QColor(128, 128, 128).rgb();
-    m_title = "Channel Analyzer NG";
+    m_title = "Channel Analyzer";
 }
 
 QByteArray ChannelAnalyzerNGSettings::serialize() const

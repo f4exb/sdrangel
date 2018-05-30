@@ -23,7 +23,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Channel Analyzer NG</string>
+   <string>Channel Analyzer</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">

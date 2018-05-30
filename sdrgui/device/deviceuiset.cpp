@@ -191,9 +191,12 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             for(int i = 0; i < channelRegistrations->count(); i++)
             {
-                if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                if (compareRxChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
                 {
-                    qDebug("DeviceUISet::loadRxChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                    qDebug("DeviceUISet::loadRxChannelSettings: creating new channel [%s] from config [%s]",
+                            qPrintable((*channelRegistrations)[i].m_channelIdURI),
+                            qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSink *rxChannel =
                             (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceSourceAPI);
                     PluginInstanceGUI *rxChannelGUI =
@@ -270,9 +273,11 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             for(int i = 0; i < channelRegistrations->count(); i++)
             {
-                if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                if ((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                 {
-                    qDebug("DeviceUISet::loadTxChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                    qDebug("DeviceUISet::loadTxChannelSettings: creating new channel [%s] from config [%s]",
+                            qPrintable((*channelRegistrations)[i].m_channelIdURI),
+                            qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSource *txChannel =
                             (*channelRegistrations)[i].m_plugin->createTxChannelBS(m_deviceSinkAPI);
                     PluginInstanceGUI *txChannelGUI =
@@ -347,4 +352,11 @@ bool DeviceUISet::ChannelInstanceRegistration::operator<(const ChannelInstanceRe
     }
 }
 
-
+bool DeviceUISet::compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI)
+{
+    if ((xChannelURI == "sdrangel.channel.chanalyzerng") || (xChannelURI == "sdrangel.channel.chanalyzer")) { // renamed ChanalyzerNG to Chanalyzer in 4.0.0
+        return registerdChannelURI == "sdrangel.channel.chanalyzer";
+    } else {
+        return registerdChannelURI == xChannelURI;
+    }
+}
