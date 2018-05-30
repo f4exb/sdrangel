@@ -77,6 +77,6 @@ target_link_libraries(inputperseus
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputperseus Core Widgets)
+target_link_libraries(inputperseus Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputperseus DESTINATION lib/plugins/samplesource)

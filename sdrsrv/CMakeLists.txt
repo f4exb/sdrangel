@@ -44,7 +44,7 @@ target_link_libraries(sdrsrv
 
 target_compile_features(sdrsrv PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrsrv Core Multimedia)
+target_link_libraries(sdrsrv Qt5::Core Qt5::Multimedia)
 
 install(TARGETS sdrsrv DESTINATION lib)
 

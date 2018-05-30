@@ -36,6 +36,6 @@ target_link_libraries(modamsrv
 	swagger
 )
 
-qt5_use_modules(modamsrv Core)
+target_link_libraries(modamsrv Qt5::Core)
 
 install(TARGETS modamsrv DESTINATION lib/pluginssrv/channeltx)

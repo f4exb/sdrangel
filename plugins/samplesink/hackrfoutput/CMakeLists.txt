@@ -76,6 +76,6 @@ target_link_libraries(outputhackrf
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputhackrf Core Widgets)
+target_link_libraries(outputhackrf Qt5::Core Qt5::Widgets)
 
 install(TARGETS outputhackrf DESTINATION lib/plugins/samplesink)

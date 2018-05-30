@@ -76,6 +76,6 @@ target_link_libraries(inputhackrf
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputhackrf Core Widgets)
+target_link_libraries(inputhackrf Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputhackrf DESTINATION lib/plugins/samplesource)

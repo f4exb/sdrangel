@@ -47,6 +47,6 @@ target_link_libraries(demodnfm
 	swagger
 )
 
-qt5_use_modules(demodnfm Core Widgets)
+target_link_libraries(demodnfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodnfm DESTINATION lib/plugins/channelrx)

@@ -40,6 +40,6 @@ target_link_libraries(modatvsrv
 	swagger
 )
 
-qt5_use_modules(modatvsrv Core)
+target_link_libraries(modatvsrv Qt5::Core)
 
 install(TARGETS modatvsrv DESTINATION lib/pluginssrv/channeltx)

@@ -43,6 +43,6 @@ target_link_libraries(demodlora
 	sdrgui
 )
 
-qt5_use_modules(demodlora Core Widgets)
+target_link_libraries(demodlora Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodlora DESTINATION lib/plugins/channelrx)

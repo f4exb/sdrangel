@@ -33,6 +33,6 @@ target_link_libraries(swagger
 
 set_target_properties(swagger PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 
-qt5_use_modules(swagger Core Network)
+target_link_libraries(swagger Qt5::Core Qt5::Network)
 
 install(TARGETS swagger DESTINATION lib)

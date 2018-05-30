@@ -82,6 +82,6 @@ target_link_libraries(outputlimesdr
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputlimesdr Core Widgets)
+target_link_libraries(outputlimesdr Qt5::Core Qt5::Widgets)
 
 install(TARGETS outputlimesdr DESTINATION lib/plugins/samplesink)

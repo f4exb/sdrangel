@@ -73,6 +73,6 @@ target_link_libraries(inputairspyhf
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputairspyhf Core Widgets)
+target_link_libraries(inputairspyhf Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputairspyhf DESTINATION lib/plugins/samplesource)

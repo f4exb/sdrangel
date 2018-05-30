@@ -36,6 +36,6 @@ target_link_libraries(logging
 	${QT_LIBRARIES}
 )
 
-qt5_use_modules(logging Core Network)
+target_link_libraries(logging Qt5::Core Qt5::Network)
 
 install(TARGETS logging DESTINATION lib)

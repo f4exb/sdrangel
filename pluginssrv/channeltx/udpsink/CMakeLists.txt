@@ -40,6 +40,6 @@ target_link_libraries(modudpsinksrv
 	swagger
 )
 
-qt5_use_modules(modudpsinksrv Core Network)
+target_link_libraries(modudpsinksrv Qt5::Core Qt5::Network)
 
 install(TARGETS modudpsinksrv DESTINATION lib/pluginssrv/channeltx)

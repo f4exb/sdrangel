@@ -75,6 +75,6 @@ target_link_libraries(outputbladerf
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputbladerf Core Widgets)
+target_link_libraries(outputbladerf Qt5::Core Qt5::Widgets)
 
 install(TARGETS outputbladerf DESTINATION lib/plugins/samplesink)

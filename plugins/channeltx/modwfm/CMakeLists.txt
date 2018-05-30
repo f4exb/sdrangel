@@ -45,6 +45,6 @@ target_link_libraries(modwfm
 	swagger
 )
 
-qt5_use_modules(modwfm Core Widgets)
+target_link_libraries(modwfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS modwfm DESTINATION lib/plugins/channeltx)

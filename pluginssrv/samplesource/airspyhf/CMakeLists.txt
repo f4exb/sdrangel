@@ -59,6 +59,6 @@ target_link_libraries(inputairspyhfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputairspyhfsrv Core)
+target_link_libraries(inputairspyhfsrv Qt5::Core)
 
 install(TARGETS inputairspyhfsrv DESTINATION lib/pluginssrv/samplesource)

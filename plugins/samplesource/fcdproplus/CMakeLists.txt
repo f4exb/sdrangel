@@ -54,6 +54,6 @@ target_link_libraries(inputfcdproplus
 	swagger
 )
 
-qt5_use_modules(inputfcdproplus Core Widgets)
+target_link_libraries(inputfcdproplus Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputfcdproplus DESTINATION lib/plugins/samplesource)

@@ -41,7 +41,7 @@ target_link_libraries(sdrbench
 
 target_compile_features(sdrbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrbench Core Gui)
+target_link_libraries(sdrbench Qt5::Core Qt5::Gui)
 
 install(TARGETS sdrbench DESTINATION lib)
 

@@ -72,6 +72,6 @@ target_link_libraries(inputrtlsdr
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputrtlsdr Core Widgets)
+target_link_libraries(inputrtlsdr Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputrtlsdr DESTINATION lib/plugins/samplesource)

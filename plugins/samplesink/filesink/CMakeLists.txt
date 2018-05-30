@@ -47,6 +47,6 @@ target_link_libraries(outputfilesink
 	swagger
 )
 
-qt5_use_modules(outputfilesink Core Widgets)
+target_link_libraries(outputfilesink Qt5::Core Qt5::Widgets)
 
 install(TARGETS outputfilesink DESTINATION lib/plugins/samplesink)

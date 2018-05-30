@@ -73,6 +73,6 @@ target_link_libraries(inputlimesdrsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputlimesdrsrv Core)
+target_link_libraries(inputlimesdrsrv Qt5::Core)
 
 install(TARGETS inputlimesdrsrv DESTINATION lib/pluginssrv/samplesource)

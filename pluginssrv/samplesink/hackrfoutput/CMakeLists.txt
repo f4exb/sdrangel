@@ -65,6 +65,6 @@ target_link_libraries(outputhackrfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputhackrfsrv Core)
+target_link_libraries(outputhackrfsrv Qt5::Core)
 
 install(TARGETS outputhackrfsrv DESTINATION lib/pluginssrv/samplesink)

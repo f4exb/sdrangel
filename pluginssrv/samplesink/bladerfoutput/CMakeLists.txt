@@ -63,6 +63,6 @@ target_link_libraries(outputbladerfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputbladerfsrv Core)
+target_link_libraries(outputbladerfsrv Qt5::Core)
 
 install(TARGETS outputbladerfsrv DESTINATION lib/pluginssrv/samplesink)
