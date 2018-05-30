@@ -144,7 +144,7 @@ void ChannelAnalyzerGUI::displayPLLSettings()
 
 void ChannelAnalyzerGUI::setSpectrumDisplay()
 {
-    qDebug("ChannelAnalyzerNGGUI::setSpectrumDisplay: m_rate: %d", m_rate);
+    qDebug("ChannelAnalyzerGUI::setSpectrumDisplay: m_rate: %d", m_rate);
     if (m_settings.m_ssb)
     {
         ui->glSpectrum->setCenterFrequency(m_rate/4);
@@ -187,7 +187,7 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
 {
     if (ChannelAnalyzer::MsgReportChannelSampleRateChanged::match(message))
     {
-        qDebug() << "ChannelAnalyzerNGGUI::handleMessage: MsgReportChannelSampleRateChanged";
+        qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged";
         ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
         ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
         setNewFinalRate();
@@ -374,7 +374,7 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
 
 ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
-	ui(new Ui::ChannelAnalyzerNGGUI),
+	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
@@ -456,7 +456,7 @@ void ChannelAnalyzerGUI::setNewFinalRate()
     if (m_rate == 0) {
         m_rate = 48000;
     }
-	qDebug("ChannelAnalyzerNGGUI::setNewFinalRate: %d m_spanLog2: %d", m_rate, m_settings.m_spanLog2);
+	qDebug("ChannelAnalyzerGUI::setNewFinalRate: %d m_spanLog2: %d", m_rate, m_settings.m_spanLog2);
 
 	setFiltersUIBoundaries();
 

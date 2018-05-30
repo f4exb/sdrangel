@@ -114,7 +114,7 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readU32(13, &m_pllPskOrder, 1);
         d.readS32(14, &tmp, 0);
         m_inputType = (InputType) tmp;
-        d.readString(15, &m_title, "Channel Analyzer NG");
+        d.readString(15, &m_title, "Channel Analyzer");
         d.readBool(16, &m_rrc, false);
         d.readU32(17, &m_rrcRolloff, 35);
 

@@ -35,7 +35,7 @@ class SpectrumVis;
 class ScopeVisNG;
 
 namespace Ui {
-	class ChannelAnalyzerNGGUI;
+	class ChannelAnalyzerGUI;
 }
 
 class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceGUI {
@@ -61,7 +61,7 @@ public slots:
 	void channelMarkerHighlightedByCursor();
 
 private:
-	Ui::ChannelAnalyzerNGGUI* ui;
+	Ui::ChannelAnalyzerGUI* ui;
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;

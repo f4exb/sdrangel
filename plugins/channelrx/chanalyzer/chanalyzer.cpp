@@ -194,7 +194,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-	    qDebug() << "ChannelAnalyzerNG::handleMessage: DownChannelizer::MsgChannelizerNotification:"
+	    qDebug() << "ChannelAnalyzer::handleMessage: DownChannelizer::MsgChannelizerNotification:"
 	            << " sampleRate: " << notif.getSampleRate()
 	            << " frequencyOffset: " << notif.getFrequencyOffset();
 
@@ -211,7 +211,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "ChannelAnalyzerNG::handleMessage: MsgConfigureChannelizer:"
+        qDebug() << "ChannelAnalyzer::handleMessage: MsgConfigureChannelizer:"
                 << " sampleRate: " << cfg.getSampleRate()
                 << " centerFrequency: " << cfg.getCenterFrequency();
 
@@ -223,7 +223,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureChannelAnalyzer::match(cmd))
     {
-        qDebug("ChannelAnalyzerNG::handleMessage: MsgConfigureChannelAnalyzer");
+        qDebug("ChannelAnalyzer::handleMessage: MsgConfigureChannelAnalyzer");
         MsgConfigureChannelAnalyzer& cfg = (MsgConfigureChannelAnalyzer&) cmd;
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -245,7 +245,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 
 void ChannelAnalyzer::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
-    qDebug() << "ChannelAnalyzerNG::applyChannelSettings:"
+    qDebug() << "ChannelAnalyzer::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
@@ -279,7 +279,7 @@ void ChannelAnalyzer::applyChannelSettings(int inputSampleRate, int inputFrequen
 
 void ChannelAnalyzer::setFilters(int sampleRate, float bandwidth, float lowCutoff)
 {
-    qDebug("ChannelAnalyzerNG::setFilters: sampleRate: %d bandwidth: %f lowCutoff: %f",
+    qDebug("ChannelAnalyzer::setFilters: sampleRate: %d bandwidth: %f lowCutoff: %f",
             sampleRate, bandwidth, lowCutoff);
 
     if (bandwidth < 0)
@@ -306,7 +306,7 @@ void ChannelAnalyzer::setFilters(int sampleRate, float bandwidth, float lowCutof
 
 void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, bool force)
 {
-    qDebug() << "ChannelAnalyzerNG::applySettings:"
+    qDebug() << "ChannelAnalyzer::applySettings:"
             << " m_downSample: " << settings.m_downSample
             << " m_downSampleRate: " << settings.m_downSampleRate
             << " m_rcc: " << settings.m_rrc
