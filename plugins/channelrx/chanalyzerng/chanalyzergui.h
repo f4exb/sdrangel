@@ -24,12 +24,12 @@
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
-#include "chanalyzerngsettings.h"
+#include "chanalyzersettings.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class ChannelAnalyzerNG;
+class ChannelAnalyzer;
 class SpectrumScopeNGComboVis;
 class SpectrumVis;
 class ScopeVisNG;
@@ -38,11 +38,11 @@ namespace Ui {
 	class ChannelAnalyzerNGGUI;
 }
 
-class ChannelAnalyzerNGGUI : public RollupWidget, public PluginInstanceGUI {
+class ChannelAnalyzerGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static ChannelAnalyzerNGGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+	static ChannelAnalyzerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -65,19 +65,19 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
-	ChannelAnalyzerNGSettings m_settings;
+	ChannelAnalyzerSettings m_settings;
 	bool m_doApplySettings;
 	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
 	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
 
-	ChannelAnalyzerNG* m_channelAnalyzer;
+	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeNGComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
 	ScopeVisNG* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerNGGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
-	virtual ~ChannelAnalyzerNGGUI();
+	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+	virtual ~ChannelAnalyzerGUI();
 
 	int  getRequestedChannelSampleRate();
 	void setNewFinalRate(); //!< set sample rate after final in-channel decimation

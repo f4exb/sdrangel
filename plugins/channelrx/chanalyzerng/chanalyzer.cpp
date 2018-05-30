@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "chanalyzerng.h"
-
 #include <QTime>
 #include <QDebug>
 #include <stdio.h>
@@ -24,16 +22,17 @@
 #include "audio/audiooutput.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
+#include "chanalyzer.h"
 
-MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzer, Message)
-MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelAnalyzerOld, Message)
-MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(ChannelAnalyzerNG::MsgReportChannelSampleRateChanged, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzerOld, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Message)
 
-const QString ChannelAnalyzerNG::m_channelIdURI = "sdrangel.channel.chanalyzer";
-const QString ChannelAnalyzerNG::m_channelId = "ChannelAnalyzer";
+const QString ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
+const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
-ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
+ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_sampleSink(0),
@@ -65,7 +64,7 @@ ChannelAnalyzerNG::ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addChannelAPI(this);
 }
 
-ChannelAnalyzerNG::~ChannelAnalyzerNG()
+ChannelAnalyzer::~ChannelAnalyzer()
 {
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -76,7 +75,7 @@ ChannelAnalyzerNG::~ChannelAnalyzerNG()
     delete RRCFilter;
 }
 
-void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
+void ChannelAnalyzer::configure(MessageQueue* messageQueue,
 		int channelSampleRate,
 		Real Bandwidth,
 		Real LowCutoff,
@@ -90,7 +89,7 @@ void ChannelAnalyzerNG::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
 	fftfilt::cmplx *sideband = 0;
 	Complex ci;
@@ -126,7 +125,7 @@ void ChannelAnalyzerNG::feed(const SampleVector::const_iterator& begin, const Sa
 	m_settingsMutex.unlock();
 }
 
-void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
+void ChannelAnalyzer::processOneSample(Complex& c, fftfilt::cmplx *sideband)
 {
     int n_out;
     int decim = 1<<m_settings.m_spanLog2;
@@ -181,16 +180,16 @@ void ChannelAnalyzerNG::processOneSample(Complex& c, fftfilt::cmplx *sideband)
     }
 }
 
-void ChannelAnalyzerNG::start()
+void ChannelAnalyzer::start()
 {
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
-void ChannelAnalyzerNG::stop()
+void ChannelAnalyzer::stop()
 {
 }
 
-bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
+bool ChannelAnalyzer::handleMessage(const Message& cmd)
 {
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
@@ -244,7 +243,7 @@ bool ChannelAnalyzerNG::handleMessage(const Message& cmd)
 	}
 }
 
-void ChannelAnalyzerNG::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
+void ChannelAnalyzer::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "ChannelAnalyzerNG::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
@@ -278,7 +277,7 @@ void ChannelAnalyzerNG::applyChannelSettings(int inputSampleRate, int inputFrequ
     m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
-void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCutoff)
+void ChannelAnalyzer::setFilters(int sampleRate, float bandwidth, float lowCutoff)
 {
     qDebug("ChannelAnalyzerNG::setFilters: sampleRate: %d bandwidth: %f lowCutoff: %f",
             sampleRate, bandwidth, lowCutoff);
@@ -305,7 +304,7 @@ void ChannelAnalyzerNG::setFilters(int sampleRate, float bandwidth, float lowCut
     RRCFilter->create_rrc_filter(bandwidth / sampleRate, m_settings.m_rrcRolloff / 100.0);
 }
 
-void ChannelAnalyzerNG::applySettings(const ChannelAnalyzerNGSettings& settings, bool force)
+void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, bool force)
 {
     qDebug() << "ChannelAnalyzerNG::applySettings:"
             << " m_downSample: " << settings.m_downSample

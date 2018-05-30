@@ -19,9 +19,10 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "chanalyzerngsettings.h"
 
-ChannelAnalyzerNGSettings::ChannelAnalyzerNGSettings() :
+#include "chanalyzersettings.h"
+
+ChannelAnalyzerSettings::ChannelAnalyzerSettings() :
     m_channelMarker(0),
     m_spectrumGUI(0),
     m_scopeGUI(0)
@@ -29,7 +30,7 @@ ChannelAnalyzerNGSettings::ChannelAnalyzerNGSettings() :
     resetToDefaults();
 }
 
-void ChannelAnalyzerNGSettings::resetToDefaults()
+void ChannelAnalyzerSettings::resetToDefaults()
 {
     m_frequency = 0;
     m_downSample = false;
@@ -48,7 +49,7 @@ void ChannelAnalyzerNGSettings::resetToDefaults()
     m_title = "Channel Analyzer";
 }
 
-QByteArray ChannelAnalyzerNGSettings::serialize() const
+QByteArray ChannelAnalyzerSettings::serialize() const
 {
     SimpleSerializer s(1);
 
@@ -73,7 +74,7 @@ QByteArray ChannelAnalyzerNGSettings::serialize() const
     return s.final();
 }
 
-bool ChannelAnalyzerNGSettings::deserialize(const QByteArray& data)
+bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

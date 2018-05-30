@@ -14,14 +14,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERNGSETTINGS_H_
-#define PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERNGSETTINGS_H_
+#ifndef PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERSETTINGS_H_
+#define PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERSETTINGS_H_
 
 #include <QByteArray>
 
 class Serializable;
 
-struct ChannelAnalyzerNGSettings
+struct ChannelAnalyzerSettings
 {
     enum InputType
     {
@@ -49,7 +49,7 @@ struct ChannelAnalyzerNGSettings
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
 
-    ChannelAnalyzerNGSettings();
+    ChannelAnalyzerSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
@@ -60,4 +60,4 @@ struct ChannelAnalyzerNGSettings
 
 
 
-#endif /* PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERNGSETTINGS_H_ */
+#endif /* PLUGINS_CHANNELRX_CHANALYZERNG_CHANALYZERSETTINGS_H_ */

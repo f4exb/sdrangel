@@ -1,17 +1,17 @@
 project(chanalyzerng)
 
 set(chanalyzerng_SOURCES
-	chanalyzerng.cpp
-	chanalyzernggui.cpp
-	chanalyzerngplugin.cpp
-	chanalyzerngsettings.cpp
+	chanalyzer.cpp
+	chanalyzergui.cpp
+	chanalyzerplugin.cpp
+	chanalyzersettings.cpp
 )
 
 set(chanalyzerng_HEADERS
-	chanalyzerng.h
-	chanalyzernggui.h
-	chanalyzerngplugin.h
-	chanalyzerngsettings.h
+	chanalyzer.h
+	chanalyzergui.h
+	chanalyzerplugin.h
+	chanalyzersettings.h
 )
 
 set(chanalyzerng_FORMS

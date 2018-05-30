@@ -24,13 +24,13 @@
 class DeviceUISet;
 class BasebandSampleSink;
 
-class ChannelAnalyzerNGPlugin : public QObject, PluginInterface {
+class ChannelAnalyzerPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID "sdrangel.channel.chanalyzerng")
 
 public:
-	explicit ChannelAnalyzerNGPlugin(QObject* parent = NULL);
+	explicit ChannelAnalyzerPlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);

@@ -31,7 +31,7 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 
-#include "chanalyzerngsettings.h"
+#include "chanalyzersettings.h"
 
 #define ssbFftLen 1024
 
@@ -39,25 +39,25 @@ class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class ChannelAnalyzerNG : public BasebandSampleSink, public ChannelSinkAPI {
+class ChannelAnalyzer : public BasebandSampleSink, public ChannelSinkAPI {
 public:
     class MsgConfigureChannelAnalyzer : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const ChannelAnalyzerNGSettings& getSettings() const { return m_settings; }
+        const ChannelAnalyzerSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureChannelAnalyzer* create(const ChannelAnalyzerNGSettings& settings, bool force)
+        static MsgConfigureChannelAnalyzer* create(const ChannelAnalyzerSettings& settings, bool force)
         {
             return new MsgConfigureChannelAnalyzer(settings, force);
         }
 
     private:
-        ChannelAnalyzerNGSettings m_settings;
+        ChannelAnalyzerSettings m_settings;
         bool m_force;
 
-        MsgConfigureChannelAnalyzer(const ChannelAnalyzerNGSettings& settings, bool force) :
+        MsgConfigureChannelAnalyzer(const ChannelAnalyzerSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -169,8 +169,8 @@ public:
         { }
     };
 
-    ChannelAnalyzerNG(DeviceSourceAPI *deviceAPI);
-	virtual ~ChannelAnalyzerNG();
+    ChannelAnalyzer(DeviceSourceAPI *deviceAPI);
+	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
@@ -212,7 +212,7 @@ private:
 	DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
-    ChannelAnalyzerNGSettings m_settings;
+    ChannelAnalyzerSettings m_settings;
 
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
@@ -240,7 +240,7 @@ private:
 
 //	void apply(bool force = false);
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
-	void applySettings(const ChannelAnalyzerNGSettings& settings, bool force = false);
+	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
 	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
 	void processOneSample(Complex& c, fftfilt::cmplx *sideband);
 
@@ -248,7 +248,7 @@ private:
 	{
 	    switch (m_settings.m_inputType)
 	    {
-	        case ChannelAnalyzerNGSettings::InputPLL:
+	        case ChannelAnalyzerSettings::InputPLL:
             {
                 if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
                     m_sampleBuffer.push_back(Sample(pll.imag()*SDR_RX_SCALEF, pll.real()*SDR_RX_SCALEF));
@@ -257,7 +257,7 @@ private:
                 }
             }
 	            break;
-	        case ChannelAnalyzerNGSettings::InputAutoCorr:
+	        case ChannelAnalyzerSettings::InputAutoCorr:
 	        {
 	            std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/768.0f), 0);
 
@@ -268,7 +268,7 @@ private:
                 }
 	        }
 	            break;
-            case ChannelAnalyzerNGSettings::InputSignal:
+            case ChannelAnalyzerSettings::InputSignal:
             default:
             {
                 if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
