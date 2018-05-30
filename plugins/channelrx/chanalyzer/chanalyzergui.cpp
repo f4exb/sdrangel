@@ -21,7 +21,7 @@
 #include <QMainWindow>
 
 #include "dsp/threadedbasebandsamplesink.h"
-#include "ui_chanalyzernggui.h"
+#include "ui_chanalyzergui.h"
 #include "dsp/spectrumscopengcombovis.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"

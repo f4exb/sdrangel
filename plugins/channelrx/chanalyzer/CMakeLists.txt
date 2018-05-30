@@ -1,21 +1,21 @@
-project(chanalyzerng)
+project(chanalyzer)
 
-set(chanalyzerng_SOURCES
+set(chanalyzer_SOURCES
 	chanalyzer.cpp
 	chanalyzergui.cpp
 	chanalyzerplugin.cpp
 	chanalyzersettings.cpp
 )
 
-set(chanalyzerng_HEADERS
+set(chanalyzer_HEADERS
 	chanalyzer.h
 	chanalyzergui.h
 	chanalyzerplugin.h
 	chanalyzersettings.h
 )
 
-set(chanalyzerng_FORMS
-	chanalyzernggui.ui
+set(chanalyzer_FORMS
+	chanalyzergui.ui
 )
 
 include_directories(
@@ -29,20 +29,20 @@ add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
 #qt5_wrap_cpp(chanalyzer_HEADERS_MOC ${chanalyzer_HEADERS})
-qt5_wrap_ui(chanalyzerng_FORMS_HEADERS ${chanalyzerng_FORMS})
+qt5_wrap_ui(chanalyzer_FORMS_HEADERS ${chanalyzer_FORMS})
 
-add_library(chanalyzerng SHARED
-	${chanalyzerng_SOURCES}
-	${chanalyzerng_HEADERS_MOC}
-	${chanalyzerng_FORMS_HEADERS}
+add_library(chanalyzer SHARED
+	${chanalyzer_SOURCES}
+	${chanalyzer_HEADERS_MOC}
+	${chanalyzer_FORMS_HEADERS}
 )
 
-target_link_libraries(chanalyzerng
+target_link_libraries(chanalyzer
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
 )
 
-qt5_use_modules(chanalyzerng Core Widgets )
+qt5_use_modules(chanalyzer Core Widgets )
 
-install(TARGETS chanalyzerng DESTINATION lib/plugins/channelrx)
+install(TARGETS chanalyzer DESTINATION lib/plugins/channelrx)
