@@ -40,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureChannelizer, Message)
 
-const QString SSBDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.ssb";
+const QString SSBDemod::m_channelIdURI = "sdrangel.channel.ssbdemod";
 const QString SSBDemod::m_channelId = "SSBDemod";
 
 SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :

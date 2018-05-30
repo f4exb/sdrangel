@@ -376,6 +376,14 @@ bool DeviceSet::compareRxChannelURIs(const QString& registerdChannelURI, const Q
 {
     if ((xChannelURI == "sdrangel.channel.chanalyzerng") || (xChannelURI == "sdrangel.channel.chanalyzer")) { // renamed ChanalyzerNG to Chanalyzer in 4.0.0
         return registerdChannelURI == "sdrangel.channel.chanalyzer";
+    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.am") || (xChannelURI == "sdrangel.channel.amdemod")) {
+        return registerdChannelURI == "sdrangel.channel.amdemod";
+    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.nfm") || (xChannelURI == "sdrangel.channel.nfmdemod")) {
+        return registerdChannelURI == "sdrangel.channel.nfmdemod";
+    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.ssb") || (xChannelURI == "sdrangel.channel.ssbdemod")) {
+        return registerdChannelURI == "sdrangel.channel.ssbdemod";
+    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.wfm") || (xChannelURI == "sdrangel.channel.wfmdemod")) {
+        return registerdChannelURI == "sdrangel.channel.wfmdemod";
     } else {
         return registerdChannelURI == xChannelURI;
     }

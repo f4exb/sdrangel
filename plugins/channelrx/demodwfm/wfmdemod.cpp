@@ -39,7 +39,7 @@
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureWFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(WFMDemod::MsgConfigureChannelizer, Message)
 
-const QString WFMDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.wfm";
+const QString WFMDemod::m_channelIdURI = "sdrangel.channel.wfmdemod";
 const QString WFMDemod::m_channelId = "WFMDemod";
 const int WFMDemod::m_udpBlockSize = 512;
 

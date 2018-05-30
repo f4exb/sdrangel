@@ -40,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgReportCTCSSFreq, Message)
 
-const QString NFMDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.nfm";
+const QString NFMDemod::m_channelIdURI = "sdrangel.channel.nfmdemod";
 const QString NFMDemod::m_channelId = "NFMDemod";
 
 static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};

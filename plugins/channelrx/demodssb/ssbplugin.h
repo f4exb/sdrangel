@@ -10,7 +10,7 @@ class BasebandSampleSink;
 class SSBPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "de.maintech.sdrangelove.channel.ssb")
+	Q_PLUGIN_METADATA(IID "sdrangel.channel.ssbdemod")
 
 public:
 	explicit SSBPlugin(QObject* parent = NULL);
