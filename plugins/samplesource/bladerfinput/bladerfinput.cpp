@@ -327,65 +327,65 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
 	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
 	{
-		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_settings.m_iqCorrection = settings.m_iqCorrection;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+//		m_settings.m_dcBlock = settings.m_dcBlock;
+//		m_settings.m_iqCorrection = settings.m_iqCorrection;
+		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
 	}
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
-		m_settings.m_lnaGain = settings.m_lnaGain;
+//		m_settings.m_lnaGain = settings.m_lnaGain;
 
 		if (m_dev != 0)
 		{
-			if(bladerf_set_lna_gain(m_dev, getLnaGain(m_settings.m_lnaGain)) != 0)
+			if(bladerf_set_lna_gain(m_dev, getLnaGain(settings.m_lnaGain)) != 0)
 			{
 				qDebug("BladerfInput::applySettings: bladerf_set_lna_gain() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput::applySettings: LNA gain set to " << getLnaGain(m_settings.m_lnaGain);
+				qDebug() << "BladerfInput::applySettings: LNA gain set to " << getLnaGain(settings.m_lnaGain);
 			}
 		}
 	}
 
 	if ((m_settings.m_vga1 != settings.m_vga1) || force)
 	{
-		m_settings.m_vga1 = settings.m_vga1;
+//		m_settings.m_vga1 = settings.m_vga1;
 
 		if (m_dev != 0)
 		{
-			if(bladerf_set_rxvga1(m_dev, m_settings.m_vga1) != 0)
+			if(bladerf_set_rxvga1(m_dev, settings.m_vga1) != 0)
 			{
 				qDebug("BladerfInput::applySettings: bladerf_set_rxvga1() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput::applySettings: VGA1 gain set to " << m_settings.m_vga1;
+				qDebug() << "BladerfInput::applySettings: VGA1 gain set to " << settings.m_vga1;
 			}
 		}
 	}
 
 	if ((m_settings.m_vga2 != settings.m_vga2) || force)
 	{
-		m_settings.m_vga2 = settings.m_vga2;
+//		m_settings.m_vga2 = settings.m_vga2;
 
 		if(m_dev != 0)
 		{
-			if(bladerf_set_rxvga2(m_dev, m_settings.m_vga2) != 0)
+			if(bladerf_set_rxvga2(m_dev, settings.m_vga2) != 0)
 			{
 				qDebug("BladerfInput::applySettings: bladerf_set_rxvga2() failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput::applySettings: VGA2 gain set to " << m_settings.m_vga2;
+				qDebug() << "BladerfInput::applySettings: VGA2 gain set to " << settings.m_vga2;
 			}
 		}
 	}
 
 	if ((m_settings.m_xb200 != settings.m_xb200) || force)
 	{
-		m_settings.m_xb200 = settings.m_xb200;
+//		m_settings.m_xb200 = settings.m_xb200;
 
 		if (m_dev != 0)
 		{
@@ -411,7 +411,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 		    if (changeSettings)
 		    {
-	            if (m_settings.m_xb200)
+	            if (settings.m_xb200)
 	            {
 	                if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0)
 	                {
@@ -434,57 +434,57 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	                }
 	            }
 
-	            m_sharedParams.m_xb200Attached = m_settings.m_xb200;
+	            m_sharedParams.m_xb200Attached = settings.m_xb200;
 		    }
 		}
 	}
 
 	if ((m_settings.m_xb200Path != settings.m_xb200Path) || force)
 	{
-		m_settings.m_xb200Path = settings.m_xb200Path;
+//		m_settings.m_xb200Path = settings.m_xb200Path;
 
 		if (m_dev != 0)
 		{
-			if(bladerf_xb200_set_path(m_dev, BLADERF_MODULE_RX, m_settings.m_xb200Path) != 0)
+			if(bladerf_xb200_set_path(m_dev, BLADERF_MODULE_RX, settings.m_xb200Path) != 0)
 			{
 				qDebug("BladerfInput::applySettings: bladerf_xb200_set_path(BLADERF_MODULE_RX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput::applySettings: set xb200 path to " << m_settings.m_xb200Path;
+				qDebug() << "BladerfInput::applySettings: set xb200 path to " << settings.m_xb200Path;
 			}
 		}
 	}
 
 	if ((m_settings.m_xb200Filter != settings.m_xb200Filter) || force)
 	{
-		m_settings.m_xb200Filter = settings.m_xb200Filter;
+//		m_settings.m_xb200Filter = settings.m_xb200Filter;
 
 		if (m_dev != 0)
 		{
-			if(bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_RX, m_settings.m_xb200Filter) != 0)
+			if(bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_RX, settings.m_xb200Filter) != 0)
 			{
 				qDebug("BladerfInput::applySettings: bladerf_xb200_set_filterbank(BLADERF_MODULE_RX) failed");
 			}
 			else
 			{
-				qDebug() << "BladerfInput::applySettings: set xb200 filter to " << m_settings.m_xb200Filter;
+				qDebug() << "BladerfInput::applySettings: set xb200 filter to " << settings.m_xb200Filter;
 			}
 		}
 	}
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
-		m_settings.m_devSampleRate = settings.m_devSampleRate;
+//		m_settings.m_devSampleRate = settings.m_devSampleRate;
 		forwardChange = true;
 
 		if (m_dev != 0)
 		{
 			unsigned int actualSamplerate;
 
-			if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_RX, m_settings.m_devSampleRate, &actualSamplerate) < 0)
+			if (bladerf_set_sample_rate(m_dev, BLADERF_MODULE_RX, settings.m_devSampleRate, &actualSamplerate) < 0)
 			{
-				qCritical("BladerfInput::applySettings: could not set sample rate: %d", m_settings.m_devSampleRate);
+				qCritical("BladerfInput::applySettings: could not set sample rate: %d", settings.m_devSampleRate);
 			}
 			else
 			{
@@ -495,15 +495,15 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
-		m_settings.m_bandwidth = settings.m_bandwidth;
+//		m_settings.m_bandwidth = settings.m_bandwidth;
 
 		if(m_dev != 0)
 		{
 			unsigned int actualBandwidth;
 
-			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_RX, m_settings.m_bandwidth, &actualBandwidth) < 0)
+			if( bladerf_set_bandwidth(m_dev, BLADERF_MODULE_RX, settings.m_bandwidth, &actualBandwidth) < 0)
 			{
-				qCritical("BladerfInput::applySettings: could not set bandwidth: %d", m_settings.m_bandwidth);
+				qCritical("BladerfInput::applySettings: could not set bandwidth: %d", settings.m_bandwidth);
 			}
 			else
 			{
@@ -523,13 +523,13 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        m_settings.m_log2Decim = settings.m_log2Decim;
+//        m_settings.m_log2Decim = settings.m_log2Decim;
         forwardChange = true;
 
         if (m_bladerfThread != 0)
         {
-            m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
-            qDebug() << "BladerfInput::applySettings: set decimation to " << (1<<m_settings.m_log2Decim);
+            m_bladerfThread->setLog2Decimation(settings.m_log2Decim);
+            qDebug() << "BladerfInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
     }
 
@@ -545,29 +545,46 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate);
 
-        m_settings.m_centerFrequency = settings.m_centerFrequency;
-        m_settings.m_log2Decim = settings.m_log2Decim;
-        m_settings.m_fcPos = settings.m_fcPos;
+//        m_settings.m_centerFrequency = settings.m_centerFrequency;
+//        m_settings.m_log2Decim = settings.m_log2Decim;
+//        m_settings.m_fcPos = settings.m_fcPos;
 
         forwardChange = true;
 
         if (m_dev != 0)
         {
             if (bladerf_set_frequency( m_dev, BLADERF_MODULE_RX, deviceCenterFrequency ) != 0) {
-                qWarning("BladerfInput::applySettings: bladerf_set_frequency(%lld) failed", m_settings.m_centerFrequency);
+                qWarning("BladerfInput::applySettings: bladerf_set_frequency(%lld) failed", settings.m_centerFrequency);
             } else {
-                qDebug("BladerfInput::applySettings: bladerf_set_frequency(%lld)", m_settings.m_centerFrequency);
+                qDebug("BladerfInput::applySettings: bladerf_set_frequency(%lld)", settings.m_centerFrequency);
             }
         }
     }
 
 	if (forwardChange)
 	{
-		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
-		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
+		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
+
+	m_settings = settings;
+
+    qDebug() << "BladerfInput::applySettings: "
+            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_bandwidth: " << m_settings.m_bandwidth
+            << " m_lnaGain: " << m_settings.m_lnaGain
+            << " m_vga1: " << m_settings.m_vga1
+            << " m_vga2: " << m_settings.m_vga2
+            << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_fcPos: " << m_settings.m_fcPos
+            << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_dcBlock: " << m_settings.m_dcBlock
+            << " m_iqCorrection: " << m_settings.m_iqCorrection
+            << " m_xb200Filter: " << m_settings.m_xb200Filter
+            << " m_xb200Path: " << m_settings.m_xb200Path
+            << " m_xb200: " << m_settings.m_xb200;
 
 	return true;
 }
