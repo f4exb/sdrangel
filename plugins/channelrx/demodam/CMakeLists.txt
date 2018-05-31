@@ -49,6 +49,6 @@ target_link_libraries(demodam
 	sdrgui
 )
 
-qt5_use_modules(demodam Core Widgets)
+target_link_libraries(demodam Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodam DESTINATION lib/plugins/channelrx)

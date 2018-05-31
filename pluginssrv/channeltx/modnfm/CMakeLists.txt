@@ -36,6 +36,6 @@ target_link_libraries(modnfmsrv
 	swagger
 )
 
-qt5_use_modules(modnfmsrv Core)
+target_link_libraries(modnfmsrv Qt5::Core)
 
 install(TARGETS modnfmsrv DESTINATION lib/pluginssrv/channeltx)

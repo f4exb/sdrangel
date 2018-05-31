@@ -50,6 +50,6 @@ target_link_libraries(modudpsink
 	swagger
 )
 
-qt5_use_modules(modudpsink Core Widgets Network)
+target_link_libraries(modudpsink Qt5::Core Qt5::Widgets Qt5::Network)
 
 install(TARGETS modudpsink DESTINATION lib/plugins/channeltx)

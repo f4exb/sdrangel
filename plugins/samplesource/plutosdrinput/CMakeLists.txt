@@ -74,6 +74,6 @@ target_link_libraries(inputplutosdr
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputplutosdr Core Widgets)
+target_link_libraries(inputplutosdr Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputplutosdr DESTINATION lib/plugins/samplesource)

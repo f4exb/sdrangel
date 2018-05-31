@@ -74,6 +74,6 @@ target_link_libraries(outputplutosdr
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputplutosdr Core Widgets)
+target_link_libraries(outputplutosdr Qt5::Core Qt5::Widgets)
 
 install(TARGETS outputplutosdr DESTINATION lib/plugins/samplesink)

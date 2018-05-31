@@ -37,6 +37,6 @@ target_link_libraries(demodamsrv
 	swagger
 )
 
-qt5_use_modules(demodamsrv Core)
+target_link_libraries(demodamsrv Qt5::Core)
 
 install(TARGETS demodamsrv DESTINATION lib/pluginssrv/channelrx)

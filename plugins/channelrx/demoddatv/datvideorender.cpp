@@ -341,7 +341,7 @@ bool DATVideoRender::OpenStream(DATVideostream *objDevice)
         return false;
     }
 
-    ptrIOBuffer = (unsigned char *)av_malloc(intIOBufferSize+ FF_INPUT_BUFFER_PADDING_SIZE);
+    ptrIOBuffer = (unsigned char *)av_malloc(intIOBufferSize+ AV_INPUT_BUFFER_PADDING_SIZE);
 
     objIOCtx = avio_alloc_context(  ptrIOBuffer,
                                     intIOBufferSize,

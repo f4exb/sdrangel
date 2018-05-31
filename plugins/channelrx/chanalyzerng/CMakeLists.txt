@@ -43,6 +43,6 @@ target_link_libraries(chanalyzerng
 	sdrgui
 )
 
-qt5_use_modules(chanalyzerng Core Widgets )
+target_link_libraries(chanalyzerng Qt5::Core Qt5::Widgets )
 
 install(TARGETS chanalyzerng DESTINATION lib/plugins/channelrx)
