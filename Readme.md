@@ -103,6 +103,8 @@ If you use your own location for libbladeRF install directory you need to specif
 
 `-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
 
+&#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF`
+
 <h2>FunCube Dongle</h2>
 
 Linux only.
@@ -374,7 +376,7 @@ For Debian Jessie or Stretch:
 
 <h2>openSUSE</h2>
 
-This has been tested with the bleeding edge "Tumbleweed" distribution:
+This has been tested with the Leap 42.3 distribution:
 
 `sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel` 
 
@@ -382,9 +384,11 @@ This has been tested with the bleeding edge "Tumbleweed" distribution:
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc5-c++` or `gcc6-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6` (for gcc 6) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
-  - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg)
-  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
+  - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg) then if your installation directory is `/opt/install/nanomsg` you will have to add this to the cmake command line: `-DLIBNANOMSG_INCLUDE_DIR=/opt/install/nanomsg/include -DLIBNANOMSG_LIBRARIES=/opt/install/nanomsg/lib64/libnanomsg.so`
+  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
+    - make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+    - create a `plugdev` group and add it tou your user group list: `sudo groupadd plugdev` then `sudo usermod -G plugdev -a <user>`
   - Note4: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
