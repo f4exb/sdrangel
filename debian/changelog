@@ -1,3 +1,12 @@
+sdrangel (4.0.0-1) unstable; urgency=medium
+
+  * Finalization of REST API and server instance
+  * Removal of old ChannelAnalyzer and TCPSrc plugins
+  * Renamed Channel Analyzer NG to Channel Analyzer
+  * DATV demod: added missing AVUTIL cmake variables
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 09 Jun 2018 20:14:18 +0200
+
 sdrangel (3.14.7-1) unstable; urgency=medium
 
   * ChanelAnalyzerNG: added PLL option and source selection with auto correlation
