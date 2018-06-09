@@ -252,7 +252,7 @@ set(sdrangel_SOURCES
 )
 
 if(WIN32)
-    SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrbase/resources/sdrangel.rc)
+    SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrgui/resources/sdrangel.rc)
 endif(WIN32)
 
 add_executable(sdrangel
