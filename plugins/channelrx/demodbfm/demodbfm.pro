@@ -21,6 +21,7 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
+INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
@@ -52,5 +53,6 @@ FORMS += bfmdemodgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
+LIBS += -L../../../swagger/$${build_subdir} -lswagger
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

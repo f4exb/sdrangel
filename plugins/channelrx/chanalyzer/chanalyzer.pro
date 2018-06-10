@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia opengl
 
-TARGET = chanalyzerng
+TARGET = chanalyzer
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -30,18 +30,18 @@ CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += chanalyzerng.cpp\
-	chanalyzernggui.cpp\
-        chanalyzerngplugin.cpp\
-        chanalyzerngsettings.cpp\
+SOURCES += chanalyzer.cpp\
+	    chanalyzergui.cpp\
+        chanalyzerplugin.cpp\
+        chanalyzersettings.cpp\
 
-HEADERS += chanalyzerng.h\
-        chanalyzernggui.h\
-        chanalyzerngplugin.h\
-        chanalyzerngplugin.h
+HEADERS += chanalyzer.h\
+        chanalyzergui.h\
+        chanalyzerplugin.h\
+        chanalyzerplugin.h
 
 
-FORMS += chanalyzernggui.ui
+FORMS += chanalyzergui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
