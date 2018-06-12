@@ -45,6 +45,7 @@ target_link_libraries(modam
 	swagger
 )
 
-qt5_use_modules(modam Core Widgets)
+target_link_libraries(modam Qt5::Core Qt5::Widgets)
 
 install(TARGETS modam DESTINATION lib/plugins/channeltx)
+

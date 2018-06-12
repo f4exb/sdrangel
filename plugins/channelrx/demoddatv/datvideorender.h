@@ -124,6 +124,8 @@ private:
     bool PreprocessStream();
     void ResetMetaData();
 
+    int new_decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt);
+
 protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 

@@ -43,6 +43,6 @@ target_link_libraries(inputfcdproplussrv
 	swagger
 )
 
-qt5_use_modules(inputfcdproplussrv Core)
+target_link_libraries(inputfcdproplussrv Qt5::Core)
 
 install(TARGETS inputfcdproplussrv DESTINATION lib/pluginssrv/samplesource)

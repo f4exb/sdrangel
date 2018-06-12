@@ -74,6 +74,6 @@ target_link_libraries(inputsdrdaemonsourcesrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputsdrdaemonsourcesrv Core)
+target_link_libraries(inputsdrdaemonsourcesrv Qt5::Core)
 
 install(TARGETS inputsdrdaemonsourcesrv DESTINATION lib/pluginssrv/samplesource)

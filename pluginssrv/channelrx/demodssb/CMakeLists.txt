@@ -38,6 +38,6 @@ target_link_libraries(demodssbsrv
 	sdrbase
 )
 
-qt5_use_modules(demodssbsrv Core)
+target_link_libraries(demodssbsrv Qt5::Core)
 
 install(TARGETS demodssbsrv DESTINATION lib/pluginssrv/channelrx)

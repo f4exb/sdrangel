@@ -76,6 +76,6 @@ target_link_libraries(outputsdrdaemonsinksrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputsdrdaemonsinksrv Core)
+target_link_libraries(outputsdrdaemonsinksrv Qt5::Core)
 
 install(TARGETS outputsdrdaemonsinksrv DESTINATION lib/pluginssrv/samplesink)

@@ -46,6 +46,6 @@ target_link_libraries(demodwfm
 	sdrgui
 )
 
-qt5_use_modules(demodwfm Core Widgets)
+target_link_libraries(demodwfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodwfm DESTINATION lib/plugins/channelrx)

@@ -39,6 +39,6 @@ target_link_libraries(outputfilesinksrv
 	swagger
 )
 
-qt5_use_modules(outputfilesinksrv Core)
+target_link_libraries(outputfilesinksrv Qt5::Core)
 
 install(TARGETS outputfilesinksrv DESTINATION lib/pluginssrv/samplesink)

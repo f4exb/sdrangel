@@ -73,6 +73,6 @@ target_link_libraries(outputlimesdrsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputlimesdrsrv Core)
+target_link_libraries(outputlimesdrsrv Qt5::Core)
 
 install(TARGETS outputlimesdrsrv DESTINATION lib/pluginssrv/samplesink)

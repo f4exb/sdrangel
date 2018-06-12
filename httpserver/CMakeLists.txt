@@ -50,6 +50,6 @@ target_link_libraries(httpserver
 	${QT_LIBRARIES}
 )
 
-qt5_use_modules(httpserver Core Network)
+target_link_libraries(httpserver Qt5::Core Qt5::Network)
 
 install(TARGETS httpserver DESTINATION lib)

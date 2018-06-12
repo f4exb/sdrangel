@@ -49,6 +49,6 @@ target_link_libraries(modatv
 	swagger
 )
 
-qt5_use_modules(modatv Core Widgets)
+target_link_libraries(modatv Qt5::Core Qt5::Widgets)
 
 install(TARGETS modatv DESTINATION lib/plugins/channeltx)

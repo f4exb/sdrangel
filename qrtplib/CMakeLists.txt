@@ -90,6 +90,6 @@ target_link_libraries(qrtplib
     ${QT_LIBRARIES}
 )
 
-qt5_use_modules(qrtplib Core Network)
+target_link_libraries(qrtplib Qt5::Core Qt5::Network)
 
 install(TARGETS qrtplib DESTINATION lib)

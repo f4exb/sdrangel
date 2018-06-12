@@ -45,6 +45,6 @@ target_link_libraries(demodudpsrc
 	sdrgui
 )
 
-qt5_use_modules(demodudpsrc Core Widgets Network)
+target_link_libraries(demodudpsrc Qt5::Core Qt5::Widgets Qt5::Network)
 
 install(TARGETS demodudpsrc DESTINATION lib/plugins/channelrx)

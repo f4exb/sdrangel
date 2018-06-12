@@ -42,9 +42,9 @@ target_link_libraries(modssb
     ${QT_LIBRARIES}
     sdrbase
     sdrgui
-	swagger    
+    swagger
 )
 
-qt5_use_modules(modssb Core Widgets)
+target_link_libraries(modssb Qt5::Core Qt5::Widgets)
 
 install(TARGETS modssb DESTINATION lib/plugins/channeltx)

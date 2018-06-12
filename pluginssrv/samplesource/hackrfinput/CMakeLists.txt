@@ -65,6 +65,6 @@ target_link_libraries(inputhackrfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputhackrfsrv Core)
+target_link_libraries(inputhackrfsrv Qt5::Core)
 
 install(TARGETS inputhackrfsrv DESTINATION lib/pluginssrv/samplesource)

@@ -50,6 +50,6 @@ target_link_libraries(demodbfmsrv
 	swagger
 )
 
-qt5_use_modules(demodbfmsrv Core)
+target_link_libraries(demodbfmsrv Qt5::Core)
 
 install(TARGETS demodbfmsrv DESTINATION lib/pluginssrv/channelrx)

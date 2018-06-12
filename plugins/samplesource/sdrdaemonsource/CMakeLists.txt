@@ -85,6 +85,6 @@ target_link_libraries(inputsdrdaemonsource
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputsdrdaemonsource Core Widgets)
+target_link_libraries(inputsdrdaemonsource Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputsdrdaemonsource DESTINATION lib/plugins/samplesource)

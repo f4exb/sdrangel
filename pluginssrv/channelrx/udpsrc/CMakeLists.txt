@@ -36,6 +36,6 @@ target_link_libraries(demodudpsrcsrv
 	sdrbase
 )
 
-qt5_use_modules(demodudpsrcsrv Core Network)
+target_link_libraries(demodudpsrcsrv Qt5::Core Qt5::Network)
 
 install(TARGETS demodudpsrcsrv DESTINATION lib/pluginssrv/channelrx)

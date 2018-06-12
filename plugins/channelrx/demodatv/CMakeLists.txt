@@ -43,6 +43,6 @@ target_link_libraries(demodatv
 	sdrgui
 )
 
-qt5_use_modules(demodatv Core Widgets)
+target_link_libraries(demodatv Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodatv DESTINATION lib/plugins/channelrx)

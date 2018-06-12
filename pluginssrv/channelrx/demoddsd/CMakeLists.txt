@@ -64,6 +64,6 @@ target_link_libraries(demoddsdsrv
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(demoddsdsrv Core)
+target_link_libraries(demoddsdsrv Qt5::Core)
 
 install(TARGETS demoddsdsrv DESTINATION lib/pluginssrv/channelrx)

@@ -58,6 +58,6 @@ target_link_libraries(inputsdrplaysrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputsdrplaysrv Core)
+target_link_libraries(inputsdrplaysrv Qt5::Core)
 
 install(TARGETS inputsdrplaysrv DESTINATION lib/pluginssrv/samplesource)

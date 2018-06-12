@@ -56,7 +56,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5Core 5.0 REQUIRED)
 find_package(Qt5Widgets 5.0 REQUIRED)
 find_package(Qt5Multimedia 5.0 REQUIRED)
-#find_package(QT5OpenGL 5.0 REQUIRED)
+find_package(Qt5OpenGL 5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig)
 find_package(Boost REQUIRED)
@@ -276,7 +276,7 @@ if(WIN32)
     set_target_properties(sdrangel PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 endif(WIN32)
 
-qt5_use_modules(sdrangel Widgets Multimedia)
+target_link_libraries(sdrangel Qt5::Widgets Qt5::Multimedia)
 
 ##############################################################################
 # main server application
@@ -300,7 +300,7 @@ target_link_libraries(sdrangelsrv
     ${QT_LIBRARIES}
 )
 
-qt5_use_modules(sdrangelsrv Multimedia)
+target_link_libraries(sdrangelsrv Qt5::Multimedia)
 
 ##############################################################################
 # main benchmark application
@@ -324,7 +324,7 @@ target_link_libraries(sdrangelbench
 )
 
 target_compile_features(sdrangelbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
-qt5_use_modules(sdrangelbench Multimedia)
+target_link_libraries(sdrangelbench Qt5::Multimedia)
 
 ##############################################################################
 

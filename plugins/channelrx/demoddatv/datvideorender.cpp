@@ -180,6 +180,10 @@ bool DATVideoRender::PreprocessStream()
 
     //Prepare Codec and extract meta data
 
+    // FIXME: codec is depreecated but replacement fails
+//    AVCodecParameters *parms = m_objFormatCtx->streams[m_intVideoStreamIndex]->codecpar;
+//    m_objDecoderCtx = new AVCodecContext();
+//    avcodec_parameters_to_context(m_objDecoderCtx, parms);
     m_objDecoderCtx = m_objFormatCtx->streams[m_intVideoStreamIndex]->codec;
 
     //Meta Data
@@ -341,7 +345,7 @@ bool DATVideoRender::OpenStream(DATVideostream *objDevice)
         return false;
     }
 
-    ptrIOBuffer = (unsigned char *)av_malloc(intIOBufferSize+ FF_INPUT_BUFFER_PADDING_SIZE);
+    ptrIOBuffer = (unsigned char *)av_malloc(intIOBufferSize+ AV_INPUT_BUFFER_PADDING_SIZE);
 
     objIOCtx = avio_alloc_context(  ptrIOBuffer,
                                     intIOBufferSize,
@@ -416,7 +420,7 @@ bool DATVideoRender::RenderStream()
 
         intGotFrame=0;
 
-        if(avcodec_decode_video2( m_objDecoderCtx, m_objFrame, &intGotFrame, &objPacket)<0)
+        if(new_decode( m_objDecoderCtx, m_objFrame, &intGotFrame, &objPacket)<0)
         {
             qDebug() << "DATVideoProcess::RenderStream decoding packet error";
 
@@ -520,7 +524,7 @@ bool DATVideoRender::RenderStream()
 
     }
 
-    av_free_packet(&objPacket);
+    av_packet_unref(&objPacket);
 
     //********** Rendering **********
 
@@ -596,4 +600,31 @@ bool DATVideoRender::CloseStream(QIODevice *objDevice)
     emit onMetaDataChanged(&MetaData);
 
     return true;
+}
+
+/**
+ * Replacement of deprecated avcodec_decode_video2 with the same signature
+ * https://blogs.gentoo.org/lu_zero/2016/03/29/new-avcodec-api/
+ */
+int DATVideoRender::new_decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt)
+{
+    int ret;
+
+    *got_frame = 0;
+
+    if (pkt) {
+        ret = avcodec_send_packet(avctx, pkt);
+        // In particular, we don't expect AVERROR(EAGAIN), because we read all
+        // decoded frames with avcodec_receive_frame() until done.
+        if (ret < 0)
+            return ret == AVERROR_EOF ? 0 : ret;
+    }
+
+    ret = avcodec_receive_frame(avctx, frame);
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+        return ret;
+    if (ret >= 0)
+        *got_frame = 1;
+
+    return 0;
 }

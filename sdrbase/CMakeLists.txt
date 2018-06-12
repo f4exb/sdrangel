@@ -301,7 +301,7 @@ endif (BUILD_DEBIAN)
 set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrbase_EXPORTS")
 target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrbase Core Multimedia)
+target_link_libraries(sdrbase Qt5::Core Qt5::Multimedia)
 
 install(TARGETS sdrbase DESTINATION lib)
 

@@ -57,6 +57,6 @@ target_link_libraries(demodbfm
 	sdrgui
 )
 
-qt5_use_modules(demodbfm Core Widgets)
+target_link_libraries(demodbfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodbfm DESTINATION lib/plugins/channelrx)

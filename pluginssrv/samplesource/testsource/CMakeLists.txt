@@ -38,6 +38,6 @@ target_link_libraries(inputtestsourcesrv
 	swagger
 )
 
-qt5_use_modules(inputtestsourcesrv Core)
+target_link_libraries(inputtestsourcesrv Qt5::Core)
 
 install(TARGETS inputtestsourcesrv DESTINATION lib/pluginssrv/samplesource)

@@ -75,6 +75,6 @@ target_link_libraries(inputbladerf
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputbladerf Core Widgets)
+target_link_libraries(inputbladerf Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputbladerf DESTINATION lib/plugins/samplesource)

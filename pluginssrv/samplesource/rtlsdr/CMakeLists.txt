@@ -63,6 +63,6 @@ target_link_libraries(inputrtlsdrsrv
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputrtlsdrsrv Core)
+target_link_libraries(inputrtlsdrsrv Qt5::Core)
 
 install(TARGETS inputrtlsdrsrv DESTINATION lib/pluginssrv/samplesource)

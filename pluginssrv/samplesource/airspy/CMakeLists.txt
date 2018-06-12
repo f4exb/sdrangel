@@ -60,6 +60,6 @@ target_link_libraries(inputairspysrv
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputairspysrv Core)
+target_link_libraries(inputairspysrv Qt5::Core)
 
 install(TARGETS inputairspysrv DESTINATION lib/pluginssrv/samplesource)

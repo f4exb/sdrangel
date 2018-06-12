@@ -49,6 +49,6 @@ target_link_libraries(inputfilesource
 	swagger
 )
 
-qt5_use_modules(inputfilesource Core Widgets)
+target_link_libraries(inputfilesource Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputfilesource DESTINATION lib/plugins/samplesource)

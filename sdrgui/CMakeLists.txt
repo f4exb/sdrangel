@@ -190,7 +190,7 @@ target_link_libraries(sdrgui
 set_target_properties(sdrgui PROPERTIES DEFINE_SYMBOL "sdrgui_EXPORTS")
 target_compile_features(sdrgui PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrgui Core Widgets OpenGL Multimedia)
+target_link_libraries(sdrgui Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::Multimedia)
 
 install(TARGETS sdrgui DESTINATION lib)
 
