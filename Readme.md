@@ -351,6 +351,13 @@ Install cmake version 3:
   - `sudo apt-get remove cmake` (if already installed)
   - `sudo apt-get install cmake`
 
+<h3>Prerequisites for 16.04 LTS</h3>
+
+You need to install the ffmpeg v.3 suite. Therefore you will need to add this PPA to the sources list using this command:
+`sudo add-apt-repository ppa:jonathonf/ffmpeg-3`
+
+Then do `sudo apt-get update` and go to the next step. Alternatively if you have an older version of ffmpeg suite already installed just do `sudo apt-get dist-upgrde`.
+
 <h3>With newer versions just do:</h3>
 
   - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libnanomsg-dev libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`

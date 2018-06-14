@@ -15,8 +15,14 @@ if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
 
 find_package(FFmpeg)
-if(FFMPEG_FOUND)
-    add_subdirectory(demoddatv)
+if (FFMPEG_FOUND)
+	# You can only get FFmpeg version from the command line
+	EXECUTE_PROCESS(COMMAND ffmpeg -version COMMAND grep ffmpeg COMMAND cut -d\  -f3 COMMAND tr -d '\n' OUTPUT_VARIABLE FFMPEG_VERSION)
+	message(STATUS "FFmpeg version ${FFMPEG_VERSION} found")
+	if(FFMPEG_VERSION VERSION_GREATER "3.1")
+		message(STATUS "Include demoddatv")
+		add_subdirectory(demoddatv)
+	endif()
 endif()
 
 if (BUILD_DEBIAN)
