@@ -18,6 +18,7 @@
 
 #include <QTime>
 #include <QDebug>
+#include <string.h>
 #include <stdio.h>
 #include <complex.h>
 
@@ -658,6 +659,48 @@ void DSDDemod::formatStatusText()
                 getDecoder().getDPMRDecoder().getOwnId(),
                 getDecoder().getDPMRDecoder().getCalledId());
         m_signalFormat = signalFormatDPMR;
+        break;
+    case DSDcc::DSDDecoder::DSDSyncNXDNP:
+    case DSDcc::DSDDecoder::DSDSyncNXDNN:
+        if (getDecoder().getNXDNDecoder().getRFChannel() == DSDcc::DSDNXDN::NXDNRCCH)
+        {
+            //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+            // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+            // RC cc mm llllll ssss
+            snprintf(m_formatStatusText, 82, "RC %02d %02X %06X %02X",
+                    getDecoder().getNXDNDecoder().getRAN(),
+                    getDecoder().getNXDNDecoder().getMessageType(),
+                    getDecoder().getNXDNDecoder().getLocationId(),
+                    getDecoder().getNXDNDecoder().getServicesFlag());
+        }
+        else if ((getDecoder().getNXDNDecoder().getRFChannel() == DSDcc::DSDNXDN::NXDNRTCH)
+            || (getDecoder().getNXDNDecoder().getRFChannel() == DSDcc::DSDNXDN::NXDNRDCH))
+        {
+            if (getDecoder().getNXDNDecoder().isIdle()) {
+                snprintf(m_formatStatusText, 82, "%s IDLE", getDecoder().getNXDNDecoder().getRFChannelStr());
+            }
+            else
+            {
+                //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+                // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+                // Rx cc mm sssss>gddddd
+                snprintf(m_formatStatusText, 82, "%s %02d %02X %05d>%c%05d",
+                        getDecoder().getNXDNDecoder().getRFChannelStr(),
+                        getDecoder().getNXDNDecoder().getRAN(),
+                        getDecoder().getNXDNDecoder().getMessageType(),
+                        getDecoder().getNXDNDecoder().getSourceId(),
+                        getDecoder().getNXDNDecoder().isGroupCall() ? 'G' : 'I',
+                        getDecoder().getNXDNDecoder().getDestinationId());
+            }
+        }
+        else
+        {
+            //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
+            // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
+            // RU
+            snprintf(m_formatStatusText, 82, "RU");
+        }
+        m_signalFormat = signalFormatNXDN;
         break;
     case DSDcc::DSDDecoder::DSDSyncYSF:
         //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8

@@ -152,7 +152,8 @@ private:
         signalFormatDMR,
         signalFormatDStar,
         signalFormatDPMR,
-        signalFormatYSF
+        signalFormatYSF,
+        signalFormatNXDN
     } SignalFormat; //!< Used for status text formatting
 
 	class MsgConfigureMyPosition : public Message {
