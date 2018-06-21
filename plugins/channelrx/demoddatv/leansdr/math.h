@@ -9,7 +9,7 @@ namespace leansdr {
   template<typename T>
   struct complex {
     T re, im;
-    complex() { }
+    complex() : re(0), im(0) { }
     complex(T x) : re(x), im(0) { }
     complex(T x, T y) : re(x), im(y) { }
     inline void operator +=(const complex<T> &x) { re+=x.re; im+=x.im; }
@@ -34,7 +34,7 @@ namespace leansdr {
   complex<T> operator *(const T &k, const complex<T> &a) {
     return complex<T>(k*a.re, k*a.im);
   }
-  
+
   // TBD Optimize with dedicated instructions
   inline int hamming_weight(uint8_t x) {
     static const int lut[16] = { 0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4 };
@@ -72,7 +72,7 @@ namespace leansdr {
     for ( ; x; ++n,x>>=1 ) ;
     return n;
   }
-  
+
   // Pre-computed sin/cos for 16-bit angles
 
   struct trig16 {

@@ -334,7 +334,7 @@ private:
     {
         for (unsigned int i = 0; i < ncoeffs; ++i)
         {
-            float a = 2 * M_PI * f * (i - (ncoeffs / 2));
+            float a = 2 * M_PI * f * (i - (ncoeffs / 2.0f));
             float c = cosf(a), s = sinf(a);
             // TBD Support T=complex
             shifted_coeffs[i].re = coeffs[i] * c;

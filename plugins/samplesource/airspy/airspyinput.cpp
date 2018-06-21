@@ -654,9 +654,6 @@ int AirspyInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("vgaGain")) {
         settings.m_vgaGain = response.getAirspySettings()->getVgaGain();
     }
-    if (deviceSettingsKeys.contains("vgaGain")) {
-        settings.m_vgaGain = response.getAirspySettings()->getVgaGain();
-    }
     if (deviceSettingsKeys.contains("lnaAGC")) {
         settings.m_lnaAGC = response.getAirspySettings()->getLnaAgc() != 0;
     }

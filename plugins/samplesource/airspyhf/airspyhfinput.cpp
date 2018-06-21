@@ -154,13 +154,7 @@ bool AirspyHFInput::start()
 
     if (m_running) { stop(); }
 
-	if ((m_airspyHFThread = new AirspyHFThread(m_dev, &m_sampleFifo)) == 0)
-	{
-	    qCritical("AirspyHFInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+	m_airspyHFThread = new AirspyHFThread(m_dev, &m_sampleFifo);
 	int sampleRateIndex = m_settings.m_devSampleRateIndex;
 
     if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {

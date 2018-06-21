@@ -13,10 +13,17 @@ struct hdlc_dec
 
     hdlc_dec(int _minframesize,  // Including CRC, excluding HDLC flags.
             int _maxframesize, bool _invert) :
-            minframesize(_minframesize), maxframesize(_maxframesize), invertmask(
-                    _invert ? 0xff : 0), framebuf(new u8[maxframesize]), debug(
-                    false)
+            minframesize(_minframesize),
+            maxframesize(_maxframesize),
+            invertmask(_invert ? 0xff : 0),
+            framebuf(new u8[maxframesize]),
+            debug(false)
     {
+        byte_out = 0;
+        nbits_out = 0;
+        framesize = 0;
+        crc16 = 0;
+
         reset();
     }
 

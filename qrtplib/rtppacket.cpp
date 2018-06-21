@@ -308,11 +308,6 @@ int RTPPacket::BuildPacket(
     if (buffer == 0)
     {
         packet = new uint8_t[packetlength];
-        if (packet == 0)
-        {
-            packetlength = 0;
-            return ERR_RTP_OUTOFMEM;
-        }
         externalbuffer = false;
     }
     else

@@ -244,8 +244,6 @@ int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason, std::size_t r
 
     byetime = receivetime;
     byereason = new uint8_t[reasonlen];
-    if (byereason == 0)
-        return ERR_RTP_OUTOFMEM;
     memcpy(byereason, reason, reasonlen);
     byereasonlen = reasonlen;
     receivedbye = true;

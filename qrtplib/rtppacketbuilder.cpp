@@ -62,6 +62,7 @@ RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) :
     numcsrcs = 0;
     numpayloadbytes = 0;
     numpackets = 0;
+    memset((char *) csrcs, 0, RTP_MAXCSRCS*sizeof(uint32_t));
     timeinit.Dummy();
 
     //std::cout << (void *)(&rtprnd) << std::endl;
@@ -81,8 +82,6 @@ int RTPPacketBuilder::Init(unsigned int max)
 
     maxpacksize = max;
     buffer = new uint8_t[max];
-    if (buffer == 0)
-        return ERR_RTP_OUTOFMEM;
     packetlength = 0;
     numpackets = 0;
 
@@ -113,8 +112,6 @@ int RTPPacketBuilder::SetMaximumPacketSize(unsigned int max)
     if (max <= 0)
         return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
     newbuf = new uint8_t[max];
-    if (newbuf == 0)
-        return ERR_RTP_OUTOFMEM;
 
     delete[] buffer;
     buffer = newbuf;

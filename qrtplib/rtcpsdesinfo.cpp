@@ -85,8 +85,7 @@ int RTCPSDESInfo::SetPrivateValue(const uint8_t *prefix, std::size_t prefixlen, 
         int status;
 
         item = new SDESPrivateItem();
-        if (item == 0)
-            return ERR_RTP_OUTOFMEM;
+
         if ((status = item->SetPrefix(prefix, prefixlen)) < 0)
         {
             delete item;

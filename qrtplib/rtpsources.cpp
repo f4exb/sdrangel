@@ -169,8 +169,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
 
         // First, we'll see if the packet can be parsed
         rtppack = new RTPPacket(*rawpack);
-        if (rtppack == 0)
-            return ERR_RTP_OUTOFMEM;
+
         if ((status = rtppack->GetCreationError()) < 0)
         {
             if (status == ERR_RTP_PACKET_INVALIDPACKET)
@@ -808,8 +807,6 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc, RTPInternalSourceData **
     if (sourcelist.GotoElement(ssrc) < 0) // No entry for this source
     {
         srcdat2 = new RTPInternalSourceData(ssrc);
-        if (srcdat2 == 0)
-            return ERR_RTP_OUTOFMEM;
         if ((status = sourcelist.AddElement(ssrc, srcdat2)) < 0)
         {
             delete srcdat2;

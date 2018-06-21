@@ -637,9 +637,6 @@ int UDPSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("amModFactor")) {
         settings.m_amModFactor = response.getUdpSinkSettings()->getAmModFactor();
     }
-    if (channelSettingsKeys.contains("amModFactor")) {
-        settings.m_amModFactor = response.getUdpSinkSettings()->getAmModFactor();
-    }
     if (channelSettingsKeys.contains("channelMute")) {
         settings.m_channelMute = response.getUdpSinkSettings()->getChannelMute() != 0;
     }
