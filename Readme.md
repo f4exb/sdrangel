@@ -244,6 +244,7 @@ This is the `demoddsd` plugin. At present it can be used to decode the following
   - dPMR
   - D-Star
   - Yaesu System Fusion (YSF)
+  - NXDN
 
 It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
 
@@ -252,13 +253,6 @@ If you have one or more serial devices interfacing the AMBE3000 chip in packet m
 Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
 
 Note that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
-
----
-&#9888; Since kernel 4.4.52 the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
-
-`echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer` or `sudo setserial /dev/ttyUSB0 low_latency`
-
----
 
 Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
 
@@ -353,7 +347,7 @@ Install cmake version 3:
 
 <h3>Prerequisites for 16.04 LTS</h3>
 
-You need to install the ffmpeg v.3 suite. Therefore you will need to add this PPA to the sources list using this command:
+For DATV demodulator support you need to install the ffmpeg v.3 suite. Therefore you will need to add this PPA to the sources list using this command:
 `sudo add-apt-repository ppa:jonathonf/ffmpeg-3`
 
 Then do `sudo apt-get update` and go to the next step. Alternatively if you have an older version of ffmpeg suite already installed just do `sudo apt-get dist-upgrde`.
