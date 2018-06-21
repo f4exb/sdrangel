@@ -53,7 +53,7 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_settings(),
     m_masterTabIndex(-1),
     m_dspEngine(DSPEngine::instance()),
-    m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
     m_logger(logger)
 {
     qDebug() << "MainCore::MainCore: start";

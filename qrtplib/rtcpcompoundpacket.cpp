@@ -171,12 +171,6 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, std::size_t datalen)
             p = new RTCPUnknownPacket(data, length);
         }
 
-        if (p == 0)
-        {
-            ClearPacketList();
-            return ERR_RTP_OUTOFMEM;
-        }
-
         rtcppacklist.push_back(p);
 
         datalen -= length;

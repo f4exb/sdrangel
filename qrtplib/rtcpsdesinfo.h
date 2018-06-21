@@ -230,8 +230,6 @@ private:
             {
                 len = (len > RTCP_SDES_MAXITEMLENGTH) ? RTCP_SDES_MAXITEMLENGTH : len;
                 uint8_t *str2 = new uint8_t[len];
-                if (str2 == 0)
-                    return ERR_RTP_OUTOFMEM;
                 memcpy(str2, s, len);
                 *destlen = len;
                 if (*dest)

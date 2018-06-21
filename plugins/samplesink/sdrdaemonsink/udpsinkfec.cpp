@@ -40,7 +40,8 @@ UDPSinkFEC::UDPSinkFEC() :
     m_frameCount(0),
     m_sampleIndex(0)
 {
-    memset((char *) m_txBlocks, 0, 4*256);
+    memset((char *) m_txBlocks, 0, 4*256*sizeof(SuperBlock));
+    memset((char *) &m_superBlock, 0, sizeof(SuperBlock));
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];

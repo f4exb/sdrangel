@@ -50,7 +50,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_nbSinceLastFlowCheck(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
 	m_doApplySettings(true),
 	m_forceSettings(true)
 {

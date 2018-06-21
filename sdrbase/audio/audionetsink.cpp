@@ -29,6 +29,7 @@ AudioNetSink::AudioNetSink(QObject *parent) :
     m_bufferIndex(0),
     m_port(9998)
 {
+    memset(m_data, 0, 65536);
     m_udpSocket = new QUdpSocket(parent);
 }
 
@@ -38,6 +39,7 @@ AudioNetSink::AudioNetSink(QObject *parent, int sampleRate, bool stereo) :
     m_bufferIndex(0),
     m_port(9998)
 {
+    memset(m_data, 0, 65536);
     m_udpSocket = new QUdpSocket(parent);
     m_rtpBufferAudio = new RTPSink(m_udpSocket, sampleRate, stereo);
 }
@@ -61,17 +63,13 @@ bool AudioNetSink::selectType(SinkType type)
     if (type == SinkUDP)
     {
         m_type = SinkUDP;
-        return true;
     }
-    else if (type == SinkRTP)
+    else // this is SinkRTP
     {
         m_type = SinkRTP;
-        return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return true;
 }
 
 void AudioNetSink::setDestination(const QString& address, uint16_t port)

@@ -266,5 +266,5 @@ bool AudioFifo::create(uint32_t numSamples)
 	m_fifo = new qint8[numSamples * m_sampleSize];
 	m_size = numSamples;
 
-	return m_fifo != 0;
+	return true;
 }

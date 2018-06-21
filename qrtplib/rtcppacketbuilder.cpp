@@ -111,8 +111,6 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
     *pack = 0;
 
     rtcpcomppack = new RTCPCompoundPacketBuilder();
-    if (rtcpcomppack == 0)
-        return ERR_RTP_OUTOFMEM;
 
     if ((status = rtcpcomppack->InitBuild(maxpacketsize)) < 0)
     {
@@ -640,8 +638,6 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack, const void *rea
     *pack = 0;
 
     rtcpcomppack = new RTCPCompoundPacketBuilder();
-    if (rtcpcomppack == 0)
-        return ERR_RTP_OUTOFMEM;
 
     if ((status = rtcpcomppack->InitBuild(maxpacketsize)) < 0)
     {

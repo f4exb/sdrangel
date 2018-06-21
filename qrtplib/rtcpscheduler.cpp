@@ -87,6 +87,11 @@ int RTCPSchedulerParams::SetMinimumTransmissionInterval(const RTPTime &t)
 RTCPScheduler::RTCPScheduler(RTPSources &s, RTPRandom &r) :
         sources(s), nextrtcptime(0, 0), prevrtcptime(0, 0), rtprand(r)
 {
+    pmembers = 0;
+    byemembers = 0;
+    pbyemembers = 0;
+    avgbyepacketsize = 0;
+    
     Reset();
 
     //std::cout << (void *)(&rtprand) << std::endl;

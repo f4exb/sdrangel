@@ -90,7 +90,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_settings(),
     m_masterTabIndex(0),
 	m_dspEngine(DSPEngine::instance()),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),

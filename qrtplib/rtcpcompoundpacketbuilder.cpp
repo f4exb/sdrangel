@@ -192,8 +192,6 @@ int RTCPCompoundPacketBuilder::AddReportBlock(uint32_t ssrc, uint8_t fractionlos
         return ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT;
 
     uint8_t *buf = new uint8_t[sizeof(RTCPReceiverReport)];
-    if (buf == 0)
-        return ERR_RTP_OUTOFMEM;
 
     RTCPReceiverReport *rr = (RTCPReceiverReport *) buf;
     uint32_t *packlost = (uint32_t *) &packetslost;
@@ -277,8 +275,6 @@ int RTCPCompoundPacketBuilder::AddSDESNormalItem(RTCPSDESPacket::ItemType t, con
     std::size_t len;
 
     buf = new uint8_t[sizeof(RTCPSDESHeader) + (std::size_t) itemlength];
-    if (buf == 0)
-        return ERR_RTP_OUTOFMEM;
     len = sizeof(RTCPSDESHeader) + (std::size_t) itemlength;
 
     RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *) (buf);
@@ -314,8 +310,6 @@ int RTCPCompoundPacketBuilder::AddSDESPrivateItem(const void *prefixdata, uint8_
     std::size_t len;
 
     buf = new uint8_t[sizeof(RTCPSDESHeader) + itemlength];
-    if (buf == 0)
-        return ERR_RTP_OUTOFMEM;
     len = sizeof(RTCPSDESHeader) + (std::size_t) itemlength;
 
     RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *) (buf);
@@ -367,8 +361,6 @@ int RTCPCompoundPacketBuilder::AddBYEPacket(uint32_t *ssrcs, uint8_t numssrcs, c
     std::size_t numwords;
 
     buf = new uint8_t[packsize];
-    if (buf == 0)
-        return ERR_RTP_OUTOFMEM;
 
     RTCPCommonHeader *hdr = (RTCPCommonHeader *) buf;
 
@@ -425,8 +417,6 @@ int RTCPCompoundPacketBuilder::AddAPPPacket(uint8_t subtype, uint32_t ssrc, cons
     uint8_t *buf;
 
     buf = new uint8_t[packsize];
-    if (buf == 0)
-        return ERR_RTP_OUTOFMEM;
 
     RTCPCommonHeader *hdr = (RTCPCommonHeader *) buf;
 
@@ -469,8 +459,6 @@ int RTCPCompoundPacketBuilder::EndBuild()
     if (!external)
     {
         buf = new uint8_t[len];
-        if (buf == 0)
-            return ERR_RTP_OUTOFMEM;
     }
     else
         buf = buffer;
@@ -526,13 +514,6 @@ int RTCPCompoundPacketBuilder::EndBuild()
                 p = new RTCPSRPacket(curbuf, offset);
             else
                 p = new RTCPRRPacket(curbuf, offset);
-            if (p == 0)
-            {
-                if (!external)
-                    delete[] buf;
-                ClearPacketList();
-                return ERR_RTP_OUTOFMEM;
-            }
             rtcppacklist.push_back(p);
 
             curbuf += offset;
@@ -600,13 +581,6 @@ int RTCPCompoundPacketBuilder::EndBuild()
             hdr->length = qToBigEndian((uint16_t) (numwords - 1));
 
             p = new RTCPSDESPacket(curbuf, offset);
-            if (p == 0)
-            {
-                if (!external)
-                    delete[] buf;
-                ClearPacketList();
-                return ERR_RTP_OUTOFMEM;
-            }
             rtcppacklist.push_back(p);
 
             curbuf += offset;
@@ -625,13 +599,6 @@ int RTCPCompoundPacketBuilder::EndBuild()
             memcpy(curbuf, (*it).packetdata, (*it).packetlength);
 
             p = new RTCPAPPPacket(curbuf, (*it).packetlength);
-            if (p == 0)
-            {
-                if (!external)
-                    delete[] buf;
-                ClearPacketList();
-                return ERR_RTP_OUTOFMEM;
-            }
             rtcppacklist.push_back(p);
 
             curbuf += (*it).packetlength;
@@ -648,13 +615,6 @@ int RTCPCompoundPacketBuilder::EndBuild()
             memcpy(curbuf, (*it).packetdata, (*it).packetlength);
 
             p = new RTCPBYEPacket(curbuf, (*it).packetlength);
-            if (p == 0)
-            {
-                if (!external)
-                    delete[] buf;
-                ClearPacketList();
-                return ERR_RTP_OUTOFMEM;
-            }
             rtcppacklist.push_back(p);
 
             curbuf += (*it).packetlength;

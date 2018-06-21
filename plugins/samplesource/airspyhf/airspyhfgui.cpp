@@ -38,7 +38,7 @@ AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     m_sampleSource = (AirspyHFInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 

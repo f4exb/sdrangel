@@ -49,7 +49,7 @@ FileSinkGui::FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
 	ui->setupUi(this);
 

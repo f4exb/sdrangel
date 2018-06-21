@@ -297,8 +297,6 @@ inline int RTPKeyHashTable<Key, Element, GetIndex, hashsize>::AddElement(const K
     // Okay, the key doesn't exist, so we can add the new element in the hash table
 
     newelem = new HashElement(k, elem, index);
-    if (newelem == 0)
-        return ERR_RTP_OUTOFMEM;
 
     e = table[index];
     table[index] = newelem;

@@ -54,7 +54,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 	m_acquisition(false),
 	m_streamSampleRate(0),
 	m_streamCenterFrequency(0),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
 	m_framesDecodingStatus(0),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),

@@ -35,7 +35,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet(deviceUISet),
     m_settings(),
     m_sampleRate(0),
-    m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_statusCounter(0),

@@ -296,8 +296,6 @@ private:
         int AddSSRC(uint32_t ssrc)
         {
             SDESSource *s = new SDESSource(ssrc);
-            if (s == 0)
-                return ERR_RTP_OUTOFMEM;
             sdessources.push_back(s);
             sdesit = sdessources.end();
             sdesit--;

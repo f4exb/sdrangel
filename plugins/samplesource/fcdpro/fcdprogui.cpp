@@ -35,7 +35,7 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     m_sampleSource = (FCDProInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 

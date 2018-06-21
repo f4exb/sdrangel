@@ -38,7 +38,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_settings(),
 	m_deviceSampleSink(NULL),
 	m_sampleRate(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
     m_deviceSampleSink = (BladerfOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 

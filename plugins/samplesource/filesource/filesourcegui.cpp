@@ -51,7 +51,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_enableNavTime(false),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

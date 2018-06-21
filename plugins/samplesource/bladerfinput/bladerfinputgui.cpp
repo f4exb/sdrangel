@@ -38,7 +38,7 @@ BladerfInputGui::BladerfInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_settings(),
 	m_sampleSource(NULL),
 	m_sampleRate(0),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     m_sampleSource = (BladerfInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 

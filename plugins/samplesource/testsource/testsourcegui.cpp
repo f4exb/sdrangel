@@ -44,7 +44,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings(true),
     m_sampleSource(0),
     m_tickCount(0),
-    m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     qDebug("TestSourceGui::TestSourceGui");
     m_sampleSource = m_deviceUISet->m_deviceSourceAPI->getSampleSource();

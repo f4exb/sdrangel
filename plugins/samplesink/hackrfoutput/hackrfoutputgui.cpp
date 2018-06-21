@@ -40,7 +40,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
 	m_doApplySettings(true)
 {
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
