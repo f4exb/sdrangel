@@ -470,8 +470,9 @@ This can be one of the following:
   - `+D-STAR_HD`: non-inverted D-Star header frame encountered
   - `-D-STAR_HD`: inverted D-Star header frame encountered
   - `+dPMR`: non-inverted dPMR non-packet frame
-  - `+NXDN`: non-inverted NXDN frame (detection only)
-  - `+YSF`: non-inverted Yaesu System Fusion frame (detection only)
+  - `+NXDN`: non-inverted NXDN frame
+  - `-NXDN`: inverted NXDN frame (not likely)
+  - `+YSF`: non-inverted Yaesu System Fusion frame
 
 <h4>B.4: Matched filter toggle</h4>
  
@@ -559,12 +560,13 @@ This button tunes the persistence decay of the points displayer on B.1. The trac
 
 <h4>B.17: Maximum expected FM deviation</h4>
 
-This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviation. You should adjust this value to make the figure on the signal scope fill the entire screen as shown in the screenshots above. The typical deviations by mode for a unit gain (1.0 at B.18) are:
+This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviation at the discriminator output. The correct value depends on the maximum deviation imposed by the modulation scheme with some guard margin. In practice you should adjust this value to make the figure on the signal scope fill the entire screen as shown in the screenshots above. The typical deviations by mode for a unit gain (1.0 at B.18) are:
   
   - DMR: &#177;5.4k
   - dPMR: &#177;2.7k
   - D-Star: &#177;3.5k
   - YSF: &#177;7.0k
+  - NXDN: &#177;2.7k
 
 <h4>B.18: Gain after discriminator</h4>
 
