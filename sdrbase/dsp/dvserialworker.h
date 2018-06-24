@@ -32,6 +32,7 @@
 #include "export.h"
 #include "dsp/filtermbe.h"
 #include "dsp/dsptypes.h"
+#include "audio/audiocompressor.h"
 
 class AudioFifo;
 
@@ -153,6 +154,7 @@ private:
     int m_upsampling;
     float m_volume;
     float m_upsamplingFactors[7];
+    AudioCompressor m_compressor;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */

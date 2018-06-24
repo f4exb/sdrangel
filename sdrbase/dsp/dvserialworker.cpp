@@ -159,7 +159,7 @@ void DVSerialWorker::upsample(int upsampling, short *in, int nbSamplesIn, unsign
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {
-        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) in[i]) : (float) in[i];
+        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) m_compressor.compress(in[i])) : (float) m_compressor.compress(in[i]);
         float prev = m_upsamplerLastValue;
         qint16 upsample;
 

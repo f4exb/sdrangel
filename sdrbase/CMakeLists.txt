@@ -3,6 +3,7 @@ project (sdrbase)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
 
 set(sdrbase_SOURCES
+    audio/audiocompressor.cpp
     audio/audiodevicemanager.cpp
     audio/audiofifo.cpp
     audio/audiooutput.cpp
@@ -90,6 +91,7 @@ set(sdrbase_SOURCES
 )
 
 set(sdrbase_HEADERS
+	audio/audiocompressor.h
     audio/audiodevicemanager.h
     audio/audiofifo.h
     audio/audiooutput.h
