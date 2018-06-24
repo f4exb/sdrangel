@@ -20,8 +20,8 @@
 const float MBEAudioInterpolatorFilter::m_lpa[3] = {1.0,           1.392667E+00, -5.474446E-01};
 const float MBEAudioInterpolatorFilter::m_lpb[3] = {3.869430E-02,  7.738860E-02,  3.869430E-02};
 
-const float MBEAudioInterpolatorFilter::m_hpa[3] = {1.000000e+00,  1.955578e+00, -9.565437e-01};
-const float MBEAudioInterpolatorFilter::m_hpb[3] = {9.780305e-01, -1.956061e+00,  9.780305e-01};
+const float MBEAudioInterpolatorFilter::m_hpa[3] = {1.000000e+00,  1.667871e+00, -7.156964e-01};
+const float MBEAudioInterpolatorFilter::m_hpb[3] = {8.459039e-01, -1.691760e+00,  8.459039e-01};
 
 MBEAudioInterpolatorFilter::MBEAudioInterpolatorFilter() :
         m_filterLP(m_lpa, m_lpb),
@@ -36,4 +36,14 @@ MBEAudioInterpolatorFilter::~MBEAudioInterpolatorFilter()
 float MBEAudioInterpolatorFilter::run(const float& sample)
 {
     return m_useHP ? m_filterLP.run(m_filterHP.run(sample)) : m_filterLP.run(sample);
+}
+
+float MBEAudioInterpolatorFilter::runHP(const float& sample)
+{
+    return m_filterHP.run(sample);
+}
+
+float MBEAudioInterpolatorFilter::runLP(const float& sample)
+{
+    return m_filterLP.run(sample);
 }

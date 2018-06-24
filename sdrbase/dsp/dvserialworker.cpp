@@ -27,13 +27,16 @@ DVSerialWorker::DVSerialWorker() :
     m_running(false),
     m_currentGainIn(0),
     m_currentGainOut(0),
-    m_upsamplerLastValue(0),
-    m_phase(0)
+    m_upsamplerLastValue(0.0f),
+    m_phase(0),
+    m_upsampling(1),
+    m_volume(1.0f)
 {
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
     m_audioFifo = 0;
     memset(m_dvAudioSamples, 0, SerialDV::MBE_AUDIO_BLOCK_SIZE*sizeof(short));
+    setVolumeFactors();
 }
 
 DVSerialWorker::~DVSerialWorker()
@@ -81,14 +84,21 @@ void DVSerialWorker::handleInputMessages()
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
             int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 2;
+            float volume = pow(10.0, dBVolume / 10.0f);
+            int upsampling = decodeMsg->getUpsampling();
+            upsampling = upsampling > 6 ? 6 : upsampling < 1 ? 1 : upsampling;
+
+            if ((volume != m_volume) || (upsampling != m_upsampling))
+            {
+                m_volume = volume;
+                m_upsampling = upsampling;
+                setVolumeFactors();
+            }
 
             m_upsampleFilter.useHP(decodeMsg->getUseHP());
 
-            if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate(), dBVolume))
+            if (m_dvController.decode(m_dvAudioSamples, decodeMsg->getMbeFrame(), decodeMsg->getMbeRate()))
             {
-                int upsampling = decodeMsg->getUpsampling();
-                upsampling = upsampling > 6 ? 6 : upsampling < 1 ? 1 : upsampling;
-
                 if (upsampling > 1) {
                     upsample(upsampling, m_dvAudioSamples, SerialDV::MBE_AUDIO_BLOCK_SIZE, decodeMsg->getChannels());
                 } else {
@@ -145,45 +155,17 @@ bool DVSerialWorker::hasFifo(AudioFifo *audioFifo)
     return m_audioFifo == audioFifo;
 }
 
-void DVSerialWorker::upsample6(short *in, int nbSamplesIn, unsigned char channels)
-{
-    for (int i = 0; i < nbSamplesIn; i++)
-    {
-        int cur = (int) in[i];
-        int prev = (int) m_upsamplerLastValue;
-        qint16 upsample;
-
-        for (int j = 1; j < 7; j++)
-        {
-            upsample = m_upsampleFilter.run((qint16) ((cur*j + prev*(6-j)) / 6));
-            m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
-            m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
-
-            if (m_audioBufferFill < m_audioBuffer.size() - 1)
-            {
-                ++m_audioBufferFill;
-            }
-            else
-            {
-                qDebug("DVSerialWorker::upsample6: audio buffer is full check its size");
-            }
-        }
-
-        m_upsamplerLastValue = in[i];
-    }
-}
-
 void DVSerialWorker::upsample(int upsampling, short *in, int nbSamplesIn, unsigned char channels)
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {
-        int cur = (int) in[i];
-        int prev = (int) m_upsamplerLastValue;
+        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) in[i]) : (float) in[i];
+        float prev = m_upsamplerLastValue;
         qint16 upsample;
 
         for (int j = 1; j <= upsampling; j++)
         {
-            upsample = m_upsampleFilter.run((qint16) ((cur*j + prev*(upsampling-j)) / upsampling));
+            upsample = (qint16) m_upsampleFilter.runLP(cur*m_upsamplingFactors[j] + prev*m_upsamplingFactors[upsampling-j]);
             m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
             m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
 
@@ -197,7 +179,7 @@ void DVSerialWorker::upsample(int upsampling, short *in, int nbSamplesIn, unsign
             }
         }
 
-        m_upsamplerLastValue = in[i];
+        m_upsamplerLastValue = cur;
     }
 }
 
@@ -205,8 +187,9 @@ void DVSerialWorker::noUpsample(short *in, int nbSamplesIn, unsigned char channe
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {
-        m_audioBuffer[m_audioBufferFill].l = channels & 1 ? in[i] : 0;
-        m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? in[i] : 0;
+        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) in[i]) : (float) in[i];
+        m_audioBuffer[m_audioBufferFill].l = channels & 1 ? cur*m_upsamplingFactors[0] : 0;
+        m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? cur*m_upsamplingFactors[0] : 0;
 
         if (m_audioBufferFill < m_audioBuffer.size() - 1)
         {
@@ -216,6 +199,15 @@ void DVSerialWorker::noUpsample(short *in, int nbSamplesIn, unsigned char channe
         {
             qDebug("DVSerialWorker::noUpsample: audio buffer is full check its size");
         }
+    }
+}
+
+void DVSerialWorker::setVolumeFactors()
+{
+    m_upsamplingFactors[0] = m_volume;
+
+    for (int i = 1; i <= m_upsampling; i++) {
+        m_upsamplingFactors[i] = (i*m_volume) / (float) m_upsampling;
     }
 }
 

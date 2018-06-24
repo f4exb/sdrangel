@@ -67,7 +67,10 @@ public:
     ~MBEAudioInterpolatorFilter();
 
     void useHP(bool useHP) { m_useHP = useHP; }
+    bool usesHP() const { return m_useHP; }
     float run(const float& sample);
+    float runHP(const float& sample);
+    float runLP(const float& sample);
 
 private:
     IIRFilter<float, 2> m_filterLP;
