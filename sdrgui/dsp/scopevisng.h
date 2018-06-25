@@ -681,8 +681,8 @@ private:
     {
         Projector m_projector;    //!< Projector transform from complex trace to real (displayable) trace
         uint32_t m_traceCount[2]; //!< Count of samples processed (double buffered)
-        Real m_maxPow;            //!< Maximum power over the current trace for MagDB overlay display
-        Real m_sumPow;            //!< Cumulative power over the current trace for MagDB overlay display
+        double m_maxPow;          //!< Maximum power over the current trace for MagDB overlay display
+        double m_sumPow;          //!< Cumulative power over the current trace for MagDB overlay display
         int m_nbPow;              //!< Number of power samples over the current trace for MagDB overlay display
 
         TraceControl() : m_projector(Projector::ProjectionReal)
