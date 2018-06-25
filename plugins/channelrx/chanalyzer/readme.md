@@ -381,18 +381,18 @@ This pair of sliders let you adjust the trigger level, The level appears on the 
 The top slider is a coarse adjustment. Each step moves the trigger level by an amount that depends on the projection type:
 
   - Real, Imag: 0.01
-  - Mag: 0.005
-  - MagSq: 0.005
+  - Mag: 0.01
+  - MagSq: 0.01
   - MagDB: 1 dB
   - Phi, dPhi: 0.01
   
 The bottom slider is a fine adjustment. Each step moves the trigger level by an amount that depends on the projection type:
 
-  - Real, Imag: 50.0E-6
-  - Mag: 25.0sE-6
-  - MagSq: 25.0sE-6
+  - Real, Imag: 20.0E-6
+  - Mag: 20.0sE-6
+  - MagSq: 20.0sE-6
   - MagDB: 0.01 dB
-  - Phi, dPhi: 50.0E-6
+  - Phi, dPhi: 20.0E-6
   
 <h3>10: Trigger delay</h3>
 

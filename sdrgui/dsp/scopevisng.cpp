@@ -915,7 +915,7 @@ void ScopeVisNG::computeDisplayTriggerLevels()
             float levelPowerdB = (100.0f * (level - 1.0f));
             float v;
 
-            if (itData->m_projectionType == Projector::ProjectionMagLin)
+            if ((itData->m_projectionType == Projector::ProjectionMagLin) || (itData->m_projectionType == Projector::ProjectionMagSq))
             {
                 v = (levelPowerLin - itData->m_ofs)*itData->m_amp - 1.0f;
             }

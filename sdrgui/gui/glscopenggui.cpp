@@ -22,7 +22,7 @@
 #include "ui_glscopenggui.h"
 #include "util/simpleserializer.h"
 
-const double GLScopeNGGUI::amps[11] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001 };
+const double GLScopeNGGUI::amps[14] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001 };
 
 GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     QWidget(parent),
@@ -1074,11 +1074,11 @@ void GLScopeNGGUI::setTrigIndexDisplay()
 
 void GLScopeNGGUI::setTrigLevelDisplay()
 {
-    double t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 20000.0f);
+    double t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 50000.0f);
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
 
     ui->trigLevelCoarse->setToolTip(QString("Trigger level coarse: %1 %").arg(ui->trigLevelCoarse->value() / 100.0f));
-    ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(ui->trigLevelFine->value() * 50));
+    ui->trigLevelFine->setToolTip(QString("Trigger level fine: %1 ppm").arg(ui->trigLevelFine->value() * 20));
 
     if (projectionType == Projector::ProjectionMagDB) {
         ui->trigLevelText->setText(tr("%1\ndB").arg(100.0 * (t - 1.0), 0, 'f', 1));
@@ -1243,7 +1243,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
 {
     triggerData.m_projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
     triggerData.m_inputIndex = 0;
-    triggerData.m_triggerLevel = (ui->trigLevelCoarse->value() / 100.0) + (ui->trigLevelFine->value() / 20000.0);
+    triggerData.m_triggerLevel = (ui->trigLevelCoarse->value() / 100.0) + (ui->trigLevelFine->value() / 50000.0);
     triggerData.m_triggerLevelCoarse = ui->trigLevelCoarse->value();
     triggerData.m_triggerLevelFine = ui->trigLevelFine->value();
     triggerData.m_triggerPositiveEdge = ui->trigPos->isChecked();

@@ -859,7 +859,7 @@ kS/s</string>
         <string>Vertical range</string>
        </property>
        <property name="maximum">
-        <number>10</number>
+        <number>13</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -1565,7 +1565,7 @@ kS/s</string>
           <string>Trigger level fine</string>
          </property>
          <property name="maximum">
-          <number>200</number>
+          <number>500</number>
          </property>
          <property name="pageStep">
           <number>1</number>
