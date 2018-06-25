@@ -463,6 +463,11 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                 {
                     v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
                 }
+                else if (projectionType == Projector::ProjectionMagSq)
+                {
+                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
+                    // TODO: power display overlay for squared magnitude
+                }
                 else if (projectionType == Projector::ProjectionMagDB)
                 {
                     Real re = begin->m_real / SDR_RX_SCALEF;

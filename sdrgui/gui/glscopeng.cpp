@@ -1877,6 +1877,7 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
         scale.setRange(Unit::Decibel, pow_floor, pow_floor + pow_range);
         break;
     case Projector::ProjectionMagLin:
+    case Projector::ProjectionMagSq:
         if (amp_range < 2.0) {
             scale.setRange(Unit::None, amp_ofs * 1000.0, amp_range * 1000.0 + amp_ofs * 1000.0);
         } else {

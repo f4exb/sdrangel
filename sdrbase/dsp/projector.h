@@ -25,6 +25,7 @@ public:
         ProjectionReal = 0, //!< Extract real part
         ProjectionImag,     //!< Extract imaginary part
         ProjectionMagLin,   //!< Calculate linear magnitude or modulus
+        ProjectionMagSq,    //!< Calculate linear squared magnitude or power
         ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
         ProjectionPhase,    //!< Calculate phase
         ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate

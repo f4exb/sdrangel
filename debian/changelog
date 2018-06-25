@@ -3,6 +3,7 @@ sdrangel (4.0.1-1) unstable; urgency=medium
   * DSD demod: added NXDN support
   * DATV demod: include it only if FFmpeg > 3.1 is installed
   * Fixes for Arch. Manual merge of pull request #183
+  * Scope: new magnitude squared projection mainly for radioastronomy
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 23 Jun 2018 09:14:18 +0200
   

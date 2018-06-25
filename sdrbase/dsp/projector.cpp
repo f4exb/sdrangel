@@ -52,6 +52,13 @@ Real Projector::run(const Sample& s)
             v = std::sqrt(magsq);
         }
             break;
+        case ProjectionMagSq:
+        {
+            Real re = s.m_real / SDR_RX_SCALEF;
+            Real im = s.m_imag / SDR_RX_SCALEF;
+            v = re*re + im*im;
+        }
+            break;
         case ProjectionMagDB:
         {
             Real re = s.m_real / SDR_RX_SCALEF;

@@ -1021,7 +1021,7 @@ void GLScopeNGGUI::setAmpOfsDisplay()
     {
         double a;
 
-        if (projectionType == Projector::ProjectionMagLin)
+        if ((projectionType == Projector::ProjectionMagLin) || (projectionType == Projector::ProjectionMagSq))
         {
             a = o/2000.0f;
         }
@@ -1087,7 +1087,7 @@ void GLScopeNGGUI::setTrigLevelDisplay()
     {
         double a;
 
-        if (projectionType == Projector::ProjectionMagLin) {
+        if ((projectionType == Projector::ProjectionMagLin) || (projectionType == Projector::ProjectionMagSq)) {
             a = 1.0 + t;
         } else {
             a = t;
@@ -1184,6 +1184,7 @@ void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)
     comboBox->addItem("Real", Projector::ProjectionReal);
     comboBox->addItem("Imag", Projector::ProjectionImag);
     comboBox->addItem("Mag", Projector::ProjectionMagLin);
+    comboBox->addItem("MagSq", Projector::ProjectionMagSq);
     comboBox->addItem("MagdB", Projector::ProjectionMagDB);
     comboBox->addItem("Phi", Projector::ProjectionPhase);
     comboBox->addItem("dPhi", Projector::ProjectionDPhase);
@@ -1225,7 +1226,7 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_ofsCoarse = ui->ofsCoarse->value();
     traceData.m_ofsFine = ui->ofsFine->value();
 
-    if (traceData.m_projectionType == Projector::ProjectionMagLin) {
+    if ((traceData.m_projectionType == Projector::ProjectionMagLin)  || (traceData.m_projectionType == Projector::ProjectionMagSq)) {
         traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 2000.0f;
     } else {
         traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
