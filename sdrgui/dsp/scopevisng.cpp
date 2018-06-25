@@ -465,8 +465,36 @@ int ScopeVisNG::processTraces(const SampleVector::const_iterator& cbegin, const 
                 }
                 else if (projectionType == Projector::ProjectionMagSq)
                 {
-                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
-                    // TODO: power display overlay for squared magnitude
+                    Real magsq = (*itCtl)->m_projector.run(*begin);
+                    v = (magsq - itData->m_ofs)*itData->m_amp - 1.0f;
+
+                    if ((traceCount >= shift) && (traceCount < shift+length)) // power display overlay values construction
+                    {
+                        if (traceCount == shift)
+                        {
+                            (*itCtl)->m_maxPow = 0.0f;
+                            (*itCtl)->m_sumPow = 0.0f;
+                            (*itCtl)->m_nbPow = 1;
+                        }
+
+                        if (magsq > 0.0f)
+                        {
+                            if (magsq > (*itCtl)->m_maxPow)
+                            {
+                                (*itCtl)->m_maxPow = magsq;
+                            }
+
+                            (*itCtl)->m_sumPow += magsq;
+                            (*itCtl)->m_nbPow++;
+                        }
+                    }
+
+                    if ((m_nbSamples == 1) && ((*itCtl)->m_nbPow > 0)) // on last sample create power display overlay
+                    {
+                        double avgPow = (*itCtl)->m_sumPow / (*itCtl)->m_nbPow;
+                        itData->m_textOverlay = QString("%1  %2").arg((*itCtl)->m_maxPow, 0, 'e', 2).arg(avgPow, 0, 'e', 2);
+                        (*itCtl)->m_nbPow = 0;
+                    }
                 }
                 else if (projectionType == Projector::ProjectionMagDB)
                 {

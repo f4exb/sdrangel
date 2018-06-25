@@ -269,6 +269,10 @@ The signal is synchronized with the PLL in 4 phase mode (locker icon is green).
   
 ![Channel Analyzer NG plugin scope1 controls](../../../doc/img/ChAnalyzerNG_plugin_overlay_dB.png)
 
+**Note3**: in the MagSq mode when the trace is selected (1) the display overlay on the top right of the trace shows 2 figures in scientific notation. From left to right: peak power and average power.
+  
+![Channel Analyzer NG plugin scope2 controls](../../../doc/img/ChAnalyzerNG_plugin_overlay_lin.png)
+
 <h3>5. Source select</h3>
 
 This is for future use when more than one incoming complex signals can be applied. The signal index appears on the right of the button

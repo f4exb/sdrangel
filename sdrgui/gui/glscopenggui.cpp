@@ -1217,7 +1217,7 @@ void GLScopeNGGUI::disableLiveMode(bool disable)
 void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
 {
     traceData.m_projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
-    traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB);
+    traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB) || (traceData.m_projectionType == Projector::ProjectionMagSq);
     traceData.m_textOverlay.clear();
     traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
