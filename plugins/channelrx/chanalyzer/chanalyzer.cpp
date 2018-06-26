@@ -156,6 +156,7 @@ void ChannelAnalyzer::processOneSample(Complex& c, fftfilt::cmplx *sideband)
             Real re = m_sum.real() / SDR_RX_SCALEF;
             Real im = m_sum.imag() / SDR_RX_SCALEF;
             m_magsq = re*re + im*im;
+            m_channelPowerAvg(m_magsq);
             std::complex<float> mix;
 
             if (m_settings.m_pll)

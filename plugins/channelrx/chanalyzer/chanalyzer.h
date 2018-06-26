@@ -30,6 +30,7 @@
 #include "dsp/freqlockcomplex.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/movingaverage.h"
 
 #include "chanalyzersettings.h"
 
@@ -188,6 +189,7 @@ public:
 	int getInputSampleRate() const { return m_inputSampleRate; }
     int getChannelSampleRate() const { return m_settings.m_downSample ? m_settings.m_downSampleRate : m_inputSampleRate; }
 	double getMagSq() const { return m_magsq; }
+	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
 	bool isPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
     Real getPllFrequency() const { return m_pll.getFreq(); }
 	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
@@ -236,6 +238,7 @@ private:
 
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
+	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
 	QMutex m_settingsMutex;
 
 //	void apply(bool force = false);

@@ -226,9 +226,9 @@ void ChannelAnalyzerGUI::channelMarkerHighlightedByCursor()
 
 void ChannelAnalyzerGUI::tick()
 {
-	double powDb = CalcDb::dbPower(m_channelAnalyzer->getMagSq());
-	m_channelPowerDbAvg(powDb);
-	ui->channelPower->setText(tr("%1 dB").arg((Real) m_channelPowerDbAvg, 0, 'f', 1));
+	m_channelPowerAvg(m_channelAnalyzer->getMagSqAvg());
+	double powDb = CalcDb::dbPower((double) m_channelPowerAvg);
+	ui->channelPower->setText(tr("%1 dB").arg(powDb, 0, 'f', 1));
 
 	if (m_channelAnalyzer->isPllLocked()) {
 	    ui->pll->setStyleSheet("QToolButton { background-color : green; }");

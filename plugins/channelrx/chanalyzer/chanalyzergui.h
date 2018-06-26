@@ -68,7 +68,7 @@ private:
 	ChannelAnalyzerSettings m_settings;
 	bool m_doApplySettings;
 	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
-	MovingAverageUtil<Real, double, 40> m_channelPowerDbAvg;
+	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
 
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeNGComboVis* m_spectrumScopeComboVis;
