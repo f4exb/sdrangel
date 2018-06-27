@@ -307,19 +307,26 @@ This is the control channel used in trunked systems and is usually sent continuo
 
 This is `RC` for RCCH
 
-<h6>A11.5.1.2: RAN number</h5>
+<h6>A11.5.2.2: Half/full rate</h5>
+
+Indicator of transmission rate:
+
+  - `H`: half rate (2400 or 4800 S/s). Uses EHR vocoder (AMBE 3600/2450)
+  - `F`: full rate (4800 S/s only). Uses EFR vocoder (AMBE 7200/4400)
+
+<h6>A11.5.1.3: RAN number</h5>
 
 This is the RAN number (0 to 63) associated to the transmission. RAN stands for "Radio Access Number" and for trunked systems this is the site identifier (Site Id) modulo 64.
 
-<h6>A11.5.1.3: Last message type code</h5>
+<h6>A11.5.1.4: Last message type code</h5>
 
 This is the type code of the last message (6 bits) displayed in hexadecimal. The complete list is found in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.
 
-<h6>A11.5.1.4: Location Id</h5>
+<h6>A11.5.1.5: Location Id</h5>
 
 This is the 3 byte location Id associated to the site displayed in hexadecimal
 
-<h6>A11.5.1.5: Services available flags</h5>
+<h6>A11.5.1.6: Services available flags</h5>
 
 This is a 16 bit collection of flags to indicate which services are available displayed in hexadecimal. The breakdown is listed in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.5.33. From MSB to LSB:
 
@@ -350,22 +357,29 @@ This is the transmission channel either in a trunked system (RTCH) or convention
 
 It can be either `RT` for RTCH or `RD` for a RDCH channel
 
-<h6>A11.5.2.2: RAN number</h5>
+<h6>A11.5.2.2: Half/full rate</h5>
+
+Indicator of transmission rate:
+
+  - `H`: half rate (2400 or 4800 S/s). Uses EHR vocoder (AMBE 3600/2450)
+  - `F`: full rate (4800 S/s only). Uses EFR vocoder (AMBE 7200/4400)
+
+<h6>A11.5.2.3: RAN number</h5>
 
 This is the RAN number (0 to 63) associated to the transmission. RAN stands for "Radio Access Number" and has a different usage in conventional or trunked systems:
 
   - Conventional (RDCH): this is used as a selective squelch. Code `0` means always unmute.
   - Trunked (RTCH): this is the site identifier (Site Id) modulo 64.
 
-<h6>A11.5.2.3: Last message type code</h5>
+<h6>A11.5.2.4: Last message type code</h5>
 
 This is the type code of the last message (6 bits) displayed in hexadecimal. The complete list is found in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.
 
-<h6>A11.5.2.4: Source Id</h5>
+<h6>A11.5.2.5: Source Id</h5>
 
 This is the source of transmission identification code on two bytes (0 to 65353) displayed in decimal.
 
-<h6>A11.5.2.5: Destination Id</h5>
+<h6>A11.5.2.6: Destination Id</h5>
 
 This is the destination of transmission identification code on two bytes (0 to 65353) displayed in decimal. It is prefixed by a group call indicator:
 
