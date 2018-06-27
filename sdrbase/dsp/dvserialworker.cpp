@@ -83,7 +83,7 @@ void DVSerialWorker::handleInputMessages()
         if (MsgMbeDecode::match(*message))
         {
             MsgMbeDecode *decodeMsg = (MsgMbeDecode *) message;
-            int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 2;
+            int dBVolume = (decodeMsg->getVolumeIndex() - 30) / 4;
             float volume = pow(10.0, dBVolume / 10.0f);
             int upsampling = decodeMsg->getUpsampling();
             upsampling = upsampling > 6 ? 6 : upsampling < 1 ? 1 : upsampling;
