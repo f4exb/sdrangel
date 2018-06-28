@@ -14,6 +14,8 @@ inline double log2f(double n)
 
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 
+const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
+
 SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	BasebandSampleSink(),
 	m_fft(FFTEngine::create()),
@@ -96,8 +98,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			m_fft->transform();
 
 			// extract power spectrum and reorder buckets
-			Real ofs = 20.0f * log10f(1.0f / m_fftSize);
-			Real mult = (10.0f / log2f(10.0f));
 			const Complex* fftOut = m_fft->out();
 			Complex c;
 			Real v;
@@ -109,7 +109,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 				{
 					c = fftOut[i];
 					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
+					v = m_average.storeAndGetAvg(v, i);
+					v = m_mult * log2f(v) + m_ofs;
 					m_logPowerSpectrum[i * 2] = v;
 					m_logPowerSpectrum[i * 2 + 1] = v;
 				}
@@ -120,18 +121,21 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 				{
 					c = fftOut[i + halfSize];
 					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
+					v = m_average.storeAndGetAvg(v, i+halfSize);
+					v = m_mult * log2f(v) + m_ofs;
 					m_logPowerSpectrum[i] = v;
 
 					c = fftOut[i];
 					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
+                    v = m_average.storeAndGetAvg(v, i);
+					v = m_mult * log2f(v) + m_ofs;
 					m_logPowerSpectrum[i + halfSize] = v;
 				}
 			}
 
 			// send new data to visualisation
 			m_glSpectrum->newSpectrum(m_logPowerSpectrum, m_fftSize);
+			m_average.nextAverage();
 
 			// advance buffer respecting the fft overlap factor
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
@@ -208,4 +212,7 @@ void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Fu
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;
 	m_refillSize = m_fftSize - m_overlapSize;
 	m_fftBufferFill = m_overlapSize;
+	m_average.resize(fftSize, 10);
+	m_averageNb = 100;
+	m_ofs = 20.0f * log10f(1.0f / m_fftSize);
 }

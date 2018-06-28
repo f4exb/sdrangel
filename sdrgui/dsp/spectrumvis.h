@@ -7,6 +7,7 @@
 #include "dsp/fftwindow.h"
 #include "export.h"
 #include "util/message.h"
+#include "util/movingaverage2d.h"
 
 class GLSpectrum;
 class MessageQueue;
@@ -62,6 +63,11 @@ private:
 
 	Real m_scalef;
 	GLSpectrum* m_glSpectrum;
+	MovingAverage2D<double> m_average;
+	unsigned int m_averageNb;
+
+	Real m_ofs;
+	static const Real m_mult;
 
 	QMutex m_mutex;
 
