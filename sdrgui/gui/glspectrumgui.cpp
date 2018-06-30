@@ -38,6 +38,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 		ui->refLevel->addItem(QString("%1").arg(ref));
 	for(int range = 100; range >= 5; range -= 5)
 		ui->levelRange->addItem(QString("%1").arg(range));
+	setAveragingCombo();
 }
 
 GLSpectrumGUI::~GLSpectrumGUI()
@@ -398,3 +399,36 @@ int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
     return x * m;
 }
 
+void GLSpectrumGUI::setAveragingCombo()
+{
+    ui->averaging->clear();
+    ui->averaging->addItem(QString("0"));
+
+    for (int i = 0; i <= m_averagingMaxScale; i++)
+    {
+        QString s;
+        int m = pow(10.0, i);
+        int x = 2*m;
+        setNumberStr(x, s);
+        ui->averaging->addItem(s);
+        x = 5*m;
+        setNumberStr(x, s);
+        ui->averaging->addItem(s);
+        x = 10*m;
+        setNumberStr(x, s);
+        ui->averaging->addItem(s);
+    }
+}
+
+void GLSpectrumGUI::setNumberStr(int n, QString& s)
+{
+    if (n < 1000) {
+        s = tr("%1").arg(n);
+    } else if (n < 1000000) {
+        s = tr("%1k").arg(n/1000);
+    } else if (n < 1000000000) {
+        s = tr("%1M").arg(n/1000000);
+    } else {
+        s = tr("%1G").arg(n/1000000000);
+    }
+}

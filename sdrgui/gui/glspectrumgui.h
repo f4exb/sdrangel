@@ -59,12 +59,14 @@ private:
 	bool m_invert;
 	AveragingMode m_averagingMode;
 	int m_averagingIndex;
-	int m_averagingMaxScale;
+	int m_averagingMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 	unsigned int m_averagingNb;
 
 	void applySettings();
 	int getAveragingIndex(int averaging) const;
 	int getAveragingValue(int averagingIndex) const;
+	void setAveragingCombo();
+	void setNumberStr(int n, QString& s);
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
