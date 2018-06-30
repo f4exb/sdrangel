@@ -18,6 +18,12 @@ class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
 
 public:
+    enum AveragingMode
+    {
+        AvgModeMoving,
+        AvgModeFixed
+    };
+
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
 	~GLSpectrumGUI();
 
@@ -51,8 +57,14 @@ private:
 	bool m_displayHistogram;
 	bool m_displayGrid;
 	bool m_invert;
+	AveragingMode m_averagingMode;
+	int m_averagingIndex;
+	int m_averagingMaxScale;
+	unsigned int m_averagingNb;
 
 	void applySettings();
+	int getAveragingIndex(int averaging) const;
+	int getAveragingValue(int averagingIndex) const;
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -64,6 +76,8 @@ private slots:
 	void on_stroke_valueChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
 	void on_traceIntensity_valueChanged(int index);
+	void on_averagingMode_currentIndexChanged(int index);
+    void on_averaging_currentIndexChanged(int index);
 
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);

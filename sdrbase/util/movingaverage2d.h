@@ -68,7 +68,7 @@ public:
 
     T storeAndGetAvg(T v, unsigned int index)
     {
-        if (m_depth == 1)
+        if (m_depth <= 1)
         {
             return v;
         }

@@ -19,27 +19,30 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		MsgConfigureSpectrumVis(int fftSize, int overlapPercent, FFTWindow::Function window) :
+		MsgConfigureSpectrumVis(int fftSize, int overlapPercent, unsigned int averageNb, FFTWindow::Function window) :
 			Message(),
 			m_fftSize(fftSize),
 			m_overlapPercent(overlapPercent),
+			m_averageNb(averageNb),
 			m_window(window)
 		{ }
 
 		int getFFTSize() const { return m_fftSize; }
 		int getOverlapPercent() const { return m_overlapPercent; }
+		unsigned int getAverageNb() const { return m_averageNb; }
 		FFTWindow::Function getWindow() const { return m_window; }
 
 	private:
 		int m_fftSize;
 		int m_overlapPercent;
+		unsigned int m_averageNb;
 		FFTWindow::Function m_window;
 	};
 
 	SpectrumVis(Real scalef, GLSpectrum* glSpectrum = 0);
 	virtual ~SpectrumVis();
 
-	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
+	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, unsigned int averagingNb, FFTWindow::Function window);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -71,7 +74,7 @@ private:
 
 	QMutex m_mutex;
 
-	void handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window);
+	void handleConfigure(int fftSize, int overlapPercent, unsigned int averageNb, FFTWindow::Function window);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

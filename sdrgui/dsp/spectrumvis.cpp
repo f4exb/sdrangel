@@ -25,10 +25,12 @@ SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	m_needMoreSamples(false),
 	m_scalef(scalef),
 	m_glSpectrum(glSpectrum),
+	m_averageNb(0),
+	m_ofs(0),
 	m_mutex(QMutex::Recursive)
 {
 	setObjectName("SpectrumVis");
-	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
+	handleConfigure(1024, 0, 0, FFTWindow::BlackmanHarris);
 }
 
 SpectrumVis::~SpectrumVis()
@@ -36,9 +38,9 @@ SpectrumVis::~SpectrumVis()
 	delete m_fft;
 }
 
-void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window)
+void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, unsigned int averagingNb, FFTWindow::Function window)
 {
-	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, window);
+	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, averagingNb, window);
 	msgQueue->push(cmd);
 }
 
@@ -171,7 +173,7 @@ bool SpectrumVis::handleMessage(const Message& message)
 	if (MsgConfigureSpectrumVis::match(message))
 	{
 		MsgConfigureSpectrumVis& conf = (MsgConfigureSpectrumVis&) message;
-		handleConfigure(conf.getFFTSize(), conf.getOverlapPercent(), conf.getWindow());
+		handleConfigure(conf.getFFTSize(), conf.getOverlapPercent(), conf.getAverageNb(), conf.getWindow());
 		return true;
 	}
 	else
@@ -180,7 +182,7 @@ bool SpectrumVis::handleMessage(const Message& message)
 	}
 }
 
-void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window)
+void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, unsigned int averageNb, FFTWindow::Function window)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -212,7 +214,7 @@ void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Fu
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;
 	m_refillSize = m_fftSize - m_overlapSize;
 	m_fftBufferFill = m_overlapSize;
-	m_average.resize(fftSize, 10);
-	m_averageNb = 100;
+	m_average.resize(fftSize, averageNb);
+	m_averageNb = averageNb;
 	m_ofs = 20.0f * log10f(1.0f / m_fftSize);
 }

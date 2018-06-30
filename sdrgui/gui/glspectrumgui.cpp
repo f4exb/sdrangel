@@ -8,9 +8,9 @@
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::GLSpectrumGUI),
-	m_messageQueue(NULL),
-	m_spectrumVis(NULL),
-	m_glSpectrum(NULL),
+	m_messageQueue(0),
+	m_spectrumVis(0),
+	m_glSpectrum(0),
 	m_fftSize(1024),
 	m_fftOverlap(0),
 	m_fftWindow(FFTWindow::Hamming),
@@ -27,7 +27,11 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_displayCurrent(false),
 	m_displayHistogram(false),
 	m_displayGrid(false),
-	m_invert(true)
+	m_invert(true),
+	m_averagingMode(AvgModeMoving),
+	m_averagingIndex(0),
+	m_averagingMaxScale(2),
+	m_averagingNb(0)
 {
 	ui->setupUi(this);
 	for(int ref = 0; ref >= -110; ref -= 5)
@@ -66,6 +70,8 @@ void GLSpectrumGUI::resetToDefaults()
 	m_displayHistogram = false;
 	m_displayGrid = false;
 	m_invert = true;
+	m_averagingMode = AvgModeMoving;
+	m_averagingIndex = 0;
 	applySettings();
 }
 
@@ -90,6 +96,8 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeBool(16, m_displayCurrent);
 	s.writeS32(17, m_displayTraceIntensity);
 	s.writeReal(18, m_glSpectrum->getWaterfallShare());
+	s.writeS32(19, (int) m_averagingMode);
+	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex));
 	return s.final();
 }
 
@@ -101,6 +109,8 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+
+	int tmp;
 
 	if(d.getVersion() == 1) {
 		d.readS32(1, &m_fftSize, 1024);
@@ -122,6 +132,12 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readS32(17, &m_displayTraceIntensity, 50);
 		Real waterfallShare;
 		d.readReal(18, &waterfallShare, 0.66);
+		d.readS32(19, &tmp, 0);
+		m_averagingMode = tmp < 0 ? AvgModeMoving : tmp > 1 ? AvgModeFixed : (AveragingMode) tmp;
+		d.readS32(20, &tmp, 0);
+		m_averagingIndex = getAveragingValue(tmp);
+	    m_averagingNb = getAveragingValue(m_averagingIndex);
+
 		m_glSpectrum->setWaterfallShare(waterfallShare);
 		applySettings();
 		return true;
@@ -142,6 +158,8 @@ void GLSpectrumGUI::applySettings()
 	}
 	ui->refLevel->setCurrentIndex(-m_refLevel / 5);
 	ui->levelRange->setCurrentIndex((100 - m_powerRange) / 5);
+	ui->averaging->setCurrentIndex(m_averagingIndex);
+	ui->averagingMode->setCurrentIndex((int) m_averagingMode);
 	ui->decay->setSliderPosition(m_decay);
 	ui->holdoff->setSliderPosition(m_histogramLateHoldoff);
 	ui->stroke->setSliderPosition(m_histogramStroke);
@@ -171,44 +189,63 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDisplayGrid(m_displayGrid);
 	m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 
-	m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, (FFTWindow::Function)m_fftWindow);
+	if (m_spectrumVis) {
+	    m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+	}
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
 {
 	m_fftWindow = index;
-	if(m_spectrumVis == NULL)
-		return;
-	m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, (FFTWindow::Function)m_fftWindow);
+	if(m_spectrumVis != 0) {
+        m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+	}
 }
 
 void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	m_fftSize = 1 << (7 + index);
-	if(m_spectrumVis != NULL)
-		m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, (FFTWindow::Function)m_fftWindow);
+	if(m_spectrumVis != 0) {
+	    m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+	}
+}
+
+void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index __attribute__((unused)))
+{
+}
+
+void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
+{
+    m_averagingIndex = index;
+    m_averagingNb = getAveragingValue(index);
+    if(m_spectrumVis != 0) {
+        m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+    }
 }
 
 void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
 {
 	m_refLevel = 0 - index * 5;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setReferenceLevel(m_refLevel);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setReferenceLevel(m_refLevel);
+	}
 }
 
 void GLSpectrumGUI::on_levelRange_currentIndexChanged(int index)
 {
 	m_powerRange = 100 - index * 5;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setPowerRange(m_powerRange);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setPowerRange(m_powerRange);
+	}
 }
 
 void GLSpectrumGUI::on_decay_valueChanged(int index)
 {
 	m_decay = index;
 	ui->decay->setToolTip(QString("Decay: %1").arg(m_decay));
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDecay(m_decay);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDecay(m_decay);
+	}
 }
 
 void GLSpectrumGUI::on_holdoff_valueChanged(int index)
@@ -218,7 +255,7 @@ void GLSpectrumGUI::on_holdoff_valueChanged(int index)
 	}
 	m_histogramLateHoldoff = index;
 	//ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramLateHoldoff));
-	if(m_glSpectrum != NULL) {
+	if(m_glSpectrum != 0) {
 		applySettings();
 	}
 }
@@ -230,7 +267,7 @@ void GLSpectrumGUI::on_stroke_valueChanged(int index)
 	}
 	m_histogramStroke = index;
 	//ui->stroke->setToolTip(QString("Stroke: %1").arg(m_histogramStroke));
-	if(m_glSpectrum != NULL) {
+	if(m_glSpectrum != 0) {
 		applySettings();
 	}
 }
@@ -238,63 +275,126 @@ void GLSpectrumGUI::on_stroke_valueChanged(int index)
 void GLSpectrumGUI::on_waterfall_toggled(bool checked)
 {
 	m_displayWaterfall = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayWaterfall(m_displayWaterfall);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayWaterfall(m_displayWaterfall);
+	}
 }
 
 void GLSpectrumGUI::on_histogram_toggled(bool checked)
 {
 	m_displayHistogram = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayHistogram(m_displayHistogram);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayHistogram(m_displayHistogram);
+	}
 }
 
 void GLSpectrumGUI::on_maxHold_toggled(bool checked)
 {
 	m_displayMaxHold = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayMaxHold(m_displayMaxHold);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayMaxHold(m_displayMaxHold);
+	}
 }
 
 void GLSpectrumGUI::on_current_toggled(bool checked)
 {
 	m_displayCurrent = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayCurrent(m_displayCurrent);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayCurrent(m_displayCurrent);
+	}
 }
 
 void GLSpectrumGUI::on_invert_toggled(bool checked)
 {
 	m_invert = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setInvertedWaterfall(m_invert);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setInvertedWaterfall(m_invert);
+	}
 }
 
 void GLSpectrumGUI::on_grid_toggled(bool checked)
 {
 	m_displayGrid = checked;
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayGrid(m_displayGrid);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayGrid(m_displayGrid);
+	}
 }
 
 void GLSpectrumGUI::on_gridIntensity_valueChanged(int index)
 {
 	m_displayGridIntensity = index;
 	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+	}
 }
 
 void GLSpectrumGUI::on_traceIntensity_valueChanged(int index)
 {
 	m_displayTraceIntensity = index;
 	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
+	}
 }
 
 void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked __attribute__((unused)))
 {
-	if(m_glSpectrum != NULL)
-		m_glSpectrum->clearSpectrumHistogram();
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->clearSpectrumHistogram();
+	}
 }
+
+int GLSpectrumGUI::getAveragingIndex(int averagingValue) const
+{
+    if (averagingValue <= 0) {
+        return 0;
+    }
+
+    int v = averagingValue;
+    int j = 0;
+
+    for (int i = 0; i <= m_averagingMaxScale; i++)
+    {
+        if (v < 20)
+        {
+            if (v < 2) {
+                j = 0;
+            } else if (v < 5) {
+                j = 1;
+            } else if (v < 10) {
+                j = 2;
+            } else {
+                j = 3;
+            }
+
+            return 3*i + j;
+        }
+
+        v /= 10;
+    }
+
+    return 3*m_averagingMaxScale + 3;
+}
+
+int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
+{
+    if (averagingIndex <= 0) {
+        return 0;
+    }
+
+    int v = averagingIndex - 1;
+    int m = pow(10.0, v/3 > m_averagingMaxScale ? m_averagingMaxScale : v/3);
+    int x;
+
+    if (v % 3 == 0) {
+        x = 2;
+    } else if (v % 3 == 1) {
+        x = 5;
+    } else if (v % 3 == 2) {
+        x = 10;
+    }
+
+    return x * m;
+}
+
