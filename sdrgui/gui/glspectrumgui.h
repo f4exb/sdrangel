@@ -5,12 +5,12 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "settings/serializable.h"
+#include "util/messagequeue.h"
 
 namespace Ui {
 	class GLSpectrumGUI;
 }
 
-class MessageQueue;
 class SpectrumVis;
 class GLSpectrum;
 
@@ -36,9 +36,10 @@ public:
 private:
 	Ui::GLSpectrumGUI* ui;
 
-	MessageQueue* m_messageQueue;
+	MessageQueue* m_messageQueueToVis;
 	SpectrumVis* m_spectrumVis;
 	GLSpectrum* m_glSpectrum;
+	MessageQueue m_messageQueue;
 
 	qint32 m_fftSize;
 	qint32 m_fftOverlap;
@@ -67,6 +68,9 @@ private:
 	int getAveragingValue(int averagingIndex) const;
 	void setAveragingCombo();
 	void setNumberStr(int n, QString& s);
+	void setNumberStr(float v, int decimalPlaces, QString& s);
+	void setAveragingToolitp();
+	bool handleMessage(const Message& message);
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -88,6 +92,8 @@ private slots:
 	void on_invert_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);
+
+	void handleInputMessages();
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H

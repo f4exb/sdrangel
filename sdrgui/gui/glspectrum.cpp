@@ -24,8 +24,11 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include "gui/glspectrum.h"
+#include "util/messagequeue.h"
 
 #include <QDebug>
+
+MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
@@ -60,7 +63,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_displayHistogram(true),
     m_displayChanged(false),
     m_matrixLoc(0),
-    m_colorLoc(0)
+    m_colorLoc(0),
+    m_messageQueueToGUI(0)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -193,6 +197,9 @@ void GLSpectrum::setHistoStroke(int stroke)
 void GLSpectrum::setSampleRate(qint32 sampleRate)
 {
 	m_sampleRate = sampleRate;
+	if (m_messageQueueToGUI) {
+	    m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
+	}
 	m_changesPending = true;
 	update();
 }

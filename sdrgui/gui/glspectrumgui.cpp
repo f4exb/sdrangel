@@ -8,7 +8,7 @@
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::GLSpectrumGUI),
-	m_messageQueue(0),
+	m_messageQueueToVis(0),
 	m_spectrumVis(0),
 	m_glSpectrum(0),
 	m_fftSize(1024),
@@ -41,6 +41,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	for(int range = 100; range >= 5; range -= 5)
 		ui->levelRange->addItem(QString("%1").arg(range));
 	setAveragingCombo();
+	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 GLSpectrumGUI::~GLSpectrumGUI()
@@ -50,9 +51,10 @@ GLSpectrumGUI::~GLSpectrumGUI()
 
 void GLSpectrumGUI::setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
-	m_messageQueue = messageQueue;
+	m_messageQueueToVis = messageQueue;
 	m_spectrumVis = spectrumVis;
 	m_glSpectrum = glSpectrum;
+	m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
 	applySettings();
 }
 
@@ -193,20 +195,22 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 
 	if (m_spectrumVis) {
-	    m_spectrumVis->configure(m_messageQueue,
+	    m_spectrumVis->configure(m_messageQueueToVis,
 	            m_fftSize,
 	            m_fftOverlap,
 	            m_averagingNb,
 	            m_averagingMode,
 	            (FFTWindow::Function)m_fftWindow);
 	}
+
+	setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
 {
 	m_fftWindow = index;
 	if(m_spectrumVis != 0) {
-        m_spectrumVis->configure(m_messageQueue,
+        m_spectrumVis->configure(m_messageQueueToVis,
                 m_fftSize,
                 m_fftOverlap,
                 m_averagingNb,
@@ -219,13 +223,14 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	m_fftSize = 1 << (7 + index);
 	if(m_spectrumVis != 0) {
-	    m_spectrumVis->configure(m_messageQueue,
+	    m_spectrumVis->configure(m_messageQueueToVis,
 	            m_fftSize,
 	            m_fftOverlap,
 	            m_averagingNb,
                 m_averagingMode,
 	            (FFTWindow::Function)m_fftWindow);
 	}
+	setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
@@ -233,7 +238,7 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
     m_averagingMode = index < 0 ? AvgModeMoving : index > 1 ? AvgModeFixed : (AveragingMode) index;
 
     if(m_spectrumVis != 0) {
-        m_spectrumVis->configure(m_messageQueue,
+        m_spectrumVis->configure(m_messageQueueToVis,
                 m_fftSize,
                 m_fftOverlap,
                 m_averagingNb,
@@ -257,7 +262,7 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
     m_averagingNb = getAveragingValue(index);
 
     if(m_spectrumVis != 0) {
-        m_spectrumVis->configure(m_messageQueue,
+        m_spectrumVis->configure(m_messageQueueToVis,
                 m_fftSize,
                 m_fftOverlap,
                 m_averagingNb,
@@ -271,6 +276,8 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
             m_glSpectrum->setTimingRate(m_averagingNb == 0 ? 1 : m_averagingNb);
         }
     }
+
+    setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
@@ -479,5 +486,65 @@ void GLSpectrumGUI::setNumberStr(int n, QString& s)
         s = tr("%1M").arg(n/1000000);
     } else {
         s = tr("%1G").arg(n/1000000000);
+    }
+}
+
+void GLSpectrumGUI::setNumberStr(float v, int decimalPlaces, QString& s)
+{
+    if (v < 1e-6) {
+        s = tr("%1n").arg(v*1e9, 0, 'f', decimalPlaces);
+    } else if (v < 1e-3) {
+        s = tr("%1µ").arg(v*1e6, 0, 'f', decimalPlaces);
+    } else if (v < 1.0) {
+        s = tr("%1m").arg(v*1e3, 0, 'f', decimalPlaces);
+    } else if (v < 1e3) {
+        s = tr("%1").arg(v, 0, 'f', decimalPlaces);
+    } else if (v < 1e6) {
+        s = tr("%1k").arg(v*1e-3, 0, 'f', decimalPlaces);
+    } else if (v < 1e9) {
+        s = tr("%1M").arg(v*1e-6, 0, 'f', decimalPlaces);
+    } else {
+        s = tr("%1G").arg(v*1e-9, 0, 'f', decimalPlaces);
+    }
+}
+
+void GLSpectrumGUI::setAveragingToolitp()
+{
+    if (m_glSpectrum)
+    {
+        QString s;
+        float averagingTime = (m_fftSize * m_averagingNb) / (float) m_glSpectrum->getSampleRate();
+        setNumberStr(averagingTime, 2, s);
+        ui->averaging->setToolTip(QString("Number of averaging samples (avg time: %1s)").arg(s));
+    }
+    else
+    {
+        ui->averaging->setToolTip(QString("Number of averaging samples"));
+    }
+}
+
+bool GLSpectrumGUI::handleMessage(const Message& message)
+{
+    if (GLSpectrum::MsgReportSampleRate::match(message))
+    {
+        setAveragingToolitp();
+        return true;
+    }
+
+    return false;
+}
+
+void GLSpectrumGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_messageQueue.pop()) != 0)
+    {
+        qDebug("GLSpectrumGUI::handleInputMessages: message: %s", message->getIdentifier());
+
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
     }
 }

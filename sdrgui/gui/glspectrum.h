@@ -34,13 +34,32 @@
 #include "dsp/channelmarker.h"
 #include "export.h"
 #include "util/incrementalarray.h"
+#include "util/message.h"
 
 class QOpenGLShaderProgram;
+class MessageQueue;
 
 class SDRGUI_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
 
 public:
+    class MsgReportSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportSampleRate(quint32 sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        {
+            m_sampleRate = sampleRate;
+        }
+
+        quint32 getSampleRate() const { return m_sampleRate; }
+
+    private:
+        quint32 m_sampleRate;
+    };
+
 	GLSpectrum(QWidget* parent = NULL);
 	~GLSpectrum();
 
@@ -62,9 +81,11 @@ public:
 	void setDisplayGrid(bool display);
 	void setDisplayGridIntensity(int intensity);
 	void setDisplayTraceIntensity(int intensity);
+	qint32 getSampleRate() const { return m_sampleRate; }
 
 	void addChannelMarker(ChannelMarker* channelMarker);
 	void removeChannelMarker(ChannelMarker* channelMarker);
+	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
 	void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
 	void clearSpectrumHistogram();
@@ -171,6 +192,8 @@ private:
 	IncrementalArray<GLfloat> m_q3TickFrequency;
 	IncrementalArray<GLfloat> m_q3TickPower;
 	IncrementalArray<GLfloat> m_q3FFT;
+
+	MessageQueue *m_messageQueueToGUI;
 
 	static const int m_waterfallBufferHeight = 256;
 

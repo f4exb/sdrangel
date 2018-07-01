@@ -1,3 +1,9 @@
+sdrangel (4.0.2-1) unstable; urgency=medium
+
+  * Spectrum: added averaging
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 01 Jul 2018 21:14:18 +0200
+  
 sdrangel (4.0.1-1) unstable; urgency=medium
 
   * DSD demod: added NXDN support
