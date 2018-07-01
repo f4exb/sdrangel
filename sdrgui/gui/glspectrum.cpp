@@ -1055,11 +1055,11 @@ void GLSpectrum::applyChanges()
 
 			if(!m_invertedWaterfall)
 			{
-				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
 			}
 			else
 			{
-				m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
 			}
 		}
 		else
@@ -1149,26 +1149,26 @@ void GLSpectrum::applyChanges()
 
 		if(m_sampleRate > 0)
 		{
-			float scaleDiv = (float)m_sampleRate * (m_ssbSpectrum ? 2 : 1);
+			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
 
 			if(!m_invertedWaterfall)
 			{
-				m_timeScale.setRange(Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (waterfallHeight * m_fftSize) / scaleDiv, 0);
 			}
 			else
 			{
-				m_timeScale.setRange(Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (waterfallHeight * m_fftSize) / scaleDiv);
 			}
 		}
 		else
 		{
 			if(!m_invertedWaterfall)
 			{
-				m_timeScale.setRange(Unit::Time, 10, 0);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 10, 0);
 			}
 			else
 			{
-				m_timeScale.setRange(Unit::Time, 0, 10);
+				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, 10);
 			}
 		}
 

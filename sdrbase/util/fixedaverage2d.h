@@ -95,6 +95,10 @@ public:
 
     bool nextAverage()
     {
+        if (m_size <= 1) {
+            return true;
+        }
+
         if (m_avgIndex == m_size - 1)
         {
             m_avgIndex = 0;

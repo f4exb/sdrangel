@@ -34,8 +34,10 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_averagingNb(0)
 {
 	ui->setupUi(this);
+	ui->refLevel->clear();
 	for(int ref = 0; ref >= -110; ref -= 5)
 		ui->refLevel->addItem(QString("%1").arg(ref));
+	ui->levelRange->clear();
 	for(int range = 100; range >= 5; range -= 5)
 		ui->levelRange->addItem(QString("%1").arg(range));
 	setAveragingCombo();
