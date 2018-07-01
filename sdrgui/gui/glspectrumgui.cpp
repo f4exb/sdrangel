@@ -138,7 +138,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readS32(19, &tmp, 0);
 		m_averagingMode = tmp < 0 ? AvgModeMoving : tmp > 1 ? AvgModeFixed : (AveragingMode) tmp;
 		d.readS32(20, &tmp, 0);
-		m_averagingIndex = getAveragingValue(tmp);
+		m_averagingIndex = getAveragingIndex(tmp);
 	    m_averagingNb = getAveragingValue(m_averagingIndex);
 
 		m_glSpectrum->setWaterfallShare(waterfallShare);
