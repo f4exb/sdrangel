@@ -191,7 +191,12 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 
 	if (m_spectrumVis) {
-	    m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+	    m_spectrumVis->configure(m_messageQueue,
+	            m_fftSize,
+	            m_fftOverlap,
+	            m_averagingNb,
+	            m_averagingMode,
+	            (FFTWindow::Function)m_fftWindow);
 	}
 }
 
@@ -199,7 +204,12 @@ void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
 {
 	m_fftWindow = index;
 	if(m_spectrumVis != 0) {
-        m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+        m_spectrumVis->configure(m_messageQueue,
+                m_fftSize,
+                m_fftOverlap,
+                m_averagingNb,
+                m_averagingMode,
+                (FFTWindow::Function)m_fftWindow);
 	}
 }
 
@@ -207,12 +217,26 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	m_fftSize = 1 << (7 + index);
 	if(m_spectrumVis != 0) {
-	    m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+	    m_spectrumVis->configure(m_messageQueue,
+	            m_fftSize,
+	            m_fftOverlap,
+	            m_averagingNb,
+                m_averagingMode,
+	            (FFTWindow::Function)m_fftWindow);
 	}
 }
 
-void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index __attribute__((unused)))
+void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
+    m_averagingMode = index < 0 ? AvgModeMoving : index > 1 ? AvgModeFixed : (AveragingMode) index;
+    if(m_spectrumVis != 0) {
+        m_spectrumVis->configure(m_messageQueue,
+                m_fftSize,
+                m_fftOverlap,
+                m_averagingNb,
+                m_averagingMode,
+                (FFTWindow::Function)m_fftWindow);
+    }
 }
 
 void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
@@ -220,7 +244,12 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
     m_averagingIndex = index;
     m_averagingNb = getAveragingValue(index);
     if(m_spectrumVis != 0) {
-        m_spectrumVis->configure(m_messageQueue, m_fftSize, m_fftOverlap, m_averagingNb, (FFTWindow::Function)m_fftWindow);
+        m_spectrumVis->configure(m_messageQueue,
+                m_fftSize,
+                m_fftOverlap,
+                m_averagingNb,
+                m_averagingMode,
+                (FFTWindow::Function)m_fftWindow);
     }
 }
 
