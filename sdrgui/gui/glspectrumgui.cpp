@@ -28,7 +28,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_displayHistogram(false),
 	m_displayGrid(false),
 	m_invert(true),
-	m_averagingMode(AvgModeMoving),
+	m_averagingMode(AvgModeNone),
 	m_averagingIndex(0),
 	m_averagingMaxScale(2),
 	m_averagingNb(0)
@@ -75,7 +75,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_displayHistogram = false;
 	m_displayGrid = false;
 	m_invert = true;
-	m_averagingMode = AvgModeMoving;
+	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
 	applySettings();
 }
@@ -138,7 +138,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		Real waterfallShare;
 		d.readReal(18, &waterfallShare, 0.66);
 		d.readS32(19, &tmp, 0);
-		m_averagingMode = tmp < 0 ? AvgModeMoving : tmp > 1 ? AvgModeFixed : (AveragingMode) tmp;
+		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 2 ? AvgModeFixed : (AveragingMode) tmp;
 		d.readS32(20, &tmp, 0);
 		m_averagingIndex = getAveragingIndex(tmp);
 	    m_averagingNb = getAveragingValue(m_averagingIndex);
@@ -235,7 +235,7 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
-    m_averagingMode = index < 0 ? AvgModeMoving : index > 1 ? AvgModeFixed : (AveragingMode) index;
+    m_averagingMode = index < 0 ? AvgModeNone : index > 2 ? AvgModeFixed : (AveragingMode) index;
 
     if(m_spectrumVis != 0) {
         m_spectrumVis->configure(m_messageQueueToVis,

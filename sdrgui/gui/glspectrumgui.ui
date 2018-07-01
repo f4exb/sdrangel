@@ -549,6 +549,11 @@
        </property>
        <item>
         <property name="text">
+         <string>No</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Mov</string>
         </property>
        </item>

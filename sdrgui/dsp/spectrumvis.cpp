@@ -26,12 +26,12 @@ SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	m_scalef(scalef),
 	m_glSpectrum(glSpectrum),
 	m_averageNb(0),
-	m_averagingMode(AvgModeMoving),
+	m_averagingMode(AvgModeNone),
 	m_ofs(0),
 	m_mutex(QMutex::Recursive)
 {
 	setObjectName("SpectrumVis");
-	handleConfigure(1024, 0, 0, AvgModeMoving, FFTWindow::BlackmanHarris);
+	handleConfigure(1024, 0, 0, AvgModeNone, FFTWindow::BlackmanHarris);
 }
 
 SpectrumVis::~SpectrumVis()
@@ -111,7 +111,39 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			Real v;
 			std::size_t halfSize = m_fftSize / 2;
 
-			if (m_averagingMode == AvgModeMoving)
+			if (m_averagingMode == AvgModeNone)
+			{
+                if ( positiveOnly )
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_mult * log2f(v) + m_ofs;
+                        m_logPowerSpectrum[i * 2] = v;
+                        m_logPowerSpectrum[i * 2 + 1] = v;
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i + halfSize];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_mult * log2f(v) + m_ofs;
+                        m_logPowerSpectrum[i] = v;
+
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_mult * log2f(v) + m_ofs;
+                        m_logPowerSpectrum[i + halfSize] = v;
+                    }
+                }
+
+                // send new data to visualisation
+                m_glSpectrum->newSpectrum(m_logPowerSpectrum, m_fftSize);
+			}
+			else if (m_averagingMode == AvgModeMoving)
 			{
 	            if ( positiveOnly )
 	            {

@@ -18,6 +18,7 @@ class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 public:
     enum AveragingMode
     {
+        AvgModeNone,
         AvgModeMoving,
         AvgModeFixed
     };
@@ -33,7 +34,7 @@ public:
 			m_averageNb(averageNb),
 			m_window(window)
 		{
-		    m_averagingMode = averagingMode < 0 ? AvgModeMoving : averagingMode > 1 ? AvgModeFixed : (SpectrumVis::AveragingMode) averagingMode;
+		    m_averagingMode = averagingMode < 0 ? AvgModeNone : averagingMode > 2 ? AvgModeFixed : (SpectrumVis::AveragingMode) averagingMode;
 		}
 
 		int getFFTSize() const { return m_fftSize; }

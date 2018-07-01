@@ -20,6 +20,7 @@ class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 public:
     enum AveragingMode
     {
+        AvgModeNone,
         AvgModeMoving,
         AvgModeFixed
     };
