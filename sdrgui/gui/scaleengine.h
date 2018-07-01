@@ -58,7 +58,7 @@ private:
 	int m_decimalPlaces;
 	bool m_makeOpposite; // will show -value instead of value
 
-	QString formatTick(double value, int decimalPlaces, bool fancyTime = true);
+	QString formatTick(double value, int decimalPlaces, bool fancyTime = false);
 	void calcCharSize();
 	void calcScaleFactor();
 	double calcMajorTickUnits(double distance, int* retDecimalPlaces);

@@ -38,6 +38,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_powerRange(100),
 	m_decay(0),
 	m_sampleRate(500000),
+	m_timingRate(1),
 	m_fftSize(512),
 	m_displayGrid(true),
 	m_displayGridIntensity(5),
@@ -194,6 +195,13 @@ void GLSpectrum::setSampleRate(qint32 sampleRate)
 	m_sampleRate = sampleRate;
 	m_changesPending = true;
 	update();
+}
+
+void GLSpectrum::setTimingRate(qint32 timingRate)
+{
+    m_timingRate = timingRate;
+    m_changesPending = true;
+    update();
 }
 
 void GLSpectrum::setDisplayWaterfall(bool display)
@@ -1043,7 +1051,7 @@ void GLSpectrum::applyChanges()
 
 		if(m_sampleRate > 0)
 		{
-			float scaleDiv = (float)m_sampleRate * (m_ssbSpectrum ? 2 : 1);
+			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
 
 			if(!m_invertedWaterfall)
 			{

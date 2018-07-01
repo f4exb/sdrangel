@@ -29,7 +29,7 @@ static double trunc(double d)
 
 QString ScaleEngine::formatTick(double value, int decimalPlaces, bool fancyTime)
 {
-	if((m_physicalUnit != Unit::Time) || (!fancyTime) || 1)
+	if((m_physicalUnit != Unit::Time) || (!fancyTime))
 	{
 		return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
 	}

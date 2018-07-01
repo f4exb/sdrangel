@@ -46,6 +46,7 @@ public:
 
 	void setCenterFrequency(qint64 frequency);
 	void setSampleRate(qint32 sampleRate);
+	void setTimingRate(qint32 timingRate);
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
@@ -110,6 +111,7 @@ private:
 	Real m_powerRange;
 	int m_decay;
 	quint32 m_sampleRate;
+	quint32 m_timingRate;
 
 	int m_fftSize;
 

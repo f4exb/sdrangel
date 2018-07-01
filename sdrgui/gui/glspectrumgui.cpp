@@ -229,6 +229,7 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
     m_averagingMode = index < 0 ? AvgModeMoving : index > 1 ? AvgModeFixed : (AveragingMode) index;
+
     if(m_spectrumVis != 0) {
         m_spectrumVis->configure(m_messageQueue,
                 m_fftSize,
@@ -237,12 +238,22 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
                 m_averagingMode,
                 (FFTWindow::Function)m_fftWindow);
     }
+
+    if (m_glSpectrum != 0)
+    {
+        if (m_averagingMode == AvgModeFixed) {
+            m_glSpectrum->setTimingRate(m_averagingNb == 0 ? 1 : m_averagingNb);
+        } else {
+            m_glSpectrum->setTimingRate(1);
+        }
+    }
 }
 
 void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
 {
     m_averagingIndex = index;
     m_averagingNb = getAveragingValue(index);
+
     if(m_spectrumVis != 0) {
         m_spectrumVis->configure(m_messageQueue,
                 m_fftSize,
@@ -250,6 +261,13 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
                 m_averagingNb,
                 m_averagingMode,
                 (FFTWindow::Function)m_fftWindow);
+    }
+
+    if (m_glSpectrum != 0)
+    {
+        if (m_averagingMode == AvgModeFixed) {
+            m_glSpectrum->setTimingRate(m_averagingNb == 0 ? 1 : m_averagingNb);
+        }
     }
 }
 
