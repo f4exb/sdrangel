@@ -513,7 +513,7 @@ void GLSpectrumGUI::setAveragingToolitp()
     if (m_glSpectrum)
     {
         QString s;
-        float averagingTime = (m_fftSize * m_averagingNb) / (float) m_glSpectrum->getSampleRate();
+        float averagingTime = (m_fftSize * (m_averagingNb == 0 ? 1 : m_averagingNb)) / (float) m_glSpectrum->getSampleRate();
         setNumberStr(averagingTime, 2, s);
         ui->averaging->setToolTip(QString("Number of averaging samples (avg time: %1s)").arg(s));
     }

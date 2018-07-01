@@ -226,7 +226,102 @@ Use this push button to add a new channel with the selected plugin
 
 <h3>4. Spectrum display control</h3>
 
-These are the controls of the main spectrum display in (7). Please refer to the spectrum display documentation (TBD) for details.
+![Spectrum GUI](../doc/img/MainWindow_spectrum_gui.png)
+
+These are the controls of the main spectrum display in (7). The same controls are found in the plugins that feature a spectrum display:
+  - Channel Analyzer
+  - Broadcast FM demodulator
+  - SSB demodulator
+  - UDP source
+  - UDP sink
+
+<h4>4.1. FFT window selector</h4>
+
+Use this combo box to select which window is applied to the FFT:
+  - **Bart**: Bartlett
+  - **B-H**: Blackmann-Harris
+  - **FT**: Flat top
+  - **Ham**: Hamming (default)
+  - **Han**: Hanning
+  - **Rec**: Rectangular (no window)
+  
+<h4>4.2. FFT size</h4>
+
+Select the size of the FFT window among these values:
+  - 128
+  - 256
+  - 512
+  - 1k = 1024 (default)
+  - 2k = 2048
+  - 4k = 4096
+
+<h4>4.3. Reference level</h4>
+
+This is the level in dB at the top of the display range. You can select values between 0 and -110 in 5 dB steps
+
+<h4>4.4. Range</h4>
+
+This is the range of display in dB. You can select values between 5 and 100 in 5 dB steps
+
+<h4>4.5. Averaging mode</h4>
+
+Use this combo to select which averaging mode is applied:
+  - **No**: no averaging. Disables averaging regardless of the number of averaged samples (4.6). This is the default option
+  - **Mov**: moving average. This is a sliding average over the amount of samples specified next (4.6). There is one complete FFT line produced at every FFT sampling period
+  - **Fix**: fixed average. Average is done over the amount of samples specified next (4.6) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
+
+<h4>4.6. Number of averaged samples</h4>
+  
+Each FFT bin (squared magnitude) is averaged over a number of samples. This combo allows selecting the number of samples between these values: 0 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000). The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
+Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall.
+
+<h4>4.7. Phosphor display stroke decay</h4>
+
+This controls the decay rate of the stroke when phosphor display is engaged (4.C)
+
+<h4>4.8. Phosphor display holdoff</h4>
+
+This controls the holdoff when phosphor display is engaged (4.C)
+
+<h4>4.9. Phosphor display stroke strength</h4>
+
+This controls the stroke strength when phosphor display is engaged (4.C)
+
+<h4>4.A. Trace intensity</h4>
+
+This controls the intensity of the maximum (4.D) and current (4.E) spectrum trace
+
+<h4>4.B. Clear spectrum</h4>
+
+This resets the maximum spectrum trace and phosphor remanence
+
+<h4>4.C. Phosphor display</h4>
+
+Toggles the phosphor display on the spectrum
+
+<h4>4.D. Maximum trace</h4>
+
+Toggles the maximum trace display (red trace) on the spectrum
+
+<h4>4.E. Current trace</h4>
+
+Toggles the current trace display (yellow trace) on the spectrum
+
+<h4>4.F. Waterfall/spectrum placement</h4>
+
+Toggles the spectrum on top or on bottom versus waterfall
+
+<h4>4.G. Waterfall</h4>
+
+Toggles the waterfall display
+
+<h4>4.H.Grid</h4>
+
+Toggles the grid display
+
+<h4>4.I.Grid intensity</h4>
+
+Controls the intensity of the grid display
 
 <h3>5. Presets and commands</h3>
 
