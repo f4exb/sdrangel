@@ -63,6 +63,7 @@ private:
 	int m_averagingIndex;
 	int m_averagingMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 	unsigned int m_averagingNb;
+	bool m_linear; //!< linear else logarithmic scale
 
 	void applySettings();
 	int getAveragingIndex(int averaging) const;
@@ -85,6 +86,7 @@ private slots:
 	void on_traceIntensity_valueChanged(int index);
 	void on_averagingMode_currentIndexChanged(int index);
     void on_averaging_currentIndexChanged(int index);
+    void on_linscale_toggled(bool checked);
 
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);

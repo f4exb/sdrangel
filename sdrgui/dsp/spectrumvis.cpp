@@ -44,9 +44,10 @@ void SpectrumVis::configure(MessageQueue* msgQueue,
         int overlapPercent,
         unsigned int averagingNb,
         int averagingMode,
-        FFTWindow::Function window)
+        FFTWindow::Function window,
+        bool linear)
 {
-	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, averagingNb, averagingMode, window);
+	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, averagingNb, averagingMode, window, linear);
 	msgQueue->push(cmd);
 }
 

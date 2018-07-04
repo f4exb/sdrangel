@@ -200,7 +200,8 @@ void GLSpectrumGUI::applySettings()
 	            m_fftOverlap,
 	            m_averagingNb,
 	            m_averagingMode,
-	            (FFTWindow::Function)m_fftWindow);
+	            (FFTWindow::Function)m_fftWindow,
+	            m_linear);
 	}
 
 	setAveragingToolitp();
@@ -215,7 +216,8 @@ void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
                 m_fftOverlap,
                 m_averagingNb,
                 m_averagingMode,
-                (FFTWindow::Function)m_fftWindow);
+                (FFTWindow::Function)m_fftWindow,
+                m_linear);
 	}
 }
 
@@ -228,7 +230,8 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 	            m_fftOverlap,
 	            m_averagingNb,
                 m_averagingMode,
-	            (FFTWindow::Function)m_fftWindow);
+	            (FFTWindow::Function)m_fftWindow,
+	            m_linear);
 	}
 	setAveragingToolitp();
 }
@@ -243,7 +246,8 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
                 m_fftOverlap,
                 m_averagingNb,
                 m_averagingMode,
-                (FFTWindow::Function)m_fftWindow);
+                (FFTWindow::Function)m_fftWindow,
+                m_linear);
     }
 
     if (m_glSpectrum != 0)
@@ -267,7 +271,8 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
                 m_fftOverlap,
                 m_averagingNb,
                 m_averagingMode,
-                (FFTWindow::Function)m_fftWindow);
+                (FFTWindow::Function)m_fftWindow,
+                m_linear);
     }
 
     if (m_glSpectrum != 0)
@@ -278,6 +283,21 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
     }
 
     setAveragingToolitp();
+}
+
+void GLSpectrumGUI::on_linscale_toggled(bool checked)
+{
+    m_linear = checked;
+
+    if(m_spectrumVis != 0) {
+        m_spectrumVis->configure(m_messageQueueToVis,
+                m_fftSize,
+                m_fftOverlap,
+                m_averagingNb,
+                m_averagingMode,
+                (FFTWindow::Function)m_fftWindow,
+                m_linear);
+    }
 }
 
 void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)

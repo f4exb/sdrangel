@@ -359,7 +359,14 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->glSpectrum->setDisplayWaterfall(false);
 	ui->glSpectrum->setDisplayMaxHold(false);
 	ui->glSpectrum->setSsbSpectrum(true);
-	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, 0, 0, FFTWindow::BlackmanHarris);
+	m_spectrumVis->configure(
+	        m_spectrumVis->getInputMessageQueue(),
+            64, // FFT size
+            10, // overlapping %
+            0,  // number of averaging samples
+            0,  // no averaging
+	        FFTWindow::BlackmanHarris,
+	        false); // logarithmic scale
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);

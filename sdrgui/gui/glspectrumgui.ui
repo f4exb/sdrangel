@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>331</width>
+    <width>342</width>
     <height>59</height>
    </rect>
   </property>
@@ -631,6 +631,24 @@
          <string>1k</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="linscale">
+       <property name="toolTip">
+        <string>Logarithmic / Linear scale selection</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/logarithmic.png</normaloff>
+         <normalon>:/linear.png</normalon>:/logarithmic.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

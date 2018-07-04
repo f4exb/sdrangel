@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>linear.png</file>
+    <file>logarithmic.png</file>
     <file>pin_last.png</file>
     <file>sweep.png</file>
     <file>minusrx.png</file>

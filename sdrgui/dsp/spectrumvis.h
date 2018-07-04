@@ -27,12 +27,19 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		MsgConfigureSpectrumVis(int fftSize, int overlapPercent, unsigned int averageNb, int averagingMode, FFTWindow::Function window) :
+		MsgConfigureSpectrumVis(
+		        int fftSize,
+		        int overlapPercent,
+		        unsigned int averageNb,
+		        int averagingMode,
+		        FFTWindow::Function window,
+		        bool linear) :
 			Message(),
 			m_fftSize(fftSize),
 			m_overlapPercent(overlapPercent),
 			m_averageNb(averageNb),
-			m_window(window)
+			m_window(window),
+			m_linear(linear)
 		{
 		    m_averagingMode = averagingMode < 0 ? AvgModeNone : averagingMode > 2 ? AvgModeFixed : (SpectrumVis::AveragingMode) averagingMode;
 		}
@@ -42,6 +49,7 @@ public:
 		unsigned int getAverageNb() const { return m_averageNb; }
 		SpectrumVis::AveragingMode getAveragingMode() const { return m_averagingMode; }
 		FFTWindow::Function getWindow() const { return m_window; }
+		bool getLinear() const { return m_linear; }
 
 	private:
 		int m_fftSize;
@@ -49,6 +57,7 @@ public:
 		unsigned int m_averageNb;
 		SpectrumVis::AveragingMode m_averagingMode;
 		FFTWindow::Function m_window;
+		bool m_linear;
 	};
 
 	SpectrumVis(Real scalef, GLSpectrum* glSpectrum = 0);
@@ -59,7 +68,8 @@ public:
 	        int overlapPercent,
 	        unsigned int averagingNb,
 	        int averagingMode,
-	        FFTWindow::Function window);
+	        FFTWindow::Function window,
+	        bool m_linear);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
