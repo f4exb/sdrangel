@@ -159,15 +159,16 @@ void DVSerialWorker::upsample(int upsampling, short *in, int nbSamplesIn, unsign
 {
     for (int i = 0; i < nbSamplesIn; i++)
     {
-        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) m_compressor.compress(in[i])) : (float) m_compressor.compress(in[i]);
+        //float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) m_compressor.compress(in[i])) : (float) m_compressor.compress(in[i]);
+        float cur = m_upsampleFilter.usesHP() ? m_upsampleFilter.runHP((float) in[i]) : (float) in[i];
         float prev = m_upsamplerLastValue;
         qint16 upsample;
 
         for (int j = 1; j <= upsampling; j++)
         {
             upsample = (qint16) m_upsampleFilter.runLP(cur*m_upsamplingFactors[j] + prev*m_upsamplingFactors[upsampling-j]);
-            m_audioBuffer[m_audioBufferFill].l = channels & 1 ? upsample : 0;
-            m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? upsample : 0;
+            m_audioBuffer[m_audioBufferFill].l = channels & 1 ? m_compressor.compress(upsample) : 0;
+            m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? m_compressor.compress(upsample) : 0;
 
             if (m_audioBufferFill < m_audioBuffer.size() - 1)
             {
