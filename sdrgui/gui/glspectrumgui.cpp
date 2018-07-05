@@ -77,6 +77,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_invert = true;
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
+	m_linear = false;
 	applySettings();
 }
 
@@ -103,6 +104,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeReal(18, m_glSpectrum->getWaterfallShare());
 	s.writeS32(19, (int) m_averagingMode);
 	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex));
+	s.writeBool(21, m_linear);
 	return s.final();
 }
 
@@ -142,6 +144,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readS32(20, &tmp, 0);
 		m_averagingIndex = getAveragingIndex(tmp);
 	    m_averagingNb = getAveragingValue(m_averagingIndex);
+	    d.readBool(21, &m_linear, false);
 
 		m_glSpectrum->setWaterfallShare(waterfallShare);
 		applySettings();
@@ -165,6 +168,7 @@ void GLSpectrumGUI::applySettings()
 	ui->levelRange->setCurrentIndex((100 - m_powerRange) / 5);
 	ui->averaging->setCurrentIndex(m_averagingIndex);
 	ui->averagingMode->setCurrentIndex((int) m_averagingMode);
+	ui->linscale->setChecked(m_linear);
 	ui->decay->setSliderPosition(m_decay);
 	ui->holdoff->setSliderPosition(m_histogramLateHoldoff);
 	ui->stroke->setSliderPosition(m_histogramStroke);
@@ -193,6 +197,7 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setInvertedWaterfall(m_invert);
 	m_glSpectrum->setDisplayGrid(m_displayGrid);
 	m_glSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+	m_glSpectrum->setLinear(m_linear);
 
 	if (m_spectrumVis) {
 	    m_spectrumVis->configure(m_messageQueueToVis,
@@ -298,21 +303,43 @@ void GLSpectrumGUI::on_linscale_toggled(bool checked)
                 (FFTWindow::Function)m_fftWindow,
                 m_linear);
     }
+
+    if(m_glSpectrum != 0)
+    {
+        Real refLevel = m_linear ? pow(10.0, m_refLevel/10.0) : m_refLevel;
+        Real powerRange = m_linear ? pow(10.0, m_refLevel/10.0) :  m_powerRange;
+        qDebug("GLSpectrumGUI::on_linscale_toggled: refLevel: %e powerRange: %e", refLevel, powerRange);
+        m_glSpectrum->setReferenceLevel(refLevel);
+        m_glSpectrum->setPowerRange(powerRange);
+        m_glSpectrum->setLinear(m_linear);
+    }
 }
 
 void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
 {
 	m_refLevel = 0 - index * 5;
-	if(m_glSpectrum != 0) {
-	    m_glSpectrum->setReferenceLevel(m_refLevel);
+
+	if(m_glSpectrum != 0)
+	{
+	    Real refLevel = m_linear ? pow(10.0, m_refLevel/10.0) : m_refLevel;
+        Real powerRange = m_linear ? pow(10.0, m_refLevel/10.0) :  m_powerRange;
+	    qDebug("GLSpectrumGUI::on_refLevel_currentIndexChanged: refLevel: %e ", refLevel);
+	    m_glSpectrum->setReferenceLevel(refLevel);
+        m_glSpectrum->setPowerRange(powerRange);
 	}
 }
 
 void GLSpectrumGUI::on_levelRange_currentIndexChanged(int index)
 {
 	m_powerRange = 100 - index * 5;
-	if(m_glSpectrum != 0) {
-	    m_glSpectrum->setPowerRange(m_powerRange);
+
+	if(m_glSpectrum != 0)
+	{
+        Real refLevel = m_linear ? pow(10.0, m_refLevel/10.0) : m_refLevel;
+	    Real powerRange = m_linear ? pow(10.0, m_refLevel/10.0) :  m_powerRange;
+	    qDebug("GLSpectrumGUI::on_levelRange_currentIndexChanged: powerRange: %e", powerRange);
+        m_glSpectrum->setReferenceLevel(refLevel);
+	    m_glSpectrum->setPowerRange(powerRange);
 	}
 }
 

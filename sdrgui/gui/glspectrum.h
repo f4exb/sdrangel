@@ -81,6 +81,7 @@ public:
 	void setDisplayGrid(bool display);
 	void setDisplayGridIntensity(int intensity);
 	void setDisplayTraceIntensity(int intensity);
+	void setLinear(bool linear);
 	qint32 getSampleRate() const { return m_sampleRate; }
 
 	void addChannelMarker(ChannelMarker* channelMarker);
@@ -130,6 +131,7 @@ private:
 	qint64 m_centerFrequency;
 	Real m_referenceLevel;
 	Real m_powerRange;
+	bool m_linear;
 	int m_decay;
 	quint32 m_sampleRate;
 	quint32 m_timingRate;

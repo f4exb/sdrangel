@@ -39,6 +39,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_centerFrequency(100000000),
 	m_referenceLevel(0),
 	m_powerRange(100),
+	m_linear(false),
 	m_decay(0),
 	m_sampleRate(500000),
 	m_timingRate(1),
@@ -289,6 +290,13 @@ void GLSpectrum::setDisplayTraceIntensity(int intensity)
 		m_displayTraceIntensity = 0;
 	}
 	update();
+}
+
+void GLSpectrum::setLinear(bool linear)
+{
+    m_linear = linear;
+    m_changesPending = true;
+    update();
 }
 
 void GLSpectrum::addChannelMarker(ChannelMarker* channelMarker)
@@ -1075,7 +1083,13 @@ void GLSpectrum::applyChanges()
 		}
 
 		m_powerScale.setSize(histogramHeight);
-		m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
+
+		if (m_linear) {
+            m_powerScale.setRange(Unit::Scientific, m_referenceLevel - m_powerRange, m_referenceLevel);
+		} else {
+		    m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
+		}
+
 		leftMargin = m_timeScale.getScaleWidth();
 
 		if(m_powerScale.getScaleWidth() > leftMargin)

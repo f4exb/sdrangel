@@ -82,7 +82,7 @@ private:
 	FFTWindow m_window;
 
 	std::vector<Complex> m_fftBuffer;
-	std::vector<Real> m_logPowerSpectrum;
+	std::vector<Real> m_powerSpectrum;
 
 	std::size_t m_fftSize;
 	std::size_t m_overlapPercent;
@@ -97,8 +97,10 @@ private:
 	FixedAverage2D<double> m_fixedAverage;
 	unsigned int m_averageNb;
 	AveragingMode m_averagingMode;
+	bool m_linear;
 
 	Real m_ofs;
+	Real m_powFFTDiv;
 	static const Real m_mult;
 
 	QMutex m_mutex;
@@ -107,7 +109,8 @@ private:
 	        int overlapPercent,
 	        unsigned int averageNb,
 	        AveragingMode averagingMode,
-	        FFTWindow::Function window);
+	        FFTWindow::Function window,
+	        bool linear);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

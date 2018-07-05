@@ -30,7 +30,8 @@ namespace Unit {
 		AngleDegrees,
 		Time,
 		TimeHMS,
-		Volt
+		Volt,
+		Scientific
 	};
 };
 

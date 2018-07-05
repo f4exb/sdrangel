@@ -31,7 +31,11 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
 	if (m_physicalUnit != Unit::TimeHMS)
 	{
-		return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	    if (m_physicalUnit == Unit::Scientific) {
+            return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', 2);
+	    } else {
+	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	    }
 	}
 	else
 	{
@@ -106,6 +110,7 @@ void ScaleEngine::calcScaleFactor()
 
 	switch(m_physicalUnit) {
 		case Unit::None:
+		case Unit::Scientific:
 			m_unitStr.clear();
 			break;
 
