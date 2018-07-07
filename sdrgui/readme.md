@@ -323,6 +323,12 @@ Toggles the grid display
 
 Controls the intensity of the grid display
 
+<h4>4.J. Logarithmic/linear scale</h4>
+
+Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logaritmic or linear curve.
+
+When in linear mode the range control (4.4) has no effect because the actual range is between 0 and the reference level. The reference level in dB (4.3) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
+
 <h3>5. Presets and commands</h3>
 
 The presets and commands tree view are by default stacked in tabs. The following sections describe the presets section 5A) and commands (section 5B) views successively 
