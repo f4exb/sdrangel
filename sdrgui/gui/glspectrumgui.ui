@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
+    <width>378</width>
     <height>59</height>
    </rect>
   </property>
@@ -328,6 +328,9 @@
    </item>
    <item row="2" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>2</number>
+     </property>
      <item>
       <widget class="QComboBox" name="fftWindow">
        <property name="sizePolicy">
@@ -396,13 +399,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>16777215</height>
         </size>
        </property>
@@ -497,13 +500,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>16777215</height>
         </size>
        </property>
@@ -568,13 +571,13 @@
       <widget class="QComboBox" name="averaging">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>45</width>
          <height>16777215</height>
         </size>
        </property>
