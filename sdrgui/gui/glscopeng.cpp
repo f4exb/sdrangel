@@ -1911,17 +1911,18 @@ void GLScopeNG::drawChannelOverlay(
     }
 
     QFontMetricsF metrics(m_channelOverlayFont);
-    QRectF rect = metrics.boundingRect(text);
-    channelOverlayPixmap = QPixmap(rect.width() + 4.0f, rect.height());
+    QRectF textRect = metrics.boundingRect(text);
+    QRectF overlayRect(0, 0, textRect.width()*1.05f + 4.0f, textRect.height());
+    channelOverlayPixmap = QPixmap(overlayRect.width(), overlayRect.height());
     channelOverlayPixmap.fill(Qt::transparent);
     QPainter painter(&channelOverlayPixmap);
     painter.setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing, false);
-    painter.fillRect(rect, QColor(0, 0, 0, 0x80));
+    painter.fillRect(overlayRect, QColor(0, 0, 0, 0x80));
     QColor textColor(color);
     textColor.setAlpha(0xC0);
     painter.setPen(textColor);
     painter.setFont(m_channelOverlayFont);
-    painter.drawText(QPointF(0, rect.height() - 2.0f), text);
+    painter.drawText(QPointF(2.0f, overlayRect.height() - 4.0f), text);
     painter.end();
 
     m_glShaderPowerOverlay.initTexture(channelOverlayPixmap.toImage());
@@ -1940,11 +1941,12 @@ void GLScopeNG::drawChannelOverlay(
                 0, 0
         };
 
-        float shiftX = glScopeRect.width() - ((rect.width() + 4.0f) / width());
+        float shiftX = glScopeRect.width() - ((overlayRect.width() + 4.0f) / width());
+        float shiftY = 4.0f / height();
         float rectX = glScopeRect.x() + shiftX;
-        float rectY = glScopeRect.y();
-        float rectW = rect.width() / (float) width();
-        float rectH = rect.height() / (float) height();
+        float rectY = glScopeRect.y() + shiftY;
+        float rectW = overlayRect.width() / (float) width();
+        float rectH = overlayRect.height() / (float) height();
 
         QMatrix4x4 mat;
         mat.setToIdentity();
