@@ -1,8 +1,9 @@
 sdrangel (4.0.3-1) unstable; urgency=medium
 
   * Spectrum: linear mode for spectrum
+  * Scope: fixed power display overlay
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 07 Jul 2018 15:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 08 Jul 2018 15:14:18 +0200
   
 sdrangel (4.0.2-1) unstable; urgency=medium
 
