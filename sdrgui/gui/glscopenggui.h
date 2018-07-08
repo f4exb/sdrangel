@@ -153,7 +153,7 @@ private:
     QColor m_focusedTraceColor;
     QColor m_focusedTriggerColor;
 
-    static const double amps[14];
+    static const double amps[27];
 
     void applySettings();
     // First row

@@ -32,7 +32,7 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 	if (m_physicalUnit != Unit::TimeHMS)
 	{
 	    if (m_physicalUnit == Unit::Scientific) {
-            return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', 2);
+            return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
 	    } else {
 	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
 	    }
@@ -270,21 +270,21 @@ double ScaleEngine::calcMajorTickUnits(double distance, int* retDecimalPlaces)
 		else if(distance < 30.0 * 86000.0)
 			return 30.0 * 86000.0;
 		else return 90.0 * 86000.0;
-	} else {*/
-		if(base <= 1.0) {
-			base = 1.0;
-		} else if(base <= 2.0) {
-			base = 2.0;
-		} else if(base <= 2.5) {
-			base = 2.5;
-			if(decimalPlaces >= 0)
-				decimalPlaces++;
-		} else if(base <= 5.0) {
-			base = 5.0;
-		} else {
-			base = 10.0;
-		}/*
-	}*/
+	} */
+
+	if(base <= 1.0) {
+        base = 1.0;
+    } else if(base <= 2.0) {
+        base = 2.0;
+    } else if(base <= 2.5) {
+        base = 2.5;
+        if(decimalPlaces >= 0)
+            decimalPlaces++;
+    } else if(base <= 5.0) {
+        base = 5.0;
+    } else {
+        base = 10.0;
+    }
 
 	if(retDecimalPlaces != 0) {
 		if(decimalPlaces < 0)
@@ -522,6 +522,7 @@ ScaleEngine::ScaleEngine() :
     m_firstMajorTickValue(1.0),
     m_numMinorTicks(1),
     m_decimalPlaces(1),
+    m_fixedDecimalPlaces(2),
     m_makeOpposite(false)
 {
 }

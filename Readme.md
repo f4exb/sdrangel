@@ -1,10 +1,10 @@
 ![SDR Angel banner](doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) SDR and signal analyzer frontend to various hardware.
+**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
-**&#9888; Warning**: Windows distribution is provided as a by product of the Qt toolchain. The platform of choice to run SDRangel is definitely Linux. You are encouraged to use the group to seek help from other Windows users but the author cannot give help or any support for problems related to running the software on Windows. Issues specific to Windows problems opened on Github will be closed systematically. Windows distribution may be discontinued in the future. 
+**&#9888; Warning**: Windows distribution is discontinued at version 4.0.0. This is the last version with a Windows build. 
 
 <h1>Source code</h1>
 
@@ -39,7 +39,7 @@ From version 2 SDRangel can integrate more than one hardware device running conc
 
 From version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
+  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
@@ -252,8 +252,6 @@ If you have one or more serial devices interfacing the AMBE3000 chip in packet m
 
 Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
 
-Note that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
-
 Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
 
 Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
@@ -269,10 +267,11 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 <h1>Software distributions</h1>
 
-In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
+In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some Debian based distributions:
 
-  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.10, Debian Stretch)
-  - Windows 32 bit (runs also in 64 bit Windows) 
+  - Ubuntu 18.04 (Bionic)
+  - Ubuntu 16.04 (Xenial)
+  - Debian Stretch
 
 <h2>Debian distributions</h2>
 
@@ -306,9 +305,11 @@ The default CPU governor is now `powersave` which exhibits excessive CPU usage w
   
 <h2>Windows distribution</h2>
 
+The last Windows distribution is for 4.0.0.
+
 This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
-<b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for the Windows distribution.</b>
+<b>&#9888; Windows distribution was provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
 
 <h1>Software build</h1>
 
@@ -317,7 +318,7 @@ This is the archive of the complete binary distribution that expands to the `sdr
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
   - Linux builds are made with 5.5.1 (Xenial) and 5.9 (Artful, Stretch)
-  - Windows build is made with 5.10.1 in 32 bit mode and has Qt ANGLE support (OpenGL emulation with DirectX)
+  - Windows build was made with 5.10.1 in 32 bit mode and has Qt ANGLE support (OpenGL emulation with DirectX)
 
 <h2>24 bit DSP</h2>
 
@@ -446,8 +447,7 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
 <h1>Limitations</h1>
 
   - Your hardware. Still SDRangel is relatively conservative on computer resources.
-  - OpenGL 3+ (Linux)
-  - OpenGL 4.3+ (Windows) for OpenGL native support however the Qt Angle framework may be able to make it work on systems supporting Direct-X only.
+  - OpenGL 3+
 
 <h1>Features</h1>
 

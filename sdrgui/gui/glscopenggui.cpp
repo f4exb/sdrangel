@@ -22,7 +22,17 @@
 #include "ui_glscopenggui.h"
 #include "util/simpleserializer.h"
 
-const double GLScopeNGGUI::amps[14] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001, 0.00005, 0.00002, 0.00001 };
+const double GLScopeNGGUI::amps[27] = {
+        2e-1, 1e-1, 5e-2,
+        2e-2, 1e-2, 5e-3,
+        2e-3, 1e-3, 5e-4,
+        2e-4, 1e-4, 5e-5,
+        2e-5, 1e-5, 5e-6,
+        2e-6, 1e-6, 5e-7,
+        2e-7, 1e-7, 5e-8,
+        2e-8, 1e-8, 5e-9,
+        2e-9, 1e-9, 5e-10,
+};
 
 GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     QWidget(parent),
@@ -1030,12 +1040,14 @@ void GLScopeNGGUI::setAmpOfsDisplay()
             a = o/1000.0f;
         }
 
-        if(fabs(a) < 0.000001f)
-            ui->ofsText->setText(tr("%1\nn").arg(a * 1000000000.0));
-        else if(fabs(a) < 0.001f)
-            ui->ofsText->setText(tr("%1\nµ").arg(a * 1000000.0));
+        if(fabs(a) < 1e-9)
+            ui->ofsText->setText(tr("%1\np").arg(a * 1e12));
+        else if(fabs(a) < 1e-6)
+            ui->ofsText->setText(tr("%1\nn").arg(a * 1e9));
+        else if(fabs(a) < 1e-3)
+            ui->ofsText->setText(tr("%1\nµ").arg(a * 1e6));
         else if(fabs(a) < 1.0f)
-            ui->ofsText->setText(tr("%1\nm").arg(a * 1000.0));
+            ui->ofsText->setText(tr("%1\nm").arg(a * 1e3));
         else
             ui->ofsText->setText(tr("%1").arg(a * 1.0));
     }

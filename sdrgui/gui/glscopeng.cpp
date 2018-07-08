@@ -1866,10 +1866,10 @@ void GLScopeNG::setPolarDisplays()
 void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 {
     ScopeVisNG::TraceData& traceData = (*m_tracesData)[highlightedTraceIndex];
-    float amp_range = 2.0 / traceData.m_amp;
-    float amp_ofs = traceData.m_ofs;
-    float pow_floor = -100.0 + traceData.m_ofs * 100.0;
-    float pow_range = 100.0 / traceData.m_amp;
+    double amp_range = 2.0 / traceData.m_amp;
+    double amp_ofs = traceData.m_ofs;
+    double pow_floor = -100.0 + traceData.m_ofs * 100.0;
+    double pow_range = 100.0 / traceData.m_amp;
 
     switch (traceData.m_projectionType)
     {
@@ -1878,8 +1878,12 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
         break;
     case Projector::ProjectionMagLin:
     case Projector::ProjectionMagSq:
-        if (amp_range < 2.0) {
-            scale.setRange(Unit::None, amp_ofs * 1000.0, amp_range * 1000.0 + amp_ofs * 1000.0);
+        if (amp_range < 1e-6) {
+            scale.setRange(Unit::None, amp_ofs * 1e9, amp_range * 1e9 + amp_ofs * 1e9);
+        } else if (amp_range < 1e-3) {
+            scale.setRange(Unit::None, amp_ofs * 1e6, amp_range * 1e6 + amp_ofs * 1e6);
+        } else if (amp_range < 1.0) {
+            scale.setRange(Unit::None, amp_ofs * 1e3, amp_range * 1e3 + amp_ofs * 1e3);
         } else {
             scale.setRange(Unit::None, amp_ofs, amp_range + amp_ofs);
         }
@@ -1891,8 +1895,12 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
     case Projector::ProjectionReal: // Linear generic
     case Projector::ProjectionImag:
     default:
-        if (amp_range < 2.0) {
-            scale.setRange(Unit::None, - amp_range * 500.0 + amp_ofs * 1000.0, amp_range * 500.0 + amp_ofs * 1000.0);
+        if (amp_range < 1e-6) {
+            scale.setRange(Unit::None, - amp_range * 5e8 + amp_ofs * 1e9, amp_range * 5e8 + amp_ofs * 1e9);
+        } else if (amp_range < 1e-3) {
+            scale.setRange(Unit::None, - amp_range * 5e5 + amp_ofs * 1e6, amp_range * 5e5 + amp_ofs * 1e6);
+        } else if (amp_range < 1.0) {
+            scale.setRange(Unit::None, - amp_range * 5e2 + amp_ofs * 1e3, amp_range * 5e2 + amp_ofs * 1e3);
         } else {
             scale.setRange(Unit::None, - amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
         }
