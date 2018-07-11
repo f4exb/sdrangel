@@ -11,12 +11,12 @@ TARGET = libbladerf
 
 DEFINES += BLADERF_OS_WINDOWS=1
 
-CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF"
-CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
-CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
-CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF"
-CONFIG(MINGW64):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
-CONFIG(MINGW64):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
+CONFIG(MINGW32):LIBBLADERFSRC = "C:\softs\bladeRF"
+CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "C:\softs\bladeRF\host\common"
+CONFIG(MINGW32):LIBBLADERFLIBSRC = "C:\softs\bladeRF\host\libraries\libbladeRF"
+CONFIG(MINGW64):LIBBLADERFSRC = "C:\softs\bladeRF"
+CONFIG(MINGW64):LIBBLADERFCOMMONSRC = "C:\softs\bladeRF\host\common"
+CONFIG(MINGW64):LIBBLADERFLIBSRC = "C:\softs\bladeRF\host\libraries\libbladeRF"
 INCLUDEPATH += $$LIBBLADERFLIBSRC/include
 INCLUDEPATH += $$LIBBLADERFLIBSRC/src
 INCLUDEPATH += $$LIBBLADERFSRC/firmware_common
@@ -25,8 +25,8 @@ INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include
 INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include/windows
 INCLUDEPATH += $$PWD/include
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.20\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.20\include\libusb-1.0"
 
 SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
     $$LIBBLADERFLIBSRC/src/bladerf_priv.c\
@@ -102,8 +102,8 @@ HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
     $$PWD/include/backend/backend_config.h\
     $$PWD/include/version.h
 
-CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

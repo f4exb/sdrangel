@@ -18,26 +18,26 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 macx:QMAKE_LFLAGS += -F/Library/Frameworks
 
-CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
-CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF\host\libraries\libbladeRF\include"
+CONFIG(MINGW32):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
+CONFIG(MINGW64):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
-CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
-CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
+CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
+CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(macx):LIBLIMESUITESRC = "../../../LimeSuite-17.12.0"
-CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
-CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
-CONFIG(MINGW32):LIBPERSEUSSRC = "D:\softs\libperseus-sdr"
+CONFIG(MINGW32):LIBLIMESUITESRC = "C:\softs\LimeSuite"
+CONFIG(MINGW64):LIBLIMESUITESRC = "C:\softs\LimeSuite"
+CONFIG(MINGW32):LIBPERSEUSSRC = "C:\softs\libperseus-sdr"
 CONFIG(macx):LIBIIOSRC = "../../../libiio"
-CONFIG(MINGW32):LIBIIOSRC = "D:\softs\libiio"
-CONFIG(MINGW64):LIBIIOSRC = "D:\softs\libiio"
+CONFIG(MINGW32):LIBIIOSRC = "C:\softs\libiio"
+CONFIG(MINGW64):LIBIIOSRC = "C:\softs\libiio"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += $$LIBBLADERFSRC
 INCLUDEPATH += $$LIBHACKRFSRC
-INCLUDEPATH += "D:\boost_1_58_0"
-INCLUDEPATH += "D:\softs\libusb-1.0.20\include"
+INCLUDEPATH += "C:\softs\boost_1_66_0"
+INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
 INCLUDEPATH += ../liblimesuite/srcmw
 INCLUDEPATH += $$LIBLIMESUITESRC/src
 INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002

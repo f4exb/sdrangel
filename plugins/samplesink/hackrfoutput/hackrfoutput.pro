@@ -17,8 +17,8 @@ DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
-CONFIG(MINGW32):LIBHACKRFSRC = "D:\softs\hackrf\host"
-CONFIG(MINGW64):LIBHACKRFSRC = "D:\softs\hackrf\host"
+CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
+CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase

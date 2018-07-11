@@ -17,16 +17,16 @@ DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
-CONFIG(MINGW32):LIBDSDCCSRC = "D:\softs\dsdcc"
-CONFIG(MINGW64):LIBDSDCCSRC = "D:\softs\dsdcc"
+CONFIG(MINGW32):LIBDSDCCSRC = "C:\softs\dsdcc"
+CONFIG(MINGW64):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(macx):LIBDSDCCSRC = "../../../../deps/dsdcc"
 
-CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
-CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
+CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(macx):LIBMBELIBSRC = "../../../../deps/mbelib"
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 
 INCLUDEPATH += $$PWD

@@ -32,11 +32,11 @@ CONFIG(Debug):build_subdir = debug
 
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\serialDV"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\serialDV"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
@@ -50,6 +50,7 @@ win32 {
 }
 
 SOURCES += audio/audiodevicemanager.cpp\
+        audio/audiocompressor.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
@@ -124,6 +125,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         mainparser.cpp
 
 HEADERS  += audio/audiodevicemanager.h\
+        audio/audiocompressor.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\

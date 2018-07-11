@@ -9,12 +9,12 @@ QT += core
 TEMPLATE = lib
 TARGET = dsdcc
 
-CONFIG(MINGW32):LIBDSDCCSRC = "D:\softs\dsdcc"
-CONFIG(MINGW64):LIBDSDCCSRC = "D:\softs\dsdcc"
+CONFIG(MINGW32):LIBDSDCCSRC = "C:\softs\dsdcc"
+CONFIG(MINGW64):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(macx):LIBDSDCCSRC = "../../deps/dsdcc"
 
-CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
-CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
+CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(macx):LIBMBELIBSRC = "../../deps/mbelib"
 
 INCLUDEPATH += $$LIBDSDCCSRC
@@ -37,6 +37,9 @@ $$LIBDSDCCSRC/dsd_symbol.cpp\
 $$LIBDSDCCSRC/dstar.cpp\
 $$LIBDSDCCSRC/ysf.cpp\
 $$LIBDSDCCSRC/nxdn.cpp\
+$$LIBDSDCCSRC/nxdnconvolution.cpp\
+$$LIBDSDCCSRC/nxdncrc.cpp\
+$$LIBDSDCCSRC/nxdnmessage.cpp\
 $$LIBDSDCCSRC/dpmr.cpp\
 $$LIBDSDCCSRC/p25p1_heuristics.cpp\
 $$LIBDSDCCSRC/fec.cpp\
@@ -62,6 +65,9 @@ $$LIBDSDCCSRC/dsd_symbol.h\
 $$LIBDSDCCSRC/dstar.h\
 $$LIBDSDCCSRC/ysf.h\
 $$LIBDSDCCSRC/nxdn.h\
+$$LIBDSDCCSRC/nxdnconvolution.h\
+$$LIBDSDCCSRC/nxdncrc.h\
+$$LIBDSDCCSRC/nxdnmessage.h\
 $$LIBDSDCCSRC/dpmr.h\
 $$LIBDSDCCSRC/p25p1_heuristics.h\
 $$LIBDSDCCSRC/runningmaxmin.h\

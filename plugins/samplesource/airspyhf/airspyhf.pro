@@ -11,8 +11,8 @@ QT += core gui widgets multimedia opengl
 
 TARGET = inputairspyhf
 
-CONFIG(MINGW32):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
-CONFIG(MINGW64):LIBAIRSPYHFSRC = "D:\softs\airspyhf"
+CONFIG(MINGW32):LIBAIRSPYHFSRC = "C:\softs\airspyhf"
+CONFIG(MINGW64):LIBAIRSPYHFSRC = "C:\softs\airspyhf"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase

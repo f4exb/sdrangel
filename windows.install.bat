@@ -1,8 +1,8 @@
-SET libusbdir="D:\softs\libusb-1.0.20\MinGW32"
-SET opencvdir="D:\softs\opencv\build\mw32\install\x86\mingw\bin"
-SET libxml2dir="D:\softs\libxml2-2.7.8.win32"
-SET libiconvdir="D:\softs\iconv-1.9.2.win32"
-SET libzlib1dir="D:\softs\zlib-1.2.5"
+SET libusbdir="C:\softs\libusb-1.0.20\MinGW32"
+SET opencvdir="C:\softs\opencv\build\mw32\install\x86\mingw\bin"
+SET libxml2dir="C:\softs\libxml2-2.7.8.win32"
+SET libiconvdir="C:\softs\iconv-1.9.2.win32"
+SET libzlib1dir="C:\softs\zlib-1.2.5"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2

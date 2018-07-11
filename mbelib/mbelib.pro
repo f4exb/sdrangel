@@ -9,8 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = mbelib
 
-CONFIG(MINGW32):LIBMBELIBSRC = "D:\softs\mbelib"
-CONFIG(MINGW64):LIBMBELIBSRC = "D:\softs\mbelib"
+CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
+CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(macx):LIBMBELIBSRC = "../../deps/mbelib"
 
 INCLUDEPATH += $$LIBMBELIBSRC
