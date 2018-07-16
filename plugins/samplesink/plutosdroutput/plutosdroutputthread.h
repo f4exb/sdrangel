@@ -54,7 +54,7 @@ private:
 
     unsigned int m_log2Interp; // soft interpolation
 
-    Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
+    Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators; //!< Pluto is on 12 bit but iio_channel_convert_inverse converts from 16 to 12 bits
 
     void run();
     void convert(qint16* buf, qint32 len);

@@ -94,7 +94,6 @@ void PlutoSDROutputThread::run()
         for (p_dat = m_plutoBox->txBufferFirst(), ihs = 0; p_dat < p_end; p_dat += p_inc, ihs += 2)
         {
             m_plutoBox->txChannelConvert((int16_t*) p_dat, &m_buf[ihs]);
-            //*((int16_t*)p_dat) = m_buf[ihs] << 4;
         }
 
         // Schedule TX buffer for sending
