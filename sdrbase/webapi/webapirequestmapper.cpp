@@ -65,6 +65,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
     {
         SWGSDRangel::SWGErrorResponse errorResponse;
         response.setHeader("Content-Type", "application/json");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setStatus(500,"Service not available");
 
         errorResponse.init();
@@ -154,6 +155,7 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -195,6 +197,7 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
     SWGSDRangel::SWGInstanceDevicesResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -228,6 +231,7 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
     SWGSDRangel::SWGInstanceChannelsResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -262,6 +266,7 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
     SWGSDRangel::SWGLoggingInfo normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -312,6 +317,7 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -340,6 +346,7 @@ void WebAPIRequestMapper::instanceAudioInputParametersService(qtwebapp::HttpRequ
     // TODO
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     QString jsonStr = request.getBody();
     QJsonObject jsonObject;
@@ -408,6 +415,7 @@ void WebAPIRequestMapper::instanceAudioOutputParametersService(qtwebapp::HttpReq
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     QString jsonStr = request.getBody();
     QJsonObject jsonObject;
@@ -476,6 +484,7 @@ void WebAPIRequestMapper::instanceAudioInputCleanupService(qtwebapp::HttpRequest
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PATCH")
     {
@@ -503,6 +512,7 @@ void WebAPIRequestMapper::instanceAudioOutputCleanupService(qtwebapp::HttpReques
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PATCH")
     {
@@ -530,6 +540,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -583,6 +594,7 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PATCH")
     {
@@ -617,6 +629,7 @@ void WebAPIRequestMapper::instancePresetsService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -636,6 +649,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PATCH")
     {
@@ -801,6 +815,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PUT")
     {
@@ -891,6 +906,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -917,6 +933,7 @@ void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& reques
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "POST")
     {
@@ -962,6 +979,7 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -999,6 +1017,7 @@ void WebAPIRequestMapper::devicesetFocusService(const std::string& indexStr, qtw
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1038,6 +1057,7 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1101,6 +1121,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1183,6 +1204,7 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1248,6 +1270,7 @@ void WebAPIRequestMapper::devicesetDeviceReportService(const std::string& indexS
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -1286,6 +1309,7 @@ void WebAPIRequestMapper::devicesetChannelsReportService(const std::string& inde
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -1326,6 +1350,7 @@ void WebAPIRequestMapper::devicesetChannelService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1403,6 +1428,7 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1447,6 +1473,7 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1535,6 +1562,7 @@ void WebAPIRequestMapper::devicesetChannelReportService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
