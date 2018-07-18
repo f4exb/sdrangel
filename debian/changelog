@@ -1,3 +1,11 @@
+sdrangel (4.0.4-1) unstable; urgency=medium
+
+  * Fixed PlutoSDR output sample width. Fixes issue #198
+  * Web API: implemented CORS
+  * Fix preset group delete not removing presets from the preset window
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 18 Jul 2018 19:14:18 +0200
+  
 sdrangel (4.0.3-1) unstable; urgency=medium
 
   * Spectrum: linear mode for spectrum
