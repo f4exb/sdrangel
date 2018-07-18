@@ -1394,7 +1394,7 @@ void MainWindow::on_presetDelete_clicked()
             {
                 m_settings.deletePresetGroup(item->text(0));
 
-                ui->commandTree->clear();
+                ui->presetTree->clear();
 
                 for (int i = 0; i < m_settings.getPresetCount(); ++i) {
                     addPresetToTree(m_settings.getPreset(i));
