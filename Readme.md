@@ -405,16 +405,16 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
   - Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
-<h2>Manjaro</h2>
+<h2>Arch Linux / Manjaro</h2>
 
-Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Since Manjaro is Arch Linux based prerequisites should be similar for Arch and all derivatives.
+Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Prerequisites should be similar for Arch and all derivatives.
 
 `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
-  - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
+  - Note2: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
 
 <h2>Windows</h2>
 
