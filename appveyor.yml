@@ -1,0 +1,182 @@
+# Sdrangel Appveyor
+version: "{branch}-ci-{build}"
+os: unstable
+
+shallow_clone: true
+
+cache:
+  - C:\softs
+  - C:\msys64
+
+# Verbose
+build:
+  verbosity: detailed
+
+# Setup the environments
+environment:
+  matrix:
+  - MINGW_ARCH: i686
+    MINGW_ROOT: C:\msys64\mingw32
+    BOOST_ROOT: C:\msys64\mingw32
+    BOOST_LIBRARYDIR: C:\msys64\mingw32\lib
+    BOOST_INCLUDEDIR: C:\msys64\mingw32\include\boost
+    CMAKE_GENERATOR: 'MSYS Makefiles'
+    Q_FLAGS: 'CONFIG+=MINGW32'
+    QT_DIR: C:\Qt\5.10.1\mingw53_32
+    MAKE: mingw32-make
+   # No MinGW 64bit Qt :/
+#  - MINGW_ARCH: x86_64
+#    MINGW_ROOT: C:\msys64\mingw64
+#    BOOST_ROOT: C:\msys64\mingw64
+#    BOOST_LIBRARYDIR: C:\msys64\mingw64\lib
+#    BOOST_INCLUDEDIR: C:\msys64\mingw64\include\boost
+#    CMAKE_GENERATOR: 'MSYS Makefiles'#
+#  - MSVC_ARCH: x86
+#    BOOST_ROOT: C:\Libraries\boost_1_60_0
+#    BOOST_LIBRARYDIR: C:\Libraries\boost_1_60_0\lib32-msvc-14.0
+#    BOOST_INCLUDEDIR: C:\Libraries\boost_1_60_0\boost
+#    CMAKE_GENERATOR: 'NMake Makefiles'
+#    Q_FLAGS: 'CONFIG+=windeployqt -tp vc'
+#    QT_DIR: C:\Qt\5.10.1\msvc2015
+#    MAKE: nmake
+#  - MSVC_ARCH: x64
+#    BOOST_ROOT: C:\Libraries\boost_1_60_0
+#    BOOST_INCLUDEDIR: C:\Libraries\boost_1_60_0\boost
+#    BOOST_LIBRARYDIR: C:\Libraries\boost_1_60_0\lib64-msvc-14.0
+#    CMAKE_GENERATOR: 'NMake Makefiles'
+#    Q_FLAGS: 'CONFIG+=windeployqt-tp vc'
+#    QT_DIR: C:\Qt\5.10.1\msvc2015_64
+#    MAKE: nmake
+
+# Install dependencies
+install:
+  # Setup path
+  - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin
+  # Fix mingw/msvc
+  - if defined MINGW_ROOT set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
+  - if defined MINGW_ARCH bash -lc "pacman --needed --noconfirm -S mingw-w64-%MINGW_ARCH%-boost"
+  - if defined MSVC_ARCH call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %MSVC_ARCH%
+  - set PATH=C:\Qt\Tools\mingw530_32;%PATH%
+  # Setup paths
+  - mkdir "C:\deps" & exit 0
+  - mkdir "C:\softs" & exit 0
+  - mkdir %APPVEYOR_BUILD_FOLDER%\release\32bit & exit 0
+  - mkdir %APPVEYOR_BUILD_FOLDER%\release\64bit & exit 0
+  # Download dependencies and Patch .pro files
+  - ps: $proFiles = Get-ChildItem . *.pro -rec
+  ## Boost (1.60.0)
+  - ps: >-
+      foreach ($file in $proFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\boost_1_58_0"), "C:\boost_1_60_0" } |
+          Set-Content $file.PSPath
+      }
+  ## Libusb (1.0.22)
+  - IF not exist "C:\libusb.7z" appveyor DownloadFile "https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.7z" -FileName "C:\libusb.7z" & exit 0
+  - 7z x -y "C:\libusb.7z" -o"C:\softs\libusb" & exit 0
+  - ps: >-
+      foreach ($file in $proFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\softs\libusb-1.0.20"), "C:\softs\libusb" } |
+          Set-Content $file.PSPath
+      }
+  ## Airspy (git master)
+  - git clone --depth 1 https://github.com/airspy/airspyone_host.git C:\softs\airspyone_host & exit 0
+  - ps: >-
+      foreach ($file in $proFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\softs\libairspy"), "C:\softs\airspyone_host" } |
+          Set-Content $file.PSPath
+      }
+  ## Airspyhf (git master)
+  - git clone --depth 1 https://github.com/airspy/airspyhf.git C:\softs\airspyhf & exit 0
+  ## Hackrf (git master)
+  - git clone --depth 1 https://github.com/mossmann/hackrf.git C:\softs\hackrf & exit 0
+  ## Librtlsdr (git master)
+  - git clone --depth 1 https://github.com/steve-m/librtlsdr.git C:\softs\librtlsdr & exit 0
+  ## BladeRF (1.5.1)
+  - git clone https://github.com/Nuand/bladeRF.git C:\softs\bladeRF & exit 0
+  - cd C:\softs\bladeRF & exit 0
+  - git checkout tags/libbladeRF_v1.5.1 -b libbladeRF_v1.5.1 & exit 0
+  - cd %APPVEYOR_BUILD_FOLDER% & exit 0
+  ## Libiio (git master)
+  - git clone --depth 1 https://github.com/analogdevicesinc/libiio.git C:\softs\libiio & exit 0
+  ### Libiio Dependencies
+  #### 32 bit
+  - IF not exist "C:\deps\iconv-1.9.2.win32.zip" appveyor DownloadFile "http://xmlsoft.org/sources/win32/iconv-1.9.2.win32.zip" -FileName "C:\deps\iconv-1.9.2.win32.zip" & exit 0
+  - 7z x "C:\deps\iconv-1.9.2.win32.zip" -y o"C:\softs\iconv-1.9.2.win32" & exit 0
+  - IF not exist "C:\deps\libxml2-2.7.8.win32.zip" appveyor DownloadFile "http://xmlsoft.org/sources/win32/libxml2-2.7.8.win32.zip" -FileName "C:\deps\libxml2-2.7.8.win32.zip" & exit 0
+  - 7z x "C:\deps\libxml2-2.7.8.win32.zip" -y o"C:\softs\libxml2-2.7.8.win32" & exit 0
+  - IF not exist "C:\deps\zlib-1.2.5.win32.zip" appveyor DownloadFile "http://xmlsoft.org/sources/win32/zlib-1.2.5.win32.zip" -FileName "C:\deps\zlib-1.2.5.win32.zip" & exit 0
+  - 7z x "C:\deps\zlib-1.2.5.win32.zip" -y o"C:\softs\zlib-1.2.5.win32" & exit 0
+  #### 64 bit
+  - IF not exist "C:\deps\libxml2-2.9.3-win32-x86_64.7z" appveyor DownloadFile "http://xmlsoft.org/sources/win32/64bit/libxml2-2.9.3-win32-x86_64.7z" -FileName "C:\deps\libxml2-2.9.3-win32-x86_64.7z" & exit 0
+  - 7z x "C:\deps\libxml2-2.9.3-win32-x86_64.7z" -y o"C:\softs\libxml2-2.9.3-win32-x86_64" & exit 0
+  ## LimeSuite (git master)
+  - git clone --depth 1 https://github.com/myriadrf/LimeSuite.git C:\softs\LimeSuite & exit 0
+  ## Perseus (git master)
+  - git clone https://github.com/Microtelecom/libperseus-sdr C:\softs\libperseus-sdr & exit 0
+  - cd C:\softs\libperseus-sdr & exit 0
+  - git pull --all & exit 0
+  - if defined MIGW_ARCH call git checkout windows & exit 0
+  - if defined MSVC_ARCH call git checkout msvc & exit 0
+  - cd %APPVEYOR_BUILD_FOLDER% & exit 0
+  ## cm256cc (git master)
+  - git clone --depth 1 https://github.com/f4exb/cm256cc.git C:\softs\cm256cc & exit 0
+  ## serialDV (git master)
+  - git clone --depth 1 https://github.com/f4exb/serialDV.git C:\softs\serialDV & exit 0
+  ## DSDcc (git master)
+  - git clone --depth 1 https://github.com/f4exb/dsdcc.git C:\softs\dsdcc & exit 0
+  ### mbelib (DSDcc dependency) (git master)
+  - git clone --depth 1 https://github.com/szechyjs/mbelib.git C:\softs\mbelib & exit 0
+  ## opencv (git master) ?
+  - git clone --depth 1 https://github.com/opencv/opencv.git C:\softs\opencv & exit 0
+  ## Patch default path
+  - ps: >-
+      foreach ($file in $proFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\softs"), "C:\softs" } |
+          Set-Content $file.PSPath
+      }
+
+# Build the project
+before_build:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - qmake sdrangel.windows.pro CONFIG+=release CONFIG+=qtquickcompiler %Q_FLAGS%
+
+build_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - '%MAKE%'
+
+after_build:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  # Patch .bat files
+  - ps: $batFiles = Get-ChildItem . *.bat -rec
+  ## Shared
+  - ps: >-
+      foreach ($file in $batFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\softs\libusb-1.0.20"), "C:\libusb" } |
+          Set-Content $file.PSPath
+      }
+  - ps: >-
+      foreach ($file in $batFiles)
+      {
+          (Get-Content $file.PSPath) |
+          Foreach-Object { $_ -replace [Regex]::Escape("D:\softs"), "C:\softs" } |
+          Set-Content $file.PSPath
+      }
+  # Generate the release
+  - if %MINGW_ARCH% == i686 call windows.install.bat release C:\release\32bit & exit 0
+  - if %MSVC_ARCH% == x86 call windows.install.bat release %APPVEYOR_BUILD_FOLDER%\release\32bit & exit 0
+  - if %MSVC_ARCH% == x64 call windows64.install.bat release %APPVEYOR_BUILD_FOLDER%\release\64bit & exit 0
+
+# Save artifacts
+artifacts:
+  - path: 'release\32bit\*'
+  - path: 'release\64bit\*'
