@@ -23,6 +23,9 @@
 
 #include "tickedslider.h"
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 TickedSlider::TickedSlider(QWidget* parent) :
     QSlider(parent),
     m_tickColor(Qt::white)

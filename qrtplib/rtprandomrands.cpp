@@ -40,6 +40,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 // If compiling on VC 8 or later for full Windows, we'll attempt to use rand_s,
 // which generates better random numbers.  However, its only supported on Windows XP,
 // Windows Server 2003, and later, so we'll do a run-time check to see if we can

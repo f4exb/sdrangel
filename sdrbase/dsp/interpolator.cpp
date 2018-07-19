@@ -3,6 +3,8 @@
 #include <vector>
 #include "dsp/interpolator.h"
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
 
 void Interpolator::createPolyphaseLowPass(
         std::vector<Real>& taps,

@@ -52,6 +52,9 @@
 #include <QTimer>
 #include <QDebug>
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 // Constants
 const int RedrawInterval = 100; // ms
 const qreal PeakDecayRate = 0.001;

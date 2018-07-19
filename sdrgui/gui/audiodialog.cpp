@@ -5,6 +5,9 @@
 #include "ui_audiodialog.h"
 #include <math.h>
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::AudioDialog),

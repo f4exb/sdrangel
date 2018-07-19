@@ -24,6 +24,9 @@
 #include <math.h>
 #include "phaselockcomplex.h"
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 PhaseLockComplex::PhaseLockComplex() :
     m_a1(1.0),
     m_a2(1.0),

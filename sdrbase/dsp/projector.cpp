@@ -18,6 +18,9 @@
 #include <math.h>
 #include "projector.h"
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 Projector::Projector(ProjectionType projectionType) :
     m_projectionType(projectionType),
     m_prevArg(0.0f),

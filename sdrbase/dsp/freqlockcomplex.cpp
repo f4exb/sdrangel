@@ -23,6 +23,9 @@
 #include "freqlockcomplex.h"
 #include <math.h>
 
+#undef M_PI
+#define M_PI 3.14159265358979323846
+
 FreqLockComplex::FreqLockComplex() :
     m_a0(0.998),
     m_a1(0.002),
