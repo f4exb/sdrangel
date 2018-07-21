@@ -76,6 +76,17 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
     {
         QByteArray path=request.getPath();
 
+        // Handle pre-flight requests
+        if (request.getMethod() == "OPTIONS")
+        {
+            qDebug("WebAPIRequestMapper::service: method OPTIONS: assume pre-flight");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+            response.setHeader("Access-Control-Allow-Methods", "*");
+            response.setStatus(200, "OK");
+            return;
+        }
+
         if (path == WebAPIAdapterInterface::instanceSummaryURL) {
             instanceSummaryService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDevicesURL) {
