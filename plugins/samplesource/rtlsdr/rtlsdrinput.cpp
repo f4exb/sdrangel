@@ -496,6 +496,11 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_lowSampleRate != settings.m_lowSampleRate) || force)
+    {
+        m_settings.m_lowSampleRate = settings.m_lowSampleRate;
+    }
+
     if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force)
     {
         m_settings.m_rfBandwidth = settings.m_rfBandwidth;
@@ -608,6 +613,7 @@ int RTLSDRInput::webapiSettingsPutPatch(
 
 void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings)
 {
+    qDebug("RTLSDRInput::webapiFormatDeviceSettings: m_lowSampleRate: %s", settings.m_lowSampleRate ? "true" : "false");
     response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
