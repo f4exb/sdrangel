@@ -587,7 +587,7 @@ int RTLSDRInput::webapiSettingsPutPatch(
         settings.m_transverterMode = response.getRtlSdrSettings()->getTransverterMode() != 0;
     }
     if (deviceSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getRtlSdrSettings()->getRfBandwidth() != 0;
+        settings.m_rfBandwidth = response.getRtlSdrSettings()->getRfBandwidth();
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
