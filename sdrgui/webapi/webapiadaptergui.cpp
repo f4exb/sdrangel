@@ -507,6 +507,30 @@ int WebAPIAdapterGUI::instanceLocationPut(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceDVSerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    response.init();
+
+    std::vector<std::string> deviceNames;
+    m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+    response.setNbDevices((int) deviceNames.size());
+    QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
+
+    std::vector<std::string>::iterator it = deviceNames.begin();
+
+    while (it != deviceNames.end())
+    {
+        deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
+        deviceNamesList->back()->init();
+        *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
+        ++it;
+    }
+
+    return 200;
+}
+
 int WebAPIAdapterGUI::instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSeralDevices& response,
@@ -524,7 +548,6 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
         QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
         std::vector<std::string>::iterator it = deviceNames.begin();
-        std::string deviceNamesStr = "DV Serial devices found: ";
 
         while (it != deviceNames.end())
         {

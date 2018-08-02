@@ -72,7 +72,7 @@ So you will have to clone this repository and checkout the `qt5cpp_rework_antis8
 ```shell
 sudo apt-get install maven # do this once to install maven
 cd swagger-codegen
-export JAVA_HOME=/opt/install/jdk1.8.0_74 # Example JDK change to your own
+export JAVA_HOME=/opt/install/jdk1.8.0_172 # Example JDK change to your own
 mvn clean package # let it compile...
 mkdir -p /opt/install/swagger/swagger-codegen
 cp modules/swagger-codegen-cli/target/swagger-codegen-cli.jar /opt/install/swagger
@@ -83,6 +83,11 @@ Then in the `/opt/install/swagger/` directory write a little `swagger-codegen` s
 ```shell
 #!/bin/sh
 /opt/install/jdk1.8.0_74/bin/java -jar /opt/install/swagger/swagger-codegen-cli.jar ${*}
+```
+Give it execute permissions:
+
+```shell
+chmod +x /opt/install/swagger/swagger-codegen
 ```
 
 Then invoke the generator with `/opt/install/swagger/swagger-codegen <commands>`

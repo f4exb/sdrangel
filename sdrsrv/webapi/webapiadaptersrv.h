@@ -97,6 +97,10 @@ public:
             SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceDVSerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSeralDevices& response,

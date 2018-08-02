@@ -12,18 +12,16 @@ base_url = "http://127.0.0.1:8091/sdrangel"
 #   - JSON body or None if unused
 #   - Descriptive message fragment
 commands = [
-    ["/deviceset/0/device", "PUT", None, {"hwType": "BladeRF"}, "setup BladeRF on Rx 0"],
+    ["/deviceset/0/device", "PUT", None, {"hwType": "AirspyHF"}, "setup AirspyHF on Rx 0"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145480000, "type": "R", "name": "Rept + Simplex + DV"}}, "load preset on Rx 0"],
     ["/deviceset", "POST", None, None, "add Rx 1 device set"],
     ["/deviceset/1/device", "PUT", None, {"hwType": "SDRdaemonSource"}, "setup SDRdaemonSource on Rx 1"],
 #    ["/preset", "PATCH", None, {"deviceSetIndex": 1, "preset": {"groupName": "OM430", "centerFrequency": 439550000, "type": "R", "name": "F5ZKP Daemon RPi3 SUSE"}}, "load preset on Rx 1"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 1, "preset": {"groupName": "PRO400", "centerFrequency": 463880000, "type": "R", "name": "PM Nice NXDN daemon"}}, "load preset on Rx 1"],
     ["/deviceset", "POST", None, None, "add Rx 2 device set"],
-#    ["/deviceset/2/device", "PUT", None, {"hwType": "SDRplay1"}, "setup SDRplay on Rx 2"],
     ["/deviceset/2/device", "PUT", None, {"hwType": "Perseus"}, "setup Perseus on Rx 2"],
     ["/preset", "PATCH", None, {"deviceSetIndex": 2, "preset": {"groupName": "20m", "centerFrequency": 14160000, "type": "R", "name": "SSB"}}, "load preset on Rx 2"],
     ["/dvserial", "PATCH", {"dvserial": 1}, None, "set DV serial processing for AMBE frames decoding"],
-#    ["/preset", "PATCH", None, {"deviceSetIndex": 0, "preset": {"groupName": "OM144", "centerFrequency": 145640000, "type": "R", "name": "Repeaters extended"}}, "load preset on Rx 0 twice"],
     ["/deviceset/0/device/run", "POST", None, None, "Start device on deviceset R0"],
     ["/deviceset/1/device/run", "POST", None, None, "Start device on deviceset R1"],
     ["/deviceset/2/device/run", "POST", None, None, "Start device on deviceset R2"],

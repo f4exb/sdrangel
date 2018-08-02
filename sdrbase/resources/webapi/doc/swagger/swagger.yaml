@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.0.0"
+  version: "4.0.6"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -375,6 +375,20 @@ paths:
           
   /sdrangel/dvserial:
     x-swagger-router-controller: instance
+    get:
+      description: Get DV serial processing parameters for AMBE frames decoding in digital voice modes
+      operationId: instanceDVSerialGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return list of devices or empty list if unset
+          schema:
+            $ref: "#/definitions/DVSeralDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
     patch:
       description: Set or reset DV serial processing for AMBE frames decoding in digital voice modes
       operationId: instanceDVSerialPatch

@@ -607,7 +607,20 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");
 
-    if (request.getMethod() == "PATCH")
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGDVSeralDevices normalResponse;
+
+        int status = m_adapter->instanceDVSerialGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PATCH")
     {
         QByteArray dvserialStr = request.getParameter("dvserial");
         bool dvserial = false;

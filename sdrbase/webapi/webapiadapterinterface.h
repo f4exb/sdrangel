@@ -260,7 +260,20 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/location (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/dvserial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceDVSerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/dvserial (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDVSerialPatch(
@@ -268,9 +281,9 @@ public:
             SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
     }
 
     /**
