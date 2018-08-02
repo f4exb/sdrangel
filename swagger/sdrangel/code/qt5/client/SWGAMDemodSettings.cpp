@@ -46,6 +46,10 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_title_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
+    pll = 0;
+    m_pll_isSet = false;
+    sync_am_operation = 0;
+    m_sync_am_operation_isSet = false;
 }
 
 SWGAMDemodSettings::~SWGAMDemodSettings() {
@@ -72,6 +76,10 @@ SWGAMDemodSettings::init() {
     m_title_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
+    pll = 0;
+    m_pll_isSet = false;
+    sync_am_operation = 0;
+    m_sync_am_operation_isSet = false;
 }
 
 void
@@ -89,6 +97,8 @@ SWGAMDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
+
 }
 
 SWGAMDemodSettings*
@@ -119,6 +129,10 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&pll, pJson["pll"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sync_am_operation, pJson["syncAMOperation"], "qint32", "");
     
 }
 
@@ -162,6 +176,12 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(m_pll_isSet){
+        obj->insert("pll", QJsonValue(pll));
+    }
+    if(m_sync_am_operation_isSet){
+        obj->insert("syncAMOperation", QJsonValue(sync_am_operation));
     }
 
     return obj;
@@ -257,6 +277,26 @@ SWGAMDemodSettings::setAudioDeviceName(QString* audio_device_name) {
     this->m_audio_device_name_isSet = true;
 }
 
+qint32
+SWGAMDemodSettings::getPll() {
+    return pll;
+}
+void
+SWGAMDemodSettings::setPll(qint32 pll) {
+    this->pll = pll;
+    this->m_pll_isSet = true;
+}
+
+qint32
+SWGAMDemodSettings::getSyncAmOperation() {
+    return sync_am_operation;
+}
+void
+SWGAMDemodSettings::setSyncAmOperation(qint32 sync_am_operation) {
+    this->sync_am_operation = sync_am_operation;
+    this->m_sync_am_operation_isSet = true;
+}
+
 
 bool
 SWGAMDemodSettings::isSet(){
@@ -271,6 +311,8 @@ SWGAMDemodSettings::isSet(){
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
+        if(m_pll_isSet){ isObjectUpdated = true; break;}
+        if(m_sync_am_operation_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

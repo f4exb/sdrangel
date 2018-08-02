@@ -69,6 +69,12 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
+    qint32 getPll();
+    void setPll(qint32 pll);
+
+    qint32 getSyncAmOperation();
+    void setSyncAmOperation(qint32 sync_am_operation);
+
 
     virtual bool isSet() override;
 
@@ -99,6 +105,12 @@ private:
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
+
+    qint32 pll;
+    bool m_pll_isSet;
+
+    qint32 sync_am_operation;
+    bool m_sync_am_operation_isSet;
 
 };
 

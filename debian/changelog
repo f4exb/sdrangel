@@ -1,6 +1,7 @@
 sdrangel (4.0.6-1) unstable; urgency=medium
 
   * Web API: RTL-SDR: fixed RF bandwidth setting
+  * Web API: enhnaced DV serial and AM demod interfaces
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 Aug 2018 09:14:18 +0200
   

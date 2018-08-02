@@ -549,6 +549,17 @@ int AMDemod::webapiSettingsPutPatch(
         settings.m_audioDeviceName = *response.getAmDemodSettings()->getAudioDeviceName();
     }
 
+    if (channelSettingsKeys.contains("pll")) {
+        settings.m_pll = response.getAmDemodSettings()->getPll();
+    }
+
+    if (channelSettingsKeys.contains("syncAMOperation")) {
+        qint32 syncAMOperationCode = response.getAmDemodSettings()->getSyncAmOperation();
+        settings.m_syncAMOperation = syncAMOperationCode < 0 ?
+                AMDemodSettings::SyncAMDSB : syncAMOperationCode > 2 ?
+                        AMDemodSettings::SyncAMDSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
+    }
+
     if (frequencyOffsetChanged)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
@@ -602,6 +613,9 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     } else {
         response.getAmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
+    response.getAmDemodSettings()->setSyncAmOperation((int) m_settings.m_syncAMOperation);
 }
 
 void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

@@ -27,6 +27,12 @@ AMDemodSettings:
       type: string
     audioDeviceName:
       type: string
+    pll:
+      description: PLL active (for synchronous AM)
+      type: integer
+    syncAMOperation:
+      description: Synchronous AM sidebands mode (DSB, USB, LSB)
+      type: integer
 
 AMDemodReport:
   description: AMDemod
