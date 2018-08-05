@@ -10,7 +10,7 @@
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("4.0.0"),
+	QString("4.0.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

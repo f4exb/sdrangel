@@ -146,10 +146,17 @@ public:
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
-        avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-        m_magsq = avg;
-        peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
         nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
         m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
@@ -184,6 +191,16 @@ public:
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
 	enum RateState {
 		RSInitialFill,
 		RSRunning
@@ -224,6 +241,7 @@ private:
     double m_magsqSum;
     double m_magsqPeak;
     int    m_magsqCount;
+    MagSqLevelsStore m_magSqLevelStore;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
