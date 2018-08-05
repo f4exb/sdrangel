@@ -370,6 +370,8 @@ void SSBMod::pullAF(Complex& sample)
         break;
     case SSBModSettings::SSBModInputNone:
     default:
+        sample.real(0.0f);
+        sample.imag(0.0f);
         break;
     }
 
