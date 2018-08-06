@@ -1984,6 +1984,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if (*deviceHwType == "TestSource")
+    {
+        if (jsonObject.contains("testSourceSettings") && jsonObject["testSourceSettings"].isObject())
+        {
+            QJsonObject testSourceSettingsJsonObject = jsonObject["testSourceSettings"].toObject();
+            deviceSettingsKeys = testSourceSettingsJsonObject.keys();
+            deviceSettings.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+            deviceSettings.getTestSourceSettings()->fromJsonObject(testSourceSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else
     {
         return false;
