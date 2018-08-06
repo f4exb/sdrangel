@@ -133,7 +133,7 @@ const QString& TestSourceInput::getDeviceDescription() const
 
 int TestSourceInput::getSampleRate() const
 {
-	return m_settings.m_sampleRate;
+	return m_settings.m_sampleRate/(1<<m_settings.m_log2Decim);
 }
 
 quint64 TestSourceInput::getCenterFrequency() const
