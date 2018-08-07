@@ -290,6 +290,8 @@ void WFMDemodGUI::displaySettings()
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
 
+    ui->audioMute->setChecked(m_settings.m_audioMute);
+
     blockApplySettings(false);
 }
 
