@@ -2,9 +2,11 @@ sdrangel (4.0.6-1) unstable; urgency=medium
 
   * Web API: RTL-SDR: fixed RF bandwidth setting
   * Web API: enhanced DV serial and AM demod interfaces
+  * Web API: fixed bug in PUT/PATCH of modulators not setting differentially
   * Fixed power display going to floor value in some demods
+  * SSB modulator: fixed sample not reset when no modulation is present
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 Aug 2018 19:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 07 Aug 2018 19:14:18 +0200
   
 sdrangel (4.0.5-1) unstable; urgency=medium
 

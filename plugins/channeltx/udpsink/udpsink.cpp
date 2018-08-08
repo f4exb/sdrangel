@@ -611,7 +611,7 @@ int UDPSink::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    UDPSinkSettings settings;
+    UDPSinkSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("sampleFormat")) {

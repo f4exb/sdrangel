@@ -567,7 +567,7 @@ int NFMMod::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    NFMModSettings settings;
+    NFMModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
 //    for (int i = 0; i < channelSettingsKeys.size(); i++) {

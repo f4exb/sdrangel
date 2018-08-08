@@ -881,7 +881,7 @@ int SSBMod::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    SSBModSettings settings;
+    SSBModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("inputFrequencyOffset"))

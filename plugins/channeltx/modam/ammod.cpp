@@ -527,7 +527,7 @@ int AMMod::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    AMModSettings settings;
+    AMModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("channelMute")) {

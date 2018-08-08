@@ -559,7 +559,7 @@ int WFMMod::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    WFMModSettings settings;
+    WFMModSettings settings = m_settings;
     bool channelizerChange = false;
 
     if (channelSettingsKeys.contains("channelMute")) {
