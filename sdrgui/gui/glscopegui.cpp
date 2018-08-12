@@ -19,7 +19,7 @@
 
 #include "glscopegui.h"
 #include "glscope.h"
-#include "ui_glscopenggui.h"
+#include "ui_glscopegui.h"
 #include "util/simpleserializer.h"
 
 const double GLScopeGUI::amps[27] = {
