@@ -46,7 +46,7 @@ set(sdrgui_SOURCES
     gui/valuedial.cpp
     gui/valuedialz.cpp
     
-    dsp/scopevisng.cpp
+    dsp/scopevis.cpp
     dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
