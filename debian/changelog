@@ -1,3 +1,10 @@
+sdrangel (4.0.7-1) unstable; urgency=medium
+
+  * Scope: removed old scope objects
+  * Web API: reduced HTTP server debug messages 
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 15 Aug 2018 19:14:18 +0200
+  
 sdrangel (4.0.6-1) unstable; urgency=medium
 
   * Web API: RTL-SDR: fixed RF bandwidth setting
