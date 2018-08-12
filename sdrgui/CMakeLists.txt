@@ -20,7 +20,7 @@ set(sdrgui_SOURCES
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
-    gui/glscopeng.cpp
+    gui/glscope.cpp
     gui/glscopemulti.cpp
     gui/glscopegui.cpp
     gui/glscopemultigui.cpp
