@@ -2,37 +2,37 @@
 #include "dsp/dspcommands.h"
 #include "util/messagequeue.h"
 
-SpectrumScopeNGComboVis::SpectrumScopeNGComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis) :
+SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis) :
 	m_spectrumVis(spectrumVis),
 	m_scopeVis(scopeVis)
 {
-	setObjectName("SpectrumScopeNGComboVis");
+	setObjectName("SpectrumScopeComboVis");
 }
 
-SpectrumScopeNGComboVis::~SpectrumScopeNGComboVis()
+SpectrumScopeComboVis::~SpectrumScopeComboVis()
 {
 }
 
-void SpectrumScopeNGComboVis::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void SpectrumScopeComboVis::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
 {
 	m_scopeVis->feed(begin, end, false);
 	SampleVector::const_iterator triggerPoint = m_scopeVis->getTriggerPoint();
 	m_spectrumVis->feedTriggered(triggerPoint, end, positiveOnly);
 }
 
-void SpectrumScopeNGComboVis::start()
+void SpectrumScopeComboVis::start()
 {
 	m_spectrumVis->start();
 	m_scopeVis->start();
 }
 
-void SpectrumScopeNGComboVis::stop()
+void SpectrumScopeComboVis::stop()
 {
 	m_spectrumVis->stop();
 	m_scopeVis->stop();
 }
 
-bool SpectrumScopeNGComboVis::handleMessage(const Message& message)
+bool SpectrumScopeComboVis::handleMessage(const Message& message)
 {
 	bool spectDone = m_spectrumVis->handleMessage(message);
 	bool scopeDone = m_scopeVis->handleMessage(message);

@@ -8,11 +8,11 @@
 
 class Message;
 
-class SDRGUI_API SpectrumScopeNGComboVis : public BasebandSampleSink {
+class SDRGUI_API SpectrumScopeComboVis : public BasebandSampleSink {
 public:
 
-    SpectrumScopeNGComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis);
-	virtual ~SpectrumScopeNGComboVis();
+    SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis);
+	virtual ~SpectrumScopeComboVis();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();

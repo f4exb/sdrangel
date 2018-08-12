@@ -30,7 +30,7 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ChannelAnalyzer;
-class SpectrumScopeNGComboVis;
+class SpectrumScopeComboVis;
 class SpectrumVis;
 class ScopeVisNG;
 
@@ -71,7 +71,7 @@ private:
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
 
 	ChannelAnalyzer* m_channelAnalyzer;
-	SpectrumScopeNGComboVis* m_spectrumScopeComboVis;
+	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
 	ScopeVisNG* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
