@@ -22,7 +22,7 @@
 
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_chanalyzergui.h"
-#include "dsp/spectrumscopengcombovis.h"
+#include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"

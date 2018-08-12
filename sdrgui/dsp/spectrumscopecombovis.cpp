@@ -1,4 +1,4 @@
-#include "dsp/spectrumscopengcombovis.h"
+#include "dsp/spectrumscopecombovis.h"
 #include "dsp/dspcommands.h"
 #include "util/messagequeue.h"
 
