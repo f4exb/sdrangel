@@ -22,7 +22,7 @@ set(sdrgui_SOURCES
     gui/externalclockdialog.cpp
     gui/glscopeng.cpp
     gui/glscopemulti.cpp
-    gui/glscopenggui.cpp
+    gui/glscopegui.cpp
     gui/glscopemultigui.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
