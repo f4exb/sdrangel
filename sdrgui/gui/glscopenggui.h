@@ -28,7 +28,7 @@
 #include "settings/serializable.h"
 
 namespace Ui {
-    class GLScopeNGGUI;
+    class GLScopeGUI;
 }
 
 class MessageQueue;
@@ -80,13 +80,13 @@ private:
     class TrigUIBlocker
     {
     public:
-        TrigUIBlocker(Ui::GLScopeNGGUI *ui);
+        TrigUIBlocker(Ui::GLScopeGUI *ui);
         ~TrigUIBlocker();
 
         void unBlock();
 
     private:
-        Ui::GLScopeNGGUI *m_ui;
+        Ui::GLScopeGUI *m_ui;
         bool m_oldStateTrigMode;
         bool m_oldStateTrigCount;
         bool m_oldStateTrigPos;
@@ -101,13 +101,13 @@ private:
     class TraceUIBlocker
     {
     public:
-        TraceUIBlocker(Ui::GLScopeNGGUI *ui);
+        TraceUIBlocker(Ui::GLScopeGUI *ui);
         ~TraceUIBlocker();
 
         void unBlock();
 
     private:
-        Ui::GLScopeNGGUI *m_ui;
+        Ui::GLScopeGUI *m_ui;
         bool m_oldStateTrace;
         bool m_oldStateTraceAdd;
         bool m_oldStateTraceDel;
@@ -123,13 +123,13 @@ private:
     class MainUIBlocker
     {
     public:
-        MainUIBlocker(Ui::GLScopeNGGUI *ui);
+        MainUIBlocker(Ui::GLScopeGUI *ui);
         ~MainUIBlocker();
 
         void unBlock();
 
     private:
-        Ui::GLScopeNGGUI *m_ui;
+        Ui::GLScopeGUI *m_ui;
         bool m_oldStateOnlyX;
         bool m_oldStateOnlyY;
         bool m_oldStateHorizontalXY;
@@ -140,7 +140,7 @@ private:
 //        bool m_oldStateTraceLen;
     };
 
-    Ui::GLScopeNGGUI* ui;
+    Ui::GLScopeGUI* ui;
 
     MessageQueue* m_messageQueue;
     ScopeVisNG* m_scopeVis;

@@ -36,7 +36,7 @@ const double GLScopeNGGUI::amps[27] = {
 
 GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     QWidget(parent),
-    ui(new Ui::GLScopeNGGUI),
+    ui(new Ui::GLScopeGUI),
     m_messageQueue(0),
     m_scopeVis(0),
     m_glScope(0),
@@ -1350,7 +1350,7 @@ bool GLScopeNGGUI::handleMessage(Message* message __attribute__((unused)))
     return false;
 }
 
-GLScopeNGGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeNGGUI *ui) :
+GLScopeNGGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
         m_ui(ui)
 {
     m_oldStateTrigMode        = ui->trigMode->blockSignals(true);
@@ -1382,7 +1382,7 @@ void GLScopeNGGUI::TrigUIBlocker::unBlock()
     m_ui->trigDelayFine->blockSignals(m_oldStateTrigDelayFine);
 }
 
-GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeNGGUI* ui) :
+GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeGUI* ui) :
         m_ui(ui)
 {
     m_oldStateTrace            = m_ui->trace->blockSignals(true);
@@ -1416,7 +1416,7 @@ void GLScopeNGGUI::TraceUIBlocker::unBlock()
     m_ui->traceColor->blockSignals(m_oldStateTraceColor);
 }
 
-GLScopeNGGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeNGGUI* ui) :
+GLScopeNGGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeGUI* ui) :
         m_ui(ui)
 {
     m_oldStateOnlyX        = m_ui->onlyX->blockSignals(true);
