@@ -11,7 +11,7 @@ class Message;
 class SDRGUI_API SpectrumScopeComboVis : public BasebandSampleSink {
 public:
 
-    SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis);
+    SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);
 	virtual ~SpectrumScopeComboVis();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -21,7 +21,7 @@ public:
 
 private:
 	SpectrumVis* m_spectrumVis;
-	ScopeVisNG* m_scopeVis;
+	ScopeVis* m_scopeVis;
 };
 
 #endif // INCLUDE_SPECTRUMSCOPENGCOMBOVIS_H

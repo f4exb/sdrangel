@@ -2,7 +2,7 @@
 #include "dsp/dspcommands.h"
 #include "util/messagequeue.h"
 
-SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVisNG* scopeVis) :
+SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis) :
 	m_spectrumVis(spectrumVis),
 	m_scopeVis(scopeVis)
 {

@@ -32,7 +32,7 @@ class BasebandSampleSink;
 class ChannelAnalyzer;
 class SpectrumScopeComboVis;
 class SpectrumVis;
-class ScopeVisNG;
+class ScopeVis;
 
 namespace Ui {
 	class ChannelAnalyzerGUI;
@@ -73,7 +73,7 @@ private:
 	ChannelAnalyzer* m_channelAnalyzer;
 	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
-	ScopeVisNG* m_scopeVis;
+	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);

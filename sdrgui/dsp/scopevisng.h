@@ -39,7 +39,7 @@
 
 class GLScope;
 
-class SDRGUI_API ScopeVisNG : public BasebandSampleSink {
+class SDRGUI_API ScopeVis : public BasebandSampleSink {
 
 public:
     struct TraceData
@@ -147,8 +147,8 @@ public:
     static const uint32_t m_maxNbTraces = 10;
     static const uint32_t m_nbTraceMemories = 50;
 
-    ScopeVisNG(GLScope* glScope = 0);
-    virtual ~ScopeVisNG();
+    ScopeVis(GLScope* glScope = 0);
+    virtual ~ScopeVis();
 
     void setSampleRate(int sampleRate);
     void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
@@ -760,7 +760,7 @@ private:
         {
             if (m_traces[0].size() < m_maxNbTraces)
             {
-                qDebug("ScopeVisNG::addTrace");
+                qDebug("ScopeVis::addTrace");
                 m_traces[0].push_back(0);
                 m_traces[1].push_back(0);
                 m_tracesData.push_back(traceData);
@@ -786,7 +786,7 @@ private:
         {
             if (traceIndex < m_tracesControl.size())
             {
-                qDebug("ScopeVisNG::removeTrace");
+                qDebug("ScopeVis::removeTrace");
                 m_traces[0].erase(m_traces[0].begin() + traceIndex);
                 m_traces[1].erase(m_traces[1].begin() + traceIndex);
                 TraceControl *traceControl = m_tracesControl[traceIndex];
@@ -912,7 +912,7 @@ private:
             }
 
 //            if (trigger) {
-//                qDebug("ScopeVisNG::triggered: %s/%s %f/%f",
+//                qDebug("ScopeVis::triggered: %s/%s %f/%f",
 //                        triggerCondition.m_prevCondition ? "T" : "F",
 //                        condition ? "T" : "F",
 //                        triggerCondition.m_projector->run(s),

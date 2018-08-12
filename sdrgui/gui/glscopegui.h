@@ -49,7 +49,7 @@ public:
     explicit GLScopeGUI(QWidget* parent = 0);
     ~GLScopeGUI();
 
-    void setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScope* glScope);
+    void setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLScope* glScope);
 
     void setSampleRate(int sampleRate);
     void resetToDefaults();
@@ -68,12 +68,12 @@ public:
     void setTraceLength(int step);
     void setPreTrigger(int step);
     // trace (second line):
-    void changeTrace(int traceIndex, const ScopeVisNG::TraceData& traceData);
-    void addTrace(const ScopeVisNG::TraceData& traceData);
+    void changeTrace(int traceIndex, const ScopeVis::TraceData& traceData);
+    void addTrace(const ScopeVis::TraceData& traceData);
     void focusOnTrace(int traceIndex);
     // trigger (third line):
-    void changeTrigger(int triggerIndex, const ScopeVisNG::TriggerData& triggerData);
-    void addTrigger(const ScopeVisNG::TriggerData& triggerData);
+    void changeTrigger(int triggerIndex, const ScopeVis::TriggerData& triggerData);
+    void addTrigger(const ScopeVis::TriggerData& triggerData);
     void focusOnTrigger(int triggerIndex);
 
 private:
@@ -143,7 +143,7 @@ private:
     Ui::GLScopeGUI* ui;
 
     MessageQueue* m_messageQueue;
-    ScopeVisNG* m_scopeVis;
+    ScopeVis* m_scopeVis;
     GLScope* m_glScope;
 
     int m_sampleRate;
@@ -175,10 +175,10 @@ private:
     void changeCurrentTrace();
     void changeCurrentTrigger();
 
-    void fillTraceData(ScopeVisNG::TraceData& traceData);
-    void fillTriggerData(ScopeVisNG::TriggerData& triggerData);
-    void setTriggerUI(const ScopeVisNG::TriggerData& triggerData);
-    void setTraceUI(const ScopeVisNG::TraceData& traceData);
+    void fillTraceData(ScopeVis::TraceData& traceData);
+    void fillTriggerData(ScopeVis::TriggerData& triggerData);
+    void setTriggerUI(const ScopeVis::TriggerData& triggerData);
+    void setTraceUI(const ScopeVis::TraceData& traceData);
 
     void fillProjectionCombo(QComboBox* comboBox);
     void disableLiveMode(bool disable);

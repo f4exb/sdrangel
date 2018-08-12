@@ -52,7 +52,7 @@ public:
 
     void connectTimer(const QTimer& timer);
 
-    void setTraces(std::vector<ScopeVisNG::TraceData>* tracesData, std::vector<float *>* traces);
+    void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
     void newTraces(std::vector<float *>* traces);
 
     int getSampleRate() const { return m_sampleRate; }
@@ -68,7 +68,7 @@ public:
     void updateDisplay();
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
-    void setFocusedTriggerData(ScopeVisNG::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
+    void setFocusedTriggerData(ScopeVis::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
     void setConfigChanged() { m_configChanged = true; }
     //void incrementTraceCounter() { m_traceCounter++; }
 
@@ -80,9 +80,9 @@ signals:
     void sampleRateChanged(int);
 
 private:
-    std::vector<ScopeVisNG::TraceData> *m_tracesData;
+    std::vector<ScopeVis::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
-    ScopeVisNG::TriggerData m_focusedTriggerData;
+    ScopeVis::TriggerData m_focusedTriggerData;
     //int m_traceCounter;
     uint32_t m_bufferIndex;
     DisplayMode m_displayMode;

@@ -28,7 +28,7 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ATVDemod;
-class ScopeVisNG;
+class ScopeVis;
 
 namespace Ui
 {
@@ -70,7 +70,7 @@ private:
     MovingAverageUtil<double, double, 4> m_objMagSqAverage;
     int m_intTickCount;
 
-    ScopeVisNG* m_scopeVis;
+    ScopeVis* m_scopeVis;
 
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;
