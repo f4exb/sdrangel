@@ -20,7 +20,7 @@
 
 #include "scopevisng.h"
 #include "dsp/dspcommands.h"
-#include "gui/glscopeng.h"
+#include "gui/glscope.h"
 
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGAddTrigger, Message)

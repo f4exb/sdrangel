@@ -25,7 +25,7 @@
 #include "dsp/spectrumscopengcombovis.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
-#include "gui/glscopeng.h"
+#include "gui/glscope.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"

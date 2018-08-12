@@ -76,7 +76,7 @@ set(sdrgui_HEADERS
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
-    gui/glscopeng.h
+    gui/glscope.h
     gui/glscopemulti.h
     gui/glscopegui.h
     gui/glscopemultigui.h

@@ -744,7 +744,7 @@
   <customwidget>
    <class>GLScope</class>
    <extends>QWidget</extends>
-   <header>gui/glscopeng.h</header>
+   <header>gui/glscope.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

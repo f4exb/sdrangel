@@ -24,7 +24,7 @@
 #include <QDebug>
 #include <algorithm>
 
-#include "glscopeng.h"
+#include "glscope.h"
 
 GLScope::GLScope(QWidget* parent) :
     QGLWidget(parent),
