@@ -24,7 +24,7 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "util/message.h"
-#include "dsp/scopevisng.h"
+#include "dsp/scopevis.h"
 #include "settings/serializable.h"
 
 namespace Ui {

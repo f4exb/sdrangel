@@ -18,7 +18,7 @@
 #include <QDebug>
 #include <QMutexLocker>
 
-#include "scopevisng.h"
+#include "scopevis.h"
 #include "dsp/dspcommands.h"
 #include "gui/glscope.h"
 

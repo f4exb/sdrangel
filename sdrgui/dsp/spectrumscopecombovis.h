@@ -3,10 +3,10 @@
 
 #include <dsp/basebandsamplesink.h>
 #include "dsp/spectrumvis.h"
-#include "dsp/scopevisng.h"
 #include "export.h"
 
 class Message;
+class ScopeVis;
 
 class SDRGUI_API SpectrumScopeComboVis : public BasebandSampleSink {
 public:

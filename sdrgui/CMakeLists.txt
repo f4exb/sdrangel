@@ -103,7 +103,7 @@ set(sdrgui_HEADERS
     gui/valuedial.h
     gui/valuedialz.h
     
-    dsp/scopevisng.h
+    dsp/scopevis.h
     dsp/scopevismulti.h
     dsp/scopevisxy.h    
     dsp/spectrumvis.h
