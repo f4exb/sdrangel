@@ -128,7 +128,7 @@ set(sdrgui_FORMS
     gui/cwkeyergui.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
-    gui/glscopenggui.ui
+    gui/glscopegui.ui
     gui/glscopemultigui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui
