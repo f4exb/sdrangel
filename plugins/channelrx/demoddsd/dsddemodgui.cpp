@@ -23,9 +23,7 @@
 
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"
-#include "dsp/scopevis.h"
 #include "dsp/scopevisxy.h"
-#include "gui/glscope.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"

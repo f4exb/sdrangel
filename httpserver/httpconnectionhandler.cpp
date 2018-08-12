@@ -234,7 +234,7 @@ void HttpConnectionHandler::read()
         if (currentRequest->getStatus()==HttpRequest::complete)
         {
             readTimer.stop();
-            qDebug("HttpConnectionHandler (%p) received request from %s (%s) %s",
+            qDebug("HttpConnectionHandler (%p): received request from %s (%s) %s",
                     this,
                     qPrintable(currentRequest->getPeerAddress().toString()),
                     currentRequest->getMethod().toStdString().c_str(),

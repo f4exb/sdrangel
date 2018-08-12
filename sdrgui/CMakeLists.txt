@@ -20,8 +20,6 @@ set(sdrgui_SOURCES
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
-    gui/glscope.cpp
-    gui/glscopegui.cpp
     gui/glscopeng.cpp
     gui/glscopemulti.cpp
     gui/glscopenggui.cpp
@@ -48,12 +46,10 @@ set(sdrgui_SOURCES
     gui/valuedial.cpp
     gui/valuedialz.cpp
     
-    dsp/scopevis.cpp
     dsp/scopevisng.cpp
     dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
-    dsp/spectrumscopecombovis.cpp
     dsp/spectrumscopengcombovis.cpp
     
     device/deviceuiset.cpp
@@ -80,8 +76,6 @@ set(sdrgui_HEADERS
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
-    gui/glscope.h
-    gui/glscopegui.h
     gui/glscopeng.h
     gui/glscopemulti.h
     gui/glscopenggui.h
@@ -109,12 +103,10 @@ set(sdrgui_HEADERS
     gui/valuedial.h
     gui/valuedialz.h
     
-    dsp/scopevis.h
     dsp/scopevisng.h
     dsp/scopevismulti.h
     dsp/scopevisxy.h    
     dsp/spectrumvis.h
-    dsp/spectrumscopecombovis.h
     dsp/spectrumscopengcombovis.h
     
     device/deviceuiset.h
@@ -136,7 +128,6 @@ set(sdrgui_FORMS
     gui/cwkeyergui.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
-    gui/glscopegui.ui
     gui/glscopenggui.ui
     gui/glscopemultigui.ui
     gui/glspectrumgui.ui
