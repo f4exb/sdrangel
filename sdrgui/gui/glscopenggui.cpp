@@ -17,7 +17,7 @@
 
 #include <QColorDialog>
 
-#include "glscopenggui.h"
+#include "glscopegui.h"
 #include "glscopeng.h"
 #include "ui_glscopenggui.h"
 #include "util/simpleserializer.h"

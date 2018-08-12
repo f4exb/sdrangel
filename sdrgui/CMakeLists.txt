@@ -78,7 +78,7 @@ set(sdrgui_HEADERS
     gui/externalclockdialog.h
     gui/glscopeng.h
     gui/glscopemulti.h
-    gui/glscopenggui.h
+    gui/glscopegui.h
     gui/glscopemultigui.h
     gui/glshadersimple.h
     gui/glshadertvarray.h
