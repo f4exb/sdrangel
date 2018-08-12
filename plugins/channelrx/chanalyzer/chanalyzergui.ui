@@ -700,7 +700,7 @@
      </widget>
     </item>
     <item>
-     <widget class="GLScopeNGGUI" name="scopeGUI" native="true"/>
+     <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
     </item>
    </layout>
   </widget>
@@ -748,7 +748,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>GLScopeNGGUI</class>
+   <class>GLScopeGUI</class>
    <extends>QWidget</extends>
    <header>gui/glscopenggui.h</header>
    <container>1</container>

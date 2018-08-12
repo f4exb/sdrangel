@@ -34,7 +34,7 @@ namespace Ui {
 class MessageQueue;
 class GLScopeNG;
 
-class SDRGUI_API GLScopeNGGUI : public QWidget, public Serializable {
+class SDRGUI_API GLScopeGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:
@@ -46,8 +46,8 @@ public:
         DisplayPol
     };
 
-    explicit GLScopeNGGUI(QWidget* parent = 0);
-    ~GLScopeNGGUI();
+    explicit GLScopeGUI(QWidget* parent = 0);
+    ~GLScopeGUI();
 
     void setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope);
 

@@ -22,7 +22,7 @@
 #include "ui_glscopenggui.h"
 #include "util/simpleserializer.h"
 
-const double GLScopeNGGUI::amps[27] = {
+const double GLScopeGUI::amps[27] = {
         2e-1, 1e-1, 5e-2,
         2e-2, 1e-2, 5e-3,
         2e-3, 1e-3, 5e-4,
@@ -34,7 +34,7 @@ const double GLScopeNGGUI::amps[27] = {
         2e-9, 1e-9, 5e-10,
 };
 
-GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
+GLScopeGUI::GLScopeGUI(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::GLScopeGUI),
     m_messageQueue(0),
@@ -45,7 +45,7 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     m_timeOffset(0),
     m_traceLenMult(1)
 {
-    qDebug("GLScopeNGGUI::GLScopeNGGUI");
+    qDebug("GLScopeGUI::GLScopeGUI");
     setEnabled(false);
     ui->setupUi(this);
     ui->trigDelayFine->setMaximum(ScopeVisNG::m_traceChunkSize / 10.0);
@@ -57,14 +57,14 @@ GLScopeNGGUI::GLScopeNGGUI(QWidget* parent) :
     ui->mem->setMaximum(ScopeVisNG::m_nbTraceMemories - 1);
 }
 
-GLScopeNGGUI::~GLScopeNGGUI()
+GLScopeGUI::~GLScopeGUI()
 {
     delete ui;
 }
 
-void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope)
+void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope)
 {
-    qDebug("GLScopeNGGUI::setBuddies");
+    qDebug("GLScopeGUI::setBuddies");
 
     m_messageQueue = messageQueue;
     m_scopeVis = scopeVis;
@@ -129,12 +129,12 @@ void GLScopeNGGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, 
     setTraceDelayDisplay();
 }
 
-void GLScopeNGGUI::setSampleRate(int sampleRate)
+void GLScopeGUI::setSampleRate(int sampleRate)
 {
     m_sampleRate = sampleRate;
 }
 
-void GLScopeNGGUI::on_scope_sampleRateChanged(int sampleRate)
+void GLScopeGUI::on_scope_sampleRateChanged(int sampleRate)
 {
     //m_sampleRate = m_glScope->getSampleRate();
     m_sampleRate = sampleRate;
@@ -147,12 +147,12 @@ void GLScopeNGGUI::on_scope_sampleRateChanged(int sampleRate)
     setTrigDelayDisplay();
 }
 
-void GLScopeNGGUI::resetToDefaults()
+void GLScopeGUI::resetToDefaults()
 {
 }
 
 
-QByteArray GLScopeNGGUI::serialize() const
+QByteArray GLScopeGUI::serialize() const
 {
     SimpleSerializer s(1);
 
@@ -206,9 +206,9 @@ QByteArray GLScopeNGGUI::serialize() const
     return s.final();
 }
 
-bool GLScopeNGGUI::deserialize(const QByteArray& data)
+bool GLScopeGUI::deserialize(const QByteArray& data)
 {
-    qDebug("GLScopeNGGUI::deserialize");
+    qDebug("GLScopeGUI::deserialize");
     SimpleDeserializer d(data);
 
     if(!d.isValid()) {
@@ -278,7 +278,7 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
         const std::vector<ScopeVisNG::TraceData>& tracesData = m_scopeVis->getTracesData();
         uint32_t iTrace = tracesData.size();
 
-        qDebug("GLScopeNGGUI::deserialize: nbTracesSaved: %u tracesData.size(): %lu", nbTracesSaved, tracesData.size());
+        qDebug("GLScopeGUI::deserialize: nbTracesSaved: %u tracesData.size(): %lu", nbTracesSaved, tracesData.size());
 
         while (iTrace > nbTracesSaved) // remove possible traces in excess
         {
@@ -350,7 +350,7 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
         d.readS32(201, &intValue, 0);
         ui->trigPre->setValue(intValue);
 
-        qDebug("GLScopeNGGUI::deserialize: nbTriggersSaved: %u nbTriggers: %u", nbTriggersSaved, nbTriggers);
+        qDebug("GLScopeGUI::deserialize: nbTriggersSaved: %u nbTriggers: %u", nbTriggersSaved, nbTriggers);
 
         while (iTrigger > nbTriggersSaved) // remove possible triggers in excess
         {
@@ -422,7 +422,7 @@ bool GLScopeNGGUI::deserialize(const QByteArray& data)
     }
 }
 
-void GLScopeNGGUI::on_onlyX_toggled(bool checked)
+void GLScopeGUI::on_onlyX_toggled(bool checked)
 {
     if (checked)
     {
@@ -440,7 +440,7 @@ void GLScopeNGGUI::on_onlyX_toggled(bool checked)
     }
 }
 
-void GLScopeNGGUI::on_onlyY_toggled(bool checked)
+void GLScopeGUI::on_onlyY_toggled(bool checked)
 {
     if (checked)
     {
@@ -458,7 +458,7 @@ void GLScopeNGGUI::on_onlyY_toggled(bool checked)
     }
 }
 
-void GLScopeNGGUI::on_horizontalXY_toggled(bool checked)
+void GLScopeGUI::on_horizontalXY_toggled(bool checked)
 {
     if (checked)
     {
@@ -476,7 +476,7 @@ void GLScopeNGGUI::on_horizontalXY_toggled(bool checked)
     }
 }
 
-void GLScopeNGGUI::on_verticalXY_toggled(bool checked)
+void GLScopeGUI::on_verticalXY_toggled(bool checked)
 {
     if (checked)
     {
@@ -494,7 +494,7 @@ void GLScopeNGGUI::on_verticalXY_toggled(bool checked)
     }
 }
 
-void GLScopeNGGUI::on_polar_toggled(bool checked)
+void GLScopeGUI::on_polar_toggled(bool checked)
 {
     if (checked)
     {
@@ -512,24 +512,24 @@ void GLScopeNGGUI::on_polar_toggled(bool checked)
     }
 }
 
-void GLScopeNGGUI::on_polarPoints_toggled(bool checked)
+void GLScopeGUI::on_polarPoints_toggled(bool checked)
 {
     m_glScope->setDisplayXYPoints(checked);
 }
 
-void GLScopeNGGUI::on_traceIntensity_valueChanged(int value)
+void GLScopeGUI::on_traceIntensity_valueChanged(int value)
 {
     ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(value));
     m_glScope->setDisplayTraceIntensity(value);
 }
 
-void GLScopeNGGUI::on_gridIntensity_valueChanged(int value)
+void GLScopeGUI::on_gridIntensity_valueChanged(int value)
 {
     ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(value));
     m_glScope->setDisplayGridIntensity(value);
 }
 
-void GLScopeNGGUI::on_time_valueChanged(int value)
+void GLScopeGUI::on_time_valueChanged(int value)
 {
     m_timeBase = value;
     setTimeScaleDisplay();
@@ -541,7 +541,7 @@ void GLScopeNGGUI::on_time_valueChanged(int value)
             ui->freerun->isChecked());
 }
 
-void GLScopeNGGUI::on_timeOfs_valueChanged(int value)
+void GLScopeGUI::on_timeOfs_valueChanged(int value)
 {
     if ((value < 0) || (value > 100)) {
         return;
@@ -556,7 +556,7 @@ void GLScopeNGGUI::on_timeOfs_valueChanged(int value)
             ui->freerun->isChecked());
 }
 
-void GLScopeNGGUI::on_traceLen_valueChanged(int value)
+void GLScopeGUI::on_traceLen_valueChanged(int value)
 {
     if ((value < 1) || (value > 100)) {
         return;
@@ -575,14 +575,14 @@ void GLScopeNGGUI::on_traceLen_valueChanged(int value)
     setTrigPreDisplay();
 }
 
-void GLScopeNGGUI::on_trace_valueChanged(int value)
+void GLScopeGUI::on_trace_valueChanged(int value)
 {
     ui->traceText->setText(value == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 
     ScopeVisNG::TraceData traceData;
     m_scopeVis->getTraceData(traceData, value);
 
-    qDebug() << "GLScopeNGGUI::on_trace_valueChanged:"
+    qDebug() << "GLScopeGUI::on_trace_valueChanged:"
             << " m_projectionType: " << (int) traceData.m_projectionType
             << " m_amp" << traceData.m_amp
             << " m_ofs" << traceData.m_ofs
@@ -593,14 +593,14 @@ void GLScopeNGGUI::on_trace_valueChanged(int value)
     m_scopeVis->focusOnTrace(value);
 }
 
-void GLScopeNGGUI::on_traceAdd_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceAdd_clicked(bool checked __attribute__((unused)))
 {
     ScopeVisNG::TraceData traceData;
     fillTraceData(traceData);
     addTrace(traceData);
 }
 
-void GLScopeNGGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->value() > 0) // not the X trace
     {
@@ -621,7 +621,7 @@ void GLScopeNGGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->maximum() > 0) // more than one trace
     {
@@ -635,7 +635,7 @@ void GLScopeNGGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_traceDown_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceDown_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trace->value() > 0) // not the X (lowest) trace
     {
@@ -649,14 +649,14 @@ void GLScopeNGGUI::on_traceDown_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_trig_valueChanged(int value)
+void GLScopeGUI::on_trig_valueChanged(int value)
 {
     ui->trigText->setText(tr("%1").arg(value));
 
     ScopeVisNG::TriggerData triggerData;
     m_scopeVis->getTriggerData(triggerData, value);
 
-    qDebug() << "GLScopeNGGUI::on_trig_valueChanged:"
+    qDebug() << "GLScopeGUI::on_trig_valueChanged:"
             << " m_projectionType: " << (int) triggerData.m_projectionType
             << " m_triggerRepeat" << triggerData.m_triggerRepeat
             << " m_triggerPositiveEdge" << triggerData.m_triggerPositiveEdge
@@ -668,14 +668,14 @@ void GLScopeNGGUI::on_trig_valueChanged(int value)
     m_scopeVis->focusOnTrigger(value);
 }
 
-void GLScopeNGGUI::on_trigAdd_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigAdd_clicked(bool checked __attribute__((unused)))
 {
     ScopeVisNG::TriggerData triggerData;
     fillTriggerData(triggerData);
     addTrigger(triggerData);
 }
 
-void GLScopeNGGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->value() > 0)
     {
@@ -684,7 +684,7 @@ void GLScopeNGGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->maximum() > 0) // more than one trigger
     {
@@ -698,7 +698,7 @@ void GLScopeNGGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
 {
     if (ui->trig->value() > 0) // not the 0 (lowest) trigger
     {
@@ -712,49 +712,49 @@ void GLScopeNGGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeNGGUI::on_traceMode_currentIndexChanged(int index __attribute__((unused)))
+void GLScopeGUI::on_traceMode_currentIndexChanged(int index __attribute__((unused)))
 {
     setAmpScaleDisplay();
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_amp_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_amp_valueChanged(int value __attribute__((unused)))
 {
     setAmpScaleDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_ofsCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_ofsCoarse_valueChanged(int value __attribute__((unused)))
 {
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_ofsFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_ofsFine_valueChanged(int value __attribute__((unused)))
 {
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_traceDelayCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_traceDelayCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_traceDelayFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_traceDelayFine_valueChanged(int value __attribute__((unused)))
 {
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_traceView_toggled(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceView_toggled(bool checked __attribute__((unused)))
 {
     changeCurrentTrace();
 }
 
-void GLScopeNGGUI::on_traceColor_clicked()
+void GLScopeGUI::on_traceColor_clicked()
 {
     QColor newColor = QColorDialog::getColor(m_focusedTraceColor, this, tr("Select Color for trace"), QColorDialog::DontUseNativeDialog);
 
@@ -768,7 +768,7 @@ void GLScopeNGGUI::on_traceColor_clicked()
     }
 }
 
-void GLScopeNGGUI::on_mem_valueChanged(int value)
+void GLScopeGUI::on_mem_valueChanged(int value)
 {
     QString text;
     text.sprintf("%02d", value);
@@ -777,19 +777,19 @@ void GLScopeNGGUI::on_mem_valueChanged(int value)
    	m_scopeVis->setMemoryIndex(value);
 }
 
-void GLScopeNGGUI::on_trigMode_currentIndexChanged(int index __attribute__((unused)))
+void GLScopeGUI::on_trigMode_currentIndexChanged(int index __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigCount_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigCount_valueChanged(int value __attribute__((unused)))
 {
     setTrigCountDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigPos_toggled(bool checked)
+void GLScopeGUI::on_trigPos_toggled(bool checked)
 {
     if (checked)
     {
@@ -799,7 +799,7 @@ void GLScopeNGGUI::on_trigPos_toggled(bool checked)
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigNeg_toggled(bool checked)
+void GLScopeGUI::on_trigNeg_toggled(bool checked)
 {
     if (checked)
     {
@@ -809,7 +809,7 @@ void GLScopeNGGUI::on_trigNeg_toggled(bool checked)
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigBoth_toggled(bool checked)
+void GLScopeGUI::on_trigBoth_toggled(bool checked)
 {
     if (checked)
     {
@@ -819,31 +819,31 @@ void GLScopeNGGUI::on_trigBoth_toggled(bool checked)
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigLevelCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigLevelFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigLevelFine_valueChanged(int value __attribute__((unused)))
 {
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigDelayCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigDelayCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigDelayFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigDelayFine_valueChanged(int value __attribute__((unused)))
 {
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeNGGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
 {
     setTrigPreDisplay();
     m_scopeVis->configure(m_traceLenMult*ScopeVisNG::m_traceChunkSize,
@@ -853,7 +853,7 @@ void GLScopeNGGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
             ui->freerun->isChecked());
 }
 
-void GLScopeNGGUI::on_trigColor_clicked()
+void GLScopeGUI::on_trigColor_clicked()
 {
     QColor newColor = QColorDialog::getColor(m_focusedTriggerColor, this, tr("Select Color for trigger line"), QColorDialog::DontUseNativeDialog);
 
@@ -867,12 +867,12 @@ void GLScopeNGGUI::on_trigColor_clicked()
     }
 }
 
-void GLScopeNGGUI::on_trigOneShot_toggled(bool checked)
+void GLScopeGUI::on_trigOneShot_toggled(bool checked)
 {
     m_scopeVis->setOneShot(checked);
 }
 
-void GLScopeNGGUI::on_freerun_toggled(bool checked)
+void GLScopeGUI::on_freerun_toggled(bool checked)
 {
     if (checked)
     {
@@ -891,19 +891,19 @@ void GLScopeNGGUI::on_freerun_toggled(bool checked)
             ui->freerun->isChecked());
 }
 
-void GLScopeNGGUI::setTraceIndexDisplay()
+void GLScopeGUI::setTraceIndexDisplay()
 {
     ui->traceText->setText(ui->trace->value() == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 }
 
-void GLScopeNGGUI::setTrigCountDisplay()
+void GLScopeGUI::setTrigCountDisplay()
 {
     QString text;
     text.sprintf("%02d", ui->trigCount->value());
     ui->trigCountText->setText(text);
 }
 
-void GLScopeNGGUI::setTimeScaleDisplay()
+void GLScopeGUI::setTimeScaleDisplay()
 {
     m_sampleRate = m_glScope->getSampleRate();
     unsigned int n_samples = (m_glScope->getTraceSize() * 1.0) / (double) m_timeBase;
@@ -939,7 +939,7 @@ void GLScopeNGGUI::setTimeScaleDisplay()
     }
 }
 
-void GLScopeNGGUI::setTraceLenDisplay()
+void GLScopeGUI::setTraceLenDisplay()
 {
     unsigned int n_samples = m_traceLenMult * ScopeVisNG::m_traceChunkSize;
 
@@ -964,7 +964,7 @@ void GLScopeNGGUI::setTraceLenDisplay()
         ui->traceLenText->setText(tr("%1\ns").arg(t * 1.0, 0, 'f', 2));
 }
 
-void GLScopeNGGUI::setTimeOfsDisplay()
+void GLScopeGUI::setTimeOfsDisplay()
 {
     unsigned int n_samples = m_glScope->getTraceSize() * (m_timeOffset/100.0);
     double dt = m_glScope->getTraceSize() * (m_timeOffset/100.0) / m_sampleRate;
@@ -987,7 +987,7 @@ void GLScopeNGGUI::setTimeOfsDisplay()
         ui->timeOfsText->setText(tr("%1\ns").arg(dt * 1.0, 0, 'f', 2));
 }
 
-void GLScopeNGGUI::setAmpScaleDisplay()
+void GLScopeGUI::setAmpScaleDisplay()
 {
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
     double ampValue = amps[ui->amp->value()];
@@ -1018,7 +1018,7 @@ void GLScopeNGGUI::setAmpScaleDisplay()
     }
 }
 
-void GLScopeNGGUI::setAmpOfsDisplay()
+void GLScopeGUI::setAmpOfsDisplay()
 {
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
     double o = (ui->ofsCoarse->value() * 10.0f) + (ui->ofsFine->value() / 20.0f);
@@ -1053,7 +1053,7 @@ void GLScopeNGGUI::setAmpOfsDisplay()
     }
 }
 
-void GLScopeNGGUI::setTraceDelayDisplay()
+void GLScopeGUI::setTraceDelayDisplay()
 {
     if (m_sampleRate > 0)
     {
@@ -1079,12 +1079,12 @@ void GLScopeNGGUI::setTraceDelayDisplay()
     }
 }
 
-void GLScopeNGGUI::setTrigIndexDisplay()
+void GLScopeGUI::setTrigIndexDisplay()
 {
     ui->trigText->setText(tr("%1").arg(ui->trig->value()));
 }
 
-void GLScopeNGGUI::setTrigLevelDisplay()
+void GLScopeGUI::setTrigLevelDisplay()
 {
     double t = (ui->trigLevelCoarse->value() / 100.0f) + (ui->trigLevelFine->value() / 50000.0f);
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
@@ -1116,7 +1116,7 @@ void GLScopeNGGUI::setTrigLevelDisplay()
     }
 }
 
-void GLScopeNGGUI::setTrigDelayDisplay()
+void GLScopeGUI::setTrigDelayDisplay()
 {
     if (m_sampleRate > 0)
     {
@@ -1147,7 +1147,7 @@ void GLScopeNGGUI::setTrigDelayDisplay()
     }
 }
 
-void GLScopeNGGUI::setTrigPreDisplay()
+void GLScopeGUI::setTrigPreDisplay()
 {
     if (m_sampleRate > 0)
     {
@@ -1175,7 +1175,7 @@ void GLScopeNGGUI::setTrigPreDisplay()
     }
 }
 
-void GLScopeNGGUI::changeCurrentTrace()
+void GLScopeGUI::changeCurrentTrace()
 {
     ScopeVisNG::TraceData traceData;
     fillTraceData(traceData);
@@ -1183,7 +1183,7 @@ void GLScopeNGGUI::changeCurrentTrace()
     m_scopeVis->changeTrace(traceData, currentTraceIndex);
 }
 
-void GLScopeNGGUI::changeCurrentTrigger()
+void GLScopeGUI::changeCurrentTrigger()
 {
     ScopeVisNG::TriggerData triggerData;
     fillTriggerData(triggerData);
@@ -1191,7 +1191,7 @@ void GLScopeNGGUI::changeCurrentTrigger()
     m_scopeVis->changeTrigger(triggerData, currentTriggerIndex);
 }
 
-void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)
+void GLScopeGUI::fillProjectionCombo(QComboBox* comboBox)
 {
     comboBox->addItem("Real", Projector::ProjectionReal);
     comboBox->addItem("Imag", Projector::ProjectionImag);
@@ -1206,7 +1206,7 @@ void GLScopeNGGUI::fillProjectionCombo(QComboBox* comboBox)
     comboBox->addItem("16PSK", Projector::Projection16PSK);
 }
 
-void GLScopeNGGUI::disableLiveMode(bool disable)
+void GLScopeGUI::disableLiveMode(bool disable)
 {
     ui->traceLen->setEnabled(!disable);
     ui->trig->setEnabled(!disable);
@@ -1226,7 +1226,7 @@ void GLScopeNGGUI::disableLiveMode(bool disable)
     ui->freerun->setEnabled(!disable);
 }
 
-void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
+void GLScopeGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
 {
     traceData.m_projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB) || (traceData.m_projectionType == Projector::ProjectionMagSq);
@@ -1251,7 +1251,7 @@ void GLScopeNGGUI::fillTraceData(ScopeVisNG::TraceData& traceData)
     traceData.m_viewTrace = ui->traceView->isChecked();
 }
 
-void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
+void GLScopeGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
 {
     triggerData.m_projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
     triggerData.m_inputIndex = 0;
@@ -1268,7 +1268,7 @@ void GLScopeNGGUI::fillTriggerData(ScopeVisNG::TriggerData& triggerData)
     triggerData.setColor(m_focusedTriggerColor);
 }
 
-void GLScopeNGGUI::setTraceUI(const ScopeVisNG::TraceData& traceData)
+void GLScopeGUI::setTraceUI(const ScopeVisNG::TraceData& traceData)
 {
     TraceUIBlocker traceUIBlocker(ui);
 
@@ -1292,7 +1292,7 @@ void GLScopeNGGUI::setTraceUI(const ScopeVisNG::TraceData& traceData)
     ui->traceView->setChecked(traceData.m_viewTrace);
 }
 
-void GLScopeNGGUI::setTriggerUI(const ScopeVisNG::TriggerData& triggerData)
+void GLScopeGUI::setTriggerUI(const ScopeVisNG::TriggerData& triggerData)
 {
     TrigUIBlocker trigUIBlocker(ui);
 
@@ -1341,16 +1341,16 @@ void GLScopeNGGUI::setTriggerUI(const ScopeVisNG::TriggerData& triggerData)
     ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
 }
 
-void GLScopeNGGUI::applySettings()
+void GLScopeGUI::applySettings()
 {
 }
 
-bool GLScopeNGGUI::handleMessage(Message* message __attribute__((unused)))
+bool GLScopeGUI::handleMessage(Message* message __attribute__((unused)))
 {
     return false;
 }
 
-GLScopeNGGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
+GLScopeGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
         m_ui(ui)
 {
     m_oldStateTrigMode        = ui->trigMode->blockSignals(true);
@@ -1364,12 +1364,12 @@ GLScopeNGGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
     m_oldStateTrigDelayFine   = ui->trigDelayFine->blockSignals(true);
 }
 
-GLScopeNGGUI::TrigUIBlocker::~TrigUIBlocker()
+GLScopeGUI::TrigUIBlocker::~TrigUIBlocker()
 {
     unBlock();
 }
 
-void GLScopeNGGUI::TrigUIBlocker::unBlock()
+void GLScopeGUI::TrigUIBlocker::unBlock()
 {
     m_ui->trigMode->blockSignals(m_oldStateTrigMode);
     m_ui->trigCount->blockSignals(m_oldStateTrigCount);
@@ -1382,7 +1382,7 @@ void GLScopeNGGUI::TrigUIBlocker::unBlock()
     m_ui->trigDelayFine->blockSignals(m_oldStateTrigDelayFine);
 }
 
-GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeGUI* ui) :
+GLScopeGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeGUI* ui) :
         m_ui(ui)
 {
     m_oldStateTrace            = m_ui->trace->blockSignals(true);
@@ -1397,12 +1397,12 @@ GLScopeNGGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeGUI* ui) :
     m_oldStateTraceColor       = m_ui->traceColor->blockSignals(true);
 }
 
-GLScopeNGGUI::TraceUIBlocker::~TraceUIBlocker()
+GLScopeGUI::TraceUIBlocker::~TraceUIBlocker()
 {
     unBlock();
 }
 
-void GLScopeNGGUI::TraceUIBlocker::unBlock()
+void GLScopeGUI::TraceUIBlocker::unBlock()
 {
     m_ui->trace->blockSignals(m_oldStateTrace);
     m_ui->traceAdd->blockSignals(m_oldStateTraceAdd);
@@ -1416,7 +1416,7 @@ void GLScopeNGGUI::TraceUIBlocker::unBlock()
     m_ui->traceColor->blockSignals(m_oldStateTraceColor);
 }
 
-GLScopeNGGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeGUI* ui) :
+GLScopeGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeGUI* ui) :
         m_ui(ui)
 {
     m_oldStateOnlyX        = m_ui->onlyX->blockSignals(true);
@@ -1429,12 +1429,12 @@ GLScopeNGGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeGUI* ui) :
 //    m_oldStateTraceLen     = m_ui->traceLen->blockSignals(true);
 }
 
-GLScopeNGGUI::MainUIBlocker::~MainUIBlocker()
+GLScopeGUI::MainUIBlocker::~MainUIBlocker()
 {
     unBlock();
 }
 
-void GLScopeNGGUI::MainUIBlocker::unBlock()
+void GLScopeGUI::MainUIBlocker::unBlock()
 {
     m_ui->onlyX->blockSignals(m_oldStateOnlyX);
     m_ui->onlyY->blockSignals(m_oldStateOnlyY);
@@ -1446,7 +1446,7 @@ void GLScopeNGGUI::MainUIBlocker::unBlock()
 //    m_ui->traceLen->blockSignals(m_oldStateTraceLen);
 }
 
-void GLScopeNGGUI::setDisplayMode(DisplayMode displayMode)
+void GLScopeGUI::setDisplayMode(DisplayMode displayMode)
 {
     if (ui->trace->maximum() == 0)
     {
@@ -1478,7 +1478,7 @@ void GLScopeNGGUI::setDisplayMode(DisplayMode displayMode)
     }
 }
 
-void GLScopeNGGUI::setTraceIntensity(int value)
+void GLScopeGUI::setTraceIntensity(int value)
 {
     if ((value < ui->traceIntensity->minimum()) || (value > ui->traceIntensity->maximum())) {
         return;
@@ -1487,7 +1487,7 @@ void GLScopeNGGUI::setTraceIntensity(int value)
     ui->traceIntensity->setValue(value);
 }
 
-void GLScopeNGGUI::setGridIntensity(int value)
+void GLScopeGUI::setGridIntensity(int value)
 {
     if ((value < ui->gridIntensity->minimum()) || (value > ui->gridIntensity->maximum())) {
         return;
@@ -1496,7 +1496,7 @@ void GLScopeNGGUI::setGridIntensity(int value)
     ui->gridIntensity->setValue(value);
 }
 
-void GLScopeNGGUI::setTimeBase(int step)
+void GLScopeGUI::setTimeBase(int step)
 {
     if ((step < ui->time->minimum()) || (step > ui->time->maximum())) {
         return;
@@ -1505,7 +1505,7 @@ void GLScopeNGGUI::setTimeBase(int step)
     ui->time->setValue(step);
 }
 
-void GLScopeNGGUI::setTimeOffset(int step)
+void GLScopeGUI::setTimeOffset(int step)
 {
     if ((step < ui->timeOfs->minimum()) || (step > ui->timeOfs->maximum())) {
         return;
@@ -1514,7 +1514,7 @@ void GLScopeNGGUI::setTimeOffset(int step)
     ui->timeOfs->setValue(step);
 }
 
-void GLScopeNGGUI::setTraceLength(int step)
+void GLScopeGUI::setTraceLength(int step)
 {
     if ((step < ui->traceLen->minimum()) || (step > ui->traceLen->maximum())) {
         return;
@@ -1523,7 +1523,7 @@ void GLScopeNGGUI::setTraceLength(int step)
     ui->traceLen->setValue(step);
 }
 
-void GLScopeNGGUI::setPreTrigger(int step)
+void GLScopeGUI::setPreTrigger(int step)
 {
     if ((step < ui->trigPre->minimum()) || (step > ui->trigPre->maximum())) {
         return;
@@ -1532,12 +1532,12 @@ void GLScopeNGGUI::setPreTrigger(int step)
     ui->trigPre->setValue(step);
 }
 
-void GLScopeNGGUI::changeTrace(int traceIndex, const ScopeVisNG::TraceData& traceData)
+void GLScopeGUI::changeTrace(int traceIndex, const ScopeVisNG::TraceData& traceData)
 {
     m_scopeVis->changeTrace(traceData, traceIndex);
 }
 
-void GLScopeNGGUI::addTrace(const ScopeVisNG::TraceData& traceData)
+void GLScopeGUI::addTrace(const ScopeVisNG::TraceData& traceData)
 {
     if (ui->trace->maximum() < 3)
     {
@@ -1554,17 +1554,17 @@ void GLScopeNGGUI::addTrace(const ScopeVisNG::TraceData& traceData)
     }
 }
 
-void GLScopeNGGUI::focusOnTrace(int traceIndex)
+void GLScopeGUI::focusOnTrace(int traceIndex)
 {
     on_trace_valueChanged(traceIndex);
 }
 
-void GLScopeNGGUI::changeTrigger(int triggerIndex, const ScopeVisNG::TriggerData& triggerData)
+void GLScopeGUI::changeTrigger(int triggerIndex, const ScopeVisNG::TriggerData& triggerData)
 {
     m_scopeVis->changeTrigger(triggerData, triggerIndex);
 }
 
-void GLScopeNGGUI::addTrigger(const ScopeVisNG::TriggerData& triggerData)
+void GLScopeGUI::addTrigger(const ScopeVisNG::TriggerData& triggerData)
 {
     if (ui->trig->maximum() < 9)
     {
@@ -1573,7 +1573,7 @@ void GLScopeNGGUI::addTrigger(const ScopeVisNG::TriggerData& triggerData)
     }
 }
 
-void GLScopeNGGUI::focusOnTrigger(int triggerIndex)
+void GLScopeGUI::focusOnTrigger(int triggerIndex)
 {
     on_trig_valueChanged(triggerIndex);
 }
