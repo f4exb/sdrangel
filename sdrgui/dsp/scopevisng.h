@@ -37,7 +37,7 @@
 #undef M_PI
 #define M_PI		3.14159265358979323846
 
-class GLScopeNG;
+class GLScope;
 
 class SDRGUI_API ScopeVisNG : public BasebandSampleSink {
 
@@ -147,7 +147,7 @@ public:
     static const uint32_t m_maxNbTraces = 10;
     static const uint32_t m_nbTraceMemories = 50;
 
-    ScopeVisNG(GLScopeNG* glScope = 0);
+    ScopeVisNG(GLScope* glScope = 0);
     virtual ~ScopeVisNG();
 
     void setSampleRate(int sampleRate);
@@ -941,7 +941,7 @@ private:
         bool m_reset;
     };
 
-    GLScopeNG* m_glScope;
+    GLScope* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers
     uint32_t m_currentTriggerIndex;                //!< Index of current index in the chain

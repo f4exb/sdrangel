@@ -62,7 +62,7 @@ GLScopeGUI::~GLScopeGUI()
     delete ui;
 }
 
-void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope)
+void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScope* glScope)
 {
     qDebug("GLScopeGUI::setBuddies");
 
@@ -80,7 +80,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GL
     ui->horizontalXY->setEnabled(false);
     ui->verticalXY->setEnabled(false);
     ui->polar->setEnabled(false);
-    m_glScope->setDisplayMode(GLScopeNG::DisplayX);
+    m_glScope->setDisplayMode(GLScope::DisplayX);
 
     // initialize trigger combo
     ui->trigPos->setChecked(true);
@@ -231,8 +231,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
         ui->polar->setEnabled(false);
 
         ui->traceMode->setCurrentIndex(0);
-        d.readS32(1, &intValue, (int) GLScopeNG::DisplayX);
-        m_glScope->setDisplayMode((GLScopeNG::DisplayMode) intValue);
+        d.readS32(1, &intValue, (int) GLScope::DisplayX);
+        m_glScope->setDisplayMode((GLScope::DisplayMode) intValue);
 
         ui->onlyX->setChecked(false);
         ui->onlyY->setChecked(false);
@@ -242,19 +242,19 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         switch (m_glScope->getDisplayMode())
         {
-        case GLScopeNG::DisplayY:
+        case GLScope::DisplayY:
             ui->onlyY->setChecked(true);
             break;
-        case GLScopeNG::DisplayXYH:
+        case GLScope::DisplayXYH:
             ui->horizontalXY->setChecked(true);
             break;
-        case GLScopeNG::DisplayXYV:
+        case GLScope::DisplayXYV:
             ui->verticalXY->setChecked(true);
             break;
-        case GLScopeNG::DisplayPol:
+        case GLScope::DisplayPol:
             ui->polar->setChecked(true);
             break;
-        case GLScopeNG::DisplayX:
+        case GLScope::DisplayX:
         default:
             ui->onlyX->setChecked(true);
             break;
@@ -430,7 +430,7 @@ void GLScopeGUI::on_onlyX_toggled(bool checked)
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScopeNG::DisplayX);
+        m_glScope->setDisplayMode(GLScope::DisplayX);
     }
     else
     {
@@ -448,7 +448,7 @@ void GLScopeGUI::on_onlyY_toggled(bool checked)
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScopeNG::DisplayY);
+        m_glScope->setDisplayMode(GLScope::DisplayY);
     }
     else
     {
@@ -466,7 +466,7 @@ void GLScopeGUI::on_horizontalXY_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScopeNG::DisplayXYH);
+        m_glScope->setDisplayMode(GLScope::DisplayXYH);
     }
     else
     {
@@ -484,7 +484,7 @@ void GLScopeGUI::on_verticalXY_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScopeNG::DisplayXYV);
+        m_glScope->setDisplayMode(GLScope::DisplayXYV);
     }
     else
     {
@@ -502,7 +502,7 @@ void GLScopeGUI::on_polar_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
-        m_glScope->setDisplayMode(GLScopeNG::DisplayPol);
+        m_glScope->setDisplayMode(GLScope::DisplayPol);
     }
     else
     {
@@ -613,7 +613,7 @@ void GLScopeGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
             ui->horizontalXY->setEnabled(false);
             ui->verticalXY->setEnabled(false);
             ui->polar->setEnabled(false);
-            m_glScope->setDisplayMode(GLScopeNG::DisplayX);
+            m_glScope->setDisplayMode(GLScope::DisplayX);
         }
 
         m_scopeVis->removeTrace(ui->trace->value());

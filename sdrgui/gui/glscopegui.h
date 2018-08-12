@@ -32,7 +32,7 @@ namespace Ui {
 }
 
 class MessageQueue;
-class GLScopeNG;
+class GLScope;
 
 class SDRGUI_API GLScopeGUI : public QWidget, public Serializable {
     Q_OBJECT
@@ -49,7 +49,7 @@ public:
     explicit GLScopeGUI(QWidget* parent = 0);
     ~GLScopeGUI();
 
-    void setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScopeNG* glScope);
+    void setBuddies(MessageQueue* messageQueue, ScopeVisNG* scopeVis, GLScope* glScope);
 
     void setSampleRate(int sampleRate);
     void resetToDefaults();
@@ -144,7 +144,7 @@ private:
 
     MessageQueue* m_messageQueue;
     ScopeVisNG* m_scopeVis;
-    GLScopeNG* m_glScope;
+    GLScope* m_glScope;
 
     int m_sampleRate;
     int m_timeBase;

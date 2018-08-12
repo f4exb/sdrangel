@@ -684,7 +684,7 @@
      <number>3</number>
     </property>
     <item>
-     <widget class="GLScopeNG" name="glScope" native="true">
+     <widget class="GLScope" name="glScope" native="true">
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -742,7 +742,7 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>GLScopeNG</class>
+   <class>GLScope</class>
    <extends>QWidget</extends>
    <header>gui/glscopeng.h</header>
    <container>1</container>

@@ -26,7 +26,7 @@
 
 #include "glscopeng.h"
 
-GLScopeNG::GLScopeNG(QWidget* parent) :
+GLScope::GLScope(QWidget* parent) :
     QGLWidget(parent),
     m_tracesData(0),
     m_traces(0),
@@ -65,12 +65,12 @@ GLScopeNG::GLScopeNG(QWidget* parent) :
     //m_traceCounter = 0;
 }
 
-GLScopeNG::~GLScopeNG()
+GLScope::~GLScope()
 {
     cleanup();
 }
 
-void GLScopeNG::setDisplayGridIntensity(int intensity)
+void GLScope::setDisplayGridIntensity(int intensity)
 {
     m_displayGridIntensity = intensity;
     if (m_displayGridIntensity > 100) {
@@ -81,7 +81,7 @@ void GLScopeNG::setDisplayGridIntensity(int intensity)
     update();
 }
 
-void GLScopeNG::setDisplayTraceIntensity(int intensity)
+void GLScope::setDisplayTraceIntensity(int intensity)
 {
     m_displayTraceIntensity = intensity;
     if (m_displayTraceIntensity > 100) {
@@ -92,13 +92,13 @@ void GLScopeNG::setDisplayTraceIntensity(int intensity)
     update();
 }
 
-void GLScopeNG::setTraces(std::vector<ScopeVisNG::TraceData>* tracesData, std::vector<float *>* traces)
+void GLScope::setTraces(std::vector<ScopeVisNG::TraceData>* tracesData, std::vector<float *>* traces)
 {
     m_tracesData = tracesData;
     m_traces = traces;
 }
 
-void GLScopeNG::newTraces(std::vector<float *>* traces)
+void GLScope::newTraces(std::vector<float *>* traces)
 {
     if (traces->size() > 0)
     {
@@ -112,22 +112,22 @@ void GLScopeNG::newTraces(std::vector<float *>* traces)
     }
 }
 
-void GLScopeNG::initializeGL()
+void GLScope::initializeGL()
 {
     QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
 
     if (glCurrentContext) {
         if (QOpenGLContext::currentContext()->isValid()) {
-            qDebug() << "GLScopeNG::initializeGL: context:"
+            qDebug() << "GLScope::initializeGL: context:"
                 << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
                 << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
                 << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
         }
         else {
-            qDebug() << "GLScopeNG::initializeGL: current context is invalid";
+            qDebug() << "GLScope::initializeGL: current context is invalid";
         }
     } else {
-        qCritical() << "GLScopeNG::initializeGL: no current context";
+        qCritical() << "GLScope::initializeGL: no current context";
         return;
     }
 
@@ -135,25 +135,25 @@ void GLScopeNG::initializeGL()
 
     if (surface == 0)
     {
-        qCritical() << "GLScopeNG::initializeGL: no surface attached";
+        qCritical() << "GLScope::initializeGL: no surface attached";
         return;
     }
     else
     {
         if (surface->surfaceType() != QSurface::OpenGLSurface)
         {
-            qCritical() << "GLScopeNG::initializeGL: surface is not an OpenGLSurface: " << surface->surfaceType()
+            qCritical() << "GLScope::initializeGL: surface is not an OpenGLSurface: " << surface->surfaceType()
                 << " cannot use an OpenGL context";
             return;
         }
         else
         {
-            qDebug() << "GLScopeNG::initializeGL: OpenGL surface:"
+            qDebug() << "GLScope::initializeGL: OpenGL surface:"
                 << " class: " << (surface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
         }
     }
 
-    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScopeNG::cleanup); // TODO: when migrating to QOpenGLWidget
+    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup); // TODO: when migrating to QOpenGLWidget
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->initializeOpenGLFunctions();
@@ -167,14 +167,14 @@ void GLScopeNG::initializeGL()
     m_glShaderPowerOverlay.initializeGL();
 }
 
-void GLScopeNG::resizeGL(int width, int height)
+void GLScope::resizeGL(int width, int height)
 {
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->glViewport(0, 0, width, height);
     m_configChanged = true;
 }
 
-void GLScopeNG::paintGL()
+void GLScope::paintGL()
 {
     if(!m_mutex.tryLock(2))
         return;
@@ -182,7 +182,7 @@ void GLScopeNG::paintGL()
     if(m_configChanged)
         applyConfig();
 
-//    qDebug("GLScopeNG::paintGL: m_traceCounter: %d", m_traceCounter);
+//    qDebug("GLScope::paintGL: m_traceCounter: %d", m_traceCounter);
 //    m_traceCounter = 0;
 
     m_dataChanged = false;
@@ -923,7 +923,7 @@ void GLScopeNG::paintGL()
     m_mutex.unlock();
 }
 
-void GLScopeNG::setSampleRate(int sampleRate)
+void GLScope::setSampleRate(int sampleRate)
 {
     m_sampleRate = sampleRate;
     m_configChanged = true;
@@ -931,55 +931,55 @@ void GLScopeNG::setSampleRate(int sampleRate)
     emit sampleRateChanged(m_sampleRate);
 }
 
-void GLScopeNG::setTimeBase(int timeBase)
+void GLScope::setTimeBase(int timeBase)
 {
     m_timeBase = timeBase;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::setTriggerPre(uint32_t triggerPre)
+void GLScope::setTriggerPre(uint32_t triggerPre)
 {
     m_triggerPre = triggerPre;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::setTimeOfsProMill(int timeOfsProMill)
+void GLScope::setTimeOfsProMill(int timeOfsProMill)
 {
     m_timeOfsProMill = timeOfsProMill;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::setFocusedTraceIndex(uint32_t traceIndex)
+void GLScope::setFocusedTraceIndex(uint32_t traceIndex)
 {
     m_focusedTraceIndex = traceIndex;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::setDisplayMode(DisplayMode displayMode)
+void GLScope::setDisplayMode(DisplayMode displayMode)
 {
     m_displayMode = displayMode;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::setTraceSize(int traceSize)
+void GLScope::setTraceSize(int traceSize)
 {
     m_traceSize = traceSize;
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::updateDisplay()
+void GLScope::updateDisplay()
 {
     m_configChanged = true;
     update();
 }
 
-void GLScopeNG::applyConfig()
+void GLScope::applyConfig()
 {
     m_configChanged = false;
 
@@ -1048,7 +1048,7 @@ void GLScopeNG::applyConfig()
     m_q3Polar.allocate(2*(end - start));
 }
 
-void GLScopeNG::setUniqueDisplays()
+void GLScope::setUniqueDisplays()
 {
     QFontMetrics fm(font());
     int M = fm.width("-");
@@ -1250,7 +1250,7 @@ void GLScopeNG::setUniqueDisplays()
     } // Y vertical scale
 }
 
-void GLScopeNG::setVerticalDisplays()
+void GLScope::setVerticalDisplays()
 {
     QFontMetrics fm(font());
     int M = fm.width("-");
@@ -1451,7 +1451,7 @@ void GLScopeNG::setVerticalDisplays()
     } // Y vertical scale (Y2)
 }
 
-void GLScopeNG::setHorizontalDisplays()
+void GLScope::setHorizontalDisplays()
 {
     QFontMetrics fm(font());
     int M = fm.width("-");
@@ -1651,7 +1651,7 @@ void GLScopeNG::setHorizontalDisplays()
     } // Y vertical scale (Y2)
 }
 
-void GLScopeNG::setPolarDisplays()
+void GLScope::setPolarDisplays()
 {
     QFontMetrics fm(font());
     int M = fm.width("-");
@@ -1863,7 +1863,7 @@ void GLScopeNG::setPolarDisplays()
     } // Polar XY vertical scale (Y2)
 }
 
-void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
+void GLScope::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
 {
     ScopeVisNG::TraceData& traceData = (*m_tracesData)[highlightedTraceIndex];
     double amp_range = 2.0 / traceData.m_amp;
@@ -1908,7 +1908,7 @@ void GLScopeNG::setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex)
     }
 }
 
-void GLScopeNG::drawChannelOverlay(
+void GLScope::drawChannelOverlay(
         const QString& text,
         const QColor& color,
         QPixmap& channelOverlayPixmap,
@@ -1964,22 +1964,22 @@ void GLScopeNG::drawChannelOverlay(
     }
 }
 
-void GLScopeNG::tick()
+void GLScope::tick()
 {
     if(m_dataChanged) {
         update();
     }
 }
 
-void GLScopeNG::connectTimer(const QTimer& timer)
+void GLScope::connectTimer(const QTimer& timer)
 {
-    qDebug() << "GLScopeNG::connectTimer";
+    qDebug() << "GLScope::connectTimer";
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.stop();
 }
 
-void GLScopeNG::cleanup()
+void GLScope::cleanup()
 {
     //makeCurrent();
     m_glShaderSimple.cleanup();

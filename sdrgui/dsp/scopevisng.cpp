@@ -39,7 +39,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVisNG::MsgScopeVisNGMemoryTrace, Message)
 const uint ScopeVisNG::m_traceChunkSize = 4800;
 
 
-ScopeVisNG::ScopeVisNG(GLScopeNG* glScope) :
+ScopeVisNG::ScopeVisNG(GLScope* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
     m_currentTriggerIndex(0),

@@ -35,7 +35,7 @@
 
 class QPainter;
 
-class SDRGUI_API GLScopeNG: public QGLWidget {
+class SDRGUI_API GLScope: public QGLWidget {
     Q_OBJECT
 
 public:
@@ -47,8 +47,8 @@ public:
         DisplayPol
     };
 
-    GLScopeNG(QWidget* parent = 0);
-    virtual ~GLScopeNG();
+    GLScope(QWidget* parent = 0);
+    virtual ~GLScope();
 
     void connectTimer(const QTimer& timer);
 
