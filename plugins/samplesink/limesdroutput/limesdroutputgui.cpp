@@ -526,10 +526,7 @@ void LimeSDROutputGUI::on_lpFIREnable_toggled(bool checked)
 void LimeSDROutputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
-
-    if (m_settings.m_lpfFIREnable) { // do not send the update if the FIR is disabled
-        sendSettings();
-    }
+    sendSettings();
 }
 
 void LimeSDROutputGUI::on_gain_valueChanged(int value)
