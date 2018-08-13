@@ -127,7 +127,7 @@ private:
     bool m_dot;
     bool m_dash;
     bool m_elementOn;
-    char m_asciiChar;
+    signed char m_asciiChar;
     CWKeyIambicState m_keyIambicState;
     CWTextState m_textState;
     CWSmoother m_cwSmoother;
