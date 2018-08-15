@@ -487,6 +487,7 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             << " m_sampleFormat: " << settings.m_sampleFormat
             << " m_inputSampleRate: " << settings.m_inputSampleRate
             << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_lowCutoff: " << settings.m_lowCutoff
             << " m_fmDeviation: " << settings.m_fmDeviation
             << " m_udpAddressStr: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
@@ -501,6 +502,7 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             << " force: " << force;
 
     if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
+       (settings.m_lowCutoff != m_settings.m_lowCutoff) ||
        (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
     {
         m_settingsMutex.lock();
