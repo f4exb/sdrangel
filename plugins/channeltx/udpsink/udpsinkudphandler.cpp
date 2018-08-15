@@ -66,7 +66,7 @@ void UDPSinkUDPHandler::start()
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
         {
             qDebug("UDPSinkUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
-            connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
+            connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); // , Qt::QueuedConnection gets stuck since Qt 5.8.0
             m_dataConnected = true;
         }
         else
