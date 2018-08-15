@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>382</width>
+    <width>395</width>
     <height>403</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>382</width>
+    <width>395</width>
     <height>0</height>
    </size>
   </property>
@@ -31,24 +31,24 @@
   <property name="windowTitle">
    <string>UDP Sample Sink</string>
   </property>
+  <property name="toolTipDuration">
+   <number>-1</number>
+  </property>
   <property name="statusTip">
    <string>UDP Sample Sink</string>
-  </property>
-  <property name="toolTipDuration" stdset="0">
-   <number>-1</number>
   </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>380</width>
+     <width>390</width>
      <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>380</width>
+     <width>390</width>
      <height>0</height>
     </size>
    </property>
@@ -56,7 +56,16 @@
     <string>Settings</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <property name="spacing">
@@ -83,7 +92,7 @@
          <string>Input sample rate (S/s)</string>
         </property>
         <property name="inputMask">
-         <string>0009999; </string>
+         <string>0009999</string>
         </property>
         <property name="text">
          <string>48000</string>
@@ -98,7 +107,7 @@
        <widget class="QLabel" name="label_3">
         <property name="minimumSize">
          <size>
-          <width>36</width>
+          <width>40</width>
           <height>0</height>
          </size>
         </property>
@@ -113,7 +122,7 @@
          <string>Signal bandwidth (Hz)</string>
         </property>
         <property name="inputMask">
-         <string>0009999; </string>
+         <string>0009999</string>
         </property>
         <property name="text">
          <string>32000</string>
@@ -503,7 +512,7 @@
          <string>FM deviation in Hz</string>
         </property>
         <property name="inputMask">
-         <string>00000; </string>
+         <string>00000</string>
         </property>
         <property name="text">
          <string>2500</string>
@@ -519,17 +528,17 @@
       </item>
       <item>
        <widget class="QLineEdit" name="amModPercent">
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
-          <width>60</width>
-          <height>16777215</height>
+          <width>26</width>
+          <height>0</height>
          </size>
         </property>
         <property name="toolTip">
          <string>Percentage of AM modulation</string>
         </property>
         <property name="inputMask">
-         <string>000; </string>
+         <string>000</string>
         </property>
         <property name="text">
          <string>95</string>
@@ -806,7 +815,7 @@
          <string>Local UDP address</string>
         </property>
         <property name="inputMask">
-         <string>000.000.000.000; </string>
+         <string>000.000.000.000</string>
         </property>
         <property name="text">
          <string>127.0.0.1</string>
@@ -850,7 +859,7 @@
          <string>Local UDP port</string>
         </property>
         <property name="inputMask">
-         <string>00000; </string>
+         <string>00000</string>
         </property>
         <property name="text">
          <string>9998</string>
@@ -960,7 +969,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
