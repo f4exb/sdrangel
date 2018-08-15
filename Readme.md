@@ -4,8 +4,6 @@
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
-**&#9888; Warning**: Windows distribution is discontinued at version 4.0.0. This is the last version with a Windows build. 
-
 <h1>Source code</h1>
 
 <h2>Repository branches</h2>
