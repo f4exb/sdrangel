@@ -658,7 +658,7 @@ int UDPSrc::webapiSettingsPutPatch(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    UDPSrcSettings settings;
+    UDPSrcSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("outputSampleRate")) {
