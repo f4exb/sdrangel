@@ -99,8 +99,6 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual void setName(const QString& name) { setObjectName(name); }
-    virtual QString getName() const { return objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
 
     virtual QByteArray serialize() const;

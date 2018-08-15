@@ -38,8 +38,8 @@ public:
 
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
-    virtual void setName(const QString& name) = 0;
-    virtual QString getName() const = 0;
+    virtual void setName(const QString& name) { m_name = name; };
+    virtual QString getName() const { return m_name; };
     virtual qint64 getCenterFrequency() const = 0;
 
     virtual QByteArray serialize() const = 0;
