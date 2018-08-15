@@ -63,4 +63,4 @@ endif (BUILD_DEBIAN)
 
 qt5_use_modules(inputplutosdrsrv Core)
 
-install(TARGETS inputplutosdrsrv DESTINATION lib/plugins/samplesource)
+install(TARGETS inputplutosdrsrv DESTINATION lib/pluginssrv/samplesource)
