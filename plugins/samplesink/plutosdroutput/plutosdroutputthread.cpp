@@ -101,7 +101,7 @@ void PlutoSDROutputThread::run()
 
         if (nbytes_tx != 4*m_blockSizeSamples)
         {
-            qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d\n", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
+            qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
             usleep(200000);
             continue;
         }

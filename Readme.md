@@ -4,7 +4,7 @@
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
-&#9888; SDRangel is intended for the power user. We expect you to already have some experience with SDR applications and digital signal processing in general. SDRangel might be a bit overwhelming for you however you are encouraged to use the discussion group above to look for help.
+&#9888; SDRangel is intended for the power user. We expect you to already have some experience with SDR applications and digital signal processing in general. SDRangel might be a bit overwhelming for you however you are encouraged to use the discussion group above to look for help. You can also find more information in the [Wiki](https://github.com/f4exb/sdrangel/wiki).
 
 <h1>Source code</h1>
 
