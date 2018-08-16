@@ -3627,6 +3627,19 @@ margin-bottom: 20px;
       "format" : "float",
       "description" : "power transmitted in channel (dB)"
     },
+    "inputPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received from UDP stream (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "bufferGauge" : {
+      "type" : "integer",
+      "description" : "buffer R/W balance indicator"
+    },
     "channelSampleRate" : {
       "type" : "integer"
     }
@@ -3707,10 +3720,15 @@ margin-bottom: 20px;
 };
             defs.UDPSrcReport = {
   "properties" : {
-    "channelPowerDB" : {
+    "outputPowerDB" : {
       "type" : "number",
       "format" : "float",
       "description" : "power transmitted in channel (dB)"
+    },
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
     },
     "squelch" : {
       "type" : "integer",
@@ -4087,7 +4105,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.0.6</div>
+              <div class="app-desc">Version: 4.0.7</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -22955,7 +22973,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-08-02T23:13:51.054+02:00
+              Generated 2018-08-16T10:09:26.795+02:00
             </div>
           </div>
       </div>

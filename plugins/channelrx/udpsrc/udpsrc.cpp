@@ -790,7 +790,8 @@ void UDPSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 
 void UDPSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    response.getUdpSrcReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getUdpSrcReport()->setChannelPowerDb(CalcDb::dbPower(getInMagSq()));
+    response.getUdpSrcReport()->setOutputPowerDb(CalcDb::dbPower(getMagSq()));
     response.getUdpSrcReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getUdpSrcReport()->setInputSampleRate(m_inputSampleRate);
 }

@@ -744,6 +744,9 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
 void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    response.getUdpSinkReport()->setInputPowerDb(CalcDb::dbPower(getInMagSq()));
     response.getUdpSinkReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getUdpSinkReport()->setSquelch(m_squelchOpen ? 1 : 0);
+    response.getUdpSinkReport()->setBufferGauge(getBufferGauge());
     response.getUdpSinkReport()->setChannelSampleRate(m_outputSampleRate);
 }

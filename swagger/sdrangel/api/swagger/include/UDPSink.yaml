@@ -57,6 +57,16 @@ UDPSinkReport:
       description: power transmitted in channel (dB)
       type: number
       format: float
+    inputPowerDB:
+      description: power received from UDP stream (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    bufferGauge:
+      description: buffer R/W balance indicator
+      type: integer
     channelSampleRate:
       type: integer
  

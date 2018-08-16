@@ -59,8 +59,12 @@ UDPSrcSettings:
 UDPSrcReport:
   description: UDPSink
   properties:
-    channelPowerDB:
+    outputPowerDB:
       description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelPowerDB:
+      description: power received in channel (dB)
       type: number
       format: float
     squelch:
