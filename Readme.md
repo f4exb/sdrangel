@@ -6,6 +6,12 @@
 
 &#9888; SDRangel is intended for the power user. We expect you to already have some experience with SDR applications and digital signal processing in general. SDRangel might be a bit overwhelming for you however you are encouraged to use the discussion group above to look for help. You can also find more information in the [Wiki](https://github.com/f4exb/sdrangel/wiki).
 
+<h1>Hardware requirements</h1>
+
+SDRangel is a near real time application that is demanding on CPU power and clock speeds for low latency. Recent (2015 or later) Core i7 class CPU is recommended preferably with 4 HT CPU cores (8 logical CPUs or more) with nominal clock over 2 GHz and at least 8 GB RAM. Modern Intel processors will include a GPU suitable for proper OpenGL support. On the other hand SDRangel is not as demanding as recent computer games for graphics and CPU integrated graphics are perfectly fine. USB-3 ports are also preferable for high speed, low latency USB communication.
+
+&#9888; The "server mode version" sdrangelsrv will not run on any ARM machine in particular the Raspberry Pi. It will work only on x86_64 architecture and you will need a server based on Intel Xeon E5 series or better.
+
 <h1>Source code</h1>
 
 <h2>Repository branches</h2>
