@@ -40,9 +40,7 @@ CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 SOURCES += mainwindow.cpp\
         device/deviceuiset.cpp\
         dsp/spectrumscopecombovis.cpp\
-        dsp/spectrumscopengcombovis.cpp\
         dsp/scopevis.cpp\
-        dsp/scopevisng.cpp\
         dsp/scopevisxy.cpp\
         dsp/spectrumvis.cpp\
         gui/aboutdialog.cpp\
@@ -62,8 +60,6 @@ SOURCES += mainwindow.cpp\
         gui/externalclockdialog.cpp\
         gui/glscope.cpp\
         gui/glscopegui.cpp\
-        gui/glscopeng.cpp\
-        gui/glscopenggui.cpp\
         gui/glshadersimple.cpp\
         gui/glshadertextured.cpp\
         gui/glshadertvarray.cpp\
@@ -92,9 +88,7 @@ SOURCES += mainwindow.cpp\
 HEADERS  += mainwindow.h\
         device/deviceuiset.h\
         dsp/spectrumscopecombovis.h\
-        dsp/spectrumscopengcombovis.h\        
         dsp/scopevis.h\
-        dsp/scopevisng.h\
         dsp/scopevisxy.h\
         dsp/spectrumvis.h\
         gui/aboutdialog.h\
@@ -116,8 +110,6 @@ HEADERS  += mainwindow.h\
         gui/externalclockdialog.h\
         gui/glscope.h\
         gui/glscopegui.h\
-        gui/glscopeng.h\
-        gui/glscopenggui.h\
         gui/glshadersimple.h\
         gui/glshadertextured.h\
         gui/glshadertvarray.h\
@@ -153,7 +145,6 @@ FORMS    += mainwindow.ui\
         gui/audiodialog.ui\
         gui/audioselectdialog.ui\
         gui/glscopegui.ui\
-        gui/glscopenggui.ui\
         gui/aboutdialog.ui\
         gui/pluginsdialog.ui\
         gui/samplingdevicecontrol.ui\
