@@ -20,6 +20,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
+#include "SWGLoggingInfo.h"
 
 #include <QObject>
 
@@ -37,6 +38,8 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
+    void daemonInstanceLoggingGet();
+    void daemonInstanceLoggingPut(SWGLoggingInfo& body);
     void daemonInstanceSummary();
     void daemonReportGet();
     void daemonRunDelete();
@@ -47,6 +50,8 @@ public:
     void daemonSettingsPut(SWGDeviceSettings& body);
     
 private:
+    void daemonInstanceLoggingGetCallback (SWGHttpRequestWorker * worker);
+    void daemonInstanceLoggingPutCallback (SWGHttpRequestWorker * worker);
     void daemonInstanceSummaryCallback (SWGHttpRequestWorker * worker);
     void daemonReportGetCallback (SWGHttpRequestWorker * worker);
     void daemonRunDeleteCallback (SWGHttpRequestWorker * worker);
@@ -57,6 +62,8 @@ private:
     void daemonSettingsPutCallback (SWGHttpRequestWorker * worker);
     
 signals:
+    void daemonInstanceLoggingGetSignal(SWGLoggingInfo* summary);
+    void daemonInstanceLoggingPutSignal(SWGLoggingInfo* summary);
     void daemonInstanceSummarySignal(SWGDaemonSummaryResponse* summary);
     void daemonReportGetSignal(SWGDeviceReport* summary);
     void daemonRunDeleteSignal(SWGDeviceState* summary);
@@ -66,6 +73,8 @@ signals:
     void daemonSettingsPatchSignal(SWGDeviceSettings* summary);
     void daemonSettingsPutSignal(SWGDeviceSettings* summary);
     
+    void daemonInstanceLoggingGetSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonInstanceLoggingPutSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonInstanceSummarySignalE(SWGDaemonSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonReportGetSignalE(SWGDeviceReport* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonRunDeleteSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -75,6 +84,8 @@ signals:
     void daemonSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonSettingsPutSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
+    void daemonInstanceLoggingGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonInstanceLoggingPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonInstanceSummarySignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonReportGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonRunDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

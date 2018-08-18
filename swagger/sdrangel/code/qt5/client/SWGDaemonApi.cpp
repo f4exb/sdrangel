@@ -29,6 +29,113 @@ SWGDaemonApi::SWGDaemonApi(QString host, QString basePath) {
 }
 
 void
+SWGDaemonApi::daemonInstanceLoggingGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/logging");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDaemonApi::daemonInstanceLoggingGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDaemonApi::daemonInstanceLoggingGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGLoggingInfo* output = static_cast<SWGLoggingInfo*>(create(json, QString("SWGLoggingInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit daemonInstanceLoggingGetSignal(output);
+    } else {
+        emit daemonInstanceLoggingGetSignalE(output, error_type, error_str);
+        emit daemonInstanceLoggingGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDaemonApi::daemonInstanceLoggingPut(SWGLoggingInfo& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/logging");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDaemonApi::daemonInstanceLoggingPutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDaemonApi::daemonInstanceLoggingPutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGLoggingInfo* output = static_cast<SWGLoggingInfo*>(create(json, QString("SWGLoggingInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit daemonInstanceLoggingPutSignal(output);
+    } else {
+        emit daemonInstanceLoggingPutSignalE(output, error_type, error_str);
+        emit daemonInstanceLoggingPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDaemonApi::daemonInstanceSummary() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrdaemon");

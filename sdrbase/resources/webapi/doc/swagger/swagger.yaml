@@ -1254,6 +1254,50 @@ paths:
         "501":
           $ref: "#/responses/Response_501"          
           
+  /sdrdaemon/logging:
+    x-swagger-router-controller: daemon
+    get:
+      description: Get logging information for this instance
+      operationId: daemonInstanceLoggingGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Change logging parmeters for this instance
+      operationId: daemonInstanceLoggingPut
+      tags:
+        - Daemon
+      consumes: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Logging information
+          required: true
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+      responses:
+        "200":
+          description: Return new data on success
+          schema:
+            $ref: "#/definitions/LoggingInfo"
+        "400":
+          description: Invalid data
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"          
+          
   /sdrdaemon/settings:
     x-swagger-router-controller: deviceset
     get:
