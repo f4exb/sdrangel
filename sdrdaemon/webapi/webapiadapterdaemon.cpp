@@ -17,12 +17,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGDaemonSummaryResponse.h"
+#include "SWGLoggingInfo.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGErrorResponse.h"
 
 #include "webapiadapterdaemon.h"
+#include "sdrdaemonmain.h"
+#include "loggerwithfile.h"
 
 QString WebAPIAdapterDaemon::daemonInstanceSummaryURL = "/sdrdaemon";
 QString WebAPIAdapterDaemon::daemonInstanceLoggingURL = "/sdrdaemon/logging";
@@ -49,22 +52,58 @@ int WebAPIAdapterDaemon::daemonInstanceSummary(
 }
 
 int WebAPIAdapterDaemon::daemonInstanceLoggingGet(
-        SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
-        SWGSDRangel::SWGErrorResponse& error)
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+    response.init();
+    response.setDumpToFile(m_sdrDaemonMain.m_logger->getUseFileLogger() ? 1 : 0);
+
+    if (response.getDumpToFile()) {
+        m_sdrDaemonMain.m_logger->getLogFileName(*response.getFileName());
+        m_sdrDaemonMain.m_logger->getFileMinMessageLevelStr(*response.getFileLevel());
+    }
+
+    m_sdrDaemonMain.m_logger->getConsoleMinMessageLevelStr(*response.getConsoleLevel());
+
+    return 200;
 }
 
 int WebAPIAdapterDaemon::daemonInstanceLoggingPut(
-        SWGSDRangel::SWGLoggingInfo& query __attribute__((unused)),
-        SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
-        SWGSDRangel::SWGErrorResponse& error)
+        SWGSDRangel::SWGLoggingInfo& query,
+        SWGSDRangel::SWGLoggingInfo& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+    // response input is the query actually
+    bool dumpToFile = (query.getDumpToFile() != 0);
+    QString* consoleLevel = query.getConsoleLevel();
+    QString* fileLevel = query.getFileLevel();
+    QString* fileName = query.getFileName();
+
+    // perform actions
+    if (consoleLevel) {
+        m_sdrDaemonMain.m_settings.setConsoleMinLogLevel(getMsgTypeFromString(*consoleLevel));
+    }
+
+    if (fileLevel) {
+        m_sdrDaemonMain.m_settings.setFileMinLogLevel(getMsgTypeFromString(*fileLevel));
+    }
+
+    m_sdrDaemonMain.m_settings.setUseLogFile(dumpToFile);
+
+    if (fileName) {
+        m_sdrDaemonMain.m_settings.setLogFileName(*fileName);
+    }
+
+    m_sdrDaemonMain.setLoggingOptions();
+
+    // build response
+    response.init();
+    getMsgTypeString(m_sdrDaemonMain.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
+    response.setDumpToFile(m_sdrDaemonMain.m_settings.getUseLogFile() ? 1 : 0);
+    getMsgTypeString(m_sdrDaemonMain.m_settings.getFileMinLogLevel(), *response.getFileLevel());
+    *response.getFileName() = m_sdrDaemonMain.m_settings.getLogFileName();
+
+    return 200;
 }
 
 int WebAPIAdapterDaemon::daemonSettingsGet(

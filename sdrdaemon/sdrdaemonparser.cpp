@@ -129,7 +129,7 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         qWarning() << "SDRDaemonParser::parse: data address invalid. Defaulting to " << m_dataAddress;
     }
 
-    // server port
+    // data port
 
     QString dataPortStr = m_parser.value(m_dataPortOption);
     serverPort = serverPortStr.toInt(&ok);

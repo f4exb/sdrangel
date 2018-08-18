@@ -51,6 +51,8 @@ public:
     ~SDRDaemonMain();
     static SDRDaemonMain *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
 
+    friend class WebAPIAdapterDaemon;
+
 signals:
     void finished();
 
