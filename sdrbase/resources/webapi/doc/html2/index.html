@@ -1667,6 +1667,47 @@ margin-bottom: 20px;
   },
   "description" : "DV serial device details"
 };
+            defs.DaemonSummaryResponse = {
+  "required" : [ "appname", "architecture", "dspRxBits", "dspTxBits", "os", "pid", "qtVersion", "version" ],
+  "properties" : {
+    "version" : {
+      "type" : "string",
+      "description" : "Current software version"
+    },
+    "qtVersion" : {
+      "type" : "string",
+      "description" : "Qt version with which the software was compiled"
+    },
+    "dspRxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Rx DSP"
+    },
+    "dspTxBits" : {
+      "type" : "integer",
+      "description" : "Number of samples significant bits in software Tx DSP"
+    },
+    "pid" : {
+      "type" : "integer",
+      "description" : "PID of the SDRangel instance"
+    },
+    "appname" : {
+      "type" : "string",
+      "description" : "Application name: SDRangel for a GUI instance and SDRangelSrv for a server instance"
+    },
+    "architecture" : {
+      "type" : "string",
+      "description" : "Codename of the CPU architecture on which the instance is running (available with Qt >= 5.4)"
+    },
+    "os" : {
+      "type" : "string",
+      "description" : "Descriptive text of the operating system running the instance (available with Qt >= 5.4)"
+    },
+    "samplingDevice" : {
+      "$ref" : "#/definitions/SamplingDevice"
+    }
+  },
+  "description" : "Summarized information about this SDRdaemon instance"
+};
             defs.DeviceListItem = {
   "properties" : {
     "displayedName" : {
@@ -2197,7 +2238,7 @@ margin-bottom: 20px;
   "description" : "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
 };
             defs.InstanceSummaryResponse = {
-  "required" : [ "appname", "devicesetlist", "dspRxBits", "dspTxBits", "pid", "qtVersion", "version" ],
+  "required" : [ "appname", "architecture", "devicesetlist", "dspRxBits", "dspTxBits", "os", "pid", "qtVersion", "version" ],
   "properties" : {
     "version" : {
       "type" : "string",
@@ -3958,6 +3999,31 @@ margin-bottom: 20px;
             -->
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
+                  <li class="nav-header" data-group="Daemon"><a href="#api-Daemon">API Methods - Daemon</a></li>
+                    <li data-group="Daemon" data-name="daemonInstanceSummary" class="">
+                      <a href="#api-Daemon-daemonInstanceSummary">daemonInstanceSummary</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonReportGet" class="">
+                      <a href="#api-Daemon-daemonReportGet">daemonReportGet</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonRunDelete" class="">
+                      <a href="#api-Daemon-daemonRunDelete">daemonRunDelete</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonRunGet" class="">
+                      <a href="#api-Daemon-daemonRunGet">daemonRunGet</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonRunPost" class="">
+                      <a href="#api-Daemon-daemonRunPost">daemonRunPost</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonSettingsGet" class="">
+                      <a href="#api-Daemon-daemonSettingsGet">daemonSettingsGet</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonSettingsPatch" class="">
+                      <a href="#api-Daemon-daemonSettingsPatch">daemonSettingsPatch</a>
+                    </li>
+                    <li data-group="Daemon" data-name="daemonSettingsPut" class="">
+                      <a href="#api-Daemon-daemonSettingsPut">daemonSettingsPut</a>
+                    </li>
                   <li class="nav-header" data-group="DeviceSet"><a href="#api-DeviceSet">API Methods - DeviceSet</a></li>
                     <li data-group="DeviceSet" data-name="devicesetChannelDelete" class="">
                       <a href="#api-DeviceSet-devicesetChannelDelete">devicesetChannelDelete</a>
@@ -4105,7 +4171,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.0.7</div>
+              <div class="app-desc">Version: 4.1.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -4123,6 +4189,3266 @@ margin-bottom: 20px;
           </div>
         </div>
         <div id="sections">
+                <section id="api-Daemon">
+                  <h1>Daemon</h1>
+                    <div id="api-Daemon-daemonInstanceSummary">
+                      <article id="api-Daemon-daemonInstanceSummary-0" data-group="User" data-name="daemonInstanceSummary" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonInstanceSummary</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get SDRdaemon summary information</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonInstanceSummary-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonInstanceSummary-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonInstanceSummary-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DaemonSummaryResponse result = apiInstance.daemonInstanceSummary();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonInstanceSummary");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DaemonSummaryResponse result = apiInstance.daemonInstanceSummary();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonInstanceSummary");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonInstanceSummaryWithCompletionHandler: 
+              ^(DaemonSummaryResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonInstanceSummary(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonInstanceSummaryExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DaemonSummaryResponse result = apiInstance.daemonInstanceSummary();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonInstanceSummary: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonInstanceSummary();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonInstanceSummary: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonInstanceSummary();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonInstanceSummary: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonInstanceSummary-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_instance_summary()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonInstanceSummary: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonInstanceSummary-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonInstanceSummary-200-schema">
+                                  <div id='responses-daemonInstanceSummary-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success",
+  "schema" : {
+    "$ref" : "#/definitions/DaemonSummaryResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonInstanceSummary-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonInstanceSummary-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonInstanceSummary-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonInstanceSummary-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonInstanceSummary-500-schema">
+                                  <div id='responses-daemonInstanceSummary-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonInstanceSummary-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonInstanceSummary-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonInstanceSummary-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonInstanceSummary-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonInstanceSummary-501-schema">
+                                  <div id='responses-daemonInstanceSummary-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonInstanceSummary-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonInstanceSummary-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonInstanceSummary-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonReportGet">
+                      <article id="api-Daemon-daemonReportGet-0" data-group="User" data-name="daemonReportGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonReportGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get the device report</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/report</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonReportGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonReportGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonReportGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonReportGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonReportGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/report"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceReport result = apiInstance.daemonReportGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceReport result = apiInstance.daemonReportGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonReportGetWithCompletionHandler: 
+              ^(DeviceReport output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonReportGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonReportGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonReportGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DeviceReport result = apiInstance.daemonReportGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonReportGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonReportGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonReportGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonReportGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonReportGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonReportGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_report_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonReportGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return device report </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonReportGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonReportGet-200-schema">
+                                  <div id='responses-daemonReportGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return device report",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceReport"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonReportGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonReportGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonReportGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonReportGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonReportGet-400-schema">
+                                  <div id='responses-daemonReportGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonReportGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonReportGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonReportGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonReportGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonReportGet-404-schema">
+                                  <div id='responses-daemonReportGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonReportGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonReportGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonReportGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonReportGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonReportGet-500-schema">
+                                  <div id='responses-daemonReportGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonReportGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonReportGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonReportGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonReportGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonReportGet-501-schema">
+                                  <div id='responses-daemonReportGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonReportGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonReportGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonReportGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonRunDelete">
+                      <article id="api-Daemon-daemonRunDelete-0" data-group="User" data-name="daemonRunDelete" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonRunDelete</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">stop device</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrdaemon/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonRunDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunDelete-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonRunDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrdaemon/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunDelete();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunDelete();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonRunDeleteWithCompletionHandler: 
+              ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonRunDelete(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonRunDeleteExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DeviceState result = apiInstance.daemonRunDelete();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonRunDelete: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonRunDelete();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonRunDelete: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonRunDelete();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonRunDelete: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunDelete-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_run_delete()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonRunDelete: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunDelete-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunDelete-200-schema">
+                                  <div id='responses-daemonRunDelete-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunDelete-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunDelete-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunDelete-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunDelete-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunDelete-400-schema">
+                                  <div id='responses-daemonRunDelete-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunDelete-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunDelete-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunDelete-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunDelete-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunDelete-404-schema">
+                                  <div id='responses-daemonRunDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunDelete-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunDelete-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunDelete-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunDelete-500-schema">
+                                  <div id='responses-daemonRunDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunDelete-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunDelete-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunDelete-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunDelete-501-schema">
+                                  <div id='responses-daemonRunDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunDelete-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunDelete-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunDelete-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonRunGet">
+                      <article id="api-Daemon-daemonRunGet-0" data-group="User" data-name="daemonRunGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonRunGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get device run status</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonRunGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonRunGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonRunGetWithCompletionHandler: 
+              ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonRunGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonRunGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonRunGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DeviceState result = apiInstance.daemonRunGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonRunGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonRunGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonRunGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonRunGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonRunGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_run_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonRunGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return current state </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunGet-200-schema">
+                                  <div id='responses-daemonRunGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return current state",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunGet-400-schema">
+                                  <div id='responses-daemonRunGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunGet-404-schema">
+                                  <div id='responses-daemonRunGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunGet-500-schema">
+                                  <div id='responses-daemonRunGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunGet-501-schema">
+                                  <div id='responses-daemonRunGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonRunPost">
+                      <article id="api-Daemon-daemonRunPost-0" data-group="User" data-name="daemonRunPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonRunPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">start device</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrdaemon/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonRunPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonRunPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonRunPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonRunPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrdaemon/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunPost();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceState result = apiInstance.daemonRunPost();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonRunPostWithCompletionHandler: 
+              ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonRunPost(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonRunPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonRunPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DeviceState result = apiInstance.daemonRunPost();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonRunPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonRunPost();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonRunPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonRunPost();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonRunPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonRunPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_run_post()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonRunPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunPost-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunPost-200-schema">
+                                  <div id='responses-daemonRunPost-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunPost-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunPost-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunPost-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunPost-400-schema">
+                                  <div id='responses-daemonRunPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunPost-404-schema">
+                                  <div id='responses-daemonRunPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunPost-500-schema">
+                                  <div id='responses-daemonRunPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonRunPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonRunPost-501-schema">
+                                  <div id='responses-daemonRunPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonRunPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonRunPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonRunPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonSettingsGet">
+                      <article id="api-Daemon-daemonSettingsGet-0" data-group="User" data-name="daemonSettingsGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonSettingsGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get device settings</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/settings</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonSettingsGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonSettingsGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/settings"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonSettingsGetWithCompletionHandler: 
+              ^(DeviceSettings output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonSettingsGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonSettingsGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                DeviceSettings result = apiInstance.daemonSettingsGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonSettingsGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonSettingsGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonSettingsGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonSettingsGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonSettingsGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_settings_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonSettingsGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success returns current settings values </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsGet-200-schema">
+                                  <div id='responses-daemonSettingsGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success returns current settings values",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid device set index or device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsGet-404-schema">
+                                  <div id='responses-daemonSettingsGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index or device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsGet-500-schema">
+                                  <div id='responses-daemonSettingsGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsGet-501-schema">
+                                  <div id='responses-daemonSettingsGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonSettingsPatch">
+                      <article id="api-Daemon-daemonSettingsPatch-0" data-group="User" data-name="daemonSettingsPatch" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonSettingsPatch</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Apply settings differentially (no force)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrdaemon/settings</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonSettingsPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPatch-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonSettingsPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrdaemon/settings"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        DeviceSettings body = ; // DeviceSettings | Device settings to apply
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        DeviceSettings body = ; // DeviceSettings | Device settings to apply
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">DeviceSettings *body = ; // Device settings to apply
+
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonSettingsPatchWith:body
+              completionHandler: ^(DeviceSettings output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var body = ; // {DeviceSettings} Device settings to apply
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonSettingsPatch(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonSettingsPatchExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+            var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
+
+            try
+            {
+                DeviceSettings result = apiInstance.daemonSettingsPatch(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonSettingsPatch: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+$body = ; // DeviceSettings | Device settings to apply
+
+try {
+    $result = $api_instance->daemonSettingsPatch($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonSettingsPatch: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
+
+eval { 
+    my $result = $api_instance->daemonSettingsPatch(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonSettingsPatch: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPatch-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+body =  # DeviceSettings | Device settings to apply
+
+try: 
+    api_response = api_instance.daemon_settings_patch(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonSettingsPatch: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Device settings to apply",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_daemonSettingsPatch_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_daemonSettingsPatch_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success returns new settings values </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPatch-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPatch-200-schema">
+                                  <div id='responses-daemonSettingsPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success returns new settings values",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPatch-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPatch-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPatch-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid device set index or device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPatch-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPatch-404-schema">
+                                  <div id='responses-daemonSettingsPatch-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index or device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPatch-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPatch-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPatch-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPatch-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPatch-500-schema">
+                                  <div id='responses-daemonSettingsPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPatch-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPatch-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPatch-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPatch-501-schema">
+                                  <div id='responses-daemonSettingsPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPatch-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPatch-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Daemon-daemonSettingsPut">
+                      <article id="api-Daemon-daemonSettingsPut-0" data-group="User" data-name="daemonSettingsPut" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonSettingsPut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Apply all settings unconditionally (force)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrdaemon/settings</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonSettingsPut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsPut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonSettingsPut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonSettingsPut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonSettingsPut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrdaemon/settings"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        DeviceSettings body = ; // DeviceSettings | Device settings to apply
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        DeviceSettings body = ; // DeviceSettings | Device settings to apply
+        try {
+            DeviceSettings result = apiInstance.daemonSettingsPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonSettingsPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">DeviceSettings *body = ; // Device settings to apply
+
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonSettingsPutWith:body
+              completionHandler: ^(DeviceSettings output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var body = ; // {DeviceSettings} Device settings to apply
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonSettingsPut(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonSettingsPutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+            var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
+
+            try
+            {
+                DeviceSettings result = apiInstance.daemonSettingsPut(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonSettingsPut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+$body = ; // DeviceSettings | Device settings to apply
+
+try {
+    $result = $api_instance->daemonSettingsPut($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonSettingsPut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
+
+eval { 
+    my $result = $api_instance->daemonSettingsPut(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonSettingsPut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonSettingsPut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+body =  # DeviceSettings | Device settings to apply
+
+try: 
+    api_response = api_instance.daemon_settings_put(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonSettingsPut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Device settings to apply",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_daemonSettingsPut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_daemonSettingsPut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success returns new settings values </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPut-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPut-200-schema">
+                                  <div id='responses-daemonSettingsPut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success returns new settings values",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPut-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPut-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPut-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid device set index or device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPut-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPut-404-schema">
+                                  <div id='responses-daemonSettingsPut-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index or device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPut-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPut-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPut-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPut-500-schema">
+                                  <div id='responses-daemonSettingsPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonSettingsPut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonSettingsPut-501-schema">
+                                  <div id='responses-daemonSettingsPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonSettingsPut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonSettingsPut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonSettingsPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
                 <section id="api-DeviceSet">
                   <h1>DeviceSet</h1>
                     <div id="api-DeviceSet-devicesetChannelDelete">
@@ -22973,7 +26299,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-08-16T10:09:26.795+02:00
+              Generated 2018-08-18T09:43:37.059+02:00
             </div>
           </div>
       </div>

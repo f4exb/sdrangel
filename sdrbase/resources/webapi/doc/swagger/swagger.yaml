@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.0.7"
+  version: "4.1.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1236,12 +1236,234 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
           
+  /sdrdaemon:
+    x-swagger-router-controller: daemon
+    get:
+      description: get SDRdaemon summary information
+      operationId: daemonInstanceSummary
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/DaemonSummaryResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"          
+          
+  /sdrdaemon/settings:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get device settings
+      operationId: daemonSettingsGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success returns current settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Apply all settings unconditionally (force)
+      operationId: daemonSettingsPut
+      tags:
+        - Daemon
+      parameters:
+        - name: body
+          in: body
+          description: Device settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: Apply settings differentially (no force)
+      operationId: daemonSettingsPatch
+      tags:
+        - Daemon
+      parameters:
+        - name: body
+          in: body
+          description: Device settings to apply
+          required: true
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/DeviceSettings"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
+  /sdrdaemon/run:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get device run status
+      operationId: daemonRunGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success return current state
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: start device
+      operationId: daemonRunPost
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: stop device
+      operationId: daemonRunDelete
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
+  /sdrdaemon/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get the device report
+      operationId: daemonReportGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success return device report
+          schema:
+            $ref: "#/definitions/DeviceReport"
+        "400":
+          description: Invalid device set
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+          
           
   /swagger:
     x-swagger-pipe: swagger_raw
     
 # complex objects have schema definitions
 definitions:
+
+  DaemonSummaryResponse:
+    description: "Summarized information about this SDRdaemon instance"
+    required:
+      - version
+      - qtVersion
+      - dspRxBits
+      - dspTxBits
+      - pid
+      - appname
+      - architecture
+      - os
+    properties:
+      version:
+        description: "Current software version"
+        type: string
+      qtVersion:
+        description: "Qt version with which the software was compiled"
+        type: string
+      dspRxBits:
+        description: "Number of samples significant bits in software Rx DSP"
+        type: integer
+      dspTxBits:
+        description: "Number of samples significant bits in software Tx DSP"
+        type: integer
+      pid:
+        description: "PID of the SDRangel instance"
+        type: integer
+      appname:
+        description: "Application name: SDRangel for a GUI instance and SDRangelSrv for a server instance"
+        type: string
+      architecture:
+        description: "Codename of the CPU architecture on which the instance is running (available with Qt >= 5.4)"
+        type: string
+      os:
+        description: "Descriptive text of the operating system running the instance (available with Qt >= 5.4)"
+        type: string
+      samplingDevice:
+        $ref: "#/definitions/SamplingDevice"
 
   InstanceSummaryResponse:
     description: "Summarized information about this SDRangel instance"
@@ -1253,6 +1475,8 @@ definitions:
       - pid
       - appname
       - devicesetlist
+      - architecture
+      - os
     properties:
       version:
         description: "Current software version"

@@ -11,48 +11,98 @@
  */
 
 /*
- * SWGGain.h
+ * SWGDaemonSummaryResponse.h
  *
- * A gain expressed in centi-Bels (tenths of dB)
+ * Summarized information about this SDRdaemon instance
  */
 
-#ifndef SWGGain_H_
-#define SWGGain_H_
+#ifndef SWGDaemonSummaryResponse_H_
+#define SWGDaemonSummaryResponse_H_
 
 #include <QJsonObject>
 
 
+#include "SWGSamplingDevice.h"
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGain: public SWGObject {
+class SWG_API SWGDaemonSummaryResponse: public SWGObject {
 public:
-    SWGGain();
-    SWGGain(QString* json);
-    virtual ~SWGGain();
+    SWGDaemonSummaryResponse();
+    SWGDaemonSummaryResponse(QString* json);
+    virtual ~SWGDaemonSummaryResponse();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGain* fromJson(QString &jsonString) override;
+    virtual SWGDaemonSummaryResponse* fromJson(QString &jsonString) override;
 
-    qint32 getGainCb();
-    void setGainCb(qint32 gain_cb);
+    QString* getVersion();
+    void setVersion(QString* version);
+
+    QString* getQtVersion();
+    void setQtVersion(QString* qt_version);
+
+    qint32 getDspRxBits();
+    void setDspRxBits(qint32 dsp_rx_bits);
+
+    qint32 getDspTxBits();
+    void setDspTxBits(qint32 dsp_tx_bits);
+
+    qint32 getPid();
+    void setPid(qint32 pid);
+
+    QString* getAppname();
+    void setAppname(QString* appname);
+
+    QString* getArchitecture();
+    void setArchitecture(QString* architecture);
+
+    QString* getOs();
+    void setOs(QString* os);
+
+    SWGSamplingDevice* getSamplingDevice();
+    void setSamplingDevice(SWGSamplingDevice* sampling_device);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 gain_cb;
-    bool m_gain_cb_isSet;
+    QString* version;
+    bool m_version_isSet;
+
+    QString* qt_version;
+    bool m_qt_version_isSet;
+
+    qint32 dsp_rx_bits;
+    bool m_dsp_rx_bits_isSet;
+
+    qint32 dsp_tx_bits;
+    bool m_dsp_tx_bits_isSet;
+
+    qint32 pid;
+    bool m_pid_isSet;
+
+    QString* appname;
+    bool m_appname_isSet;
+
+    QString* architecture;
+    bool m_architecture_isSet;
+
+    QString* os;
+    bool m_os_isSet;
+
+    SWGSamplingDevice* sampling_device;
+    bool m_sampling_device_isSet;
 
 };
 
 }
 
-#endif /* SWGGain_H_ */
+#endif /* SWGDaemonSummaryResponse_H_ */
