@@ -1,0 +1,98 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
+//                                                                               //
+// SDRDaemon Swagger server adapter interface                                    //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef SDRDAEMON_WEBAPI_WEBAPIADAPTERDAEMON_H_
+#define SDRDAEMON_WEBAPI_WEBAPIADAPTERDAEMON_H_
+
+#include <QtGlobal>
+#include <QStringList>
+
+namespace SWGSDRangel
+{
+    class SWGDaemonSummaryResponse;
+    class SWGDeviceSet;
+    class SWGDeviceListItem;
+    class SWGDeviceSettings;
+    class SWGDeviceState;
+    class SWGDeviceReport;
+    class SWGSuccessResponse;
+    class SWGErrorResponse;
+    class SWGLoggingInfo;
+}
+
+class SDRDaemonMain;
+
+class WebAPIAdapterDaemon
+{
+public:
+    WebAPIAdapterDaemon(SDRDaemonMain& sdrDaemonMain);
+    ~WebAPIAdapterDaemon();
+
+    int daemonInstanceSummary(
+            SWGSDRangel::SWGDaemonSummaryResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonInstanceLoggingGet(
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonInstanceLoggingPut(
+            SWGSDRangel::SWGLoggingInfo& query,
+            SWGSDRangel::SWGLoggingInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonSettingsGet(
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonSettingsPutPatch(
+            bool force,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonRunPost(
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonRunDelete(
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    static QString daemonInstanceSummaryURL;
+    static QString daemonInstanceLoggingURL;
+    static QString daemonSettingsURL;
+    static QString daemonReportURL;
+    static QString daemonRunURL;
+
+private:
+    SDRDaemonMain& m_sdrDaemonMain;
+
+    static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
+    static void getMsgTypeString(const QtMsgType& msgType, QString& level);
+};
+
+#endif /* SDRDAEMON_WEBAPI_WEBAPIADAPTERDAEMON_H_ */
