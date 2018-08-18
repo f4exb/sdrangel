@@ -87,6 +87,16 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             return;
         }
 
+        if (path.startsWith("/sdrdaemon"))
+        {
+            SWGSDRangel::SWGErrorResponse errorResponse;
+            response.setStatus(501,"Not implemented");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Not implemented";
+            response.write(errorResponse.asJson().toUtf8());
+            return;
+        }
+
         if (path == WebAPIAdapterInterface::instanceSummaryURL) {
             instanceSummaryService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDevicesURL) {
