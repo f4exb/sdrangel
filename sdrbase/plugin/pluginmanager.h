@@ -43,6 +43,8 @@ public:
 
 	PluginAPI *getPluginAPI() { return &m_pluginAPI; }
 	void loadPlugins(const QString& pluginsSubDir);
+	void loadPluginsPart(const QString& pluginsSubDir);
+	void loadPluginsFinal();
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins

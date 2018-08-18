@@ -81,7 +81,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             return;
         }
 
-        if (path.startsWith("/sdrangel"))
+        if (path.startsWith("/sdrangel") && (path != "/sdrangel_logo.png"))
         {
             SWGSDRangel::SWGErrorResponse errorResponse;
             response.setStatus(501,"Not implemented");

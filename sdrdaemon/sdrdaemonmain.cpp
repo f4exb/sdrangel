@@ -24,6 +24,7 @@
 #include <QResource>
 #include <unistd.h>
 
+#include "mainparser.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "plugin/pluginmanager.h"
@@ -44,12 +45,14 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const MainParser&
     m_dspEngine(DSPEngine::instance()),
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
-    qDebug() << "SDRdaemon::SDRdaemon: start";
+    qDebug() << "SDRDaemonMain::SDRDaemonMain: start";
 
     m_instance = this;
 
     m_pluginManager = new PluginManager(this);
-    m_pluginManager->loadPlugins(QString("pluginssrv"));
+    m_pluginManager->loadPluginsPart(QString("pluginssrv/samplesink"));
+    m_pluginManager->loadPluginsPart(QString("pluginssrv/samplesource"));
+    m_pluginManager->loadPluginsFinal();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_masterTimer.start(50);
@@ -59,9 +62,9 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const MainParser&
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
     if (QResource::registerResource(applicationDirPath + "/sdrbase.rcc")) {
-        qDebug("MainCore::MainCore: registered resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
+        qDebug("SDRDaemonMain::SDRDaemonMain: registered resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
     } else {
-        qWarning("MainCore::MainCore: could not register resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
+        qWarning("SDRDaemonMain::SDRDaemonMain: could not register resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
     }
 
     m_apiAdapter = new WebAPIAdapterDaemon(*this);
@@ -70,7 +73,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const MainParser&
     m_apiServer = new SDRDaemon::WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
 
-    qDebug() << "SDRdaemon::SDRdaemon: end";
+    qDebug() << "SDRDaemonMain::SDRDaemonMain: end";
 }
 
 SDRDaemonMain::~SDRDaemonMain()
@@ -83,13 +86,13 @@ SDRDaemonMain::~SDRDaemonMain()
 
     delete m_pluginManager;
 
-    qDebug() << "SDRdaemon::~SDRdaemon: end";
+    qDebug() << "SDRDaemonMain::~SDRdaemon: end";
     delete m_logger;
 }
 
 void SDRDaemonMain::loadSettings()
 {
-    qDebug() << "SDRdaemon::loadSettings";
+    qDebug() << "SDRDaemonMain::loadSettings";
 
     m_settings.load();
     setLoggingOptions();
@@ -155,7 +158,7 @@ void SDRDaemonMain::handleMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRdaemon::handleMessages: message: %s", message->getIdentifier());
+        qDebug("SDRDaemonMain::handleMessages: message: %s", message->getIdentifier());
         handleMessage(*message);
         delete message;
     }

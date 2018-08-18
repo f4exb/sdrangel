@@ -26,7 +26,6 @@
 #include <QObject>
 #include <QTimer>
 
-#include "mainparser.h"
 #include "sdrdaemonsettings.h"
 #include "util/messagequeue.h"
 
@@ -39,6 +38,7 @@ namespace qtwebapp {
     class LoggerWithFile;
 }
 
+class MainParser;
 class DSPEngine;
 class PluginManager;
 class Message;
@@ -50,6 +50,9 @@ public:
     explicit SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent = 0);
     ~SDRDaemonMain();
     static SDRDaemonMain *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
+
+signals:
+    void finished();
 
 private:
     static SDRDaemonMain *m_instance;
