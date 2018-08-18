@@ -36,6 +36,8 @@ public:
 
     const QString& getServerAddress() const { return m_serverAddress; }
     uint16_t getServerPort() const { return m_serverPort; }
+    const QString& getDataAddress() const { return m_dataAddress; }
+    uint16_t getDataPort() const { return m_dataPort; }
     const QString& getDeviceType() const { return m_deviceType; }
     bool getTx() const { return m_tx; }
     const QString& getSerial() const { return m_serial; }
@@ -45,18 +47,22 @@ public:
     bool hasSerial() const { return m_hasSerial; }
 
 private:
-    QString  m_serverAddress;
-    uint16_t m_serverPort;
-    QString  m_deviceType;  //!< Identifies the type of device
-    bool     m_tx;          //!< True for Tx
-    QString  m_serial;      //!< Serial number of the device
-    uint16_t m_sequence;    //!< Sequence of the device for the same type of device in enumeration process
-    bool     m_hasSerial;   //!< True if serial was specified
-    bool     m_hasSequence; //!< True if sequence was specified
+    QString  m_serverAddress; //!< Address of interface the API and UDP data (Tx) listens on
+    uint16_t m_serverPort;    //!< Port the API listens on
+    QString  m_dataAddress;   //!< Address of destination of UDP stream (Rx)
+    uint16_t m_dataPort;      //!< Destination port of UDP stream (Rx) or listening port (Tx)
+    QString  m_deviceType;    //!< Identifies the type of device
+    bool     m_tx;            //!< True for Tx
+    QString  m_serial;        //!< Serial number of the device
+    uint16_t m_sequence;      //!< Sequence of the device for the same type of device in enumeration process
+    bool     m_hasSerial;     //!< True if serial was specified
+    bool     m_hasSequence;   //!< True if sequence was specified
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
     QCommandLineOption m_serverPortOption;
+    QCommandLineOption m_dataAddressOption;
+    QCommandLineOption m_dataPortOption;
     QCommandLineOption m_deviceTypeOption;
     QCommandLineOption m_txOption;
     QCommandLineOption m_serialOption;

@@ -28,30 +28,39 @@
 
 SDRDaemonParser::SDRDaemonParser() :
     m_serverAddressOption(QStringList() << "a" << "api-address",
-        "Web API server address.",
-        "address",
+        "API server and data (Tx) address.",
+        "localAddress",
         "127.0.0.1"),
     m_serverPortOption(QStringList() << "p" << "api-port",
         "Web API server port.",
-        "port",
+        "apiPort",
+        "9091"),
+    m_dataAddressOption(QStringList() << "A" << "data-address",
+        "Remote data address (Rx).",
+        "remoteAddress",
+        "127.0.0.1"),
+    m_dataPortOption(QStringList() << "D" << "data-port",
+        "UDP stream data port.",
+        "dataPort",
         "9091"),
     m_deviceTypeOption(QStringList() << "T" << "device-type",
         "Device type.",
         "deviceType",
         "TestSource"),
     m_txOption(QStringList() << "t" << "tx",
-        "Tx indicator.",
-        "tx"),
+        "Tx indicator."),
     m_serialOption(QStringList() << "s" << "serial",
         "Device serial number.",
         "serial"),
     m_sequenceOption(QStringList() << "n" << "sequence",
         "Device sequence number in enumeration for the same device type.",
-        "serial")
+        "sequence")
 
 {
     m_serverAddress = "127.0.0.1";
     m_serverPort = 9091;
+    m_dataAddress = "127.0.0.1";
+    m_dataPort = 9090;
     m_deviceType = "TestSource";
     m_tx = false;
     m_sequence = 0;
@@ -64,6 +73,8 @@ SDRDaemonParser::SDRDaemonParser() :
 
     m_parser.addOption(m_serverAddressOption);
     m_parser.addOption(m_serverPortOption);
+    m_parser.addOption(m_dataAddressOption);
+    m_parser.addOption(m_dataPortOption);
     m_parser.addOption(m_deviceTypeOption);
     m_parser.addOption(m_txOption);
     m_parser.addOption(m_serialOption);
@@ -106,6 +117,27 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         m_serverPort = serverPort;
     } else {
         qWarning() << "SDRDaemonParser::parse: server port invalid. Defaulting to " << m_serverPort;
+    }
+
+    // data address
+
+    QString dataAddress = m_parser.value(m_dataAddressOption);
+
+    if (ipValidator.validate(dataAddress, pos) == QValidator::Acceptable) {
+        m_dataAddress = dataAddress;
+    } else {
+        qWarning() << "SDRDaemonParser::parse: data address invalid. Defaulting to " << m_dataAddress;
+    }
+
+    // server port
+
+    QString dataPortStr = m_parser.value(m_dataPortOption);
+    serverPort = serverPortStr.toInt(&ok);
+
+    if (ok && (serverPort > 1023) && (serverPort < 65536)) {
+        m_dataPort = serverPort;
+    } else {
+        qWarning() << "SDRDaemonParser::parse: data port invalid. Defaulting to " << m_dataPort;
     }
 
     // hardware Id
