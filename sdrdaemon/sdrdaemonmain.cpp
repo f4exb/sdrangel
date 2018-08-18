@@ -24,21 +24,21 @@
 #include <QResource>
 #include <unistd.h>
 
-#include "mainparser.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "plugin/pluginmanager.h"
 #include "util/message.h"
 #include "loggerwithfile.h"
-#include "sdrdaemonmain.h"
 
 #include "webapi/webapiadapterdaemon.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
+#include "sdrdaemonparser.h"
+#include "sdrdaemonmain.h"
 
 SDRDaemonMain *SDRDaemonMain::m_instance = 0;
 
-SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
+SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonParser& parser, QObject *parent) :
     QObject(parent),
     m_logger(logger),
     m_settings(),

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon instance                                                            //
+// SDRdaemon command line parser                                                 //
 //                                                                               //
 // SDRdaemon is a detached SDR front end that handles the interface with a       //
 // physical device and sends or receives the I/Q samples stream to or from a     //
@@ -20,60 +20,49 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_SDRDAEMONMAIN_H_
-#define SDRDAEMON_SDRDAEMONMAIN_H_
+#ifndef SDRDAEMON_SDRDAEMONPARSER_H_
+#define SDRDAEMON_SDRDAEMONPARSER_H_
 
-#include <QObject>
-#include <QTimer>
+#include <QCommandLineParser>
+#include <stdint.h>
 
-#include "sdrdaemonsettings.h"
-#include "util/messagequeue.h"
-
-namespace SDRDaemon {
-    class WebAPIRequestMapper;
-    class WebAPIServer;
-}
-
-namespace qtwebapp {
-    class LoggerWithFile;
-}
-
-class SDRDaemonParser;
-class DSPEngine;
-class PluginManager;
-class Message;
-class WebAPIAdapterDaemon;
-
-class SDRDaemonMain : public QObject {
-    Q_OBJECT
+class SDRDaemonParser
+{
 public:
-    explicit SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonParser& parser, QObject *parent = 0);
-    ~SDRDaemonMain();
-    static SDRDaemonMain *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
+    SDRDaemonParser();
+    ~SDRDaemonParser();
 
-signals:
-    void finished();
+    void parse(const QCoreApplication& app);
+
+    const QString& getServerAddress() const { return m_serverAddress; }
+    uint16_t getServerPort() const { return m_serverPort; }
+    const QString& getDeviceType() const { return m_deviceType; }
+    bool getTx() const { return m_tx; }
+    const QString& getSerial() const { return m_serial; }
+    uint16_t getSequence() const { return m_sequence; }
+
+    bool hasSequence() const { return m_hasSequence; }
+    bool hasSerial() const { return m_hasSerial; }
 
 private:
-    static SDRDaemonMain *m_instance;
-    qtwebapp::LoggerWithFile *m_logger;
-    SDRDaemonSettings m_settings;
-    DSPEngine* m_dspEngine;
-    int m_lastEngineState;
-    PluginManager* m_pluginManager;
-    MessageQueue m_inputMessageQueue;
-    QTimer m_masterTimer;
+    QString  m_serverAddress;
+    uint16_t m_serverPort;
+    QString  m_deviceType;  //!< Identifies the type of device
+    bool     m_tx;          //!< True for Tx
+    QString  m_serial;      //!< Serial number of the device
+    uint16_t m_sequence;    //!< Sequence of the device for the same type of device in enumeration process
+    bool     m_hasSerial;   //!< True if serial was specified
+    bool     m_hasSequence; //!< True if sequence was specified
 
-    SDRDaemon::WebAPIRequestMapper *m_requestMapper;
-    SDRDaemon::WebAPIServer *m_apiServer;
-    WebAPIAdapterDaemon *m_apiAdapter;
-
-    void loadSettings();
-    void setLoggingOptions();
-    bool handleMessage(const Message& cmd);
-
-private slots:
-    void handleMessages();
+    QCommandLineParser m_parser;
+    QCommandLineOption m_serverAddressOption;
+    QCommandLineOption m_serverPortOption;
+    QCommandLineOption m_deviceTypeOption;
+    QCommandLineOption m_txOption;
+    QCommandLineOption m_serialOption;
+    QCommandLineOption m_sequenceOption;
 };
 
-#endif /* SDRDAEMON_SDRDAEMONMAIN_H_ */
+
+
+#endif /* SDRDAEMON_SDRDAEMONPARSER_H_ */

@@ -27,10 +27,10 @@
 #include <unistd.h>
 #include <vector>
 
-#include "mainparser.h"
-#include "loggerwithfile.h"
-#include "sdrdaemonmain.h"
 #include "dsp/dsptypes.h"
+#include "loggerwithfile.h"
+#include "sdrdaemonparser.h"
+#include "sdrdaemonmain.h"
 
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
@@ -67,7 +67,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));
     catchUnixSignals(vsig);
 
-    MainParser parser;
+    SDRDaemonParser parser;
     parser.parse(a);
 
 #if QT_VERSION >= 0x050400
