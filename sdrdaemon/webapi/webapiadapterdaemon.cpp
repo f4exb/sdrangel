@@ -253,7 +253,7 @@ int WebAPIAdapterDaemon::daemonSettingsPutPatch(
 }
 
 int WebAPIAdapterDaemon::daemonRunGet(
-        SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+        SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
@@ -278,21 +278,53 @@ int WebAPIAdapterDaemon::daemonRunGet(
 }
 
 int WebAPIAdapterDaemon::daemonRunPost(
-        SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+        SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+        response.init();
+        return source->webapiRun(true, response, *error.getMessage());
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+        response.init();
+        return sink->webapiRun(true, response, *error.getMessage());
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonRunDelete(
-        SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+        SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+        response.init();
+        return source->webapiRun(false, response, *error.getMessage());
+   }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+        response.init();
+        return sink->webapiRun(false, response, *error.getMessage());
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonReportGet(
