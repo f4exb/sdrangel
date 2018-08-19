@@ -250,9 +250,6 @@ int WebAPIAdapterDaemon::daemonSettingsPutPatch(
         *error.getMessage() = QString("DeviceSet error");
         return 500;
     }
-
-    *error.getMessage() = "Not implemented";
-    return 501;
 }
 
 int WebAPIAdapterDaemon::daemonRunGet(
@@ -260,8 +257,24 @@ int WebAPIAdapterDaemon::daemonRunGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+        response.init();
+        return source->webapiRunGet(response, *error.getMessage());
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+        response.init();
+        return sink->webapiRunGet(response, *error.getMessage());
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonRunPost(
