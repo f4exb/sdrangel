@@ -202,12 +202,55 @@ int WebAPIAdapterDaemon::daemonSettingsGet(
 }
 
 int WebAPIAdapterDaemon::daemonSettingsPutPatch(
-        bool force __attribute__((unused)),
-        const QStringList& deviceSettingsKeys __attribute__((unused)),
-        SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        if (response.getTx() != 0)
+        {
+            *error.getMessage() = QString("Rx device found but Tx device requested");
+            return 400;
+        }
+        if (m_sdrDaemonMain.m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
+        {
+            *error.getMessage() = QString("Device mismatch. Found %1 input").arg(m_sdrDaemonMain.m_deviceSourceAPI->getHardwareId());
+            return 400;
+        }
+        else
+        {
+            DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+            return source->webapiSettingsPutPatch(force, deviceSettingsKeys, response, *error.getMessage());
+        }
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        if (response.getTx() == 0)
+        {
+            *error.getMessage() = QString("Tx device found but Rx device requested");
+            return 400;
+        }
+        else if (m_sdrDaemonMain.m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
+        {
+            *error.getMessage() = QString("Device mismatch. Found %1 output").arg(m_sdrDaemonMain.m_deviceSinkAPI->getHardwareId());
+            return 400;
+        }
+        else
+        {
+            DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+            return sink->webapiSettingsPutPatch(force, deviceSettingsKeys, response, *error.getMessage());
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
+
     *error.getMessage() = "Not implemented";
     return 501;
 }
