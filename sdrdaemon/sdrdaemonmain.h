@@ -43,6 +43,10 @@ class DSPEngine;
 class PluginManager;
 class Message;
 class WebAPIAdapterDaemon;
+class DSPDeviceSourceEngine;
+class DeviceSourceAPI;
+class DSPDeviceSinkEngine;
+class DeviceSinkAPI;
 
 class SDRDaemonMain : public QObject {
     Q_OBJECT
@@ -50,6 +54,15 @@ public:
     explicit SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonParser& parser, QObject *parent = 0);
     ~SDRDaemonMain();
     static SDRDaemonMain *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
+
+    MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
+
+    const QTimer& getMasterTimer() const { return m_masterTimer; }
+    const SDRDaemonSettings& getSettings() const { return m_settings; }
+
+    bool addSourceDevice();
+    bool addSinkDevice();
+    void removeDevice();
 
     friend class WebAPIAdapterDaemon;
 
@@ -70,8 +83,19 @@ private:
     SDRDaemon::WebAPIServer *m_apiServer;
     WebAPIAdapterDaemon *m_apiAdapter;
 
+    bool m_tx;
+    QString m_deviceType;
+    QString m_deviceSerial;
+    int m_deviceSequence;
+
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
+    DeviceSourceAPI *m_deviceSourceAPI;
+    DSPDeviceSinkEngine *m_deviceSinkEngine;
+    DeviceSinkAPI *m_deviceSinkAPI;
+
     void loadSettings();
     void setLoggingOptions();
+    int getDeviceIndex();
     bool handleMessage(const Message& cmd);
 
 private slots:

@@ -52,8 +52,8 @@ SDRDaemonParser::SDRDaemonParser() :
     m_serialOption(QStringList() << "s" << "serial",
         "Device serial number.",
         "serial"),
-    m_sequenceOption(QStringList() << "n" << "sequence",
-        "Device sequence number in enumeration for the same device type.",
+    m_sequenceOption(QStringList() << "i" << "sequence",
+        "Device sequence index in enumeration for the same device type.",
         "sequence")
 
 {
@@ -140,27 +140,31 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         qWarning() << "SDRDaemonParser::parse: data port invalid. Defaulting to " << m_dataPort;
     }
 
-    // hardware Id
+    // device type
 
     QString deviceType = m_parser.value(m_deviceTypeOption);
 
-    QRegExp deviceTypeRegex("^[A-Z][a-z][A-Za-z0-9]+$");
+    QRegExp deviceTypeRegex("^[A-Z][A-Za-z0-9]+$");
     QRegExpValidator deviceTypeValidator(deviceTypeRegex);
 
     if (deviceTypeValidator.validate(deviceType, pos) == QValidator::Acceptable) {
         m_deviceType = deviceType;
+        qDebug() << "SDRDaemonParser::parse: device type: " << m_deviceType;
     } else {
-        qWarning() << "SDRDaemonParser::parse: device type invalid. Defaulting to " << deviceType;
+        qWarning() << "SDRDaemonParser::parse: device type invalid. Defaulting to " << m_deviceType;
     }
 
     // tx
     m_tx = m_parser.isSet(m_txOption);
+    qDebug() << "SDRDaemonParser::parse: tx: " << m_tx;
 
     // serial
     m_hasSerial = m_parser.isSet(m_serialOption);
 
-    if (m_hasSerial) {
+    if (m_hasSerial)
+    {
         m_serial = m_parser.value(m_serialOption);
+        qDebug() << "SDRDaemonParser::parse: serial: " << m_serial;
     }
 
     // sequence
@@ -173,6 +177,7 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
 
         if (ok && (sequence >= 0) && (sequence < 65536)) {
             m_sequence = sequence;
+            qDebug() << "SDRDaemonParser::parse: sequence: " << m_sequence;
         } else {
             qWarning() << "SDRDaemonParser::parse: sequence invalid. Defaulting to " << m_sequence;
         }
