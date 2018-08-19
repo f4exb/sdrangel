@@ -47,6 +47,7 @@ class DSPDeviceSourceEngine;
 class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
+class SDRDaemonChannelSink;
 
 class SDRDaemonMain : public QObject {
     Q_OBJECT
@@ -92,11 +93,13 @@ private:
     DeviceSourceAPI *m_deviceSourceAPI;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DeviceSinkAPI *m_deviceSinkAPI;
+    SDRDaemonChannelSink *m_channelSink;
 
     void loadSettings();
     void setLoggingOptions();
     int getDeviceIndex();
     bool handleMessage(const Message& cmd);
+    void addChannelSink();
 
 private slots:
     void handleMessages();

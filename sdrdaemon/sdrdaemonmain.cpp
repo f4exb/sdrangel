@@ -37,6 +37,7 @@
 #include "webapi/webapiadapterdaemon.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
+#include "channel/sdrdaemonchannelsink.h"
 #include "sdrdaemonparser.h"
 #include "sdrdaemonmain.h"
 
@@ -85,6 +86,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
     m_deviceSinkEngine = 0;
     m_deviceSourceAPI = 0;
     m_deviceSinkAPI = 0;
+    m_channelSink = 0;
 
     if (m_tx)
     {
@@ -123,6 +125,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
             QDebug info = qInfo();
             info.noquote();
             info << msg;
+            m_channelSink = new SDRDaemonChannelSink(m_deviceSourceAPI);
         }
         else
         {
@@ -283,6 +286,11 @@ void SDRDaemonMain::removeDevice()
         m_deviceSourceEngine->stopAcquistion();
 
         // deletes old UI and input object
+
+        if (m_channelSink) {
+            m_channelSink->destroy();
+        }
+
         m_deviceSourceAPI->resetSampleSourceId();
         m_deviceSourceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceSourceAPI->getSampleSource());
