@@ -179,8 +179,26 @@ int WebAPIAdapterDaemon::daemonSettingsGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        response.setDeviceHwType(new QString(m_sdrDaemonMain.m_deviceSourceAPI->getHardwareId()));
+        response.setTx(0);
+        DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+        return source->webapiSettingsGet(response, *error.getMessage());
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        response.setDeviceHwType(new QString(m_sdrDaemonMain.m_deviceSinkAPI->getHardwareId()));
+        response.setTx(1);
+        DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+        return sink->webapiSettingsGet(response, *error.getMessage());
+    }
+    else
+    {
+        *error.getMessage() = QString("Device error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonSettingsPutPatch(
