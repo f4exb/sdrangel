@@ -328,12 +328,30 @@ int WebAPIAdapterDaemon::daemonRunDelete(
 }
 
 int WebAPIAdapterDaemon::daemonReportGet(
-        SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
+        SWGSDRangel::SWGDeviceReport& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        response.setDeviceHwType(new QString(m_sdrDaemonMain.m_deviceSourceAPI->getHardwareId()));
+        response.setTx(0);
+        DeviceSampleSource *source = m_sdrDaemonMain.m_deviceSourceAPI->getSampleSource();
+        return source->webapiReportGet(response, *error.getMessage());
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        response.setDeviceHwType(new QString(m_sdrDaemonMain.m_deviceSinkAPI->getHardwareId()));
+        response.setTx(1);
+        DeviceSampleSink *sink = m_sdrDaemonMain.m_deviceSinkAPI->getSampleSink();
+        return sink->webapiReportGet(response, *error.getMessage());
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
 }
 
 // TODO: put in library in common with SDRangel. Can be static.
