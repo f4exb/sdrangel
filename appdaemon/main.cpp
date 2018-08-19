@@ -94,10 +94,17 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     SDRDaemonMain m(logger, parser, &a);
 
-    // This will cause the application to exit when SDRdaemon is finished
-    QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
+    if (m.doAbort())
+    {
+        return -1;
+    }
+    else
+    {
+        // This will cause the application to exit when SDRdaemon is finished
+        QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
 
-    return a.exec();
+        return a.exec();
+    }
 }
 
 int main(int argc, char* argv[])

@@ -48,6 +48,7 @@ class DeviceSourceAPI;
 class DSPDeviceSinkEngine;
 class DeviceSinkAPI;
 class SDRDaemonChannelSink;
+class SDRDaemonChannelSource;
 
 class SDRDaemonMain : public QObject {
     Q_OBJECT
@@ -64,6 +65,8 @@ public:
     bool addSourceDevice();
     bool addSinkDevice();
     void removeDevice();
+
+    bool doAbort() const { return m_abort; }
 
     friend class WebAPIAdapterDaemon;
 
@@ -94,6 +97,9 @@ private:
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DeviceSinkAPI *m_deviceSinkAPI;
     SDRDaemonChannelSink *m_channelSink;
+    SDRDaemonChannelSource *m_channelSource;
+
+    bool m_abort;
 
     void loadSettings();
     void setLoggingOptions();

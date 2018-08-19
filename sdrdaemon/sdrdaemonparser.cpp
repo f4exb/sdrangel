@@ -146,21 +146,30 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
 
     // device type
 
-    QString deviceType = m_parser.value(m_deviceTypeOption);
-
-    QRegExp deviceTypeRegex("^[A-Z][A-Za-z0-9]+$");
-    QRegExpValidator deviceTypeValidator(deviceTypeRegex);
-
-    if (deviceTypeValidator.validate(deviceType, pos) == QValidator::Acceptable)
+    if (m_parser.isSet(m_deviceTypeOption))
     {
-        m_deviceType = deviceType;
-        qDebug() << "SDRDaemonParser::parse: device type: " << m_deviceType;
+        QString deviceType = m_parser.value(m_deviceTypeOption);
+
+        QRegExp deviceTypeRegex("^[A-Z][A-Za-z0-9]+$");
+        QRegExpValidator deviceTypeValidator(deviceTypeRegex);
+
+        if (deviceTypeValidator.validate(deviceType, pos) == QValidator::Acceptable)
+        {
+            m_deviceType = deviceType;
+            qDebug() << "SDRDaemonParser::parse: device type: " << m_deviceType;
+        }
+        else
+        {
+            m_deviceType = m_tx ? "FileSink" : "TestSource";
+            qWarning() << "SDRDaemonParser::parse: device type invalid. Defaulting to " << m_deviceType;
+        }
     }
     else
     {
         m_deviceType = m_tx ? "FileSink" : "TestSource";
-        qWarning() << "SDRDaemonParser::parse: device type invalid. Defaulting to " << m_deviceType;
+        qInfo() << "SDRDaemonParser::parse: device type not specified. defaulting to " << m_deviceType;
     }
+
 
     // serial
     m_hasSerial = m_parser.isSet(m_serialOption);

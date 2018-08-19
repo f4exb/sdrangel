@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx)                                                   //
+// SDRdaemon source channel (Tx)                                                 //
 //                                                                               //
 // SDRdaemon is a detached SDR front end that handles the interface with a       //
 // physical device and sends or receives the I/Q samples stream to or from a     //
@@ -20,30 +20,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
-#define SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
+#ifndef SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSOURCE_H_
+#define SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSOURCE_H_
 
-#include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "dsp/basebandsamplesource.h"
+#include "channel/channelsourceapi.h"
 
-class DeviceSourceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
+class ThreadedBasebandSampleSource;
+class UpChannelizer;
+class DeviceSinkAPI;
 
-class SDRDaemonChannelSink : public BasebandSampleSink, public ChannelSinkAPI {
+class SDRDaemonChannelSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 public:
-    SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI);
-    virtual ~SDRDaemonChannelSink();
+    SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI);
+    ~SDRDaemonChannelSource();
     virtual void destroy() { delete this; }
 
-    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
+    virtual void pull(Sample& sample);
     virtual void start();
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual void getTitle(QString& title) { title = "SDRDaemon Sink"; }
+    virtual void getTitle(QString& title) { title = "SDRDaemon Source"; }
     virtual qint64 getCenterFrequency() const { return 0; }
 
     virtual QByteArray serialize() const;
@@ -53,11 +53,13 @@ public:
     static const QString m_channelId;
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
+    DeviceSinkAPI *m_deviceAPI;
+    ThreadedBasebandSampleSource* m_threadedChannelizer;
+    UpChannelizer* m_channelizer;
 
     bool m_running;
+    uint32_t m_samplesCount;
 };
 
-#endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */
+
+#endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSOURCE_H_ */

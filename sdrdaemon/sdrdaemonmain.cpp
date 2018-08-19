@@ -38,6 +38,7 @@
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
 #include "channel/sdrdaemonchannelsink.h"
+#include "channel/sdrdaemonchannelsource.h"
 #include "sdrdaemonparser.h"
 #include "sdrdaemonmain.h"
 
@@ -48,7 +49,8 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
     m_logger(logger),
     m_settings(),
     m_dspEngine(DSPEngine::instance()),
-    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
+    m_abort(false)
 {
     qDebug() << "SDRDaemonMain::SDRDaemonMain: start";
 
@@ -87,6 +89,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
     m_deviceSourceAPI = 0;
     m_deviceSinkAPI = 0;
     m_channelSink = 0;
+    m_channelSource = 0;
 
     if (m_tx)
     {
@@ -103,11 +106,12 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
             QDebug info = qInfo();
             info.noquote();
             info << msg;
+            m_channelSource = new SDRDaemonChannelSource(m_deviceSinkAPI);
         }
         else
         {
             qCritical("SDRDaemonMain::SDRDaemonMain: sink device not found aborting");
-            emit finished();
+            m_abort = true;
         }
     }
     else
@@ -130,7 +134,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
         else
         {
             qCritical("SDRDaemonMain::SDRDaemonMain: source device not found aborting");
-            emit finished();
+            m_abort = true;
         }
     }
 
@@ -211,20 +215,20 @@ void SDRDaemonMain::setLoggingOptions()
 
 bool SDRDaemonMain::addSinkDevice()
 {
-    DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
-    dspDeviceSinkEngine->start();
-
-    uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
-
-    m_deviceSinkEngine = dspDeviceSinkEngine;
-
-    m_deviceSinkAPI = new DeviceSinkAPI(0, dspDeviceSinkEngine);
     int deviceIndex = getDeviceIndex();
 
     if (deviceIndex >= 0)
     {
+        DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
+        dspDeviceSinkEngine->start();
+
+        uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
+        char uidCStr[16];
+        sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
+
+        m_deviceSinkEngine = dspDeviceSinkEngine;
+        m_deviceSinkAPI = new DeviceSinkAPI(0, dspDeviceSinkEngine);
+
         PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
         m_deviceSinkAPI->setSampleSinkSequence(samplingDevice.sequence);
         m_deviceSinkAPI->setNbItems(samplingDevice.deviceNbItems);
@@ -246,20 +250,20 @@ bool SDRDaemonMain::addSinkDevice()
 
 bool SDRDaemonMain::addSourceDevice()
 {
-    DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
-    dspDeviceSourceEngine->start();
-
-    uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
-
-    m_deviceSourceEngine = dspDeviceSourceEngine;
-
-    m_deviceSourceAPI = new DeviceSourceAPI(0, dspDeviceSourceEngine);
     int deviceIndex = getDeviceIndex();
 
     if (deviceIndex >= 0)
     {
+        DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
+        dspDeviceSourceEngine->start();
+
+        uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
+        char uidCStr[16];
+        sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
+
+        m_deviceSourceEngine = dspDeviceSourceEngine;
+        m_deviceSourceAPI = new DeviceSourceAPI(0, dspDeviceSourceEngine);
+
         PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
         m_deviceSourceAPI->setSampleSourceSequence(samplingDevice.sequence);
         m_deviceSourceAPI->setNbItems(samplingDevice.deviceNbItems);
@@ -307,6 +311,11 @@ void SDRDaemonMain::removeDevice()
         m_deviceSinkEngine->stopGeneration();
 
         // deletes old UI and output object
+
+        if (m_channelSource) {
+            m_channelSource->destroy();
+        }
+
         m_deviceSinkAPI->resetSampleSinkId();
         m_deviceSinkAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
                 m_deviceSinkAPI->getSampleSink());
