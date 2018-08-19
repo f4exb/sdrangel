@@ -27,23 +27,16 @@ These plugins come from the parent code base and have been maintained so that th
 channelrx:
 
   - demodlora
-  - tcpsrc (although it has evolved please use the udpsrc plugin instead)
-
-<h2>Deprecated plugins</h2>
-
-These plugins are still present at least in the code but have been superceded:
-
-  - chanalyzer: the Channel Analyzer channel plugin is superceded by the "new generation" Channel Analyzer NG (chanalyzerng)
 
 <h1>Specific features</h1>
 
 <h2>Multiple device support</h2>
 
-From version 2 SDRangel can integrate more than one hardware device running concurrently.
+Since version 2 SDRangel can integrate more than one hardware device running concurrently.
 
 <h2>Transmission support</h2>
 
-From version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
+Since version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
   - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
@@ -54,11 +47,15 @@ From version 3 transmission or signal generation is supported for BladeRF, HackR
 
 <h2>REST API</h2>
 
-From version 4 a REST API is available to interact with the SDRangel application. More details are provided in the server instance documentation in the `sdrsrv` folder.
+Since version 4 a REST API is available to interact with the SDRangel application. More details are provided in the server instance documentation in the `sdrsrv` folder.
 
 <h2>Server instance</h2>
 
-From version 4 the `sdrangelsrv` binary launches a server mode SDRangel instance that runs wihout the GUI. More information is provided in the Readme file of the `sdrsrv` folder. 
+Since version 4 the `sdrangelsrv` binary launches a server mode SDRangel instance that runs wihout the GUI. More information is provided in the Readme file of the `sdrsrv` folder. 
+
+<h2>Detached RF head server (SDRdaemon)</h2>
+
+Since version 4.1 the previously separated project SDRdaemon has been modified and included in SDRangel. Another binary `sdrdaemonsrv` is provided for handling just the RF part of the SDRangel processing chain. The baseband samples are comunicated via UDP to/from a SDRangel instance. More details are provided in the server instance documentation in the `sdrdaemon` folder.
 
 <h1>Notes on pulseaudio setup</h1>
 

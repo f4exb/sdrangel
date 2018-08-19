@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QCoreApplication>
+
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGLoggingInfo.h"
 #include "SWGDeviceSettings.h"
@@ -23,6 +25,13 @@
 #include "SWGDeviceReport.h"
 #include "SWGErrorResponse.h"
 
+#include "dsp/dsptypes.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
+#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
+#include "dsp/devicesamplesink.h"
+#include "dsp/devicesamplesource.h"
 #include "webapiadapterdaemon.h"
 #include "sdrdaemonmain.h"
 #include "loggerwithfile.h"
@@ -43,12 +52,71 @@ WebAPIAdapterDaemon::~WebAPIAdapterDaemon()
 }
 
 int WebAPIAdapterDaemon::daemonInstanceSummary(
-        SWGSDRangel::SWGDaemonSummaryResponse& response __attribute__((unused)),
-        SWGSDRangel::SWGErrorResponse& error)
+        SWGSDRangel::SWGDaemonSummaryResponse& response,
+        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+    response.init();
+    *response.getAppname() = QCoreApplication::applicationName();
+    *response.getVersion() = QCoreApplication::applicationVersion();
+    *response.getQtVersion() = QString(QT_VERSION_STR);
+    response.setDspRxBits(SDR_RX_SAMP_SZ);
+    response.setDspTxBits(SDR_TX_SAMP_SZ);
+    response.setPid(QCoreApplication::applicationPid());
+#if QT_VERSION >= 0x050400
+    *response.getArchitecture() = QString(QSysInfo::currentCpuArchitecture());
+    *response.getOs() = QString(QSysInfo::prettyProductName());
+#endif
+
+    SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
+    logging->init();
+    logging->setDumpToFile(m_sdrDaemonMain.m_logger->getUseFileLogger() ? 1 : 0);
+
+    if (logging->getDumpToFile()) {
+        m_sdrDaemonMain.m_logger->getLogFileName(*logging->getFileName());
+        m_sdrDaemonMain.m_logger->getFileMinMessageLevelStr(*logging->getFileLevel());
+    }
+
+    m_sdrDaemonMain.m_logger->getConsoleMinMessageLevelStr(*logging->getConsoleLevel());
+
+    SWGSDRangel::SWGSamplingDevice *samplingDevice = response.getSamplingDevice();
+    samplingDevice->setTx(m_sdrDaemonMain.m_tx ? 1 : 0);
+    samplingDevice->setHwType(new QString(m_sdrDaemonMain.m_deviceType));
+    samplingDevice->setIndex(0);
+
+    if (m_sdrDaemonMain.m_tx)
+    {
+        QString state;
+        m_sdrDaemonMain.m_deviceSinkAPI->getDeviceEngineStateStr(state);
+        samplingDevice->setState(new QString(state));
+        samplingDevice->setSerial(new QString(m_sdrDaemonMain.m_deviceSinkAPI->getSampleSinkSerial()));
+        samplingDevice->setSequence(m_sdrDaemonMain.m_deviceSinkAPI->getSampleSinkSequence());
+        samplingDevice->setNbStreams(m_sdrDaemonMain.m_deviceSinkAPI->getNbItems());
+        samplingDevice->setStreamIndex(m_sdrDaemonMain.m_deviceSinkAPI->getItemIndex());
+        DeviceSampleSink *sampleSink = m_sdrDaemonMain.m_deviceSinkEngine->getSink();
+
+        if (sampleSink) {
+            samplingDevice->setCenterFrequency(sampleSink->getCenterFrequency());
+            samplingDevice->setBandwidth(sampleSink->getSampleRate());
+        }
+    }
+    else
+    {
+        QString state;
+        m_sdrDaemonMain.m_deviceSourceAPI->getDeviceEngineStateStr(state);
+        samplingDevice->setState(new QString(state));
+        samplingDevice->setSerial(new QString(m_sdrDaemonMain.m_deviceSourceAPI->getSampleSourceSerial()));
+        samplingDevice->setSequence(m_sdrDaemonMain.m_deviceSourceAPI->getSampleSourceSequence());
+        samplingDevice->setNbStreams(m_sdrDaemonMain.m_deviceSourceAPI->getNbItems());
+        samplingDevice->setStreamIndex(m_sdrDaemonMain.m_deviceSourceAPI->getItemIndex());
+        DeviceSampleSource *sampleSource = m_sdrDaemonMain.m_deviceSourceEngine->getSource();
+
+        if (sampleSource) {
+            samplingDevice->setCenterFrequency(sampleSource->getCenterFrequency());
+            samplingDevice->setBandwidth(sampleSource->getSampleRate());
+        }
+    }
+
+    return 200;
 }
 
 int WebAPIAdapterDaemon::daemonInstanceLoggingGet(

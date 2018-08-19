@@ -1506,6 +1506,8 @@ definitions:
       os:
         description: "Descriptive text of the operating system running the instance (available with Qt >= 5.4)"
         type: string
+      logging:
+        $ref: "#/definitions/LoggingInfo"
       samplingDevice:
         $ref: "#/definitions/SamplingDevice"
 

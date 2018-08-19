@@ -44,6 +44,8 @@ SWGDaemonSummaryResponse::SWGDaemonSummaryResponse() {
     m_architecture_isSet = false;
     os = nullptr;
     m_os_isSet = false;
+    logging = nullptr;
+    m_logging_isSet = false;
     sampling_device = nullptr;
     m_sampling_device_isSet = false;
 }
@@ -70,6 +72,8 @@ SWGDaemonSummaryResponse::init() {
     m_architecture_isSet = false;
     os = new QString("");
     m_os_isSet = false;
+    logging = new SWGLoggingInfo();
+    m_logging_isSet = false;
     sampling_device = new SWGSamplingDevice();
     m_sampling_device_isSet = false;
 }
@@ -93,6 +97,9 @@ SWGDaemonSummaryResponse::cleanup() {
     }
     if(os != nullptr) { 
         delete os;
+    }
+    if(logging != nullptr) { 
+        delete logging;
     }
     if(sampling_device != nullptr) { 
         delete sampling_device;
@@ -125,6 +132,8 @@ SWGDaemonSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&architecture, pJson["architecture"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&os, pJson["os"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
     
     ::SWGSDRangel::setValue(&sampling_device, pJson["samplingDevice"], "SWGSamplingDevice", "SWGSamplingDevice");
     
@@ -167,6 +176,9 @@ SWGDaemonSummaryResponse::asJsonObject() {
     }
     if(os != nullptr && *os != QString("")){
         toJsonValue(QString("os"), os, obj, QString("QString"));
+    }
+    if((logging != nullptr) && (logging->isSet())){
+        toJsonValue(QString("logging"), logging, obj, QString("SWGLoggingInfo"));
     }
     if((sampling_device != nullptr) && (sampling_device->isSet())){
         toJsonValue(QString("samplingDevice"), sampling_device, obj, QString("SWGSamplingDevice"));
@@ -255,6 +267,16 @@ SWGDaemonSummaryResponse::setOs(QString* os) {
     this->m_os_isSet = true;
 }
 
+SWGLoggingInfo*
+SWGDaemonSummaryResponse::getLogging() {
+    return logging;
+}
+void
+SWGDaemonSummaryResponse::setLogging(SWGLoggingInfo* logging) {
+    this->logging = logging;
+    this->m_logging_isSet = true;
+}
+
 SWGSamplingDevice*
 SWGDaemonSummaryResponse::getSamplingDevice() {
     return sampling_device;
@@ -278,6 +300,7 @@ SWGDaemonSummaryResponse::isSet(){
         if(appname != nullptr && *appname != QString("")){ isObjectUpdated = true; break;}
         if(architecture != nullptr && *architecture != QString("")){ isObjectUpdated = true; break;}
         if(os != nullptr && *os != QString("")){ isObjectUpdated = true; break;}
+        if(logging != nullptr && logging->isSet()){ isObjectUpdated = true; break;}
         if(sampling_device != nullptr && sampling_device->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

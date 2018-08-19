@@ -140,6 +140,10 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         qWarning() << "SDRDaemonParser::parse: data port invalid. Defaulting to " << m_dataPort;
     }
 
+    // tx
+    m_tx = m_parser.isSet(m_txOption);
+    qDebug() << "SDRDaemonParser::parse: tx: " << m_tx;
+
     // device type
 
     QString deviceType = m_parser.value(m_deviceTypeOption);
@@ -147,16 +151,16 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
     QRegExp deviceTypeRegex("^[A-Z][A-Za-z0-9]+$");
     QRegExpValidator deviceTypeValidator(deviceTypeRegex);
 
-    if (deviceTypeValidator.validate(deviceType, pos) == QValidator::Acceptable) {
+    if (deviceTypeValidator.validate(deviceType, pos) == QValidator::Acceptable)
+    {
         m_deviceType = deviceType;
         qDebug() << "SDRDaemonParser::parse: device type: " << m_deviceType;
-    } else {
+    }
+    else
+    {
+        m_deviceType = m_tx ? "FileSink" : "TestSource";
         qWarning() << "SDRDaemonParser::parse: device type invalid. Defaulting to " << m_deviceType;
     }
-
-    // tx
-    m_tx = m_parser.isSet(m_txOption);
-    qDebug() << "SDRDaemonParser::parse: tx: " << m_tx;
 
     // serial
     m_hasSerial = m_parser.isSet(m_serialOption);

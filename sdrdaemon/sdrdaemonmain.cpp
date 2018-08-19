@@ -215,7 +215,6 @@ bool SDRDaemonMain::addSinkDevice()
     char uidCStr[16];
     sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
-    m_deviceSourceEngine = 0;
     m_deviceSinkEngine = dspDeviceSinkEngine;
 
     m_deviceSinkAPI = new DeviceSinkAPI(0, dspDeviceSinkEngine);
@@ -250,6 +249,8 @@ bool SDRDaemonMain::addSourceDevice()
     uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
     char uidCStr[16];
     sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
+
+    m_deviceSourceEngine = dspDeviceSourceEngine;
 
     m_deviceSourceAPI = new DeviceSourceAPI(0, dspDeviceSourceEngine);
     int deviceIndex = getDeviceIndex();

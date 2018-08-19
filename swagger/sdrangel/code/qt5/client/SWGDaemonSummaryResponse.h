@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGLoggingInfo.h"
 #include "SWGSamplingDevice.h"
 #include <QString>
 
@@ -67,6 +68,9 @@ public:
     QString* getOs();
     void setOs(QString* os);
 
+    SWGLoggingInfo* getLogging();
+    void setLogging(SWGLoggingInfo* logging);
+
     SWGSamplingDevice* getSamplingDevice();
     void setSamplingDevice(SWGSamplingDevice* sampling_device);
 
@@ -97,6 +101,9 @@ private:
 
     QString* os;
     bool m_os_isSet;
+
+    SWGLoggingInfo* logging;
+    bool m_logging_isSet;
 
     SWGSamplingDevice* sampling_device;
     bool m_sampling_device_isSet;
