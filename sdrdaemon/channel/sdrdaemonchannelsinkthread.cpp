@@ -20,6 +20,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QUdpSocket>
 
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
@@ -31,14 +32,18 @@ SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQ
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
-    m_cm256(cm256)
+    m_cm256(cm256),
+    m_address(QHostAddress::LocalHost),
+    m_port(9090)
 {
+    m_socket = new QUdpSocket(this);
     connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()));
 }
 
 SDRDaemonChannelSinkThread::~SDRDaemonChannelSinkThread()
 {
     stopWork();
+    delete m_socket;
 }
 
 void SDRDaemonChannelSinkThread::startWork()
@@ -69,7 +74,7 @@ void SDRDaemonChannelSinkThread::run()
         sleep(1); // Do nothing as everything is in the data handler (dequeuer)
     }
 
-    m_running = false;    
+    m_running = false;
     qDebug("SDRDaemonChannelSinkThread::run: end");
 }
 
@@ -88,7 +93,8 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     {
         for (int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
         {
-            // TODO: send block via UDP here
+            // send block via UDP
+            m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, m_port);
             usleep(txDelay);
         }
     }
@@ -109,7 +115,7 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             txBlockx[i].m_header.m_blockIndex = i;
             descriptorBlocks[i].Block = (void *) &(txBlockx[i].m_protectedBlock);
             descriptorBlocks[i].Index = txBlockx[i].m_header.m_blockIndex;
-        }        
+        }
 
         // Encode FEC blocks
         if (m_cm256->cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
@@ -117,7 +123,7 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             qWarning("SDRDaemonChannelSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
             // TODO: send without FEC changing meta data to set indication of no FEC
             return true;
-        }       
+        }
 
         // Merge FEC with data to transmit
         for (int i = 0; i < cm256Params.RecoveryCount; i++)
@@ -128,7 +134,8 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         // Transmit all blocks
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
         {
-            // TODO: send block via UDP here
+            // send block via UDP
+            m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, m_port);
             usleep(txDelay);
         }
     }
@@ -147,5 +154,5 @@ void SDRDaemonChannelSinkThread::handleData()
         {
             delete dataBlock;
         }
-    }    
+    }
 }

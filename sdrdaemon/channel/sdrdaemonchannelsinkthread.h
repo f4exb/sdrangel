@@ -23,10 +23,12 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QHostAddress>
 
 class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
 class CM256;
+class QUdpSocket;
 
 class SDRDaemonChannelSinkThread : public QThread {
     Q_OBJECT
@@ -38,14 +40,20 @@ public:
     void startWork();
 	void stopWork();
 
+    void setAddress(QString& address) { m_address.setAddress(address); }
+    void setPort(unsigned int port) { m_port = port; }
+
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
     SDRDaemonDataQueue *m_dataQueue;
-
     CM256 *m_cm256;                       //!< CM256 library object
+
+    QHostAddress m_address;
+    unsigned int m_port;
+    QUdpSocket *m_socket;
 
     void run();
     bool handleDataBlock(SDRDaemonDataBlock& dataBlock);
