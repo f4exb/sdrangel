@@ -24,6 +24,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "device/devicesourceapi.h"
+#include "channel/sdrdaemonchannelsinkthread.h"
 #include "sdrdaemonchannelsink.h"
 
 const QString SDRDaemonChannelSink::m_channelIdURI = "sdrangel.channel.sdrdaemonsink";
@@ -32,7 +33,11 @@ const QString SDRDaemonChannelSink::m_channelId = "SDRDaemonChannelSink";
 SDRDaemonChannelSink::SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_running(false)
+        m_running(false),
+        m_sinkThread(0),
+        m_txBlockIndex(0),
+        m_frameCount(0),
+        m_sampleIndex(0)
 {
     setObjectName(m_channelId);
 
@@ -40,6 +45,8 @@ SDRDaemonChannelSink::SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
 }
 
 SDRDaemonChannelSink::~SDRDaemonChannelSink()
@@ -58,6 +65,8 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
 void SDRDaemonChannelSink::start()
 {
     qDebug("SDRDaemonChannelSink::start");
+    if (m_running) { stop(); }
+    m_sinkThread = new SDRDaemonChannelSinkThread(&m_dataQueue, m_cm256p);
     m_running = true;
 }
 

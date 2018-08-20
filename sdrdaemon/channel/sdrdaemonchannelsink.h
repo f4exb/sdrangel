@@ -23,12 +23,16 @@
 #ifndef SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
 #define SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
 
+#include "cm256.h"
+
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
+#include "channel/sdrdaemondataqueue.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+class SDRDaemonChannelSinkThread;
 
 class SDRDaemonChannelSink : public BasebandSampleSink, public ChannelSinkAPI {
     Q_OBJECT
@@ -56,8 +60,16 @@ private:
     DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
-
     bool m_running;
+
+    SDRDaemonDataQueue m_dataQueue;
+    SDRDaemonChannelSinkThread *m_sinkThread;
+    CM256 m_cm256;
+    CM256 *m_cm256p;
+
+    int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
+    uint16_t m_frameCount;               //!< transmission frame count
+    int m_sampleIndex;                   //!< Current sample index in protected block data
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */
