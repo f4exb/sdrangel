@@ -29,57 +29,57 @@
 
 #define UDPSINKFEC_UDPSIZE 512
 #define UDPSINKFEC_NBORIGINALBLOCKS 128
-#define UDPSINKFEC_NBTXBLOCKS 8
-
-namespace SDRDaemon {
+//#define UDPSINKFEC_NBTXBLOCKS 8
 
 #pragma pack(push, 1)
-struct MetaDataFEC
+struct SDRDaemonMetaDataFEC
 {
     uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
     uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-    uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample
-    uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample
+    uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample (2 or 3)
+    uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample (8 t0 24)
     uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
     uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
     uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
     uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
     uint32_t m_crc32;             //!< 24 CRC32 of the above
 
-    bool operator==(const MetaDataFEC& rhs)
+    bool operator==(const SDRDaemonMetaDataFEC& rhs)
     {
         return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
     }
 
     void init()
     {
-        memset((void *) this, 0, sizeof(MetaDataFEC));
+        memset((void *) this, 0, sizeof(SDRDaemonMetaDataFEC));
         m_nbFECBlocks = -1;
     }
 };
 
-struct Header
+struct SDRDaemonHeader
 {
     uint16_t m_frameIndex;
     uint8_t  m_blockIndex;
     uint8_t  m_filler;
 };
 
-static const int samplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(Header)) / sizeof(Sample);
+static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
+static const int SDRDaemonNbOrginalBlocks = UDPSINKFEC_NBORIGINALBLOCKS;
+static const int SDRDaemonSamplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader)) / (SDR_RX_SAMP_SZ/4);
 
-struct ProtectedBlock
+struct SDRDaemonProtectedBlock
 {
-    Sample m_samples[samplesPerBlock];
+    Sample m_samples[SDRDaemonSamplesPerBlock];
 };
 
-struct SuperBlock
+struct SDRDaemonSuperBlock
 {
-    Header         m_header;
-    ProtectedBlock m_protectedBlock;
+    SDRDaemonHeader         m_header;
+    SDRDaemonProtectedBlock m_protectedBlock;
 };
 #pragma pack(pop)
 
-struct TxControlBlock
+struct SDRDaemonTxControlBlock
 {
     bool m_processed;
     uint16_t m_frameIndex;
@@ -87,14 +87,11 @@ struct TxControlBlock
     int m_txDelay;
 };
 
-class DataBlock
+class SDRDaemonDataBlock
 {
-    SuperBlock     m_superBlock;
-    TxControlBlock m_controlBlock;
+public:
+    SDRDaemonTxControlBlock m_controlBlock;
+    SDRDaemonSuperBlock     m_superBlock;
 };
-
-} // namespace SDRDaemon
-
-
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_ */

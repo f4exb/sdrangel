@@ -20,34 +20,67 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_
-#define SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_
+#include <QDebug>
+#include <QMutexLocker>
+#include "channel/sdrdaemondataqueue.h"
+#include "channel/sdrdaemondatablock.h"
 
-#include <QObject>
-#include <QMutex>
-#include <QQueue>
+SDRDaemonDataQueue::SDRDaemonDataQueue(QObject* parent) :
+	QObject(parent),
+	m_lock(QMutex::Recursive),
+	m_queue()
+{
+}
 
-class SDRDaemonDataBlock;
+SDRDaemonDataQueue::~SDRDaemonDataQueue()
+{
+	SDRDaemonDataBlock* data;
 
-class SDRDaemonDataQueue : public QObject {
-    Q_OBJECT
+	while ((data = pop()) != 0)
+	{
+		qDebug() << "SDRDaemonDataQueue::~SDRDaemonDataQueue: data block was still in queue";
+		delete data;
+	}
+}
 
-public:
-    SDRDaemonDataQueue(QObject* parent = NULL);
-    ~SDRDaemonDataQueue();
+void SDRDaemonDataQueue::push(SDRDaemonDataBlock* data, bool emitSignal)
+{
+	if (data)
+	{
+		m_lock.lock();
+		m_queue.append(data);
+		m_lock.unlock();
+	}
 
-    void push(SDRDaemonDataBlock* dataBlock, bool emitSignal = true);  //!< Push daa block onto queue
-    SDRDaemonDataBlock* pop(); //!< Pop message from queue
+	if (emitSignal)
+	{
+		emit dataBlockEnqueued();
+	}
+}
 
-    int size(); //!< Returns queue size
-    void clear(); //!< Empty queue
+SDRDaemonDataBlock* SDRDaemonDataQueue::pop()
+{
+	QMutexLocker locker(&m_lock);
 
-signals:
-    void dataBlockEnqueued();
+	if (m_queue.isEmpty())
+	{
+		return 0;
+	}
+	else
+	{
+		return m_queue.takeFirst();
+	}
+}
 
-private:
-    QMutex m_lock;
-    QQueue<SDRDaemonDataBlock*> m_queue;
-};
+int SDRDaemonDataQueue::size()
+{
+	QMutexLocker locker(&m_lock);
 
-#endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_ */
+	return m_queue.size();
+}
+
+void SDRDaemonDataQueue::clear()
+{
+	QMutexLocker locker(&m_lock);
+	m_queue.clear();
+}
