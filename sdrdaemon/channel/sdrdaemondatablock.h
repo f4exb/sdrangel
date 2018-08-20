@@ -36,17 +36,22 @@ struct SDRDaemonMetaDataFEC
 {
     uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
     uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-    uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample (2 or 3)
-    uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample (8 t0 24)
-    uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
-    uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
-    uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
-    uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
-    uint32_t m_crc32;             //!< 24 CRC32 of the above
+    uint8_t  m_bigEndian;         //!<  9 1 if encoded as big endian, 0 for little endian
+    uint8_t  m_reserved1;         //!< 10 reserved
+    uint8_t  m_reserved2;         //!< 11 reserved
+    uint8_t  m_reserved3;         //!< 12 reserved
+    uint8_t  m_sampleBytes;       //!< 13 number of bytes per sample (2 or 3)
+    uint8_t  m_sampleBits;        //!< 14 number of effective bits per sample (8 t0 24)
+    uint8_t  m_nbOriginalBlocks;  //!< 15 number of blocks with original (protected) data
+    uint8_t  m_nbFECBlocks;       //!< 16 number of blocks carrying FEC
+    uint32_t m_tv_sec;            //!< 20 seconds of timestamp at start time of super-frame processing
+    uint32_t m_tv_usec;           //!< 24 microseconds of timestamp at start time of super-frame processing
+    uint32_t m_crc32;             //!< 28 CRC32 of the above
+    // 32 bytes
 
     bool operator==(const SDRDaemonMetaDataFEC& rhs)
     {
-        return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
+        return (memcmp((const void *) this, (const void *) &rhs, 16) == 0); // Only the 16 first bytes are relevant
     }
 
     void init()
