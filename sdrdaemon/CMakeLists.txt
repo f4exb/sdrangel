@@ -48,12 +48,14 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/httpserver
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CM256CC_INCLUDE_DIR}    
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(sdrdaemon
     ${QT_LIBRARIES}
+    ${CM256CC_LIBRARIES}
     sdrbase
     logging
 )

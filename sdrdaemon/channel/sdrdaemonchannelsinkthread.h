@@ -26,12 +26,13 @@
 
 class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
+class CM256;
 
 class SDRDaemonChannelSinkThread : public QThread {
     Q_OBJECT
 
 public:
-    SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
+    SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent = 0);
     ~SDRDaemonChannelSinkThread();
 
     void startWork();
@@ -43,6 +44,8 @@ private:
 	bool m_running;
 
     SDRDaemonDataQueue *m_dataQueue;
+
+    CM256 *m_cm256;                       //!< CM256 library object
 
     void run();
     bool handleDataBlock(SDRDaemonDataBlock& dataBlock);

@@ -25,10 +25,13 @@
 #include "channel/sdrdaemondatablock.h"
 #include "channel/sdrdaemonchannelsinkthread.h"
 
-SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
+#include "cm256.h"
+
+SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent) :
     QThread(parent),
     m_running(false),
-    m_dataQueue(dataQueue)
+    m_dataQueue(dataQueue),
+    m_cm256(cm256)
 {
     connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()));
 }
@@ -72,6 +75,65 @@ void SDRDaemonChannelSinkThread::run()
 
 bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 {
+	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
+	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
+	SDRDaemonProtectedBlock fecBlocks[256];   //!< FEC data
+
+    uint16_t frameIndex = dataBlock.m_controlBlock.m_frameIndex;
+    int nbBlocksFEC = dataBlock.m_controlBlock.m_nbBlocksFEC;
+    int txDelay = dataBlock.m_controlBlock.m_txDelay;
+    SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
+
+    if ((nbBlocksFEC == 0) || !m_cm256) // Do not FEC encode
+    {
+        for (int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+        {
+            // TODO: send block via UDP here
+            usleep(txDelay);
+        }
+    }
+    else
+    {
+        cm256Params.BlockBytes = sizeof(SDRDaemonProtectedBlock);
+        cm256Params.OriginalCount = SDRDaemonNbOrginalBlocks;
+        cm256Params.RecoveryCount = nbBlocksFEC;
+
+        // Fill pointers to data
+        for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; ++i)
+        {
+            if (i >= cm256Params.OriginalCount) {
+                memset((void *) &txBlockx[i].m_protectedBlock, 0, sizeof(SDRDaemonProtectedBlock));
+            }
+
+            txBlockx[i].m_header.m_frameIndex = frameIndex;
+            txBlockx[i].m_header.m_blockIndex = i;
+            descriptorBlocks[i].Block = (void *) &(txBlockx[i].m_protectedBlock);
+            descriptorBlocks[i].Index = txBlockx[i].m_header.m_blockIndex;
+        }        
+
+        // Encode FEC blocks
+        if (m_cm256->cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
+        {
+            qWarning("SDRDaemonChannelSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
+            // TODO: send without FEC changing meta data to set indication of no FEC
+            return true;
+        }       
+
+        // Merge FEC with data to transmit
+        for (int i = 0; i < cm256Params.RecoveryCount; i++)
+        {
+            txBlockx[i + cm256Params.OriginalCount].m_protectedBlock = fecBlocks[i];
+        }
+
+        // Transmit all blocks
+        for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
+        {
+            // TODO: send block via UDP here
+            usleep(txDelay);
+        }
+    }
+
+    dataBlock.m_controlBlock.m_processed = true;
     return true;
 }
 

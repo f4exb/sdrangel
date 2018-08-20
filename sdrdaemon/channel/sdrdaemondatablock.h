@@ -96,7 +96,7 @@ class SDRDaemonDataBlock
 {
 public:
     SDRDaemonTxControlBlock m_controlBlock;
-    SDRDaemonSuperBlock     m_superBlock;
+    SDRDaemonSuperBlock     m_superBlocks[256];
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_ */
