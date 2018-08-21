@@ -63,7 +63,6 @@ public:
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
 
     void setSampleBytes(uint8_t sampleBytes) { m_sampleBytes = sampleBytes; }
-    void setSampleBits(uint8_t sampleBits) { m_sampleBits = sampleBits; }
     void setNbBlocksFEC(int nbBlocksFEC);
     void setTxDelay(int txDelay);
 
@@ -92,7 +91,6 @@ private:
     uint64_t m_centerFrequency;
     uint32_t m_sampleRate;
     uint8_t m_sampleBytes;
-    uint8_t m_sampleBits;
     int m_nbBlocksFEC;
     int m_txDelay;
 };
