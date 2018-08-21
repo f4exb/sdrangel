@@ -47,7 +47,7 @@ SDRDaemonChannelSink::SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI) :
         m_dataBlock(0),
         m_centerFrequency(0),
         m_sampleRate(48000),
-        m_sampleBytes(SDR_RX_SAMP_SZ/8),
+        m_sampleBytes(SDR_RX_SAMP_SZ == 24 ? 4 : 2),
         m_nbBlocksFEC(0),
         m_txDelay(100)
 {
@@ -128,7 +128,7 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
                 qDebug() << "SDRDaemonChannelSink::feed: meta: "
                         << "|" << metaData.m_centerFrequency
                         << ":" << metaData.m_sampleRate
-                        << ":" << (int) (metaData.m_sampleBytes & 0xF)
+                        << ":" << (int) metaData.m_sampleBytes
                         << ":" << (int) metaData.m_sampleBits
                         << "|" << (int) metaData.m_nbOriginalBlocks
                         << ":" << (int) metaData.m_nbFECBlocks

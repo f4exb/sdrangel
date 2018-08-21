@@ -62,7 +62,6 @@ public:
     /** Set sample rate given in Hz */
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
 
-    void setSampleBytes(uint8_t sampleBytes) { m_sampleBytes = sampleBytes; }
     void setNbBlocksFEC(int nbBlocksFEC);
     void setTxDelay(int txDelay);
 

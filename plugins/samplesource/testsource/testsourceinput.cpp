@@ -175,7 +175,7 @@ bool TestSourceInput::handleMessage(const Message& message)
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        qDebug() << "TestSourceInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
         if (conf.getStartStop())
         {
@@ -197,7 +197,7 @@ bool TestSourceInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "TestSourceInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
