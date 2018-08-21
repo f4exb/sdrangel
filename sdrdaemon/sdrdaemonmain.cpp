@@ -130,6 +130,8 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
             info.noquote();
             info << msg;
             m_channelSink = new SDRDaemonChannelSink(m_deviceSourceAPI);
+            m_channelSink->setNbBlocksFEC(parser.getNbBlocksFEC());
+            m_channelSink->setTxDelay(parser.getTxDelay());
         }
         else
         {

@@ -42,6 +42,8 @@ public:
     bool getTx() const { return m_tx; }
     const QString& getSerial() const { return m_serial; }
     uint16_t getSequence() const { return m_sequence; }
+    int getTxDelay() const { return m_txDelay; }
+    int getNbBlocksFEC() const { return m_nbBlocksFEC; } 
 
     bool hasSequence() const { return m_hasSequence; }
     bool hasSerial() const { return m_hasSerial; }
@@ -55,6 +57,8 @@ private:
     bool     m_tx;            //!< True for Tx
     QString  m_serial;        //!< Serial number of the device
     uint16_t m_sequence;      //!< Sequence of the device for the same type of device in enumeration process
+    int      m_txDelay;       //!< Initial delay between transmission of UDP blocks in milliseconds
+    int      m_nbBlocksFEC;   //!< Number of FEC blocks per frame; 
     bool     m_hasSerial;     //!< True if serial was specified
     bool     m_hasSequence;   //!< True if sequence was specified
 
@@ -67,6 +71,8 @@ private:
     QCommandLineOption m_txOption;
     QCommandLineOption m_serialOption;
     QCommandLineOption m_sequenceOption;
+    QCommandLineOption m_txDelayOption;
+    QCommandLineOption m_nbBlocksFECOption;
 };
 
 

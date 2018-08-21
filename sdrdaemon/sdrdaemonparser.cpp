@@ -54,8 +54,15 @@ SDRDaemonParser::SDRDaemonParser() :
         "serial"),
     m_sequenceOption(QStringList() << "i" << "sequence",
         "Device sequence index in enumeration for the same device type.",
-        "sequence")
-
+        "sequence"),
+    m_txDelayOption(QStringList() << "d" << "tx-delay",
+        "delay between transmission of UDP blocks (ms).",
+        "txDelay",
+        "100"),        
+    m_nbBlocksFECOption(QStringList() << "f" << "fec-blocks",
+        "Number of FEC blocks per frame.",
+        "nbBlocksFEC",
+        "8")
 {
     m_serverAddress = "127.0.0.1";
     m_serverPort = 9091;
@@ -64,6 +71,8 @@ SDRDaemonParser::SDRDaemonParser() :
     m_deviceType = "TestSource";
     m_tx = false;
     m_sequence = 0;
+    m_txDelay = 100;
+    m_nbBlocksFEC = 8;
     m_hasSequence = false;
     m_hasSerial = false;
 
@@ -79,6 +88,8 @@ SDRDaemonParser::SDRDaemonParser() :
     m_parser.addOption(m_txOption);
     m_parser.addOption(m_serialOption);
     m_parser.addOption(m_sequenceOption);
+    m_parser.addOption(m_txDelayOption);
+    m_parser.addOption(m_nbBlocksFECOption);
 }
 
 SDRDaemonParser::~SDRDaemonParser()
@@ -193,6 +204,32 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
             qDebug() << "SDRDaemonParser::parse: sequence: " << m_sequence;
         } else {
             qWarning() << "SDRDaemonParser::parse: sequence invalid. Defaulting to " << m_sequence;
+        }
+    }
+
+    // Tx delay
+    if (m_parser.isSet(m_txDelayOption))
+    {
+        QString txDelayStr = m_parser.value(m_txDelayOption);
+        int txDelay = txDelayStr.toInt(&ok);
+
+        if (ok && (txDelay > 0)) {
+            m_txDelay = txDelay;
+        } else {
+            qWarning() << "SDRDaemonParser::parse: Tx delay invalid. Defaulting to " << m_txDelay;
+        }
+    }
+
+    // nb FEC blocks
+    if (m_parser.isSet(m_nbBlocksFECOption))
+    {
+        QString nbBlocksFECStr = m_parser.value(m_nbBlocksFECOption);
+        int nbBlocksFEC = nbBlocksFECStr.toInt(&ok);
+
+        if (ok && (nbBlocksFEC >= 0) && (nbBlocksFEC < 128)) {
+            m_nbBlocksFEC = nbBlocksFEC;
+        } else {
+            qWarning() << "SDRDaemonParser::parse: Tx number of FEC blocks invalid. Defaulting to " << m_nbBlocksFEC;
         }
     }
 }
