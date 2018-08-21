@@ -37,7 +37,7 @@ SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQ
     m_port(9090)
 {
     m_socket = new QUdpSocket(this);
-    connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()));
+    connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
 }
 
 SDRDaemonChannelSinkThread::~SDRDaemonChannelSinkThread()
