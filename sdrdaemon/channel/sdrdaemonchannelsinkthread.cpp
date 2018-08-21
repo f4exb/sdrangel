@@ -28,6 +28,8 @@
 
 #include "cm256.h"
 
+MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSinkThread::MsgStartStop, Message)
+
 SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent) :
     QThread(parent),
     m_running(false),
@@ -36,20 +38,26 @@ SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQ
     m_address(QHostAddress::LocalHost),
     m_port(9090)
 {
-    m_socket = new QUdpSocket(this);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
 }
 
 SDRDaemonChannelSinkThread::~SDRDaemonChannelSinkThread()
 {
-    stopWork();
-    delete m_socket;
+    qDebug("SDRDaemonChannelSinkThread::~SDRDaemonChannelSinkThread");
+}
+
+void SDRDaemonChannelSinkThread::startStop(bool start)
+{
+    MsgStartStop *msg = MsgStartStop::create(start);
+    m_inputMessageQueue.push(msg);
 }
 
 void SDRDaemonChannelSinkThread::startWork()
 {
     qDebug("SDRDaemonChannelSinkThread::startWork");
 	m_startWaitMutex.lock();
+	m_socket = new QUdpSocket(this);
 	start();
 	while(!m_running)
 		m_startWaiter.wait(&m_startWaitMutex, 100);
@@ -59,6 +67,7 @@ void SDRDaemonChannelSinkThread::startWork()
 void SDRDaemonChannelSinkThread::stopWork()
 {
 	qDebug("SDRDaemonChannelSinkThread::stopWork");
+    delete m_socket;
 	m_running = false;
 	wait();
 }
@@ -153,6 +162,28 @@ void SDRDaemonChannelSinkThread::handleData()
         if (handleDataBlock(*dataBlock))
         {
             delete dataBlock;
+        }
+    }
+}
+
+void SDRDaemonChannelSinkThread::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (MsgStartStop::match(*message))
+        {
+            MsgStartStop* notif = (MsgStartStop*) message;
+            qDebug("SDRDaemonChannelSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+
+            if (notif->getStartStop()) {
+                startWork();
+            } else {
+                stopWork();
+            }
+
+            delete message;
         }
     }
 }

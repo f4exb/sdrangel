@@ -25,6 +25,9 @@
 #include <QWaitCondition>
 #include <QHostAddress>
 
+#include "util/message.h"
+#include "util/messagequeue.h"
+
 class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
 class CM256;
@@ -34,11 +37,29 @@ class SDRDaemonChannelSinkThread : public QThread {
     Q_OBJECT
 
 public:
+    class MsgStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStop* create(bool startStop) {
+            return new MsgStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent = 0);
     ~SDRDaemonChannelSinkThread();
 
-    void startWork();
-	void stopWork();
+    void startStop(bool start);
 
     void setAddress(QString& address) { m_address.setAddress(address); }
     void setPort(unsigned int port) { m_port = port; }
@@ -55,9 +76,15 @@ private:
     unsigned int m_port;
     QUdpSocket *m_socket;
 
+    MessageQueue m_inputMessageQueue;
+
+    void startWork();
+    void stopWork();
+
     void run();
     bool handleDataBlock(SDRDaemonDataBlock& dataBlock);
 
 private slots:
     void handleData();
+    void handleInputMessages();
 };

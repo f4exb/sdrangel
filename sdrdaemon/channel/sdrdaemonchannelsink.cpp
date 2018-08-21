@@ -113,7 +113,7 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
             if (!m_dataBlock) { // on the very first cycle there is no data block allocated
                 m_dataBlock = new SDRDaemonDataBlock();
             }
-            
+
             boost::crc_32_type crc32;
             crc32.process_bytes(&metaData, 20);
             metaData.m_crc32 = crc32.checksum();
@@ -182,7 +182,7 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
             {
                 m_txBlockIndex++;
             }
-        }        
+        }
     }
 }
 
@@ -191,27 +191,27 @@ void SDRDaemonChannelSink::start()
     qDebug("SDRDaemonChannelSink::start");
 
     memset((void *) &m_currentMetaFEC, 0, sizeof(SDRDaemonMetaDataFEC));
-    
-    if (m_running) { 
-        stop(); 
+
+    if (m_running) {
+        stop();
     }
-    
+
     m_sinkThread = new SDRDaemonChannelSinkThread(&m_dataQueue, m_cm256p);
-    m_sinkThread->startWork();
+    m_sinkThread->startStop(true);
     m_running = true;
 }
 
 void SDRDaemonChannelSink::stop()
 {
     qDebug("SDRDaemonChannelSink::stop");
-    
+
     if (m_sinkThread != 0)
     {
-        m_sinkThread->stopWork();
-        delete m_sinkThread;
+        m_sinkThread->startStop(false);
+        m_sinkThread->deleteLater();
         m_sinkThread = 0;
     }
-    
+
     m_running = false;
 }
 
@@ -224,7 +224,7 @@ bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unuse
         qDebug() << "SDRDaemonChannelSink::handleMessage: MsgChannelizerNotification:"
                 << " channelSampleRate: " << notif.getSampleRate()
                 << " offsetFrequency: " << notif.getFrequencyOffset();
-        
+
         if (notif.getSampleRate() > 0) {
             setSampleRate(notif.getSampleRate());
         }
@@ -238,7 +238,7 @@ bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unuse
         qDebug() << "SDRDaemonChannelSink::handleMessage: DSPSignalNotification:"
                 << " inputSampleRate: " << notif.getSampleRate()
                 << " centerFrequency: " << notif.getCenterFrequency();
-        
+
         setCenterFrequency(notif.getCenterFrequency());
 
         return true;
@@ -246,7 +246,7 @@ bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unuse
     else
     {
         return false;
-    }    
+    }
 }
 
 QByteArray SDRDaemonChannelSink::serialize() const
