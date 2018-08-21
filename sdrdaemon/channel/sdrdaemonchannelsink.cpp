@@ -189,15 +189,29 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
 void SDRDaemonChannelSink::start()
 {
     qDebug("SDRDaemonChannelSink::start");
+
     memset((void *) &m_currentMetaFEC, 0, sizeof(SDRDaemonMetaDataFEC));
-    if (m_running) { stop(); }
+    
+    if (m_running) { 
+        stop(); 
+    }
+    
     m_sinkThread = new SDRDaemonChannelSinkThread(&m_dataQueue, m_cm256p);
+    m_sinkThread->startWork();
     m_running = true;
 }
 
 void SDRDaemonChannelSink::stop()
 {
     qDebug("SDRDaemonChannelSink::stop");
+    
+    if (m_sinkThread != 0)
+    {
+        m_sinkThread->stopWork();
+        delete m_sinkThread;
+        m_sinkThread = 0;
+    }
+    
     m_running = false;
 }
 
