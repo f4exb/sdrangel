@@ -23,6 +23,8 @@
 #ifndef SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
 #define SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_
 
+#include <QMutex>
+
 #include "cm256.h"
 
 #include "dsp/basebandsamplesink.h"
@@ -54,6 +56,17 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    /** Set center frequency given in Hz */
+    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency / 1000; }
+
+    /** Set sample rate given in Hz */
+    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
+
+    void setSampleBytes(uint8_t sampleBytes) { m_sampleBytes = sampleBytes; }
+    void setSampleBits(uint8_t sampleBits) { m_sampleBits = sampleBits; }
+    void setNbBlocksFEC(int nbBlocksFEC);
+    void setTxDelay(int txDelay);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -73,7 +86,15 @@ private:
     int m_sampleIndex;                   //!< Current sample index in protected block data
     SDRDaemonSuperBlock m_superBlock;
     SDRDaemonMetaDataFEC m_currentMetaFEC;
-    SDRDaemonDataBlock m_dataBlock;
+    SDRDaemonDataBlock *m_dataBlock;
+    QMutex m_dataBlockMutex;
+
+    uint64_t m_centerFrequency;
+    uint32_t m_sampleRate;
+    uint8_t m_sampleBytes;
+    uint8_t m_sampleBits;
+    int m_nbBlocksFEC;
+    int m_txDelay;
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */

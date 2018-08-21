@@ -81,10 +81,19 @@ struct SDRDaemonSuperBlock
 
 struct SDRDaemonTxControlBlock
 {
+    bool m_complete;
     bool m_processed;
     uint16_t m_frameIndex;
     int m_nbBlocksFEC;
     int m_txDelay;
+
+    SDRDaemonTxControlBlock() {
+        m_complete = false;
+        m_processed = false;
+        m_frameIndex = 0;
+        m_nbBlocksFEC = 0;
+        m_txDelay = 100;
+    }
 };
 
 class SDRDaemonDataBlock
