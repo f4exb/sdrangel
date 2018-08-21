@@ -28,6 +28,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
+#include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "channel/sdrdaemonchannelsinkthread.h"
 #include "sdrdaemonchannelsink.h"
@@ -205,7 +206,36 @@ void SDRDaemonChannelSink::stop()
 
 bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unused)))
 {
-    return false;
+	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
+	{
+		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
+
+        qDebug() << "SDRDaemonChannelSink::handleMessage: MsgChannelizerNotification:"
+                << " channelSampleRate: " << notif.getSampleRate()
+                << " offsetFrequency: " << notif.getFrequencyOffset();
+        
+        if (notif.getSampleRate() > 0) {
+            setSampleRate(notif.getSampleRate());
+        }
+
+		return true;
+	}
+    else if (DSPSignalNotification::match(cmd))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+        qDebug() << "SDRDaemonChannelSink::handleMessage: DSPSignalNotification:"
+                << " inputSampleRate: " << notif.getSampleRate()
+                << " centerFrequency: " << notif.getCenterFrequency();
+        
+        setCenterFrequency(notif.getCenterFrequency());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }    
 }
 
 QByteArray SDRDaemonChannelSink::serialize() const
