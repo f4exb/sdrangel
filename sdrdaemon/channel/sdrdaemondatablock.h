@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <algorithm>
 #include "dsp/dsptypes.h"
 
 #define UDPSINKFEC_UDPSIZE 512
@@ -51,8 +52,15 @@ struct SDRDaemonMetaDataFEC
 
     void init()
     {
-        memset((void *) this, 0, sizeof(SDRDaemonMetaDataFEC));
+        m_centerFrequency = 0;
+        m_sampleRate = 0;
+        m_sampleBytes = 0;
+        m_sampleBits = 0;
+        m_nbOriginalBlocks = 0;
         m_nbFECBlocks = -1;
+        m_tv_sec = 0;
+        m_tv_usec = 0;
+        m_crc32 = 0;
     }
 };
 
@@ -61,6 +69,13 @@ struct SDRDaemonHeader
     uint16_t m_frameIndex;
     uint8_t  m_blockIndex;
     uint8_t  m_filler;
+
+    void init() 
+    {
+        m_frameIndex = 0;
+        m_blockIndex = 0;
+        m_filler = 0;
+    }    
 };
 
 static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
@@ -70,12 +85,22 @@ static const int SDRDaemonSamplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(SDRDaem
 struct SDRDaemonProtectedBlock
 {
     Sample m_samples[SDRDaemonSamplesPerBlock];
+
+    void init() {
+        std::fill(m_samples, m_samples+SDRDaemonSamplesPerBlock, Sample{0,0});
+    }
 };
 
 struct SDRDaemonSuperBlock
 {
     SDRDaemonHeader         m_header;
     SDRDaemonProtectedBlock m_protectedBlock;
+
+    void init()
+    {
+        m_header.init();
+        m_protectedBlock.init();
+    }
 };
 #pragma pack(pop)
 
@@ -99,8 +124,14 @@ struct SDRDaemonTxControlBlock
 class SDRDaemonDataBlock
 {
 public:
+    SDRDaemonDataBlock() {
+        m_superBlocks = new SDRDaemonSuperBlock[256];
+    }
+    ~SDRDaemonDataBlock() {
+        delete[] m_superBlocks;
+    }
     SDRDaemonTxControlBlock m_controlBlock;
-    SDRDaemonSuperBlock     m_superBlocks[256];
+    SDRDaemonSuperBlock     *m_superBlocks;
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_ */

@@ -110,13 +110,15 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
             metaData.m_tv_sec = tv.tv_sec;
             metaData.m_tv_usec = tv.tv_usec;
 
+            if (!m_dataBlock) { // on the very first cycle there is no data block allocated
+                m_dataBlock = new SDRDaemonDataBlock();
+            }
+            
             boost::crc_32_type crc32;
             crc32.process_bytes(&metaData, 20);
             metaData.m_crc32 = crc32.checksum();
             SDRDaemonSuperBlock& superBlock = m_dataBlock->m_superBlocks[0]; // first block
-
-            memset((void *) &superBlock, 0, SDRDaemonUdpSize);
-
+            superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
             memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
@@ -134,10 +136,6 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
                         << ":" << metaData.m_tv_usec;
 
                 m_currentMetaFEC = metaData;
-            }
-
-            if (!m_dataBlock) {
-                m_dataBlock = new SDRDaemonDataBlock();
             }
 
             m_txBlockIndex = 1; // next Tx block with data
