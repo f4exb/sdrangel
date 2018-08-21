@@ -46,7 +46,7 @@ struct SDRDaemonMetaDataFEC
 
     bool operator==(const SDRDaemonMetaDataFEC& rhs)
     {
-        return (memcmp((const void *) this, (const void *) &rhs, 16) == 0); // Only the 16 first bytes are relevant
+        return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
     }
 
     void init()

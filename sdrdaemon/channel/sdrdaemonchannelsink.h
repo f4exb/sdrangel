@@ -28,6 +28,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
 #include "channel/sdrdaemondataqueue.h"
+#include "channel/sdrdaemondatablock.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
@@ -70,6 +71,9 @@ private:
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;               //!< transmission frame count
     int m_sampleIndex;                   //!< Current sample index in protected block data
+    SDRDaemonSuperBlock m_superBlock;
+    SDRDaemonMetaDataFEC m_currentMetaFEC;
+    SDRDaemonDataBlock m_dataBlock;
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */

@@ -20,6 +20,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/time.h>
+#include <unistd.h>
+#include <boost/crc.hpp>
+#include <boost/cstdint.hpp>
+
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
@@ -59,12 +64,63 @@ SDRDaemonChannelSink::~SDRDaemonChannelSink()
 
 void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
 {
-    qDebug("SDRDaemonChannelSink::feed: received %d samples", (int) (end - begin));
+    SampleVector::const_iterator it = begin;
+
+    while (it != end)
+    {
+        int inSamplesIndex = it - begin;
+        int inRemainingSamples = end - it;
+
+        if (m_txBlockIndex == 0)
+        {
+            struct timeval tv;
+            SDRDaemonMetaDataFEC metaData;
+            gettimeofday(&tv, 0);
+
+            metaData.m_centerFrequency = 0; // TODO
+            metaData.m_sampleRate = 48000; // TODO
+            metaData.m_sampleBytes = SDR_RX_SAMP_SZ/8;
+            metaData.m_sampleBits = SDR_RX_SAMP_SZ;
+            metaData.m_nbOriginalBlocks = SDRDaemonNbOrginalBlocks;
+            metaData.m_nbFECBlocks = 8; // TODO
+            metaData.m_tv_sec = tv.tv_sec;
+            metaData.m_tv_usec = tv.tv_usec;
+
+            boost::crc_32_type crc32;
+            crc32.process_bytes(&metaData, 20);
+            metaData.m_crc32 = crc32.checksum();
+            SDRDaemonSuperBlock& superBlock = m_dataBlock.m_superBlocks[0]; // first block
+
+            memset((void *) &superBlock, 0, SDRDaemonUdpSize);
+
+            superBlock.m_header.m_frameIndex = m_frameCount;
+            superBlock.m_header.m_blockIndex = m_txBlockIndex;
+            memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
+
+            if (!(metaData == m_currentMetaFEC))
+            {
+                qDebug() << "SDRDaemonChannelSink::feed: meta: "
+                        << "|" << metaData.m_centerFrequency
+                        << ":" << metaData.m_sampleRate
+                        << ":" << (int) (metaData.m_sampleBytes & 0xF)
+                        << ":" << (int) metaData.m_sampleBits
+                        << "|" << (int) metaData.m_nbOriginalBlocks
+                        << ":" << (int) metaData.m_nbFECBlocks
+                        << "|" << metaData.m_tv_sec
+                        << ":" << metaData.m_tv_usec;
+
+                m_currentMetaFEC = metaData;
+            }
+
+            m_txBlockIndex = 1; // next Tx block with data
+        }
+    }
 }
 
 void SDRDaemonChannelSink::start()
 {
     qDebug("SDRDaemonChannelSink::start");
+    memset((void *) &m_currentMetaFEC, 0, sizeof(SDRDaemonMetaDataFEC));
     if (m_running) { stop(); }
     m_sinkThread = new SDRDaemonChannelSinkThread(&m_dataQueue, m_cm256p);
     m_running = true;
