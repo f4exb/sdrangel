@@ -23,6 +23,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGSDRDaemonDataSettings.h"
 #include "SWGErrorResponse.h"
 
 #include "dsp/dsptypes.h"
@@ -38,8 +39,9 @@
 
 QString WebAPIAdapterDaemon::daemonInstanceSummaryURL = "/sdrdaemon";
 QString WebAPIAdapterDaemon::daemonInstanceLoggingURL = "/sdrdaemon/logging";
-QString WebAPIAdapterDaemon::daemonSettingsURL = "/sdrdaemon/settings";
-QString WebAPIAdapterDaemon::daemonReportURL = "/sdrdaemon/report";
+QString WebAPIAdapterDaemon::daemonDataSettingsURL = "/sdrdaemon/data/settings";
+QString WebAPIAdapterDaemon::daemonDeviceSettingsURL = "/sdrdaemon/device/settings";
+QString WebAPIAdapterDaemon::daemonDeviceReportURL = "/sdrdaemon/device/report";
 QString WebAPIAdapterDaemon::daemonRunURL = "/sdrdaemon/run";
 
 WebAPIAdapterDaemon::WebAPIAdapterDaemon(SDRDaemonMain& sdrDaemonMain) :
@@ -174,7 +176,27 @@ int WebAPIAdapterDaemon::daemonInstanceLoggingPut(
     return 200;
 }
 
-int WebAPIAdapterDaemon::daemonSettingsGet(
+int WebAPIAdapterDaemon::daemonDataSettingsGet(
+        SWGSDRangel::SWGSDRDaemonDataSettings& response __attribute__((unused)),
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+    *error.getMessage() = "Not implemented";
+    return 501;
+}
+
+int WebAPIAdapterDaemon::daemonDataSettingsPutPatch(
+        bool force __attribute__((unused)),
+        const QStringList& dataSettingsKeys __attribute__((unused)),
+        SWGSDRangel::SWGSDRDaemonDataSettings& response __attribute__((unused)),
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+    *error.getMessage() = "Not implemented";
+    return 501;
+}
+
+int WebAPIAdapterDaemon::daemonDeviceSettingsGet(
         SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -201,7 +223,7 @@ int WebAPIAdapterDaemon::daemonSettingsGet(
     }
 }
 
-int WebAPIAdapterDaemon::daemonSettingsPutPatch(
+int WebAPIAdapterDaemon::daemonDeviceSettingsPutPatch(
         bool force,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response,

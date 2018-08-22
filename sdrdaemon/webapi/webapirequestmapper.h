@@ -30,6 +30,7 @@
 
 namespace SWGSDRangel
 {
+    class SWGSDRDaemonDataSettings;
     class SWGDeviceSettings;
     class SWGDeviceReport;
 }
@@ -53,10 +54,12 @@ private:
 
     void daemonInstanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonInstanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void daemonSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void daemonDataSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void daemonDeviceSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonRunService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void daemonReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void daemonDeviceReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
+    bool validateDataSettings(SWGSDRangel::SWGSDRDaemonDataSettings& dataSettings, QJsonObject& jsonObject, QStringList& dataSettingsKeys);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
 
     void appendSettingsSubKeys(

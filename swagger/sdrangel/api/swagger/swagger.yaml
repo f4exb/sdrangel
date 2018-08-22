@@ -1297,12 +1297,73 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"          
+
+  /sdrdaemon/data/settings:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get data handling details
+      operationId: daemonDataSettingsGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success returns current data handling details
+          schema:
+            $ref: "#/definitions/SDRDaemonDataSettings"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Apply data handling details unconditionally (force)
+      operationId: daemonDataSettingsPut
+      tags:
+        - Daemon
+      parameters:
+        - name: body
+          in: body
+          description: Data handling details to apply
+          required: true
+          schema:
+            $ref: "#/definitions/SDRDaemonDataSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/SDRDaemonDataSettings"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: Apply data handling details differentially (no force)
+      operationId: daemonDataSettingsPatch
+      tags:
+        - Daemon
+      parameters:
+        - name: body
+          in: body
+          description: Data handling detail to apply
+          required: true
+          schema:
+            $ref: "#/definitions/SDRDaemonDataSettings"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "#/definitions/SDRDaemonDataSettings"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+        
+      
           
-  /sdrdaemon/settings:
+  /sdrdaemon/device/settings:
     x-swagger-router-controller: deviceset
     get:
       description: Get device settings
-      operationId: daemonSettingsGet
+      operationId: daemonDeviceSettingsGet
       tags:
         - Daemon
       responses:
@@ -1320,7 +1381,7 @@ paths:
           $ref: "#/responses/Response_501"
     put:
       description: Apply all settings unconditionally (force)
-      operationId: daemonSettingsPut
+      operationId: daemonDeviceSettingsPut
       tags:
         - Daemon
       parameters:
@@ -1345,7 +1406,7 @@ paths:
           $ref: "#/responses/Response_501"
     patch:
       description: Apply settings differentially (no force)
-      operationId: daemonSettingsPatch
+      operationId: daemonDeviceSettingsPatch
       tags:
         - Daemon
       parameters:
@@ -1438,11 +1499,11 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
           
-  /sdrdaemon/report:
+  /sdrdaemon/device/report:
     x-swagger-router-controller: deviceset
     get:
       description: get the device report
-      operationId: daemonReportGet
+      operationId: daemonDeviceReportGet
       tags:
         - Daemon
       responses:
@@ -2182,6 +2243,22 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodReport"
       WFMModReport:
         $ref: "http://localhost:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
+
+  SDRDaemonDataSettings:
+    description: "Data handling details for SDRDaemon"
+    properties:
+      nbFECBlocks:
+        description: "Number of FEC blocks per frame"
+        type: integer
+      dataAddress:
+        description: "Receiving USB data address"
+        type: string
+      dataPort:
+        description: "Receiving USB data port"
+        type: integer
+      txDelay:
+        description: "Minimum delay in ms between consecutive USB blocks transmissions"
+        type: integer
 
 responses:
 

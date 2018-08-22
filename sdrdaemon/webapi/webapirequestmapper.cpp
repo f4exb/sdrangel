@@ -26,6 +26,7 @@
 #include "webapirequestmapper.h"
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGSDRDaemonDataSettings.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
@@ -95,10 +96,12 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             daemonInstanceSummaryService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonInstanceLoggingURL) {
             daemonInstanceLoggingService(request, response);
-        } else if (path == WebAPIAdapterDaemon::daemonSettingsURL) {
-            daemonSettingsService(request, response);
-        } else if (path == WebAPIAdapterDaemon::daemonReportURL) {
-            daemonReportService(request, response);
+        } else if (path == WebAPIAdapterDaemon::daemonDataSettingsURL) {
+            daemonDataSettingsService(request, response);
+        } else if (path == WebAPIAdapterDaemon::daemonDeviceSettingsURL) {
+            daemonDeviceSettingsService(request, response);
+        } else if (path == WebAPIAdapterDaemon::daemonDeviceReportURL) {
+            daemonDeviceReportService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonRunURL) {
             daemonRunService(request, response);
         } else {
@@ -188,7 +191,75 @@ void WebAPIRequestMapper::daemonInstanceLoggingService(qtwebapp::HttpRequest& re
     }
 }
 
-void WebAPIRequestMapper::daemonSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::daemonDataSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
+    {
+        QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
+
+        if (parseJsonBody(jsonStr, jsonObject, response))
+        {
+            SWGSDRangel::SWGSDRDaemonDataSettings normalResponse;
+            QStringList dataSettingsKeys;
+
+            if (validateDataSettings(normalResponse, jsonObject, dataSettingsKeys))
+            {
+                int status = m_adapter->daemonDataSettingsPutPatch(
+                        (request.getMethod() == "PUT"), // force settings on PUT
+                        dataSettingsKeys,
+                        normalResponse,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON request");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON request";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGSDRDaemonDataSettings normalResponse;
+        int status = m_adapter->daemonDataSettingsGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::daemonDeviceSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
@@ -207,7 +278,7 @@ void WebAPIRequestMapper::daemonSettingsService(qtwebapp::HttpRequest& request, 
 
             if (validateDeviceSettings(normalResponse, jsonObject, deviceSettingsKeys))
             {
-                int status = m_adapter->daemonSettingsPutPatch(
+                int status = m_adapter->daemonDeviceSettingsPutPatch(
                         (request.getMethod() == "PUT"), // force settings on PUT
                         deviceSettingsKeys,
                         normalResponse,
@@ -240,7 +311,7 @@ void WebAPIRequestMapper::daemonSettingsService(qtwebapp::HttpRequest& request, 
     {
         SWGSDRangel::SWGDeviceSettings normalResponse;
         resetDeviceSettings(normalResponse);
-        int status = m_adapter->daemonSettingsGet(normalResponse, errorResponse);
+        int status = m_adapter->daemonDeviceSettingsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -258,7 +329,7 @@ void WebAPIRequestMapper::daemonSettingsService(qtwebapp::HttpRequest& request, 
     }
 }
 
-void WebAPIRequestMapper::daemonReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::daemonDeviceReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
@@ -338,6 +409,53 @@ void WebAPIRequestMapper::daemonRunService(qtwebapp::HttpRequest& request, qtweb
         *errorResponse.getMessage() = "Invalid HTTP method";
         response.write(errorResponse.asJson().toUtf8());
     }
+}
+
+
+bool WebAPIRequestMapper::validateDataSettings(SWGSDRangel::SWGSDRDaemonDataSettings& dataSettings, QJsonObject& jsonObject, QStringList& dataSettingsKeys)
+{
+    if (jsonObject.contains("nbFECBlocks"))
+    {
+        int nbFECBlocks = jsonObject["nbFECBlocks"].toInt();
+
+        if (nbFECBlocks >=0 && nbFECBlocks < 127) {
+            dataSettings.setNbFecBlocks(nbFECBlocks);
+        } else {
+            dataSettings.setNbFecBlocks(0);
+        }
+    }
+
+    if (jsonObject.contains("dataPort"))
+    {
+        int dataPort = jsonObject["dataPort"].toInt();
+
+        if (dataPort > 1023 && dataPort < 65536) {
+            dataSettings.setDataPort(dataPort);
+        } else {
+            dataSettings.setDataPort(9090);
+        }
+    }
+
+    if (jsonObject.contains("txDelay"))
+    {
+        int txDelay = jsonObject["txDelay"].toInt();
+
+        if (txDelay > 100) {
+            dataSettings.setTxDelay(txDelay);
+        } else {
+            dataSettings.setTxDelay(100);
+        }
+    }
+
+    if (jsonObject.contains("dataAddress")  && jsonObject["dataAddress"].isString()) {
+        dataSettings.setDataAddress(new QString(jsonObject["dataAddress"].toString()));
+    } else {
+        return false;
+    }
+
+    dataSettingsKeys = jsonObject.keys();
+
+    return true;
 }
 
 // TODO: put in library in common with SDRangel. Can be static.
