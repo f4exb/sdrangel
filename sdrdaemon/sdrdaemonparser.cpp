@@ -42,7 +42,7 @@ SDRDaemonParser::SDRDaemonParser() :
     m_dataPortOption(QStringList() << "D" << "data-port",
         "UDP stream data port.",
         "dataPort",
-        "9091"),
+        "9090"),
     m_deviceTypeOption(QStringList() << "T" << "device-type",
         "Device type.",
         "deviceType",
@@ -155,12 +155,12 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
     // data port
 
     QString dataPortStr = m_parser.value(m_dataPortOption);
-    serverPort = serverPortStr.toInt(&ok);
+    serverPort = dataPortStr.toInt(&ok);
 
     if (ok && (serverPort > 1023) && (serverPort < 65536))
     {
         m_dataPort = serverPort;
-        qWarning() << "SDRDaemonParser::parse: data port: " << m_dataPort;
+        qDebug() << "SDRDaemonParser::parse: data port: " << m_dataPort;
     }
     else
     {
