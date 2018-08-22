@@ -61,9 +61,6 @@ public:
 
     void startStop(bool start);
 
-    void setAddress(QString& address) { m_address.setAddress(address); }
-    void setPort(unsigned int port) { m_port = port; }
-
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
@@ -73,7 +70,6 @@ private:
     CM256 *m_cm256;                       //!< CM256 library object
 
     QHostAddress m_address;
-    unsigned int m_port;
     QUdpSocket *m_socket;
 
     MessageQueue m_inputMessageQueue;

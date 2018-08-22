@@ -64,6 +64,8 @@ public:
 
     void setNbBlocksFEC(int nbBlocksFEC);
     void setTxDelay(int txDelay);
+    void setDataAddress(const QString& address) { m_dataAddress = address; }
+    void setDataPort(uint16_t port) { m_dataPort = port; }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -92,6 +94,8 @@ private:
     uint8_t m_sampleBytes;
     int m_nbBlocksFEC;
     int m_txDelay;
+    QString m_dataAddress;
+    uint16_t m_dataPort;
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */

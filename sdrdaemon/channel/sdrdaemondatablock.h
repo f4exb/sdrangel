@@ -70,12 +70,12 @@ struct SDRDaemonHeader
     uint8_t  m_blockIndex;
     uint8_t  m_filler;
 
-    void init() 
+    void init()
     {
         m_frameIndex = 0;
         m_blockIndex = 0;
         m_filler = 0;
-    }    
+    }
 };
 
 static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
@@ -111,6 +111,8 @@ struct SDRDaemonTxControlBlock
     uint16_t m_frameIndex;
     int m_nbBlocksFEC;
     int m_txDelay;
+    QString m_dataAddress;
+    uint16_t m_dataPort;
 
     SDRDaemonTxControlBlock() {
         m_complete = false;
@@ -118,6 +120,8 @@ struct SDRDaemonTxControlBlock
         m_frameIndex = 0;
         m_nbBlocksFEC = 0;
         m_txDelay = 100;
+        m_dataAddress = "127.0.0.1";
+        m_dataPort = 9090;
     }
 };
 

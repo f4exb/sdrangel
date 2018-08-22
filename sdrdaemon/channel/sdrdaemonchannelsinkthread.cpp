@@ -36,7 +36,7 @@ SDRDaemonChannelSinkThread::SDRDaemonChannelSinkThread(SDRDaemonDataQueue *dataQ
     m_dataQueue(dataQueue),
     m_cm256(cm256),
     m_address(QHostAddress::LocalHost),
-    m_port(9090)
+    m_socket(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
@@ -68,6 +68,7 @@ void SDRDaemonChannelSinkThread::stopWork()
 {
 	qDebug("SDRDaemonChannelSinkThread::stopWork");
     delete m_socket;
+    m_socket = 0;
 	m_running = false;
 	wait();
 }
@@ -96,15 +97,20 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     uint16_t frameIndex = dataBlock.m_controlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock.m_controlBlock.m_nbBlocksFEC;
     int txDelay = dataBlock.m_controlBlock.m_txDelay;
+    m_address.setAddress(dataBlock.m_controlBlock.m_dataAddress);
+    uint16_t dataPort = dataBlock.m_controlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
 
     if ((nbBlocksFEC == 0) || !m_cm256) // Do not FEC encode
     {
-        for (int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+        if (m_socket)
         {
-            // send block via UDP
-            m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, m_port);
-            usleep(txDelay);
+            for (int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+            {
+                // send block via UDP
+                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
+                usleep(txDelay);
+            }
         }
     }
     else
@@ -141,11 +147,14 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         }
 
         // Transmit all blocks
-        for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
+        if (m_socket)
         {
-            // send block via UDP
-            m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, m_port);
-            usleep(txDelay);
+            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
+            {
+                // send block via UDP
+                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
+                usleep(txDelay);
+            }
         }
     }
 

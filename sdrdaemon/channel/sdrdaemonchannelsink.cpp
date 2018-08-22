@@ -49,7 +49,9 @@ SDRDaemonChannelSink::SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI) :
         m_sampleRate(48000),
         m_sampleBytes(SDR_RX_SAMP_SZ == 24 ? 4 : 2),
         m_nbBlocksFEC(0),
-        m_txDelay(100)
+        m_txDelay(100),
+        m_dataAddress("127.0.0.1"),
+        m_dataPort(9090)
 {
     setObjectName(m_channelId);
 
@@ -170,6 +172,8 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
                 m_dataBlock->m_controlBlock.m_complete = true;
                 m_dataBlock->m_controlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
                 m_dataBlock->m_controlBlock.m_txDelay = m_txDelay;
+                m_dataBlock->m_controlBlock.m_dataAddress = m_dataAddress;
+                m_dataBlock->m_controlBlock.m_dataPort = m_dataPort;
 
                 m_dataQueue.push(m_dataBlock);
                 m_dataBlock = new SDRDaemonDataBlock(); // create a new one immediately

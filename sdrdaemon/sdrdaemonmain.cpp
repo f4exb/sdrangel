@@ -132,6 +132,8 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
             m_channelSink = new SDRDaemonChannelSink(m_deviceSourceAPI);
             m_channelSink->setNbBlocksFEC(parser.getNbBlocksFEC());
             m_channelSink->setTxDelay(parser.getTxDelay());
+            m_channelSink->setDataAddress(parser.getDataAddress());
+            m_channelSink->setDataPort(parser.getDataPort());
         }
         else
         {
