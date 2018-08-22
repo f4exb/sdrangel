@@ -58,7 +58,7 @@ SDRDaemonParser::SDRDaemonParser() :
     m_txDelayOption(QStringList() << "d" << "tx-delay",
         "delay between transmission of UDP blocks (ms).",
         "txDelay",
-        "100"),        
+        "100"),
     m_nbBlocksFECOption(QStringList() << "f" << "fec-blocks",
         "Number of FEC blocks per frame.",
         "nbBlocksFEC",
@@ -113,9 +113,13 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
                      + "\\." + ipRange + "$");
     QRegExpValidator ipValidator(ipRegex);
 
-    if (ipValidator.validate(serverAddress, pos) == QValidator::Acceptable) {
+    if (ipValidator.validate(serverAddress, pos) == QValidator::Acceptable)
+    {
         m_serverAddress = serverAddress;
-    } else {
+        qDebug() << "SDRDaemonParser::parse: server address: " << m_serverAddress;
+    }
+    else
+    {
         qWarning() << "SDRDaemonParser::parse: server address invalid. Defaulting to " << m_serverAddress;
     }
 
@@ -124,9 +128,13 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
     QString serverPortStr = m_parser.value(m_serverPortOption);
     int serverPort = serverPortStr.toInt(&ok);
 
-    if (ok && (serverPort > 1023) && (serverPort < 65536)) {
+    if (ok && (serverPort > 1023) && (serverPort < 65536))
+    {
         m_serverPort = serverPort;
-    } else {
+        qDebug() << "SDRDaemonParser::parse: server port: " << m_serverPort;
+    }
+    else
+    {
         qWarning() << "SDRDaemonParser::parse: server port invalid. Defaulting to " << m_serverPort;
     }
 
@@ -134,9 +142,13 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
 
     QString dataAddress = m_parser.value(m_dataAddressOption);
 
-    if (ipValidator.validate(dataAddress, pos) == QValidator::Acceptable) {
+    if (ipValidator.validate(dataAddress, pos) == QValidator::Acceptable)
+    {
         m_dataAddress = dataAddress;
-    } else {
+        qDebug() << "SDRDaemonParser::parse: data address: " << m_dataAddress;
+    }
+    else
+    {
         qWarning() << "SDRDaemonParser::parse: data address invalid. Defaulting to " << m_dataAddress;
     }
 
@@ -145,9 +157,13 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
     QString dataPortStr = m_parser.value(m_dataPortOption);
     serverPort = serverPortStr.toInt(&ok);
 
-    if (ok && (serverPort > 1023) && (serverPort < 65536)) {
+    if (ok && (serverPort > 1023) && (serverPort < 65536))
+    {
         m_dataPort = serverPort;
-    } else {
+        qWarning() << "SDRDaemonParser::parse: data port: " << m_dataPort;
+    }
+    else
+    {
         qWarning() << "SDRDaemonParser::parse: data port invalid. Defaulting to " << m_dataPort;
     }
 
@@ -213,9 +229,13 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         QString txDelayStr = m_parser.value(m_txDelayOption);
         int txDelay = txDelayStr.toInt(&ok);
 
-        if (ok && (txDelay > 0)) {
+        if (ok && (txDelay > 0))
+        {
             m_txDelay = txDelay;
-        } else {
+            qDebug() << "SDRDaemonParser::parse: Tx delay: " << m_txDelay;
+        }
+        else
+        {
             qWarning() << "SDRDaemonParser::parse: Tx delay invalid. Defaulting to " << m_txDelay;
         }
     }
@@ -226,10 +246,14 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         QString nbBlocksFECStr = m_parser.value(m_nbBlocksFECOption);
         int nbBlocksFEC = nbBlocksFECStr.toInt(&ok);
 
-        if (ok && (nbBlocksFEC >= 0) && (nbBlocksFEC < 128)) {
+        if (ok && (nbBlocksFEC >= 0) && (nbBlocksFEC < 128))
+        {
             m_nbBlocksFEC = nbBlocksFEC;
-        } else {
-            qWarning() << "SDRDaemonParser::parse: Tx number of FEC blocks invalid. Defaulting to " << m_nbBlocksFEC;
+            qDebug() << "SDRDaemonParser::parse: number of FEC blocks: " << m_nbBlocksFEC;
+        }
+        else
+        {
+            qWarning() << "SDRDaemonParser::parse: number of FEC blocks invalid. Defaulting to " << m_nbBlocksFEC;
         }
     }
 }
