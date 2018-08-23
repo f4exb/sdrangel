@@ -1298,46 +1298,46 @@ paths:
         "501":
           $ref: "#/responses/Response_501"          
 
-  /sdrdaemon/data/settings:
+  /sdrdaemon/channel/settings:
     x-swagger-router-controller: deviceset
     get:
-      description: Get data handling details
-      operationId: daemonDataSettingsGet
+      description: Get channel handling details
+      operationId: daemonChannelSettingsGet
       tags:
         - Daemon
       responses:
         "200":
-          description: On success returns current data handling details
+          description: On success return channel settings
           schema:
-            $ref: "#/definitions/SDRDaemonDataSettings"
+            $ref: "#/definitions/ChannelSettings"
         "500":
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
     put:
-      description: Apply data handling details unconditionally (force)
-      operationId: daemonDataSettingsPut
+      description: Apply channel handling details unconditionally (force)
+      operationId: daemonChannelSettingsPut
       tags:
         - Daemon
       parameters:
         - name: body
           in: body
-          description: Data handling details to apply
+          description: Channel handling details to apply
           required: true
           schema:
-            $ref: "#/definitions/SDRDaemonDataSettings"
+            $ref: "#/definitions/ChannelSettings"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "#/definitions/SDRDaemonDataSettings"
+            $ref: "#/definitions/ChannelSettings"
         "500":
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
     patch:
-      description: Apply data handling details differentially (no force)
-      operationId: daemonDataSettingsPatch
+      description: Apply channel handling details differentially (no force)
+      operationId: daemonChannelSettingsPatch
       tags:
         - Daemon
       parameters:
@@ -1346,12 +1346,12 @@ paths:
           description: Data handling detail to apply
           required: true
           schema:
-            $ref: "#/definitions/SDRDaemonDataSettings"
+            $ref: "#/definitions/ChannelSettings"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "#/definitions/SDRDaemonDataSettings"
+            $ref: "#/definitions/ChannelSettings"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -2194,6 +2194,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+      SDRDaemonChannelSettings:
+        $ref: "/doc/swagger/include/SDRDaemonChannel.yaml#/SDRDaemonChannelSettings"
       SSBModSettings:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -2243,22 +2245,6 @@ definitions:
         $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
       WFMModReport:
         $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
-
-  SDRDaemonDataSettings:
-    description: "Data handling details for SDRDaemon"
-    properties:
-      nbFECBlocks:
-        description: "Number of FEC blocks per frame"
-        type: integer
-      dataAddress:
-        description: "Receiving USB data address"
-        type: string
-      dataPort:
-        description: "Receiving USB data port"
-        type: integer
-      txDelay:
-        description: "Minimum delay in ms between consecutive USB blocks transmissions"
-        type: integer
 
 responses:
 

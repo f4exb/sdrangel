@@ -1467,6 +1467,9 @@ margin-bottom: 20px;
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
     },
+    "SDRDaemonChannelSettings" : {
+      "$ref" : "#/definitions/SDRDaemonChannelSettings"
+    },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
     },
@@ -3143,7 +3146,7 @@ margin-bottom: 20px;
   },
   "description" : "RTLSDR"
 };
-            defs.SDRDaemonDataSettings = {
+            defs.SDRDaemonChannelSettings = {
   "properties" : {
     "nbFECBlocks" : {
       "type" : "integer",
@@ -4024,14 +4027,14 @@ margin-bottom: 20px;
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
                   <li class="nav-header" data-group="Daemon"><a href="#api-Daemon">API Methods - Daemon</a></li>
-                    <li data-group="Daemon" data-name="daemonDataSettingsGet" class="">
-                      <a href="#api-Daemon-daemonDataSettingsGet">daemonDataSettingsGet</a>
+                    <li data-group="Daemon" data-name="daemonChannelSettingsGet" class="">
+                      <a href="#api-Daemon-daemonChannelSettingsGet">daemonChannelSettingsGet</a>
                     </li>
-                    <li data-group="Daemon" data-name="daemonDataSettingsPatch" class="">
-                      <a href="#api-Daemon-daemonDataSettingsPatch">daemonDataSettingsPatch</a>
+                    <li data-group="Daemon" data-name="daemonChannelSettingsPatch" class="">
+                      <a href="#api-Daemon-daemonChannelSettingsPatch">daemonChannelSettingsPatch</a>
                     </li>
-                    <li data-group="Daemon" data-name="daemonDataSettingsPut" class="">
-                      <a href="#api-Daemon-daemonDataSettingsPut">daemonDataSettingsPut</a>
+                    <li data-group="Daemon" data-name="daemonChannelSettingsPut" class="">
+                      <a href="#api-Daemon-daemonChannelSettingsPut">daemonChannelSettingsPut</a>
                     </li>
                     <li data-group="Daemon" data-name="daemonDeviceReportGet" class="">
                       <a href="#api-Daemon-daemonDeviceReportGet">daemonDeviceReportGet</a>
@@ -4230,41 +4233,41 @@ margin-bottom: 20px;
         <div id="sections">
                 <section id="api-Daemon">
                   <h1>Daemon</h1>
-                    <div id="api-Daemon-daemonDataSettingsGet">
-                      <article id="api-Daemon-daemonDataSettingsGet-0" data-group="User" data-name="daemonDataSettingsGet" data-version="0">
+                    <div id="api-Daemon-daemonChannelSettingsGet">
+                      <article id="api-Daemon-daemonChannelSettingsGet-0" data-group="User" data-name="daemonChannelSettingsGet" data-version="0">
                         <div class="pull-left">
-                          <h1>daemonDataSettingsGet</h1>
+                          <h1>daemonChannelSettingsGet</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Get data handling details</p>
+                        <p class="marked">Get channel handling details</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/data/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/channel/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Daemon-daemonDataSettingsGet-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsGet-0-python">Python</a></li>
+                          <li class="active"><a href="#examples-Daemon-daemonChannelSettingsGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsGet-0-python">Python</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Daemon-daemonDataSettingsGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/data/settings"</code></pre>
+                          <div class="tab-pane active" id="examples-Daemon-daemonChannelSettingsGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/channel/settings"</code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-java">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
 import SWGSDRangel.auth.*;
 import SWGSDRangel.model.*;
@@ -4279,17 +4282,17 @@ public class DaemonApiExample {
         
         DaemonApi apiInstance = new DaemonApi();
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsGet();
+            ChannelSettings result = apiInstance.daemonChannelSettingsGet();
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsGet");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsGet");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-android">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-android">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
 
 public class DaemonApiExample {
@@ -4297,25 +4300,25 @@ public class DaemonApiExample {
     public static void main(String[] args) {
         DaemonApi apiInstance = new DaemonApi();
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsGet();
+            ChannelSettings result = apiInstance.daemonChannelSettingsGet();
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsGet");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsGet");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-groovy">
+  <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-objc">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">
 DaemonApi *apiInstance = [[DaemonApi alloc] init];
 
-[apiInstance daemonDataSettingsGetWithCompletionHandler: 
-              ^(SDRDaemonDataSettings output, NSError* error) {
+[apiInstance daemonChannelSettingsGetWithCompletionHandler: 
+              ^(ChannelSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -4326,7 +4329,7 @@ DaemonApi *apiInstance = [[DaemonApi alloc] init];
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-javascript">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
 
 var api = new SdRangel.DaemonApi()
@@ -4338,14 +4341,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.daemonDataSettingsGet(callback);
+api.daemonChannelSettingsGet(callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-angular">
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-csharp">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using SWGSDRangel.Api;
@@ -4354,7 +4357,7 @@ using SWGSDRangel.Model;
 
 namespace Example
 {
-    public class daemonDataSettingsGetExample
+    public class daemonChannelSettingsGetExample
     {
         public void main()
         {
@@ -4363,12 +4366,12 @@ namespace Example
 
             try
             {
-                SDRDaemonDataSettings result = apiInstance.daemonDataSettingsGet();
+                ChannelSettings result = apiInstance.daemonChannelSettingsGet();
                 Debug.WriteLine(result);
             }
             catch (Exception e)
             {
-                Debug.Print("Exception when calling DaemonApi.daemonDataSettingsGet: " + e.Message );
+                Debug.Print("Exception when calling DaemonApi.daemonChannelSettingsGet: " + e.Message );
             }
         }
     }
@@ -4376,22 +4379,22 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-php">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DaemonApi();
 
 try {
-    $result = $api_instance->daemonDataSettingsGet();
+    $result = $api_instance->daemonChannelSettingsGet();
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling DaemonApi->daemonDataSettingsGet: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling DaemonApi->daemonChannelSettingsGet: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-perl">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use SWGSDRangel::Configuration;
 use SWGSDRangel::DaemonApi;
@@ -4399,15 +4402,15 @@ use SWGSDRangel::DaemonApi;
 my $api_instance = SWGSDRangel::DaemonApi->new();
 
 eval { 
-    my $result = $api_instance->daemonDataSettingsGet();
+    my $result = $api_instance->daemonChannelSettingsGet();
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling DaemonApi->daemonDataSettingsGet: $@\n";
+    warn "Exception when calling DaemonApi->daemonChannelSettingsGet: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsGet-0-python">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsGet-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import swagger_sdrangel
@@ -4418,10 +4421,10 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DaemonApi()
 
 try: 
-    api_response = api_instance.daemon_data_settings_get()
+    api_response = api_instance.daemon_channel_settings_get()
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DaemonApi->daemonDataSettingsGet: %s\n" % e)</code></pre>
+    print("Exception when calling DaemonApi->daemonChannelSettingsGet: %s\n" % e)</code></pre>
                             </div>
                           </div>
 
@@ -4433,24 +4436,24 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success returns current data handling details </h3>
+                            <h3> Status: 200 - On success return channel settings </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsGet-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsGet-200-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsGet-200-schema">
-                                  <div id='responses-daemonDataSettingsGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsGet-200-schema">
+                                  <div id='responses-daemonChannelSettingsGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success returns current data handling details",
+  "description" : "On success return channel settings",
   "schema" : {
-    "$ref" : "#/definitions/SDRDaemonDataSettings"
+    "$ref" : "#/definitions/ChannelSettings"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -4465,14 +4468,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsGet-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsGet-200-schema-200');
+                                        $('#responses-daemonChannelSettingsGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsGet-200-schema-200');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsGet-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsGet-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -4480,14 +4483,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsGet-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsGet-500-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsGet-500-schema">
-                                  <div id='responses-daemonDataSettingsGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsGet-500-schema">
+                                  <div id='responses-daemonChannelSettingsGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -4508,14 +4511,14 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsGet-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsGet-500-schema-500');
+                                        $('#responses-daemonChannelSettingsGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsGet-500-schema-500');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsGet-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsGet-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -4523,14 +4526,14 @@ except ApiException as e:
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsGet-501-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsGet-501-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsGet-501-schema">
-                                  <div id='responses-daemonDataSettingsGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsGet-501-schema">
+                                  <div id='responses-daemonChannelSettingsGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -4551,55 +4554,55 @@ except ApiException as e:
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsGet-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsGet-501-schema-501');
+                                        $('#responses-daemonChannelSettingsGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsGet-501-schema-501');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsGet-501-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsGet-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
                         </article>
                       </div>
                       <hr>
-                    <div id="api-Daemon-daemonDataSettingsPatch">
-                      <article id="api-Daemon-daemonDataSettingsPatch-0" data-group="User" data-name="daemonDataSettingsPatch" data-version="0">
+                    <div id="api-Daemon-daemonChannelSettingsPatch">
+                      <article id="api-Daemon-daemonChannelSettingsPatch-0" data-group="User" data-name="daemonChannelSettingsPatch" data-version="0">
                         <div class="pull-left">
-                          <h1>daemonDataSettingsPatch</h1>
+                          <h1>daemonChannelSettingsPatch</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Apply data handling details differentially (no force)</p>
+                        <p class="marked">Apply channel handling details differentially (no force)</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrdaemon/data/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrdaemon/channel/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Daemon-daemonDataSettingsPatch-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPatch-0-python">Python</a></li>
+                          <li class="active"><a href="#examples-Daemon-daemonChannelSettingsPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPatch-0-python">Python</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Daemon-daemonDataSettingsPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrdaemon/data/settings"</code></pre>
+                          <div class="tab-pane active" id="examples-Daemon-daemonChannelSettingsPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrdaemon/channel/settings"</code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-java">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
 import SWGSDRangel.auth.*;
 import SWGSDRangel.model.*;
@@ -4613,47 +4616,47 @@ public class DaemonApiExample {
     public static void main(String[] args) {
         
         DaemonApi apiInstance = new DaemonApi();
-        SDRDaemonDataSettings body = ; // SDRDaemonDataSettings | Data handling detail to apply
+        ChannelSettings body = ; // ChannelSettings | Data handling detail to apply
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPatch(body);
+            ChannelSettings result = apiInstance.daemonChannelSettingsPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsPatch");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsPatch");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-android">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-android">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
 
 public class DaemonApiExample {
 
     public static void main(String[] args) {
         DaemonApi apiInstance = new DaemonApi();
-        SDRDaemonDataSettings body = ; // SDRDaemonDataSettings | Data handling detail to apply
+        ChannelSettings body = ; // ChannelSettings | Data handling detail to apply
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPatch(body);
+            ChannelSettings result = apiInstance.daemonChannelSettingsPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsPatch");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsPatch");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-groovy">
+  <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">SDRDaemonDataSettings *body = ; // Data handling detail to apply
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">ChannelSettings *body = ; // Data handling detail to apply
 
 DaemonApi *apiInstance = [[DaemonApi alloc] init];
 
-[apiInstance daemonDataSettingsPatchWith:body
-              completionHandler: ^(SDRDaemonDataSettings output, NSError* error) {
+[apiInstance daemonChannelSettingsPatchWith:body
+              completionHandler: ^(ChannelSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -4664,12 +4667,12 @@ DaemonApi *apiInstance = [[DaemonApi alloc] init];
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-javascript">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
 
 var api = new SdRangel.DaemonApi()
 
-var body = ; // {SDRDaemonDataSettings} Data handling detail to apply
+var body = ; // {ChannelSettings} Data handling detail to apply
 
 
 var callback = function(error, data, response) {
@@ -4679,14 +4682,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.daemonDataSettingsPatch(body, callback);
+api.daemonChannelSettingsPatch(body, callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-angular">
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-csharp">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using SWGSDRangel.Api;
@@ -4695,22 +4698,22 @@ using SWGSDRangel.Model;
 
 namespace Example
 {
-    public class daemonDataSettingsPatchExample
+    public class daemonChannelSettingsPatchExample
     {
         public void main()
         {
             
             var apiInstance = new DaemonApi();
-            var body = new SDRDaemonDataSettings(); // SDRDaemonDataSettings | Data handling detail to apply
+            var body = new ChannelSettings(); // ChannelSettings | Data handling detail to apply
 
             try
             {
-                SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPatch(body);
+                ChannelSettings result = apiInstance.daemonChannelSettingsPatch(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
             {
-                Debug.Print("Exception when calling DaemonApi.daemonDataSettingsPatch: " + e.Message );
+                Debug.Print("Exception when calling DaemonApi.daemonChannelSettingsPatch: " + e.Message );
             }
         }
     }
@@ -4718,40 +4721,40 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-php">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DaemonApi();
-$body = ; // SDRDaemonDataSettings | Data handling detail to apply
+$body = ; // ChannelSettings | Data handling detail to apply
 
 try {
-    $result = $api_instance->daemonDataSettingsPatch($body);
+    $result = $api_instance->daemonChannelSettingsPatch($body);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling DaemonApi->daemonDataSettingsPatch: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling DaemonApi->daemonChannelSettingsPatch: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-perl">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use SWGSDRangel::Configuration;
 use SWGSDRangel::DaemonApi;
 
 my $api_instance = SWGSDRangel::DaemonApi->new();
-my $body = SWGSDRangel::Object::SDRDaemonDataSettings->new(); # SDRDaemonDataSettings | Data handling detail to apply
+my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Data handling detail to apply
 
 eval { 
-    my $result = $api_instance->daemonDataSettingsPatch(body => $body);
+    my $result = $api_instance->daemonChannelSettingsPatch(body => $body);
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling DaemonApi->daemonDataSettingsPatch: $@\n";
+    warn "Exception when calling DaemonApi->daemonChannelSettingsPatch: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPatch-0-python">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPatch-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import swagger_sdrangel
@@ -4760,13 +4763,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.DaemonApi()
-body =  # SDRDaemonDataSettings | Data handling detail to apply
+body =  # ChannelSettings | Data handling detail to apply
 
 try: 
-    api_response = api_instance.daemon_data_settings_patch(body)
+    api_response = api_instance.daemon_channel_settings_patch(body)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DaemonApi->daemonDataSettingsPatch: %s\n" % e)</code></pre>
+    print("Exception when calling DaemonApi->daemonChannelSettingsPatch: %s\n" % e)</code></pre>
                             </div>
                           </div>
 
@@ -4792,7 +4795,7 @@ $(document).ready(function() {
   "description" : "Data handling detail to apply",
   "required" : true,
   "schema" : {
-    "$ref" : "#/definitions/SDRDaemonDataSettings"
+    "$ref" : "#/definitions/ChannelSettings"
   }
 };
   var schema = schemaWrapper.schema;
@@ -4806,12 +4809,12 @@ $(document).ready(function() {
   }
 
   var view = new JSONSchemaView(schema,2,{isBodyParam: true});
-  var result = $('#d2e199_daemonDataSettingsPatch_body');
+  var result = $('#d2e199_daemonChannelSettingsPatch_body');
   result.empty();
   result.append(view.render());
 });
 </script>
-<div id="d2e199_daemonDataSettingsPatch_body"></div>
+<div id="d2e199_daemonChannelSettingsPatch_body"></div>
 </td>
 </tr>
 
@@ -4824,20 +4827,20 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPatch-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPatch-200-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPatch-200-schema">
-                                  <div id='responses-daemonDataSettingsPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPatch-200-schema">
+                                  <div id='responses-daemonChannelSettingsPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
   "description" : "On success returns new settings values",
   "schema" : {
-    "$ref" : "#/definitions/SDRDaemonDataSettings"
+    "$ref" : "#/definitions/ChannelSettings"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -4852,14 +4855,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPatch-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPatch-200-schema-200');
+                                        $('#responses-daemonChannelSettingsPatch-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPatch-200-schema-200');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPatch-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPatch-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -4867,14 +4870,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPatch-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPatch-500-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPatch-500-schema">
-                                  <div id='responses-daemonDataSettingsPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPatch-500-schema">
+                                  <div id='responses-daemonChannelSettingsPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -4895,14 +4898,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPatch-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPatch-500-schema-500');
+                                        $('#responses-daemonChannelSettingsPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPatch-500-schema-500');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPatch-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPatch-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -4910,14 +4913,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPatch-501-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPatch-501-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPatch-501-schema">
-                                  <div id='responses-daemonDataSettingsPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPatch-501-schema">
+                                  <div id='responses-daemonChannelSettingsPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -4938,55 +4941,55 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPatch-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPatch-501-schema-501');
+                                        $('#responses-daemonChannelSettingsPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPatch-501-schema-501');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPatch-501-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPatch-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
                         </article>
                       </div>
                       <hr>
-                    <div id="api-Daemon-daemonDataSettingsPut">
-                      <article id="api-Daemon-daemonDataSettingsPut-0" data-group="User" data-name="daemonDataSettingsPut" data-version="0">
+                    <div id="api-Daemon-daemonChannelSettingsPut">
+                      <article id="api-Daemon-daemonChannelSettingsPut-0" data-group="User" data-name="daemonChannelSettingsPut" data-version="0">
                         <div class="pull-left">
-                          <h1>daemonDataSettingsPut</h1>
+                          <h1>daemonChannelSettingsPut</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Apply data handling details unconditionally (force)</p>
+                        <p class="marked">Apply channel handling details unconditionally (force)</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrdaemon/data/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrdaemon/channel/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Daemon-daemonDataSettingsPut-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Daemon-daemonDataSettingsPut-0-python">Python</a></li>
+                          <li class="active"><a href="#examples-Daemon-daemonChannelSettingsPut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelSettingsPut-0-python">Python</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Daemon-daemonDataSettingsPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrdaemon/data/settings"</code></pre>
+                          <div class="tab-pane active" id="examples-Daemon-daemonChannelSettingsPut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrdaemon/channel/settings"</code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-java">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
 import SWGSDRangel.auth.*;
 import SWGSDRangel.model.*;
@@ -5000,47 +5003,47 @@ public class DaemonApiExample {
     public static void main(String[] args) {
         
         DaemonApi apiInstance = new DaemonApi();
-        SDRDaemonDataSettings body = ; // SDRDaemonDataSettings | Data handling details to apply
+        ChannelSettings body = ; // ChannelSettings | Channel handling details to apply
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPut(body);
+            ChannelSettings result = apiInstance.daemonChannelSettingsPut(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsPut");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsPut");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-android">
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-android">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
 
 public class DaemonApiExample {
 
     public static void main(String[] args) {
         DaemonApi apiInstance = new DaemonApi();
-        SDRDaemonDataSettings body = ; // SDRDaemonDataSettings | Data handling details to apply
+        ChannelSettings body = ; // ChannelSettings | Channel handling details to apply
         try {
-            SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPut(body);
+            ChannelSettings result = apiInstance.daemonChannelSettingsPut(body);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DaemonApi#daemonDataSettingsPut");
+            System.err.println("Exception when calling DaemonApi#daemonChannelSettingsPut");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-groovy">
+  <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">SDRDaemonDataSettings *body = ; // Data handling details to apply
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">ChannelSettings *body = ; // Channel handling details to apply
 
 DaemonApi *apiInstance = [[DaemonApi alloc] init];
 
-[apiInstance daemonDataSettingsPutWith:body
-              completionHandler: ^(SDRDaemonDataSettings output, NSError* error) {
+[apiInstance daemonChannelSettingsPutWith:body
+              completionHandler: ^(ChannelSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -5051,12 +5054,12 @@ DaemonApi *apiInstance = [[DaemonApi alloc] init];
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-javascript">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
 
 var api = new SdRangel.DaemonApi()
 
-var body = ; // {SDRDaemonDataSettings} Data handling details to apply
+var body = ; // {ChannelSettings} Channel handling details to apply
 
 
 var callback = function(error, data, response) {
@@ -5066,14 +5069,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.daemonDataSettingsPut(body, callback);
+api.daemonChannelSettingsPut(body, callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-angular">
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-csharp">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using SWGSDRangel.Api;
@@ -5082,22 +5085,22 @@ using SWGSDRangel.Model;
 
 namespace Example
 {
-    public class daemonDataSettingsPutExample
+    public class daemonChannelSettingsPutExample
     {
         public void main()
         {
             
             var apiInstance = new DaemonApi();
-            var body = new SDRDaemonDataSettings(); // SDRDaemonDataSettings | Data handling details to apply
+            var body = new ChannelSettings(); // ChannelSettings | Channel handling details to apply
 
             try
             {
-                SDRDaemonDataSettings result = apiInstance.daemonDataSettingsPut(body);
+                ChannelSettings result = apiInstance.daemonChannelSettingsPut(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
             {
-                Debug.Print("Exception when calling DaemonApi.daemonDataSettingsPut: " + e.Message );
+                Debug.Print("Exception when calling DaemonApi.daemonChannelSettingsPut: " + e.Message );
             }
         }
     }
@@ -5105,40 +5108,40 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-php">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DaemonApi();
-$body = ; // SDRDaemonDataSettings | Data handling details to apply
+$body = ; // ChannelSettings | Channel handling details to apply
 
 try {
-    $result = $api_instance->daemonDataSettingsPut($body);
+    $result = $api_instance->daemonChannelSettingsPut($body);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling DaemonApi->daemonDataSettingsPut: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling DaemonApi->daemonChannelSettingsPut: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-perl">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use SWGSDRangel::Configuration;
 use SWGSDRangel::DaemonApi;
 
 my $api_instance = SWGSDRangel::DaemonApi->new();
-my $body = SWGSDRangel::Object::SDRDaemonDataSettings->new(); # SDRDaemonDataSettings | Data handling details to apply
+my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel handling details to apply
 
 eval { 
-    my $result = $api_instance->daemonDataSettingsPut(body => $body);
+    my $result = $api_instance->daemonChannelSettingsPut(body => $body);
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling DaemonApi->daemonDataSettingsPut: $@\n";
+    warn "Exception when calling DaemonApi->daemonChannelSettingsPut: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Daemon-daemonDataSettingsPut-0-python">
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelSettingsPut-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import swagger_sdrangel
@@ -5147,13 +5150,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.DaemonApi()
-body =  # SDRDaemonDataSettings | Data handling details to apply
+body =  # ChannelSettings | Channel handling details to apply
 
 try: 
-    api_response = api_instance.daemon_data_settings_put(body)
+    api_response = api_instance.daemon_channel_settings_put(body)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DaemonApi->daemonDataSettingsPut: %s\n" % e)</code></pre>
+    print("Exception when calling DaemonApi->daemonChannelSettingsPut: %s\n" % e)</code></pre>
                             </div>
                           </div>
 
@@ -5176,10 +5179,10 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Data handling details to apply",
+  "description" : "Channel handling details to apply",
   "required" : true,
   "schema" : {
-    "$ref" : "#/definitions/SDRDaemonDataSettings"
+    "$ref" : "#/definitions/ChannelSettings"
   }
 };
   var schema = schemaWrapper.schema;
@@ -5193,12 +5196,12 @@ $(document).ready(function() {
   }
 
   var view = new JSONSchemaView(schema,2,{isBodyParam: true});
-  var result = $('#d2e199_daemonDataSettingsPut_body');
+  var result = $('#d2e199_daemonChannelSettingsPut_body');
   result.empty();
   result.append(view.render());
 });
 </script>
-<div id="d2e199_daemonDataSettingsPut_body"></div>
+<div id="d2e199_daemonChannelSettingsPut_body"></div>
 </td>
 </tr>
 
@@ -5211,20 +5214,20 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPut-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPut-200-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPut-200-schema">
-                                  <div id='responses-daemonDataSettingsPut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPut-200-schema">
+                                  <div id='responses-daemonChannelSettingsPut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
   "description" : "On success returns new settings values",
   "schema" : {
-    "$ref" : "#/definitions/SDRDaemonDataSettings"
+    "$ref" : "#/definitions/ChannelSettings"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -5239,14 +5242,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPut-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPut-200-schema-200');
+                                        $('#responses-daemonChannelSettingsPut-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPut-200-schema-200');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPut-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPut-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -5254,14 +5257,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPut-500-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPut-500-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPut-500-schema">
-                                  <div id='responses-daemonDataSettingsPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPut-500-schema">
+                                  <div id='responses-daemonChannelSettingsPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -5282,14 +5285,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPut-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPut-500-schema-500');
+                                        $('#responses-daemonChannelSettingsPut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPut-500-schema-500');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPut-500-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPut-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -5297,14 +5300,14 @@ $(document).ready(function() {
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-daemonDataSettingsPut-501-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-daemonChannelSettingsPut-501-schema">Schema</a>
                                 </li>
 
                             </ul>
 
                             <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-daemonDataSettingsPut-501-schema">
-                                  <div id='responses-daemonDataSettingsPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                <div class="tab-pane active" id="responses-daemonChannelSettingsPut-501-schema">
+                                  <div id='responses-daemonChannelSettingsPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
@@ -5325,14 +5328,14 @@ $(document).ready(function() {
 
                                         //console.log(JSON.stringify(schema));
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-daemonDataSettingsPut-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-daemonDataSettingsPut-501-schema-501');
+                                        $('#responses-daemonChannelSettingsPut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelSettingsPut-501-schema-501');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-daemonDataSettingsPut-501-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-daemonChannelSettingsPut-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -28212,7 +28215,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-08-23T00:21:49.115+02:00
+              Generated 2018-08-23T14:53:21.934+02:00
             </div>
           </div>
       </div>

@@ -26,7 +26,7 @@
 #include "webapirequestmapper.h"
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
-#include "SWGSDRDaemonDataSettings.h"
+#include "SWGChannelSettings.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
@@ -96,8 +96,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             daemonInstanceSummaryService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonInstanceLoggingURL) {
             daemonInstanceLoggingService(request, response);
-        } else if (path == WebAPIAdapterDaemon::daemonDataSettingsURL) {
-            daemonDataSettingsService(request, response);
+        } else if (path == WebAPIAdapterDaemon::daemonChannelSettingsURL) {
+            daemonChannelSettingsService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonDeviceSettingsURL) {
             daemonDeviceSettingsService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonDeviceReportURL) {
@@ -191,27 +191,41 @@ void WebAPIRequestMapper::daemonInstanceLoggingService(qtwebapp::HttpRequest& re
     }
 }
 
-void WebAPIRequestMapper::daemonDataSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::daemonChannelSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");
 
-    if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGChannelSettings normalResponse;
+        resetChannelSettings(normalResponse);
+        int status = m_adapter->daemonChannelSettingsGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
     {
         QString jsonStr = request.getBody();
         QJsonObject jsonObject;
 
         if (parseJsonBody(jsonStr, jsonObject, response))
         {
-            SWGSDRangel::SWGSDRDaemonDataSettings normalResponse;
-            QStringList dataSettingsKeys;
+            SWGSDRangel::SWGChannelSettings normalResponse;
+            resetChannelSettings(normalResponse);
+            QStringList channelSettingsKeys;
 
-            if (validateDataSettings(normalResponse, jsonObject, dataSettingsKeys))
+            if (validateChannelSettings(normalResponse, jsonObject, channelSettingsKeys))
             {
-                int status = m_adapter->daemonDataSettingsPutPatch(
+                int status = m_adapter->daemonChannelSettingsPutPatch(
                         (request.getMethod() == "PUT"), // force settings on PUT
-                        dataSettingsKeys,
+                        channelSettingsKeys,
                         normalResponse,
                         errorResponse);
                 response.setStatus(status);
@@ -235,18 +249,6 @@ void WebAPIRequestMapper::daemonDataSettingsService(qtwebapp::HttpRequest& reque
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
             *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGSDRDaemonDataSettings normalResponse;
-        int status = m_adapter->daemonDataSettingsGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -411,51 +413,248 @@ void WebAPIRequestMapper::daemonRunService(qtwebapp::HttpRequest& request, qtweb
     }
 }
 
-
-bool WebAPIRequestMapper::validateDataSettings(SWGSDRangel::SWGSDRDaemonDataSettings& dataSettings, QJsonObject& jsonObject, QStringList& dataSettingsKeys)
+// TODO: put in library in common with SDRangel. Can be static.
+bool WebAPIRequestMapper::validateChannelSettings(
+        SWGSDRangel::SWGChannelSettings& channelSettings,
+        QJsonObject& jsonObject,
+        QStringList& channelSettingsKeys)
 {
-    if (jsonObject.contains("nbFECBlocks"))
-    {
-        int nbFECBlocks = jsonObject["nbFECBlocks"].toInt();
-
-        if (nbFECBlocks >=0 && nbFECBlocks < 127) {
-            dataSettings.setNbFecBlocks(nbFECBlocks);
-        } else {
-            dataSettings.setNbFecBlocks(0);
-        }
+    if (jsonObject.contains("tx")) {
+        channelSettings.setTx(jsonObject["tx"].toInt());
+    } else {
+        channelSettings.setTx(0); // assume Rx
     }
 
-    if (jsonObject.contains("dataPort"))
-    {
-        int dataPort = jsonObject["dataPort"].toInt();
-
-        if (dataPort > 1023 && dataPort < 65536) {
-            dataSettings.setDataPort(dataPort);
-        } else {
-            dataSettings.setDataPort(9090);
-        }
-    }
-
-    if (jsonObject.contains("txDelay"))
-    {
-        int txDelay = jsonObject["txDelay"].toInt();
-
-        if (txDelay > 100) {
-            dataSettings.setTxDelay(txDelay);
-        } else {
-            dataSettings.setTxDelay(100);
-        }
-    }
-
-    if (jsonObject.contains("dataAddress")  && jsonObject["dataAddress"].isString()) {
-        dataSettings.setDataAddress(new QString(jsonObject["dataAddress"].toString()));
+    if (jsonObject.contains("channelType") && jsonObject["channelType"].isString()) {
+        channelSettings.setChannelType(new QString(jsonObject["channelType"].toString()));
     } else {
         return false;
     }
 
-    dataSettingsKeys = jsonObject.keys();
+    QString *channelType = channelSettings.getChannelType();
 
-    return true;
+    if (*channelType == "AMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject amDemodSettingsJsonObject = jsonObject["AMDemodSettings"].toObject();
+            channelSettingsKeys = amDemodSettingsJsonObject.keys();
+            channelSettings.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+            channelSettings.getAmDemodSettings()->fromJsonObject(amDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "AMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject amModSettingsJsonObject = jsonObject["AMModSettings"].toObject();
+            channelSettingsKeys = amModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(amModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+            channelSettings.getAmModSettings()->fromJsonObject(amModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "ATVMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject atvModSettingsJsonObject = jsonObject["ATVModSettings"].toObject();
+            channelSettingsKeys = atvModSettingsJsonObject.keys();
+            channelSettings.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+            channelSettings.getAtvModSettings()->fromJsonObject(atvModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "BFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject bfmDemodSettingsJsonObject = jsonObject["BFMDemodSettings"].toObject();
+            channelSettingsKeys = bfmDemodSettingsJsonObject.keys();
+            channelSettings.setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+            channelSettings.getBfmDemodSettings()->fromJsonObject(bfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "DSDDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject dsdDemodSettingsJsonObject = jsonObject["DSDDemodSettings"].toObject();
+            channelSettingsKeys = dsdDemodSettingsJsonObject.keys();
+            channelSettings.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+            channelSettings.getDsdDemodSettings()->fromJsonObject(dsdDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject nfmDemodSettingsJsonObject = jsonObject["NFMDemodSettings"].toObject();
+            channelSettingsKeys = nfmDemodSettingsJsonObject.keys();
+            channelSettings.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+            channelSettings.getNfmDemodSettings()->fromJsonObject(nfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
+            channelSettingsKeys = nfmModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(nfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+            channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "SDRDaemonChannel")
+    {
+        QJsonObject sdrDaemonChannelSettingsJsonObject = jsonObject["SDRDaemonChannelSettings"].toObject();
+        channelSettingsKeys = sdrDaemonChannelSettingsJsonObject.keys();
+        channelSettings.setSdrDaemonChannelSettings(new SWGSDRangel::SWGSDRDaemonChannelSettings());
+        channelSettings.getSdrDaemonChannelSettings()->fromJsonObject(sdrDaemonChannelSettingsJsonObject);
+        return true;
+    }
+    else if (*channelType == "SSBDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject ssbDemodSettingsJsonObject = jsonObject["SSBDemodSettings"].toObject();
+            channelSettingsKeys = ssbDemodSettingsJsonObject.keys();
+            channelSettings.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+            channelSettings.getSsbDemodSettings()->fromJsonObject(ssbDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "SSBMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject ssbModSettingsJsonObject = jsonObject["SSBModSettings"].toObject();
+            channelSettingsKeys = ssbModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(ssbModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+            channelSettings.getSsbModSettings()->fromJsonObject(ssbModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "UDPSink")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
+            channelSettingsKeys = udpSinkSettingsJsonObject.keys();
+            channelSettings.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+            channelSettings.getUdpSinkSettings()->fromJsonObject(udpSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "UDPSrc")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject udpSrcSettingsJsonObject = jsonObject["UDPSrcSettings"].toObject();
+            channelSettingsKeys = udpSrcSettingsJsonObject.keys();
+            channelSettings.setUdpSrcSettings(new SWGSDRangel::SWGUDPSrcSettings());
+            channelSettings.getUdpSrcSettings()->fromJsonObject(udpSrcSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "WFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject wfmDemodSettingsJsonObject = jsonObject["WFMDemodSettings"].toObject();
+            channelSettingsKeys = wfmDemodSettingsJsonObject.keys();
+            channelSettings.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+            channelSettings.getWfmDemodSettings()->fromJsonObject(wfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "WFMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject wfmModSettingsJsonObject = jsonObject["WFMModSettings"].toObject();
+            channelSettingsKeys = wfmModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(wfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+            channelSettings.getWfmModSettings()->fromJsonObject(wfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 // TODO: put in library in common with SDRangel. Can be static.
@@ -772,6 +971,27 @@ bool WebAPIRequestMapper::parseJsonBody(QString& jsonStr, QJsonObject& jsonObjec
 
         return false;
     }
+}
+
+// TODO: put in library in common with SDRangel. Can be static.
+void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
+{
+    channelSettings.cleanup();
+    channelSettings.setChannelType(0);
+    channelSettings.setAmDemodSettings(0);
+    channelSettings.setAmModSettings(0);
+    channelSettings.setAtvModSettings(0);
+    channelSettings.setBfmDemodSettings(0);
+    channelSettings.setDsdDemodSettings(0);
+    channelSettings.setNfmDemodSettings(0);
+    channelSettings.setNfmModSettings(0);
+    channelSettings.setSdrDaemonChannelSettings(0);
+    channelSettings.setSsbDemodSettings(0);
+    channelSettings.setSsbModSettings(0);
+    channelSettings.setUdpSinkSettings(0);
+    channelSettings.setUdpSrcSettings(0);
+    channelSettings.setWfmDemodSettings(0);
+    channelSettings.setWfmModSettings(0);
 }
 
 // TODO: put in library in common with SDRangel. Can be static.

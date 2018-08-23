@@ -2146,6 +2146,14 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "SDRDaemonChannel")
+    {
+        QJsonObject sdrDaemonChannelSettingsJsonObject = jsonObject["SDRDaemonChannelSettings"].toObject();
+        channelSettingsKeys = sdrDaemonChannelSettingsJsonObject.keys();
+        channelSettings.setSdrDaemonChannelSettings(new SWGSDRangel::SWGSDRDaemonChannelSettings());
+        channelSettings.getSdrDaemonChannelSettings()->fromJsonObject(sdrDaemonChannelSettingsJsonObject);
+        return true;
+    }
     else if (*channelType == "SSBDemod")
     {
         if (channelSettings.getTx() == 0)
@@ -2384,6 +2392,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
+    channelSettings.setSdrDaemonChannelSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
     channelSettings.setUdpSinkSettings(0);

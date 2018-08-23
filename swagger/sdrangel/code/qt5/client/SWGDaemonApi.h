@@ -15,13 +15,13 @@
 
 #include "SWGHttpRequest.h"
 
+#include "SWGChannelSettings.h"
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGDeviceReport.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
 #include "SWGLoggingInfo.h"
-#include "SWGSDRDaemonDataSettings.h"
 
 #include <QObject>
 
@@ -39,9 +39,9 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
-    void daemonDataSettingsGet();
-    void daemonDataSettingsPatch(SWGSDRDaemonDataSettings& body);
-    void daemonDataSettingsPut(SWGSDRDaemonDataSettings& body);
+    void daemonChannelSettingsGet();
+    void daemonChannelSettingsPatch(SWGChannelSettings& body);
+    void daemonChannelSettingsPut(SWGChannelSettings& body);
     void daemonDeviceReportGet();
     void daemonDeviceSettingsGet();
     void daemonDeviceSettingsPatch(SWGDeviceSettings& body);
@@ -54,9 +54,9 @@ public:
     void daemonRunPost();
     
 private:
-    void daemonDataSettingsGetCallback (SWGHttpRequestWorker * worker);
-    void daemonDataSettingsPatchCallback (SWGHttpRequestWorker * worker);
-    void daemonDataSettingsPutCallback (SWGHttpRequestWorker * worker);
+    void daemonChannelSettingsGetCallback (SWGHttpRequestWorker * worker);
+    void daemonChannelSettingsPatchCallback (SWGHttpRequestWorker * worker);
+    void daemonChannelSettingsPutCallback (SWGHttpRequestWorker * worker);
     void daemonDeviceReportGetCallback (SWGHttpRequestWorker * worker);
     void daemonDeviceSettingsGetCallback (SWGHttpRequestWorker * worker);
     void daemonDeviceSettingsPatchCallback (SWGHttpRequestWorker * worker);
@@ -69,9 +69,9 @@ private:
     void daemonRunPostCallback (SWGHttpRequestWorker * worker);
     
 signals:
-    void daemonDataSettingsGetSignal(SWGSDRDaemonDataSettings* summary);
-    void daemonDataSettingsPatchSignal(SWGSDRDaemonDataSettings* summary);
-    void daemonDataSettingsPutSignal(SWGSDRDaemonDataSettings* summary);
+    void daemonChannelSettingsGetSignal(SWGChannelSettings* summary);
+    void daemonChannelSettingsPatchSignal(SWGChannelSettings* summary);
+    void daemonChannelSettingsPutSignal(SWGChannelSettings* summary);
     void daemonDeviceReportGetSignal(SWGDeviceReport* summary);
     void daemonDeviceSettingsGetSignal(SWGDeviceSettings* summary);
     void daemonDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
@@ -83,9 +83,9 @@ signals:
     void daemonRunGetSignal(SWGDeviceState* summary);
     void daemonRunPostSignal(SWGDeviceState* summary);
     
-    void daemonDataSettingsGetSignalE(SWGSDRDaemonDataSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void daemonDataSettingsPatchSignalE(SWGSDRDaemonDataSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void daemonDataSettingsPutSignalE(SWGSDRDaemonDataSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsGetSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsPatchSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsPutSignalE(SWGChannelSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceReportGetSignalE(SWGDeviceReport* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -97,9 +97,9 @@ signals:
     void daemonRunGetSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
-    void daemonDataSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void daemonDataSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void daemonDataSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void daemonChannelSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceReportGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void daemonDeviceSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

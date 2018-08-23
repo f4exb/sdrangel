@@ -30,7 +30,7 @@
 
 namespace SWGSDRangel
 {
-    class SWGSDRDaemonDataSettings;
+    class SWGChannelSettings;
     class SWGDeviceSettings;
     class SWGDeviceReport;
 }
@@ -54,12 +54,12 @@ private:
 
     void daemonInstanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonInstanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void daemonDataSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void daemonChannelSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonDeviceSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonRunService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonDeviceReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
-    bool validateDataSettings(SWGSDRangel::SWGSDRDaemonDataSettings& dataSettings, QJsonObject& jsonObject, QStringList& dataSettingsKeys);
+    bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
 
     void appendSettingsSubKeys(
@@ -70,6 +70,7 @@ private:
 
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
+    void resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings);
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
 };

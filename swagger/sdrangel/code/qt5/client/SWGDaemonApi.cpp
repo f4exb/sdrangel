@@ -29,9 +29,9 @@ SWGDaemonApi::SWGDaemonApi(QString host, QString basePath) {
 }
 
 void
-SWGDaemonApi::daemonDataSettingsGet() {
+SWGDaemonApi::daemonChannelSettingsGet() {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/data/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/channel/settings");
 
 
 
@@ -49,13 +49,13 @@ SWGDaemonApi::daemonDataSettingsGet() {
     connect(worker,
             &SWGHttpRequestWorker::on_execution_finished,
             this,
-            &SWGDaemonApi::daemonDataSettingsGetCallback);
+            &SWGDaemonApi::daemonChannelSettingsGetCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDaemonApi::daemonDataSettingsGetCallback(SWGHttpRequestWorker * worker) {
+SWGDaemonApi::daemonChannelSettingsGetCallback(SWGHttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -69,21 +69,21 @@ SWGDaemonApi::daemonDataSettingsGetCallback(SWGHttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGSDRDaemonDataSettings* output = static_cast<SWGSDRDaemonDataSettings*>(create(json, QString("SWGSDRDaemonDataSettings")));
+    SWGChannelSettings* output = static_cast<SWGChannelSettings*>(create(json, QString("SWGChannelSettings")));
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
-        emit daemonDataSettingsGetSignal(output);
+        emit daemonChannelSettingsGetSignal(output);
     } else {
-        emit daemonDataSettingsGetSignalE(output, error_type, error_str);
-        emit daemonDataSettingsGetSignalEFull(worker, error_type, error_str);
+        emit daemonChannelSettingsGetSignalE(output, error_type, error_str);
+        emit daemonChannelSettingsGetSignalEFull(worker, error_type, error_str);
     }
 }
 
 void
-SWGDaemonApi::daemonDataSettingsPatch(SWGSDRDaemonDataSettings& body) {
+SWGDaemonApi::daemonChannelSettingsPatch(SWGChannelSettings& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/data/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/channel/settings");
 
 
 
@@ -104,13 +104,13 @@ SWGDaemonApi::daemonDataSettingsPatch(SWGSDRDaemonDataSettings& body) {
     connect(worker,
             &SWGHttpRequestWorker::on_execution_finished,
             this,
-            &SWGDaemonApi::daemonDataSettingsPatchCallback);
+            &SWGDaemonApi::daemonChannelSettingsPatchCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDaemonApi::daemonDataSettingsPatchCallback(SWGHttpRequestWorker * worker) {
+SWGDaemonApi::daemonChannelSettingsPatchCallback(SWGHttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -124,21 +124,21 @@ SWGDaemonApi::daemonDataSettingsPatchCallback(SWGHttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGSDRDaemonDataSettings* output = static_cast<SWGSDRDaemonDataSettings*>(create(json, QString("SWGSDRDaemonDataSettings")));
+    SWGChannelSettings* output = static_cast<SWGChannelSettings*>(create(json, QString("SWGChannelSettings")));
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
-        emit daemonDataSettingsPatchSignal(output);
+        emit daemonChannelSettingsPatchSignal(output);
     } else {
-        emit daemonDataSettingsPatchSignalE(output, error_type, error_str);
-        emit daemonDataSettingsPatchSignalEFull(worker, error_type, error_str);
+        emit daemonChannelSettingsPatchSignalE(output, error_type, error_str);
+        emit daemonChannelSettingsPatchSignalEFull(worker, error_type, error_str);
     }
 }
 
 void
-SWGDaemonApi::daemonDataSettingsPut(SWGSDRDaemonDataSettings& body) {
+SWGDaemonApi::daemonChannelSettingsPut(SWGChannelSettings& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/data/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/channel/settings");
 
 
 
@@ -159,13 +159,13 @@ SWGDaemonApi::daemonDataSettingsPut(SWGSDRDaemonDataSettings& body) {
     connect(worker,
             &SWGHttpRequestWorker::on_execution_finished,
             this,
-            &SWGDaemonApi::daemonDataSettingsPutCallback);
+            &SWGDaemonApi::daemonChannelSettingsPutCallback);
 
     worker->execute(&input);
 }
 
 void
-SWGDaemonApi::daemonDataSettingsPutCallback(SWGHttpRequestWorker * worker) {
+SWGDaemonApi::daemonChannelSettingsPutCallback(SWGHttpRequestWorker * worker) {
     QString msg;
     QString error_str = worker->error_str;
     QNetworkReply::NetworkError error_type = worker->error_type;
@@ -179,14 +179,14 @@ SWGDaemonApi::daemonDataSettingsPutCallback(SWGHttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGSDRDaemonDataSettings* output = static_cast<SWGSDRDaemonDataSettings*>(create(json, QString("SWGSDRDaemonDataSettings")));
+    SWGChannelSettings* output = static_cast<SWGChannelSettings*>(create(json, QString("SWGChannelSettings")));
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
-        emit daemonDataSettingsPutSignal(output);
+        emit daemonChannelSettingsPutSignal(output);
     } else {
-        emit daemonDataSettingsPutSignalE(output, error_type, error_str);
-        emit daemonDataSettingsPutSignalEFull(worker, error_type, error_str);
+        emit daemonChannelSettingsPutSignalE(output, error_type, error_str);
+        emit daemonChannelSettingsPutSignalEFull(worker, error_type, error_str);
     }
 }
 

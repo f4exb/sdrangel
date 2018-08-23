@@ -23,7 +23,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGSDRDaemonDataSettings.h"
+#include "SWGChannelSettings.h"
 #include "SWGErrorResponse.h"
 
 #include "dsp/dsptypes.h"
@@ -39,7 +39,7 @@
 
 QString WebAPIAdapterDaemon::daemonInstanceSummaryURL = "/sdrdaemon";
 QString WebAPIAdapterDaemon::daemonInstanceLoggingURL = "/sdrdaemon/logging";
-QString WebAPIAdapterDaemon::daemonDataSettingsURL = "/sdrdaemon/data/settings";
+QString WebAPIAdapterDaemon::daemonChannelSettingsURL = "/sdrdaemon/channel/settings";
 QString WebAPIAdapterDaemon::daemonDeviceSettingsURL = "/sdrdaemon/device/settings";
 QString WebAPIAdapterDaemon::daemonDeviceReportURL = "/sdrdaemon/device/report";
 QString WebAPIAdapterDaemon::daemonRunURL = "/sdrdaemon/run";
@@ -176,8 +176,8 @@ int WebAPIAdapterDaemon::daemonInstanceLoggingPut(
     return 200;
 }
 
-int WebAPIAdapterDaemon::daemonDataSettingsGet(
-        SWGSDRangel::SWGSDRDaemonDataSettings& response __attribute__((unused)),
+int WebAPIAdapterDaemon::daemonChannelSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
@@ -185,10 +185,10 @@ int WebAPIAdapterDaemon::daemonDataSettingsGet(
     return 501;
 }
 
-int WebAPIAdapterDaemon::daemonDataSettingsPutPatch(
+int WebAPIAdapterDaemon::daemonChannelSettingsPutPatch(
         bool force __attribute__((unused)),
-        const QStringList& dataSettingsKeys __attribute__((unused)),
-        SWGSDRangel::SWGSDRDaemonDataSettings& response __attribute__((unused)),
+        const QStringList& channelSettingsKeys __attribute__((unused)),
+        SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();

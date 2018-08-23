@@ -33,7 +33,7 @@ namespace SWGSDRangel
     class SWGSuccessResponse;
     class SWGErrorResponse;
     class SWGLoggingInfo;
-    class SWGSDRDaemonDataSettings;
+    class SWGChannelSettings;
 }
 
 class SDRDaemonMain;
@@ -57,14 +57,14 @@ public:
             SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    int daemonDataSettingsGet(
-            SWGSDRangel::SWGSDRDaemonDataSettings& response,
+    int daemonChannelSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    int daemonDataSettingsPutPatch(
+    int daemonChannelSettingsPutPatch(
             bool force,
-            const QStringList& dataSettingsKeys,
-            SWGSDRangel::SWGSDRDaemonDataSettings& response,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     int daemonDeviceSettingsGet(
@@ -95,7 +95,7 @@ public:
 
     static QString daemonInstanceSummaryURL;
     static QString daemonInstanceLoggingURL;
-    static QString daemonDataSettingsURL;
+    static QString daemonChannelSettingsURL;
     static QString daemonDeviceSettingsURL;
     static QString daemonDeviceReportURL;
     static QString daemonRunURL;

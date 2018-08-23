@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGSDRDaemonDataSettings.h
+ * SWGSDRDaemonChannelSettings.h
  *
  * Data handling details for SDRDaemon
  */
 
-#ifndef SWGSDRDaemonDataSettings_H_
-#define SWGSDRDaemonDataSettings_H_
+#ifndef SWGSDRDaemonChannelSettings_H_
+#define SWGSDRDaemonChannelSettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGSDRDaemonDataSettings: public SWGObject {
+class SWG_API SWGSDRDaemonChannelSettings: public SWGObject {
 public:
-    SWGSDRDaemonDataSettings();
-    SWGSDRDaemonDataSettings(QString* json);
-    virtual ~SWGSDRDaemonDataSettings();
+    SWGSDRDaemonChannelSettings();
+    SWGSDRDaemonChannelSettings(QString* json);
+    virtual ~SWGSDRDaemonChannelSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGSDRDaemonDataSettings* fromJson(QString &jsonString) override;
+    virtual SWGSDRDaemonChannelSettings* fromJson(QString &jsonString) override;
 
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
@@ -74,4 +74,4 @@ private:
 
 }
 
-#endif /* SWGSDRDaemonDataSettings_H_ */
+#endif /* SWGSDRDaemonChannelSettings_H_ */

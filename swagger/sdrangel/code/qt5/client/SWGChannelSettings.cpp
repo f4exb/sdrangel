@@ -46,6 +46,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
     m_nfm_mod_settings_isSet = false;
+    sdr_daemon_channel_settings = nullptr;
+    m_sdr_daemon_channel_settings_isSet = false;
     ssb_mod_settings = nullptr;
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = nullptr;
@@ -84,6 +86,8 @@ SWGChannelSettings::init() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
     m_nfm_mod_settings_isSet = false;
+    sdr_daemon_channel_settings = new SWGSDRDaemonChannelSettings();
+    m_sdr_daemon_channel_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = new SWGSSBDemodSettings();
@@ -124,6 +128,9 @@ SWGChannelSettings::cleanup() {
     }
     if(nfm_mod_settings != nullptr) { 
         delete nfm_mod_settings;
+    }
+    if(sdr_daemon_channel_settings != nullptr) { 
+        delete sdr_daemon_channel_settings;
     }
     if(ssb_mod_settings != nullptr) { 
         delete ssb_mod_settings;
@@ -173,6 +180,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
+    
+    ::SWGSDRangel::setValue(&sdr_daemon_channel_settings, pJson["SDRDaemonChannelSettings"], "SWGSDRDaemonChannelSettings", "SWGSDRDaemonChannelSettings");
     
     ::SWGSDRangel::setValue(&ssb_mod_settings, pJson["SSBModSettings"], "SWGSSBModSettings", "SWGSSBModSettings");
     
@@ -228,6 +237,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((nfm_mod_settings != nullptr) && (nfm_mod_settings->isSet())){
         toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
+    }
+    if((sdr_daemon_channel_settings != nullptr) && (sdr_daemon_channel_settings->isSet())){
+        toJsonValue(QString("SDRDaemonChannelSettings"), sdr_daemon_channel_settings, obj, QString("SWGSDRDaemonChannelSettings"));
     }
     if((ssb_mod_settings != nullptr) && (ssb_mod_settings->isSet())){
         toJsonValue(QString("SSBModSettings"), ssb_mod_settings, obj, QString("SWGSSBModSettings"));
@@ -341,6 +353,16 @@ SWGChannelSettings::setNfmModSettings(SWGNFMModSettings* nfm_mod_settings) {
     this->m_nfm_mod_settings_isSet = true;
 }
 
+SWGSDRDaemonChannelSettings*
+SWGChannelSettings::getSdrDaemonChannelSettings() {
+    return sdr_daemon_channel_settings;
+}
+void
+SWGChannelSettings::setSdrDaemonChannelSettings(SWGSDRDaemonChannelSettings* sdr_daemon_channel_settings) {
+    this->sdr_daemon_channel_settings = sdr_daemon_channel_settings;
+    this->m_sdr_daemon_channel_settings_isSet = true;
+}
+
 SWGSSBModSettings*
 SWGChannelSettings::getSsbModSettings() {
     return ssb_mod_settings;
@@ -415,6 +437,7 @@ SWGChannelSettings::isSet(){
         if(dsd_demod_settings != nullptr && dsd_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(sdr_daemon_channel_settings != nullptr && sdr_daemon_channel_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_demod_settings != nullptr && ssb_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(udp_sink_settings != nullptr && udp_sink_settings->isSet()){ isObjectUpdated = true; break;}

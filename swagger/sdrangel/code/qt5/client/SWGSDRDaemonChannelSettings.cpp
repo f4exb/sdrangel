@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSDRDaemonDataSettings.h"
+#include "SWGSDRDaemonChannelSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGSDRDaemonDataSettings::SWGSDRDaemonDataSettings(QString* json) {
+SWGSDRDaemonChannelSettings::SWGSDRDaemonChannelSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSDRDaemonDataSettings::SWGSDRDaemonDataSettings() {
+SWGSDRDaemonChannelSettings::SWGSDRDaemonChannelSettings() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = nullptr;
@@ -38,12 +38,12 @@ SWGSDRDaemonDataSettings::SWGSDRDaemonDataSettings() {
     m_tx_delay_isSet = false;
 }
 
-SWGSDRDaemonDataSettings::~SWGSDRDaemonDataSettings() {
+SWGSDRDaemonChannelSettings::~SWGSDRDaemonChannelSettings() {
     this->cleanup();
 }
 
 void
-SWGSDRDaemonDataSettings::init() {
+SWGSDRDaemonChannelSettings::init() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = new QString("");
@@ -55,7 +55,7 @@ SWGSDRDaemonDataSettings::init() {
 }
 
 void
-SWGSDRDaemonDataSettings::cleanup() {
+SWGSDRDaemonChannelSettings::cleanup() {
 
     if(data_address != nullptr) { 
         delete data_address;
@@ -64,8 +64,8 @@ SWGSDRDaemonDataSettings::cleanup() {
 
 }
 
-SWGSDRDaemonDataSettings*
-SWGSDRDaemonDataSettings::fromJson(QString &json) {
+SWGSDRDaemonChannelSettings*
+SWGSDRDaemonChannelSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -74,7 +74,7 @@ SWGSDRDaemonDataSettings::fromJson(QString &json) {
 }
 
 void
-SWGSDRDaemonDataSettings::fromJsonObject(QJsonObject &pJson) {
+SWGSDRDaemonChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
@@ -86,7 +86,7 @@ SWGSDRDaemonDataSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGSDRDaemonDataSettings::asJson ()
+SWGSDRDaemonChannelSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -97,7 +97,7 @@ SWGSDRDaemonDataSettings::asJson ()
 }
 
 QJsonObject*
-SWGSDRDaemonDataSettings::asJsonObject() {
+SWGSDRDaemonChannelSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
@@ -116,48 +116,48 @@ SWGSDRDaemonDataSettings::asJsonObject() {
 }
 
 qint32
-SWGSDRDaemonDataSettings::getNbFecBlocks() {
+SWGSDRDaemonChannelSettings::getNbFecBlocks() {
     return nb_fec_blocks;
 }
 void
-SWGSDRDaemonDataSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
+SWGSDRDaemonChannelSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
 }
 
 QString*
-SWGSDRDaemonDataSettings::getDataAddress() {
+SWGSDRDaemonChannelSettings::getDataAddress() {
     return data_address;
 }
 void
-SWGSDRDaemonDataSettings::setDataAddress(QString* data_address) {
+SWGSDRDaemonChannelSettings::setDataAddress(QString* data_address) {
     this->data_address = data_address;
     this->m_data_address_isSet = true;
 }
 
 qint32
-SWGSDRDaemonDataSettings::getDataPort() {
+SWGSDRDaemonChannelSettings::getDataPort() {
     return data_port;
 }
 void
-SWGSDRDaemonDataSettings::setDataPort(qint32 data_port) {
+SWGSDRDaemonChannelSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
 }
 
 qint32
-SWGSDRDaemonDataSettings::getTxDelay() {
+SWGSDRDaemonChannelSettings::getTxDelay() {
     return tx_delay;
 }
 void
-SWGSDRDaemonDataSettings::setTxDelay(qint32 tx_delay) {
+SWGSDRDaemonChannelSettings::setTxDelay(qint32 tx_delay) {
     this->tx_delay = tx_delay;
     this->m_tx_delay_isSet = true;
 }
 
 
 bool
-SWGSDRDaemonDataSettings::isSet(){
+SWGSDRDaemonChannelSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
