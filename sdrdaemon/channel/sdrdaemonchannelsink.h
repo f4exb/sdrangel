@@ -80,6 +80,16 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
     /** Set center frequency given in Hz */
     void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency / 1000; }
 
@@ -123,6 +133,7 @@ private:
     uint16_t m_dataPort;
 
     void applySettings(const SDRDaemonChannelSinkSettings& settings, bool force = false);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSinkSettings& settings);
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */

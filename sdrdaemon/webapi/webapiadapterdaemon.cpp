@@ -31,6 +31,8 @@
 #include "dsp/dspdevicesinkengine.h"
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
+#include "channel/channelsourceapi.h"
+#include "channel/channelsinkapi.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/devicesamplesource.h"
 #include "webapiadapterdaemon.h"
@@ -181,8 +183,46 @@ int WebAPIAdapterDaemon::daemonChannelSettingsGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        ChannelSinkAPI *channelAPI = m_sdrDaemonMain.m_deviceSourceAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500; // a SDRDaemon sink channel should have been created so this is a server error
+        }
+        else
+        {
+            response.setChannelType(new QString());
+            channelAPI->getIdentifier(*response.getChannelType());
+            response.setTx(0);
+            return channelAPI->webapiSettingsGet(response, *error.getMessage());
+        }
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        ChannelSourceAPI *channelAPI = m_sdrDaemonMain.m_deviceSinkAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500; // a SDRDaemon source channel should have been created so this is a server error
+        }
+        else
+        {
+            response.setChannelType(new QString());
+            channelAPI->getIdentifier(*response.getChannelType());
+            response.setTx(1);
+            return channelAPI->webapiSettingsGet(response, *error.getMessage());
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("Device not created error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonChannelSettingsPutPatch(
@@ -192,8 +232,62 @@ int WebAPIAdapterDaemon::daemonChannelSettingsPutPatch(
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
-    *error.getMessage() = "Not implemented";
-    return 501;
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        ChannelSinkAPI *channelAPI = m_sdrDaemonMain.m_deviceSourceAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500;
+        }
+        else
+        {
+            QString channelType;
+            channelAPI->getIdentifier(channelType);
+
+            if (channelType == *response.getChannelType())
+            {
+                return channelAPI->webapiSettingsPutPatch(force, channelSettingsKeys, response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("Channel has wrong type. Found %1.").arg(channelType);
+                return 500;
+            }
+        }
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        ChannelSourceAPI *channelAPI = m_sdrDaemonMain.m_deviceSinkAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500;
+        }
+        else
+        {
+            QString channelType;
+            channelAPI->getIdentifier(channelType);
+
+            if (channelType == *response.getChannelType())
+            {
+                return channelAPI->webapiSettingsPutPatch(force, channelSettingsKeys, response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("Channel has wrong type. Found %3.").arg(channelType);
+                return 500;
+            }
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("DeviceSet error");
+        return 500;
+    }
 }
 
 int WebAPIAdapterDaemon::daemonDeviceSettingsGet(

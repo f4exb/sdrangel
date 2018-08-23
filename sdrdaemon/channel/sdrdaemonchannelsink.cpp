@@ -25,6 +25,8 @@
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
+#include "SWGChannelSettings.h"
+
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
@@ -311,4 +313,64 @@ void SDRDaemonChannelSink::applySettings(const SDRDaemonChannelSinkSettings& set
     }
 
     m_settings = settings;
+}
+
+int SDRDaemonChannelSink::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonChannelSinkSettings(new SWGSDRangel::SWGSDRDaemonChannelSinkSettings());
+    response.getSdrDaemonChannelSinkSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int SDRDaemonChannelSink::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    SDRDaemonChannelSinkSettings settings = m_settings;
+
+    if (channelSettingsKeys.contains("nbFECBlocks")) {
+        settings.m_nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+    }
+    if (channelSettingsKeys.contains("txDelay")) {
+        settings.m_txDelay = response.getSdrDaemonChannelSinkSettings()->getTxDelay();
+    }
+    if (channelSettingsKeys.contains("dataAddress")) {
+        settings.m_dataAddress = *response.getSdrDaemonChannelSinkSettings()->getDataAddress();
+    }
+    if (channelSettingsKeys.contains("dataPort")) {
+        settings.m_dataPort = response.getSdrDaemonChannelSinkSettings()->getDataPort();
+    }
+
+    MsgConfigureSDRDaemonChannelSink *msg = MsgConfigureSDRDaemonChannelSink::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("SDRDaemonChannelSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRDaemonChannelSink *msgToGUI = MsgConfigureSDRDaemonChannelSink::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void SDRDaemonChannelSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSinkSettings& settings)
+{
+    response.getSdrDaemonChannelSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getSdrDaemonChannelSinkSettings()->setTxDelay(settings.m_txDelay);
+
+    if (response.getSdrDaemonChannelSinkSettings()->getDataAddress()) {
+        *response.getSdrDaemonChannelSinkSettings()->getDataAddress() = settings.m_dataAddress;
+    } else {
+        response.getSdrDaemonChannelSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    }
+
+    response.getSdrDaemonChannelSinkSettings()->setDataPort(settings.m_dataPort);
 }
