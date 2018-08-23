@@ -20,11 +20,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/upchannelizer.h"
 #include "device/devicesinkapi.h"
 #include "sdrdaemonchannelsource.h"
+
+MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSource::MsgConfigureSDRDaemonChannelSource, Message)
 
 const QString SDRDaemonChannelSource::m_channelIdURI = "sdrangel.channel.sdrdaemonsource";
 const QString SDRDaemonChannelSource::m_channelId = "SDRDaemonChannelSource";
@@ -33,7 +37,9 @@ SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
         ChannelSourceAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_running(false),
-        m_samplesCount(0)
+        m_samplesCount(0),
+        m_dataAddress("127.0.0.1"),
+        m_dataPort(9090)
 {
     setObjectName(m_channelId);
 
@@ -78,17 +84,58 @@ void SDRDaemonChannelSource::stop()
 
 bool SDRDaemonChannelSource::handleMessage(const Message& cmd __attribute__((unused)))
 {
-    return false;
+    if (MsgConfigureSDRDaemonChannelSource::match(cmd))
+    {
+        MsgConfigureSDRDaemonChannelSource& cfg = (MsgConfigureSDRDaemonChannelSource&) cmd;
+        qDebug() << "SDRDaemonChannelSource::handleMessage: MsgConfigureSDRDaemonChannelSource";
+        applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 QByteArray SDRDaemonChannelSource::serialize() const
 {
-    SimpleSerializer s(1);
-    return s.final();
+    return m_settings.serialize();
 }
 
 bool SDRDaemonChannelSource::deserialize(const QByteArray& data __attribute__((unused)))
 {
-    return false;
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureSDRDaemonChannelSource *msg = MsgConfigureSDRDaemonChannelSource::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureSDRDaemonChannelSource *msg = MsgConfigureSDRDaemonChannelSource::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
 }
+
+void SDRDaemonChannelSource::applySettings(const SDRDaemonChannelSourceSettings& settings, bool force)
+{
+    qDebug() << "SDRDaemonChannelSource::applySettings:"
+            << " m_dataAddress: " << settings.m_dataAddress
+            << " m_dataPort: " << settings.m_dataPort
+            << " force: " << force;
+
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+        m_dataAddress = settings.m_dataAddress;
+    }
+
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+        m_dataPort = settings.m_dataPort;
+    }
+
+    m_settings = settings;
+}
+
 

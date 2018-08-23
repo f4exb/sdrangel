@@ -22,33 +22,29 @@
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "channel/sdrdaemonchannelsinksettings.h"
+#include "channel/sdrdaemonchannelsourcesettings.h"
 
-SDRDaemonChannelSinkSettings::SDRDaemonChannelSinkSettings()
+SDRDaemonChannelSourceSettings::SDRDaemonChannelSourceSettings()
 {
     resetToDefaults();
 }
 
-void SDRDaemonChannelSinkSettings::resetToDefaults()
+void SDRDaemonChannelSourceSettings::resetToDefaults()
 {
-    m_nbFECBlocks = 0;
-    m_txDelay = 100;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
 }
 
-QByteArray SDRDaemonChannelSinkSettings::serialize() const
+QByteArray SDRDaemonChannelSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeU32(1, m_nbFECBlocks);
-    s.writeU32(2, m_txDelay);
-    s.writeString(3, m_dataAddress);
-    s.writeU32(4, m_dataPort);
+    s.writeString(1, m_dataAddress);
+    s.writeU32(2, m_dataPort);
 
     return s.final();
 }
 
-bool SDRDaemonChannelSinkSettings::deserialize(const QByteArray& data)
+bool SDRDaemonChannelSourceSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -63,17 +59,8 @@ bool SDRDaemonChannelSinkSettings::deserialize(const QByteArray& data)
         uint32_t tmp;
         QString strtmp;
 
-        d.readU32(1, &tmp, 0);
-
-        if (tmp < 128) {
-            m_nbFECBlocks = tmp;
-        } else {
-            m_nbFECBlocks = 0;
-        }
-
-        d.readU32(2, &m_txDelay, 100);
-        d.readString(3, &m_dataAddress, "127.0.0.1");
-        d.readU32(4, &tmp, 0);
+        d.readString(1, &m_dataAddress, "127.0.0.1");
+        d.readU32(2, &tmp, 0);
 
         if ((tmp > 1023) && (tmp < 65535)) {
             m_dataPort = tmp;
@@ -89,6 +76,8 @@ bool SDRDaemonChannelSinkSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+
 
 
 

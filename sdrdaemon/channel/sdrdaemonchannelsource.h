@@ -25,6 +25,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"
+#include "channel/sdrdaemonchannelsourcesettings.h"
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -33,6 +34,29 @@ class DeviceSinkAPI;
 class SDRDaemonChannelSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 public:
+    class MsgConfigureSDRDaemonChannelSource : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SDRDaemonChannelSourceSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSDRDaemonChannelSource* create(const SDRDaemonChannelSourceSettings& settings, bool force)
+        {
+            return new MsgConfigureSDRDaemonChannelSource(settings, force);
+        }
+
+    private:
+        SDRDaemonChannelSourceSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSDRDaemonChannelSource(const SDRDaemonChannelSourceSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI);
     ~SDRDaemonChannelSource();
     virtual void destroy() { delete this; }
@@ -58,7 +82,13 @@ private:
     UpChannelizer* m_channelizer;
 
     bool m_running;
+    SDRDaemonChannelSourceSettings m_settings;
     uint32_t m_samplesCount;
+
+    QString m_dataAddress;
+    uint16_t m_dataPort;
+
+    void applySettings(const SDRDaemonChannelSourceSettings& settings, bool force = false);
 };
 
 
