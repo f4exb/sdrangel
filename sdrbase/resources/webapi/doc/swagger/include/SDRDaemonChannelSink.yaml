@@ -1,4 +1,4 @@
-SDRDaemonChannelSettings:
+SDRDaemonChannelSinkSettings:
   description: "Data handling details for SDRDaemon"
   properties:
     nbFECBlocks:

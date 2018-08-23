@@ -89,7 +89,7 @@
 #include "SWGRDSReport_altFrequencies.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
-#include "SWGSDRDaemonChannelSettings.h"
+#include "SWGSDRDaemonChannelSinkSettings.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSinkReport.h"
@@ -341,8 +341,8 @@ namespace SWGSDRangel {
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
     }
-    if(QString("SWGSDRDaemonChannelSettings").compare(type) == 0) {
-      return new SWGSDRDaemonChannelSettings();
+    if(QString("SWGSDRDaemonChannelSinkSettings").compare(type) == 0) {
+      return new SWGSDRDaemonChannelSinkSettings();
     }
     if(QString("SWGSDRPlayReport").compare(type) == 0) {
       return new SWGSDRPlayReport();

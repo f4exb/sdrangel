@@ -2194,8 +2194,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
-      SDRDaemonChannelSettings:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannel.yaml#/SDRDaemonChannelSettings"
+      SDRDaemonChannelSinkSettings:
+        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSink.yaml#/SDRDaemonChannelSinkSettings"
       SSBModSettings:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:

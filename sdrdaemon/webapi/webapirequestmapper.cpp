@@ -545,13 +545,19 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "SDRDaemonChannel")
+    else if (*channelType == "SDRDaemonChannelSink")
     {
-        QJsonObject sdrDaemonChannelSettingsJsonObject = jsonObject["SDRDaemonChannelSettings"].toObject();
-        channelSettingsKeys = sdrDaemonChannelSettingsJsonObject.keys();
-        channelSettings.setSdrDaemonChannelSettings(new SWGSDRangel::SWGSDRDaemonChannelSettings());
-        channelSettings.getSdrDaemonChannelSettings()->fromJsonObject(sdrDaemonChannelSettingsJsonObject);
-        return true;
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject sdrDaemonChannelSinkSettingsJsonObject = jsonObject["SDRDaemonChannelSinkSettings"].toObject();
+            channelSettingsKeys = sdrDaemonChannelSinkSettingsJsonObject.keys();
+            channelSettings.setSdrDaemonChannelSinkSettings(new SWGSDRangel::SWGSDRDaemonChannelSinkSettings());
+            channelSettings.getSdrDaemonChannelSinkSettings()->fromJsonObject(sdrDaemonChannelSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     else if (*channelType == "SSBDemod")
     {
@@ -985,7 +991,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
-    channelSettings.setSdrDaemonChannelSettings(0);
+    channelSettings.setSdrDaemonChannelSinkSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
     channelSettings.setUdpSinkSettings(0);

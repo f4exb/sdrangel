@@ -2194,8 +2194,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
-      SDRDaemonChannelSettings:
-        $ref: "/doc/swagger/include/SDRDaemonChannel.yaml#/SDRDaemonChannelSettings"
+      SDRDaemonChannelSinkSettings:
+        $ref: "/doc/swagger/include/SDRDaemonChannelSink.yaml#/SDRDaemonChannelSinkSettings"
       SSBModSettings:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:

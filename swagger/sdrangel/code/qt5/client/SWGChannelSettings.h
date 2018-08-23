@@ -29,7 +29,7 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
-#include "SWGSDRDaemonChannelSettings.h"
+#include "SWGSDRDaemonChannelSinkSettings.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGUDPSinkSettings.h"
@@ -83,8 +83,8 @@ public:
     SWGNFMModSettings* getNfmModSettings();
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
 
-    SWGSDRDaemonChannelSettings* getSdrDaemonChannelSettings();
-    void setSdrDaemonChannelSettings(SWGSDRDaemonChannelSettings* sdr_daemon_channel_settings);
+    SWGSDRDaemonChannelSinkSettings* getSdrDaemonChannelSinkSettings();
+    void setSdrDaemonChannelSinkSettings(SWGSDRDaemonChannelSinkSettings* sdr_daemon_channel_sink_settings);
 
     SWGSSBModSettings* getSsbModSettings();
     void setSsbModSettings(SWGSSBModSettings* ssb_mod_settings);
@@ -135,8 +135,8 @@ private:
     SWGNFMModSettings* nfm_mod_settings;
     bool m_nfm_mod_settings_isSet;
 
-    SWGSDRDaemonChannelSettings* sdr_daemon_channel_settings;
-    bool m_sdr_daemon_channel_settings_isSet;
+    SWGSDRDaemonChannelSinkSettings* sdr_daemon_channel_sink_settings;
+    bool m_sdr_daemon_channel_sink_settings_isSet;
 
     SWGSSBModSettings* ssb_mod_settings;
     bool m_ssb_mod_settings_isSet;

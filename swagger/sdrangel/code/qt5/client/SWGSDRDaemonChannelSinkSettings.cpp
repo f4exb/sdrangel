@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSDRDaemonChannelSettings.h"
+#include "SWGSDRDaemonChannelSinkSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGSDRDaemonChannelSettings::SWGSDRDaemonChannelSettings(QString* json) {
+SWGSDRDaemonChannelSinkSettings::SWGSDRDaemonChannelSinkSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSDRDaemonChannelSettings::SWGSDRDaemonChannelSettings() {
+SWGSDRDaemonChannelSinkSettings::SWGSDRDaemonChannelSinkSettings() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = nullptr;
@@ -38,12 +38,12 @@ SWGSDRDaemonChannelSettings::SWGSDRDaemonChannelSettings() {
     m_tx_delay_isSet = false;
 }
 
-SWGSDRDaemonChannelSettings::~SWGSDRDaemonChannelSettings() {
+SWGSDRDaemonChannelSinkSettings::~SWGSDRDaemonChannelSinkSettings() {
     this->cleanup();
 }
 
 void
-SWGSDRDaemonChannelSettings::init() {
+SWGSDRDaemonChannelSinkSettings::init() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = new QString("");
@@ -55,7 +55,7 @@ SWGSDRDaemonChannelSettings::init() {
 }
 
 void
-SWGSDRDaemonChannelSettings::cleanup() {
+SWGSDRDaemonChannelSinkSettings::cleanup() {
 
     if(data_address != nullptr) { 
         delete data_address;
@@ -64,8 +64,8 @@ SWGSDRDaemonChannelSettings::cleanup() {
 
 }
 
-SWGSDRDaemonChannelSettings*
-SWGSDRDaemonChannelSettings::fromJson(QString &json) {
+SWGSDRDaemonChannelSinkSettings*
+SWGSDRDaemonChannelSinkSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -74,7 +74,7 @@ SWGSDRDaemonChannelSettings::fromJson(QString &json) {
 }
 
 void
-SWGSDRDaemonChannelSettings::fromJsonObject(QJsonObject &pJson) {
+SWGSDRDaemonChannelSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
@@ -86,7 +86,7 @@ SWGSDRDaemonChannelSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGSDRDaemonChannelSettings::asJson ()
+SWGSDRDaemonChannelSinkSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -97,7 +97,7 @@ SWGSDRDaemonChannelSettings::asJson ()
 }
 
 QJsonObject*
-SWGSDRDaemonChannelSettings::asJsonObject() {
+SWGSDRDaemonChannelSinkSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
@@ -116,48 +116,48 @@ SWGSDRDaemonChannelSettings::asJsonObject() {
 }
 
 qint32
-SWGSDRDaemonChannelSettings::getNbFecBlocks() {
+SWGSDRDaemonChannelSinkSettings::getNbFecBlocks() {
     return nb_fec_blocks;
 }
 void
-SWGSDRDaemonChannelSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
+SWGSDRDaemonChannelSinkSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
 }
 
 QString*
-SWGSDRDaemonChannelSettings::getDataAddress() {
+SWGSDRDaemonChannelSinkSettings::getDataAddress() {
     return data_address;
 }
 void
-SWGSDRDaemonChannelSettings::setDataAddress(QString* data_address) {
+SWGSDRDaemonChannelSinkSettings::setDataAddress(QString* data_address) {
     this->data_address = data_address;
     this->m_data_address_isSet = true;
 }
 
 qint32
-SWGSDRDaemonChannelSettings::getDataPort() {
+SWGSDRDaemonChannelSinkSettings::getDataPort() {
     return data_port;
 }
 void
-SWGSDRDaemonChannelSettings::setDataPort(qint32 data_port) {
+SWGSDRDaemonChannelSinkSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
 }
 
 qint32
-SWGSDRDaemonChannelSettings::getTxDelay() {
+SWGSDRDaemonChannelSinkSettings::getTxDelay() {
     return tx_delay;
 }
 void
-SWGSDRDaemonChannelSettings::setTxDelay(qint32 tx_delay) {
+SWGSDRDaemonChannelSinkSettings::setTxDelay(qint32 tx_delay) {
     this->tx_delay = tx_delay;
     this->m_tx_delay_isSet = true;
 }
 
 
 bool
-SWGSDRDaemonChannelSettings::isSet(){
+SWGSDRDaemonChannelSinkSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
