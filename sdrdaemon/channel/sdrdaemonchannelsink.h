@@ -31,6 +31,7 @@
 #include "channel/channelsinkapi.h"
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
+#include "channel/sdrdaemonchannelsinksettings.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
@@ -40,6 +41,29 @@ class SDRDaemonChannelSinkThread;
 class SDRDaemonChannelSink : public BasebandSampleSink, public ChannelSinkAPI {
     Q_OBJECT
 public:
+    class MsgConfigureSDRDaemonChannelSink : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SDRDaemonChannelSinkSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSDRDaemonChannelSink* create(const SDRDaemonChannelSinkSettings& settings, bool force)
+        {
+            return new MsgConfigureSDRDaemonChannelSink(settings, force);
+        }
+
+    private:
+        SDRDaemonChannelSinkSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSDRDaemonChannelSink(const SDRDaemonChannelSinkSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI);
     virtual ~SDRDaemonChannelSink();
     virtual void destroy() { delete this; }
@@ -76,6 +100,7 @@ private:
     DownChannelizer* m_channelizer;
     bool m_running;
 
+    SDRDaemonChannelSinkSettings m_settings;
     SDRDaemonDataQueue m_dataQueue;
     SDRDaemonChannelSinkThread *m_sinkThread;
     CM256 m_cm256;
@@ -96,6 +121,8 @@ private:
     int m_txDelay;
     QString m_dataAddress;
     uint16_t m_dataPort;
+
+    void applySettings(const SDRDaemonChannelSinkSettings& settings, bool force = false);
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSINK_H_ */

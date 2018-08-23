@@ -33,6 +33,8 @@
 #include "channel/sdrdaemonchannelsinkthread.h"
 #include "sdrdaemonchannelsink.h"
 
+MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSink::MsgConfigureSDRDaemonChannelSink, Message)
+
 const QString SDRDaemonChannelSink::m_channelIdURI = "sdrangel.channel.sdrdaemonsink";
 const QString SDRDaemonChannelSink::m_channelId = "SDRDaemonChannelSink";
 
@@ -247,6 +249,14 @@ bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unuse
 
         return true;
     }
+    else if (MsgConfigureSDRDaemonChannelSink::match(cmd))
+    {
+        MsgConfigureSDRDaemonChannelSink& cfg = (MsgConfigureSDRDaemonChannelSink&) cmd;
+        qDebug() << "SDRDaemonChannelSink::handleMessage: MsgConfigureSDRDaemonChannelSink";
+        applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
     else
     {
         return false;
@@ -255,11 +265,50 @@ bool SDRDaemonChannelSink::handleMessage(const Message& cmd __attribute__((unuse
 
 QByteArray SDRDaemonChannelSink::serialize() const
 {
-    SimpleSerializer s(1);
-    return s.final();
+    return m_settings.serialize();
 }
 
 bool SDRDaemonChannelSink::deserialize(const QByteArray& data __attribute__((unused)))
 {
-    return false;
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureSDRDaemonChannelSink *msg = MsgConfigureSDRDaemonChannelSink::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureSDRDaemonChannelSink *msg = MsgConfigureSDRDaemonChannelSink::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return false;
+    }
+}
+
+void SDRDaemonChannelSink::applySettings(const SDRDaemonChannelSinkSettings& settings, bool force)
+{
+    qDebug() << "SDRDaemonChannelSink::applySettings:"
+            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
+            << " m_txDelay: " << settings.m_txDelay
+            << " m_dataAddress: " << settings.m_dataAddress
+            << " m_dataPort: " << settings.m_dataPort
+            << " force: " << force;
+
+    if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
+        m_nbBlocksFEC = settings.m_nbFECBlocks;
+    }
+
+    if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
+        m_txDelay = settings.m_txDelay;
+    }
+
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+        m_dataAddress = settings.m_dataAddress;
+    }
+
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+        m_dataPort = settings.m_dataPort;
+    }
+
+    m_settings = settings;
 }
