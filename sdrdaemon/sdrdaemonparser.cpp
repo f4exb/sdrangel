@@ -229,7 +229,7 @@ void SDRDaemonParser::parse(const QCoreApplication& app)
         QString txDelayStr = m_parser.value(m_txDelayOption);
         int txDelay = txDelayStr.toInt(&ok);
 
-        if (ok && (txDelay > 0))
+        if (ok && (txDelay >= 0))
         {
             m_txDelay = txDelay;
             qDebug() << "SDRDaemonParser::parse: Tx delay: " << m_txDelay;

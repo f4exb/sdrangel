@@ -333,17 +333,41 @@ int SDRDaemonChannelSink::webapiSettingsPutPatch(
 {
     SDRDaemonChannelSinkSettings settings = m_settings;
 
-    if (channelSettingsKeys.contains("nbFECBlocks")) {
-        settings.m_nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+    if (channelSettingsKeys.contains("nbFECBlocks"))
+    {
+        int nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+
+        if ((nbFECBlocks < 0) || (nbFECBlocks > 127)) {
+            settings.m_nbFECBlocks = 8;
+        } else {
+            settings.m_nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+        }
     }
-    if (channelSettingsKeys.contains("txDelay")) {
-        settings.m_txDelay = response.getSdrDaemonChannelSinkSettings()->getTxDelay();
+
+    if (channelSettingsKeys.contains("txDelay"))
+    {
+        int txDelay = response.getSdrDaemonChannelSinkSettings()->getTxDelay();
+
+        if (txDelay < 0) {
+            settings.m_txDelay = 100;
+        } else {
+            settings.m_txDelay = txDelay;
+        }
     }
+
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getSdrDaemonChannelSinkSettings()->getDataAddress();
     }
-    if (channelSettingsKeys.contains("dataPort")) {
-        settings.m_dataPort = response.getSdrDaemonChannelSinkSettings()->getDataPort();
+
+    if (channelSettingsKeys.contains("dataPort"))
+    {
+        int dataPort = response.getSdrDaemonChannelSinkSettings()->getDataPort();
+
+        if ((dataPort < 1024) || (dataPort > 65535)) {
+            settings.m_dataPort = 9090;
+        } else {
+            settings.m_dataPort = dataPort;
+        }
     }
 
     MsgConfigureSDRDaemonChannelSink *msg = MsgConfigureSDRDaemonChannelSink::create(settings, force);
