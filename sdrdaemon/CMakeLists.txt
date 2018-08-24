@@ -11,6 +11,7 @@ set(sdrdaemon_SOURCES
     channel/sdrdaemonchannelsinkthread.cpp
     channel/sdrdaemonchannelsinksettings.cpp
     channel/sdrdaemonchannelsourcesettings.cpp
+    channel/sdrdaemonchannelsourcethread.cpp
     webapi/webapiadapterdaemon.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
@@ -28,6 +29,7 @@ set(sdrdaemon_HEADERS
     channel/sdrdaemonchannelsinkthread.h
     channel/sdrdaemonchannelsinksettings.h
     channel/sdrdaemonchannelsourcesettings.h
+    channel/sdrdaemonchannelsourcethread.h
     webapi/webapiadapterdaemon.h
     webapi/webapirequestmapper.h
     webapi/webapiserver.h
