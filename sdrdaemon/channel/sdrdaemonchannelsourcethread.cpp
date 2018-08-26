@@ -20,6 +20,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include <QUdpSocket>
 
 #include "channel/sdrdaemondataqueue.h"
@@ -31,14 +33,14 @@
 MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSourceThread::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSourceThread::MsgDataBind, Message)
 
-SDRDaemonChannelSourceThread::SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent) :
+SDRDaemonChannelSourceThread::SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
-    m_cm256(cm256),
     m_address(QHostAddress::LocalHost),
     m_socket(0)
 {
+    std::fill(m_dataBlocks, m_dataBlocks+4, (SDRDaemonDataBlock *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -131,17 +133,69 @@ void SDRDaemonChannelSourceThread::handleInputMessages()
 
 void SDRDaemonChannelSourceThread::readPendingDatagrams()
 {
-    char data[1024];
+    SDRDaemonSuperBlock superBlock;
+    qint64 size;
+
     while (m_socket->hasPendingDatagrams())
     {
         QHostAddress sender;
         quint16 senderPort = 0;
-        qint64 pendingDataSize = m_socket->pendingDatagramSize();
-        m_socket->readDatagram(data, pendingDataSize, &sender, &senderPort);
-        qDebug("SDRDaemonChannelSourceThread::readPendingDatagrams: %lld bytes received from %s:%d",
-                pendingDataSize,
-                qPrintable(sender.toString()),
-                senderPort);
+        //qint64 pendingDataSize = m_socket->pendingDatagramSize();
+        size = m_socket->readDatagram((char *) &superBlock, (long long int) sizeof(SDRDaemonSuperBlock), &sender, &senderPort);
 
+        if (size == sizeof(SDRDaemonSuperBlock))
+        {
+            unsigned int dataBlockIndex = superBlock.m_header.m_frameIndex % m_nbDataBlocks;
+
+            // create the first block for this index
+            if (m_dataBlocks[dataBlockIndex] == 0) {
+                m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
+            }
+
+            if (m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex < 0)
+            {
+                // initialize virgin block with the frame index
+                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
+            }
+            else
+            {
+                // if the frame index is not the same for the same slot it means we are starting a new frame
+                uint32_t frameIndex = m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex;
+
+                if (superBlock.m_header.m_frameIndex != frameIndex)
+                {
+                    //qDebug("SDRDaemonChannelSourceThread::readPendingDatagrams: push frame %u", frameIndex);
+                    m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
+                    m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
+                    m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
+                }
+            }
+
+            m_dataBlocks[dataBlockIndex]->m_superBlocks[superBlock.m_header.m_blockIndex] = superBlock;
+
+            if (superBlock.m_header.m_blockIndex == 0) {
+                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_metaRetrieved = true;
+            }
+
+            if (superBlock.m_header.m_blockIndex < SDRDaemonNbOrginalBlocks) {
+                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_originalCount++;
+            } else {
+                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_recoveryCount++;
+            }
+
+            m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_blockCount++;
+
+//            // if enough data blocks to decode push into data queue
+//            if (m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_blockCount == SDRDaemonNbOrginalBlocks)
+//            {
+//                //qDebug("SDRDaemonChannelSourceThread::readPendingDatagrams: push frame %u", superBlock.m_header.m_frameIndex);
+//                m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
+//                m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
+//            }
+        }
+        else
+        {
+            qWarning("SDRDaemonChannelSourceThread::readPendingDatagrams: wrong super block size not processing");
+        }
     }
 }

@@ -57,7 +57,7 @@ struct SDRDaemonMetaDataFEC
         m_sampleBytes = 0;
         m_sampleBits = 0;
         m_nbOriginalBlocks = 0;
-        m_nbFECBlocks = -1;
+        m_nbFECBlocks = 0;
         m_tv_sec = 0;
         m_tv_usec = 0;
         m_crc32 = 0;
@@ -125,6 +125,23 @@ struct SDRDaemonTxControlBlock
     }
 };
 
+struct SDRDaemonRxControlBlock
+{
+    int  m_blockCount;    //!< number of blocks received for this frame
+    int  m_originalCount; //!< number of original blocks received
+    int  m_recoveryCount; //!< number of recovery blocks received
+    bool m_metaRetrieved; //!< true if meta data (block zero) was retrieved
+    int  m_frameIndex;    //!< this frame index or -1 if unset
+
+    SDRDaemonRxControlBlock() {
+        m_blockCount = 0;
+        m_originalCount = 0;
+        m_recoveryCount = 0;
+        m_metaRetrieved = false;
+        m_frameIndex = -1;
+    }
+};
+
 class SDRDaemonDataBlock
 {
 public:
@@ -134,7 +151,8 @@ public:
     ~SDRDaemonDataBlock() {
         delete[] m_superBlocks;
     }
-    SDRDaemonTxControlBlock m_controlBlock;
+    SDRDaemonTxControlBlock m_txControlBlock;
+    SDRDaemonRxControlBlock m_rxControlBlock;
     SDRDaemonSuperBlock     *m_superBlocks;
 };
 

@@ -33,7 +33,6 @@
 
 class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
-class CM256;
 class QUdpSocket;
 
 class SDRDaemonChannelSourceThread : public QThread {
@@ -81,7 +80,7 @@ public:
         }
     };
 
-    SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent = 0);
+    SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
     ~SDRDaemonChannelSourceThread();
 
     void startStop(bool start);
@@ -94,10 +93,12 @@ private:
 
     MessageQueue m_inputMessageQueue;
     SDRDaemonDataQueue *m_dataQueue;
-    CM256 *m_cm256;                       //!< CM256 library object
 
     QHostAddress m_address;
     QUdpSocket *m_socket;
+
+    static const uint32_t m_nbDataBlocks = 4;          //!< number of data blocks in the ring buffer
+    SDRDaemonDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
 
     void startWork();
     void stopWork();

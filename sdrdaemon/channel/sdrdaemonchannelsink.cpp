@@ -70,7 +70,7 @@ SDRDaemonChannelSink::SDRDaemonChannelSink(DeviceSourceAPI *deviceAPI) :
 SDRDaemonChannelSink::~SDRDaemonChannelSink()
 {
     m_dataBlockMutex.lock();
-    if (m_dataBlock && !m_dataBlock->m_controlBlock.m_complete) {
+    if (m_dataBlock && !m_dataBlock->m_txControlBlock.m_complete) {
         delete m_dataBlock;
     }
     m_dataBlockMutex.unlock();
@@ -171,13 +171,13 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
             if (m_txBlockIndex == SDRDaemonNbOrginalBlocks - 1) // frame complete
             {
                 m_dataBlockMutex.lock();
-                m_dataBlock->m_controlBlock.m_frameIndex = m_frameCount;
-                m_dataBlock->m_controlBlock.m_processed = false;
-                m_dataBlock->m_controlBlock.m_complete = true;
-                m_dataBlock->m_controlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
-                m_dataBlock->m_controlBlock.m_txDelay = m_txDelay;
-                m_dataBlock->m_controlBlock.m_dataAddress = m_dataAddress;
-                m_dataBlock->m_controlBlock.m_dataPort = m_dataPort;
+                m_dataBlock->m_txControlBlock.m_frameIndex = m_frameCount;
+                m_dataBlock->m_txControlBlock.m_processed = false;
+                m_dataBlock->m_txControlBlock.m_complete = true;
+                m_dataBlock->m_txControlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
+                m_dataBlock->m_txControlBlock.m_txDelay = m_txDelay;
+                m_dataBlock->m_txControlBlock.m_dataAddress = m_dataAddress;
+                m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 
                 m_dataQueue.push(m_dataBlock);
                 m_dataBlock = new SDRDaemonDataBlock(); // create a new one immediately

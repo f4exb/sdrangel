@@ -94,11 +94,11 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
 	SDRDaemonProtectedBlock fecBlocks[256];   //!< FEC data
 
-    uint16_t frameIndex = dataBlock.m_controlBlock.m_frameIndex;
-    int nbBlocksFEC = dataBlock.m_controlBlock.m_nbBlocksFEC;
-    int txDelay = dataBlock.m_controlBlock.m_txDelay;
-    m_address.setAddress(dataBlock.m_controlBlock.m_dataAddress);
-    uint16_t dataPort = dataBlock.m_controlBlock.m_dataPort;
+    uint16_t frameIndex = dataBlock.m_txControlBlock.m_frameIndex;
+    int nbBlocksFEC = dataBlock.m_txControlBlock.m_nbBlocksFEC;
+    int txDelay = dataBlock.m_txControlBlock.m_txDelay;
+    m_address.setAddress(dataBlock.m_txControlBlock.m_dataAddress);
+    uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
 
     if ((nbBlocksFEC == 0) || !m_cm256) // Do not FEC encode
@@ -158,7 +158,7 @@ bool SDRDaemonChannelSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         }
     }
 
-    dataBlock.m_controlBlock.m_processed = true;
+    dataBlock.m_txControlBlock.m_processed = true;
     return true;
 }
 
