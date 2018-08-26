@@ -30,8 +30,8 @@ class Serializable;
 
 struct SDRDaemonChannelSourceSettings
 {
-    QString  m_dataAddress;
-    uint16_t m_dataPort;
+    QString  m_dataAddress; //!< Listening (local) data address
+    uint16_t m_dataPort;    //!< Listening data port
 
     SDRDaemonChannelSourceSettings();
     void resetToDefaults();

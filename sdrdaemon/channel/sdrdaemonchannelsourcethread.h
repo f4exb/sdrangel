@@ -58,23 +58,46 @@ public:
         { }
     };
 
+    class MsgDataBind : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QHostAddress getAddress() const { return m_address; }
+        uint16_t getPort() const { return m_port; }
+
+        static MsgDataBind* create(const QString& address, uint16_t port) {
+            return new MsgDataBind(address, port);
+        }
+
+    protected:
+        QHostAddress m_address;
+        uint16_t m_port;
+
+        MsgDataBind(const QString& address, uint16_t port) :
+            Message(),
+            m_port(port)
+        {
+            m_address.setAddress(address);
+        }
+    };
+
     SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent = 0);
     ~SDRDaemonChannelSourceThread();
 
     void startStop(bool start);
+    void dataBind(const QString& address, uint16_t port);
 
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
     bool m_running;
 
+    MessageQueue m_inputMessageQueue;
     SDRDaemonDataQueue *m_dataQueue;
     CM256 *m_cm256;                       //!< CM256 library object
 
     QHostAddress m_address;
     QUdpSocket *m_socket;
-
-    MessageQueue m_inputMessageQueue;
 
     void startWork();
     void stopWork();
@@ -83,6 +106,7 @@ private:
 
 private slots:
     void handleInputMessages();
+    void readPendingDatagrams();
 };
 
 

@@ -29,6 +29,7 @@
 #include "cm256.h"
 
 MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSourceThread::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSourceThread::MsgDataBind, Message)
 
 SDRDaemonChannelSourceThread::SDRDaemonChannelSourceThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent) :
     QThread(parent),
@@ -39,7 +40,6 @@ SDRDaemonChannelSourceThread::SDRDaemonChannelSourceThread(SDRDaemonDataQueue *d
     m_socket(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-    connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
 }
 
 SDRDaemonChannelSourceThread::~SDRDaemonChannelSourceThread()
@@ -50,6 +50,12 @@ SDRDaemonChannelSourceThread::~SDRDaemonChannelSourceThread()
 void SDRDaemonChannelSourceThread::startStop(bool start)
 {
     MsgStartStop *msg = MsgStartStop::create(start);
+    m_inputMessageQueue.push(msg);
+}
+
+void SDRDaemonChannelSourceThread::dataBind(const QString& address, uint16_t port)
+{
+    MsgDataBind *msg = MsgDataBind::create(address, port);
     m_inputMessageQueue.push(msg);
 }
 
@@ -108,5 +114,34 @@ void SDRDaemonChannelSourceThread::handleInputMessages()
 
             delete message;
         }
+        else if (MsgDataBind::match(*message))
+        {
+            MsgDataBind* notif = (MsgDataBind*) message;
+            qDebug("SDRDaemonChannelSourceThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
+
+            if (m_socket)
+            {
+                disconnect(m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+                m_socket->bind(notif->getAddress(), notif->getPort());
+                connect(m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+            }
+        }
+    }
+}
+
+void SDRDaemonChannelSourceThread::readPendingDatagrams()
+{
+    char data[1024];
+    while (m_socket->hasPendingDatagrams())
+    {
+        QHostAddress sender;
+        quint16 senderPort = 0;
+        qint64 pendingDataSize = m_socket->pendingDatagramSize();
+        m_socket->readDatagram(data, pendingDataSize, &sender, &senderPort);
+        qDebug("SDRDaemonChannelSourceThread::readPendingDatagrams: %lld bytes received from %s:%d",
+                pendingDataSize,
+                qPrintable(sender.toString()),
+                senderPort);
+
     }
 }

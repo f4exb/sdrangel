@@ -27,6 +27,8 @@
 #include "dsp/upchannelizer.h"
 #include "device/devicesinkapi.h"
 #include "sdrdaemonchannelsource.h"
+#include "channel/sdrdaemonchannelsourcethread.h"
+#include "channel/sdrdaemondatablock.h"
 
 MESSAGE_CLASS_DEFINITION(SDRDaemonChannelSource::MsgConfigureSDRDaemonChannelSource, Message)
 
@@ -36,6 +38,7 @@ const QString SDRDaemonChannelSource::m_channelId = "SDRDaemonChannelSource";
 SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
         ChannelSourceAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
+        m_sourceThread(0),
         m_running(false),
         m_samplesCount(0),
         m_dataAddress("127.0.0.1"),
@@ -47,6 +50,9 @@ SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
+    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
 }
 
 SDRDaemonChannelSource::~SDRDaemonChannelSource()
@@ -62,23 +68,34 @@ void SDRDaemonChannelSource::pull(Sample& sample)
     sample.m_real = 0.0f;
     sample.m_imag = 0.0f;
 
-    if (m_samplesCount < 1023) {
-        m_samplesCount++;
-    } else {
-        qDebug("SDRDaemonChannelSource::pull: 1024 samples pulled");
-        m_samplesCount = 0;
-    }
+    m_samplesCount++;
 }
 
 void SDRDaemonChannelSource::start()
 {
     qDebug("SDRDaemonChannelSink::start");
+
+    if (m_running) {
+        stop();
+    }
+
+    m_sourceThread = new SDRDaemonChannelSourceThread(&m_dataQueue, m_cm256p);
+    m_sourceThread->startStop(true);
+    m_sourceThread->dataBind(m_dataAddress, m_dataPort);
     m_running = true;
 }
 
 void SDRDaemonChannelSource::stop()
 {
     qDebug("SDRDaemonChannelSink::stop");
+
+    if (m_sourceThread != 0)
+    {
+        m_sourceThread->startStop(false);
+        m_sourceThread->deleteLater();
+        m_sourceThread = 0;
+    }
+
     m_running = false;
 }
 
@@ -127,15 +144,42 @@ void SDRDaemonChannelSource::applySettings(const SDRDaemonChannelSourceSettings&
             << " m_dataPort: " << settings.m_dataPort
             << " force: " << force;
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+    bool change = false;
+
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force)
+    {
         m_dataAddress = settings.m_dataAddress;
+        change = true;
     }
 
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force)
+    {
         m_dataPort = settings.m_dataPort;
+        change = true;
+    }
+
+    if (change && m_sourceThread) {
+        m_sourceThread->dataBind(m_dataAddress, m_dataPort);
     }
 
     m_settings = settings;
 }
 
+bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock __attribute__((unused)))
+{
+    //TODO: Push into R/W buffer
+    return true;
+}
 
+void SDRDaemonChannelSource::handleData()
+{
+    SDRDaemonDataBlock* dataBlock;
+
+    while (m_running && ((dataBlock = m_dataQueue.pop()) != 0))
+    {
+        if (handleDataBlock(*dataBlock))
+        {
+            delete dataBlock;
+        }
+    }
+}

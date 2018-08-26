@@ -23,13 +23,18 @@
 #ifndef SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSOURCE_H_
 #define SDRDAEMON_CHANNEL_SDRDAEMONCHANNELSOURCE_H_
 
+#include "cm256.h"
+
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"
 #include "channel/sdrdaemonchannelsourcesettings.h"
+#include "channel/sdrdaemondataqueue.h"
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class DeviceSinkAPI;
+class SDRDaemonChannelSourceThread;
+class SDRDaemonDataBlock;
 
 class SDRDaemonChannelSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
@@ -80,15 +85,23 @@ private:
     DeviceSinkAPI *m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
-
+    SDRDaemonDataQueue m_dataQueue;
+    SDRDaemonChannelSourceThread *m_sourceThread;
+    CM256 m_cm256;
+    CM256 *m_cm256p;
     bool m_running;
+
     SDRDaemonChannelSourceSettings m_settings;
-    uint32_t m_samplesCount;
+    uint64_t m_samplesCount;
 
     QString m_dataAddress;
     uint16_t m_dataPort;
 
     void applySettings(const SDRDaemonChannelSourceSettings& settings, bool force = false);
+    bool handleDataBlock(SDRDaemonDataBlock& dataBlock);
+
+private slots:
+    void handleData();
 };
 
 
