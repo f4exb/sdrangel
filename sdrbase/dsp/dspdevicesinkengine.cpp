@@ -592,7 +592,7 @@ void DSPDeviceSinkEngine::checkNumberOfBasebandSources()
         if (m_threadedBasebandSampleSources.size() == 1) {
             m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
         } else if (m_basebandSampleSources.size() == 1) {
-            m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
+            m_basebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
         }
 
         m_multipleSourcesDivisionFactor = 1; // for consistency but it is not used in this case
