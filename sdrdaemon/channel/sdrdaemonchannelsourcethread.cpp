@@ -184,14 +184,6 @@ void SDRDaemonChannelSourceThread::readPendingDatagrams()
             }
 
             m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_blockCount++;
-
-//            // if enough data blocks to decode push into data queue
-//            if (m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_blockCount == SDRDaemonNbOrginalBlocks)
-//            {
-//                //qDebug("SDRDaemonChannelSourceThread::readPendingDatagrams: push frame %u", superBlock.m_header.m_frameIndex);
-//                m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
-//                m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
-//            }
         }
         else
         {

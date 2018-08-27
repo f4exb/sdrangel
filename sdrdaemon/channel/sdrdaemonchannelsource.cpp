@@ -28,6 +28,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/upchannelizer.h"
+#include "dsp/devicesamplesink.h"
 #include "device/devicesinkapi.h"
 #include "sdrdaemonchannelsource.h"
 #include "channel/sdrdaemonchannelsourcethread.h"
@@ -105,7 +106,19 @@ void SDRDaemonChannelSource::stop()
 
 bool SDRDaemonChannelSource::handleMessage(const Message& cmd __attribute__((unused)))
 {
-    if (MsgConfigureSDRDaemonChannelSource::match(cmd))
+    if (UpChannelizer::MsgChannelizerNotification::match(cmd))
+    {
+        UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
+        qDebug() << "SDRDaemonChannelSource::handleMessage: UpChannelizer::MsgChannelizerNotification:"
+                << " basebandSampleRate: " << notif.getBasebandSampleRate()
+                << " outputSampleRate: " << notif.getSampleRate()
+                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
+
+        //applyChannelSettings(notif.getBasebandSampleRate(), notif.getSampleRate(), notif.getFrequencyOffset());
+
+        return true;
+    }
+    else if (MsgConfigureSDRDaemonChannelSource::match(cmd))
     {
         MsgConfigureSDRDaemonChannelSource& cfg = (MsgConfigureSDRDaemonChannelSource&) cmd;
         qDebug() << "SDRDaemonChannelSource::handleMessage: MsgConfigureSDRDaemonChannelSource";
@@ -242,8 +255,17 @@ bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 
             if (crc32.checksum() == metaData->m_crc32)
             {
-                if (!(m_currentMeta == *metaData)) {
+                if (!(m_currentMeta == *metaData))
+                {
                     printMeta("SDRDaemonChannelSource::handleDataBlock", metaData);
+
+                    if (m_currentMeta.m_centerFrequency != metaData->m_centerFrequency) {
+                        m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency);
+                    }
+
+                    if (m_currentMeta.m_sampleRate != metaData->m_sampleRate) {
+                        m_channelizer->configure(m_channelizer->getInputMessageQueue(), metaData->m_sampleRate, 0);
+                    }
                 }
 
                 m_currentMeta = *metaData;
@@ -273,7 +295,7 @@ void SDRDaemonChannelSource::handleData()
 
 void SDRDaemonChannelSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
 {
-    qDebug() << header << ": "
+    qDebug().noquote() << header << ": "
             << "|" << metaData->m_centerFrequency
             << ":" << metaData->m_sampleRate
             << ":" << (int) (metaData->m_sampleBytes & 0xF)

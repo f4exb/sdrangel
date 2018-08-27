@@ -134,7 +134,7 @@ void SDRDaemonChannelSink::feed(const SampleVector::const_iterator& begin, const
                 qDebug() << "SDRDaemonChannelSink::feed: meta: "
                         << "|" << metaData.m_centerFrequency
                         << ":" << metaData.m_sampleRate
-                        << ":" << (int) metaData.m_sampleBytes
+                        << ":" << (int) (metaData.m_sampleBytes & 0xF)
                         << ":" << (int) metaData.m_sampleBits
                         << "|" << (int) metaData.m_nbOriginalBlocks
                         << ":" << (int) metaData.m_nbFECBlocks

@@ -37,7 +37,7 @@ struct SDRDaemonMetaDataFEC
 {
     uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
     uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-    uint8_t  m_sampleBytes;       //!<  9 number of bytes per sample (2 or 3)
+    uint8_t  m_sampleBytes;       //!<  9 4 LSB: number of bytes per sample (2 or 3)
     uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample (deprecated)
     uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
     uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
