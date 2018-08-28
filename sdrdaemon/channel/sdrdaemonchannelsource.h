@@ -30,6 +30,7 @@
 #include "channel/sdrdaemonchannelsourcesettings.h"
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
+#include "channel/sdrdaemondatareadqueue.h"
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -101,8 +102,10 @@ private:
     CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
     SDRDaemonMetaDataFEC m_currentMeta;
 
+    SDRDaemonDataReadQueue m_dataReadQueue;
+
     void applySettings(const SDRDaemonChannelSourceSettings& settings, bool force = false);
-    bool handleDataBlock(SDRDaemonDataBlock& dataBlock);
+    void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
 
 private slots:

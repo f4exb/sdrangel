@@ -70,9 +70,7 @@ SDRDaemonChannelSource::~SDRDaemonChannelSource()
 
 void SDRDaemonChannelSource::pull(Sample& sample)
 {
-    sample.m_real = 0.0f;
-    sample.m_imag = 0.0f;
-
+    m_dataReadQueue.readSample(sample);
     m_samplesCount++;
 }
 
@@ -182,9 +180,9 @@ void SDRDaemonChannelSource::applySettings(const SDRDaemonChannelSourceSettings&
     m_settings = settings;
 }
 
-bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
+void SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
 {
-    if (dataBlock.m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
+    if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
     {
         qWarning("SDRDaemonChannelSource::handleDataBlock: incomplete data block: not processing");
     }
@@ -194,16 +192,16 @@ bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 
         for (int blockIndex = 0; blockIndex < 256; blockIndex++)
         {
-            if ((blockIndex == 0) && (dataBlock.m_rxControlBlock.m_metaRetrieved))
+            if ((blockIndex == 0) && (dataBlock->m_rxControlBlock.m_metaRetrieved))
             {
                 m_cm256DescriptorBlocks[blockCount].Index = 0;
-                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock.m_superBlocks[0].m_protectedBlock);
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
                 blockCount++;
             }
-            else if (dataBlock.m_superBlocks[blockIndex].m_header.m_blockIndex != 0)
+            else if (dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex != 0)
             {
-                m_cm256DescriptorBlocks[blockCount].Index = dataBlock.m_superBlocks[blockIndex].m_header.m_blockIndex;
-                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock.m_superBlocks[blockIndex].m_protectedBlock);
+                m_cm256DescriptorBlocks[blockCount].Index = dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex;
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock);
                 blockCount++;
             }
         }
@@ -211,15 +209,15 @@ bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         //qDebug("SDRDaemonChannelSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
 
         // Need to use the CM256 recovery
-        if (m_cm256p &&(dataBlock.m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
+        if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
         {
-            qDebug("SDRDaemonChannelSource::handleDataBlock: %d recovery blocks", dataBlock.m_rxControlBlock.m_recoveryCount);
+            qDebug("SDRDaemonChannelSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
             paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
             paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
 
             if (m_currentMeta.m_tv_sec == 0) {
-                paramsCM256.RecoveryCount = dataBlock.m_rxControlBlock.m_recoveryCount;
+                paramsCM256.RecoveryCount = dataBlock->m_rxControlBlock.m_recoveryCount;
             } else {
                 paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks;
             }
@@ -227,29 +225,29 @@ bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
                 qWarning() << "SDRDaemonChannelSource::handleDataBlock: decode CM256 error:"
-                        << " m_originalCount: " << dataBlock.m_rxControlBlock.m_originalCount
-                        << " m_recoveryCount: " << dataBlock.m_rxControlBlock.m_recoveryCount;
+                        << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
+                        << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
             }
             else
             {
-                for (int ir = 0; ir < dataBlock.m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
+                for (int ir = 0; ir < dataBlock->m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
                 {
-                    int recoveryIndex = SDRDaemonNbOrginalBlocks - dataBlock.m_rxControlBlock.m_recoveryCount + ir;
+                    int recoveryIndex = SDRDaemonNbOrginalBlocks - dataBlock->m_rxControlBlock.m_recoveryCount + ir;
                     int blockIndex = m_cm256DescriptorBlocks[recoveryIndex].Index;
                     SDRDaemonProtectedBlock *recoveredBlock =
                             (SDRDaemonProtectedBlock *) m_cm256DescriptorBlocks[recoveryIndex].Block;
-                    memcpy((void *) &(dataBlock.m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(SDRDaemonProtectedBlock));
-                    if ((blockIndex == 0) && !dataBlock.m_rxControlBlock.m_metaRetrieved) {
-                        dataBlock.m_rxControlBlock.m_metaRetrieved = true;
+                    memcpy((void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(SDRDaemonProtectedBlock));
+                    if ((blockIndex == 0) && !dataBlock->m_rxControlBlock.m_metaRetrieved) {
+                        dataBlock->m_rxControlBlock.m_metaRetrieved = true;
                     }
                 }
             }
         }
 
         // Validate block zero and retrieve its data
-        if (dataBlock.m_rxControlBlock.m_metaRetrieved)
+        if (dataBlock->m_rxControlBlock.m_metaRetrieved)
         {
-            SDRDaemonMetaDataFEC *metaData = (SDRDaemonMetaDataFEC *) &(dataBlock.m_superBlocks[0].m_protectedBlock);
+            SDRDaemonMetaDataFEC *metaData = (SDRDaemonMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
             boost::crc_32_type crc32;
             crc32.process_bytes(metaData, 20);
 
@@ -275,21 +273,17 @@ bool SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock& dataBlock)
                 qWarning() << "SDRDaemonChannelSource::handleDataBlock: recovered meta: invalid CRC32";
             }
         }
+
+        m_dataReadQueue.push(dataBlock); // Push into R/W buffer
     }
-    //TODO: Push into R/W buffer
-    return true;
 }
 
 void SDRDaemonChannelSource::handleData()
 {
     SDRDaemonDataBlock* dataBlock;
 
-    while (m_running && ((dataBlock = m_dataQueue.pop()) != 0))
-    {
-        if (handleDataBlock(*dataBlock))
-        {
-            delete dataBlock;
-        }
+    while (m_running && ((dataBlock = m_dataQueue.pop()) != 0)) {
+        handleDataBlock(dataBlock);
     }
 }
 

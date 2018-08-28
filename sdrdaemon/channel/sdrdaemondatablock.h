@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <algorithm>
+#include <QString>
 #include "dsp/dsptypes.h"
 
 #define UDPSINKFEC_UDPSIZE 512

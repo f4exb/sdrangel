@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon source channel (Tx). Samples buffer                                 //
+// SDRdaemon sink channel (Rx) data blocks to read queue                         //
 //                                                                               //
 // SDRdaemon is a detached SDR front end that handles the interface with a       //
 // physical device and sends or receives the I/Q samples stream to or from a     //
@@ -20,23 +20,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
+#ifndef SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_
+#define SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_
 
-#include "dsp/dsptypes.h"
+#include <QQueue>
 
-class SDRDaemonChannelSourceBuffer
+class SDRDaemonDataBlock;
+class Sample;
+
+class SDRDaemonDataReadQueue
 {
 public:
-    SDRDaemonChannelSourceBuffer(uint32_t nbSamples);
-    ~SDRDaemonChannelSourceBuffer();
-    void resize(uint32_t nbSamples);
-    void write(Sample *begin, uint32_t nbSamples);
-    void readOne(Sample& sample);
-    int getRWBalancePercent(); //!< positive write leads, negative read leads, balance = 0, percentage of buffer size
+    SDRDaemonDataReadQueue();
+    ~SDRDaemonDataReadQueue();
+
+    void push(SDRDaemonDataBlock* dataBlock); //!< push block on the queue
+    SDRDaemonDataBlock* pop();                //!< Pop block from the queue
+    void readSample(Sample& s);               //!< Read sample from queue
+    uint32_t size();                          //!< Returns queue size
+
+    static const uint32_t MaxSize;
 
 private:
-    Sample *m_buffer;
-    uint32_t m_size;
-    uint32_t m_rp;
-    uint32_t m_wp;
+    QQueue<SDRDaemonDataBlock*> m_dataReadQueue;
+    SDRDaemonDataBlock *m_dataBlock;
+    uint32_t m_blockIndex;
+    uint32_t m_sampleIndex;
 };
+
+
+
+#endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_ */

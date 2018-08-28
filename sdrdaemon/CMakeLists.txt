@@ -8,11 +8,11 @@ set(sdrdaemon_SOURCES
     channel/sdrdaemonchannelsink.cpp
     channel/sdrdaemonchannelsource.cpp
     channel/sdrdaemondataqueue.cpp
+    channel/sdrdaemondatareadqueue.cpp    
     channel/sdrdaemonchannelsinkthread.cpp
     channel/sdrdaemonchannelsinksettings.cpp
     channel/sdrdaemonchannelsourcesettings.cpp
     channel/sdrdaemonchannelsourcethread.cpp
-    channel/sdrdaemonchannelsourcebuffer.cpp
     webapi/webapiadapterdaemon.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
@@ -26,12 +26,12 @@ set(sdrdaemon_HEADERS
     channel/sdrdaemonchannelsink.h
     channel/sdrdaemonchannelsource.h
     channel/sdrdaemondataqueue.h
+    channel/sdrdaemondatareadqueue.h
     channel/sdrdaemondatablock.h
     channel/sdrdaemonchannelsinkthread.h
     channel/sdrdaemonchannelsinksettings.h
     channel/sdrdaemonchannelsourcesettings.h
     channel/sdrdaemonchannelsourcethread.h
-    channel/sdrdaemonchannelsourcebuffer.h
     webapi/webapiadapterdaemon.h
     webapi/webapirequestmapper.h
     webapi/webapiserver.h
