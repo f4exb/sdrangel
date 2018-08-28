@@ -205,8 +205,6 @@ void SDRdaemonSinkGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRdaemonSinkGui::handleInputMessages: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
@@ -418,6 +416,7 @@ void SDRdaemonSinkGui::on_interp_currentIndexChanged(int index)
     m_settings.m_log2Interp = index;
     updateSampleRateAndFrequency();
     sendControl();
+    sendSettings();
 }
 
 void SDRdaemonSinkGui::on_txDelay_valueChanged(int value)
@@ -506,6 +505,8 @@ void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused
     {
         m_settings.m_dataPort = udpDataPort;
     }
+
+    sendSettings();
 }
 
 void SDRdaemonSinkGui::on_sendButton_clicked(bool checked __attribute__((unused)))

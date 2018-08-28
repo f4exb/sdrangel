@@ -248,22 +248,15 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        m_settings.m_address = settings.m_address;
-        m_settings.m_dataPort = settings.m_dataPort;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setRemoteAddress(settings.m_address, settings.m_dataPort);
         }
     }
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
     {
-        m_settings.m_centerFrequency = settings.m_centerFrequency;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setCenterFrequency(settings.m_centerFrequency);
         }
 
         forwardChange = true;
@@ -271,11 +264,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
-        m_settings.m_sampleRate = settings.m_sampleRate;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setSamplerate(settings.m_sampleRate);
         }
 
         forwardChange = true;
@@ -284,17 +274,13 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
     {
-        m_settings.m_log2Interp = settings.m_log2Interp;
         forwardChange = true;
     }
 
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
     {
-        m_settings.m_nbFECBlocks = settings.m_nbFECBlocks;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
 
         changeTxDelay = true;
@@ -302,13 +288,12 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_txDelay != settings.m_txDelay))
     {
-        m_settings.m_txDelay = settings.m_txDelay;
         changeTxDelay = true;
     }
 
     if (changeTxDelay)
     {
-        double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+        double delay = ((127*127*settings.m_txDelay) / settings.m_sampleRate)/(128 + settings.m_nbFECBlocks);
         qDebug("SDRdaemonSinkOutput::applySettings: Tx delay: %f us", delay*1e6);
 
         if (m_sdrDaemonSinkThread != 0)
@@ -323,19 +308,22 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     mutexLocker.unlock();
 
-    qDebug("SDRdaemonSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %f m_nbFECBlocks: %d",
-            forwardChange ? "forward change" : "",
-            m_settings.m_centerFrequency,
-            m_settings.m_sampleRate,
-            m_settings.m_log2Interp,
-            m_settings.m_txDelay,
-            m_settings.m_nbFECBlocks);
+    qDebug() << "SDRdaemonSinkOutput::applySettings:"
+            << " m_centerFrequency: " << settings.m_centerFrequency
+            << " m_sampleRate: " << settings.m_sampleRate
+            << " m_log2Interp: " << settings.m_log2Interp
+            << " m_txDelay: " << settings.m_txDelay
+            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
+            << " m_address: " << settings.m_address
+            << " m_dataPort: " << settings.m_dataPort;
 
     if (forwardChange)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, settings.m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
+
+    m_settings = settings;
 }
 
 int SDRdaemonSinkOutput::webapiRunGet(

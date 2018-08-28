@@ -25,12 +25,12 @@ SDRdaemonSinkSettings::SDRdaemonSinkSettings()
 void SDRdaemonSinkSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
-    m_sampleRate = 192000;
-    m_log2Interp = 4;
+    m_sampleRate = 48000;
+    m_log2Interp = 0;
     m_txDelay = 0.5;
     m_nbFECBlocks = 0;
     m_address = "127.0.0.1";
-    m_dataPort = 9092;
+    m_dataPort = 9090;
     m_controlPort = 9093;
     m_specificParameters = "";
 }
