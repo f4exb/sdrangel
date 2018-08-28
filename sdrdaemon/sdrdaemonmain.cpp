@@ -107,6 +107,7 @@ SDRDaemonMain::SDRDaemonMain(qtwebapp::LoggerWithFile *logger, const SDRDaemonPa
             info.noquote();
             info << msg;
             m_channelSource = new SDRDaemonChannelSource(m_deviceSinkAPI);
+            m_channelSource->setDataLink(parser.getDataAddress(), parser.getDataPort());
         }
         else
         {

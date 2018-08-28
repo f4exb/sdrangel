@@ -44,9 +44,7 @@ SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_sourceThread(0),
         m_running(false),
-        m_samplesCount(0),
-        m_dataAddress("127.0.0.1"),
-        m_dataPort(9090)
+        m_samplesCount(0)
 {
     setObjectName(m_channelId);
 
@@ -84,7 +82,7 @@ void SDRDaemonChannelSource::start()
 
     m_sourceThread = new SDRDaemonChannelSourceThread(&m_dataQueue);
     m_sourceThread->startStop(true);
-    m_sourceThread->dataBind(m_dataAddress, m_dataPort);
+    m_sourceThread->dataBind(m_settings.m_dataAddress, m_settings.m_dataPort);
     m_running = true;
 }
 
@@ -100,6 +98,16 @@ void SDRDaemonChannelSource::stop()
     }
 
     m_running = false;
+}
+
+void SDRDaemonChannelSource::setDataLink(const QString& dataAddress, uint16_t dataPort)
+{
+    SDRDaemonChannelSourceSettings settings = m_settings;
+    settings.m_dataAddress = dataAddress;
+    settings.m_dataPort = dataPort;
+
+    MsgConfigureSDRDaemonChannelSource *msg = MsgConfigureSDRDaemonChannelSource::create(settings, false);
+    m_inputMessageQueue.push(msg);
 }
 
 bool SDRDaemonChannelSource::handleMessage(const Message& cmd __attribute__((unused)))
@@ -161,20 +169,16 @@ void SDRDaemonChannelSource::applySettings(const SDRDaemonChannelSourceSettings&
 
     bool change = false;
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force)
-    {
-        m_dataAddress = settings.m_dataAddress;
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
         change = true;
     }
 
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force)
-    {
-        m_dataPort = settings.m_dataPort;
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
         change = true;
     }
 
     if (change && m_sourceThread) {
-        m_sourceThread->dataBind(m_dataAddress, m_dataPort);
+        m_sourceThread->dataBind(settings.m_dataAddress, settings.m_dataPort);
     }
 
     m_settings = settings;

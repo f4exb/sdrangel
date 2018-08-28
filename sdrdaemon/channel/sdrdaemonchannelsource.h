@@ -80,6 +80,8 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    void setDataLink(const QString& dataAddress, uint16_t dataPort);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -95,9 +97,6 @@ private:
 
     SDRDaemonChannelSourceSettings m_settings;
     uint64_t m_samplesCount;
-
-    QString m_dataAddress;
-    uint16_t m_dataPort;
 
     CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
     SDRDaemonMetaDataFEC m_currentMeta;
