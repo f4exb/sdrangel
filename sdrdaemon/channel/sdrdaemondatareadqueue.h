@@ -46,6 +46,7 @@ private:
     SDRDaemonDataBlock *m_dataBlock;
     uint32_t m_blockIndex;
     uint32_t m_sampleIndex;
+    bool m_full; //!< full condition was hit
 };
 
 

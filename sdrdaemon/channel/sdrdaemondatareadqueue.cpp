@@ -28,7 +28,8 @@ const uint32_t SDRDaemonDataReadQueue::MaxSize = 20;
 SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_dataBlock(0),
         m_blockIndex(1),
-        m_sampleIndex(0)
+        m_sampleIndex(0),
+        m_full(false)
 {}
 
 SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
@@ -44,14 +45,21 @@ SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
 
 void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
 {
-    if (size() > MaxSize)
+    if (size() >= MaxSize)
     {
         qWarning("SDRDaemonDataReadQueue::push: queue is full");
+        m_full = true; // stop filling the queue
         SDRDaemonDataBlock *data = m_dataReadQueue.takeLast();
         delete data;
     }
 
-    m_dataReadQueue.append(dataBlock);
+    if (m_full) {
+        m_full = (size() > MaxSize/2); // do not fill queue again before queue is half size
+    }
+
+    if (!m_full) {
+        m_dataReadQueue.append(dataBlock);
+    }
 }
 
 SDRDaemonDataBlock* SDRDaemonDataReadQueue::pop()
@@ -76,7 +84,7 @@ uint32_t SDRDaemonDataReadQueue::size()
 
 void SDRDaemonDataReadQueue::readSample(Sample& s)
 {
-    // initial state
+    // depletion/repletion state
     if (m_dataBlock == 0)
     {
         if (size() >= MaxSize/2)
