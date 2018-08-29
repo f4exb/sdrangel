@@ -262,7 +262,7 @@ void SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
                     printMeta("SDRDaemonChannelSource::handleDataBlock", metaData);
 
                     if (m_currentMeta.m_centerFrequency != metaData->m_centerFrequency) {
-                        m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency);
+                        m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency*1000); // frequency is in kHz
                     }
 
                     if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
