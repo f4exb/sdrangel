@@ -37,13 +37,15 @@ public:
     void push(SDRDaemonDataBlock* dataBlock); //!< push block on the queue
     SDRDaemonDataBlock* pop();                //!< Pop block from the queue
     void readSample(Sample& s);               //!< Read sample from queue
-    uint32_t size();                          //!< Returns queue size
+    uint32_t size() const;                    //!< Returns queue size
+    void setSize(uint32_t size);              //!< Sets the queue size
 
-    static const uint32_t MaxSize;
+    static const uint32_t MinimumMaxSize;
 
 private:
     QQueue<SDRDaemonDataBlock*> m_dataReadQueue;
     SDRDaemonDataBlock *m_dataBlock;
+    uint32_t m_maxSize;
     uint32_t m_blockIndex;
     uint32_t m_sampleIndex;
     bool m_full; //!< full condition was hit

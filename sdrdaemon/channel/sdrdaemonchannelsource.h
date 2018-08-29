@@ -106,6 +106,7 @@ private:
     void applySettings(const SDRDaemonChannelSourceSettings& settings, bool force = false);
     void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
+    uint32_t calculateDataReadQueueSize(int sampleRate);
 
 private slots:
     void handleData();

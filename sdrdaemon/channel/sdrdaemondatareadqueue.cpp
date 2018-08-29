@@ -23,10 +23,11 @@
 #include "channel/sdrdaemondatablock.h"
 #include "channel/sdrdaemondatareadqueue.h"
 
-const uint32_t SDRDaemonDataReadQueue::MaxSize = 20;
+const uint32_t SDRDaemonDataReadQueue::MinimumMaxSize = 10;
 
 SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_dataBlock(0),
+        m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
         m_sampleIndex(0),
         m_full(false)
@@ -45,7 +46,7 @@ SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
 
 void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
 {
-    if (size() >= MaxSize)
+    if (size() >= m_maxSize)
     {
         qWarning("SDRDaemonDataReadQueue::push: queue is full");
         m_full = true; // stop filling the queue
@@ -54,7 +55,7 @@ void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
     }
 
     if (m_full) {
-        m_full = (size() > MaxSize/2); // do not fill queue again before queue is half size
+        m_full = (size() > m_maxSize/2); // do not fill queue again before queue is half size
     }
 
     if (!m_full) {
@@ -77,9 +78,16 @@ SDRDaemonDataBlock* SDRDaemonDataReadQueue::pop()
     }
 }
 
-uint32_t SDRDaemonDataReadQueue::size()
+uint32_t SDRDaemonDataReadQueue::size() const
 {
     return m_dataReadQueue.size();
+}
+
+void SDRDaemonDataReadQueue::setSize(uint32_t size)
+{
+    if (size != m_maxSize) {
+        m_maxSize = size < MinimumMaxSize ? MinimumMaxSize : size;
+    }
 }
 
 void SDRDaemonDataReadQueue::readSample(Sample& s)
@@ -87,7 +95,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
     // depletion/repletion state
     if (m_dataBlock == 0)
     {
-        if (size() >= MaxSize/2)
+        if (size() >= m_maxSize/2)
         {
             qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", size());
             m_blockIndex = 1;

@@ -265,8 +265,10 @@ void SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
                         m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency);
                     }
 
-                    if (m_currentMeta.m_sampleRate != metaData->m_sampleRate) {
+                    if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
+                    {
                         m_channelizer->configure(m_channelizer->getInputMessageQueue(), metaData->m_sampleRate, 0);
+                        m_dataReadQueue.setSize(calculateDataReadQueueSize(metaData->m_sampleRate));
                     }
                 }
 
@@ -303,4 +305,13 @@ void SDRDaemonChannelSource::printMeta(const QString& header, SDRDaemonMetaDataF
             << "|" << metaData->m_tv_sec
             << ":" << metaData->m_tv_usec
             << "|";
+}
+
+uint32_t SDRDaemonChannelSource::calculateDataReadQueueSize(int sampleRate)
+{
+    // scale for 20 blocks at 48 kS/s. Take next even number.
+    uint32_t maxSize = sampleRate / 2400;
+    maxSize = (maxSize % 2 == 0) ? maxSize : maxSize + 1;
+    qDebug("SDRDaemonChannelSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
+    return maxSize;
 }
