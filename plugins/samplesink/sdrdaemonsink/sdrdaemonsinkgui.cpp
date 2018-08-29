@@ -365,10 +365,9 @@ void SDRdaemonSinkGui::on_dataPort_returnPressed()
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unused)))
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
-    m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool apiOk;
     int apiPort = ui->apiPort->text().toInt(&apiOk);
@@ -377,6 +376,13 @@ void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused
     {
         m_settings.m_apiPort = apiPort;
     }
+
+    sendSettings();
+}
+
+void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);

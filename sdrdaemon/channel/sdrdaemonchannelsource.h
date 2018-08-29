@@ -80,6 +80,20 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     void setDataLink(const QString& dataAddress, uint16_t dataPort);
 
     static const QString m_channelIdURI;
@@ -103,10 +117,15 @@ private:
 
     SDRDaemonDataReadQueue m_dataReadQueue;
 
+    uint32_t m_nbCorrectableErrors;   //!< count of correctable errors in number of blocks
+    uint32_t m_nbUncorrectableErrors; //!< count of uncorrectable errors in number of blocks
+
     void applySettings(const SDRDaemonChannelSourceSettings& settings, bool force = false);
     void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSourceSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
 private slots:
     void handleData();

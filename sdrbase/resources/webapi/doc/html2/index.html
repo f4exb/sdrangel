@@ -1416,6 +1416,9 @@ margin-bottom: 20px;
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
+    "SDRDaemonChannelSourceReport" : {
+      "$ref" : "#/definitions/SDRDaemonChannelSourceReport"
+    },
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
     },
@@ -1469,6 +1472,9 @@ margin-bottom: 20px;
     },
     "SDRDaemonChannelSinkSettings" : {
       "$ref" : "#/definitions/SDRDaemonChannelSinkSettings"
+    },
+    "SDRDaemonChannelSourceSettings" : {
+      "$ref" : "#/definitions/SDRDaemonChannelSourceSettings"
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
@@ -3167,6 +3173,52 @@ margin-bottom: 20px;
   },
   "description" : "Data handling details for SDRDaemon"
 };
+            defs.SDRDaemonChannelSourceReport = {
+  "properties" : {
+    "queueLength" : {
+      "type" : "integer",
+      "description" : "Data read/write queue length in number of data frames"
+    },
+    "queueSize" : {
+      "type" : "integer",
+      "description" : "Data read/write queue size in number of data frames"
+    },
+    "samplesCount" : {
+      "type" : "integer",
+      "description" : "Absolute consumed samples count"
+    },
+    "correctableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of correctable errors"
+    },
+    "uncorrectableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of uncorrectable errors"
+    },
+    "tvSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp seconds"
+    },
+    "tvUSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp microseconds"
+    }
+  },
+  "description" : "SDRDaemon channel source report"
+};
+            defs.SDRDaemonChannelSourceSettings = {
+  "properties" : {
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Remote USB data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Remote USB data port"
+    }
+  },
+  "description" : "Data handling details for SDRDaemon"
+};
             defs.SDRPlayReport = {
   "properties" : {
     "sampleRates" : {
@@ -4024,6 +4076,9 @@ margin-bottom: 20px;
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
                   <li class="nav-header" data-group="Daemon"><a href="#api-Daemon">API Methods - Daemon</a></li>
+                    <li data-group="Daemon" data-name="daemonChannelReportGet" class="">
+                      <a href="#api-Daemon-daemonChannelReportGet">daemonChannelReportGet</a>
+                    </li>
                     <li data-group="Daemon" data-name="daemonChannelSettingsGet" class="">
                       <a href="#api-Daemon-daemonChannelSettingsGet">daemonChannelSettingsGet</a>
                     </li>
@@ -4230,6 +4285,427 @@ margin-bottom: 20px;
         <div id="sections">
                 <section id="api-Daemon">
                   <h1>Daemon</h1>
+                    <div id="api-Daemon-daemonChannelReportGet">
+                      <article id="api-Daemon-daemonChannelReportGet-0" data-group="User" data-name="daemonChannelReportGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>daemonChannelReportGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get the channel report</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrdaemon/channel/report</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Daemon-daemonChannelReportGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Daemon-daemonChannelReportGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Daemon-daemonChannelReportGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrdaemon/channel/report"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DaemonApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            ChannelReport result = apiInstance.daemonChannelReportGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonChannelReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DaemonApi;
+
+public class DaemonApiExample {
+
+    public static void main(String[] args) {
+        DaemonApi apiInstance = new DaemonApi();
+        try {
+            ChannelReport result = apiInstance.daemonChannelReportGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DaemonApi#daemonChannelReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+DaemonApi *apiInstance = [[DaemonApi alloc] init];
+
+[apiInstance daemonChannelReportGetWithCompletionHandler: 
+              ^(ChannelReport output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DaemonApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.daemonChannelReportGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class daemonChannelReportGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DaemonApi();
+
+            try
+            {
+                ChannelReport result = apiInstance.daemonChannelReportGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DaemonApi.daemonChannelReportGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DaemonApi();
+
+try {
+    $result = $api_instance->daemonChannelReportGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DaemonApi->daemonChannelReportGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DaemonApi;
+
+my $api_instance = SWGSDRangel::DaemonApi->new();
+
+eval { 
+    my $result = $api_instance->daemonChannelReportGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DaemonApi->daemonChannelReportGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Daemon-daemonChannelReportGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DaemonApi()
+
+try: 
+    api_response = api_instance.daemon_channel_report_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DaemonApi->daemonChannelReportGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return channel report </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonChannelReportGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonChannelReportGet-200-schema">
+                                  <div id='responses-daemonChannelReportGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return channel report",
+  "schema" : {
+    "$ref" : "#/definitions/ChannelReport"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonChannelReportGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelReportGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonChannelReportGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or channel index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonChannelReportGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonChannelReportGet-400-schema">
+                                  <div id='responses-daemonChannelReportGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or channel index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonChannelReportGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelReportGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonChannelReportGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or channel not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonChannelReportGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonChannelReportGet-404-schema">
+                                  <div id='responses-daemonChannelReportGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or channel not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonChannelReportGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelReportGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonChannelReportGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonChannelReportGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonChannelReportGet-500-schema">
+                                  <div id='responses-daemonChannelReportGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonChannelReportGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelReportGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonChannelReportGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-daemonChannelReportGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-daemonChannelReportGet-501-schema">
+                                  <div id='responses-daemonChannelReportGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-daemonChannelReportGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-daemonChannelReportGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-daemonChannelReportGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Daemon-daemonChannelSettingsGet">
                       <article id="api-Daemon-daemonChannelSettingsGet-0" data-group="User" data-name="daemonChannelSettingsGet" data-version="0">
                         <div class="pull-left">
@@ -28212,7 +28688,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-08-29T15:59:39.880+02:00
+              Generated 2018-08-30T01:40:47.594+02:00
             </div>
           </div>
       </div>

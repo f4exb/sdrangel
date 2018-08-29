@@ -105,7 +105,8 @@ private slots:
     void on_apiPort_returnPressed();
     void on_dataAddress_returnPressed();
     void on_dataPort_returnPressed();
-    void on_applyButton_clicked(bool checked);
+    void on_apiApplyButton_clicked(bool checked);
+    void on_dataApplyButton_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
 	void on_eventCountsReset_clicked(bool checked);
     void updateHardware();

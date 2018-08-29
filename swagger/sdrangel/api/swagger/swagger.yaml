@@ -1299,7 +1299,7 @@ paths:
           $ref: "#/responses/Response_501"          
 
   /sdrdaemon/channel/settings:
-    x-swagger-router-controller: deviceset
+    x-swagger-router-controller: daemon
     get:
       description: Get channel handling details
       operationId: daemonChannelSettingsGet
@@ -1360,7 +1360,7 @@ paths:
       
           
   /sdrdaemon/device/settings:
-    x-swagger-router-controller: deviceset
+    x-swagger-router-controller: daemon
     get:
       description: Get device settings
       operationId: daemonDeviceSettingsGet
@@ -1431,7 +1431,7 @@ paths:
           $ref: "#/responses/Response_501"
           
   /sdrdaemon/run:
-    x-swagger-router-controller: deviceset
+    x-swagger-router-controller: daemon
     get:
       description: get device run status
       operationId: daemonRunGet
@@ -1500,7 +1500,7 @@ paths:
           $ref: "#/responses/Response_501"
           
   /sdrdaemon/device/report:
-    x-swagger-router-controller: deviceset
+    x-swagger-router-controller: daemon
     get:
       description: get the device report
       operationId: daemonDeviceReportGet
@@ -1524,6 +1524,30 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
           
+  /sdrdaemon/channel/report:
+    x-swagger-router-controller: daemon
+    get:
+      description: get the channel report
+      operationId: daemonChannelReportGet
+      tags:
+        - Daemon
+      responses:
+        "200":
+          description: On success return channel report
+          schema:
+            $ref: "#/definitions/ChannelReport"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
           
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -2196,6 +2220,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
       SDRDaemonChannelSinkSettings:
         $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSink.yaml#/SDRDaemonChannelSinkSettings"
+      SDRDaemonChannelSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceSettings"
       SSBModSettings:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -2235,6 +2261,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+      SDRDaemonChannelSourceReport:
+        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceReport"        
       SSBModReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSinkReport:

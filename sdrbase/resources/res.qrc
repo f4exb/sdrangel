@@ -22,6 +22,7 @@
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/SDRDaemonChannelSink.yaml</file>
+        <file>webapi/doc/swagger/include/SDRDaemonChannelSource.yaml</file>
         <file>webapi/doc/swagger/include/SDRDaemonSource.yaml</file>
         <file>webapi/doc/swagger/include/SDRDaemonSink.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>

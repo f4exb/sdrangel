@@ -30,6 +30,7 @@ SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
         m_sampleIndex(0),
+        m_sampleCount(0),
         m_full(false)
 {}
 
@@ -46,7 +47,7 @@ SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
 
 void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
 {
-    if (size() >= m_maxSize)
+    if (length() >= m_maxSize)
     {
         qWarning("SDRDaemonDataReadQueue::push: queue is full");
         m_full = true; // stop filling the queue
@@ -55,7 +56,7 @@ void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
     }
 
     if (m_full) {
-        m_full = (size() > m_maxSize/2); // do not fill queue again before queue is half size
+        m_full = (length() > m_maxSize/2); // do not fill queue again before queue is half size
     }
 
     if (!m_full) {
@@ -78,11 +79,6 @@ SDRDaemonDataBlock* SDRDaemonDataReadQueue::pop()
     }
 }
 
-uint32_t SDRDaemonDataReadQueue::size() const
-{
-    return m_dataReadQueue.size();
-}
-
 void SDRDaemonDataReadQueue::setSize(uint32_t size)
 {
     if (size != m_maxSize) {
@@ -95,13 +91,14 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
     // depletion/repletion state
     if (m_dataBlock == 0)
     {
-        if (size() >= m_maxSize/2)
+        if (length() >= m_maxSize/2)
         {
-            qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", size());
+            qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", length());
             m_blockIndex = 1;
             m_dataBlock = m_dataReadQueue.takeFirst();
             s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
             m_sampleIndex++;
+            m_sampleCount++;
         }
         else
         {
@@ -115,6 +112,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
     {
         s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
         m_sampleIndex++;
+        m_sampleCount++;
     }
     else
     {
@@ -125,6 +123,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
         {
             s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
             m_sampleIndex++;
+            m_sampleCount++;
         }
         else
         {
@@ -133,18 +132,19 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
                 delete m_dataBlock;
                 m_dataBlock = 0;
 
-                if (size() == 0) {
+                if (length() == 0) {
                     qWarning("SDRDaemonDataReadQueue::readSample: try to pop new block but queue is empty");
                 }
             }
 
-            if (size() > 0)
+            if (length() > 0)
             {
-                qDebug("SDRDaemonDataReadQueue::readSample: pop new block: queue size: %u", size());
+                //qDebug("SDRDaemonDataReadQueue::readSample: pop new block: queue size: %u", length());
                 m_blockIndex = 1;
                 m_dataBlock = m_dataReadQueue.takeFirst();
                 s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
                 m_sampleIndex++;
+                m_sampleCount++;
             }
             else
             {

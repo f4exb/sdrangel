@@ -31,6 +31,7 @@
 namespace SWGSDRangel
 {
     class SWGChannelSettings;
+    class SWGChannelReport;
     class SWGDeviceSettings;
     class SWGDeviceReport;
 }
@@ -58,6 +59,7 @@ private:
     void daemonDeviceSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonRunService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void daemonDeviceReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void daemonChannelReportService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
@@ -71,6 +73,7 @@ private:
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings);
+    void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
 };

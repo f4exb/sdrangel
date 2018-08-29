@@ -27,6 +27,7 @@
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
@@ -98,6 +99,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             daemonInstanceLoggingService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonChannelSettingsURL) {
             daemonChannelSettingsService(request, response);
+        } else if (path == WebAPIAdapterDaemon::daemonChannelReportURL) {
+            daemonChannelReportService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonDeviceSettingsURL) {
             daemonDeviceSettingsService(request, response);
         } else if (path == WebAPIAdapterDaemon::daemonDeviceReportURL) {
@@ -261,6 +264,29 @@ void WebAPIRequestMapper::daemonChannelSettingsService(qtwebapp::HttpRequest& re
     }
 }
 
+void WebAPIRequestMapper::daemonChannelReportService(
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGChannelReport normalResponse;
+        resetChannelReport(normalResponse);
+        int status = m_adapter->daemonChannelReportGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+}
+
 void WebAPIRequestMapper::daemonDeviceSettingsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -341,7 +367,7 @@ void WebAPIRequestMapper::daemonDeviceReportService(qtwebapp::HttpRequest& reque
     {
         SWGSDRangel::SWGDeviceReport normalResponse;
         resetDeviceReport(normalResponse);
-        int status = m_adapter->daemonReportGet(normalResponse, errorResponse);
+        int status = m_adapter->daemonDeviceReportGet(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -992,12 +1018,33 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
     channelSettings.setSdrDaemonChannelSinkSettings(0);
+    channelSettings.setSdrDaemonChannelSourceSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
     channelSettings.setUdpSinkSettings(0);
     channelSettings.setUdpSrcSettings(0);
     channelSettings.setWfmDemodSettings(0);
     channelSettings.setWfmModSettings(0);
+}
+
+void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport)
+{
+    channelReport.cleanup();
+    channelReport.setChannelType(0);
+    channelReport.setAmDemodReport(0);
+    channelReport.setAmModReport(0);
+    channelReport.setAtvModReport(0);
+    channelReport.setBfmDemodReport(0);
+    channelReport.setDsdDemodReport(0);
+    channelReport.setNfmDemodReport(0);
+    channelReport.setNfmModReport(0);
+    channelReport.setSdrDaemonChannelSourceReport(0);
+    channelReport.setSsbDemodReport(0);
+    channelReport.setSsbModReport(0);
+    channelReport.setUdpSinkReport(0);
+    channelReport.setUdpSrcReport(0);
+    channelReport.setWfmDemodReport(0);
+    channelReport.setWfmModReport(0);
 }
 
 // TODO: put in library in common with SDRangel. Can be static.

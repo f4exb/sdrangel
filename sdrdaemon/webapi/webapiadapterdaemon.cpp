@@ -23,6 +23,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
 #include "SWGErrorResponse.h"
 
@@ -44,6 +45,7 @@ QString WebAPIAdapterDaemon::daemonInstanceLoggingURL = "/sdrdaemon/logging";
 QString WebAPIAdapterDaemon::daemonChannelSettingsURL = "/sdrdaemon/channel/settings";
 QString WebAPIAdapterDaemon::daemonDeviceSettingsURL = "/sdrdaemon/device/settings";
 QString WebAPIAdapterDaemon::daemonDeviceReportURL = "/sdrdaemon/device/report";
+QString WebAPIAdapterDaemon::daemonChannelReportURL = "/sdrdaemon/channel/report";
 QString WebAPIAdapterDaemon::daemonRunURL = "/sdrdaemon/run";
 
 WebAPIAdapterDaemon::WebAPIAdapterDaemon(SDRDaemonMain& sdrDaemonMain) :
@@ -179,7 +181,7 @@ int WebAPIAdapterDaemon::daemonInstanceLoggingPut(
 }
 
 int WebAPIAdapterDaemon::daemonChannelSettingsGet(
-        SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+        SWGSDRangel::SWGChannelSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
@@ -226,9 +228,9 @@ int WebAPIAdapterDaemon::daemonChannelSettingsGet(
 }
 
 int WebAPIAdapterDaemon::daemonChannelSettingsPutPatch(
-        bool force __attribute__((unused)),
-        const QStringList& channelSettingsKeys __attribute__((unused)),
-        SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     error.init();
@@ -443,7 +445,7 @@ int WebAPIAdapterDaemon::daemonRunDelete(
     }
 }
 
-int WebAPIAdapterDaemon::daemonReportGet(
+int WebAPIAdapterDaemon::daemonDeviceReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -469,6 +471,54 @@ int WebAPIAdapterDaemon::daemonReportGet(
         return 500;
     }
 }
+
+int WebAPIAdapterDaemon::daemonChannelReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if (m_sdrDaemonMain.m_deviceSourceEngine) // Rx
+    {
+        ChannelSinkAPI *channelAPI = m_sdrDaemonMain.m_deviceSourceAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500; // a SDRDaemon sink channel should have been created so this is a server error
+        }
+        else
+        {
+            response.setChannelType(new QString());
+            channelAPI->getIdentifier(*response.getChannelType());
+            response.setTx(0);
+            return channelAPI->webapiReportGet(response, *error.getMessage());
+        }
+    }
+    else if (m_sdrDaemonMain.m_deviceSinkEngine) // Tx
+    {
+        ChannelSourceAPI *channelAPI = m_sdrDaemonMain.m_deviceSinkAPI->getChanelAPIAt(0);
+
+        if (channelAPI == 0)
+        {
+            *error.getMessage() = QString("There is no channel");
+            return 500; // a SDRDaemon source channel should have been created so this is a server error
+        }
+        else
+        {
+            response.setChannelType(new QString());
+            channelAPI->getIdentifier(*response.getChannelType());
+            response.setTx(1);
+            return channelAPI->webapiReportGet(response, *error.getMessage());
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("Device not created error");
+        return 500;
+    }
+}
+
 
 // TODO: put in library in common with SDRangel. Can be static.
 QtMsgType WebAPIAdapterDaemon::getMsgTypeFromString(const QString& msgTypeString)

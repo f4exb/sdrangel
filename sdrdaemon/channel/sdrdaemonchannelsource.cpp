@@ -20,10 +20,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/time.h>
+#include <unistd.h>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
 #include <QDebug>
+
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGSDRDaemonChannelSourceReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/threadedbasebandsamplesource.h"
@@ -44,7 +50,9 @@ SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_sourceThread(0),
         m_running(false),
-        m_samplesCount(0)
+        m_samplesCount(0),
+        m_nbCorrectableErrors(0),
+        m_nbUncorrectableErrors(0)
 {
     setObjectName(m_channelId);
 
@@ -226,6 +234,13 @@ void SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
                 paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks;
             }
 
+            // update counters
+            if (dataBlock->m_rxControlBlock.m_recoveryCount > paramsCM256.RecoveryCount) {
+                m_nbUncorrectableErrors += SDRDaemonNbOrginalBlocks - dataBlock->m_rxControlBlock.m_originalCount;
+            } else {
+                m_nbCorrectableErrors += dataBlock->m_rxControlBlock.m_recoveryCount;
+            }
+
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
                 qWarning() << "SDRDaemonChannelSource::handleDataBlock: decode CM256 error:"
@@ -314,4 +329,87 @@ uint32_t SDRDaemonChannelSource::calculateDataReadQueueSize(int sampleRate)
     maxSize = (maxSize % 2 == 0) ? maxSize : maxSize + 1;
     qDebug("SDRDaemonChannelSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
     return maxSize;
+}
+
+int SDRDaemonChannelSource::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonChannelSourceSettings(new SWGSDRangel::SWGSDRDaemonChannelSourceSettings());
+    response.getSdrDaemonChannelSourceSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int SDRDaemonChannelSource::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    SDRDaemonChannelSourceSettings settings = m_settings;
+
+    if (channelSettingsKeys.contains("dataAddress")) {
+        settings.m_dataAddress = *response.getSdrDaemonChannelSourceSettings()->getDataAddress();
+    }
+
+    if (channelSettingsKeys.contains("dataPort"))
+    {
+        int dataPort = response.getSdrDaemonChannelSourceSettings()->getDataPort();
+
+        if ((dataPort < 1024) || (dataPort > 65535)) {
+            settings.m_dataPort = 9090;
+        } else {
+            settings.m_dataPort = dataPort;
+        }
+    }
+
+    MsgConfigureSDRDaemonChannelSource *msg = MsgConfigureSDRDaemonChannelSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("SDRDaemonChannelSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRDaemonChannelSource *msgToGUI = MsgConfigureSDRDaemonChannelSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int SDRDaemonChannelSource::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonChannelSourceReport(new SWGSDRangel::SWGSDRDaemonChannelSourceReport());
+    response.getSdrDaemonChannelSourceReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void SDRDaemonChannelSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSourceSettings& settings)
+{
+    if (response.getSdrDaemonChannelSourceSettings()->getDataAddress()) {
+        *response.getSdrDaemonChannelSourceSettings()->getDataAddress() = settings.m_dataAddress;
+    } else {
+        response.getSdrDaemonChannelSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    }
+
+    response.getSdrDaemonChannelSourceSettings()->setDataPort(settings.m_dataPort);
+}
+
+void SDRDaemonChannelSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+
+    response.getSdrDaemonChannelSourceReport()->setTvSec(tv.tv_sec);
+    response.getSdrDaemonChannelSourceReport()->setTvUSec(tv.tv_usec);
+    response.getSdrDaemonChannelSourceReport()->setQueueSize(m_dataReadQueue.size());
+    response.getSdrDaemonChannelSourceReport()->setQueueLength(m_dataReadQueue.length());
+    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
+    response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
+    response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
 }

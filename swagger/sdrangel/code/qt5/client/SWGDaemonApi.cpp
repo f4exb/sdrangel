@@ -29,6 +29,58 @@ SWGDaemonApi::SWGDaemonApi(QString host, QString basePath) {
 }
 
 void
+SWGDaemonApi::daemonChannelReportGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/channel/report");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDaemonApi::daemonChannelReportGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDaemonApi::daemonChannelReportGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGChannelReport* output = static_cast<SWGChannelReport*>(create(json, QString("SWGChannelReport")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit daemonChannelReportGetSignal(output);
+    } else {
+        emit daemonChannelReportGetSignalE(output, error_type, error_str);
+        emit daemonChannelReportGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDaemonApi::daemonChannelSettingsGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrdaemon/channel/settings");

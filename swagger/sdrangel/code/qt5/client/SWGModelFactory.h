@@ -90,6 +90,8 @@
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRDaemonChannelSinkSettings.h"
+#include "SWGSDRDaemonChannelSourceReport.h"
+#include "SWGSDRDaemonChannelSourceSettings.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSinkReport.h"
@@ -343,6 +345,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSDRDaemonChannelSinkSettings").compare(type) == 0) {
       return new SWGSDRDaemonChannelSinkSettings();
+    }
+    if(QString("SWGSDRDaemonChannelSourceReport").compare(type) == 0) {
+      return new SWGSDRDaemonChannelSourceReport();
+    }
+    if(QString("SWGSDRDaemonChannelSourceSettings").compare(type) == 0) {
+      return new SWGSDRDaemonChannelSourceSettings();
     }
     if(QString("SWGSDRPlayReport").compare(type) == 0) {
       return new SWGSDRPlayReport();

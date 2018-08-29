@@ -30,6 +30,7 @@ namespace SWGSDRangel
     class SWGDeviceSettings;
     class SWGDeviceState;
     class SWGDeviceReport;
+    class SWGChannelReport;
     class SWGSuccessResponse;
     class SWGErrorResponse;
     class SWGLoggingInfo;
@@ -89,8 +90,12 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    int daemonReportGet(
+    int daemonDeviceReportGet(
             SWGSDRangel::SWGDeviceReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    int daemonChannelReportGet(
+            SWGSDRangel::SWGChannelReport& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     static QString daemonInstanceSummaryURL;
@@ -98,6 +103,7 @@ public:
     static QString daemonChannelSettingsURL;
     static QString daemonDeviceSettingsURL;
     static QString daemonDeviceReportURL;
+    static QString daemonChannelReportURL;
     static QString daemonRunURL;
 
 private:
