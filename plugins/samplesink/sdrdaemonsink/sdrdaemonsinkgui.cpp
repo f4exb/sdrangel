@@ -43,7 +43,6 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_deviceSampleSink(0),
-	m_sampleRate(0),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_nbSinceLastFlowCheck(0),
@@ -193,9 +192,9 @@ void SDRdaemonSinkGui::handleInputMessages()
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
@@ -224,9 +223,9 @@ void SDRdaemonSinkGui::updateTxDelayTooltip()
 
 void SDRdaemonSinkGui::displaySettings()
 {
+    blockApplySettings(true);
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate) / 1000));
     ui->txDelay->setValue(m_settings.m_txDelay*100);
     ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
@@ -239,6 +238,7 @@ void SDRdaemonSinkGui::displaySettings()
     ui->apiPort->setText(tr("%1").arg(m_settings.m_apiPort));
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    blockApplySettings(false);
 }
 
 void SDRdaemonSinkGui::sendSettings()
@@ -447,7 +447,7 @@ void SDRdaemonSinkGui::tick()
 	{
 		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
-        
+
         displayEventTimer();
 	}
 }
