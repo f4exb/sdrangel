@@ -6,22 +6,20 @@ SDRdaemonSinkSettings:
       format: uint64
     sampleRate:
       type: integer
-    log2Interp:
-      type: integer
     txDelay:
       description: minimum delay in ms between two consecutive packets sending
       type: number
       format: float
     nbFECBlocks:
       type: integer
-    address:
+    apiAddress:
+      type: string
+    apiPort:
+      type: integer
+    dataAddress:
       type: string
     dataPort:
       type: integer
-    controlPort:
-      type: integer
-    specificParameters:
-      type: string
 
 SDRdaemonSinkReport:
   description: SDRdaemonSource

@@ -50,7 +50,7 @@ public:
 	void setSamplerate(int samplerate);
     void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
     void setTxDelay(uint32_t txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
-    void setRemoteAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
+    void setDataAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
 
     bool isRunning() const { return m_running; }
 

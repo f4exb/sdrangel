@@ -66,7 +66,7 @@ bool SDRdaemonSinkOutput::start()
 	qDebug() << "SDRdaemonSinkOutput::start";
 
 	m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo);
-	m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
+	m_sdrDaemonSinkThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
 	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
@@ -246,10 +246,10 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     bool forwardChange = false;
     bool changeTxDelay = false;
 
-    if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
+    if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
         if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setRemoteAddress(settings.m_address, settings.m_dataPort);
+            m_sdrDaemonSinkThread->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
     }
 
@@ -270,11 +270,6 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
         forwardChange = true;
         changeTxDelay = true;
-    }
-
-    if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
-    {
-        forwardChange = true;
     }
 
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
@@ -311,10 +306,11 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     qDebug() << "SDRdaemonSinkOutput::applySettings:"
             << " m_centerFrequency: " << settings.m_centerFrequency
             << " m_sampleRate: " << settings.m_sampleRate
-            << " m_log2Interp: " << settings.m_log2Interp
             << " m_txDelay: " << settings.m_txDelay
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_address: " << settings.m_address
+            << " m_apiAddress: " << settings.m_apiAddress
+            << " m_apiPort: " << settings.m_apiPort
+            << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort;
 
     if (forwardChange)
@@ -376,26 +372,23 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("sampleRate")) {
         settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
     }
-    if (deviceSettingsKeys.contains("log2Interp")) {
-        settings.m_log2Interp = response.getSdrDaemonSinkSettings()->getLog2Interp();
-    }
     if (deviceSettingsKeys.contains("txDelay")) {
         settings.m_txDelay = response.getSdrDaemonSinkSettings()->getTxDelay();
     }
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
         settings.m_nbFECBlocks = response.getSdrDaemonSinkSettings()->getNbFecBlocks();
     }
-    if (deviceSettingsKeys.contains("address")) {
-        settings.m_address = *response.getSdrDaemonSinkSettings()->getAddress();
+    if (deviceSettingsKeys.contains("apiAddress")) {
+        settings.m_apiAddress = *response.getSdrDaemonSinkSettings()->getApiAddress();
+    }
+    if (deviceSettingsKeys.contains("apiPort")) {
+        settings.m_apiPort = response.getSdrDaemonSinkSettings()->getApiPort();
+    }
+    if (deviceSettingsKeys.contains("dataAddress")) {
+        settings.m_dataAddress = *response.getSdrDaemonSinkSettings()->getDataAddress();
     }
     if (deviceSettingsKeys.contains("dataPort")) {
         settings.m_dataPort = response.getSdrDaemonSinkSettings()->getDataPort();
-    }
-    if (deviceSettingsKeys.contains("controlPort")) {
-        settings.m_controlPort = response.getSdrDaemonSinkSettings()->getControlPort();
-    }
-    if (deviceSettingsKeys.contains("specificParameters")) {
-        settings.m_specificParameters = *response.getSdrDaemonSinkSettings()->getSpecificParameters();
     }
 
     MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
@@ -425,13 +418,12 @@ void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSetti
 {
     response.getSdrDaemonSinkSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
-    response.getSdrDaemonSinkSettings()->setLog2Interp(settings.m_log2Interp);
     response.getSdrDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
     response.getSdrDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getSdrDaemonSinkSettings()->setAddress(new QString(settings.m_address));
+    response.getSdrDaemonSinkSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    response.getSdrDaemonSinkSettings()->setApiPort(settings.m_apiPort);
+    response.getSdrDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
     response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
-    response.getSdrDaemonSinkSettings()->setControlPort(settings.m_controlPort);
-    response.getSdrDaemonSinkSettings()->setSpecificParameters(new QString(settings.m_specificParameters));
 }
 
 void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

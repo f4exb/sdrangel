@@ -99,15 +99,13 @@ private slots:
     void handleInputMessages();
     void on_centerFrequency_changed(quint64 value);
     void on_sampleRate_changed(quint64 value);
-    void on_interp_currentIndexChanged(int index);
     void on_txDelay_valueChanged(int value);
     void on_nbFECBlocks_valueChanged(int value);
-    void on_address_returnPressed();
+    void on_apiAddress_returnPressed();
+    void on_apiPort_returnPressed();
+    void on_dataAddress_returnPressed();
     void on_dataPort_returnPressed();
-    void on_controlPort_returnPressed();
-    void on_specificParms_returnPressed();
     void on_applyButton_clicked(bool checked);
-    void on_sendButton_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
 	void on_eventCountsReset_clicked(bool checked);
     void updateHardware();

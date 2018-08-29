@@ -32,20 +32,18 @@ SWGSDRdaemonSinkSettings::SWGSDRdaemonSinkSettings() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    log2_interp = 0;
-    m_log2_interp_isSet = false;
     tx_delay = 0.0f;
     m_tx_delay_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
-    address = nullptr;
-    m_address_isSet = false;
+    api_address = nullptr;
+    m_api_address_isSet = false;
+    api_port = 0;
+    m_api_port_isSet = false;
+    data_address = nullptr;
+    m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    control_port = 0;
-    m_control_port_isSet = false;
-    specific_parameters = nullptr;
-    m_specific_parameters_isSet = false;
 }
 
 SWGSDRdaemonSinkSettings::~SWGSDRdaemonSinkSettings() {
@@ -58,20 +56,18 @@ SWGSDRdaemonSinkSettings::init() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    log2_interp = 0;
-    m_log2_interp_isSet = false;
     tx_delay = 0.0f;
     m_tx_delay_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
-    address = new QString("");
-    m_address_isSet = false;
+    api_address = new QString("");
+    m_api_address_isSet = false;
+    api_port = 0;
+    m_api_port_isSet = false;
+    data_address = new QString("");
+    m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    control_port = 0;
-    m_control_port_isSet = false;
-    specific_parameters = new QString("");
-    m_specific_parameters_isSet = false;
 }
 
 void
@@ -80,15 +76,14 @@ SWGSDRdaemonSinkSettings::cleanup() {
 
 
 
-
-    if(address != nullptr) { 
-        delete address;
+    if(api_address != nullptr) { 
+        delete api_address;
     }
 
-
-    if(specific_parameters != nullptr) { 
-        delete specific_parameters;
+    if(data_address != nullptr) { 
+        delete data_address;
     }
+
 }
 
 SWGSDRdaemonSinkSettings*
@@ -106,19 +101,17 @@ SWGSDRdaemonSinkSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&tx_delay, pJson["txDelay"], "float", "");
     
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&address, pJson["address"], "QString", "QString");
+    ::SWGSDRangel::setValue(&api_address, pJson["apiAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&api_port, pJson["apiPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&control_port, pJson["controlPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&specific_parameters, pJson["specificParameters"], "QString", "QString");
     
 }
 
@@ -142,26 +135,23 @@ SWGSDRdaemonSinkSettings::asJsonObject() {
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
     }
-    if(m_log2_interp_isSet){
-        obj->insert("log2Interp", QJsonValue(log2_interp));
-    }
     if(m_tx_delay_isSet){
         obj->insert("txDelay", QJsonValue(tx_delay));
     }
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
     }
-    if(address != nullptr && *address != QString("")){
-        toJsonValue(QString("address"), address, obj, QString("QString"));
+    if(api_address != nullptr && *api_address != QString("")){
+        toJsonValue(QString("apiAddress"), api_address, obj, QString("QString"));
+    }
+    if(m_api_port_isSet){
+        obj->insert("apiPort", QJsonValue(api_port));
+    }
+    if(data_address != nullptr && *data_address != QString("")){
+        toJsonValue(QString("dataAddress"), data_address, obj, QString("QString"));
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
-    }
-    if(m_control_port_isSet){
-        obj->insert("controlPort", QJsonValue(control_port));
-    }
-    if(specific_parameters != nullptr && *specific_parameters != QString("")){
-        toJsonValue(QString("specificParameters"), specific_parameters, obj, QString("QString"));
     }
 
     return obj;
@@ -187,16 +177,6 @@ SWGSDRdaemonSinkSettings::setSampleRate(qint32 sample_rate) {
     this->m_sample_rate_isSet = true;
 }
 
-qint32
-SWGSDRdaemonSinkSettings::getLog2Interp() {
-    return log2_interp;
-}
-void
-SWGSDRdaemonSinkSettings::setLog2Interp(qint32 log2_interp) {
-    this->log2_interp = log2_interp;
-    this->m_log2_interp_isSet = true;
-}
-
 float
 SWGSDRdaemonSinkSettings::getTxDelay() {
     return tx_delay;
@@ -218,13 +198,33 @@ SWGSDRdaemonSinkSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
 }
 
 QString*
-SWGSDRdaemonSinkSettings::getAddress() {
-    return address;
+SWGSDRdaemonSinkSettings::getApiAddress() {
+    return api_address;
 }
 void
-SWGSDRdaemonSinkSettings::setAddress(QString* address) {
-    this->address = address;
-    this->m_address_isSet = true;
+SWGSDRdaemonSinkSettings::setApiAddress(QString* api_address) {
+    this->api_address = api_address;
+    this->m_api_address_isSet = true;
+}
+
+qint32
+SWGSDRdaemonSinkSettings::getApiPort() {
+    return api_port;
+}
+void
+SWGSDRdaemonSinkSettings::setApiPort(qint32 api_port) {
+    this->api_port = api_port;
+    this->m_api_port_isSet = true;
+}
+
+QString*
+SWGSDRdaemonSinkSettings::getDataAddress() {
+    return data_address;
+}
+void
+SWGSDRdaemonSinkSettings::setDataAddress(QString* data_address) {
+    this->data_address = data_address;
+    this->m_data_address_isSet = true;
 }
 
 qint32
@@ -237,26 +237,6 @@ SWGSDRdaemonSinkSettings::setDataPort(qint32 data_port) {
     this->m_data_port_isSet = true;
 }
 
-qint32
-SWGSDRdaemonSinkSettings::getControlPort() {
-    return control_port;
-}
-void
-SWGSDRdaemonSinkSettings::setControlPort(qint32 control_port) {
-    this->control_port = control_port;
-    this->m_control_port_isSet = true;
-}
-
-QString*
-SWGSDRdaemonSinkSettings::getSpecificParameters() {
-    return specific_parameters;
-}
-void
-SWGSDRdaemonSinkSettings::setSpecificParameters(QString* specific_parameters) {
-    this->specific_parameters = specific_parameters;
-    this->m_specific_parameters_isSet = true;
-}
-
 
 bool
 SWGSDRdaemonSinkSettings::isSet(){
@@ -264,13 +244,12 @@ SWGSDRdaemonSinkSettings::isSet(){
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
         if(m_tx_delay_isSet){ isObjectUpdated = true; break;}
         if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
-        if(address != nullptr && *address != QString("")){ isObjectUpdated = true; break;}
+        if(api_address != nullptr && *api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_api_port_isSet){ isObjectUpdated = true; break;}
+        if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
         if(m_data_port_isSet){ isObjectUpdated = true; break;}
-        if(m_control_port_isSet){ isObjectUpdated = true; break;}
-        if(specific_parameters != nullptr && *specific_parameters != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

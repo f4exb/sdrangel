@@ -3274,9 +3274,6 @@ margin-bottom: 20px;
     "sampleRate" : {
       "type" : "integer"
     },
-    "log2Interp" : {
-      "type" : "integer"
-    },
     "txDelay" : {
       "type" : "number",
       "format" : "float",
@@ -3285,17 +3282,17 @@ margin-bottom: 20px;
     "nbFECBlocks" : {
       "type" : "integer"
     },
-    "address" : {
+    "apiAddress" : {
+      "type" : "string"
+    },
+    "apiPort" : {
+      "type" : "integer"
+    },
+    "dataAddress" : {
       "type" : "string"
     },
     "dataPort" : {
       "type" : "integer"
-    },
-    "controlPort" : {
-      "type" : "integer"
-    },
-    "specificParameters" : {
-      "type" : "string"
     }
   },
   "description" : "SDRdaemonSink"
@@ -28215,7 +28212,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-08-23T17:21:24.907+02:00
+              Generated 2018-08-29T15:59:39.880+02:00
             </div>
           </div>
       </div>
