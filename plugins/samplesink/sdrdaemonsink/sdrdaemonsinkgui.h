@@ -21,13 +21,16 @@
 #include <QTimer>
 #include <QTime>
 #include <QWidget>
+#include <QNetworkRequest>
 
 #include "util/messagequeue.h"
 
 #include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
 
-
+class QNetworkAccessManager;
+class QNetworkReply;
+class QJsonObject;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -84,6 +87,9 @@ private:
 
     MessageQueue m_inputMessageQueue;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();
@@ -94,6 +100,7 @@ private:
 	void updateTxDelayTooltip();
 	void displayEventCounts();
     void displayEventTimer();
+    void analyzeChannelReport(const QJsonObject& jsonObject);
 
 private slots:
     void handleInputMessages();
@@ -112,6 +119,7 @@ private slots:
     void updateHardware();
     void updateStatus();
 	void tick();
+	void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FILESINKGUI_H

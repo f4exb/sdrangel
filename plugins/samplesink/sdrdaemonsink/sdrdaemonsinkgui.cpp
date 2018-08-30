@@ -20,6 +20,9 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QJsonParseError>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -74,6 +77,9 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
+	m_networkManager = new QNetworkAccessManager();
+	connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
     m_time.start();
     displayEventCounts();
     displayEventTimer();
@@ -84,6 +90,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 SDRdaemonSinkGui::~SDRdaemonSinkGui()
 {
+    delete m_networkManager;
 	delete ui;
 }
 
@@ -451,9 +458,60 @@ void SDRdaemonSinkGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0) // 16*50ms ~800ms
 	{
-		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
-		m_deviceSampleSink->getInputMessageQueue()->push(message);
+	    QString reportURL = QString("http://%1:%2/sdrdaemon/channel/report").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+	    m_networkRequest.setUrl(QUrl(reportURL));
+	    m_networkManager->get(m_networkRequest);
+
+//		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
+//		m_deviceSampleSink->getInputMessageQueue()->push(message);
 
         displayEventTimer();
 	}
+}
+
+void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        qDebug() << "SDRdaemonSinkGui::networkManagerFinished" << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+
+    try
+    {
+        QByteArray jsonBytes(answer.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error == QJsonParseError::NoError)
+        {
+            analyzeChannelReport(doc.object());
+        }
+        else
+        {
+            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        QString errorMsg = QString("Error parsing request: ") + ex.what();
+        qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+    }
+}
+
+void SDRdaemonSinkGui::analyzeChannelReport(const QJsonObject& jsonObject)
+{
+    if (jsonObject.contains("SDRDaemonChannelSourceReport"))
+    {
+        QJsonObject report = jsonObject["SDRDaemonChannelSourceReport"].toObject();
+        int queueSize = report["queueSize"].toInt();
+        queueSize = queueSize == 0 ? 10 : queueSize;
+        int queueLength = report["queueLength"].toInt();
+        QString queueLengthText = QString("%1/%2").arg(queueLength).arg(queueSize);
+        ui->queueLengthText->setText(queueLengthText);
+        ui->queueLengthGauge->setValue((queueLength*100)/queueSize);
+    }
 }
