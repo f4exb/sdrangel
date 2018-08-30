@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>237</height>
+    <height>270</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>190</height>
+    <height>270</height>
    </size>
   </property>
   <property name="font">
@@ -358,7 +358,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost</string>
+        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost, blue = remote not streaming</string>
        </property>
        <property name="text">
         <string/>
@@ -366,6 +366,38 @@
        <property name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
          <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="remoteStreamRateText">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Remote stream rate (S/s)</string>
+       </property>
+       <property name="text">
+        <string>0000000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="remoteStreamRateUnits">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>S/s</string>
        </property>
       </widget>
      </item>
@@ -668,6 +700,28 @@
        </property>
        <property name="text">
         <string>Set</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="statusLayout">
+     <item>
+      <widget class="QLabel" name="statusText">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="infoLayout">
+     <item>
+      <widget class="QLabel" name="infoText">
+       <property name="text">
+        <string>...</string>
        </property>
       </widget>
      </item>

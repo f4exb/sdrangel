@@ -57,6 +57,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_countRecovered = 0;
     m_lastCountUnrecoverable = 0;
     m_lastCountRecovered = 0;
+    m_lastSampleCount = 0;
     m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
@@ -335,6 +336,10 @@ void SDRdaemonSinkGui::on_apiAddress_returnPressed()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
     sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);    
 }
 
 void SDRdaemonSinkGui::on_apiPort_returnPressed()
@@ -352,6 +357,10 @@ void SDRdaemonSinkGui::on_apiPort_returnPressed()
     }
 
     sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);    
 }
 
 void SDRdaemonSinkGui::on_dataAddress_returnPressed()
@@ -390,6 +399,10 @@ void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unu
     }
 
     sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
 }
 
 void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
@@ -496,7 +509,7 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
     if (reply->error())
     {
         ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-        qDebug() << "SDRdaemonSinkGui::networkManagerFinished" << reply->errorString();
+        ui->statusText->setText(reply->errorString());
         return;
     }
 
@@ -511,25 +524,30 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
         if (error.error == QJsonParseError::NoError)
         {
             ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
-            analyzeChannelReport(doc.object());
+            ui->statusText->setText(QString("API OK"));
+            analyzeApiReply(doc.object());
         }
         else
         {
             ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
-            qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+            ui->statusText->setText(QString("JSON error. See log"));
+            qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
         }
     }
     catch (const std::exception& ex)
     {
         ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         QString errorMsg = QString("Error parsing request: ") + ex.what();
-        qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+        ui->statusText->setText("Error parsing request. See log for details");
+        qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
     }
 }
 
-void SDRdaemonSinkGui::analyzeChannelReport(const QJsonObject& jsonObject)
+void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
 {
+    QString infoLine;
+
     if (jsonObject.contains("SDRDaemonChannelSourceReport"))
     {
         QJsonObject report = jsonObject["SDRDaemonChannelSourceReport"].toObject();
@@ -541,6 +559,8 @@ void SDRdaemonSinkGui::analyzeChannelReport(const QJsonObject& jsonObject)
         ui->queueLengthGauge->setValue((queueLength*100)/queueSize);
         int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
         int recoverableCount = report["correctableErrorsCount"].toInt();
+        int sampleCount = report["samplesCount"].toInt();
+        uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
 
         if (!m_resetCounts)
         {
@@ -552,8 +572,41 @@ void SDRdaemonSinkGui::analyzeChannelReport(const QJsonObject& jsonObject)
             displayEventCounts();
         }
 
+        if ((sampleCount - m_lastSampleCount) == 0) {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+        }
+
+        double remoteStreamRate = (sampleCount - m_lastSampleCount) / (double) (timestampUs - m_lastTimestampUs);
+        ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate * 1e6, 0, 'f', 0));
+
         m_resetCounts = false;
         m_lastCountRecovered = recoverableCount;
         m_lastCountUnrecoverable = unrecoverableCount;
+        m_lastSampleCount = sampleCount;
+        m_lastTimestampUs = timestampUs;
+    }
+
+    if (jsonObject.contains("version")) {
+        infoLine = "v" + jsonObject["version"].toString();
+    }
+
+    if (jsonObject.contains("qtVersion")) {
+        infoLine += " Qt" + jsonObject["qtVersion"].toString();
+    }
+
+    if (jsonObject.contains("architecture")) {
+        infoLine += " " + jsonObject["architecture"].toString();
+    }
+
+    if (jsonObject.contains("os")) {
+        infoLine += " " + jsonObject["os"].toString();
+    }
+
+    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits")) {
+        infoLine +=  QString(" %1/%2b").arg(jsonObject["dspRxBits"].toInt()).arg(jsonObject["dspTxBits"].toInt());
+    }
+
+    if (infoLine.size() > 0) {
+        ui->infoText->setText(infoLine);
     }
 }

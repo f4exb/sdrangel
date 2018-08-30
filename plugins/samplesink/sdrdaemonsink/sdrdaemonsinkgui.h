@@ -75,12 +75,12 @@ private:
     bool m_doApplySettings;
     bool m_forceSettings;
 
-    int m_nnSender;
-
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
     uint32_t m_lastCountUnrecoverable;
     uint32_t m_lastCountRecovered;
+	uint32_t m_lastSampleCount;
+	uint64_t m_lastTimestampUs; 
     bool m_resetCounts;
     QTime m_time;
 
@@ -104,7 +104,7 @@ private:
 	void displayEventCounts();
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
-    void analyzeChannelReport(const QJsonObject& jsonObject);
+    void analyzeApiReply(const QJsonObject& jsonObject);
 
 private slots:
     void handleInputMessages();
