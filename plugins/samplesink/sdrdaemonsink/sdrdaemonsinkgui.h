@@ -79,6 +79,9 @@ private:
 
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
+    uint32_t m_lastCountUnrecoverable;
+    uint32_t m_lastCountRecovered;
+    bool m_resetCounts;
     QTime m_time;
 
     QPalette m_paletteGreenText;
@@ -99,6 +102,7 @@ private:
 	void updateSampleRateAndFrequency();
 	void updateTxDelayTooltip();
 	void displayEventCounts();
+	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
     void analyzeChannelReport(const QJsonObject& jsonObject);
 

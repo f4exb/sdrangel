@@ -498,6 +498,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Green if communication OK else KO</string>
+       </property>
        <property name="text">
         <string>API</string>
        </property>

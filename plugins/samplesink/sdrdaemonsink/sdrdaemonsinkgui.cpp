@@ -55,6 +55,9 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
+    m_lastCountUnrecoverable = 0;
+    m_lastCountRecovered = 0;
+    m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
@@ -67,6 +70,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
+
+    ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -428,6 +433,23 @@ void SDRdaemonSinkGui::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
+void SDRdaemonSinkGui::displayEventStatus(int recoverableCount, int unrecoverableCount)
+{
+
+    if (unrecoverableCount == 0)
+    {
+        if (recoverableCount == 0) {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+    }
+    else
+    {
+        ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
+    }
+}
+
 void SDRdaemonSinkGui::displayEventTimer()
 {
     int elapsedTimeMillis = m_time.elapsed();
@@ -473,6 +495,7 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
 {
     if (reply->error())
     {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         qDebug() << "SDRdaemonSinkGui::networkManagerFinished" << reply->errorString();
         return;
     }
@@ -487,16 +510,19 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
 
         if (error.error == QJsonParseError::NoError)
         {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
             analyzeChannelReport(doc.object());
         }
         else
         {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
             qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
         }
     }
     catch (const std::exception& ex)
     {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         QString errorMsg = QString("Error parsing request: ") + ex.what();
         qDebug().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
     }
@@ -513,5 +539,21 @@ void SDRdaemonSinkGui::analyzeChannelReport(const QJsonObject& jsonObject)
         QString queueLengthText = QString("%1/%2").arg(queueLength).arg(queueSize);
         ui->queueLengthText->setText(queueLengthText);
         ui->queueLengthGauge->setValue((queueLength*100)/queueSize);
+        int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
+        int recoverableCount = report["correctableErrorsCount"].toInt();
+
+        if (!m_resetCounts)
+        {
+            int recoverableCountDelta = recoverableCount - m_lastCountRecovered;
+            int unrecoverableCountDelta = unrecoverableCount - m_lastCountUnrecoverable;
+            displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
+            m_countRecovered += recoverableCountDelta;
+            m_countUnrecoverable += unrecoverableCountDelta;
+            displayEventCounts();
+        }
+
+        m_resetCounts = false;
+        m_lastCountRecovered = recoverableCount;
+        m_lastCountUnrecoverable = unrecoverableCount;
     }
 }
