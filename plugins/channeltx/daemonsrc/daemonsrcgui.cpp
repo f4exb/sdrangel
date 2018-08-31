@@ -16,7 +16,10 @@
 
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
+#include "gui/basicchannelsettingsdialog.h"
+#include "mainwindow.h"
 
+#include "daemonsrc.h"
 #include "ui_daemonsrcgui.h"
 #include "daemonsrcgui.h"
 
@@ -73,8 +76,14 @@ bool DaemonSrcGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DaemonSrcGUI::handleMessage(const Message& message __attribute__((unused)))
+bool DaemonSrcGUI::handleMessage(const Message& message)
 {
+    if (DaemonSrc::MsgSampleRateNotification::match(message))
+    {
+        DaemonSrc::MsgSampleRateNotification& notif = (DaemonSrc::MsgSampleRateNotification&) message;
+        m_channelMarker.setBandwidth(notif.getSampleRate());
+    }
+
     return false;
 }
 
@@ -87,6 +96,27 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
+    m_daemonSrc = (DaemonSrc*) channelTx;
+    m_daemonSrc->setMessageQueueToGUI(getInputMessageQueue());
+
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle("Daemon source");
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true); // activate signal on the last setting only
+
+    m_settings.setChannelMarker(&m_channelMarker);
+
+    m_deviceUISet->registerTxChannelInstance(DaemonSrc::m_channelIdURI, this);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
+    m_deviceUISet->addRollupWidget(this);
+
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+
+    displaySettings();
+    applySettings(true);
 }
 
 DaemonSrcGUI::~DaemonSrcGUI()
@@ -106,4 +136,60 @@ void DaemonSrcGUI::applySettings(bool force __attribute((unused)))
 
 void DaemonSrcGUI::displaySettings()
 {
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle(m_settings.m_title);
+    m_channelMarker.setBandwidth(5000); // TODO
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
+
+    setTitleColor(m_settings.m_rgbColor);
+    setWindowTitle(m_channelMarker.getTitle());
+
+    blockApplySettings(true);
+    ui->dataAddress->setText(m_settings.m_dataAddress);
+    ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    blockApplySettings(false);
+}
+
+void DaemonSrcGUI::leaveEvent(QEvent*)
+{
+    m_channelMarker.setHighlighted(false);
+}
+
+void DaemonSrcGUI::enterEvent(QEvent*)
+{
+    m_channelMarker.setHighlighted(true);
+}
+
+void DaemonSrcGUI::handleSourceMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
+}
+
+void DaemonSrcGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+{
+}
+
+void DaemonSrcGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
 }

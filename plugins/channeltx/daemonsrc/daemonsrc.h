@@ -16,6 +16,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"
+#include "util/message.h"
 
 #include "daemonsrcsettings.h"
 
@@ -27,6 +28,26 @@ class DaemonSrc : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
+    class MsgSampleRateNotification : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSampleRateNotification* create(int sampleRate) {
+            return new MsgSampleRateNotification(sampleRate);
+        }
+
+        int getSampleRate() const { return m_sampleRate; }
+
+    private:
+
+        MsgSampleRateNotification(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+
+        int m_sampleRate;
+    };
+
     DaemonSrc(DeviceSinkAPI *deviceAPI);
     ~DaemonSrc();
 

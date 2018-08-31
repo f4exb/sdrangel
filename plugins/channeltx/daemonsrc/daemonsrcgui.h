@@ -20,12 +20,14 @@
 #include "plugin/plugininstancegui.h"
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
+#include "dsp/channelmarker.h"
 
 #include "daemonsrcsettings.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSource;
+class DaemonSrc;
 
 namespace Ui {
     class DaemonSrcGUI;
@@ -53,9 +55,12 @@ private:
     Ui::DaemonSrcGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
-    MessageQueue m_inputMessageQueue;
+    ChannelMarker m_channelMarker;
     DaemonSrcSettings m_settings;
     bool m_doApplySettings;
+
+    DaemonSrc* m_daemonSrc;
+    MessageQueue m_inputMessageQueue;
 
     explicit DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~DaemonSrcGUI();
@@ -64,6 +69,13 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
 
+    void leaveEvent(QEvent*);
+    void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
 };
 
 

@@ -14,11 +14,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 
 #include "daemonsrc.h"
+
+MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgSampleRateNotification, Message)
 
 const QString DaemonSrc::m_channelIdURI = "sdrangel.channeltx.daemonsrc";
 const QString DaemonSrc::m_channelId ="DaemonSrc";
@@ -61,8 +65,24 @@ void DaemonSrc::stop()
 {
 }
 
-bool DaemonSrc::handleMessage(const Message& cmd __attribute__((unused)))
+bool DaemonSrc::handleMessage(const Message& cmd)
 {
+    if (UpChannelizer::MsgChannelizerNotification::match(cmd))
+    {
+        UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
+        qDebug() << "DaemonSrc::handleMessage: MsgChannelizerNotification:"
+                << " basebandSampleRate: " << notif.getBasebandSampleRate()
+                << " outputSampleRate: " << notif.getSampleRate()
+                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
+
+        if (m_guiMessageQueue)
+        {
+            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getBasebandSampleRate());
+            m_guiMessageQueue->push(msg);
+        }
+
+        return true;
+    }
     return false;
 }
 

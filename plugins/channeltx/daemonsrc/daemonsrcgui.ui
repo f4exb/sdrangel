@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LoRa Demodulator</string>
+   <string>Daemon source</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
