@@ -537,7 +537,6 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         ui->queueLengthGauge->setValue(queueLengthPercent);
         int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
         int recoverableCount = report["correctableErrorsCount"].toInt();
-        LimitedCounter<uint32_t, 2000000000> sampleCount(report["samplesCount"].toInt());
         uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
 
         if (m_lastTimestampRateCorrection == 0) {
@@ -559,13 +558,20 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
             displayEventCounts();
         }
 
-        LimitedCounter<uint32_t, 2000000000> sampleCountDelta = sampleCount - m_lastSampleCount;
+        uint32_t sampleCountDelta, sampleCount;
+        sampleCount = report["samplesCount"].toInt();
 
-        if (sampleCountDelta.value() == 0) {
+        if (sampleCount < m_lastSampleCount) {
+            sampleCountDelta = (0xFFFFFFFFU - sampleCount) + m_lastSampleCount + 1;
+        } else {
+            sampleCountDelta = sampleCount - m_lastSampleCount;
+        }
+
+        if (sampleCountDelta == 0) {
             ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
         }
 
-        double remoteStreamRate = sampleCountDelta.value()*1e6 / (double) (timestampUs - m_lastTimestampUs);
+        double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
 
         if (remoteStreamRate != 0)
         {

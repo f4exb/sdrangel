@@ -71,7 +71,7 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_samplesCount;
-	MovingAverageUtil<double, double, 120> m_rateMovingAverage; // ~2mn average
+	MovingAverageUtil<double, double, 30> m_rateMovingAverage; // ~30s average
 	uint32_t m_tickCount;
 	std::size_t m_nbSinceLastFlowCheck;
 	int m_lastEngineState;
@@ -82,7 +82,7 @@ private:
     uint32_t m_countRecovered;
     uint32_t m_lastCountUnrecoverable;
     uint32_t m_lastCountRecovered;
-	LimitedCounter<uint32_t, 2000000000> m_lastSampleCount;
+	uint32_t m_lastSampleCount;
 	uint64_t m_lastTimestampUs;
 	uint64_t m_lastTimestampRateCorrection;
     bool m_resetCounts;

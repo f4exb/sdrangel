@@ -407,7 +407,7 @@ void SDRDaemonChannelSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelRe
     response.getSdrDaemonChannelSourceReport()->setTvUSec(tv.tv_usec);
     response.getSdrDaemonChannelSourceReport()->setQueueSize(m_dataReadQueue.size());
     response.getSdrDaemonChannelSourceReport()->setQueueLength(m_dataReadQueue.length());
-    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount().value());
+    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
     response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
     response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
 }
