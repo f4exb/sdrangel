@@ -1,13 +1,19 @@
 project(mod)
 
-find_package(OpenCV)
-
 add_subdirectory(modam)
 add_subdirectory(modnfm)
 add_subdirectory(modssb)
 add_subdirectory(modwfm)
 add_subdirectory(udpsink)
 
+find_package(CM256cc)
+
+if(CM256CC_FOUND)
+    add_subdirectory(sdrdaemonchannelsource)
+endif(CM256CC_FOUND)
+
+find_package(OpenCV)
+
 if (OpenCV_FOUND)
-add_subdirectory(modatv)
+    add_subdirectory(modatv)
 endif()
