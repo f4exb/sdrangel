@@ -58,6 +58,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastCountUnrecoverable = 0;
     m_lastCountRecovered = 0;
     m_lastSampleCount = 0;
+    m_lastTimestampRateCorrection = 0;
     m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
@@ -176,12 +177,6 @@ bool SDRdaemonSinkGui::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
-	{
-		m_samplesCount = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming&)message).getSamplesCount();
-		updateWithStreamTime();
-		return true;
-	}
     else if (SDRdaemonSinkOutput::MsgStartStop::match(message))
     {
         SDRdaemonSinkOutput::MsgStartStop& notif = (SDRdaemonSinkOutput::MsgStartStop&) message;
@@ -339,7 +334,7 @@ void SDRdaemonSinkGui::on_apiAddress_returnPressed()
 
     QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
     m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);    
+    m_networkManager->get(m_networkRequest);
 }
 
 void SDRdaemonSinkGui::on_apiPort_returnPressed()
@@ -360,7 +355,7 @@ void SDRdaemonSinkGui::on_apiPort_returnPressed()
 
     QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
     m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);    
+    m_networkManager->get(m_networkRequest);
 }
 
 void SDRdaemonSinkGui::on_dataAddress_returnPressed()
@@ -472,35 +467,17 @@ void SDRdaemonSinkGui::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void SDRdaemonSinkGui::updateWithStreamTime()
-{
-	int t_sec = 0;
-	int t_msec = 0;
-
-	if (m_settings.m_sampleRate > 0){
-		t_msec = ((m_samplesCount * 1000) / m_settings.m_sampleRate) % 1000;
-		t_sec = m_samplesCount / m_settings.m_sampleRate;
-	}
-
-	QTime t(0, 0, 0, 0);
-	t = t.addSecs(t_sec);
-	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("HH:mm:ss.zzz");
-	//ui->relTimeText->setText(s_timems); TODO with absolute time
-}
-
 void SDRdaemonSinkGui::tick()
 {
-	if ((++m_tickCount & 0xf) == 0) // 16*50ms ~800ms
+    if (++m_tickCount == 20) // once per second
 	{
 	    QString reportURL = QString("http://%1:%2/sdrdaemon/channel/report").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
 	    m_networkRequest.setUrl(QUrl(reportURL));
 	    m_networkManager->get(m_networkRequest);
 
-//		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
-//		m_deviceSampleSink->getInputMessageQueue()->push(message);
-
         displayEventTimer();
+
+        m_tickCount = 0;
 	}
 }
 
@@ -556,11 +533,21 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         int queueLength = report["queueLength"].toInt();
         QString queueLengthText = QString("%1/%2").arg(queueLength).arg(queueSize);
         ui->queueLengthText->setText(queueLengthText);
-        ui->queueLengthGauge->setValue((queueLength*100)/queueSize);
+        int queueLengthPercent = (queueLength*100)/queueSize;
+        ui->queueLengthGauge->setValue(queueLengthPercent);
         int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
         int recoverableCount = report["correctableErrorsCount"].toInt();
-        int sampleCount = report["samplesCount"].toInt();
+        LimitedCounter<uint32_t, 2000000000> sampleCount(report["samplesCount"].toInt());
         uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
+
+        if (m_lastTimestampRateCorrection == 0) {
+            m_lastTimestampRateCorrection = timestampUs;
+        }
+
+        if ((timestampUs - m_lastTimestampRateCorrection > 600e6) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
+        {
+            m_lastTimestampRateCorrection = timestampUs;
+        }
 
         if (!m_resetCounts)
         {
@@ -572,12 +559,19 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
             displayEventCounts();
         }
 
-        if ((sampleCount - m_lastSampleCount) == 0) {
+        LimitedCounter<uint32_t, 2000000000> sampleCountDelta = sampleCount - m_lastSampleCount;
+
+        if (sampleCountDelta.value() == 0) {
             ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
         }
 
-        double remoteStreamRate = (sampleCount - m_lastSampleCount) / (double) (timestampUs - m_lastTimestampUs);
-        ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate * 1e6, 0, 'f', 0));
+        double remoteStreamRate = sampleCountDelta.value()*1e6 / (double) (timestampUs - m_lastTimestampUs);
+
+        if (remoteStreamRate != 0)
+        {
+            m_rateMovingAverage(remoteStreamRate);
+            ui->remoteStreamRateText->setText(QString("%1").arg(m_rateMovingAverage.instantAverage(), 0, 'f', 0));
+        }
 
         m_resetCounts = false;
         m_lastCountRecovered = recoverableCount;
@@ -609,4 +603,17 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
     if (infoLine.size() > 0) {
         ui->infoText->setText(infoLine);
     }
+}
+
+void SDRdaemonSinkGui::sampleRateCorrection(int queueLength, int queueSize, int64_t timeDelta)
+{
+    int nbBlocksDiff = queueLength - (queueSize/2);
+    int nbSamplesDiff = nbBlocksDiff * 127 * 127;
+    float sampleCorr = (nbSamplesDiff * 50000.0) / timeDelta;
+    int chunkCorr = roundf(sampleCorr);
+
+    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d samples", -chunkCorr);
+
+    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(-chunkCorr);
+    m_deviceSampleSink->getInputMessageQueue()->push(message);
 }

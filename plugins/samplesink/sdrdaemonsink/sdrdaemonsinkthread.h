@@ -67,7 +67,7 @@ private:
 
 	int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;
-    std::size_t m_samplesCount;
+    uint32_t m_samplesCount;
     int m_chunkCorrection;
 
 	int m_samplerate;

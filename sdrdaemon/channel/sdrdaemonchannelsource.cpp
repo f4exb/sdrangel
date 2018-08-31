@@ -50,7 +50,6 @@ SDRDaemonChannelSource::SDRDaemonChannelSource(DeviceSinkAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_sourceThread(0),
         m_running(false),
-        m_samplesCount(0),
         m_nbCorrectableErrors(0),
         m_nbUncorrectableErrors(0)
 {
@@ -77,7 +76,6 @@ SDRDaemonChannelSource::~SDRDaemonChannelSource()
 void SDRDaemonChannelSource::pull(Sample& sample)
 {
     m_dataReadQueue.readSample(sample);
-    m_samplesCount++;
 }
 
 void SDRDaemonChannelSource::start()
@@ -235,8 +233,8 @@ void SDRDaemonChannelSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             }
 
             // update counters
-            if (dataBlock->m_rxControlBlock.m_recoveryCount > paramsCM256.RecoveryCount) {
-                m_nbUncorrectableErrors += SDRDaemonNbOrginalBlocks - dataBlock->m_rxControlBlock.m_originalCount;
+            if (dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount) {
+                m_nbUncorrectableErrors += SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount - dataBlock->m_rxControlBlock.m_originalCount;
             } else {
                 m_nbCorrectableErrors += dataBlock->m_rxControlBlock.m_recoveryCount;
             }
@@ -409,7 +407,7 @@ void SDRDaemonChannelSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelRe
     response.getSdrDaemonChannelSourceReport()->setTvUSec(tv.tv_usec);
     response.getSdrDaemonChannelSourceReport()->setQueueSize(m_dataReadQueue.size());
     response.getSdrDaemonChannelSourceReport()->setQueueLength(m_dataReadQueue.length());
-    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
+    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount().value());
     response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
     response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
 }

@@ -58,6 +58,7 @@ class MovingAverageUtil
     double asDouble() const { return ((double)m_total) / N; }
     float asFloat() const { return ((float)m_total) / N; }
     operator T() const { return  m_total / N; }
+    T instantAverage() const { return m_total / (m_num_samples == 0 ? 1 : m_num_samples); }
 
   private:
     T m_samples[N];

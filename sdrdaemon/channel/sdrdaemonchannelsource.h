@@ -110,7 +110,6 @@ private:
     bool m_running;
 
     SDRDaemonChannelSourceSettings m_settings;
-    uint64_t m_samplesCount;
 
     CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
     SDRDaemonMetaDataFEC m_currentMeta;

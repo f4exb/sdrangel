@@ -114,43 +114,6 @@ public:
         { }
     };
 
-	class MsgConfigureSDRdaemonSinkStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-
-		static MsgConfigureSDRdaemonSinkStreamTiming* create()
-		{
-			return new MsgConfigureSDRdaemonSinkStreamTiming();
-		}
-
-	private:
-
-		MsgConfigureSDRdaemonSinkStreamTiming() :
-			Message()
-		{ }
-	};
-
-	class MsgReportSDRdaemonSinkStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		std::size_t getSamplesCount() const { return m_samplesCount; }
-
-		static MsgReportSDRdaemonSinkStreamTiming* create(std::size_t samplesCount)
-		{
-			return new MsgReportSDRdaemonSinkStreamTiming(samplesCount);
-		}
-
-	protected:
-		std::size_t m_samplesCount;
-
-		MsgReportSDRdaemonSinkStreamTiming(std::size_t samplesCount) :
-			Message(),
-			m_samplesCount(samplesCount)
-		{ }
-	};
-
 	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~SDRdaemonSinkOutput();
 	virtual void destroy();

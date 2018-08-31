@@ -30,7 +30,6 @@ SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
         m_sampleIndex(0),
-        m_sampleCount(0),
         m_full(false)
 {}
 

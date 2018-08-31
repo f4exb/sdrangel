@@ -24,6 +24,8 @@
 #include <QNetworkRequest>
 
 #include "util/messagequeue.h"
+#include "util/limitedcounter.h"
+#include "util/movingaverage.h"
 
 #include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
@@ -69,7 +71,8 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_samplesCount;
-	std::size_t m_tickCount;
+	MovingAverageUtil<double, double, 120> m_rateMovingAverage; // ~2mn average
+	uint32_t m_tickCount;
 	std::size_t m_nbSinceLastFlowCheck;
 	int m_lastEngineState;
     bool m_doApplySettings;
@@ -79,8 +82,9 @@ private:
     uint32_t m_countRecovered;
     uint32_t m_lastCountUnrecoverable;
     uint32_t m_lastCountRecovered;
-	uint32_t m_lastSampleCount;
-	uint64_t m_lastTimestampUs; 
+	LimitedCounter<uint32_t, 2000000000> m_lastSampleCount;
+	uint64_t m_lastTimestampUs;
+	uint64_t m_lastTimestampRateCorrection;
     bool m_resetCounts;
     QTime m_time;
 
@@ -98,13 +102,13 @@ private:
 	void displayTime();
     void sendControl(bool force = false);
 	void sendSettings();
-	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
 	void updateTxDelayTooltip();
 	void displayEventCounts();
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
     void analyzeApiReply(const QJsonObject& jsonObject);
+    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDelta);
 
 private slots:
     void handleInputMessages();

@@ -36,9 +36,7 @@
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming, Message)
 
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -211,18 +209,6 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 
         return true;
     }
-	else if (MsgConfigureSDRdaemonSinkStreamTiming::match(message))
-	{
-        MsgReportSDRdaemonSinkStreamTiming *report;
-
-		if (m_sdrDaemonSinkThread != 0 && getMessageQueueToGUI())
-		{
-			report = MsgReportSDRdaemonSinkStreamTiming::create(m_sdrDaemonSinkThread->getSamplesCount());
-			getMessageQueueToGUI()->push(report);
-		}
-
-		return true;
-	}
 	else if (MsgConfigureSDRdaemonSinkChunkCorrection::match(message))
 	{
 	    MsgConfigureSDRdaemonSinkChunkCorrection& conf = (MsgConfigureSDRdaemonSinkChunkCorrection&) message;

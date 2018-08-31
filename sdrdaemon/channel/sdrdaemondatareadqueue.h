@@ -25,6 +25,8 @@
 
 #include <QQueue>
 
+#include "util/limitedcounter.h"
+
 class SDRDaemonDataBlock;
 class Sample;
 
@@ -40,7 +42,7 @@ public:
     uint32_t length() const { return m_dataReadQueue.size(); } //!< Returns queue length
     uint32_t size() const { return m_maxSize; } //!< Returns queue size (max length)
     void setSize(uint32_t size);              //!< Sets the queue size (max length)
-    uint32_t readSampleCount() const { return m_sampleCount; } //!< Returns the absolute number of samples read
+    LimitedCounter<uint32_t, 2000000000> readSampleCount() const { return m_sampleCount; } //!< Returns the absolute number of samples read
 
     static const uint32_t MinimumMaxSize;
 
@@ -50,7 +52,7 @@ private:
     uint32_t m_maxSize;
     uint32_t m_blockIndex;
     uint32_t m_sampleIndex;
-    uint32_t m_sampleCount;
+    LimitedCounter<uint32_t, 2000000000> m_sampleCount; //!< use a counter capped below 2^31 as it is going to be converted to an int in the web interface
     bool m_full; //!< full condition was hit
 };
 
