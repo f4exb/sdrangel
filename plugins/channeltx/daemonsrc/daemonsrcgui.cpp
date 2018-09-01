@@ -130,8 +130,15 @@ void DaemonSrcGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void DaemonSrcGUI::applySettings(bool force __attribute((unused)))
+void DaemonSrcGUI::applySettings(bool force)
 {
+    if (m_doApplySettings)
+    {
+        setTitleColor(m_channelMarker.getColor());
+
+        DaemonSrc::MsgConfigureDaemonSrc* message = DaemonSrc::MsgConfigureDaemonSrc::create(m_settings, force);
+        m_daemonSrc->getInputMessageQueue()->push(message);
+    }
 }
 
 void DaemonSrcGUI::displaySettings()
@@ -190,6 +197,44 @@ void DaemonSrcGUI::onMenuDialogCalled(const QPoint &p)
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
+void DaemonSrcGUI::on_dataAddress_returnPressed()
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
+    applySettings();
+}
+
+void DaemonSrcGUI::on_dataPort_returnPressed()
+{
+    bool dataOk;
+    int dataPort = ui->dataPort->text().toInt(&dataOk);
+
+    if((!dataOk) || (dataPort < 1024) || (dataPort > 65535))
+    {
+        return;
+    }
+    else
+    {
+        m_settings.m_dataPort = dataPort;
+    }
+
+    applySettings();
+}
+
+void DaemonSrcGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
+
+    bool dataOk;
+    int udpDataPort = ui->dataPort->text().toInt(&dataOk);
+
+    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
+    {
+        m_settings.m_dataPort = udpDataPort;
+    }
 
     applySettings();
 }

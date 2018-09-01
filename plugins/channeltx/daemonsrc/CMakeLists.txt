@@ -4,7 +4,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(daemonsrc_SOURCES
 	daemonsrc.cpp
-#	daemonsrcthread.cpp
+	daemonsrcthread.cpp
 	daemonsrcgui.cpp
 	daemonsrcplugin.cpp
 	daemonsrcsettings.cpp
@@ -12,7 +12,7 @@ set(daemonsrc_SOURCES
 
 set(daemonsrc_HEADERS
 	daemonsrc.h
-#	daemonsrcthread.h
+	daemonsrcthread.h
 	daemonsrcgui.h
 	daemonsrcplugin.h
 	daemonsrcsettings.h
@@ -25,7 +25,7 @@ set(daemonsrc_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-#	${CMAKE_SOURCE_DIR}/sdrdaemon
+	${CMAKE_SOURCE_DIR}/sdrdaemon
 	${CM256CC_INCLUDE_DIR}
 	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
@@ -47,7 +47,7 @@ target_link_libraries(daemonsrc
 	${QT_LIBRARIES}
 	${CM256CC_LIBRARIES}
 	sdrbase
-#	sdrdaemon
+	sdrdaemon
 	sdrgui
 	swagger
 )

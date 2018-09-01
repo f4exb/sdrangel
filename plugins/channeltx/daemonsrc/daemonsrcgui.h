@@ -74,6 +74,9 @@ private:
 
 private slots:
     void handleSourceMessages();
+    void on_dataAddress_returnPressed();
+    void on_dataPort_returnPressed();
+    void on_dataApplyButton_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 };
