@@ -56,7 +56,7 @@ void DaemonSrcThread::dataBind(const QString& address, uint16_t port)
     m_inputMessageQueue.push(msg);
 }
 
-void SDRDaemonChannelSourceThread::startWork()
+void DaemonSrcThread::startWork()
 {
     qDebug("DaemonSrcThread::startWork");
     m_startWaitMutex.lock();

@@ -16,6 +16,8 @@
 
 #include <sys/time.h>
 #include <unistd.h>
+#include <boost/crc.hpp>
+#include <boost/cstdint.hpp>
 
 #include <QDebug>
 
@@ -23,6 +25,7 @@
 #include "SWGChannelReport.h"
 #include "SWGSDRDaemonChannelSourceReport.h"
 
+#include "dsp/devicesamplesink.h"
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
@@ -188,6 +191,109 @@ void DaemonSrc::applySettings(const DaemonSrcSettings& settings, bool force)
 
 void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unused)))
 {
+    if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
+    {
+        qWarning("SDRDaemonChannelSource::handleDataBlock: incomplete data block: not processing");
+    }
+    else
+    {
+        int blockCount = 0;
+
+        for (int blockIndex = 0; blockIndex < 256; blockIndex++)
+        {
+            if ((blockIndex == 0) && (dataBlock->m_rxControlBlock.m_metaRetrieved))
+            {
+                m_cm256DescriptorBlocks[blockCount].Index = 0;
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
+                blockCount++;
+            }
+            else if (dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex != 0)
+            {
+                m_cm256DescriptorBlocks[blockCount].Index = dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex;
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock);
+                blockCount++;
+            }
+        }
+
+        //qDebug("SDRDaemonChannelSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
+
+        // Need to use the CM256 recovery
+        if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
+        {
+            qDebug("SDRDaemonChannelSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
+            CM256::cm256_encoder_params paramsCM256;
+            paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
+            paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
+
+            if (m_currentMeta.m_tv_sec == 0) {
+                paramsCM256.RecoveryCount = dataBlock->m_rxControlBlock.m_recoveryCount;
+            } else {
+                paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks;
+            }
+
+            // update counters
+            if (dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount) {
+                m_nbUncorrectableErrors += SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount - dataBlock->m_rxControlBlock.m_originalCount;
+            } else {
+                m_nbCorrectableErrors += dataBlock->m_rxControlBlock.m_recoveryCount;
+            }
+
+            if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
+            {
+                qWarning() << "SDRDaemonChannelSource::handleDataBlock: decode CM256 error:"
+                        << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
+                        << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
+            }
+            else
+            {
+                for (int ir = 0; ir < dataBlock->m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
+                {
+                    int recoveryIndex = SDRDaemonNbOrginalBlocks - dataBlock->m_rxControlBlock.m_recoveryCount + ir;
+                    int blockIndex = m_cm256DescriptorBlocks[recoveryIndex].Index;
+                    SDRDaemonProtectedBlock *recoveredBlock =
+                            (SDRDaemonProtectedBlock *) m_cm256DescriptorBlocks[recoveryIndex].Block;
+                    memcpy((void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(SDRDaemonProtectedBlock));
+                    if ((blockIndex == 0) && !dataBlock->m_rxControlBlock.m_metaRetrieved) {
+                        dataBlock->m_rxControlBlock.m_metaRetrieved = true;
+                    }
+                }
+            }
+        }
+
+        // Validate block zero and retrieve its data
+        if (dataBlock->m_rxControlBlock.m_metaRetrieved)
+        {
+            SDRDaemonMetaDataFEC *metaData = (SDRDaemonMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
+            boost::crc_32_type crc32;
+            crc32.process_bytes(metaData, 20);
+
+            if (crc32.checksum() == metaData->m_crc32)
+            {
+                if (!(m_currentMeta == *metaData))
+                {
+                    printMeta("SDRDaemonChannelSource::handleDataBlock", metaData);
+
+                    if (m_currentMeta.m_centerFrequency != metaData->m_centerFrequency) {
+                        m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency*1000); // frequency is in kHz
+                    }
+
+                    if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
+                    {
+                        m_channelizer->configure(m_channelizer->getInputMessageQueue(), metaData->m_sampleRate, 0);
+                        m_dataReadQueue.setSize(calculateDataReadQueueSize(metaData->m_sampleRate));
+                    }
+                }
+
+                m_currentMeta = *metaData;
+            }
+            else
+            {
+                qWarning() << "SDRDaemonChannelSource::handleDataBlock: recovered meta: invalid CRC32";
+            }
+        }
+
+        m_dataReadQueue.push(dataBlock); // Push into R/W buffer
+    }
 }
 
 void DaemonSrc::handleData()
