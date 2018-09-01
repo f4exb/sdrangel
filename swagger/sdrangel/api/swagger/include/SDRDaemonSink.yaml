@@ -20,6 +20,12 @@ SDRdaemonSinkSettings:
       type: string
     dataPort:
       type: integer
+    serverType:
+      type: integer
+    deviceIndex:
+      type: integer
+    channelIndex:
+      type: integer
 
 SDRdaemonSinkReport:
   description: SDRdaemonSource

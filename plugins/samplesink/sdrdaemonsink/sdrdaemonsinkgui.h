@@ -116,6 +116,9 @@ private slots:
     void on_sampleRate_changed(quint64 value);
     void on_txDelay_valueChanged(int value);
     void on_nbFECBlocks_valueChanged(int value);
+    void on_serverType_currentIndexChanged(int index);
+    void on_deviceIndex_returnPressed();
+    void on_channelIndex_returnPressed();
     void on_apiAddress_returnPressed();
     void on_apiPort_returnPressed();
     void on_dataAddress_returnPressed();

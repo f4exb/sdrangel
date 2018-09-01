@@ -20,6 +20,12 @@
 #include <QByteArray>
 
 struct SDRdaemonSinkSettings {
+
+    typedef enum {
+        ServerAngel = 0,
+        ServerDaemon
+    } ServerType;
+
     quint64 m_centerFrequency;
     quint32 m_sampleRate;
     float   m_txDelay;
@@ -28,6 +34,9 @@ struct SDRdaemonSinkSettings {
     quint16 m_apiPort;
     QString m_dataAddress;
     quint16 m_dataPort;
+    ServerType m_serverType;
+    quint32 m_deviceIndex;
+    quint32 m_channelIndex;
 
     SDRdaemonSinkSettings();
     void resetToDefaults();

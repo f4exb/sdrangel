@@ -327,12 +327,52 @@ void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
     sendSettings();
 }
 
+void SDRdaemonSinkGui::on_serverType_currentIndexChanged(int index)
+{
+    m_settings.m_serverType = (SDRdaemonSinkSettings::ServerType) index;
+    sendSettings();
+
+    QString typeCode = m_settings.m_serverType == SDRdaemonSinkSettings::ServerAngel ? "sdrangel" : "sdrdaemon";
+    QString infoURL = QString("http://%1:%2/%3").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort).arg(typeCode);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
+}
+
+void SDRdaemonSinkGui::on_deviceIndex_returnPressed()
+{
+    bool dataOk;
+    int deviceIndex = ui->deviceIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (deviceIndex < 0)) {
+        return;
+    } else {
+        m_settings.m_deviceIndex = deviceIndex;
+    }
+
+    sendSettings();
+}
+
+void SDRdaemonSinkGui::on_channelIndex_returnPressed()
+{
+    bool dataOk;
+    int channelIndex = ui->channelIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (channelIndex < 0)) {
+        return;
+    } else {
+        m_settings.m_channelIndex = channelIndex;
+    }
+
+    sendSettings();
+}
+
 void SDRdaemonSinkGui::on_apiAddress_returnPressed()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    QString typeCode = m_settings.m_serverType == SDRdaemonSinkSettings::ServerAngel ? "sdrangel" : "sdrdaemon";
+    QString infoURL = QString("http://%1:%2/%3").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort).arg(typeCode);
     m_networkRequest.setUrl(QUrl(infoURL));
     m_networkManager->get(m_networkRequest);
 }
@@ -342,18 +382,16 @@ void SDRdaemonSinkGui::on_apiPort_returnPressed()
     bool dataOk;
     int apiPort = ui->apiPort->text().toInt(&dataOk);
 
-    if((!dataOk) || (apiPort < 1024) || (apiPort > 65535))
-    {
+    if((!dataOk) || (apiPort < 1024) || (apiPort > 65535)) {
         return;
-    }
-    else
-    {
+    } else {
         m_settings.m_apiPort = apiPort;
     }
 
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    QString typeCode = m_settings.m_serverType == SDRdaemonSinkSettings::ServerAngel ? "sdrangel" : "sdrdaemon";
+    QString infoURL = QString("http://%1:%2/%3").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort).arg(typeCode);
     m_networkRequest.setUrl(QUrl(infoURL));
     m_networkManager->get(m_networkRequest);
 }
@@ -369,12 +407,9 @@ void SDRdaemonSinkGui::on_dataPort_returnPressed()
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
 
-    if((!dataOk) || (dataPort < 1024) || (dataPort > 65535))
-    {
+    if((!dataOk) || (dataPort < 1024) || (dataPort > 65535)) {
         return;
-    }
-    else
-    {
+    } else {
         m_settings.m_dataPort = dataPort;
     }
 
@@ -395,7 +430,8 @@ void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unu
 
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrdaemon").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    QString typeCode = m_settings.m_serverType == SDRdaemonSinkSettings::ServerAngel ? "sdrangel" : "sdrdaemon";
+    QString infoURL = QString("http://%1:%2/%3").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort).arg(typeCode);
     m_networkRequest.setUrl(QUrl(infoURL));
     m_networkManager->get(m_networkRequest);
 }
@@ -471,7 +507,22 @@ void SDRdaemonSinkGui::tick()
 {
     if (++m_tickCount == 20) // once per second
 	{
-	    QString reportURL = QString("http://%1:%2/sdrdaemon/channel/report").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+        QString reportURL;
+
+        if (m_settings.m_serverType == SDRdaemonSinkSettings::ServerAngel) {
+            reportURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/report")
+                    .arg(m_settings.m_apiAddress)
+                    .arg(m_settings.m_apiPort)
+                    .arg(m_settings.m_deviceIndex)
+                    .arg(m_settings.m_channelIndex);
+        }
+        else
+        {
+            reportURL = QString("http://%1:%2/sdrdaemon/channel/report")
+                    .arg(m_settings.m_apiAddress)
+                    .arg(m_settings.m_apiPort);
+        }
+
 	    m_networkRequest.setUrl(QUrl(reportURL));
 	    m_networkManager->get(m_networkRequest);
 

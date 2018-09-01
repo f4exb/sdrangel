@@ -376,6 +376,18 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("dataPort")) {
         settings.m_dataPort = response.getSdrDaemonSinkSettings()->getDataPort();
     }
+    if (deviceSettingsKeys.contains("serverType")) {
+        int serverType = response.getSdrDaemonSinkSettings()->getServerType();
+        settings.m_serverType = serverType < 0 ? SDRdaemonSinkSettings::ServerAngel
+                : serverType > 1 ? SDRdaemonSinkSettings::ServerAngel
+                        : (SDRdaemonSinkSettings::ServerType) serverType;
+    }
+    if (deviceSettingsKeys.contains("deviceIndex")) {
+        settings.m_deviceIndex = response.getSdrDaemonSinkSettings()->getDeviceIndex();
+    }
+    if (deviceSettingsKeys.contains("channelIndex")) {
+        settings.m_channelIndex = response.getSdrDaemonSinkSettings()->getChannelIndex();
+    }
 
     MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -410,6 +422,9 @@ void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSetti
     response.getSdrDaemonSinkSettings()->setApiPort(settings.m_apiPort);
     response.getSdrDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
     response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getSdrDaemonSinkSettings()->setServerType((int) settings.m_serverType);
+    response.getSdrDaemonSinkSettings()->setDeviceIndex(settings.m_deviceIndex);
+    response.getSdrDaemonSinkSettings()->setChannelIndex(settings.m_channelIndex);
 }
 
 void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
