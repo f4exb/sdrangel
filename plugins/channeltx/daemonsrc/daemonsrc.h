@@ -14,6 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
+#define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
+
 #include "cm256.h"
 
 #include "dsp/basebandsamplesource.h"
@@ -145,3 +148,5 @@ private:
 private slots:
     void handleData();
 };
+
+#endif // PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
