@@ -349,7 +349,6 @@ int DaemonSrc::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getSdrDaemonChannelSourceSettings()->getDataAddress();
     }
-
     if (channelSettingsKeys.contains("dataPort"))
     {
         int dataPort = response.getSdrDaemonChannelSourceSettings()->getDataPort();
@@ -359,6 +358,12 @@ int DaemonSrc::webapiSettingsPutPatch(
         } else {
             settings.m_dataPort = dataPort;
         }
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getSdrDaemonChannelSourceSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSdrDaemonChannelSourceSettings()->getTitle();
     }
 
     MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(settings, force);
@@ -395,6 +400,13 @@ void DaemonSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     }
 
     response.getSdrDaemonChannelSourceSettings()->setDataPort(settings.m_dataPort);
+    response.getSdrDaemonChannelSourceSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getSdrDaemonChannelSourceSettings()->getTitle()) {
+        *response.getSdrDaemonChannelSourceSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSdrDaemonChannelSourceSettings()->setTitle(new QString(settings.m_title));
+    }
 }
 
 void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

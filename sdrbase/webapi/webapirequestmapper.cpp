@@ -2146,14 +2146,14 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "SDRDaemonChannelSink")
+    else if (*channelType == "DaemonSrc")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getTx() != 0)
         {
-            QJsonObject sdrDaemonChannelSinkSettingsJsonObject = jsonObject["SDRDaemonChannelSinkSettings"].toObject();
-            channelSettingsKeys = sdrDaemonChannelSinkSettingsJsonObject.keys();
-            channelSettings.setSdrDaemonChannelSinkSettings(new SWGSDRangel::SWGSDRDaemonChannelSinkSettings());
-            channelSettings.getSdrDaemonChannelSinkSettings()->fromJsonObject(sdrDaemonChannelSinkSettingsJsonObject);
+            QJsonObject daemonChannelSourceSettingsJsonObject = jsonObject["SDRDaemonChannelSourceSettings"].toObject();
+            channelSettingsKeys = daemonChannelSourceSettingsJsonObject.keys();
+            channelSettings.setSdrDaemonChannelSourceSettings(new SWGSDRangel::SWGSDRDaemonChannelSourceSettings());
+            channelSettings.getSdrDaemonChannelSourceSettings()->fromJsonObject(daemonChannelSourceSettingsJsonObject);
             return true;
         }
         else {

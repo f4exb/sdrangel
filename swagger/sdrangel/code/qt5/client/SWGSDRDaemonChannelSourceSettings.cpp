@@ -32,6 +32,10 @@ SWGSDRDaemonChannelSourceSettings::SWGSDRDaemonChannelSourceSettings() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
 }
 
 SWGSDRDaemonChannelSourceSettings::~SWGSDRDaemonChannelSourceSettings() {
@@ -44,6 +48,10 @@ SWGSDRDaemonChannelSourceSettings::init() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = new QString("");
+    m_title_isSet = false;
 }
 
 void
@@ -52,6 +60,10 @@ SWGSDRDaemonChannelSourceSettings::cleanup() {
         delete data_address;
     }
 
+
+    if(title != nullptr) { 
+        delete title;
+    }
 }
 
 SWGSDRDaemonChannelSourceSettings*
@@ -68,6 +80,10 @@ SWGSDRDaemonChannelSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
 }
 
@@ -90,6 +106,12 @@ SWGSDRDaemonChannelSourceSettings::asJsonObject() {
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
+    }
+    if(m_rgb_color_isSet){
+        obj->insert("rgbColor", QJsonValue(rgb_color));
+    }
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
     }
 
     return obj;
@@ -115,6 +137,26 @@ SWGSDRDaemonChannelSourceSettings::setDataPort(qint32 data_port) {
     this->m_data_port_isSet = true;
 }
 
+qint32
+SWGSDRDaemonChannelSourceSettings::getRgbColor() {
+    return rgb_color;
+}
+void
+SWGSDRDaemonChannelSourceSettings::setRgbColor(qint32 rgb_color) {
+    this->rgb_color = rgb_color;
+    this->m_rgb_color_isSet = true;
+}
+
+QString*
+SWGSDRDaemonChannelSourceSettings::getTitle() {
+    return title;
+}
+void
+SWGSDRDaemonChannelSourceSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
+}
+
 
 bool
 SWGSDRDaemonChannelSourceSettings::isSet(){
@@ -122,6 +164,8 @@ SWGSDRDaemonChannelSourceSettings::isSet(){
     do{
         if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
         if(m_data_port_isSet){ isObjectUpdated = true; break;}
+        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
+        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

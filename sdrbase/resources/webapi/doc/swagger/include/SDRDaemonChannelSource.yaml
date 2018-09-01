@@ -7,6 +7,10 @@ SDRDaemonChannelSourceSettings:
     dataPort:
       description: "Remote USB data port"
       type: integer
+    rgbColor:
+      type: integer                  
+    title:
+      type: string      
  
 SDRDaemonChannelSourceReport:
   description: "SDRDaemon channel source report"

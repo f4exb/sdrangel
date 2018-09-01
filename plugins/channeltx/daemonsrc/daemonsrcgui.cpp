@@ -82,9 +82,21 @@ bool DaemonSrcGUI::handleMessage(const Message& message)
     {
         DaemonSrc::MsgSampleRateNotification& notif = (DaemonSrc::MsgSampleRateNotification&) message;
         m_channelMarker.setBandwidth(notif.getSampleRate());
+        return true;
     }
-
-    return false;
+    else if (DaemonSrc::MsgConfigureDaemonSrc::match(message))
+    {
+        const DaemonSrc::MsgConfigureDaemonSrc& cfg = (DaemonSrc::MsgConfigureDaemonSrc&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx __attribute__((unused)), QWidget* parent) :
