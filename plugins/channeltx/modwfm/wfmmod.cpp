@@ -68,7 +68,8 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
-    memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
+    std::fill(m_rfFilterBuffer, m_rfFilterBuffer+m_rfFilterFFTLength, Complex{0,0});
+    //memset(m_rfFilterBuffer, 0, sizeof(Complex)*(m_rfFilterFFTLength));
     m_rfFilterBufferIndex = 0;
 
 	m_audioBuffer.resize(1<<14);

@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <complex.h>
+#include <algorithm>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -80,8 +81,10 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
-    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
-    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+    std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
+    std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
+//    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+//    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -787,12 +790,14 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     {
         if (settings.m_dsb)
         {
-            memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+            std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
+            //memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
             m_DSBFilterBufferIndex = 0;
         }
         else
         {
-            memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+            std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
+            //memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
             m_SSBFilterBufferIndex = 0;
         }
     }
