@@ -17,15 +17,16 @@
 #ifndef INCLUDE_SDRDAEMONSINKGUI_H
 #define INCLUDE_SDRDAEMONSINKGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <stdint.h>
+
 #include <QTimer>
 #include <QTime>
 #include <QWidget>
 #include <QNetworkRequest>
 
+#include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 #include "util/limitedcounter.h"
-#include "util/movingaverage.h"
 
 #include "sdrdaemonsinksettings.h"
 #include "sdrdaemonsinkoutput.h"
@@ -39,6 +40,33 @@ class DeviceUISet;
 namespace Ui {
 	class SDRdaemonSinkGui;
 }
+
+class SDRdaemonSinkExpAvg {
+public:
+    SDRdaemonSinkExpAvg(float alpha) :
+        m_alpha(alpha),
+        m_start(true),
+        m_s(0)
+    {}
+    int put(int y)
+    {
+        if (m_start) {
+            m_start = false;
+            m_s = y;
+        } else {
+            m_s = m_alpha*y + (1.0-m_alpha)*m_s;
+        }
+        return roundf(m_s);
+    }
+    void reset() {
+        m_start = true;
+    }
+
+private:
+    float m_alpha;
+    bool m_start;
+    float m_s;
+};
 
 class SDRdaemonSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
@@ -71,7 +99,6 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_samplesCount;
-	MovingAverageUtil<double, double, 30> m_rateMovingAverage; // ~30s average
 	uint32_t m_tickCount;
 	std::size_t m_nbSinceLastFlowCheck;
 	int m_lastEngineState;
@@ -85,6 +112,8 @@ private:
 	uint32_t m_lastSampleCount;
 	uint64_t m_lastTimestampUs;
 	uint64_t m_lastTimestampRateCorrection;
+	uint32_t m_nbSamplesSinceRateCorrection;
+	int m_chunkSizeCorrection;
     bool m_resetCounts;
     QTime m_time;
 
@@ -108,7 +137,7 @@ private:
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
     void analyzeApiReply(const QJsonObject& jsonObject);
-    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDelta);
+    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs);
 
 private slots:
     void handleInputMessages();

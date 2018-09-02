@@ -83,6 +83,99 @@ public:
         int m_sampleRate;
     };
 
+    class MsgQueryStreamData : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgQueryStreamData* create() {
+            return new MsgQueryStreamData();
+        }
+    private:
+        MsgQueryStreamData() : Message() {}
+    };
+
+    class MsgReportStreamData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        uint32_t get_tv_sec() const { return m_tv_sec; }
+        uint32_t get_tv_usec() const { return m_tv_usec; }
+        uint32_t get_queueSize() const { return m_queueSize; }
+        uint32_t get_queueLength() const { return m_queueLength; }
+        uint32_t get_readSamplesCount() const { return m_readSamplesCount; }
+        uint32_t get_nbCorrectableErrors() const { return m_nbCorrectableErrors; }
+        uint32_t get_nbUncorrectableErrors() const { return m_nbUncorrectableErrors; }
+        uint32_t get_nbOriginalBlocks() const { return m_nbOriginalBlocks; }
+        uint32_t get_nbFECBlocks() const { return m_nbFECBlocks; }
+        uint32_t get_centerFreq() const { return m_centerFreq; }
+        uint32_t get_sampleRate() const { return m_sampleRate; }
+
+        static MsgReportStreamData* create(
+                uint32_t tv_sec,
+                uint32_t tv_usec,
+                uint32_t queueSize,
+                uint32_t queueLength,
+                uint32_t readSamplesCount,
+                uint32_t nbCorrectableErrors,
+                uint32_t nbUncorrectableErrors,
+                uint32_t nbOriginalBlocks,
+                uint32_t nbFECBlocks,
+                uint32_t centerFreq,
+                uint32_t sampleRate)
+        {
+            return new MsgReportStreamData(
+                    tv_sec,
+                    tv_usec,
+                    queueSize,
+                    queueLength,
+                    readSamplesCount,
+                    nbCorrectableErrors,
+                    nbUncorrectableErrors,
+                    nbOriginalBlocks,
+                    nbFECBlocks,
+                    centerFreq,
+                    sampleRate);
+        }
+
+    protected:
+        uint32_t m_tv_sec;
+        uint32_t m_tv_usec;
+        uint32_t m_queueSize;
+        uint32_t m_queueLength;
+        uint32_t m_readSamplesCount;
+        uint32_t m_nbCorrectableErrors;
+        uint32_t m_nbUncorrectableErrors;
+        uint32_t m_nbOriginalBlocks;
+        uint32_t m_nbFECBlocks;
+        uint32_t m_centerFreq;
+        uint32_t m_sampleRate;
+
+        MsgReportStreamData(
+                uint32_t tv_sec,
+                uint32_t tv_usec,
+                uint32_t queueSize,
+                uint32_t queueLength,
+                uint32_t readSamplesCount,
+                uint32_t nbCorrectableErrors,
+                uint32_t nbUncorrectableErrors,
+                uint32_t nbOriginalBlocks,
+                uint32_t nbFECBlocks,
+                uint32_t centerFreq,
+                uint32_t sampleRate) :
+            Message(),
+            m_tv_sec(tv_sec),
+            m_tv_usec(tv_usec),
+            m_queueSize(queueSize),
+            m_queueLength(queueLength),
+            m_readSamplesCount(readSamplesCount),
+            m_nbCorrectableErrors(nbCorrectableErrors),
+            m_nbUncorrectableErrors(nbUncorrectableErrors),
+            m_nbOriginalBlocks(nbOriginalBlocks),
+            m_nbFECBlocks(nbFECBlocks),
+            m_centerFreq(centerFreq),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     DaemonSrc(DeviceSinkAPI *deviceAPI);
     ~DaemonSrc();
 

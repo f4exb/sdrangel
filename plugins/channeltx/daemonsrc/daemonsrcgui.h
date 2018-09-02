@@ -17,10 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCGUI_H_
 #define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCGUI_H_
 
+#include <QTime>
+
 #include "plugin/plugininstancegui.h"
+#include "dsp/channelmarker.h"
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
-#include "dsp/channelmarker.h"
 
 #include "daemonsrcsettings.h"
 
@@ -62,6 +64,16 @@ private:
     DaemonSrc* m_daemonSrc;
     MessageQueue m_inputMessageQueue;
 
+    uint32_t m_countUnrecoverable;
+    uint32_t m_countRecovered;
+    uint32_t m_lastCountUnrecoverable;
+    uint32_t m_lastCountRecovered;
+    uint32_t m_lastSampleCount;
+    uint64_t m_lastTimestampUs;
+    bool m_resetCounts;
+    QTime m_time;
+    uint32_t m_tickCount;
+
     explicit DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~DaemonSrcGUI();
 
@@ -72,6 +84,10 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
+    void displayEventCounts();
+    void displayEventStatus(int recoverableCount, int unrecoverableCount);
+    void displayEventTimer();
+
 private slots:
     void handleSourceMessages();
     void on_dataAddress_returnPressed();
@@ -79,6 +95,8 @@ private slots:
     void on_dataApplyButton_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void on_eventCountsReset_clicked(bool checked);
+    void tick();
 };
 
 

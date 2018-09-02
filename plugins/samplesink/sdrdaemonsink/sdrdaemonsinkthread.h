@@ -54,7 +54,7 @@ public:
 
     bool isRunning() const { return m_running; }
 
-    std::size_t getSamplesCount() const { return m_samplesCount; }
+    uint32_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
     void setChunkCorrection(int chunkCorrection) { m_chunkCorrection = chunkCorrection; }
 

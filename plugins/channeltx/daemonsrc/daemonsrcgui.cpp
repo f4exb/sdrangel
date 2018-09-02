@@ -93,6 +93,60 @@ bool DaemonSrcGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DaemonSrc::MsgReportStreamData::match(message))
+    {
+        const DaemonSrc::MsgReportStreamData& report = (DaemonSrc::MsgReportStreamData&) message;
+        ui->centerFrequency->setText(QString("%1").arg(report.get_centerFreq()));
+        ui->sampleRate->setText(QString("%1").arg(report.get_sampleRate()));
+        QString nominalNbBlocksText = QString("%1/%2")
+                .arg(report.get_nbOriginalBlocks() + report.get_nbFECBlocks())
+                .arg(report.get_nbFECBlocks());
+        ui->nominalNbBlocksText->setText(nominalNbBlocksText);
+        QString queueLengthText = QString("%1/%2").arg(report.get_queueLength()).arg(report.get_queueSize());
+        ui->queueLengthText->setText(queueLengthText);
+        int queueLengthPercent = (report.get_queueLength()*100)/report.get_queueSize();
+        ui->queueLengthGauge->setValue(queueLengthPercent);
+        int unrecoverableCount = report.get_nbUncorrectableErrors();
+        int recoverableCount = report.get_nbCorrectableErrors();
+        uint64_t timestampUs = report.get_tv_sec()*1000000ULL + report.get_tv_usec();
+
+        if (!m_resetCounts)
+        {
+            int recoverableCountDelta = recoverableCount - m_lastCountRecovered;
+            int unrecoverableCountDelta = unrecoverableCount - m_lastCountUnrecoverable;
+            displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
+            m_countRecovered += recoverableCountDelta;
+            m_countUnrecoverable += unrecoverableCountDelta;
+            displayEventCounts();
+        }
+
+        uint32_t sampleCountDelta, sampleCount;
+        sampleCount = report.get_readSamplesCount();
+
+        if (sampleCount < m_lastSampleCount) {
+            sampleCountDelta = (0xFFFFFFFFU - sampleCount) + m_lastSampleCount + 1;
+        } else {
+            sampleCountDelta = sampleCount - m_lastSampleCount;
+        }
+
+        if (sampleCountDelta == 0) {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+        }
+
+        double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
+
+        if (remoteStreamRate != 0) {
+            ui->streamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
+        }
+
+        m_resetCounts = false;
+        m_lastCountRecovered = recoverableCount;
+        m_lastCountUnrecoverable = unrecoverableCount;
+        m_lastSampleCount = sampleCount;
+        m_lastTimestampUs = timestampUs;
+
+        return true;
+    }
     else
     {
         return false;
@@ -103,7 +157,15 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         RollupWidget(parent),
         ui(new Ui::DaemonSrcGUI),
         m_pluginAPI(pluginAPI),
-        m_deviceUISet(deviceUISet)
+        m_deviceUISet(deviceUISet),
+        m_countUnrecoverable(0),
+        m_countRecovered(0),
+        m_lastCountUnrecoverable(0),
+        m_lastCountRecovered(0),
+        m_lastSampleCount(0),
+        m_lastTimestampUs(0),
+        m_resetCounts(true),
+        m_tickCount(0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -126,6 +188,9 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_deviceUISet->addRollupWidget(this);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+
+    m_time.start();
 
     displaySettings();
     applySettings(true);
@@ -249,4 +314,60 @@ void DaemonSrcGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused
     }
 
     applySettings();
+}
+
+void DaemonSrcGUI::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+{
+    m_countUnrecoverable = 0;
+    m_countRecovered = 0;
+    m_time.start();
+    displayEventCounts();
+    displayEventTimer();
+}
+
+void DaemonSrcGUI::displayEventCounts()
+{
+    QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
+    ui->eventUnrecText->setText(nstr);
+    nstr = QString("%1").arg(m_countRecovered, 3, 10, QChar('0'));
+    ui->eventRecText->setText(nstr);
+}
+
+void DaemonSrcGUI::displayEventStatus(int recoverableCount, int unrecoverableCount)
+{
+
+    if (unrecoverableCount == 0)
+    {
+        if (recoverableCount == 0) {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+    }
+    else
+    {
+        ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
+    }
+}
+
+void DaemonSrcGUI::displayEventTimer()
+{
+    int elapsedTimeMillis = m_time.elapsed();
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
+    QString s_time = recordLength.toString("HH:mm:ss");
+    ui->eventCountsTimeText->setText(s_time);
+}
+
+void DaemonSrcGUI::tick()
+{
+    if (++m_tickCount == 20) // once per second
+    {
+        DaemonSrc::MsgQueryStreamData *msg = DaemonSrc::MsgQueryStreamData::create();
+        m_daemonSrc->getInputMessageQueue()->push(msg);
+
+        displayEventTimer();
+
+        m_tickCount = 0;
+    }
 }

@@ -59,6 +59,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastCountRecovered = 0;
     m_lastSampleCount = 0;
     m_lastTimestampRateCorrection = 0;
+    m_nbSamplesSinceRateCorrection = 0;
+    m_chunkSizeCorrection = 0;
     m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
@@ -242,6 +244,9 @@ void SDRdaemonSinkGui::displaySettings()
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s0).arg(s1));
 
+    ui->serverType->setCurrentIndex((int) m_settings.m_serverType);
+    ui->deviceIndex->setText(tr("%1").arg(m_settings.m_deviceIndex));
+    ui->channelIndex->setText(tr("%1").arg(m_settings.m_channelIndex));
     ui->apiAddress->setText(m_settings.m_apiAddress);
     ui->apiPort->setText(tr("%1").arg(m_settings.m_apiPort));
     ui->dataAddress->setText(m_settings.m_dataAddress);
@@ -455,6 +460,9 @@ void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
+        m_nbSamplesSinceRateCorrection = 0;
+        m_lastTimestampRateCorrection = 0;
+
         SDRdaemonSinkOutput::MsgStartStop *message = SDRdaemonSinkOutput::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
@@ -590,15 +598,6 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         int recoverableCount = report["correctableErrorsCount"].toInt();
         uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
 
-        if (m_lastTimestampRateCorrection == 0) {
-            m_lastTimestampRateCorrection = timestampUs;
-        }
-
-        if ((timestampUs - m_lastTimestampRateCorrection > 600e6) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
-        {
-            m_lastTimestampRateCorrection = timestampUs;
-        }
-
         if (!m_resetCounts)
         {
             int recoverableCountDelta = recoverableCount - m_lastCountRecovered;
@@ -618,16 +617,31 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
             sampleCountDelta = sampleCount - m_lastSampleCount;
         }
 
-        if (sampleCountDelta == 0) {
+        if (sampleCountDelta == 0)
+        {
             ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+        }
+        else
+        {
+            if (m_lastTimestampRateCorrection == 0) {
+                m_lastTimestampRateCorrection = timestampUs;
+            }
+
+            //if ((timestampUs - m_lastTimestampRateCorrection > 300e6) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
+            if ((m_nbSamplesSinceRateCorrection > 20000000) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
+            {
+                sampleRateCorrection(queueLength, queueSize, timestampUs - m_lastTimestampRateCorrection);
+                m_lastTimestampRateCorrection = timestampUs;
+                m_nbSamplesSinceRateCorrection = 0;
+            }
+
+            m_nbSamplesSinceRateCorrection += sampleCountDelta;
         }
 
         double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
 
-        if (remoteStreamRate != 0)
-        {
-            m_rateMovingAverage(remoteStreamRate);
-            ui->remoteStreamRateText->setText(QString("%1").arg(m_rateMovingAverage.instantAverage(), 0, 'f', 0));
+        if (remoteStreamRate != 0) {
+            ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
         }
 
         m_resetCounts = false;
@@ -662,15 +676,16 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
     }
 }
 
-void SDRdaemonSinkGui::sampleRateCorrection(int queueLength, int queueSize, int64_t timeDelta)
+void SDRdaemonSinkGui::sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs)
 {
     int nbBlocksDiff = queueLength - (queueSize/2);
     int nbSamplesDiff = nbBlocksDiff * 127 * 127;
-    float sampleCorr = (nbSamplesDiff * 50000.0) / timeDelta;
-    int chunkCorr = roundf(sampleCorr);
+    float sampleCorr = (nbSamplesDiff * 50000.0) / timeDeltaUs; // correction for ~50ms chunks (50000 us)
+    int chunkCorr = -roundf(sampleCorr);
+    m_chunkSizeCorrection += chunkCorr;
 
-    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d samples", -chunkCorr);
+    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d (%d) samples", m_chunkSizeCorrection, chunkCorr);
 
-    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(-chunkCorr);
+    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
 }

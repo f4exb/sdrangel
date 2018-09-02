@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>90</height>
+    <height>140</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>90</height>
+    <height>140</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>320</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -37,7 +43,7 @@
      <x>10</x>
      <y>10</y>
      <width>301</width>
-     <height>61</height>
+     <height>121</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -151,6 +157,272 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="nominalValuesLayout">
+      <item>
+       <widget class="QLabel" name="centerFrequencyLabel">
+        <property name="text">
+         <string>Freq</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="centerFrequency">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Stream center frequency setting</string>
+        </property>
+        <property name="text">
+         <string>00000000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="centerFrequencyUnits">
+        <property name="text">
+         <string>kHz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="sampleRateLabel">
+        <property name="text">
+         <string> SR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sampleRate">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Stream nominal sample rate</string>
+        </property>
+        <property name="text">
+         <string>0000000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sampleRateUnits">
+        <property name="text">
+         <string>S/s</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="monitorLayout">
+      <item>
+       <widget class="QLabel" name="nominalNbBlocksText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Nb total blocks / Nb FEC blocks</string>
+        </property>
+        <property name="text">
+         <string>000/00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="allFramesDecoded">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost, blue = remote not streaming</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/locked.png</normaloff>:/locked.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="streamRateText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Stream actual sample rate</string>
+        </property>
+        <property name="text">
+         <string>0000000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="streamRateUnits">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>S/s</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="eventCountsReset">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="eventUnrecText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of unrecoverable errors since event counts reset</string>
+        </property>
+        <property name="text">
+         <string>000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="eventRecText">
+        <property name="minimumSize">
+         <size>
+          <width>25</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of correctable errors since event counts reset</string>
+        </property>
+        <property name="text">
+         <string>000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="eventCountsTimeText">
+        <property name="toolTip">
+         <string>Time since last event counts reset</string>
+        </property>
+        <property name="text">
+         <string>00:00:00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="queueLengthLayout">
+      <item>
+       <widget class="QLabel" name="queueLengthLabel">
+        <property name="text">
+         <string>QL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="queueLengthGauge">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>14</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Queue length gauge</string>
+        </property>
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="queueLengthText">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Queued data blocks / Queue size in data blocks</string>
+        </property>
+        <property name="text">
+         <string>000/000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -174,6 +446,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

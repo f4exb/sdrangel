@@ -35,6 +35,8 @@
 
 MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgConfigureDaemonSrc, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgQueryStreamData, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgReportStreamData, Message)
 
 const QString DaemonSrc::m_channelIdURI = "sdrangel.channeltx.daemonsrc";
 const QString DaemonSrc::m_channelId ="DaemonSrc";
@@ -137,6 +139,30 @@ bool DaemonSrc::handleMessage(const Message& cmd)
         MsgConfigureDaemonSrc& cfg = (MsgConfigureDaemonSrc&) cmd;
         qDebug() << "MsgConfigureDaemonSrc::handleMessage: MsgConfigureDaemonSrc";
         applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgQueryStreamData::match(cmd))
+    {
+        if (m_guiMessageQueue)
+        {
+            struct timeval tv;
+            gettimeofday(&tv, 0);
+
+            MsgReportStreamData *msg = MsgReportStreamData::create(
+                    tv.tv_sec,
+                    tv.tv_usec,
+                    m_dataReadQueue.size(),
+                    m_dataReadQueue.length(),
+                    m_dataReadQueue.readSampleCount(),
+                    m_nbCorrectableErrors,
+                    m_nbUncorrectableErrors,
+                    m_currentMeta.m_nbOriginalBlocks,
+                    m_currentMeta.m_nbFECBlocks,
+                    m_currentMeta.m_centerFrequency,
+                    m_currentMeta.m_sampleRate);
+            m_guiMessageQueue->push(msg);
+        }
 
         return true;
     }
@@ -422,3 +448,4 @@ void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
     response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
 }
+
