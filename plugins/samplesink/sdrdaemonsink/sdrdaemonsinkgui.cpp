@@ -612,7 +612,7 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         sampleCount = report["samplesCount"].toInt();
 
         if (sampleCount < m_lastSampleCount) {
-            sampleCountDelta = (0xFFFFFFFFU - sampleCount) + m_lastSampleCount + 1;
+            sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
         } else {
             sampleCountDelta = sampleCount - m_lastSampleCount;
         }
