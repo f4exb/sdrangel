@@ -17,6 +17,8 @@
 #ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
 #define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
 
+#include <QObject>
+
 #include "cm256.h"
 
 #include "dsp/basebandsamplesource.h"
