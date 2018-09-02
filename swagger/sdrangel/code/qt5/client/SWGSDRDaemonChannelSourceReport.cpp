@@ -42,6 +42,14 @@ SWGSDRDaemonChannelSourceReport::SWGSDRDaemonChannelSourceReport() {
     m_tv_sec_isSet = false;
     tv_u_sec = 0;
     m_tv_u_sec_isSet = false;
+    nb_original_blocks = 0;
+    m_nb_original_blocks_isSet = false;
+    nb_fec_blocks = 0;
+    m_nb_fec_blocks_isSet = false;
+    center_freq = 0;
+    m_center_freq_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
 }
 
 SWGSDRDaemonChannelSourceReport::~SWGSDRDaemonChannelSourceReport() {
@@ -64,10 +72,22 @@ SWGSDRDaemonChannelSourceReport::init() {
     m_tv_sec_isSet = false;
     tv_u_sec = 0;
     m_tv_u_sec_isSet = false;
+    nb_original_blocks = 0;
+    m_nb_original_blocks_isSet = false;
+    nb_fec_blocks = 0;
+    m_nb_fec_blocks_isSet = false;
+    center_freq = 0;
+    m_center_freq_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
 }
 
 void
 SWGSDRDaemonChannelSourceReport::cleanup() {
+
+
+
+
 
 
 
@@ -101,6 +121,14 @@ SWGSDRDaemonChannelSourceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tv_sec, pJson["tvSec"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tv_u_sec, pJson["tvUSec"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nb_original_blocks, pJson["nbOriginalBlocks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&center_freq, pJson["centerFreq"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
 }
 
@@ -138,6 +166,18 @@ SWGSDRDaemonChannelSourceReport::asJsonObject() {
     }
     if(m_tv_u_sec_isSet){
         obj->insert("tvUSec", QJsonValue(tv_u_sec));
+    }
+    if(m_nb_original_blocks_isSet){
+        obj->insert("nbOriginalBlocks", QJsonValue(nb_original_blocks));
+    }
+    if(m_nb_fec_blocks_isSet){
+        obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
+    }
+    if(m_center_freq_isSet){
+        obj->insert("centerFreq", QJsonValue(center_freq));
+    }
+    if(m_sample_rate_isSet){
+        obj->insert("sampleRate", QJsonValue(sample_rate));
     }
 
     return obj;
@@ -213,6 +253,46 @@ SWGSDRDaemonChannelSourceReport::setTvUSec(qint32 tv_u_sec) {
     this->m_tv_u_sec_isSet = true;
 }
 
+qint32
+SWGSDRDaemonChannelSourceReport::getNbOriginalBlocks() {
+    return nb_original_blocks;
+}
+void
+SWGSDRDaemonChannelSourceReport::setNbOriginalBlocks(qint32 nb_original_blocks) {
+    this->nb_original_blocks = nb_original_blocks;
+    this->m_nb_original_blocks_isSet = true;
+}
+
+qint32
+SWGSDRDaemonChannelSourceReport::getNbFecBlocks() {
+    return nb_fec_blocks;
+}
+void
+SWGSDRDaemonChannelSourceReport::setNbFecBlocks(qint32 nb_fec_blocks) {
+    this->nb_fec_blocks = nb_fec_blocks;
+    this->m_nb_fec_blocks_isSet = true;
+}
+
+qint32
+SWGSDRDaemonChannelSourceReport::getCenterFreq() {
+    return center_freq;
+}
+void
+SWGSDRDaemonChannelSourceReport::setCenterFreq(qint32 center_freq) {
+    this->center_freq = center_freq;
+    this->m_center_freq_isSet = true;
+}
+
+qint32
+SWGSDRDaemonChannelSourceReport::getSampleRate() {
+    return sample_rate;
+}
+void
+SWGSDRDaemonChannelSourceReport::setSampleRate(qint32 sample_rate) {
+    this->sample_rate = sample_rate;
+    this->m_sample_rate_isSet = true;
+}
+
 
 bool
 SWGSDRDaemonChannelSourceReport::isSet(){
@@ -225,6 +305,10 @@ SWGSDRDaemonChannelSourceReport::isSet(){
         if(m_uncorrectable_errors_count_isSet){ isObjectUpdated = true; break;}
         if(m_tv_sec_isSet){ isObjectUpdated = true; break;}
         if(m_tv_u_sec_isSet){ isObjectUpdated = true; break;}
+        if(m_nb_original_blocks_isSet){ isObjectUpdated = true; break;}
+        if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
+        if(m_center_freq_isSet){ isObjectUpdated = true; break;}
+        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

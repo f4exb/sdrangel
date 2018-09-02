@@ -447,5 +447,9 @@ void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
     response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
     response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
+    response.getSdrDaemonChannelSourceReport()->setNbOriginalBlocks(m_currentMeta.m_nbOriginalBlocks);
+    response.getSdrDaemonChannelSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
+    response.getSdrDaemonChannelSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
+    response.getSdrDaemonChannelSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
 }
 

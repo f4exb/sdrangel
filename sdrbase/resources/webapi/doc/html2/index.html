@@ -3202,6 +3202,22 @@ margin-bottom: 20px;
     "tvUSec" : {
       "type" : "integer",
       "description" : "Counts timestamp microseconds"
+    },
+    "nbOriginalBlocks" : {
+      "type" : "integer",
+      "description" : "Number of original blocks per frame"
+    },
+    "nbFECBlocks" : {
+      "type" : "integer",
+      "description" : "Number of FEC blocks per frame"
+    },
+    "centerFreq" : {
+      "type" : "integer",
+      "description" : "Stream center frequency setting in kHz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Stream nominal sample rate in S/s"
     }
   },
   "description" : "SDRDaemon channel source report"
@@ -28703,7 +28719,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-01T10:19:35.190+02:00
+              Generated 2018-09-02T19:22:42.257+02:00
             </div>
           </div>
       </div>

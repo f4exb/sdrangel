@@ -62,6 +62,18 @@ public:
     qint32 getTvUSec();
     void setTvUSec(qint32 tv_u_sec);
 
+    qint32 getNbOriginalBlocks();
+    void setNbOriginalBlocks(qint32 nb_original_blocks);
+
+    qint32 getNbFecBlocks();
+    void setNbFecBlocks(qint32 nb_fec_blocks);
+
+    qint32 getCenterFreq();
+    void setCenterFreq(qint32 center_freq);
+
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
+
 
     virtual bool isSet() override;
 
@@ -86,6 +98,18 @@ private:
 
     qint32 tv_u_sec;
     bool m_tv_u_sec_isSet;
+
+    qint32 nb_original_blocks;
+    bool m_nb_original_blocks_isSet;
+
+    qint32 nb_fec_blocks;
+    bool m_nb_fec_blocks_isSet;
+
+    qint32 center_freq;
+    bool m_center_freq_isSet;
+
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
 };
 

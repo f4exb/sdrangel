@@ -35,4 +35,17 @@ SDRDaemonChannelSourceReport:
       type: integer
     tvUSec:
       description: "Counts timestamp microseconds"
-      type: integer      
+      type: integer     
+    nbOriginalBlocks:
+      description: "Number of original blocks per frame"
+      type: integer
+    nbFECBlocks:
+      description: "Number of FEC blocks per frame"
+      type: integer
+    centerFreq:
+      description: "Stream center frequency setting in kHz"
+      type: integer
+    sampleRate:
+      description: "Stream nominal sample rate in S/s"
+      type: integer     
+      
