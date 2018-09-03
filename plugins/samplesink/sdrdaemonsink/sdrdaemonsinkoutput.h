@@ -17,11 +17,13 @@
 #ifndef INCLUDE_SDRDAEMONSINKOUTPUT_H
 #define INCLUDE_SDRDAEMONSINKOUTPUT_H
 
-#include <QString>
-#include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <fstream>
+
+#include <QString>
+#include <QTimer>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesink.h"
 
@@ -29,6 +31,9 @@
 
 class SDRdaemonSinkThread;
 class DeviceSinkAPI;
+class QNetworkAccessManager;
+class QNetworkReply;
+class QJsonObject;
 
 class SDRdaemonSinkOutput : public DeviceSampleSink {
 public:
@@ -165,10 +170,27 @@ private:
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
+	uint32_t m_tickCount;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    uint32_t m_lastSampleCount;
+    uint64_t m_lastTimestampUs;
+    uint64_t m_lastTimestampRateCorrection;
+    uint32_t m_nbSamplesSinceRateCorrection;
+    int m_chunkSizeCorrection;
 
 	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+
+    void analyzeApiReply(const QJsonObject& jsonObject);
+    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs);
+
+private slots:
+    void tick();
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_SDRDAEMONSINKOUTPUT_H

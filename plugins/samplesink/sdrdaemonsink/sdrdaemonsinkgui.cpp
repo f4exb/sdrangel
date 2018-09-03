@@ -99,6 +99,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 SDRdaemonSinkGui::~SDRdaemonSinkGui()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	delete ui;
 }
@@ -684,8 +685,8 @@ void SDRdaemonSinkGui::sampleRateCorrection(int queueLength, int queueSize, int6
     int chunkCorr = -roundf(sampleCorr);
     m_chunkSizeCorrection += chunkCorr;
 
-    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d (%d) samples", m_chunkSizeCorrection, chunkCorr);
-
-    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
-    m_deviceSampleSink->getInputMessageQueue()->push(message);
+//    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d (%d) samples", m_chunkSizeCorrection, chunkCorr);
+//
+//    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
+//    m_deviceSampleSink->getInputMessageQueue()->push(message);
 }
