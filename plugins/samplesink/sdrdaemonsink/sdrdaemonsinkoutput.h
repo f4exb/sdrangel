@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <QObject>
 #include <QString>
 #include <QTimer>
 #include <QNetworkRequest>
@@ -36,6 +37,7 @@ class QNetworkReply;
 class QJsonObject;
 
 class SDRdaemonSinkOutput : public DeviceSampleSink {
+    Q_OBJECT
 public:
 	class MsgConfigureSDRdaemonSink : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -171,6 +173,7 @@ private:
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 	uint32_t m_tickCount;
+    uint32_t m_tickMultiplier;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -180,6 +183,7 @@ private:
     uint64_t m_lastTimestampRateCorrection;
     uint32_t m_nbSamplesSinceRateCorrection;
     int m_chunkSizeCorrection;
+    static const uint32_t NbSamplesForRateCorrection;
 
 	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);

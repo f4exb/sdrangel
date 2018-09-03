@@ -41,6 +41,8 @@ MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Mes
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection, Message)
 
+const uint32_t SDRdaemonSinkOutput::NbSamplesForRateCorrection = 5000000;
+
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
@@ -49,6 +51,7 @@ SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer()),
 	m_tickCount(0),
+    m_tickMultiplier(20),
 	m_lastSampleCount(0),
 	m_lastTimestampUs(0),
 	m_lastTimestampRateCorrection(0),
@@ -268,6 +271,9 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
             m_sdrDaemonSinkThread->setSamplerate(settings.m_sampleRate);
         }
 
+        m_tickMultiplier = (20*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period
+        m_tickMultiplier = m_tickMultiplier < 20 ? 20 : m_tickMultiplier; // not below half a second
+
         forwardChange = true;
         changeTxDelay = true;
     }
@@ -449,7 +455,7 @@ void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport&
 
 void SDRdaemonSinkOutput::tick()
 {
-    if (++m_tickCount == 20*60) // once per minute
+    if (++m_tickCount == m_tickMultiplier)
     {
         QString reportURL;
 
@@ -515,31 +521,29 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
         uint32_t sampleCountDelta, sampleCount;
         sampleCount = report["samplesCount"].toInt();
 
-        qDebug("SDRdaemonSinkOutput::analyzeApiReply: sampleCount: %u m_nbSamplesSinceRateCorrection: %u",
-                sampleCount,
-                m_nbSamplesSinceRateCorrection);
-
         if (sampleCount < m_lastSampleCount) {
             sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
         } else {
             sampleCountDelta = sampleCount - m_lastSampleCount;
         }
 
-        if (sampleCountDelta != 0)
+        if (m_lastTimestampRateCorrection == 0) {
+            m_lastTimestampRateCorrection = timestampUs;
+        }
+        else
         {
-            if (m_lastTimestampRateCorrection == 0) {
-                m_lastTimestampRateCorrection = timestampUs;
-            }
-            else
-            {
-                m_nbSamplesSinceRateCorrection += sampleCountDelta;
+            m_nbSamplesSinceRateCorrection += sampleCountDelta;
 
-                if ((m_nbSamplesSinceRateCorrection > 20000000) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
-                {
-                    sampleRateCorrection(queueLength, queueSize, timestampUs - m_lastTimestampRateCorrection);
-                    m_lastTimestampRateCorrection = timestampUs;
-                    m_nbSamplesSinceRateCorrection = 0;
-                }
+            qDebug("SDRdaemonSinkOutput::analyzeApiReply: queueLengthPercent: %d sampleCount: %u m_nbSamplesSinceRateCorrection: %u",
+                queueLengthPercent,
+                sampleCount,
+                m_nbSamplesSinceRateCorrection);
+
+            if ((m_nbSamplesSinceRateCorrection > NbSamplesForRateCorrection) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
+            {
+                sampleRateCorrection(queueLength, queueSize, timestampUs - m_lastTimestampRateCorrection);
+                m_lastTimestampRateCorrection = timestampUs;
+                m_nbSamplesSinceRateCorrection = 0;
             }
         }
 
