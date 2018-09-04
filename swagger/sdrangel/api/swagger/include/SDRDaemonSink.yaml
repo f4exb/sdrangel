@@ -20,11 +20,11 @@ SDRdaemonSinkSettings:
       type: string
     dataPort:
       type: integer
-    serverType:
-      type: integer
     deviceIndex:
+      device: remote SDRangel instance deviceset index
       type: integer
     channelIndex:
+      device: remote SDRangel instance channel index
       type: integer
 
 SDRdaemonSinkReport:

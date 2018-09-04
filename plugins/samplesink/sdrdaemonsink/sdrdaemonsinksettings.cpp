@@ -32,7 +32,6 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_apiPort = 9091;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
-    m_serverType = ServerAngel;
     m_deviceIndex = 0;
     m_channelIndex = 0;
 }
@@ -49,7 +48,6 @@ QByteArray SDRdaemonSinkSettings::serialize() const
     s.writeU32(6, m_apiPort);
     s.writeString(7, m_dataAddress);
     s.writeU32(8, m_dataPort);
-    s.writeS32(9, (int) m_serverType);
     s.writeU32(10, m_deviceIndex);
     s.writeU32(11, m_channelIndex);
 
@@ -69,7 +67,6 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         quint32 uintval;
-        int intval;
 
         d.readU64(1, &m_centerFrequency, 435000*1000);
         d.readU32(2, &m_sampleRate, 48000);
@@ -81,14 +78,6 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
         d.readString(7, &m_dataAddress, "127.0.0.1");
         d.readU32(8, &uintval, 9090);
         m_dataPort = uintval % (1<<16);
-        d.readS32(9, &intval, 0);
-
-        if ((intval < 0) || (intval > 1)) {
-            m_serverType = ServerAngel;
-        } else {
-            m_serverType = (ServerType) intval;
-        }
-
         d.readU32(10, &m_deviceIndex, 0);
         d.readU32(11, &m_channelIndex, 0);
 

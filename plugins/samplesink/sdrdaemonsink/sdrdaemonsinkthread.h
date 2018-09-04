@@ -17,15 +17,16 @@
 #ifndef INCLUDE_SDRDAEMONSINKTHREAD_H
 #define INCLUDE_SDRDAEMONSINKTHREAD_H
 
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <stdint.h>
+
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <stdint.h>
 
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
@@ -35,6 +36,7 @@
 #define SDRDAEMONSINK_THROTTLE_MS 50
 
 class SampleSourceFifo;
+struct timeval;
 
 class SDRdaemonSinkThread : public QThread {
 	Q_OBJECT
@@ -54,7 +56,7 @@ public:
 
     bool isRunning() const { return m_running; }
 
-    uint32_t getSamplesCount() const { return m_samplesCount; }
+    uint32_t getSamplesCount(struct timeval& tv) const;
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
     void setChunkCorrection(int chunkCorrection) { m_chunkCorrection = chunkCorrection; }
 

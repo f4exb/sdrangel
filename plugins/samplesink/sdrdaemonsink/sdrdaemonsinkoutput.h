@@ -178,9 +178,13 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    uint32_t m_lastRemoteSampleCount;
     uint32_t m_lastSampleCount;
+    uint64_t m_lastRemoteTimestampUs;
     uint64_t m_lastTimestampUs;
+    uint64_t m_lastRemoteTimestampRateCorrection;
     uint64_t m_lastTimestampRateCorrection;
+    uint32_t m_nbRemoteSamplesSinceRateCorrection;
     uint32_t m_nbSamplesSinceRateCorrection;
     int m_chunkSizeCorrection;
     static const uint32_t NbSamplesForRateCorrection;
@@ -190,7 +194,7 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     void analyzeApiReply(const QJsonObject& jsonObject);
-    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs);
+    void sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount);
 
 private slots:
     void tick();

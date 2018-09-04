@@ -66,9 +66,6 @@ public:
     qint32 getDataPort();
     void setDataPort(qint32 data_port);
 
-    qint32 getServerType();
-    void setServerType(qint32 server_type);
-
     qint32 getDeviceIndex();
     void setDeviceIndex(qint32 device_index);
 
@@ -102,9 +99,6 @@ private:
 
     qint32 data_port;
     bool m_data_port_isSet;
-
-    qint32 server_type;
-    bool m_server_type_isSet;
 
     qint32 device_index;
     bool m_device_index_isSet;

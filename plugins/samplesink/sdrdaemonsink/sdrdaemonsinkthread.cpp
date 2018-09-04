@@ -14,6 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/time.h>
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
@@ -135,4 +136,10 @@ void SDRdaemonSinkThread::tick()
 
         m_udpSinkFEC.write(beginRead, m_samplesChunkSize);
 	}
+}
+
+uint32_t SDRdaemonSinkThread::getSamplesCount(struct timeval& tv) const
+{
+    gettimeofday(&tv, 0);
+    return m_samplesCount;
 }

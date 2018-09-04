@@ -44,8 +44,6 @@ SWGSDRdaemonSinkSettings::SWGSDRdaemonSinkSettings() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    server_type = 0;
-    m_server_type_isSet = false;
     device_index = 0;
     m_device_index_isSet = false;
     channel_index = 0;
@@ -74,8 +72,6 @@ SWGSDRdaemonSinkSettings::init() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    server_type = 0;
-    m_server_type_isSet = false;
     device_index = 0;
     m_device_index_isSet = false;
     channel_index = 0;
@@ -95,7 +91,6 @@ SWGSDRdaemonSinkSettings::cleanup() {
     if(data_address != nullptr) { 
         delete data_address;
     }
-
 
 
 
@@ -127,8 +122,6 @@ SWGSDRdaemonSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&server_type, pJson["serverType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&device_index, pJson["deviceIndex"], "qint32", "");
     
@@ -173,9 +166,6 @@ SWGSDRdaemonSinkSettings::asJsonObject() {
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
-    }
-    if(m_server_type_isSet){
-        obj->insert("serverType", QJsonValue(server_type));
     }
     if(m_device_index_isSet){
         obj->insert("deviceIndex", QJsonValue(device_index));
@@ -268,16 +258,6 @@ SWGSDRdaemonSinkSettings::setDataPort(qint32 data_port) {
 }
 
 qint32
-SWGSDRdaemonSinkSettings::getServerType() {
-    return server_type;
-}
-void
-SWGSDRdaemonSinkSettings::setServerType(qint32 server_type) {
-    this->server_type = server_type;
-    this->m_server_type_isSet = true;
-}
-
-qint32
 SWGSDRdaemonSinkSettings::getDeviceIndex() {
     return device_index;
 }
@@ -310,7 +290,6 @@ SWGSDRdaemonSinkSettings::isSet(){
         if(m_api_port_isSet){ isObjectUpdated = true; break;}
         if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
         if(m_data_port_isSet){ isObjectUpdated = true; break;}
-        if(m_server_type_isSet){ isObjectUpdated = true; break;}
         if(m_device_index_isSet){ isObjectUpdated = true; break;}
         if(m_channel_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
