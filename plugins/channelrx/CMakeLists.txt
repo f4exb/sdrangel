@@ -25,6 +25,12 @@ if (FFMPEG_FOUND)
 	endif()
 endif()
 
+find_package(CM256cc)
+if(CM256CC_FOUND)
+    add_subdirectory(daemonsink)
+endif(CM256CC_FOUND)
+
 if (BUILD_DEBIAN)
     add_subdirectory(demoddsd)
+    add_subdirectory(daemonsink)
 endif (BUILD_DEBIAN)
