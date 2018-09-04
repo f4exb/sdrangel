@@ -91,6 +91,9 @@ bool SDRdaemonSinkOutput::start()
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
 	m_sdrDaemonSinkThread->startWork();
 
+	m_lastRemoteTimestampRateCorrection = 0;
+	m_lastTimestampRateCorrection = 0;
+
     double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
 
@@ -542,6 +545,8 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
         {
             m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
             m_lastTimestampRateCorrection = timestampUs;
+            m_nbRemoteSamplesSinceRateCorrection = 0;
+            m_nbSamplesSinceRateCorrection = 0;
         }
         else
         {
