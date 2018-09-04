@@ -27,9 +27,9 @@
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGDaemonSourceReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
-#include "SWGSDRDaemonChannelSourceReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
 #include "SWGUDPSinkReport.h"
@@ -86,8 +86,8 @@ public:
     SWGSSBDemodReport* getSsbDemodReport();
     void setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report);
 
-    SWGSDRDaemonChannelSourceReport* getSdrDaemonChannelSourceReport();
-    void setSdrDaemonChannelSourceReport(SWGSDRDaemonChannelSourceReport* sdr_daemon_channel_source_report);
+    SWGDaemonSourceReport* getDaemonSourceReport();
+    void setDaemonSourceReport(SWGDaemonSourceReport* daemon_source_report);
 
     SWGSSBModReport* getSsbModReport();
     void setSsbModReport(SWGSSBModReport* ssb_mod_report);
@@ -138,8 +138,8 @@ private:
     SWGSSBDemodReport* ssb_demod_report;
     bool m_ssb_demod_report_isSet;
 
-    SWGSDRDaemonChannelSourceReport* sdr_daemon_channel_source_report;
-    bool m_sdr_daemon_channel_source_report_isSet;
+    SWGDaemonSourceReport* daemon_source_report;
+    bool m_daemon_source_report_isSet;
 
     SWGSSBModReport* ssb_mod_report;
     bool m_ssb_mod_report_isSet;

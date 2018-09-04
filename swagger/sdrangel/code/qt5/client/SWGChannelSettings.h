@@ -27,10 +27,10 @@
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGDaemonSinkSettings.h"
+#include "SWGDaemonSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
-#include "SWGSDRDaemonChannelSinkSettings.h"
-#include "SWGSDRDaemonChannelSourceSettings.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGUDPSinkSettings.h"
@@ -84,11 +84,11 @@ public:
     SWGNFMModSettings* getNfmModSettings();
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
 
-    SWGSDRDaemonChannelSinkSettings* getSdrDaemonChannelSinkSettings();
-    void setSdrDaemonChannelSinkSettings(SWGSDRDaemonChannelSinkSettings* sdr_daemon_channel_sink_settings);
+    SWGDaemonSinkSettings* getDaemonSinkSettings();
+    void setDaemonSinkSettings(SWGDaemonSinkSettings* daemon_sink_settings);
 
-    SWGSDRDaemonChannelSourceSettings* getSdrDaemonChannelSourceSettings();
-    void setSdrDaemonChannelSourceSettings(SWGSDRDaemonChannelSourceSettings* sdr_daemon_channel_source_settings);
+    SWGDaemonSourceSettings* getDaemonSourceSettings();
+    void setDaemonSourceSettings(SWGDaemonSourceSettings* daemon_source_settings);
 
     SWGSSBModSettings* getSsbModSettings();
     void setSsbModSettings(SWGSSBModSettings* ssb_mod_settings);
@@ -139,11 +139,11 @@ private:
     SWGNFMModSettings* nfm_mod_settings;
     bool m_nfm_mod_settings_isSet;
 
-    SWGSDRDaemonChannelSinkSettings* sdr_daemon_channel_sink_settings;
-    bool m_sdr_daemon_channel_sink_settings_isSet;
+    SWGDaemonSinkSettings* daemon_sink_settings;
+    bool m_daemon_sink_settings_isSet;
 
-    SWGSDRDaemonChannelSourceSettings* sdr_daemon_channel_source_settings;
-    bool m_sdr_daemon_channel_source_settings_isSet;
+    SWGDaemonSourceSettings* daemon_source_settings;
+    bool m_daemon_source_settings_isSet;
 
     SWGSSBModSettings* ssb_mod_settings;
     bool m_ssb_mod_settings_isSet;

@@ -48,8 +48,8 @@ SWGChannelReport::SWGChannelReport() {
     m_nfm_mod_report_isSet = false;
     ssb_demod_report = nullptr;
     m_ssb_demod_report_isSet = false;
-    sdr_daemon_channel_source_report = nullptr;
-    m_sdr_daemon_channel_source_report_isSet = false;
+    daemon_source_report = nullptr;
+    m_daemon_source_report_isSet = false;
     ssb_mod_report = nullptr;
     m_ssb_mod_report_isSet = false;
     udp_sink_report = nullptr;
@@ -88,8 +88,8 @@ SWGChannelReport::init() {
     m_nfm_mod_report_isSet = false;
     ssb_demod_report = new SWGSSBDemodReport();
     m_ssb_demod_report_isSet = false;
-    sdr_daemon_channel_source_report = new SWGSDRDaemonChannelSourceReport();
-    m_sdr_daemon_channel_source_report_isSet = false;
+    daemon_source_report = new SWGDaemonSourceReport();
+    m_daemon_source_report_isSet = false;
     ssb_mod_report = new SWGSSBModReport();
     m_ssb_mod_report_isSet = false;
     udp_sink_report = new SWGUDPSinkReport();
@@ -132,8 +132,8 @@ SWGChannelReport::cleanup() {
     if(ssb_demod_report != nullptr) { 
         delete ssb_demod_report;
     }
-    if(sdr_daemon_channel_source_report != nullptr) { 
-        delete sdr_daemon_channel_source_report;
+    if(daemon_source_report != nullptr) { 
+        delete daemon_source_report;
     }
     if(ssb_mod_report != nullptr) { 
         delete ssb_mod_report;
@@ -183,7 +183,7 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ssb_demod_report, pJson["SSBDemodReport"], "SWGSSBDemodReport", "SWGSSBDemodReport");
     
-    ::SWGSDRangel::setValue(&sdr_daemon_channel_source_report, pJson["SDRDaemonChannelSourceReport"], "SWGSDRDaemonChannelSourceReport", "SWGSDRDaemonChannelSourceReport");
+    ::SWGSDRangel::setValue(&daemon_source_report, pJson["DaemonSourceReport"], "SWGDaemonSourceReport", "SWGDaemonSourceReport");
     
     ::SWGSDRangel::setValue(&ssb_mod_report, pJson["SSBModReport"], "SWGSSBModReport", "SWGSSBModReport");
     
@@ -241,8 +241,8 @@ SWGChannelReport::asJsonObject() {
     if((ssb_demod_report != nullptr) && (ssb_demod_report->isSet())){
         toJsonValue(QString("SSBDemodReport"), ssb_demod_report, obj, QString("SWGSSBDemodReport"));
     }
-    if((sdr_daemon_channel_source_report != nullptr) && (sdr_daemon_channel_source_report->isSet())){
-        toJsonValue(QString("SDRDaemonChannelSourceReport"), sdr_daemon_channel_source_report, obj, QString("SWGSDRDaemonChannelSourceReport"));
+    if((daemon_source_report != nullptr) && (daemon_source_report->isSet())){
+        toJsonValue(QString("DaemonSourceReport"), daemon_source_report, obj, QString("SWGDaemonSourceReport"));
     }
     if((ssb_mod_report != nullptr) && (ssb_mod_report->isSet())){
         toJsonValue(QString("SSBModReport"), ssb_mod_report, obj, QString("SWGSSBModReport"));
@@ -363,14 +363,14 @@ SWGChannelReport::setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report) {
     this->m_ssb_demod_report_isSet = true;
 }
 
-SWGSDRDaemonChannelSourceReport*
-SWGChannelReport::getSdrDaemonChannelSourceReport() {
-    return sdr_daemon_channel_source_report;
+SWGDaemonSourceReport*
+SWGChannelReport::getDaemonSourceReport() {
+    return daemon_source_report;
 }
 void
-SWGChannelReport::setSdrDaemonChannelSourceReport(SWGSDRDaemonChannelSourceReport* sdr_daemon_channel_source_report) {
-    this->sdr_daemon_channel_source_report = sdr_daemon_channel_source_report;
-    this->m_sdr_daemon_channel_source_report_isSet = true;
+SWGChannelReport::setDaemonSourceReport(SWGDaemonSourceReport* daemon_source_report) {
+    this->daemon_source_report = daemon_source_report;
+    this->m_daemon_source_report_isSet = true;
 }
 
 SWGSSBModReport*
@@ -438,7 +438,7 @@ SWGChannelReport::isSet(){
         if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(ssb_demod_report != nullptr && ssb_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_daemon_channel_source_report != nullptr && sdr_daemon_channel_source_report->isSet()){ isObjectUpdated = true; break;}
+        if(daemon_source_report != nullptr && daemon_source_report->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_report != nullptr && ssb_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(udp_sink_report != nullptr && udp_sink_report->isSet()){ isObjectUpdated = true; break;}
         if(udp_src_report != nullptr && udp_src_report->isSet()){ isObjectUpdated = true; break;}

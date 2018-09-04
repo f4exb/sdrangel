@@ -1,5 +1,5 @@
-SDRDaemonChannelSinkSettings:
-  description: "Data handling details for SDRDaemon"
+DaemonSinkSettings:
+  description: "Daemon channel sink settings"
   properties:
     nbFECBlocks:
       description: "Number of FEC blocks per frame"

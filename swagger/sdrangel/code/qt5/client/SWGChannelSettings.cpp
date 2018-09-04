@@ -46,10 +46,10 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
     m_nfm_mod_settings_isSet = false;
-    sdr_daemon_channel_sink_settings = nullptr;
-    m_sdr_daemon_channel_sink_settings_isSet = false;
-    sdr_daemon_channel_source_settings = nullptr;
-    m_sdr_daemon_channel_source_settings_isSet = false;
+    daemon_sink_settings = nullptr;
+    m_daemon_sink_settings_isSet = false;
+    daemon_source_settings = nullptr;
+    m_daemon_source_settings_isSet = false;
     ssb_mod_settings = nullptr;
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = nullptr;
@@ -88,10 +88,10 @@ SWGChannelSettings::init() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
     m_nfm_mod_settings_isSet = false;
-    sdr_daemon_channel_sink_settings = new SWGSDRDaemonChannelSinkSettings();
-    m_sdr_daemon_channel_sink_settings_isSet = false;
-    sdr_daemon_channel_source_settings = new SWGSDRDaemonChannelSourceSettings();
-    m_sdr_daemon_channel_source_settings_isSet = false;
+    daemon_sink_settings = new SWGDaemonSinkSettings();
+    m_daemon_sink_settings_isSet = false;
+    daemon_source_settings = new SWGDaemonSourceSettings();
+    m_daemon_source_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = new SWGSSBDemodSettings();
@@ -133,11 +133,11 @@ SWGChannelSettings::cleanup() {
     if(nfm_mod_settings != nullptr) { 
         delete nfm_mod_settings;
     }
-    if(sdr_daemon_channel_sink_settings != nullptr) { 
-        delete sdr_daemon_channel_sink_settings;
+    if(daemon_sink_settings != nullptr) { 
+        delete daemon_sink_settings;
     }
-    if(sdr_daemon_channel_source_settings != nullptr) { 
-        delete sdr_daemon_channel_source_settings;
+    if(daemon_source_settings != nullptr) { 
+        delete daemon_source_settings;
     }
     if(ssb_mod_settings != nullptr) { 
         delete ssb_mod_settings;
@@ -188,9 +188,9 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
     
-    ::SWGSDRangel::setValue(&sdr_daemon_channel_sink_settings, pJson["SDRDaemonChannelSinkSettings"], "SWGSDRDaemonChannelSinkSettings", "SWGSDRDaemonChannelSinkSettings");
+    ::SWGSDRangel::setValue(&daemon_sink_settings, pJson["DaemonSinkSettings"], "SWGDaemonSinkSettings", "SWGDaemonSinkSettings");
     
-    ::SWGSDRangel::setValue(&sdr_daemon_channel_source_settings, pJson["SDRDaemonChannelSourceSettings"], "SWGSDRDaemonChannelSourceSettings", "SWGSDRDaemonChannelSourceSettings");
+    ::SWGSDRangel::setValue(&daemon_source_settings, pJson["DaemonSourceSettings"], "SWGDaemonSourceSettings", "SWGDaemonSourceSettings");
     
     ::SWGSDRangel::setValue(&ssb_mod_settings, pJson["SSBModSettings"], "SWGSSBModSettings", "SWGSSBModSettings");
     
@@ -247,11 +247,11 @@ SWGChannelSettings::asJsonObject() {
     if((nfm_mod_settings != nullptr) && (nfm_mod_settings->isSet())){
         toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
     }
-    if((sdr_daemon_channel_sink_settings != nullptr) && (sdr_daemon_channel_sink_settings->isSet())){
-        toJsonValue(QString("SDRDaemonChannelSinkSettings"), sdr_daemon_channel_sink_settings, obj, QString("SWGSDRDaemonChannelSinkSettings"));
+    if((daemon_sink_settings != nullptr) && (daemon_sink_settings->isSet())){
+        toJsonValue(QString("DaemonSinkSettings"), daemon_sink_settings, obj, QString("SWGDaemonSinkSettings"));
     }
-    if((sdr_daemon_channel_source_settings != nullptr) && (sdr_daemon_channel_source_settings->isSet())){
-        toJsonValue(QString("SDRDaemonChannelSourceSettings"), sdr_daemon_channel_source_settings, obj, QString("SWGSDRDaemonChannelSourceSettings"));
+    if((daemon_source_settings != nullptr) && (daemon_source_settings->isSet())){
+        toJsonValue(QString("DaemonSourceSettings"), daemon_source_settings, obj, QString("SWGDaemonSourceSettings"));
     }
     if((ssb_mod_settings != nullptr) && (ssb_mod_settings->isSet())){
         toJsonValue(QString("SSBModSettings"), ssb_mod_settings, obj, QString("SWGSSBModSettings"));
@@ -365,24 +365,24 @@ SWGChannelSettings::setNfmModSettings(SWGNFMModSettings* nfm_mod_settings) {
     this->m_nfm_mod_settings_isSet = true;
 }
 
-SWGSDRDaemonChannelSinkSettings*
-SWGChannelSettings::getSdrDaemonChannelSinkSettings() {
-    return sdr_daemon_channel_sink_settings;
+SWGDaemonSinkSettings*
+SWGChannelSettings::getDaemonSinkSettings() {
+    return daemon_sink_settings;
 }
 void
-SWGChannelSettings::setSdrDaemonChannelSinkSettings(SWGSDRDaemonChannelSinkSettings* sdr_daemon_channel_sink_settings) {
-    this->sdr_daemon_channel_sink_settings = sdr_daemon_channel_sink_settings;
-    this->m_sdr_daemon_channel_sink_settings_isSet = true;
+SWGChannelSettings::setDaemonSinkSettings(SWGDaemonSinkSettings* daemon_sink_settings) {
+    this->daemon_sink_settings = daemon_sink_settings;
+    this->m_daemon_sink_settings_isSet = true;
 }
 
-SWGSDRDaemonChannelSourceSettings*
-SWGChannelSettings::getSdrDaemonChannelSourceSettings() {
-    return sdr_daemon_channel_source_settings;
+SWGDaemonSourceSettings*
+SWGChannelSettings::getDaemonSourceSettings() {
+    return daemon_source_settings;
 }
 void
-SWGChannelSettings::setSdrDaemonChannelSourceSettings(SWGSDRDaemonChannelSourceSettings* sdr_daemon_channel_source_settings) {
-    this->sdr_daemon_channel_source_settings = sdr_daemon_channel_source_settings;
-    this->m_sdr_daemon_channel_source_settings_isSet = true;
+SWGChannelSettings::setDaemonSourceSettings(SWGDaemonSourceSettings* daemon_source_settings) {
+    this->daemon_source_settings = daemon_source_settings;
+    this->m_daemon_source_settings_isSet = true;
 }
 
 SWGSSBModSettings*
@@ -459,8 +459,8 @@ SWGChannelSettings::isSet(){
         if(dsd_demod_settings != nullptr && dsd_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_daemon_channel_sink_settings != nullptr && sdr_daemon_channel_sink_settings->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_daemon_channel_source_settings != nullptr && sdr_daemon_channel_source_settings->isSet()){ isObjectUpdated = true; break;}
+        if(daemon_sink_settings != nullptr && daemon_sink_settings->isSet()){ isObjectUpdated = true; break;}
+        if(daemon_source_settings != nullptr && daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_demod_settings != nullptr && ssb_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(udp_sink_settings != nullptr && udp_sink_settings->isSet()){ isObjectUpdated = true; break;}

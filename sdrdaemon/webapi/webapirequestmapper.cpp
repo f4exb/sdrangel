@@ -577,8 +577,8 @@ bool WebAPIRequestMapper::validateChannelSettings(
         {
             QJsonObject sdrDaemonChannelSinkSettingsJsonObject = jsonObject["SDRDaemonChannelSinkSettings"].toObject();
             channelSettingsKeys = sdrDaemonChannelSinkSettingsJsonObject.keys();
-            channelSettings.setSdrDaemonChannelSinkSettings(new SWGSDRangel::SWGSDRDaemonChannelSinkSettings());
-            channelSettings.getSdrDaemonChannelSinkSettings()->fromJsonObject(sdrDaemonChannelSinkSettingsJsonObject);
+            channelSettings.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
+            channelSettings.getDaemonSinkSettings()->fromJsonObject(sdrDaemonChannelSinkSettingsJsonObject);
             return true;
         }
         else {
@@ -1017,8 +1017,8 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
-    channelSettings.setSdrDaemonChannelSinkSettings(0);
-    channelSettings.setSdrDaemonChannelSourceSettings(0);
+    channelSettings.setDaemonSinkSettings(0);
+    channelSettings.setDaemonSourceSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
     channelSettings.setUdpSinkSettings(0);
@@ -1038,7 +1038,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDsdDemodReport(0);
     channelReport.setNfmDemodReport(0);
     channelReport.setNfmModReport(0);
-    channelReport.setSdrDaemonChannelSourceReport(0);
+    channelReport.setDaemonSourceReport(0);
     channelReport.setSsbDemodReport(0);
     channelReport.setSsbModReport(0);
     channelReport.setUdpSinkReport(0);

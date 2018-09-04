@@ -333,8 +333,8 @@ int SDRDaemonChannelSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setSdrDaemonChannelSourceSettings(new SWGSDRangel::SWGSDRDaemonChannelSourceSettings());
-    response.getSdrDaemonChannelSourceSettings()->init();
+    response.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
+    response.getDaemonSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -348,12 +348,12 @@ int SDRDaemonChannelSource::webapiSettingsPutPatch(
     SDRDaemonChannelSourceSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getSdrDaemonChannelSourceSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getDaemonSourceSettings()->getDataAddress();
     }
 
     if (channelSettingsKeys.contains("dataPort"))
     {
-        int dataPort = response.getSdrDaemonChannelSourceSettings()->getDataPort();
+        int dataPort = response.getDaemonSourceSettings()->getDataPort();
 
         if ((dataPort < 1024) || (dataPort > 65535)) {
             settings.m_dataPort = 9090;
@@ -381,21 +381,21 @@ int SDRDaemonChannelSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setSdrDaemonChannelSourceReport(new SWGSDRangel::SWGSDRDaemonChannelSourceReport());
-    response.getSdrDaemonChannelSourceReport()->init();
+    response.setDaemonSourceReport(new SWGSDRangel::SWGDaemonSourceReport());
+    response.getDaemonSourceReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void SDRDaemonChannelSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSourceSettings& settings)
 {
-    if (response.getSdrDaemonChannelSourceSettings()->getDataAddress()) {
-        *response.getSdrDaemonChannelSourceSettings()->getDataAddress() = settings.m_dataAddress;
+    if (response.getDaemonSourceSettings()->getDataAddress()) {
+        *response.getDaemonSourceSettings()->getDataAddress() = settings.m_dataAddress;
     } else {
-        response.getSdrDaemonChannelSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
+        response.getDaemonSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
-    response.getSdrDaemonChannelSourceSettings()->setDataPort(settings.m_dataPort);
+    response.getDaemonSourceSettings()->setDataPort(settings.m_dataPort);
 }
 
 void SDRDaemonChannelSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -403,11 +403,11 @@ void SDRDaemonChannelSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelRe
     struct timeval tv;
     gettimeofday(&tv, 0);
 
-    response.getSdrDaemonChannelSourceReport()->setTvSec(tv.tv_sec);
-    response.getSdrDaemonChannelSourceReport()->setTvUSec(tv.tv_usec);
-    response.getSdrDaemonChannelSourceReport()->setQueueSize(m_dataReadQueue.size());
-    response.getSdrDaemonChannelSourceReport()->setQueueLength(m_dataReadQueue.length());
-    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
-    response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
-    response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
+    response.getDaemonSourceReport()->setTvSec(tv.tv_sec);
+    response.getDaemonSourceReport()->setTvUSec(tv.tv_usec);
+    response.getDaemonSourceReport()->setQueueSize(m_dataReadQueue.size());
+    response.getDaemonSourceReport()->setQueueLength(m_dataReadQueue.length());
+    response.getDaemonSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
+    response.getDaemonSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
+    response.getDaemonSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
 }

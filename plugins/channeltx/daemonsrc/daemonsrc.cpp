@@ -23,7 +23,7 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGSDRDaemonChannelSourceReport.h"
+#include "SWGDaemonSourceReport.h"
 
 #include "dsp/devicesamplesink.h"
 #include "device/devicesinkapi.h"
@@ -219,7 +219,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
 {
     if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
     {
-        qWarning("SDRDaemonChannelSource::handleDataBlock: incomplete data block: not processing");
+        qWarning("DaemonSrc::handleDataBlock: incomplete data block: not processing");
     }
     else
     {
@@ -241,12 +241,12 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             }
         }
 
-        //qDebug("SDRDaemonChannelSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
+        //qDebug("DaemonSrc::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
 
         // Need to use the CM256 recovery
         if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
         {
-            qDebug("SDRDaemonChannelSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
+            qDebug("DaemonSrc::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
             paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
             paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
@@ -266,7 +266,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
 
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qWarning() << "SDRDaemonChannelSource::handleDataBlock: decode CM256 error:"
+                qWarning() << "DaemonSrc::handleDataBlock: decode CM256 error:"
                         << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
                         << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
             }
@@ -297,7 +297,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             {
                 if (!(m_currentMeta == *metaData))
                 {
-                    printMeta("SDRDaemonChannelSource::handleDataBlock", metaData);
+                    printMeta("DaemonSrc::handleDataBlock", metaData);
 
                     if (m_currentMeta.m_centerFrequency != metaData->m_centerFrequency) {
                         m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency*1000); // frequency is in kHz
@@ -314,7 +314,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             }
             else
             {
-                qWarning() << "SDRDaemonChannelSource::handleDataBlock: recovered meta: invalid CRC32";
+                qWarning() << "DaemonSrc::handleDataBlock: recovered meta: invalid CRC32";
             }
         }
 
@@ -350,7 +350,7 @@ uint32_t DaemonSrc::calculateDataReadQueueSize(int sampleRate)
     // scale for 20 blocks at 48 kS/s. Take next even number.
     uint32_t maxSize = sampleRate / 2400;
     maxSize = (maxSize % 2 == 0) ? maxSize : maxSize + 1;
-    qDebug("SDRDaemonChannelSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
+    qDebug("DaemonSrc::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
     return maxSize;
 }
 
@@ -358,8 +358,8 @@ int DaemonSrc::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setSdrDaemonChannelSourceSettings(new SWGSDRangel::SWGSDRDaemonChannelSourceSettings());
-    response.getSdrDaemonChannelSourceSettings()->init();
+    response.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
+    response.getDaemonSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -373,11 +373,11 @@ int DaemonSrc::webapiSettingsPutPatch(
     DaemonSrcSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getSdrDaemonChannelSourceSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getDaemonSourceSettings()->getDataAddress();
     }
     if (channelSettingsKeys.contains("dataPort"))
     {
-        int dataPort = response.getSdrDaemonChannelSourceSettings()->getDataPort();
+        int dataPort = response.getDaemonSourceSettings()->getDataPort();
 
         if ((dataPort < 1024) || (dataPort > 65535)) {
             settings.m_dataPort = 9090;
@@ -386,10 +386,10 @@ int DaemonSrc::webapiSettingsPutPatch(
         }
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getSdrDaemonChannelSourceSettings()->getRgbColor();
+        settings.m_rgbColor = response.getDaemonSourceSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getSdrDaemonChannelSourceSettings()->getTitle();
+        settings.m_title = *response.getDaemonSourceSettings()->getTitle();
     }
 
     MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(settings, force);
@@ -411,27 +411,27 @@ int DaemonSrc::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setSdrDaemonChannelSourceReport(new SWGSDRangel::SWGSDRDaemonChannelSourceReport());
-    response.getSdrDaemonChannelSourceReport()->init();
+    response.setDaemonSourceReport(new SWGSDRangel::SWGDaemonSourceReport());
+    response.getDaemonSourceReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void DaemonSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSrcSettings& settings)
 {
-    if (response.getSdrDaemonChannelSourceSettings()->getDataAddress()) {
-        *response.getSdrDaemonChannelSourceSettings()->getDataAddress() = settings.m_dataAddress;
+    if (response.getDaemonSourceSettings()->getDataAddress()) {
+        *response.getDaemonSourceSettings()->getDataAddress() = settings.m_dataAddress;
     } else {
-        response.getSdrDaemonChannelSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
+        response.getDaemonSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
-    response.getSdrDaemonChannelSourceSettings()->setDataPort(settings.m_dataPort);
-    response.getSdrDaemonChannelSourceSettings()->setRgbColor(settings.m_rgbColor);
+    response.getDaemonSourceSettings()->setDataPort(settings.m_dataPort);
+    response.getDaemonSourceSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getSdrDaemonChannelSourceSettings()->getTitle()) {
-        *response.getSdrDaemonChannelSourceSettings()->getTitle() = settings.m_title;
+    if (response.getDaemonSourceSettings()->getTitle()) {
+        *response.getDaemonSourceSettings()->getTitle() = settings.m_title;
     } else {
-        response.getSdrDaemonChannelSourceSettings()->setTitle(new QString(settings.m_title));
+        response.getDaemonSourceSettings()->setTitle(new QString(settings.m_title));
     }
 }
 
@@ -440,16 +440,16 @@ void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     struct timeval tv;
     gettimeofday(&tv, 0);
 
-    response.getSdrDaemonChannelSourceReport()->setTvSec(tv.tv_sec);
-    response.getSdrDaemonChannelSourceReport()->setTvUSec(tv.tv_usec);
-    response.getSdrDaemonChannelSourceReport()->setQueueSize(m_dataReadQueue.size());
-    response.getSdrDaemonChannelSourceReport()->setQueueLength(m_dataReadQueue.length());
-    response.getSdrDaemonChannelSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
-    response.getSdrDaemonChannelSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
-    response.getSdrDaemonChannelSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
-    response.getSdrDaemonChannelSourceReport()->setNbOriginalBlocks(m_currentMeta.m_nbOriginalBlocks);
-    response.getSdrDaemonChannelSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
-    response.getSdrDaemonChannelSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
-    response.getSdrDaemonChannelSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
+    response.getDaemonSourceReport()->setTvSec(tv.tv_sec);
+    response.getDaemonSourceReport()->setTvUSec(tv.tv_usec);
+    response.getDaemonSourceReport()->setQueueSize(m_dataReadQueue.size());
+    response.getDaemonSourceReport()->setQueueLength(m_dataReadQueue.length());
+    response.getDaemonSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
+    response.getDaemonSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
+    response.getDaemonSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
+    response.getDaemonSourceReport()->setNbOriginalBlocks(m_currentMeta.m_nbOriginalBlocks);
+    response.getDaemonSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
+    response.getDaemonSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
+    response.getDaemonSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
 }
 

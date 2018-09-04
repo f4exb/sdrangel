@@ -2218,10 +2218,10 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
-      SDRDaemonChannelSinkSettings:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSink.yaml#/SDRDaemonChannelSinkSettings"
-      SDRDaemonChannelSourceSettings:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceSettings"
+      DaemonSinkSettings:
+        $ref: "http://localhost:8081/api/swagger/include/DaemonSink.yaml#/DaemonSinkSettings"
+      DaemonSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
       SSBModSettings:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -2261,8 +2261,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
-      SDRDaemonChannelSourceReport:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceReport"        
+      DaemonSourceReport:
+        $ref: "http://localhost:8081/api/swagger/include/DaemonSource.yaml#/DaemonSourceReport"        
       SSBModReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSinkReport:

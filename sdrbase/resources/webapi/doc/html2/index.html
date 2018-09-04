@@ -1416,8 +1416,8 @@ margin-bottom: 20px;
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
-    "SDRDaemonChannelSourceReport" : {
-      "$ref" : "#/definitions/SDRDaemonChannelSourceReport"
+    "DaemonSourceReport" : {
+      "$ref" : "#/definitions/DaemonSourceReport"
     },
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
@@ -1470,11 +1470,11 @@ margin-bottom: 20px;
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
     },
-    "SDRDaemonChannelSinkSettings" : {
-      "$ref" : "#/definitions/SDRDaemonChannelSinkSettings"
+    "DaemonSinkSettings" : {
+      "$ref" : "#/definitions/DaemonSinkSettings"
     },
-    "SDRDaemonChannelSourceSettings" : {
-      "$ref" : "#/definitions/SDRDaemonChannelSourceSettings"
+    "DaemonSourceSettings" : {
+      "$ref" : "#/definitions/DaemonSourceSettings"
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
@@ -1675,6 +1675,95 @@ margin-bottom: 20px;
     }
   },
   "description" : "DV serial device details"
+};
+            defs.DaemonSinkSettings = {
+  "properties" : {
+    "nbFECBlocks" : {
+      "type" : "integer",
+      "description" : "Number of FEC blocks per frame"
+    },
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Receiving USB data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Receiving USB data port"
+    },
+    "txDelay" : {
+      "type" : "integer",
+      "description" : "Minimum delay in ms between consecutive USB blocks transmissions"
+    }
+  },
+  "description" : "Daemon channel sink settings"
+};
+            defs.DaemonSourceReport = {
+  "properties" : {
+    "queueLength" : {
+      "type" : "integer",
+      "description" : "Data read/write queue length in number of data frames"
+    },
+    "queueSize" : {
+      "type" : "integer",
+      "description" : "Data read/write queue size in number of data frames"
+    },
+    "samplesCount" : {
+      "type" : "integer",
+      "description" : "Absolute consumed samples count"
+    },
+    "correctableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of correctable errors"
+    },
+    "uncorrectableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of uncorrectable errors"
+    },
+    "tvSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp seconds"
+    },
+    "tvUSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp microseconds"
+    },
+    "nbOriginalBlocks" : {
+      "type" : "integer",
+      "description" : "Number of original blocks per frame"
+    },
+    "nbFECBlocks" : {
+      "type" : "integer",
+      "description" : "Number of FEC blocks per frame"
+    },
+    "centerFreq" : {
+      "type" : "integer",
+      "description" : "Stream center frequency setting in kHz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Stream nominal sample rate in S/s"
+    }
+  },
+  "description" : "Daemon channel source report"
+};
+            defs.DaemonSourceSettings = {
+  "properties" : {
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Remote USB data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Remote USB data port"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  },
+  "description" : "Daemon channel source settings"
 };
             defs.DaemonSummaryResponse = {
   "required" : [ "appname", "architecture", "dspRxBits", "dspTxBits", "os", "pid", "qtVersion", "version" ],
@@ -3151,95 +3240,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
-};
-            defs.SDRDaemonChannelSinkSettings = {
-  "properties" : {
-    "nbFECBlocks" : {
-      "type" : "integer",
-      "description" : "Number of FEC blocks per frame"
-    },
-    "dataAddress" : {
-      "type" : "string",
-      "description" : "Receiving USB data address"
-    },
-    "dataPort" : {
-      "type" : "integer",
-      "description" : "Receiving USB data port"
-    },
-    "txDelay" : {
-      "type" : "integer",
-      "description" : "Minimum delay in ms between consecutive USB blocks transmissions"
-    }
-  },
-  "description" : "Data handling details for SDRDaemon"
-};
-            defs.SDRDaemonChannelSourceReport = {
-  "properties" : {
-    "queueLength" : {
-      "type" : "integer",
-      "description" : "Data read/write queue length in number of data frames"
-    },
-    "queueSize" : {
-      "type" : "integer",
-      "description" : "Data read/write queue size in number of data frames"
-    },
-    "samplesCount" : {
-      "type" : "integer",
-      "description" : "Absolute consumed samples count"
-    },
-    "correctableErrorsCount" : {
-      "type" : "integer",
-      "description" : "Absolute number of correctable errors"
-    },
-    "uncorrectableErrorsCount" : {
-      "type" : "integer",
-      "description" : "Absolute number of uncorrectable errors"
-    },
-    "tvSec" : {
-      "type" : "integer",
-      "description" : "Counts timestamp seconds"
-    },
-    "tvUSec" : {
-      "type" : "integer",
-      "description" : "Counts timestamp microseconds"
-    },
-    "nbOriginalBlocks" : {
-      "type" : "integer",
-      "description" : "Number of original blocks per frame"
-    },
-    "nbFECBlocks" : {
-      "type" : "integer",
-      "description" : "Number of FEC blocks per frame"
-    },
-    "centerFreq" : {
-      "type" : "integer",
-      "description" : "Stream center frequency setting in kHz"
-    },
-    "sampleRate" : {
-      "type" : "integer",
-      "description" : "Stream nominal sample rate in S/s"
-    }
-  },
-  "description" : "SDRDaemon channel source report"
-};
-            defs.SDRDaemonChannelSourceSettings = {
-  "properties" : {
-    "dataAddress" : {
-      "type" : "string",
-      "description" : "Remote USB data address"
-    },
-    "dataPort" : {
-      "type" : "integer",
-      "description" : "Remote USB data port"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    }
-  },
-  "description" : "Data handling details for SDRDaemon"
 };
             defs.SDRPlayReport = {
   "properties" : {
@@ -28716,7 +28716,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-04T08:40:33.765+02:00
+              Generated 2018-09-04T20:03:50.896+02:00
             </div>
           </div>
       </div>

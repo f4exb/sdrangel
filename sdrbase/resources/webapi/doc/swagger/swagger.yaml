@@ -2218,10 +2218,10 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
-      SDRDaemonChannelSinkSettings:
-        $ref: "/doc/swagger/include/SDRDaemonChannelSink.yaml#/SDRDaemonChannelSinkSettings"
-      SDRDaemonChannelSourceSettings:
-        $ref: "/doc/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceSettings"
+      DaemonSinkSettings:
+        $ref: "/doc/swagger/include/DaemonSink.yaml#/DaemonSinkSettings"
+      DaemonSourceSettings:
+        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
       SSBModSettings:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -2261,8 +2261,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
         $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
-      SDRDaemonChannelSourceReport:
-        $ref: "/doc/swagger/include/SDRDaemonChannelSource.yaml#/SDRDaemonChannelSourceReport"        
+      DaemonSourceReport:
+        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceReport"        
       SSBModReport:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSinkReport:

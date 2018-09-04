@@ -42,6 +42,9 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
+#include "SWGDaemonSinkSettings.h"
+#include "SWGDaemonSourceReport.h"
+#include "SWGDaemonSourceSettings.h"
 #include "SWGDaemonSummaryResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceReport.h"
@@ -89,9 +92,6 @@
 #include "SWGRDSReport_altFrequencies.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
-#include "SWGSDRDaemonChannelSinkSettings.h"
-#include "SWGSDRDaemonChannelSourceReport.h"
-#include "SWGSDRDaemonChannelSourceSettings.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRdaemonSinkReport.h"
@@ -201,6 +201,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDVSerialDevice").compare(type) == 0) {
       return new SWGDVSerialDevice();
+    }
+    if(QString("SWGDaemonSinkSettings").compare(type) == 0) {
+      return new SWGDaemonSinkSettings();
+    }
+    if(QString("SWGDaemonSourceReport").compare(type) == 0) {
+      return new SWGDaemonSourceReport();
+    }
+    if(QString("SWGDaemonSourceSettings").compare(type) == 0) {
+      return new SWGDaemonSourceSettings();
     }
     if(QString("SWGDaemonSummaryResponse").compare(type) == 0) {
       return new SWGDaemonSummaryResponse();
@@ -342,15 +351,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
-    }
-    if(QString("SWGSDRDaemonChannelSinkSettings").compare(type) == 0) {
-      return new SWGSDRDaemonChannelSinkSettings();
-    }
-    if(QString("SWGSDRDaemonChannelSourceReport").compare(type) == 0) {
-      return new SWGSDRDaemonChannelSourceReport();
-    }
-    if(QString("SWGSDRDaemonChannelSourceSettings").compare(type) == 0) {
-      return new SWGSDRDaemonChannelSourceSettings();
     }
     if(QString("SWGSDRPlayReport").compare(type) == 0) {
       return new SWGSDRPlayReport();

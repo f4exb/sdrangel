@@ -508,9 +508,9 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
         return;
     }
 
-    if (jsonObject.contains("SDRDaemonChannelSourceReport"))
+    if (jsonObject.contains("DaemonSourceReport"))
     {
-        QJsonObject report = jsonObject["SDRDaemonChannelSourceReport"].toObject();
+        QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 10 : queueSize;
         int queueLength = report["queueLength"].toInt();

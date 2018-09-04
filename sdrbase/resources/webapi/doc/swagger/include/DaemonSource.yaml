@@ -1,5 +1,5 @@
-SDRDaemonChannelSourceSettings:
-  description: "Data handling details for SDRDaemon"
+DaemonSourceSettings:
+  description: "Daemon channel source settings"
   properties:
     dataAddress:
       description: "Remote USB data address"
@@ -12,8 +12,8 @@ SDRDaemonChannelSourceSettings:
     title:
       type: string      
  
-SDRDaemonChannelSourceReport:
-  description: "SDRDaemon channel source report"
+DaemonSourceReport:
+  description: "Daemon channel source report"
   properties:
     queueLength:
       description: "Data read/write queue length in number of data frames"

@@ -319,8 +319,8 @@ int SDRDaemonChannelSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setSdrDaemonChannelSinkSettings(new SWGSDRangel::SWGSDRDaemonChannelSinkSettings());
-    response.getSdrDaemonChannelSinkSettings()->init();
+    response.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
+    response.getDaemonSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -335,18 +335,18 @@ int SDRDaemonChannelSink::webapiSettingsPutPatch(
 
     if (channelSettingsKeys.contains("nbFECBlocks"))
     {
-        int nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+        int nbFECBlocks = response.getDaemonSinkSettings()->getNbFecBlocks();
 
         if ((nbFECBlocks < 0) || (nbFECBlocks > 127)) {
             settings.m_nbFECBlocks = 8;
         } else {
-            settings.m_nbFECBlocks = response.getSdrDaemonChannelSinkSettings()->getNbFecBlocks();
+            settings.m_nbFECBlocks = response.getDaemonSinkSettings()->getNbFecBlocks();
         }
     }
 
     if (channelSettingsKeys.contains("txDelay"))
     {
-        int txDelay = response.getSdrDaemonChannelSinkSettings()->getTxDelay();
+        int txDelay = response.getDaemonSinkSettings()->getTxDelay();
 
         if (txDelay < 0) {
             settings.m_txDelay = 100;
@@ -356,12 +356,12 @@ int SDRDaemonChannelSink::webapiSettingsPutPatch(
     }
 
     if (channelSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getSdrDaemonChannelSinkSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getDaemonSinkSettings()->getDataAddress();
     }
 
     if (channelSettingsKeys.contains("dataPort"))
     {
-        int dataPort = response.getSdrDaemonChannelSinkSettings()->getDataPort();
+        int dataPort = response.getDaemonSinkSettings()->getDataPort();
 
         if ((dataPort < 1024) || (dataPort > 65535)) {
             settings.m_dataPort = 9090;
@@ -387,14 +387,14 @@ int SDRDaemonChannelSink::webapiSettingsPutPatch(
 
 void SDRDaemonChannelSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SDRDaemonChannelSinkSettings& settings)
 {
-    response.getSdrDaemonChannelSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getSdrDaemonChannelSinkSettings()->setTxDelay(settings.m_txDelay);
+    response.getDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
 
-    if (response.getSdrDaemonChannelSinkSettings()->getDataAddress()) {
-        *response.getSdrDaemonChannelSinkSettings()->getDataAddress() = settings.m_dataAddress;
+    if (response.getDaemonSinkSettings()->getDataAddress()) {
+        *response.getDaemonSinkSettings()->getDataAddress() = settings.m_dataAddress;
     } else {
-        response.getSdrDaemonChannelSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
+        response.getDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
-    response.getSdrDaemonChannelSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getDaemonSinkSettings()->setDataPort(settings.m_dataPort);
 }
