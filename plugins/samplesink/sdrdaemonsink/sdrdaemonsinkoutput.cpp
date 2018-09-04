@@ -55,8 +55,6 @@ SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_tickMultiplier(20),
 	m_lastRemoteSampleCount(0),
 	m_lastSampleCount(0),
-	m_lastRemoteTimestampUs(0),
-	m_lastTimestampUs(0),
 	m_lastRemoteTimestampRateCorrection(0),
 	m_lastTimestampRateCorrection(0),
 	m_nbRemoteSamplesSinceRateCorrection(0),
@@ -569,8 +567,6 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
 
         m_lastRemoteSampleCount = remoteSampleCount;
         m_lastSampleCount = sampleCount;
-        m_lastRemoteTimestampUs = remoteTimestampUs; // TODO: remove
-        m_lastTimestampUs = timestampUs; // TODO: remove
     }
 }
 

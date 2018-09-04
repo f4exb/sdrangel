@@ -180,8 +180,6 @@ private:
 
     uint32_t m_lastRemoteSampleCount;
     uint32_t m_lastSampleCount;
-    uint64_t m_lastRemoteTimestampUs;
-    uint64_t m_lastTimestampUs;
     uint64_t m_lastRemoteTimestampRateCorrection;
     uint64_t m_lastTimestampRateCorrection;
     uint32_t m_nbRemoteSamplesSinceRateCorrection;
