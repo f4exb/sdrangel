@@ -111,9 +111,6 @@ private:
     uint32_t m_lastCountRecovered;
 	uint32_t m_lastSampleCount;
 	uint64_t m_lastTimestampUs;
-	uint64_t m_lastTimestampRateCorrection;
-	uint32_t m_nbSamplesSinceRateCorrection;
-	int m_chunkSizeCorrection;
     bool m_resetCounts;
     QTime m_time;
 
@@ -137,7 +134,6 @@ private:
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
     void analyzeApiReply(const QJsonObject& jsonObject);
-    void sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs);
 
 private slots:
     void handleInputMessages();

@@ -58,9 +58,6 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastCountUnrecoverable = 0;
     m_lastCountRecovered = 0;
     m_lastSampleCount = 0;
-    m_lastTimestampRateCorrection = 0;
-    m_nbSamplesSinceRateCorrection = 0;
-    m_chunkSizeCorrection = 0;
     m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
@@ -446,9 +443,6 @@ void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        m_nbSamplesSinceRateCorrection = 0;
-        m_lastTimestampRateCorrection = 0;
-
         SDRdaemonSinkOutput::MsgStartStop *message = SDRdaemonSinkOutput::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
@@ -598,22 +592,6 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         {
             ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
         }
-        else
-        {
-            if (m_lastTimestampRateCorrection == 0) {
-                m_lastTimestampRateCorrection = timestampUs;
-            }
-
-            //if ((timestampUs - m_lastTimestampRateCorrection > 300e6) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
-            if ((m_nbSamplesSinceRateCorrection > 20000000) && ((queueLengthPercent > 60) || (queueLengthPercent < 40)))
-            {
-                sampleRateCorrection(queueLength, queueSize, timestampUs - m_lastTimestampRateCorrection);
-                m_lastTimestampRateCorrection = timestampUs;
-                m_nbSamplesSinceRateCorrection = 0;
-            }
-
-            m_nbSamplesSinceRateCorrection += sampleCountDelta;
-        }
 
         double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
 
@@ -651,18 +629,4 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
     if (infoLine.size() > 0) {
         ui->infoText->setText(infoLine);
     }
-}
-
-void SDRdaemonSinkGui::sampleRateCorrection(int queueLength, int queueSize, int64_t timeDeltaUs)
-{
-    int nbBlocksDiff = queueLength - (queueSize/2);
-    int nbSamplesDiff = nbBlocksDiff * 127 * 127;
-    float sampleCorr = (nbSamplesDiff * 50000.0) / timeDeltaUs; // correction for ~50ms chunks (50000 us)
-    int chunkCorr = -roundf(sampleCorr);
-    m_chunkSizeCorrection += chunkCorr;
-
-//    qDebug("SDRdaemonSinkGui::sampleRateCorrection: %d (%d) samples", m_chunkSizeCorrection, chunkCorr);
-//
-//    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
-//    m_deviceSampleSink->getInputMessageQueue()->push(message);
 }
