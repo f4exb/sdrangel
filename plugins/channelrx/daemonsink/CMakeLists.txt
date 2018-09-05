@@ -4,18 +4,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(daemonsink_SOURCES
 	daemonsink.cpp
-#	daemonsinkgui.cpp
+	daemonsinkgui.cpp
 	daemonsinksettings.cpp
 	daemonsinkthread.cpp
-#	daemonsinkplugin.cpp
+	daemonsinkplugin.cpp
 )
 
 set(daemonsink_HEADERS
 	daemonsink.h
-#	daemonsinkgui.h
+	daemonsinkgui.h
 	daemonsinksettings.h
 	daemonsinkthread.h
-#	daemonsinkplugin.h
+	daemonsinkplugin.h
 )
 
 set(daemonsink_FORMS

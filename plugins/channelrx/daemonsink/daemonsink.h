@@ -23,6 +23,7 @@
 #ifndef INCLUDE_DAEMONSINK_H_
 #define INCLUDE_DAEMONSINK_H_
 
+#include <QObject>
 #include <QMutex>
 
 #include "cm256.h"
@@ -62,6 +63,26 @@ public:
             m_settings(settings),
             m_force(force)
         { }
+    };
+
+    class MsgSampleRateNotification : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSampleRateNotification* create(int sampleRate) {
+            return new MsgSampleRateNotification(sampleRate);
+        }
+
+        int getSampleRate() const { return m_sampleRate; }
+
+    private:
+
+        MsgSampleRateNotification(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+
+        int m_sampleRate;
     };
 
     DaemonSink(DeviceSourceAPI *deviceAPI);

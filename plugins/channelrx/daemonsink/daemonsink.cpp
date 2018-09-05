@@ -36,6 +36,7 @@
 #include "daemonsink.h"
 
 MESSAGE_CLASS_DEFINITION(DaemonSink::MsgConfigureDaemonSink, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSink::MsgSampleRateNotification, Message)
 
 const QString DaemonSink::m_channelIdURI = "sdrangel.channel.daemonsink";
 const QString DaemonSink::m_channelId = "DaemonSink";
@@ -235,6 +236,12 @@ bool DaemonSink::handleMessage(const Message& cmd __attribute__((unused)))
 
         if (notif.getSampleRate() > 0) {
             setSampleRate(notif.getSampleRate());
+        }
+
+        if (m_guiMessageQueue)
+        {
+            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
+            m_guiMessageQueue->push(msg);
         }
 
 		return true;

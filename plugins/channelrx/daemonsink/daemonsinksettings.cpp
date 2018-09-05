@@ -20,6 +20,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 #include "daemonsinksettings.h"
@@ -44,6 +46,8 @@ QByteArray DaemonSinkSettings::serialize() const
     s.writeU32(2, m_txDelay);
     s.writeString(3, m_dataAddress);
     s.writeU32(4, m_dataPort);
+    s.writeU32(5, m_rgbColor);
+    s.writeString(6, m_title);
 
     return s.final();
 }
@@ -80,6 +84,9 @@ bool DaemonSinkSettings::deserialize(const QByteArray& data)
         } else {
             m_dataPort = 9090;
         }
+
+        d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
+        d.readString(6, &m_title, "Daemon sink");
 
         return true;
     }

@@ -33,9 +33,14 @@ struct DaemonSinkSettings
     uint32_t m_txDelay;
     QString  m_dataAddress;
     uint16_t m_dataPort;
+    quint32 m_rgbColor;
+    QString m_title;
+
+    Serializable *m_channelMarker;
 
     DaemonSinkSettings();
     void resetToDefaults();
+    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

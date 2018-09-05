@@ -71,7 +71,7 @@ bool DaemonSrcSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(3, &m_rgbColor, QColor(0, 255, 255).rgb());
-        d.readString(4, &m_title, "AM Modulator");
+        d.readString(4, &m_title, "Daemon source");
 
         return true;
     }
