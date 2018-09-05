@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "device/devicesinkapi.h"
+#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
@@ -129,7 +129,7 @@ DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceUISet->addRollupWidget(this);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_time.start();
 

@@ -48,7 +48,7 @@ void DaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 {
     m_pluginAPI = pluginAPI;
 
-    // register TCP Channel Source
+    // register channel Source
     m_pluginAPI->registerRxChannel(DaemonSink::m_channelIdURI, DaemonSink::m_channelId, this);
 }
 
