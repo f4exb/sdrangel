@@ -83,8 +83,11 @@ DaemonSink::~DaemonSink()
 
 void DaemonSink::setTxDelay(int txDelay)
 {
-    qDebug() << "DaemonSink::setTxDelay: txDelay: " << txDelay;
-    m_txDelay = txDelay;
+    double txDelayRatio = txDelay / 100.0;
+    double delay = m_sampleRate == 0 ? 1.0 : (127*127*txDelayRatio) / m_sampleRate;
+    delay /= 128 + m_settings.m_nbFECBlocks;
+    m_txDelay = roundf(delay*1e6); // microseconds
+    qDebug() << "DaemonSink::setTxDelay: "<< txDelay << "% m_txDelay: " << m_txDelay << "us";
 }
 
 void DaemonSink::setNbBlocksFEC(int nbBlocksFEC)
@@ -304,11 +307,11 @@ void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
             << " force: " << force;
 
     if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
-        m_nbBlocksFEC = settings.m_nbFECBlocks;
+        setNbBlocksFEC(settings.m_nbFECBlocks);
     }
 
     if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
-        m_txDelay = settings.m_txDelay;
+        setTxDelay(settings.m_txDelay);
     }
 
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {

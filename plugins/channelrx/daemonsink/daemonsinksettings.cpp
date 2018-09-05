@@ -37,6 +37,8 @@ void DaemonSinkSettings::resetToDefaults()
     m_txDelay = 100;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
+    m_rgbColor = QColor(140, 4, 4).rgb();
+    m_title = "Daemon sink";
 }
 
 QByteArray DaemonSinkSettings::serialize() const

@@ -97,6 +97,7 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     uint16_t frameIndex = dataBlock.m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock.m_txControlBlock.m_nbBlocksFEC;
     int txDelay = dataBlock.m_txControlBlock.m_txDelay;
+    qDebug("DaemonSinkThread::handleDataBlock: txDelay: %d QS: %d", txDelay, m_dataQueue->size());
     m_address.setAddress(dataBlock.m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
@@ -109,7 +110,8 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             {
                 // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
-                usleep(txDelay);
+                //m_socket->SendDataGram((const char*)&txBlockx[i], (int) SDRDaemonUdpSize, m_address.toStdString(), (uint32_t) dataPort);
+                //usleep(txDelay);
             }
         }
     }

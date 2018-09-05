@@ -129,7 +129,7 @@ DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceUISet->addRollupWidget(this);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+    //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_time.start();
 
@@ -174,6 +174,11 @@ void DaemonSinkGUI::displaySettings()
     blockApplySettings(true);
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
+    QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
+    ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay));
+    updateTxDelayTooltip();
     blockApplySettings(false);
 }
 
@@ -259,7 +264,7 @@ void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked __attribute__((unuse
 
 void DaemonSinkGUI::on_txDelay_valueChanged(int value)
 {
-    m_settings.m_txDelay = value / 100.0;
+    m_settings.m_txDelay = value; // percentage
     ui->txDelayText->setText(tr("%1").arg(value));
     updateTxDelayTooltip();
     applySettings();
@@ -279,7 +284,9 @@ void DaemonSinkGUI::on_nbFECBlocks_valueChanged(int value)
 
 void DaemonSinkGUI::updateTxDelayTooltip()
 {
-    double delay = m_sampleRate == 0 ? 0.0 : ((127*127*m_settings.m_txDelay) / m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    double txDelayRatio = m_settings.m_txDelay / 100.0;
+    double delay = m_sampleRate == 0 ? 0.0 : (127*127*txDelayRatio) / m_sampleRate;
+    delay /= 128 + m_settings.m_nbFECBlocks;
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
