@@ -83,6 +83,7 @@ bool DaemonSinkGUI::handleMessage(const Message& message)
         DaemonSink::MsgSampleRateNotification& notif = (DaemonSink::MsgSampleRateNotification&) message;
         m_channelMarker.setBandwidth(notif.getSampleRate());
         m_sampleRate = notif.getSampleRate();
+        updateTxDelayTime();
         return true;
     }
     else if (DaemonSink::MsgConfigureDaemonSink::match(message))
@@ -177,8 +178,8 @@ void DaemonSinkGUI::displaySettings()
     QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay));
-    updateTxDelayTooltip();
+    ui->txDelayText->setText(tr("%1%").arg(m_settings.m_txDelay));
+    updateTxDelayTime();
     blockApplySettings(false);
 }
 
@@ -265,8 +266,8 @@ void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked __attribute__((unuse
 void DaemonSinkGUI::on_txDelay_valueChanged(int value)
 {
     m_settings.m_txDelay = value; // percentage
-    ui->txDelayText->setText(tr("%1").arg(value));
-    updateTxDelayTooltip();
+    ui->txDelayText->setText(tr("%1%").arg(value));
+    updateTxDelayTime();
     applySettings();
 }
 
@@ -278,16 +279,16 @@ void DaemonSinkGUI::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    updateTxDelayTooltip();
+    updateTxDelayTime();
     applySettings();
 }
 
-void DaemonSinkGUI::updateTxDelayTooltip()
+void DaemonSinkGUI::updateTxDelayTime()
 {
     double txDelayRatio = m_settings.m_txDelay / 100.0;
     double delay = m_sampleRate == 0 ? 0.0 : (127*127*txDelayRatio) / m_sampleRate;
     delay /= 128 + m_settings.m_nbFECBlocks;
-    ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
+    ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
 void DaemonSinkGUI::tick()

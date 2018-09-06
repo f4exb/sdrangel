@@ -75,7 +75,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void updateTxDelayTooltip();
+    void updateTxDelayTime();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

@@ -110,8 +110,7 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             {
                 // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
-                //m_socket->SendDataGram((const char*)&txBlockx[i], (int) SDRDaemonUdpSize, m_address.toStdString(), (uint32_t) dataPort);
-                //usleep(txDelay);
+                usleep(txDelay);
             }
         }
     }

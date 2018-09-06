@@ -118,7 +118,7 @@ public:
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
 
     void setNbBlocksFEC(int nbBlocksFEC);
-    void setTxDelay(int txDelay);
+    void setTxDelay(int txDelay, int nbBlocksFEC);
     void setDataAddress(const QString& address) { m_dataAddress = address; }
     void setDataPort(uint16_t port) { m_dataPort = port; }
 

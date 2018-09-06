@@ -54,7 +54,7 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
         m_sampleRate(48000),
         m_sampleBytes(SDR_RX_SAMP_SZ == 24 ? 4 : 2),
         m_nbBlocksFEC(0),
-        m_txDelay(100),
+        m_txDelay(50),
         m_dataAddress("127.0.0.1"),
         m_dataPort(9090)
 {
@@ -81,13 +81,16 @@ DaemonSink::~DaemonSink()
     delete m_channelizer;
 }
 
-void DaemonSink::setTxDelay(int txDelay)
+void DaemonSink::setTxDelay(int txDelay, int nbBlocksFEC)
 {
     double txDelayRatio = txDelay / 100.0;
     double delay = m_sampleRate == 0 ? 1.0 : (127*127*txDelayRatio) / m_sampleRate;
-    delay /= 128 + m_settings.m_nbFECBlocks;
+    delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
-    qDebug() << "DaemonSink::setTxDelay: "<< txDelay << "% m_txDelay: " << m_txDelay << "us";
+    qDebug() << "DaemonSink::setTxDelay:"
+            << " " << txDelay
+            << "% m_txDelay: " << m_txDelay << "us"
+            << " m_sampleRate: " << m_sampleRate << "S/s";
 }
 
 void DaemonSink::setNbBlocksFEC(int nbBlocksFEC)
@@ -183,6 +186,7 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
                 m_dataBlock->m_txControlBlock.m_dataAddress = m_dataAddress;
                 m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 
+                qDebug("DaemonSink::feed: m_dataBlock: %p m_dataQueue.sz: %d", m_dataBlock, m_dataQueue.size());
                 m_dataQueue.push(m_dataBlock);
                 m_dataBlock = new SDRDaemonDataBlock(); // create a new one immediately
                 m_dataBlockMutex.unlock();
@@ -240,6 +244,8 @@ bool DaemonSink::handleMessage(const Message& cmd __attribute__((unused)))
         if (notif.getSampleRate() > 0) {
             setSampleRate(notif.getSampleRate());
         }
+
+        setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks);
 
         if (m_guiMessageQueue)
         {
@@ -308,10 +314,11 @@ void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
 
     if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
         setNbBlocksFEC(settings.m_nbFECBlocks);
+        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
     }
 
     if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
-        setTxDelay(settings.m_txDelay);
+        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
     }
 
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
@@ -359,7 +366,7 @@ int DaemonSink::webapiSettingsPutPatch(
         int txDelay = response.getDaemonSinkSettings()->getTxDelay();
 
         if (txDelay < 0) {
-            settings.m_txDelay = 100;
+            settings.m_txDelay = 50;
         } else {
             settings.m_txDelay = txDelay;
         }

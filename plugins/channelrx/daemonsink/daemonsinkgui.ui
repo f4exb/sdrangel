@@ -159,6 +159,13 @@
     <item>
      <layout class="QHBoxLayout" name="nominalValuesLayout">
       <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>FEC</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="nbFECBlocks">
         <property name="maximumSize">
          <size>
@@ -242,12 +249,28 @@
        <widget class="QLabel" name="txDelayText">
         <property name="minimumSize">
          <size>
-          <width>20</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>90</string>
+         <string>50%</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="txDelayTime">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>10000us</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
