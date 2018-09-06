@@ -74,6 +74,12 @@ public:
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
 
+    qint32 getDeviceCenterFreq();
+    void setDeviceCenterFreq(qint32 device_center_freq);
+
+    qint32 getDeviceSampleRate();
+    void setDeviceSampleRate(qint32 device_sample_rate);
+
 
     virtual bool isSet() override;
 
@@ -110,6 +116,12 @@ private:
 
     qint32 sample_rate;
     bool m_sample_rate_isSet;
+
+    qint32 device_center_freq;
+    bool m_device_center_freq_isSet;
+
+    qint32 device_sample_rate;
+    bool m_device_sample_rate_isSet;
 
 };
 

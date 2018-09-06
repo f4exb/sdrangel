@@ -48,4 +48,10 @@ DaemonSourceReport:
     sampleRate:
       description: "Stream nominal sample rate in S/s"
       type: integer     
+    deviceCenterFreq:
+      description: "Device center frequency in kHz"
+      type: integer
+    deviceSampleRate:
+      description: "Device baseband sample rate in S/s"
+      type: integer     
       

@@ -451,5 +451,7 @@ void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getDaemonSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
     response.getDaemonSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
     response.getDaemonSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
+    response.getDaemonSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency()/1000);
+    response.getDaemonSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
 

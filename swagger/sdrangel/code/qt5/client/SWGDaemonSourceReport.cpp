@@ -50,6 +50,10 @@ SWGDaemonSourceReport::SWGDaemonSourceReport() {
     m_center_freq_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
+    device_center_freq = 0;
+    m_device_center_freq_isSet = false;
+    device_sample_rate = 0;
+    m_device_sample_rate_isSet = false;
 }
 
 SWGDaemonSourceReport::~SWGDaemonSourceReport() {
@@ -80,10 +84,16 @@ SWGDaemonSourceReport::init() {
     m_center_freq_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
+    device_center_freq = 0;
+    m_device_center_freq_isSet = false;
+    device_sample_rate = 0;
+    m_device_sample_rate_isSet = false;
 }
 
 void
 SWGDaemonSourceReport::cleanup() {
+
+
 
 
 
@@ -129,6 +139,10 @@ SWGDaemonSourceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_freq, pJson["centerFreq"], "qint32", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&device_center_freq, pJson["deviceCenterFreq"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&device_sample_rate, pJson["deviceSampleRate"], "qint32", "");
     
 }
 
@@ -178,6 +192,12 @@ SWGDaemonSourceReport::asJsonObject() {
     }
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
+    }
+    if(m_device_center_freq_isSet){
+        obj->insert("deviceCenterFreq", QJsonValue(device_center_freq));
+    }
+    if(m_device_sample_rate_isSet){
+        obj->insert("deviceSampleRate", QJsonValue(device_sample_rate));
     }
 
     return obj;
@@ -293,6 +313,26 @@ SWGDaemonSourceReport::setSampleRate(qint32 sample_rate) {
     this->m_sample_rate_isSet = true;
 }
 
+qint32
+SWGDaemonSourceReport::getDeviceCenterFreq() {
+    return device_center_freq;
+}
+void
+SWGDaemonSourceReport::setDeviceCenterFreq(qint32 device_center_freq) {
+    this->device_center_freq = device_center_freq;
+    this->m_device_center_freq_isSet = true;
+}
+
+qint32
+SWGDaemonSourceReport::getDeviceSampleRate() {
+    return device_sample_rate;
+}
+void
+SWGDaemonSourceReport::setDeviceSampleRate(qint32 device_sample_rate) {
+    this->device_sample_rate = device_sample_rate;
+    this->m_device_sample_rate_isSet = true;
+}
+
 
 bool
 SWGDaemonSourceReport::isSet(){
@@ -309,6 +349,8 @@ SWGDaemonSourceReport::isSet(){
         if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
         if(m_center_freq_isSet){ isObjectUpdated = true; break;}
         if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_device_center_freq_isSet){ isObjectUpdated = true; break;}
+        if(m_device_sample_rate_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
