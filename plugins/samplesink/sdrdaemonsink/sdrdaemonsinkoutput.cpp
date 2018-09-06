@@ -47,6 +47,7 @@ const uint32_t SDRdaemonSinkOutput::NbSamplesForRateCorrection = 5000000;
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
+	m_centerFrequency(0),
     m_sdrDaemonSinkThread(0),
 	m_deviceDescription("SDRdaemonSink"),
     m_startingTimeStamp(0),
@@ -85,7 +86,6 @@ bool SDRdaemonSinkOutput::start()
 
 	m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo);
 	m_sdrDaemonSinkThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
-	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
@@ -161,22 +161,7 @@ int SDRdaemonSinkOutput::getSampleRate() const
 
 quint64 SDRdaemonSinkOutput::getCenterFrequency() const
 {
-	return m_settings.m_centerFrequency;
-}
-
-void SDRdaemonSinkOutput::setCenterFrequency(qint64 centerFrequency)
-{
-    SDRdaemonSinkSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
-
-    MsgConfigureSDRdaemonSink* message = MsgConfigureSDRdaemonSink::create(settings, false);
-    m_inputMessageQueue.push(message);
-
-    if (m_guiMessageQueue)
-    {
-        MsgConfigureSDRdaemonSink* messageToGUI = MsgConfigureSDRdaemonSink::create(settings, false);
-        m_guiMessageQueue->push(messageToGUI);
-    }
+	return m_centerFrequency;
 }
 
 std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const
@@ -262,15 +247,6 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
         }
     }
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
-    {
-        if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setCenterFrequency(settings.m_centerFrequency);
-        }
-
-        forwardChange = true;
-    }
-
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
         if (m_sdrDaemonSinkThread != 0) {
@@ -316,7 +292,6 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     mutexLocker.unlock();
 
     qDebug() << "SDRdaemonSinkOutput::applySettings:"
-            << " m_centerFrequency: " << settings.m_centerFrequency
             << " m_sampleRate: " << settings.m_sampleRate
             << " m_txDelay: " << settings.m_txDelay
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
@@ -327,7 +302,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (forwardChange)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -378,9 +353,6 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
 {
     SDRdaemonSinkSettings settings = m_settings;
 
-    if (deviceSettingsKeys.contains("centerFrequency")) {
-        settings.m_centerFrequency = response.getSdrDaemonSinkSettings()->getCenterFrequency();
-    }
     if (deviceSettingsKeys.contains("sampleRate")) {
         settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
     }
@@ -434,7 +406,7 @@ int SDRdaemonSinkOutput::webapiReportGet(
 
 void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings)
 {
-    response.getSdrDaemonSinkSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getSdrDaemonSinkSettings()->setCenterFrequency(m_centerFrequency);
     response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
     response.getSdrDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
     response.getSdrDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
@@ -514,6 +486,7 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
     if (jsonObject.contains("DaemonSourceReport"))
     {
         QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 10 : queueSize;
         int queueLength = report["queueLength"].toInt();

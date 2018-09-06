@@ -96,7 +96,6 @@ bool DaemonSrcGUI::handleMessage(const Message& message)
     else if (DaemonSrc::MsgReportStreamData::match(message))
     {
         const DaemonSrc::MsgReportStreamData& report = (DaemonSrc::MsgReportStreamData&) message;
-        ui->centerFrequency->setText(QString("%1").arg(report.get_centerFreq()));
         ui->sampleRate->setText(QString("%1").arg(report.get_sampleRate()));
         QString nominalNbBlocksText = QString("%1/%2")
                 .arg(report.get_nbOriginalBlocks() + report.get_nbFECBlocks())

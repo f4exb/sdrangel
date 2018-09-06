@@ -46,6 +46,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_deviceSampleSink(0),
+	m_deviceCenterFrequency(0),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_nbSinceLastFlowCheck(0),
@@ -85,6 +86,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	m_networkManager = new QNetworkAccessManager();
 	connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+	m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
 
     m_time.start();
     displayEventCounts();
@@ -127,18 +130,6 @@ void SDRdaemonSinkGui::resetToDefaults()
 	m_settings.resetToDefaults();
 	displaySettings();
 	blockApplySettings(false);
-	sendSettings();
-}
-
-qint64 SDRdaemonSinkGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void SDRdaemonSinkGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
-	displaySettings();
 	sendSettings();
 }
 
@@ -201,9 +192,8 @@ void SDRdaemonSinkGui::handleInputMessages()
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
-            m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
-            updateSampleRateAndFrequency();
+            updateSampleRate();
 
             delete message;
         }
@@ -216,10 +206,9 @@ void SDRdaemonSinkGui::handleInputMessages()
     }
 }
 
-void SDRdaemonSinkGui::updateSampleRateAndFrequency()
+void SDRdaemonSinkGui::updateSampleRate()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate) / 1000));
 }
 
@@ -232,7 +221,7 @@ void SDRdaemonSinkGui::updateTxDelayTooltip()
 void SDRdaemonSinkGui::displaySettings()
 {
     blockApplySettings(true);
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->txDelay->setValue(m_settings.m_txDelay*100);
     ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
@@ -294,12 +283,6 @@ void SDRdaemonSinkGui::updateStatus()
 
         m_lastEngineState = state;
     }
-}
-
-void SDRdaemonSinkGui::on_centerFrequency_changed(quint64 value)
-{
-    m_settings.m_centerFrequency = value * 1000;
-    sendSettings();
 }
 
 void SDRdaemonSinkGui::on_sampleRate_changed(quint64 value)
@@ -558,6 +541,11 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
     if (jsonObject.contains("DaemonSourceReport"))
     {
         QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        m_deviceCenterFrequency = report["deviceCenterFreq"].toInt() * 1000;
+        m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+        ui->centerFrequency->setValue(m_deviceCenterFrequency/1000);
+        int remoteRate = report["deviceSampleRate"].toInt();
+        ui->remoteRateText->setText(tr("%1k").arg((float)(remoteRate) / 1000));
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 10 : queueSize;
         int queueLength = report["queueLength"].toInt();

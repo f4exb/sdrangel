@@ -159,52 +159,6 @@
     <item>
      <layout class="QHBoxLayout" name="nominalValuesLayout">
       <item>
-       <widget class="QLabel" name="centerFrequencyLabel">
-        <property name="text">
-         <string>Freq</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="centerFrequency">
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Stream center frequency setting</string>
-        </property>
-        <property name="text">
-         <string>00000000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="centerFrequencyUnits">
-        <property name="text">
-         <string>kHz</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QLabel" name="sampleRateLabel">
         <property name="text">
          <string> SR</string>
@@ -236,6 +190,19 @@
          <string>S/s</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

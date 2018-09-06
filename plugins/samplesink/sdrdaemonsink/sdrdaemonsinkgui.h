@@ -80,8 +80,8 @@ public:
 	QString getName() const;
 
 	void resetToDefaults();
-	virtual qint64 getCenterFrequency() const;
-	virtual void setCenterFrequency(qint64 centerFrequency);
+	virtual qint64 getCenterFrequency() const { return m_deviceCenterFrequency; }
+	virtual void setCenterFrequency(qint64 centerFrequency __attribute__((unused))) {}
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -128,7 +128,7 @@ private:
 	void displayTime();
     void sendControl(bool force = false);
 	void sendSettings();
-	void updateSampleRateAndFrequency();
+	void updateSampleRate();
 	void updateTxDelayTooltip();
 	void displayEventCounts();
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);

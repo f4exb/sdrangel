@@ -109,9 +109,6 @@ public:
         return ret;
     }
 
-    /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency / 1000; }
-
     /** Set sample rate given in Hz */
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
 
@@ -131,7 +128,6 @@ public:
 private:
     std::string  m_error;
 
-    uint32_t     m_centerFrequency;   //!< center frequency in kHz
     uint32_t     m_sampleRate;        //!< sample rate in Hz
     uint8_t      m_sampleBytes;       //!< number of bytes per sample
     uint8_t      m_sampleBits;        //!< number of effective bits per sample

@@ -136,7 +136,7 @@ public:
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    virtual void setCenterFrequency(qint64 centerFrequency __attribute__((unused))) {}
 	std::time_t getStartingTimeStamp() const;
 
 	virtual bool handleMessage(const Message& message);
@@ -168,6 +168,7 @@ private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
 	SDRdaemonSinkSettings m_settings;
+	uint64_t m_centerFrequency;
 	SDRdaemonSinkThread* m_sdrDaemonSinkThread;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;

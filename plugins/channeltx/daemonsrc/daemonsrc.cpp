@@ -299,10 +299,6 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
                 {
                     printMeta("DaemonSrc::handleDataBlock", metaData);
 
-                    if (m_currentMeta.m_centerFrequency != metaData->m_centerFrequency) {
-                        m_deviceAPI->getSampleSink()->setCenterFrequency(metaData->m_centerFrequency*1000); // frequency is in kHz
-                    }
-
                     if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
                     {
                         m_channelizer->configure(m_channelizer->getInputMessageQueue(), metaData->m_sampleRate, 0);

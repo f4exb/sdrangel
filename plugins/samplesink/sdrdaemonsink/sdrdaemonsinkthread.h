@@ -48,7 +48,6 @@ public:
 	void startWork();
 	void stopWork();
 
-    void setCenterFrequency(uint64_t centerFrequency) { m_udpSinkFEC.setCenterFrequency(centerFrequency); }
 	void setSamplerate(int samplerate);
     void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
     void setTxDelay(uint32_t txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
