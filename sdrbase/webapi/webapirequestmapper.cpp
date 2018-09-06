@@ -2146,6 +2146,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "DaemonSink")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject daemonChannelSinkSettingsJsonObject = jsonObject["DaemonSinkSettings"].toObject();
+            channelSettingsKeys = daemonChannelSinkSettingsJsonObject.keys();
+            channelSettings.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
+            channelSettings.getDaemonSinkSettings()->fromJsonObject(daemonChannelSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "DaemonSrc")
     {
         if (channelSettings.getTx() != 0)
