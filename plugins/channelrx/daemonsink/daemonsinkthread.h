@@ -30,7 +30,6 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
 class CM256;
 class QUdpSocket;
@@ -58,7 +57,7 @@ public:
         { }
     };
 
-    DaemonSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
+    DaemonSinkThread(QObject* parent = 0);
     ~DaemonSinkThread();
 
     void startStop(bool start);
@@ -71,7 +70,6 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
-    SDRDaemonDataQueue *m_dataQueue;
     CM256 m_cm256;
     CM256 *m_cm256p;
 
@@ -87,6 +85,5 @@ private:
     void handleDataBlock(SDRDaemonDataBlock& dataBlock);
 
 private slots:
-    void handleData();
     void handleInputMessages();
 };

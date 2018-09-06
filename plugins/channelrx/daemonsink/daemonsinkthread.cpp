@@ -22,7 +22,6 @@
 
 #include <QUdpSocket>
 
-#include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 #include "daemonsinkthread.h"
 
@@ -30,17 +29,15 @@
 
 MESSAGE_CLASS_DEFINITION(DaemonSinkThread::MsgStartStop, Message)
 
-DaemonSinkThread::DaemonSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
+DaemonSinkThread::DaemonSinkThread(QObject* parent) :
     QThread(parent),
     m_running(false),
-    m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
     m_socket(0)
 {
 
     m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-    connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
 }
 
 DaemonSinkThread::~DaemonSinkThread()
@@ -104,7 +101,6 @@ void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     uint16_t frameIndex = dataBlock.m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock.m_txControlBlock.m_nbBlocksFEC;
     int txDelay = dataBlock.m_txControlBlock.m_txDelay;
-    //qDebug("DaemonSinkThread::handleDataBlock: dataBlock: %p QS: %d", &dataBlock, m_dataQueue->size());
     m_address.setAddress(dataBlock.m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
@@ -166,17 +162,6 @@ void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     }
 
     dataBlock.m_txControlBlock.m_processed = true;
-}
-
-void DaemonSinkThread::handleData()
-{
-    SDRDaemonDataBlock* dataBlock;
-
-    while (m_running && ((dataBlock = m_dataQueue->pop()) != 0))
-    {
-        handleDataBlock(*dataBlock);
-        delete dataBlock;
-    }
 }
 
 void DaemonSinkThread::handleInputMessages()

@@ -28,7 +28,6 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
-#include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 #include "daemonsinksettings.h"
 
@@ -133,7 +132,6 @@ private:
     bool m_running;
 
     DaemonSinkSettings m_settings;
-    SDRDaemonDataQueue m_dataQueue;
     DaemonSinkThread *m_sinkThread;
 
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
