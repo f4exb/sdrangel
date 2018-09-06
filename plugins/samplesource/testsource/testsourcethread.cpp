@@ -22,6 +22,8 @@
 
 #define TESTSOURCE_BLOCKSIZE 16384
 
+MESSAGE_CLASS_DEFINITION(TestSourceThread::MsgStartStop, Message)
+
 TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
@@ -55,15 +57,17 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
     m_throttleToggle(false),
     m_mutex(QMutex::Recursive)
 {
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 TestSourceThread::~TestSourceThread()
 {
-	stopWork();
 }
 
 void TestSourceThread::startWork()
 {
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.start(50);
 	m_startWaitMutex.lock();
 	m_elapsedTimer.start();
 	start();
@@ -76,6 +80,8 @@ void TestSourceThread::stopWork()
 {
 	m_running = false;
 	wait();
+    m_timer.stop();
+    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void TestSourceThread::setSamplerate(int samplerate)
@@ -175,6 +181,12 @@ void TestSourceThread::setFMDeviation(float deviation)
     float fmDeviationUnit = deviation / (float) m_samplerate;
     m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 0.5f ? 0.5f : fmDeviationUnit;
     qDebug("TestSourceThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
+}
+
+void TestSourceThread::startStop(bool start)
+{
+    MsgStartStop *msg = MsgStartStop::create(start);
+    m_inputMessageQueue.push(msg);
 }
 
 void TestSourceThread::run()
@@ -291,19 +303,13 @@ void TestSourceThread::callback(const qint16* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void TestSourceThread::connectTimer(const QTimer& timer)
-{
-    qDebug() << "TestSourceThread::connectTimer";
-    connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-}
-
 void TestSourceThread::tick()
 {
     if (m_running)
     {
         qint64 throttlems = m_elapsedTimer.restart();
 
-        if (throttlems != m_throttlems)
+        if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
         {
             QMutexLocker mutexLocker(&m_mutex);
             m_throttlems = throttlems;
@@ -315,3 +321,24 @@ void TestSourceThread::tick()
     }
 }
 
+void TestSourceThread::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (MsgStartStop::match(*message))
+        {
+            MsgStartStop* notif = (MsgStartStop*) message;
+            qDebug("TestSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+
+            if (notif->getStartStop()) {
+                startWork();
+            } else {
+                stopWork();
+            }
+
+            delete message;
+        }
+    }
+}

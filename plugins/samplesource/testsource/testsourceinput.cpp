@@ -74,8 +74,7 @@ bool TestSourceInput::start()
 
     m_testSourceThread = new TestSourceThread(&m_sampleFifo);
 	m_testSourceThread->setSamplerate(m_settings.m_sampleRate);
-	m_testSourceThread->connectTimer(m_masterTimer);
-	m_testSourceThread->startWork();
+	m_testSourceThread->startStop(true);
 
 	mutexLocker.unlock();
 
@@ -91,8 +90,8 @@ void TestSourceInput::stop()
 
 	if (m_testSourceThread != 0)
 	{
-	    m_testSourceThread->stopWork();
-		delete m_testSourceThread;
+	    m_testSourceThread->startStop(false);
+        m_testSourceThread->deleteLater();
 		m_testSourceThread = 0;
 	}
 
