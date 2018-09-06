@@ -184,8 +184,9 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
                 m_dataBlock->m_txControlBlock.m_dataAddress = m_dataAddress;
                 m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 
-                qDebug("DaemonSink::feed: m_dataBlock: %p m_dataQueue.sz: %d", m_dataBlock, m_dataQueue.size());
-                m_dataQueue.push(m_dataBlock);
+                //qDebug("DaemonSink::feed: m_dataBlock: %p m_dataQueue.sz: %d", m_dataBlock, m_dataQueue.size());
+                emit dataBlockAvailable(m_dataBlock);
+                //m_dataQueue.push(m_dataBlock);
                 m_dataBlock = new SDRDaemonDataBlock(); // create a new one immediately
                 m_dataBlockMutex.unlock();
 
@@ -211,6 +212,11 @@ void DaemonSink::start()
     }
 
     m_sinkThread = new DaemonSinkThread(&m_dataQueue);
+    connect(this,
+            SIGNAL(dataBlockAvailable(SDRDaemonDataBlock *)),
+            m_sinkThread,
+            SLOT(processDataBlock(SDRDaemonDataBlock *)),
+            Qt::QueuedConnection);
     m_sinkThread->startStop(true);
     m_running = true;
 }

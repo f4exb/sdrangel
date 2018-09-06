@@ -89,7 +89,13 @@ void DaemonSinkThread::run()
     qDebug("DaemonSinkThread::run: end");
 }
 
-bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
+void DaemonSinkThread::processDataBlock(SDRDaemonDataBlock *dataBlock)
+{
+    handleDataBlock(*dataBlock);
+    delete dataBlock;
+}
+
+void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 {
 	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
@@ -98,7 +104,7 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     uint16_t frameIndex = dataBlock.m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock.m_txControlBlock.m_nbBlocksFEC;
     int txDelay = dataBlock.m_txControlBlock.m_txDelay;
-    qDebug("DaemonSinkThread::handleDataBlock: txDelay: %d QS: %d", txDelay, m_dataQueue->size());
+    //qDebug("DaemonSinkThread::handleDataBlock: dataBlock: %p QS: %d", &dataBlock, m_dataQueue->size());
     m_address.setAddress(dataBlock.m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
@@ -139,7 +145,6 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         {
             qWarning("SDRDaemonChannelSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
             // TODO: send without FEC changing meta data to set indication of no FEC
-            return true;
         }
 
         // Merge FEC with data to transmit
@@ -161,7 +166,6 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     }
 
     dataBlock.m_txControlBlock.m_processed = true;
-    return true;
 }
 
 void DaemonSinkThread::handleData()
@@ -170,10 +174,8 @@ void DaemonSinkThread::handleData()
 
     while (m_running && ((dataBlock = m_dataQueue->pop()) != 0))
     {
-        if (handleDataBlock(*dataBlock))
-        {
-            delete dataBlock;
-        }
+        handleDataBlock(*dataBlock);
+        delete dataBlock;
     }
 }
 

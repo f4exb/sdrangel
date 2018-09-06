@@ -63,6 +63,9 @@ public:
 
     void startStop(bool start);
 
+public slots:
+    void processDataBlock(SDRDaemonDataBlock *dataBlock);
+
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
@@ -81,7 +84,7 @@ private:
     void stopWork();
 
     void run();
-    bool handleDataBlock(SDRDaemonDataBlock& dataBlock);
+    void handleDataBlock(SDRDaemonDataBlock& dataBlock);
 
 private slots:
     void handleData();

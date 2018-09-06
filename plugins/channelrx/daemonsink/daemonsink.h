@@ -123,6 +123,9 @@ public:
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
+signals:
+    void dataBlockAvailable(SDRDaemonDataBlock *dataBlock);
+
 private:
     DeviceSourceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
