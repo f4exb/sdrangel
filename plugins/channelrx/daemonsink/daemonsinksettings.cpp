@@ -34,7 +34,7 @@ DaemonSinkSettings::DaemonSinkSettings()
 void DaemonSinkSettings::resetToDefaults()
 {
     m_nbFECBlocks = 0;
-    m_txDelay = 50;
+    m_txDelay = 35;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -77,7 +77,7 @@ bool DaemonSinkSettings::deserialize(const QByteArray& data)
             m_nbFECBlocks = 0;
         }
 
-        d.readU32(2, &m_txDelay, 50);
+        d.readU32(2, &m_txDelay, 35);
         d.readString(3, &m_dataAddress, "127.0.0.1");
         d.readU32(4, &tmp, 0);
 

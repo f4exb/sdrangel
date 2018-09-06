@@ -179,6 +179,7 @@ void DaemonSinkGUI::displaySettings()
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
     ui->txDelayText->setText(tr("%1%").arg(m_settings.m_txDelay));
+    ui->txDelay->setValue(m_settings.m_txDelay);
     updateTxDelayTime();
     blockApplySettings(false);
 }

@@ -54,7 +54,7 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
         m_sampleRate(48000),
         m_sampleBytes(SDR_RX_SAMP_SZ == 24 ? 4 : 2),
         m_nbBlocksFEC(0),
-        m_txDelay(50),
+        m_txDelay(35),
         m_dataAddress("127.0.0.1"),
         m_dataPort(9090)
 {
@@ -64,8 +64,6 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
 }
 
 DaemonSink::~DaemonSink()
@@ -212,7 +210,7 @@ void DaemonSink::start()
         stop();
     }
 
-    m_sinkThread = new DaemonSinkThread(&m_dataQueue, m_cm256p);
+    m_sinkThread = new DaemonSinkThread(&m_dataQueue);
     m_sinkThread->startStop(true);
     m_running = true;
 }
@@ -366,7 +364,7 @@ int DaemonSink::webapiSettingsPutPatch(
         int txDelay = response.getDaemonSinkSettings()->getTxDelay();
 
         if (txDelay < 0) {
-            settings.m_txDelay = 50;
+            settings.m_txDelay = 35;
         } else {
             settings.m_txDelay = txDelay;
         }

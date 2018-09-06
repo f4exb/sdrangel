@@ -25,6 +25,8 @@
 #include <QWaitCondition>
 #include <QHostAddress>
 
+#include "cm256.h"
+
 #include "util/message.h"
 #include "util/messagequeue.h"
 
@@ -56,7 +58,7 @@ public:
         { }
     };
 
-    DaemonSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent = 0);
+    DaemonSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
     ~DaemonSinkThread();
 
     void startStop(bool start);
@@ -67,7 +69,8 @@ private:
 	bool m_running;
 
     SDRDaemonDataQueue *m_dataQueue;
-    CM256 *m_cm256;                       //!< CM256 library object
+    CM256 m_cm256;
+    CM256 *m_cm256p;
 
     QHostAddress m_address;
     QUdpSocket *m_socket;

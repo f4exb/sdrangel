@@ -26,8 +26,6 @@
 #include <QObject>
 #include <QMutex>
 
-#include "cm256.h"
-
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
 #include "channel/sdrdaemondataqueue.h"
@@ -134,8 +132,6 @@ private:
     DaemonSinkSettings m_settings;
     SDRDaemonDataQueue m_dataQueue;
     DaemonSinkThread *m_sinkThread;
-    CM256 m_cm256;
-    CM256 *m_cm256p;
 
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;               //!< transmission frame count

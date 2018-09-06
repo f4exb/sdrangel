@@ -30,14 +30,15 @@
 
 MESSAGE_CLASS_DEFINITION(DaemonSinkThread::MsgStartStop, Message)
 
-DaemonSinkThread::DaemonSinkThread(SDRDaemonDataQueue *dataQueue, CM256 *cm256, QObject* parent) :
+DaemonSinkThread::DaemonSinkThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
-    m_cm256(cm256),
     m_address(QHostAddress::LocalHost),
     m_socket(0)
 {
+
+    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
 }
@@ -102,7 +103,7 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
     SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
 
-    if ((nbBlocksFEC == 0) || !m_cm256) // Do not FEC encode
+    if ((nbBlocksFEC == 0) || !m_cm256p) // Do not FEC encode
     {
         if (m_socket)
         {
@@ -134,7 +135,7 @@ bool DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         }
 
         // Encode FEC blocks
-        if (m_cm256->cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
+        if (m_cm256p->cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
         {
             qWarning("SDRDaemonChannelSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
             // TODO: send without FEC changing meta data to set indication of no FEC
