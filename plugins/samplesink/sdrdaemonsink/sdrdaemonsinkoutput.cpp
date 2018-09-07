@@ -58,6 +58,7 @@ SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
 	m_lastSampleCount(0),
 	m_lastRemoteTimestampRateCorrection(0),
 	m_lastTimestampRateCorrection(0),
+	m_lastQueueLength(-2),
 	m_nbRemoteSamplesSinceRateCorrection(0),
 	m_nbSamplesSinceRateCorrection(0),
 	m_chunkSizeCorrection(0)
@@ -93,6 +94,7 @@ bool SDRdaemonSinkOutput::start()
 
 	m_lastRemoteTimestampRateCorrection = 0;
 	m_lastTimestampRateCorrection = 0;
+	m_lastQueueLength = -2; // set first value out of bounds
 
     double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
@@ -514,7 +516,8 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
 
         uint64_t timestampUs = tv.tv_sec*1000000ULL + tv.tv_usec;
 
-        if (m_lastRemoteTimestampRateCorrection == 0)
+        // on initial state wait for queue stabilization
+        if ((m_lastRemoteTimestampRateCorrection == 0) && (queueLength >= m_lastQueueLength-1) && (queueLength <= m_lastQueueLength+1))
         {
             m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
             m_lastTimestampRateCorrection = timestampUs;
@@ -545,6 +548,7 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
 
         m_lastRemoteSampleCount = remoteSampleCount;
         m_lastSampleCount = sampleCount;
+        m_lastQueueLength = queueLength;
     }
 }
 

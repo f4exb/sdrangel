@@ -183,6 +183,7 @@ private:
     uint32_t m_lastSampleCount;
     uint64_t m_lastRemoteTimestampRateCorrection;
     uint64_t m_lastTimestampRateCorrection;
+    int m_lastQueueLength;
     uint32_t m_nbRemoteSamplesSinceRateCorrection;
     uint32_t m_nbSamplesSinceRateCorrection;
     int m_chunkSizeCorrection;
