@@ -54,6 +54,12 @@ public:
     qint32 getTxDelay();
     void setTxDelay(qint32 tx_delay);
 
+    qint32 getRgbColor();
+    void setRgbColor(qint32 rgb_color);
+
+    QString* getTitle();
+    void setTitle(QString* title);
+
 
     virtual bool isSet() override;
 
@@ -69,6 +75,12 @@ private:
 
     qint32 tx_delay;
     bool m_tx_delay_isSet;
+
+    qint32 rgb_color;
+    bool m_rgb_color_isSet;
+
+    QString* title;
+    bool m_title_isSet;
 
 };
 

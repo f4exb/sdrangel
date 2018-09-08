@@ -13,3 +13,7 @@ DaemonSinkSettings:
     txDelay:
       description: "Minimum delay in ms between consecutive USB blocks transmissions"
       type: integer
+    rgbColor:
+      type: integer                  
+    title:
+      type: string      

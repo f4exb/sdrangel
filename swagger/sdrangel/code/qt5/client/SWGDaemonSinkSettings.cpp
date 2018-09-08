@@ -36,6 +36,10 @@ SWGDaemonSinkSettings::SWGDaemonSinkSettings() {
     m_data_port_isSet = false;
     tx_delay = 0;
     m_tx_delay_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
 }
 
 SWGDaemonSinkSettings::~SWGDaemonSinkSettings() {
@@ -52,6 +56,10 @@ SWGDaemonSinkSettings::init() {
     m_data_port_isSet = false;
     tx_delay = 0;
     m_tx_delay_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
+    title = new QString("");
+    m_title_isSet = false;
 }
 
 void
@@ -62,6 +70,10 @@ SWGDaemonSinkSettings::cleanup() {
     }
 
 
+
+    if(title != nullptr) { 
+        delete title;
+    }
 }
 
 SWGDaemonSinkSettings*
@@ -82,6 +94,10 @@ SWGDaemonSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_delay, pJson["txDelay"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
 }
 
@@ -110,6 +126,12 @@ SWGDaemonSinkSettings::asJsonObject() {
     }
     if(m_tx_delay_isSet){
         obj->insert("txDelay", QJsonValue(tx_delay));
+    }
+    if(m_rgb_color_isSet){
+        obj->insert("rgbColor", QJsonValue(rgb_color));
+    }
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
     }
 
     return obj;
@@ -155,6 +177,26 @@ SWGDaemonSinkSettings::setTxDelay(qint32 tx_delay) {
     this->m_tx_delay_isSet = true;
 }
 
+qint32
+SWGDaemonSinkSettings::getRgbColor() {
+    return rgb_color;
+}
+void
+SWGDaemonSinkSettings::setRgbColor(qint32 rgb_color) {
+    this->rgb_color = rgb_color;
+    this->m_rgb_color_isSet = true;
+}
+
+QString*
+SWGDaemonSinkSettings::getTitle() {
+    return title;
+}
+void
+SWGDaemonSinkSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
+}
+
 
 bool
 SWGDaemonSinkSettings::isSet(){
@@ -164,6 +206,8 @@ SWGDaemonSinkSettings::isSet(){
         if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
         if(m_data_port_isSet){ isObjectUpdated = true; break;}
         if(m_tx_delay_isSet){ isObjectUpdated = true; break;}
+        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
+        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
