@@ -389,6 +389,14 @@ int DaemonSink::webapiSettingsPutPatch(
         }
     }
 
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getDaemonSinkSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getDaemonSinkSettings()->getTitle();
+    }
+
+
     MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(settings, force);
     m_inputMessageQueue.push(msg);
 
@@ -416,4 +424,12 @@ void DaemonSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     }
 
     response.getDaemonSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getDaemonSinkSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getDaemonSinkSettings()->getTitle()) {
+        *response.getDaemonSinkSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getDaemonSinkSettings()->setTitle(new QString(settings.m_title));
+    }
+
 }
