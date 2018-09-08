@@ -28,30 +28,18 @@ SWGSDRdaemonSourceSettings::SWGSDRdaemonSourceSettings(QString* json) {
 }
 
 SWGSDRdaemonSourceSettings::SWGSDRdaemonSourceSettings() {
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    log2_decim = 0;
-    m_log2_decim_isSet = false;
-    tx_delay = 0.0f;
-    m_tx_delay_isSet = false;
-    nb_fec_blocks = 0;
-    m_nb_fec_blocks_isSet = false;
-    address = nullptr;
-    m_address_isSet = false;
+    api_address = nullptr;
+    m_api_address_isSet = false;
+    api_port = 0;
+    m_api_port_isSet = false;
+    data_address = nullptr;
+    m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    control_port = 0;
-    m_control_port_isSet = false;
-    specific_parameters = nullptr;
-    m_specific_parameters_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
 }
@@ -62,48 +50,30 @@ SWGSDRdaemonSourceSettings::~SWGSDRdaemonSourceSettings() {
 
 void
 SWGSDRdaemonSourceSettings::init() {
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    log2_decim = 0;
-    m_log2_decim_isSet = false;
-    tx_delay = 0.0f;
-    m_tx_delay_isSet = false;
-    nb_fec_blocks = 0;
-    m_nb_fec_blocks_isSet = false;
-    address = new QString("");
-    m_address_isSet = false;
+    api_address = new QString("");
+    m_api_address_isSet = false;
+    api_port = 0;
+    m_api_port_isSet = false;
+    data_address = new QString("");
+    m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    control_port = 0;
-    m_control_port_isSet = false;
-    specific_parameters = new QString("");
-    m_specific_parameters_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
 }
 
 void
 SWGSDRdaemonSourceSettings::cleanup() {
-
-
-
-
-
-    if(address != nullptr) { 
-        delete address;
+    if(api_address != nullptr) { 
+        delete api_address;
     }
 
-
-    if(specific_parameters != nullptr) { 
-        delete specific_parameters;
+    if(data_address != nullptr) { 
+        delete data_address;
     }
 
 
@@ -124,29 +94,17 @@ SWGSDRdaemonSourceSettings::fromJson(QString &json) {
 
 void
 SWGSDRdaemonSourceSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&api_address, pJson["apiAddress"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&api_port, pJson["apiPort"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_delay, pJson["txDelay"], "float", "");
-    
-    ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&address, pJson["address"], "QString", "QString");
+    ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&control_port, pJson["controlPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&specific_parameters, pJson["specificParameters"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -166,41 +124,23 @@ SWGSDRdaemonSourceSettings::asJson ()
 QJsonObject*
 SWGSDRdaemonSourceSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_center_frequency_isSet){
-        obj->insert("centerFrequency", QJsonValue(center_frequency));
+    if(api_address != nullptr && *api_address != QString("")){
+        toJsonValue(QString("apiAddress"), api_address, obj, QString("QString"));
     }
-    if(m_sample_rate_isSet){
-        obj->insert("sampleRate", QJsonValue(sample_rate));
+    if(m_api_port_isSet){
+        obj->insert("apiPort", QJsonValue(api_port));
     }
-    if(m_log2_decim_isSet){
-        obj->insert("log2Decim", QJsonValue(log2_decim));
-    }
-    if(m_tx_delay_isSet){
-        obj->insert("txDelay", QJsonValue(tx_delay));
-    }
-    if(m_nb_fec_blocks_isSet){
-        obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
-    }
-    if(address != nullptr && *address != QString("")){
-        toJsonValue(QString("address"), address, obj, QString("QString"));
+    if(data_address != nullptr && *data_address != QString("")){
+        toJsonValue(QString("dataAddress"), data_address, obj, QString("QString"));
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
-    }
-    if(m_control_port_isSet){
-        obj->insert("controlPort", QJsonValue(control_port));
-    }
-    if(specific_parameters != nullptr && *specific_parameters != QString("")){
-        toJsonValue(QString("specificParameters"), specific_parameters, obj, QString("QString"));
     }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
-    }
-    if(m_fc_pos_isSet){
-        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -209,64 +149,34 @@ SWGSDRdaemonSourceSettings::asJsonObject() {
     return obj;
 }
 
-qint32
-SWGSDRdaemonSourceSettings::getCenterFrequency() {
-    return center_frequency;
+QString*
+SWGSDRdaemonSourceSettings::getApiAddress() {
+    return api_address;
 }
 void
-SWGSDRdaemonSourceSettings::setCenterFrequency(qint32 center_frequency) {
-    this->center_frequency = center_frequency;
-    this->m_center_frequency_isSet = true;
+SWGSDRdaemonSourceSettings::setApiAddress(QString* api_address) {
+    this->api_address = api_address;
+    this->m_api_address_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getSampleRate() {
-    return sample_rate;
+SWGSDRdaemonSourceSettings::getApiPort() {
+    return api_port;
 }
 void
-SWGSDRdaemonSourceSettings::setSampleRate(qint32 sample_rate) {
-    this->sample_rate = sample_rate;
-    this->m_sample_rate_isSet = true;
-}
-
-qint32
-SWGSDRdaemonSourceSettings::getLog2Decim() {
-    return log2_decim;
-}
-void
-SWGSDRdaemonSourceSettings::setLog2Decim(qint32 log2_decim) {
-    this->log2_decim = log2_decim;
-    this->m_log2_decim_isSet = true;
-}
-
-float
-SWGSDRdaemonSourceSettings::getTxDelay() {
-    return tx_delay;
-}
-void
-SWGSDRdaemonSourceSettings::setTxDelay(float tx_delay) {
-    this->tx_delay = tx_delay;
-    this->m_tx_delay_isSet = true;
-}
-
-qint32
-SWGSDRdaemonSourceSettings::getNbFecBlocks() {
-    return nb_fec_blocks;
-}
-void
-SWGSDRdaemonSourceSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
-    this->nb_fec_blocks = nb_fec_blocks;
-    this->m_nb_fec_blocks_isSet = true;
+SWGSDRdaemonSourceSettings::setApiPort(qint32 api_port) {
+    this->api_port = api_port;
+    this->m_api_port_isSet = true;
 }
 
 QString*
-SWGSDRdaemonSourceSettings::getAddress() {
-    return address;
+SWGSDRdaemonSourceSettings::getDataAddress() {
+    return data_address;
 }
 void
-SWGSDRdaemonSourceSettings::setAddress(QString* address) {
-    this->address = address;
-    this->m_address_isSet = true;
+SWGSDRdaemonSourceSettings::setDataAddress(QString* data_address) {
+    this->data_address = data_address;
+    this->m_data_address_isSet = true;
 }
 
 qint32
@@ -277,26 +187,6 @@ void
 SWGSDRdaemonSourceSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
-}
-
-qint32
-SWGSDRdaemonSourceSettings::getControlPort() {
-    return control_port;
-}
-void
-SWGSDRdaemonSourceSettings::setControlPort(qint32 control_port) {
-    this->control_port = control_port;
-    this->m_control_port_isSet = true;
-}
-
-QString*
-SWGSDRdaemonSourceSettings::getSpecificParameters() {
-    return specific_parameters;
-}
-void
-SWGSDRdaemonSourceSettings::setSpecificParameters(QString* specific_parameters) {
-    this->specific_parameters = specific_parameters;
-    this->m_specific_parameters_isSet = true;
 }
 
 qint32
@@ -319,16 +209,6 @@ SWGSDRdaemonSourceSettings::setIqCorrection(qint32 iq_correction) {
     this->m_iq_correction_isSet = true;
 }
 
-qint32
-SWGSDRdaemonSourceSettings::getFcPos() {
-    return fc_pos;
-}
-void
-SWGSDRdaemonSourceSettings::setFcPos(qint32 fc_pos) {
-    this->fc_pos = fc_pos;
-    this->m_fc_pos_isSet = true;
-}
-
 QString*
 SWGSDRdaemonSourceSettings::getFileRecordName() {
     return file_record_name;
@@ -344,18 +224,12 @@ bool
 SWGSDRdaemonSourceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_tx_delay_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
-        if(address != nullptr && *address != QString("")){ isObjectUpdated = true; break;}
+        if(api_address != nullptr && *api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_api_port_isSet){ isObjectUpdated = true; break;}
+        if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
         if(m_data_port_isSet){ isObjectUpdated = true; break;}
-        if(m_control_port_isSet){ isObjectUpdated = true; break;}
-        if(specific_parameters != nullptr && *specific_parameters != QString("")){ isObjectUpdated = true; break;}
         if(m_dc_block_isSet){ isObjectUpdated = true; break;}
         if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
         if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

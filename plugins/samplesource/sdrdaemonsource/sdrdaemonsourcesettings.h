@@ -21,18 +21,12 @@
 #include <QString>
 
 struct SDRdaemonSourceSettings {
-    quint64 m_centerFrequency;
-    quint64 m_sampleRate;
-    quint32 m_log2Decim;
-    float   m_txDelay;
-    quint32 m_nbFECBlocks;
-    QString m_address;
+    QString m_apiAddress;
+    quint16 m_apiPort;
+    QString m_dataAddress;
     quint16 m_dataPort;
-    quint16 m_controlPort;
-    QString m_specificParameters;
     bool    m_dcBlock;
     bool    m_iqCorrection;
-    quint32 m_fcPos;
     QString m_fileRecordName;
 
     SDRdaemonSourceSettings();

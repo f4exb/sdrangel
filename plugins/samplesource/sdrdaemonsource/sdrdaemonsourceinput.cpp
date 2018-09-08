@@ -57,12 +57,6 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(),
 	m_startingTimeStamp(0)
 {
-    m_sender = nn_socket(AF_SP, NN_PAIR);
-    assert(m_sender != -1);
-    int millis = 500;
-    int rc __attribute__((unused)) = nn_setsockopt (m_sender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
-    assert (rc == 0);
-
 	m_sampleFifo.setSize(96000 * 4);
 	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, m_deviceAPI);
 
@@ -141,29 +135,16 @@ const QString& SDRdaemonSourceInput::getDeviceDescription() const
 
 int SDRdaemonSourceInput::getSampleRate() const
 {
-    if (m_SDRdaemonUDPHandler->getSampleRate()) {
-        return m_SDRdaemonUDPHandler->getSampleRate();
-    } else {
-        return m_settings.m_sampleRate / (1<<m_settings.m_log2Decim);
-    }
+    return m_SDRdaemonUDPHandler->getSampleRate();
 }
 
 quint64 SDRdaemonSourceInput::getCenterFrequency() const
 {
-    if (m_SDRdaemonUDPHandler->getCenterFrequency()) {
-        return m_SDRdaemonUDPHandler->getCenterFrequency();
-    } else {
-        return m_settings.m_centerFrequency;
-    }
+    return m_SDRdaemonUDPHandler->getCenterFrequency();
 }
 
-void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency)
+void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
 {
-    SDRdaemonSourceSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
-
-    MsgConfigureSDRdaemonSource* message = MsgConfigureSDRdaemonSource::create(m_settings, false);
-    m_inputMessageQueue.push(message);
 }
 
 std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const
@@ -240,9 +221,7 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
-    bool changeTxDelay = false;
     std::ostringstream os;
-    int nbArgs = 0;
     QString remoteAddress;
     m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
 
@@ -250,121 +229,14 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
         qDebug("SDRdaemonSourceInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
-                m_settings.m_dcBlock ? "true" : "false",
-                m_settings.m_iqCorrection ? "true" : "false");
+                settings.m_dcBlock ? "true" : "false",
+                settings.m_iqCorrection ? "true" : "false");
     }
 
-    if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
+    if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        m_SDRdaemonUDPHandler->configureUDPLink(settings.m_address, settings.m_dataPort);
+        m_SDRdaemonUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
         m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
-    }
-
-    if (force || (remoteAddress != m_remoteAddress) || (m_settings.m_controlPort != settings.m_controlPort))
-    {
-        int rc = nn_shutdown(m_sender, 0);
-
-        if (rc < 0) {
-            qDebug() << "SDRdaemonSourceInput::applySettings: nn disconnection failed";
-        } else {
-            qDebug() << "SDRdaemonSourceInput::applySettings: nn disconnection successful";
-        }
-
-        std::ostringstream os;
-        os << "tcp://" << remoteAddress.toStdString() << ":" << m_settings.m_controlPort;
-        std::string addrstrng = os.str();
-        rc = nn_connect(m_sender, addrstrng.c_str());
-
-        if (rc < 0) {
-            qDebug() << "SDRdaemonSourceInput::applySettings: nn connexion to " << addrstrng.c_str() << " failed";
-        } else {
-            qDebug() << "SDRdaemonSourceInput::applySettings: nn connexion to " << addrstrng.c_str() << " successful";
-        }
-    }
-
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
-    {
-        os << "freq=" << settings.m_centerFrequency;
-        nbArgs++;
-    }
-
-    if (force || (m_settings.m_sampleRate != settings.m_sampleRate) || (m_settings.m_log2Decim != settings.m_log2Decim))
-    {
-        if (nbArgs > 0) os << ",";
-        os << "srate=" << m_settings.m_sampleRate;
-        nbArgs++;
-        changeTxDelay = m_settings.m_sampleRate != settings.m_sampleRate;
-    }
-
-    if (force || (m_settings.m_log2Decim != settings.m_log2Decim))
-    {
-        if (nbArgs > 0) os << ",";
-        os << "decim=" << settings.m_log2Decim;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "fcpos=" << m_settings.m_fcPos;
-        nbArgs++;
-    }
-
-    if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
-    {
-        if (nbArgs > 0) os << ",";
-        os << "fecblk=" << m_settings.m_nbFECBlocks;
-        nbArgs++;
-        changeTxDelay = true;
-    }
-
-    if (force || (m_settings.m_txDelay != settings.m_txDelay))
-    {
-        changeTxDelay = true;
-    }
-
-    if (changeTxDelay)
-    {
-        double delay = ((127*127*settings.m_txDelay) / settings.m_sampleRate)/(128 + settings.m_nbFECBlocks);
-        qDebug("SDRdaemonSourceInput::applySettings: Tx delay: %f us", delay*1e6);
-
-        if (delay != 0.0)
-        {
-            if (nbArgs > 0) os << ",";
-            os << "txdelay=" << (int) (delay*1e6);
-            nbArgs++;
-        }
-    }
-
-    if ((m_settings.m_specificParameters != settings.m_specificParameters) || force)
-    {
-        if (settings.m_specificParameters.size() > 0)
-        {
-            if (nbArgs > 0) os << ",";
-            os << settings.m_specificParameters.toStdString();
-            nbArgs++;
-        }
-    }
-
-    if (nbArgs > 0)
-    {
-        int config_size = os.str().size();
-        int rc = nn_send(m_sender, (void *) os.str().c_str(), config_size, 0);
-
-        if (rc != config_size)
-        {
-            qDebug() << "SDRdaemonSourceInput::applySettings: Cannot nn send to "
-                << " remoteAddress: " << remoteAddress
-                << " remotePort: " << settings.m_controlPort
-                << " message: " << os.str().c_str();
-        }
-        else
-        {
-            qDebug() << "SDRdaemonSourceInput::applySettings: nn send to "
-                << "remoteAddress:" << remoteAddress
-                << "remotePort:" << settings.m_controlPort
-                << "message:" << os.str().c_str();
-        }
     }
 
     mutexLocker.unlock();
@@ -372,17 +244,11 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     m_remoteAddress = remoteAddress;
 
     qDebug() << "SDRdaemonSourceInput::applySettings: "
-            << " m_address: " << m_settings.m_address
-            << " m_remoteAddress: " << m_remoteAddress
+            << " m_dataAddress: " << m_settings.m_dataAddress
             << " m_dataPort: " << m_settings.m_dataPort
-            << " m_controlPort: " << m_settings.m_controlPort
-            << " m_centerFrequency: " << m_settings.m_centerFrequency
-            << " m_sampleRate: " << m_settings.m_sampleRate
-            << " m_log2Decim: " << m_settings.m_log2Decim
-            << " m_fcPos: " << m_settings.m_fcPos
-            << " m_txDelay: " << m_settings.m_txDelay
-            << " m_nbFECBlocks: " << m_settings.m_nbFECBlocks
-            << " m_specificParameters: " << m_settings.m_specificParameters;
+            << " m_apiAddress: " << m_settings.m_apiAddress
+            << " m_apiPort: " << m_settings.m_apiPort
+            << " m_remoteAddress: " << m_remoteAddress;
 }
 
 int SDRdaemonSourceInput::webapiRunGet(
@@ -429,42 +295,23 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
 {
     SDRdaemonSourceSettings settings = m_settings;
 
-    if (deviceSettingsKeys.contains("centerFrequency")) {
-        settings.m_centerFrequency = response.getSdrDaemonSourceSettings()->getCenterFrequency();
+    if (deviceSettingsKeys.contains("apiAddress")) {
+        settings.m_apiAddress = *response.getSdrDaemonSourceSettings()->getApiAddress();
     }
-    if (deviceSettingsKeys.contains("sampleRate")) {
-        settings.m_sampleRate = response.getSdrDaemonSourceSettings()->getSampleRate();
+    if (deviceSettingsKeys.contains("apiPort")) {
+        settings.m_apiPort = response.getSdrDaemonSourceSettings()->getApiPort();
     }
-    if (deviceSettingsKeys.contains("log2Decim")) {
-        settings.m_log2Decim = response.getSdrDaemonSourceSettings()->getLog2Decim();
-    }
-    if (deviceSettingsKeys.contains("txDelay")) {
-        settings.m_txDelay = response.getSdrDaemonSourceSettings()->getTxDelay();
-    }
-    if (deviceSettingsKeys.contains("nbFECBlocks")) {
-        settings.m_txDelay = response.getSdrDaemonSourceSettings()->getNbFecBlocks();
-    }
-    if (deviceSettingsKeys.contains("address")) {
-        settings.m_address = *response.getSdrDaemonSourceSettings()->getAddress();
+    if (deviceSettingsKeys.contains("dataAddress")) {
+        settings.m_dataAddress = *response.getSdrDaemonSourceSettings()->getDataAddress();
     }
     if (deviceSettingsKeys.contains("dataPort")) {
         settings.m_dataPort = response.getSdrDaemonSourceSettings()->getDataPort();
-    }
-    if (deviceSettingsKeys.contains("controlPort")) {
-        settings.m_controlPort = response.getSdrDaemonSourceSettings()->getControlPort();
-    }
-    if (deviceSettingsKeys.contains("specificParameters")) {
-        settings.m_specificParameters = *response.getSdrDaemonSourceSettings()->getSpecificParameters();
     }
     if (deviceSettingsKeys.contains("dcBlock")) {
         settings.m_dcBlock = response.getSdrDaemonSourceSettings()->getDcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getSdrDaemonSourceSettings()->getIqCorrection() != 0;
-    }
-    if (deviceSettingsKeys.contains("fcPos")) {
-        int fcPos = response.getSdrDaemonSourceSettings()->getFcPos();
-        settings.m_fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getSdrDaemonSourceSettings()->getFileRecordName();
@@ -485,18 +332,12 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
 
 void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings)
 {
-    response.getSdrDaemonSourceSettings()->setCenterFrequency(settings.m_centerFrequency);
-    response.getSdrDaemonSourceSettings()->setSampleRate(settings.m_sampleRate);
-    response.getSdrDaemonSourceSettings()->setLog2Decim(settings.m_log2Decim);
-    response.getSdrDaemonSourceSettings()->setTxDelay(settings.m_txDelay);
-    response.getSdrDaemonSourceSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getSdrDaemonSourceSettings()->setAddress(new QString(settings.m_address));
+    response.getSdrDaemonSourceSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    response.getSdrDaemonSourceSettings()->setApiPort(settings.m_apiPort);
+    response.getSdrDaemonSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
     response.getSdrDaemonSourceSettings()->setDataPort(settings.m_dataPort);
-    response.getSdrDaemonSourceSettings()->setControlPort(settings.m_controlPort);
-    response.getSdrDaemonSourceSettings()->setSpecificParameters(new QString(settings.m_specificParameters));
     response.getSdrDaemonSourceSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getSdrDaemonSourceSettings()->setIqCorrection(settings.m_iqCorrection);
-    response.getSdrDaemonSourceSettings()->setFcPos((int) settings.m_fcPos);
 
     if (response.getSdrDaemonSourceSettings()->getFileRecordName()) {
         *response.getSdrDaemonSourceSettings()->getFileRecordName() = settings.m_fileRecordName;

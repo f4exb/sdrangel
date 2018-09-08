@@ -42,41 +42,23 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGSDRdaemonSourceSettings* fromJson(QString &jsonString) override;
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
+    QString* getApiAddress();
+    void setApiAddress(QString* api_address);
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getApiPort();
+    void setApiPort(qint32 api_port);
 
-    qint32 getLog2Decim();
-    void setLog2Decim(qint32 log2_decim);
-
-    float getTxDelay();
-    void setTxDelay(float tx_delay);
-
-    qint32 getNbFecBlocks();
-    void setNbFecBlocks(qint32 nb_fec_blocks);
-
-    QString* getAddress();
-    void setAddress(QString* address);
+    QString* getDataAddress();
+    void setDataAddress(QString* data_address);
 
     qint32 getDataPort();
     void setDataPort(qint32 data_port);
-
-    qint32 getControlPort();
-    void setControlPort(qint32 control_port);
-
-    QString* getSpecificParameters();
-    void setSpecificParameters(QString* specific_parameters);
 
     qint32 getDcBlock();
     void setDcBlock(qint32 dc_block);
 
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
-
-    qint32 getFcPos();
-    void setFcPos(qint32 fc_pos);
 
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
@@ -85,41 +67,23 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 center_frequency;
-    bool m_center_frequency_isSet;
+    QString* api_address;
+    bool m_api_address_isSet;
 
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 api_port;
+    bool m_api_port_isSet;
 
-    qint32 log2_decim;
-    bool m_log2_decim_isSet;
-
-    float tx_delay;
-    bool m_tx_delay_isSet;
-
-    qint32 nb_fec_blocks;
-    bool m_nb_fec_blocks_isSet;
-
-    QString* address;
-    bool m_address_isSet;
+    QString* data_address;
+    bool m_data_address_isSet;
 
     qint32 data_port;
     bool m_data_port_isSet;
-
-    qint32 control_port;
-    bool m_control_port_isSet;
-
-    QString* specific_parameters;
-    bool m_specific_parameters_isSet;
 
     qint32 dc_block;
     bool m_dc_block_isSet;
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
-
-    qint32 fc_pos;
-    bool m_fc_pos_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;

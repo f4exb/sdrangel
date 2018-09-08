@@ -1,33 +1,17 @@
 SDRdaemonSourceSettings:
   description: SDRdaemonSource
   properties:
-    centerFrequency:
+    apiAddress:
+      type: string
+    apiPort:
       type: integer
-      format: uint64
-    sampleRate:
-      type: integer
-    log2Decim:
-      type: integer
-    txDelay:
-      description: minimum delay in ms between two consecutive packets sending
-      type: number
-      format: float
-    nbFECBlocks:
-      type: integer
-    address:
+    dataAddress:
       type: string
     dataPort:
       type: integer
-    controlPort:
-      type: integer
-    specificParameters:
-      type: string
     dcBlock:
       type: integer
     iqCorrection:
-      type: integer
-    fcPos:
-      description: 0=Infra 1=Supra 2=Center
       type: integer
     fileRecordName:
       type: string

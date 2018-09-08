@@ -24,14 +24,10 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-
-#ifdef _WIN32
-#include <nn.h>
-#include <pair.h>
-#else
-#include <nanomsg/nn.h>
-#include <nanomsg/pair.h>
-#endif
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QJsonParseError>
+#include <QJsonObject>
 
 #include "ui_sdrdaemonsourcegui.h"
 #include "gui/colormapper.h"
@@ -40,9 +36,9 @@
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
 #include "util/simpleserializer.h"
-
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
+
 #include "sdrdaemonsourcegui.h"
 
 SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -80,12 +76,6 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, 9999999U);
 
-    ui->freq->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->freq->setValueRange(7, 0, 9999999U);
-
-    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(7, 32000U, 9999999U);
-
 	displaySettings();
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -97,6 +87,9 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
     m_eventsTime.start();
     displayEventCounts();
     displayEventTimer();
@@ -107,6 +100,8 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 
 SDRdaemonSourceGui::~SDRdaemonSourceGui()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	delete ui;
 }
 
@@ -149,7 +144,6 @@ bool SDRdaemonSourceGui::deserialize(const QByteArray& data)
 
     if (m_settings.deserialize(data))
     {
-        updateTxDelay();
         displaySettings();
         m_forceSettings = true;
         sendSettings();
@@ -167,10 +161,8 @@ qint64 SDRdaemonSourceGui::getCenterFrequency() const
     return m_streamCenterFrequency;
 }
 
-void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
+void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
 {
-    m_settings.m_centerFrequency = centerFrequency;
-    sendSettings();
 }
 
 bool SDRdaemonSourceGui::handleMessage(const Message& message)
@@ -220,10 +212,8 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
 
         int nbFECBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getNbFECBlocksPerFrame();
 
-        if (m_nbFECBlocks != nbFECBlocks)
-        {
+        if (m_nbFECBlocks != nbFECBlocks) {
             m_nbFECBlocks = nbFECBlocks;
-            updateTxDelay();
         }
 
 		updateWithStreamTime();
@@ -256,10 +246,8 @@ void SDRdaemonSourceGui::handleInputMessages()
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
 
-            if (notif->getSampleRate() != m_streamSampleRate)
-            {
+            if (notif->getSampleRate() != m_streamSampleRate) {
                 m_streamSampleRate = notif->getSampleRate();
-                updateTxDelay();
             }
 
             m_streamCenterFrequency = notif->getCenterFrequency();
@@ -289,19 +277,7 @@ void SDRdaemonSourceGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
-    ui->freq->setValue(m_streamCenterFrequency / 1000);
     blockApplySettings(false);
-}
-
-void SDRdaemonSourceGui::updateTxDelay()
-{
-    if (m_streamSampleRate == 0) {
-        m_txDelay = 0.0; // 0 value will not set the Tx delay
-    } else {
-        m_txDelay = ((127*127*m_settings.m_txDelay) / m_streamSampleRate)/(128 + m_nbFECBlocks);
-    }
-
-    ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(m_txDelay*1e6, 'f', 0)));
 }
 
 void SDRdaemonSourceGui::displaySettings()
@@ -311,24 +287,10 @@ void SDRdaemonSourceGui::displaySettings()
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
     ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
 
-    ui->freq->setValue(m_streamCenterFrequency / 1000);
-    ui->decim->setCurrentIndex(m_settings.m_log2Decim);
-    ui->fcPos->setCurrentIndex(m_settings.m_fcPos);
-    ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->specificParms->setText(m_settings.m_specificParameters);
-    ui->specificParms->setCursorPosition(0);
-    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
-    ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
-    QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
-    ui->nbFECBlocksText->setText(nstr);
-
-    QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
-    ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s0).arg(nstr));
-
-    ui->address->setText(m_settings.m_address);
+    ui->apiAddress->setText(m_settings.m_apiAddress);
+    ui->apiPort->setText(tr("%1").arg(m_settings.m_apiPort));
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
-    ui->controlPort->setText(tr("%1").arg(m_settings.m_controlPort));
-    ui->specificParms->setText(m_settings.m_specificParameters);
+    ui->dataAddress->setText(m_settings.m_dataAddress);
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
@@ -342,45 +304,48 @@ void SDRdaemonSourceGui::sendSettings()
         m_updateTimer.start(100);
 }
 
-void SDRdaemonSourceGui::on_applyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_apiApplyButton_clicked(bool checked __attribute__((unused)))
 {
-    m_settings.m_address = ui->address->text();
+    m_settings.m_apiAddress = ui->apiAddress->text();
 
-    bool send = false;
     bool ctlOk;
-    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
+    int udpApiPort = ui->apiPort->text().toInt(&ctlOk);
 
-    if((ctlOk) && (udpCtlPort >= 1024) && (udpCtlPort < 65535))
-    {
-        m_settings.m_controlPort = udpCtlPort;
-        send = true;
+    if((ctlOk) && (udpApiPort >= 1024) && (udpApiPort < 65535)) {
+        m_settings.m_apiPort = udpApiPort;
     }
+
+    sendSettings();
+}
+
+void SDRdaemonSourceGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
 
-    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
-    {
+    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535)) {
         m_settings.m_dataPort = udpDataPort;
-        send = true;
     }
 
-    if (send) {
-        sendSettings();
-    }
-}
-
-void SDRdaemonSourceGui::on_sendButton_clicked(bool checked __attribute__((unused)))
-{
-    updateTxDelay();
-    m_forceSettings = true;
     sendSettings();
-	ui->specificParms->setCursorPosition(0);
 }
 
-void SDRdaemonSourceGui::on_address_returnPressed()
+void SDRdaemonSourceGui::on_apiAddress_returnPressed()
 {
-    m_settings.m_address = ui->address->text();
+    m_settings.m_apiAddress = ui->apiAddress->text();
+
+    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
+
+    sendSettings();
+}
+
+void SDRdaemonSourceGui::on_dataAddress_returnPressed()
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
     sendSettings();
 }
 
@@ -400,18 +365,23 @@ void SDRdaemonSourceGui::on_dataPort_returnPressed()
     }
 }
 
-void SDRdaemonSourceGui::on_controlPort_returnPressed()
+void SDRdaemonSourceGui::on_apiPort_returnPressed()
 {
     bool ctlOk;
-    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
+    int udpApiPort = ui->apiPort->text().toInt(&ctlOk);
 
-    if((!ctlOk) || (udpCtlPort < 1024) || (udpCtlPort > 65535))
+    if((!ctlOk) || (udpApiPort < 1024) || (udpApiPort > 65535))
     {
         return;
     }
     else
     {
-        m_settings.m_controlPort = udpCtlPort;
+        m_settings.m_apiPort = udpApiPort;
+
+        QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+        m_networkRequest.setUrl(QUrl(infoURL));
+        m_networkManager->get(m_networkRequest);
+
         sendSettings();
     }
 }
@@ -425,54 +395,6 @@ void SDRdaemonSourceGui::on_dcOffset_toggled(bool checked)
 void SDRdaemonSourceGui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_freq_changed(quint64 value)
-{
-    m_settings.m_centerFrequency = value * 1000;
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_sampleRate_changed(quint64 value)
-{
-    m_settings.m_sampleRate = value;
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_specificParms_returnPressed()
-{
-    if ((ui->specificParms->text()).size() > 0) {
-        m_settings.m_specificParameters = ui->specificParms->text();
-        sendSettings();
-    }
-}
-
-void SDRdaemonSourceGui::on_decim_currentIndexChanged(int index __attribute__((unused)))
-{
-    m_settings.m_log2Decim = ui->decim->currentIndex();
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_fcPos_currentIndexChanged(int index __attribute__((unused)))
-{
-    m_settings.m_fcPos = ui->fcPos->currentIndex();
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_txDelay_valueChanged(int value)
-{
-    m_settings.m_txDelay = value / 100.0;
-    ui->txDelayText->setText(tr("%1").arg(value));
-    updateTxDelay();
-    sendSettings();
-}
-
-void SDRdaemonSourceGui::on_nbFECBlocks_valueChanged(int value)
-{
-    m_settings.m_nbFECBlocks = value;
-    QString nstr = QString("%1").arg(m_settings.m_nbFECBlocks, 2, 10, QChar('0'));
-    ui->nbFECBlocksText->setText(nstr);
     sendSettings();
 }
 
@@ -629,5 +551,74 @@ void SDRdaemonSourceGui::updateStatus()
         ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         ui->startStop->setChecked(false);
         ui->startStop->setEnabled(false);
+    }
+}
+
+void SDRdaemonSourceGui::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        ui->statusText->setText(reply->errorString());
+        return;
+    }
+
+    QString answer = reply->readAll();
+
+    try
+    {
+        QByteArray jsonBytes(answer.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error == QJsonParseError::NoError)
+        {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
+            ui->statusText->setText(QString("API OK"));
+            analyzeApiReply(doc.object());
+        }
+        else
+        {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            ui->statusText->setText(QString("JSON error. See log"));
+            qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        QString errorMsg = QString("Error parsing request: ") + ex.what();
+        ui->statusText->setText("Error parsing request. See log for details");
+        qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+    }
+}
+
+void SDRdaemonSourceGui::analyzeApiReply(const QJsonObject& jsonObject)
+{
+    QString infoLine;
+
+    if (jsonObject.contains("version")) {
+        infoLine = "v" + jsonObject["version"].toString();
+    }
+
+    if (jsonObject.contains("qtVersion")) {
+        infoLine += " Qt" + jsonObject["qtVersion"].toString();
+    }
+
+    if (jsonObject.contains("architecture")) {
+        infoLine += " " + jsonObject["architecture"].toString();
+    }
+
+    if (jsonObject.contains("os")) {
+        infoLine += " " + jsonObject["os"].toString();
+    }
+
+    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits")) {
+        infoLine +=  QString(" %1/%2b").arg(jsonObject["dspRxBits"].toInt()).arg(jsonObject["dspTxBits"].toInt());
+    }
+
+    if (infoLine.size() > 0) {
+        ui->infoText->setText(infoLine);
     }
 }

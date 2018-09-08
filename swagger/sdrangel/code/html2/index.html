@@ -3421,45 +3421,23 @@ margin-bottom: 20px;
 };
             defs.SDRdaemonSourceSettings = {
   "properties" : {
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
+    "apiAddress" : {
+      "type" : "string"
     },
-    "sampleRate" : {
+    "apiPort" : {
       "type" : "integer"
     },
-    "log2Decim" : {
-      "type" : "integer"
-    },
-    "txDelay" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "minimum delay in ms between two consecutive packets sending"
-    },
-    "nbFECBlocks" : {
-      "type" : "integer"
-    },
-    "address" : {
+    "dataAddress" : {
       "type" : "string"
     },
     "dataPort" : {
       "type" : "integer"
-    },
-    "controlPort" : {
-      "type" : "integer"
-    },
-    "specificParameters" : {
-      "type" : "string"
     },
     "dcBlock" : {
       "type" : "integer"
     },
     "iqCorrection" : {
       "type" : "integer"
-    },
-    "fcPos" : {
-      "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
     },
     "fileRecordName" : {
       "type" : "string"
@@ -28730,7 +28708,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-08T18:41:07.952+02:00
+              Generated 2018-09-08T22:13:50.971+02:00
             </div>
           </div>
       </div>

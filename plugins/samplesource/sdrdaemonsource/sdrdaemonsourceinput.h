@@ -308,7 +308,6 @@ private:
 	SDRdaemonSourceSettings m_settings;
 	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
     QString m_remoteAddress;
-	int m_sender;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
