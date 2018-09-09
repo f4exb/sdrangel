@@ -52,6 +52,8 @@ public:
         void init()
         {
             memset((char *) this, 0, sizeof(MetaDataFEC));
+            m_sampleBits = 16; // assume 16 bits samples to start with
+            m_sampleBytes = 2;
         }
     };
 
@@ -158,8 +160,6 @@ public:
 
     static const int m_udpPayloadSize = SDRDAEMONSOURCE_UDPSIZE;
     static const int m_nbOriginalBlocks = SDRDAEMONSOURCE_NBORIGINALBLOCKS;
-	static const int m_sampleSize;
-	static const int m_iqSampleSize;
 
 private:
     static const int nbDecoderSlots = SDRDAEMONSOURCE_NBDECODERSLOTS;

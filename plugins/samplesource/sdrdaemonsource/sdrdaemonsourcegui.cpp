@@ -57,6 +57,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 	m_nbOriginalBlocks(128),
     m_nbFECBlocks(0),
     m_sampleBits(16),
+    m_sampleBytes(2),
     m_samplesCount(0),
     m_tickCount(0),
     m_addressEdited(false),
@@ -211,6 +212,7 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
         m_avgNbRecovery = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getAvgNbRecovery();
         m_nbOriginalBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getNbOriginalBlocksPerFrame();
         m_sampleBits = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getSampleBits();
+        m_sampleBytes = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getSampleBytes();
 
         int nbFECBlocks = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getNbFECBlocksPerFrame();
 

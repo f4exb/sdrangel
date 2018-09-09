@@ -263,8 +263,8 @@ void SDRdaemonSourceUDPHandler::tick()
         m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
-    m_readLength = m_readLengthSamples * SDRdaemonSourceBuffer::m_iqSampleSize;
     const SDRdaemonSourceBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    m_readLength = m_readLengthSamples * metaData.m_sampleBytes * 2;
 
     if (SDR_RX_SAMP_SZ == metaData.m_sampleBits) // same sample size
     {
@@ -332,6 +332,7 @@ void SDRdaemonSourceUDPHandler::tick()
 	        int nbOriginalBlocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbOriginalBlocks;
 	        int nbFECblocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbFECBlocks;
 	        int sampleBits = m_sdrDaemonBuffer.getCurrentMeta().m_sampleBits;
+	        int sampleBytes = m_sdrDaemonBuffer.getCurrentMeta().m_sampleBytes;
 
 	        //framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
 	        if (minNbBlocks < nbOriginalBlocks) {
@@ -357,7 +358,8 @@ void SDRdaemonSourceUDPHandler::tick()
 	            m_sdrDaemonBuffer.getAvgNbRecovery(),
 	            nbOriginalBlocks,
 	            nbFECblocks,
-	            sampleBits);
+	            sampleBits,
+	            sampleBytes);
 
 	            m_outputMessageQueueToGUI->push(report);
 		}

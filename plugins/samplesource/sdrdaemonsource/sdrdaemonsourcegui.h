@@ -86,6 +86,7 @@ private:
     int m_nbOriginalBlocks;
     int m_nbFECBlocks;
     int m_sampleBits;
+    int m_sampleBytes;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;

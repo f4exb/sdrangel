@@ -25,9 +25,6 @@
 
 
 
-const int SDRdaemonSourceBuffer::m_sampleSize = 2;
-const int SDRdaemonSourceBuffer::m_iqSampleSize = 2 * m_sampleSize;
-
 SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
         m_decoderIndexHead(nbDecoderSlots/2),
         m_frameHead(0),
@@ -152,7 +149,7 @@ void SDRdaemonSourceBuffer::rwCorrectionEstimate(int slotIndex)
 			dBytes = (nbDecoderSlots * sizeof(BufferFrame)) - normalizedReadIndex - rwDelta;
 		}
 
-        m_balCorrection = (m_balCorrection / 4) + (dBytes / (int) (m_iqSampleSize * m_nbReads)); // correction is in number of samples. Alpha = 0.25
+        m_balCorrection = (m_balCorrection / 4) + (dBytes / (int) (m_currentMeta.m_sampleBytes * 2 * m_nbReads)); // correction is in number of samples. Alpha = 0.25
 
         if (m_balCorrection < -m_balCorrLimit) {
             m_balCorrection = -m_balCorrLimit;
@@ -310,9 +307,9 @@ void SDRdaemonSourceBuffer::writeData(char *array)
                 int sampleRate =  metaData->m_sampleRate;
 
                 if (sampleRate > 0) {
-                    m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * m_iqSampleSize);
+                    m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * m_currentMeta.m_sampleBytes * 2);
                     m_balCorrLimit = sampleRate / 1000; // +/- 1 ms correction max per read
-                    m_readNbBytes = (sampleRate * m_iqSampleSize) / 20;
+                    m_readNbBytes = (sampleRate * m_currentMeta.m_sampleBytes * 2) / 20;
                 }
 
                 printMeta("SDRdaemonSourceBuffer::writeData: new meta", metaData); // print for change other than timestamp
