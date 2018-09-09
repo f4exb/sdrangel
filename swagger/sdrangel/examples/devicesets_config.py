@@ -73,7 +73,7 @@ def main():
                 
         print("All done!")
     
-    except Exception, msg:
+    except Exception as ex:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
 

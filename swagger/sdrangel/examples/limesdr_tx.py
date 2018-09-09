@@ -13,22 +13,24 @@ requests_methods = {
     "DELETE": requests.delete
 }
 
+
 # ======================================================================
 def getInputOptions():
 
     parser = OptionParser(usage="usage: %%prog [-t]\n")
-    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
-    parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int") 
+    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string")
+    parser.add_option("-d", "--device-index", dest="device_index", help="device set index", metavar="INDEX", type="int")
 
     (options, args) = parser.parse_args()
-    
+
     if options.address == None:
         options.address = "127.0.0.1:8091"
-    
+
     if options.device_index == None:
         options.device_index = 1
-    
+
     return options
+
 
 # ======================================================================
 def printResponse(response):
@@ -39,38 +41,40 @@ def printResponse(response):
         elif "text/plain" in content_type:
             print(response.text)
 
+
 # ======================================================================
 def callAPI(url, method, params, json, text):
     request_method = requests_methods.get(method, None)
     if request_method is not None:
-        r = request_method(url=base_url+url, params=params, json=json)
+        r = request_method(url=base_url + url, params=params, json=json)
         if r.status_code / 100 == 2:
             print(text + " succeeded")
             printResponse(r)
-            return r.json() # all 200 yield application/json response
+            return r.json()  # all 200 yield application/json response
         else:
             print(text + " failed")
             printResponse(r)
             return None
 
+
 # ======================================================================
 def main():
     try:
         options = getInputOptions()
-        
+
         global base_url
         base_url = "http://%s/sdrangel" % options.address
-        
+
         r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
         if r is None:
             exit(-1)
-            
+
         deviceset_url = "/deviceset/%d" % options.device_index
-        
+
         r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "LimeSDR", "tx": 1}, "setup LimeSDR on Tx device set")
         if r is None:
             exit(-1)
-            
+
         settings = callAPI(deviceset_url + "/device/settings", "GET", None, None, "Get LimeSDR Tx settings")
         if settings is None:
             exit(-1)
@@ -81,35 +85,35 @@ def main():
         settings["limeSdrOutputSettings"]["ncoEnable"] = 1
         settings["limeSdrOutputSettings"]["ncoFrequency"] = -500000
         settings["limeSdrOutputSettings"]["lpfFIRBW"] = 100000
-        settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1 
-        
+        settings["limeSdrOutputSettings"]["lpfFIREnable"] = 1
+
         r = callAPI(deviceset_url + "/device/settings", "PATCH", None, settings, "Patch LimeSDR Tx settings")
         if r is None:
             exit(-1)
-            
+
         r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
         if r is None:
             exit(-1)
-        
+
         settings = callAPI(deviceset_url + "/channel/0/settings", "GET", None, None, "Get NFM mod settings")
         if settings is None:
             exit(-1)
-        
+
         settings["NFMModSettings"]["cwKeyer"]["text"] = "VVV DE F4EXB  "
         settings["NFMModSettings"]["cwKeyer"]["loop"] = 1
-        settings["NFMModSettings"]["cwKeyer"]["mode"] = 1 # text
-        settings["NFMModSettings"]["modAFInput"] = 4 # CW text
+        settings["NFMModSettings"]["cwKeyer"]["mode"] = 1  # text
+        settings["NFMModSettings"]["modAFInput"] = 4  # CW text
         settings["NFMModSettings"]["toneFrequency"] = 600
-        
+
         r = callAPI(deviceset_url + "/channel/0/settings", "PATCH", None, settings, "Change NFM mod")
         if r is None:
             exit(-1)
-            
+
         r = callAPI(deviceset_url + "/device/run", "POST", None, None, "Start device on deviceset R1")
         if r is None:
             exit(-1)
-        
-    except Exception, msg:
+
+    except Exception as ex:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
 

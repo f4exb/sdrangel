@@ -358,10 +358,7 @@ def main():
             time.sleep(1)
             setup_audio(options)
 
-#         if options.channel_id == "BFMDemod":
-#             channelsReport(deviceset_url)
-
-    except Exception, msg:
+    except Exception as ex:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
 
