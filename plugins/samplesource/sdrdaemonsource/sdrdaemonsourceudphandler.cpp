@@ -264,14 +264,15 @@ void SDRdaemonSourceUDPHandler::tick()
     }
 
     m_readLength = m_readLengthSamples * SDRdaemonSourceBuffer::m_iqSampleSize;
+    const SDRdaemonSourceBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
 
-    if (SDR_RX_SAMP_SZ == 16)
+    if (SDR_RX_SAMP_SZ == metaData.m_sampleBits) // same sample size
     {
         // read samples directly feeding the SampleFifo (no callback)
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
         m_samplesCount += m_readLengthSamples;
     }
-    else if (SDR_RX_SAMP_SZ == 24)
+    else if (metaData.m_sampleBits == 16) // 16 -> 24 bits
     {
         if (m_readLengthSamples > m_converterBufferNbSamples)
         {
@@ -283,13 +284,36 @@ void SDRdaemonSourceUDPHandler::tick()
 
         for (unsigned int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is];
+            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is]; // I
             m_converterBuffer[2*is]<<=8;
-            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1];
+            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1]; // Q
             m_converterBuffer[2*is+1]<<=8;
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
+    }
+    else if (metaData.m_sampleBits == 24) // 24 -> 16 bits
+    {
+        if (m_readLengthSamples > m_converterBufferNbSamples)
+        {
+            if (m_converterBuffer) { delete[] m_converterBuffer; }
+            m_converterBuffer = new int32_t[m_readLengthSamples];
+        }
+
+        uint8_t *buf = m_sdrDaemonBuffer.readData(m_readLength);
+
+        for (unsigned int is = 0; is < m_readLengthSamples; is++)
+        {
+            m_converterBuffer[is] =  ((int32_t *)buf)[2*is]>>8; // I -> MSB
+            m_converterBuffer[is] <<=16;
+            m_converterBuffer[is] += ((int32_t *)buf)[2*is+1]>>8; // Q -> LSB
+        }
+
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
+    }
+    else
+    {
+        qWarning("SDRdaemonSourceUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
     }
 
 	if (m_tickCount < m_rateDivider)

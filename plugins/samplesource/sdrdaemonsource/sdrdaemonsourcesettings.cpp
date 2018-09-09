@@ -38,8 +38,8 @@ QByteArray SDRdaemonSourceSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeString(5, m_apiAddress);
-    s.writeU32(6, m_dataPort);
-    s.writeU32(7, m_apiPort);
+    s.writeU32(6, m_apiPort);
+    s.writeU32(7, m_dataPort);
     s.writeString(8, m_dataAddress);
     s.writeBool(9, m_dcBlock);
     s.writeBool(10, m_iqCorrection);
@@ -62,7 +62,7 @@ bool SDRdaemonSourceSettings::deserialize(const QByteArray& data)
         quint32 uintval;
         d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);
-        m_dataPort = uintval % (1<<16);
+        m_apiPort = uintval % (1<<16);
         d.readU32(7, &uintval, 9091);
         m_dataPort = uintval % (1<<16);
         d.readString(8, &m_dataAddress, "127.0.0.1");
