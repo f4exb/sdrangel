@@ -29,8 +29,8 @@ MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgConfigureRemoteAddress, Message)
 
 UDPSinkFEC::UDPSinkFEC() :
     m_sampleRate(48000),
-    m_sampleBytes(1),
-    m_sampleBits(8),
+    m_sampleBytes(SDR_TX_SAMP_SZ == 24 ? 4 : 2),
+    m_sampleBits(SDR_TX_SAMP_SZ),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
     m_txDelay(0),
@@ -104,7 +104,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             // create meta data TODO: semaphore
             metaData.m_centerFrequency = 0; // frequency not set by stream
             metaData.m_sampleRate = m_sampleRate;
-            metaData.m_sampleBytes = m_sampleBytes;
+            metaData.m_sampleBytes = m_sampleBytes & 0xF;
             metaData.m_sampleBits = m_sampleBits;
             metaData.m_nbOriginalBlocks = m_nbOriginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;

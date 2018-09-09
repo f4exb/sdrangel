@@ -307,6 +307,7 @@ void SDRdaemonSourceUDPHandler::tick()
 	        int minNbOriginalBlocks = m_sdrDaemonBuffer.getMinOriginalBlocks();
 	        int nbOriginalBlocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbOriginalBlocks;
 	        int nbFECblocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbFECBlocks;
+	        int sampleBits = m_sdrDaemonBuffer.getCurrentMeta().m_sampleBits;
 
 	        //framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
 	        if (minNbBlocks < nbOriginalBlocks) {
@@ -331,7 +332,8 @@ void SDRdaemonSourceUDPHandler::tick()
 	            m_sdrDaemonBuffer.getAvgOriginalBlocks(),
 	            m_sdrDaemonBuffer.getAvgNbRecovery(),
 	            nbOriginalBlocks,
-	            nbFECblocks);
+	            nbFECblocks,
+	            sampleBits);
 
 	            m_outputMessageQueueToGUI->push(report);
 		}

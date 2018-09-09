@@ -374,6 +374,16 @@
    <item>
     <layout class="QHBoxLayout" name="streamLayout">
      <item>
+      <widget class="QLabel" name="sampleBitsText">
+       <property name="toolTip">
+        <string>Sample size (bits)</string>
+       </property>
+       <property name="text">
+        <string>16b</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="nominalNbBlocksText">
        <property name="minimumSize">
         <size>

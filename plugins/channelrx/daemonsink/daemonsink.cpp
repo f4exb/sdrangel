@@ -114,8 +114,8 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
 
             metaData.m_centerFrequency = m_centerFrequency;
             metaData.m_sampleRate = m_sampleRate;
-            metaData.m_sampleBytes = m_sampleBytes;
-            metaData.m_sampleBits = 0; // TODO: deprecated
+            metaData.m_sampleBytes = m_sampleBytes & 0xF;
+            metaData.m_sampleBits = SDR_RX_SAMP_SZ;
             metaData.m_nbOriginalBlocks = SDRDaemonNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
             metaData.m_tv_sec = tv.tv_sec;

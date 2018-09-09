@@ -140,6 +140,7 @@ public:
         float getAvgNbRecovery() const { return m_avgNbRecovery; }
         int getNbOriginalBlocksPerFrame() const { return m_nbOriginalBlocksPerFrame; }
         int getNbFECBlocksPerFrame() const { return m_nbFECBlocksPerFrame; }
+        int getSampleBits() const { return m_sampleBits; }
 
 		static MsgReportSDRdaemonSourceStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -154,7 +155,8 @@ public:
                 float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
-                int nbFECBlocksPerFrame)
+                int nbFECBlocksPerFrame,
+                int sampleBits)
 		{
 			return new MsgReportSDRdaemonSourceStreamTiming(tv_sec,
 					tv_usec,
@@ -169,7 +171,8 @@ public:
                     avgNbOriginalBlocks,
                     avgNbRecovery,
                     nbOriginalBlocksPerFrame,
-                    nbFECBlocksPerFrame);
+                    nbFECBlocksPerFrame,
+                    sampleBits);
 		}
 
 	protected:
@@ -187,6 +190,7 @@ public:
         float    m_avgNbRecovery;
         int      m_nbOriginalBlocksPerFrame;
         int      m_nbFECBlocksPerFrame;
+        int      m_sampleBits;
 
 		MsgReportSDRdaemonSourceStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -201,7 +205,8 @@ public:
                 float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
-                int nbFECBlocksPerFrame) :
+                int nbFECBlocksPerFrame,
+                int sampleBits) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
@@ -216,7 +221,8 @@ public:
             m_avgNbOriginalBlocks(avgNbOriginalBlocks),
             m_avgNbRecovery(avgNbRecovery),
             m_nbOriginalBlocksPerFrame(nbOriginalBlocksPerFrame),
-            m_nbFECBlocksPerFrame(nbFECBlocksPerFrame)
+            m_nbFECBlocksPerFrame(nbFECBlocksPerFrame),
+            m_sampleBits(sampleBits)
 		{ }
 	};
 

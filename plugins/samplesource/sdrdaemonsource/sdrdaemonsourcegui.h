@@ -85,6 +85,7 @@ private:
     float m_avgNbRecovery;
     int m_nbOriginalBlocks;
     int m_nbFECBlocks;
+    int m_sampleBits;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;
