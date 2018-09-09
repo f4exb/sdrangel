@@ -53,7 +53,6 @@ target_include_directories(inputsdrdaemonsource PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBCM256CCSRC}
-    ${LIBNANOMSG_INCLUDE_DIR}
 )
 else (BUILD_DEBIAN)
 target_include_directories(inputsdrdaemonsource PUBLIC
@@ -61,7 +60,6 @@ target_include_directories(inputsdrdaemonsource PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CM256CC_INCLUDE_DIR}
-    ${LIBNANOMSG_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 
@@ -69,7 +67,6 @@ if (BUILD_DEBIAN)
 target_link_libraries(inputsdrdaemonsource
     ${QT_LIBRARIES}
     cm256cc
-    ${LIBNANOMSG_LIBRARIES}
     sdrbase
     sdrgui
     swagger
@@ -78,7 +75,6 @@ else (BUILD_DEBIAN)
 target_link_libraries(inputsdrdaemonsource
     ${QT_LIBRARIES}
     ${CM256CC_LIBRARIES}
-    ${LIBNANOMSG_LIBRARIES}
     sdrbase
     sdrgui
     swagger

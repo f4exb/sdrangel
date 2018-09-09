@@ -28,7 +28,6 @@ for f in `find plugins/samplesink/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}
 for f in `find plugins/samplesource/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/samplesource/"; done
 
 cd $APP_LIB
-cp /opt/local/lib/libnanomsg.5.0.0.dylib .
 ln -s libdsdcc.dylib libdsdcc.1.dylib
 ln -s libdevices.dylib libdevices.1.dylib
 ln -s libsdrbase.dylib libsdrbase.1.dylib

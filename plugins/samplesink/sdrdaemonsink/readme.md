@@ -8,7 +8,7 @@ Forward Error Correction with a Cauchy MDS block erasure codec is used to preven
 
 <h2>Build</h2>
 
-The plugin will be built only if `libnanomsg` and the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. `libnanomasg` is present in most distributions and the dev version can be installed using the package manager. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
 <h2>Interface</h2>
 

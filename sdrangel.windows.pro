@@ -15,7 +15,6 @@ SUBDIRS += qrtplib
 SUBDIRS += swagger
 SUBDIRS += sdrbase
 SUBDIRS += sdrgui
-CONFIG(MINGW64)SUBDIRS += nanomsg
 SUBDIRS += fcdhid
 SUBDIRS += fcdlib
 SUBDIRS += libairspy

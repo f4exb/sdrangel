@@ -213,27 +213,25 @@ The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/s
 
 Linux only.
 
-The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiving center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hardware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
+The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of an instance of SDRangel running the Daemon Sink channel plugin. On the "Data" line you must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiving center frequency. The remote is entirely controlled by the REST API. On the "API" line you can specify the address and port at which the remote REST API listens. However it is used just to display basic information about the remote. 
 
 The data blocks transmitted via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
 There is an automated skew rate compensation in place. During rate readjustment streaming can be suspended or signal glitches can occur for about one second.
 
-This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected. 
 
 <h2>SDRdaemon transmitter output</h2>
 
 Linux only.
 
-The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of the SDRdaemon transmitter server `sdrdaemontx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9092`). It also opens a TCP link to another port to exchange service messages such as setting the center frequency or getting status information from the server (default port is `9093`). The `libnanomsg` library is used to support this messaging.
+The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of and instance of SDRangel running the Daemon Source channel plugin. On the "Data" line you must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9090`). The remote is entirely controlled by the REST API. On the "API" line you can specify the address and port at which the remote REST API listens. The API is pinged regularly to retrieve the status of the data blocks queue and allow rate control to stabilize the queue length. Therefore it is important to connect to the API properly (The status line must return "API OK" and the API label should be lit in green).
 
 The data blocks sent via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
-There is an automated skew rate compensation in place so that the generator throttling is adjusted to match the actual sample rate of the distant device. This is based on the number of buffer blocks sent back from the distant server using the TCP link. 
-
-This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) IS installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSink[0]` even if no physical device is connected.
 
@@ -358,7 +356,7 @@ Then do `sudo apt-get update` and go to the next step. Alternatively if you have
 
 <h3>With newer versions just do:</h3>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libnanomsg-dev libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
   - `mkdir build && cd build && cmake ../ && make`
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
@@ -390,11 +388,10 @@ This has been tested with the Leap 42.3 distribution:
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
   - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
-  - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg) then if your installation directory is `/opt/install/nanomsg` you will have to add this to the cmake command line: `-DLIBNANOMSG_INCLUDE_DIR=/opt/install/nanomsg/include -DLIBNANOMSG_LIBRARIES=/opt/install/nanomsg/lib64/libnanomsg.so`
-  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
+  - Note2 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
     - make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
     - create a `plugdev` group and add it tou your user group list: `sudo groupadd plugdev` then `sudo usermod -G plugdev -a <user>`
-  - Note4: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
+  - Note3: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
 

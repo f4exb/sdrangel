@@ -11,9 +11,6 @@ QT += core gui widgets multimedia network opengl
 
 TARGET = inputsdrdaemonsource
 
-CONFIG(MINGW32):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
-CONFIG(MINGW64):LIBNANOMSGSRC = "D:\softs\nanomsg-0.8-beta"
-
 CONFIG(MINGW32):LIBCM256CCSRC = "D:\softs\cm256cc"
 CONFIG(MINGW64):LIBCM256CCSRC = "D:\softs\cm256cc"
 CONFIG(macx):LIBCM256CCSRC = "../../../../deps/cm256cc"
@@ -22,7 +19,6 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
-!macx:INCLUDEPATH += $$LIBNANOMSGSRC/src
 macx:INCLUDEPATH += /opt/local/include
 INCLUDEPATH += $$LIBCM256CCSRC
 
@@ -60,8 +56,6 @@ FORMS += sdrdaemonsourcegui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-!macx:LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
-macx:LIBS += -L/opt/local/lib -lnanomsg
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

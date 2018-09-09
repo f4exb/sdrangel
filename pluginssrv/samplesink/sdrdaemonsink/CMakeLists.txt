@@ -36,7 +36,6 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
     ${LIBCM256CCSRC}
-    ${LIBNANOMSG_INCLUDE_DIR}
 )
 else (BUILD_DEBIAN)
 include_directories(
@@ -45,7 +44,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    	
 	${CMAKE_SOURCE_DIR}/devices
     ${CM256CC_INCLUDE_DIR}	
-    ${LIBNANOMSG_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 
@@ -64,7 +62,6 @@ target_link_libraries(outputsdrdaemonsinksrv
     sdrbase
     swagger
     cm256cc
-    ${LIBNANOMSG_LIBRARIES}
 )
 else (BUILD_DEBIAN)
 target_link_libraries(outputsdrdaemonsinksrv
@@ -72,7 +69,6 @@ target_link_libraries(outputsdrdaemonsinksrv
 	sdrbase
 	swagger
     ${CM256CC_LIBRARIES}	
-    ${LIBNANOMSG_LIBRARIES}    
 )
 endif (BUILD_DEBIAN)
 

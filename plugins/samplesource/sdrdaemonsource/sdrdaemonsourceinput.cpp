@@ -19,15 +19,6 @@
 #include <sys/time.h>
 #include <QDebug>
 
-
-#ifdef _WIN32
-#include <nn.h>
-#include <pair.h>
-#else
-#include <nanomsg/nn.h>
-#include <nanomsg/pair.h>
-#endif
-
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
