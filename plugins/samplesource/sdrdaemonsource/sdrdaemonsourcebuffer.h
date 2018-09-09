@@ -57,12 +57,6 @@ public:
         }
     };
 
-    struct SDRdaemonSample
-    {
-        int16_t i;
-        int16_t q;
-    };
-
     struct Header
     {
         uint16_t frameIndex;
@@ -70,12 +64,11 @@ public:
         uint8_t  filler;
     };
 
-    static const int samplesPerBlock = (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header)) / sizeof(SDRdaemonSample);
     static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDAEMONSOURCE_NBORIGINALBLOCKS - 1) * (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header));
 
     struct ProtectedBlock
     {
-        SDRdaemonSample samples[samplesPerBlock];
+        uint8_t buf[SDRDAEMONSOURCE_UDPSIZE - sizeof(Header)];
     };
 
     struct SuperBlock

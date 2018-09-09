@@ -174,7 +174,7 @@ void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
     if (sampleRate > 0)
     {
         int64_t ts = m_currentMeta.m_tv_sec * 1000000LL + m_currentMeta.m_tv_usec;
-        ts -= (rwDelayBytes * 1000000LL) / (sampleRate * sizeof(SDRdaemonSample));
+        ts -= (rwDelayBytes * 1000000LL) / (sampleRate * 2 * m_currentMeta.m_sampleBytes);
         m_tvOut_sec = ts / 1000000LL;
         m_tvOut_usec = ts - (m_tvOut_sec * 1000000LL);
     }
