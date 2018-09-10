@@ -33,6 +33,7 @@ UDPSinkFEC::UDPSinkFEC() :
     m_sampleBits(SDR_TX_SAMP_SZ),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
+    m_txDelayRatio(0.0),
     m_txDelay(0),
     m_txBlockIndex(0),
     m_txBlocksIndex(0),
@@ -66,16 +67,31 @@ UDPSinkFEC::~UDPSinkFEC()
     delete m_udpThread;
 }
 
-void UDPSinkFEC::setTxDelay(uint32_t txDelay)
+void UDPSinkFEC::setTxDelay(float txDelayRatio)
 {
-    qDebug() << "UDPSinkFEC::setTxDelay: txDelay: " << txDelay;
-    m_txDelay = txDelay;
+    // delay is calculated from the fraction of the nominal UDP block process time
+    // frame size: 127 * (126 or 63 samples depending on I or Q sample bytes of 2 or 4 bytes respectively)
+    // divided by sample rate gives the frame process time
+    // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
+    m_txDelayRatio = txDelayRatio;
+    int samplesPerBlock = bytesPerBlock / (m_sampleBytes*2);
+    double delay = ((127*samplesPerBlock*txDelayRatio) / m_sampleRate)/(128 + m_nbBlocksFEC);
+    m_txDelay = delay * 1e6;
+    qDebug() << "UDPSinkFEC::setTxDelay: txDelay: " << txDelayRatio << " m_txDelay: " << m_txDelay << " us";
 }
 
 void UDPSinkFEC::setNbBlocksFEC(uint32_t nbBlocksFEC)
 {
     qDebug() << "UDPSinkFEC::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
     m_nbBlocksFEC = nbBlocksFEC;
+    setTxDelay(m_txDelayRatio);
+}
+
+void UDPSinkFEC::setSampleRate(uint32_t sampleRate)
+{
+    qDebug() << "UDPSinkFEC::setSampleRate: sampleRate: " << sampleRate;
+    m_sampleRate = sampleRate;
+    setTxDelay(m_txDelayRatio);
 }
 
 void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)

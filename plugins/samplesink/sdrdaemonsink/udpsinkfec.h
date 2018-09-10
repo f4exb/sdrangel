@@ -110,14 +110,11 @@ public:
         return ret;
     }
 
-    /** Set sample rate given in Hz */
-    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
-
-    void setSampleBytes(uint8_t sampleBytes) { m_sampleBytes = (sampleBytes & 0x0F) + (m_sampleBytes & 0xF0); }
-    void setSampleBits(uint8_t sampleBits) { m_sampleBits = sampleBits; }
+    /** Set sample rate given in S/s */
+    void setSampleRate(uint32_t sampleRate);
 
     void setNbBlocksFEC(uint32_t nbBlocksFEC);
-    void setTxDelay(uint32_t txDelay);
+    void setTxDelay(float txDelayRatio);
     void setRemoteAddress(const QString& address, uint16_t port);
 
     /** Return true if the stream is OK, return false if there is an error. */
@@ -142,6 +139,7 @@ private:
 
     MetaDataFEC m_currentMetaFEC;        //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;              //!< Variable number of FEC blocks
+    float m_txDelayRatio;                //!< Delay in ratio of nominal frame period
     uint32_t m_txDelay;                  //!< Delay in microseconds (usleep) between each sending of an UDP datagram
     SuperBlock m_txBlocks[4][256];       //!< UDP blocks to send with original data + FEC
     SuperBlock m_superBlock;             //!< current super block being built
