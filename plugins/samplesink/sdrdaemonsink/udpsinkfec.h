@@ -75,11 +75,11 @@ public:
         uint32_t filler2;
     };
 
-    static const int samplesPerBlock = (m_udpSize - sizeof(Header)) / (2 * SDR_TX_SAMP_SZ);
+    static const int bytesPerBlock = m_udpSize - sizeof(Header);
 
     struct ProtectedBlock
     {
-        Sample m_samples[samplesPerBlock];
+        uint8_t m_buf[bytesPerBlock];
     };
 
     struct SuperBlock

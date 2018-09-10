@@ -92,9 +92,11 @@ bool SDRdaemonSinkOutput::start()
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
 	m_sdrDaemonSinkThread->startWork();
 
+	// restart auto rate correction
 	m_lastRemoteTimestampRateCorrection = 0;
 	m_lastTimestampRateCorrection = 0;
 	m_lastQueueLength = -2; // set first value out of bounds
+	m_chunkSizeCorrection = 0;
 
     double delay = ((127*126*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));

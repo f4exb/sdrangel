@@ -141,18 +141,34 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_txBlockIndex = 1; // next Tx block with data
         }
 
+        int samplesPerBlock = bytesPerBlock / (m_sampleBytes*2);
+
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            if (SDR_RX_SAMP_SZ == SDR_TX_SAMP_SZ) // can do direct copy if sizes are equal (to 16 bits)
+            if (sizeof(Sample) == m_sampleBytes*2) // can do direct copy if sample sizes are equal
             {
-                memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                memcpy((char *) &m_superBlock.protectedBlock.m_buf[m_sampleIndex*m_sampleBytes*2],
                         (const char *) &(*it),
                         inRemainingSamples * sizeof(Sample));
             }
-            else // Samples are limited to 16 bits by the modulators
+            else if ((sizeof(Sample) == 8) && (m_sampleBytes == 2)) // modulators produce 16 bit samples
             {
-                for (int is = 0; is < inRemainingSamples; is++) {
-                    m_superBlock.protectedBlock.m_samples[m_sampleIndex+is] = *(it+is);
+                for (int is = 0; is < inRemainingSamples; is++)
+                {
+                    int16_t *rp = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
+                    int16_t *ip = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+2]);
+                    *rp = (it+is)->m_real & 0xFFFF;
+                    *ip = (it+is)->m_imag & 0xFFFF;
+                }
+            }
+            else if ((sizeof(Sample) == 4) && (m_sampleBytes == 4)) // use 16 bit samples for Tx
+            {
+                for (int is = 0; is < inRemainingSamples; is++)
+                {
+                    int32_t *rp = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
+                    int32_t *ip = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+4]);
+                    *rp = (it+is)->m_real;
+                    *ip = (it+is)->m_imag;
                 }
             }
 
@@ -161,16 +177,30 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
         }
         else // complete super block and initiate the next if not end of frame
         {
-            if (SDR_RX_SAMP_SZ == SDR_TX_SAMP_SZ) // can do direct copy if sizes are equal (to 16 bits)
+            if (sizeof(Sample) == m_sampleBytes*2) // can do direct copy if sample sizes are equal
             {
-                memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                memcpy((char *) &m_superBlock.protectedBlock.m_buf[m_sampleIndex*m_sampleBytes*2],
                         (const char *) &(*it),
                         (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
             }
-            else // Samples are limited to 16 bits by the modulators
+            else if ((sizeof(Sample) == 8) && (m_sampleBytes == 2)) // modulators produce 16 bit samples
             {
-                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++) {
-                    m_superBlock.protectedBlock.m_samples[m_sampleIndex+is] = *(it+is);
+                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++)
+                {
+                    int16_t *rp = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
+                    int16_t *ip = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+2]);
+                    *rp = (it+is)->m_real & 0xFFFF;
+                    *ip = (it+is)->m_imag & 0xFFFF;
+                }
+            }
+            else if ((sizeof(Sample) == 4) && (m_sampleBytes == 4)) // use 16 bit samples for Tx
+            {
+                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++)
+                {
+                    int32_t *rp = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
+                    int32_t *ip = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+4]);
+                    *rp = (it+is)->m_real;
+                    *ip = (it+is)->m_imag;
                 }
             }
 

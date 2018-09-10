@@ -620,7 +620,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>API IP address</string>
+        <string>Remote API IPv4 address</string>
        </property>
        <property name="inputMask">
         <string>000.000.000.000</string>
@@ -646,7 +646,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>API IP port</string>
+        <string>Remote API port</string>
        </property>
        <property name="inputMask">
         <string>00000</string>
@@ -711,7 +711,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Remote data address</string>
+        <string>Remote data connection IPv4 address</string>
        </property>
        <property name="inputMask">
         <string>000.000.000.000</string>
@@ -737,7 +737,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Remote data port</string>
+        <string>Remote data connection port</string>
        </property>
        <property name="inputMask">
         <string>00000</string>
