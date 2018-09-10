@@ -52,7 +52,7 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
         m_dataBlock(0),
         m_centerFrequency(0),
         m_sampleRate(48000),
-        m_sampleBytes(SDR_RX_SAMP_SZ == 24 ? 4 : 2),
+        m_sampleBytes(SDR_RX_SAMP_SZ <= 16 ? 2 : 4),
         m_nbBlocksFEC(0),
         m_txDelay(35),
         m_dataAddress("127.0.0.1"),
@@ -82,7 +82,7 @@ DaemonSink::~DaemonSink()
 void DaemonSink::setTxDelay(int txDelay, int nbBlocksFEC)
 {
     double txDelayRatio = txDelay / 100.0;
-    double delay = m_sampleRate == 0 ? 1.0 : (127*127*txDelayRatio) / m_sampleRate;
+    double delay = m_sampleRate == 0 ? 1.0 : (127*SDRDaemonSamplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
     qDebug() << "DaemonSink::setTxDelay:"

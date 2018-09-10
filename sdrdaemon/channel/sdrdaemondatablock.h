@@ -70,18 +70,20 @@ struct SDRDaemonHeader
     uint16_t m_frameIndex;
     uint8_t  m_blockIndex;
     uint8_t  m_filler;
+    uint32_t m_filler2;
 
     void init()
     {
         m_frameIndex = 0;
         m_blockIndex = 0;
         m_filler = 0;
+        m_filler2 = 0;
     }
 };
 
 static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
 static const int SDRDaemonNbOrginalBlocks = UDPSINKFEC_NBORIGINALBLOCKS;
-static const int SDRDaemonSamplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader)) / (SDR_RX_SAMP_SZ/4);
+static const int SDRDaemonSamplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader)) / sizeof(Sample);
 
 struct SDRDaemonProtectedBlock
 {

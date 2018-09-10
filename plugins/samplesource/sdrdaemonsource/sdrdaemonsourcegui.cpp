@@ -56,7 +56,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
     m_bufferGauge(-50),
 	m_nbOriginalBlocks(128),
     m_nbFECBlocks(0),
-    m_sampleBits(16),
+    m_sampleBits(16), // assume 16 bits to start with
     m_sampleBytes(2),
     m_samplesCount(0),
     m_tickCount(0),

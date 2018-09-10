@@ -29,7 +29,7 @@ MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgConfigureRemoteAddress, Message)
 
 UDPSinkFEC::UDPSinkFEC() :
     m_sampleRate(48000),
-    m_sampleBytes(SDR_TX_SAMP_SZ == 24 ? 4 : 2),
+    m_sampleBytes(SDR_TX_SAMP_SZ <= 16 ? 2 : 4),
     m_sampleBits(SDR_TX_SAMP_SZ),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
@@ -101,7 +101,6 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
             gettimeofday(&tv, 0);
 
-            // create meta data TODO: semaphore
             metaData.m_centerFrequency = 0; // frequency not set by stream
             metaData.m_sampleRate = m_sampleRate;
             metaData.m_sampleBytes = m_sampleBytes & 0xF;
@@ -142,6 +141,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_txBlockIndex = 1; // next Tx block with data
         }
 
+        // TODO: memcpy is valid for 4 bytes samples only (16 bits) else conversion must take place to take only LSB assuming Tx is 16 bit only
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
             memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
@@ -167,7 +167,6 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                 int nbBlocksFEC = m_nbBlocksFEC;
                 int txDelay = m_txDelay;
 
-                // TODO: send blocks
                 //qDebug("UDPSinkFEC::write: push frame to worker: %u", m_frameCount);
                 m_udpWorker->pushTxFrame(m_txBlocks[m_txBlocksIndex], nbBlocksFEC, txDelay, m_frameCount);
                 //m_txThread = new std::thread(transmitUDP, this, m_txBlocks[m_txBlocksIndex], m_frameCount, nbBlocksFEC, txDelay, m_cm256Valid);

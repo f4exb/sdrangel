@@ -72,9 +72,10 @@ public:
         uint16_t frameIndex;
         uint8_t  blockIndex;
         uint8_t  filler;
+        uint32_t filler2;
     };
 
-    static const int samplesPerBlock = (m_udpSize - sizeof(Header)) / sizeof(Sample);
+    static const int samplesPerBlock = (m_udpSize - sizeof(Header)) / (2 * SDR_TX_SAMP_SZ);
 
     struct ProtectedBlock
     {

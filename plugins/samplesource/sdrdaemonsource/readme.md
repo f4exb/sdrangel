@@ -159,9 +159,10 @@ The value is a percentage of the nominal time it takes to process a block of sam
   - Sample rate on the network: _SR_
   - Delay percentage: _d_
   - Number of FEC blocks: _F_
-  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 4 bytes header (1 sample) thus there are 127 samples remaining effectively. This gives the constant 127*127 = 16219 samples per frame in the formula
+  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 8 bytes header (1 sample for 24 bit and 2 samples for 16 bit) thus there are 126 (16 bit) or 63 (24 bit) samples remaining effectively.
   
-Formula: ((127 &#x2715; 127 &#x2715; _d_) / _SR_) / (128 + _F_)   
+Formula (16 bit): ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)   
+Formula (24 bit): ((127 &#x2715; 63 &#x2715; _d_) / _SR_) / (128 + _F_) thus half the above  
 
 <h3>8: Desired distant device sample rate</h3>
 

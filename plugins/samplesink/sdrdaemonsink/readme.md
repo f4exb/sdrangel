@@ -50,9 +50,9 @@ The value is a percentage of the nominal time it takes to process a block of sam
   - Sample rate on the network: _SR_
   - Delay percentage: _d_
   - Number of FEC blocks: _F_
-  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 4 bytes header (1 sample) thus there are 127 samples remaining effectively. This gives the constant 127*127 = 16219 samples per frame in the formula
+  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 8 bytes header (2 samples) thus there are 126 samples remaining effectively. This gives the constant 127*126 = 16002 samples per frame in the formula
   
-Formula: ((127 &#x2715; 127 &#x2715; _d_) / _SR_) / (128 + _F_)   
+Formula: ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)   
 
 <h3>6: Forward Error Correction setting and status</h3>
 
@@ -64,7 +64,7 @@ This sets the number of FEC blocks per frame. A frame consists of 128 data block
 
 <h4>6.2: Distant transmitter queue length</h4>
 
-This is the samples queue length reported from the distant transmitter. This is a number of vectors of 127 &#x2715; 127 &#x2715; _I_ samples where _I_ is the interpolation factor. This corresponds to a block of 127 &#x2715; 127 samples sent over the network. This numbers serves to throttle the sample generator so that the queue length is close to 8 vectors.
+This is the samples queue length reported from the distant transmitter. This is a number of vectors of 127 &#x2715; 127 &#x2715; _I_ samples where _I_ is the interpolation factor. This corresponds to a block of 127 &#x2715; 126 samples sent over the network. This numbers serves to throttle the sample generator so that the queue length is close to 8 vectors.
 
 <h4>6.3: Stream status</h4>
 

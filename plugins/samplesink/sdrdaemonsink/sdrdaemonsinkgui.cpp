@@ -214,7 +214,7 @@ void SDRdaemonSinkGui::updateSampleRate()
 
 void SDRdaemonSinkGui::updateTxDelayTooltip()
 {
-    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    double delay = ((127*126*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
 }
 

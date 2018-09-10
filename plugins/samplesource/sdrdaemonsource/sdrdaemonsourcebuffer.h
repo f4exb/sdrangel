@@ -62,6 +62,7 @@ public:
         uint16_t frameIndex;
         uint8_t  blockIndex;
         uint8_t  filler;
+        uint32_t filler2;
     };
 
     static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDAEMONSOURCE_NBORIGINALBLOCKS - 1) * (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header));

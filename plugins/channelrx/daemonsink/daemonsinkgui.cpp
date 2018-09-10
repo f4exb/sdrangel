@@ -287,7 +287,7 @@ void DaemonSinkGUI::on_nbFECBlocks_valueChanged(int value)
 void DaemonSinkGUI::updateTxDelayTime()
 {
     double txDelayRatio = m_settings.m_txDelay / 100.0;
-    double delay = m_sampleRate == 0 ? 0.0 : (127*127*txDelayRatio) / m_sampleRate;
+    double delay = m_sampleRate == 0 ? 0.0 : (127*SDRDaemonSamplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + m_settings.m_nbFECBlocks;
     ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
 }

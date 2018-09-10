@@ -96,7 +96,7 @@ bool SDRdaemonSinkOutput::start()
 	m_lastTimestampRateCorrection = 0;
 	m_lastQueueLength = -2; // set first value out of bounds
 
-    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    double delay = ((127*126*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
 
 	mutexLocker.unlock();
@@ -278,13 +278,13 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (changeTxDelay)
     {
-        double delay = ((127*127*settings.m_txDelay) / settings.m_sampleRate)/(128 + settings.m_nbFECBlocks);
+        double delay = ((127*126*settings.m_txDelay) / settings.m_sampleRate)/(128 + settings.m_nbFECBlocks);
         qDebug("SDRdaemonSinkOutput::applySettings: Tx delay: %f us", delay*1e6);
 
         if (m_sdrDaemonSinkThread != 0)
         {
             // delay is calculated as a fraction of the nominal UDP block process time
-            // frame size: 127 * 127 samples
+            // frame size: 127 * 126 samples
             // divided by sample rate gives the frame process time
             // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
             m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));

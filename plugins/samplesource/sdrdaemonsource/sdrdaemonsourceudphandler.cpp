@@ -264,7 +264,7 @@ void SDRdaemonSourceUDPHandler::tick()
     }
 
     const SDRdaemonSourceBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
-    m_readLength = m_readLengthSamples * metaData.m_sampleBytes * 2;
+    m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
 
     if (SDR_RX_SAMP_SZ == metaData.m_sampleBits) // same sample size
     {
@@ -304,9 +304,9 @@ void SDRdaemonSourceUDPHandler::tick()
 
         for (unsigned int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[is] =  ((int32_t *)buf)[2*is]>>8; // I -> MSB
+            m_converterBuffer[is] =  ((int32_t *)buf)[2*is+1]>>8; // Q -> MSB
             m_converterBuffer[is] <<=16;
-            m_converterBuffer[is] += ((int32_t *)buf)[2*is+1]>>8; // Q -> LSB
+            m_converterBuffer[is] += ((int32_t *)buf)[2*is]>>8; // I -> LSB
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
