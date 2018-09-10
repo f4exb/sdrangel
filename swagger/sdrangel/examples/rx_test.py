@@ -95,7 +95,7 @@ def callAPI(url, method, params, json, text):
     if request_method is not None:
         # print(base_url, url, json)
         r = request_method(url=base_url + url, params=params, json=json)
-        if r.status_code / 100 == 2:
+        if r.status_code // 100 == 2:
             print(text + " succeeded")
             printResponse(r)
             return r.json()  # all 200 yield application/json response
@@ -137,9 +137,9 @@ def setupDevice(deviceset_url, options):
             exit(-1)
 
         # calculate RF analog and FIR optimal bandpass filters bandwidths
-        lpFIRBW = options.sample_rate * 1000 / (1 << options.log2_decim)
+        lpFIRBW = options.sample_rate * 1000 // (1 << options.log2_decim)
         if options.fc_pos == 2:  # center of passband
-            lpfBW = options.sample_rate * 1000 / (1 << options.log2_decim)
+            lpfBW = options.sample_rate * 1000 // (1 << options.log2_decim)
         else:  # side of passband
             if options.log2_decim == 0:
                 lpfBW = options.sample_rate * 1000
@@ -253,7 +253,7 @@ def setupChannel(deviceset_url, options):
         settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
         settings["NFMDemodSettings"]["volume"] = options.volume
         settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10  # centi-Bels
-        settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10  # 10's of ms
+        settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate // 10  # 10's of ms
         settings["NFMDemodSettings"]["title"] = "Channel %d" % i
     elif options.channel_id == "BFMDemod":
         settings["BFMDemodSettings"]["inputFrequencyOffset"] = options.channel_freq
