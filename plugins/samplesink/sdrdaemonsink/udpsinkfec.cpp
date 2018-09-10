@@ -141,20 +141,39 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_txBlockIndex = 1; // next Tx block with data
         }
 
-        // TODO: memcpy is valid for 4 bytes samples only (16 bits) else conversion must take place to take only LSB assuming Tx is 16 bit only
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
-                    (const char *) &(*it),
-                    inRemainingSamples * sizeof(Sample));
+            if (SDR_RX_SAMP_SZ == SDR_TX_SAMP_SZ) // can do direct copy if sizes are equal (to 16 bits)
+            {
+                memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                        (const char *) &(*it),
+                        inRemainingSamples * sizeof(Sample));
+            }
+            else // Samples are limited to 16 bits by the modulators
+            {
+                for (int is = 0; is < inRemainingSamples; is++) {
+                    m_superBlock.protectedBlock.m_samples[m_sampleIndex+is] = *(it+is);
+                }
+            }
+
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
-                    (const char *) &(*it),
-                    (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            if (SDR_RX_SAMP_SZ == SDR_TX_SAMP_SZ) // can do direct copy if sizes are equal (to 16 bits)
+            {
+                memcpy((char *) &m_superBlock.protectedBlock.m_samples[m_sampleIndex],
+                        (const char *) &(*it),
+                        (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            }
+            else // Samples are limited to 16 bits by the modulators
+            {
+                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++) {
+                    m_superBlock.protectedBlock.m_samples[m_sampleIndex+is] = *(it+is);
+                }
+            }
+
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 
