@@ -83,14 +83,14 @@ struct SDRDaemonHeader
 
 static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
 static const int SDRDaemonNbOrginalBlocks = UDPSINKFEC_NBORIGINALBLOCKS;
-static const int SDRDaemonSamplesPerBlock = (UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader)) / sizeof(Sample);
+static const int SDRDaemonNbBytesPerBlock = UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader);
 
 struct SDRDaemonProtectedBlock
 {
-    Sample m_samples[SDRDaemonSamplesPerBlock];
+    uint8_t buf[SDRDaemonNbBytesPerBlock];
 
     void init() {
-        std::fill(m_samples, m_samples+SDRDaemonSamplesPerBlock, Sample{0,0});
+        std::fill(buf, buf+SDRDaemonNbBytesPerBlock, 0);
     }
 };
 

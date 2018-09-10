@@ -25,7 +25,8 @@
 
 const uint32_t SDRDaemonDataReadQueue::MinimumMaxSize = 10;
 
-SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
+SDRDaemonDataReadQueue::SDRDaemonDataReadQueue(uint32_t sampleSize) :
+        m_sampleSize(sampleSize),
         m_dataBlock(0),
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
@@ -95,7 +96,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
             qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", length());
             m_blockIndex = 1;
             m_dataBlock = m_dataReadQueue.takeFirst();
-            s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
+            convertDataToSample(s, m_blockIndex, m_sampleIndex);
             m_sampleIndex++;
             m_sampleCount++;
         }
@@ -107,9 +108,11 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
         return;
     }
 
-    if (m_sampleIndex < SDRDaemonSamplesPerBlock)
+    uint32_t samplesPerBlock = SDRDaemonNbBytesPerBlock / m_sampleSize;
+
+    if (m_sampleIndex < samplesPerBlock)
     {
-        s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
+        convertDataToSample(s, m_blockIndex, m_sampleIndex);
         m_sampleIndex++;
         m_sampleCount++;
     }
@@ -120,7 +123,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
 
         if (m_blockIndex < SDRDaemonNbOrginalBlocks)
         {
-            s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
+            convertDataToSample(s, m_blockIndex, m_sampleIndex);
             m_sampleIndex++;
             m_sampleCount++;
         }
@@ -141,7 +144,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
                 //qDebug("SDRDaemonDataReadQueue::readSample: pop new block: queue size: %u", length());
                 m_blockIndex = 1;
                 m_dataBlock = m_dataReadQueue.takeFirst();
-                s = m_dataBlock->m_superBlocks[m_blockIndex].m_protectedBlock.m_samples[m_sampleIndex];
+                convertDataToSample(s, m_blockIndex, m_sampleIndex);
                 m_sampleIndex++;
                 m_sampleCount++;
             }

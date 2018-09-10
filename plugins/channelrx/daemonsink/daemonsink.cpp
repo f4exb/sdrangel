@@ -82,7 +82,8 @@ DaemonSink::~DaemonSink()
 void DaemonSink::setTxDelay(int txDelay, int nbBlocksFEC)
 {
     double txDelayRatio = txDelay / 100.0;
-    double delay = m_sampleRate == 0 ? 1.0 : (127*SDRDaemonSamplesPerBlock*txDelayRatio) / m_sampleRate;
+    int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
+    double delay = m_sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
     qDebug() << "DaemonSink::setTxDelay:"
@@ -152,10 +153,11 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             m_txBlockIndex = 1; // next Tx block with data
         } // block zero
 
-        // TODO: handle different sample sizes...
-        if (m_sampleIndex + inRemainingSamples < SDRDaemonSamplesPerBlock) // there is still room in the current super block
+        // handle different sample sizes...
+        int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
+        if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.m_samples[m_sampleIndex],
+            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
                     (const void *) &(*(begin+inSamplesIndex)),
                     inRemainingSamples * sizeof(Sample));
             m_sampleIndex += inRemainingSamples;
@@ -163,10 +165,10 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         }
         else // complete super block and initiate the next if not end of frame
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.m_samples[m_sampleIndex],
+            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
                     (const void *) &(*(begin+inSamplesIndex)),
-                    (SDRDaemonSamplesPerBlock - m_sampleIndex) * sizeof(Sample));
-            it += SDRDaemonSamplesPerBlock - m_sampleIndex;
+                    (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 
             m_superBlock.m_header.m_frameIndex = m_frameCount;

@@ -31,7 +31,7 @@ class Sample;
 class SDRDaemonDataReadQueue
 {
 public:
-    SDRDaemonDataReadQueue();
+    SDRDaemonDataReadQueue(uint32_t sampleSize);
     ~SDRDaemonDataReadQueue();
 
     void push(SDRDaemonDataBlock* dataBlock); //!< push block on the queue
@@ -45,6 +45,7 @@ public:
     static const uint32_t MinimumMaxSize;
 
 private:
+    uint32_t m_sampleSize;
     QQueue<SDRDaemonDataBlock*> m_dataReadQueue;
     SDRDaemonDataBlock *m_dataBlock;
     uint32_t m_maxSize;
@@ -52,6 +53,32 @@ private:
     uint32_t m_sampleIndex;
     uint32_t m_sampleCount; //!< use a counter capped below 2^31 as it is going to be converted to an int in the web interface
     bool m_full; //!< full condition was hit
+
+    inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex)
+    {
+        if (sizeof(Sample) == m_sampleSize)
+        {
+            s = *((Sample*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*m_sampleSize]));
+        }
+        else if ((sizeof(Sample) == 4) && (m_sampleSize == 8))
+        {
+            int32_t rp = *( (int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*m_sampleSize]) );
+            int32_t ip = *( (int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*m_sampleSize+4]) );
+            s.setReal(rp>>8);
+            s.setImag(ip>>8);
+        }
+        else if ((sizeof(Sample) == 8) && (m_sampleSize == 4))
+        {
+            int32_t rp = *( (int16_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*m_sampleSize]) );
+            int32_t ip = *( (int16_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*m_sampleSize+2]) );
+                s.setReal(rp<<8);
+                s.setImag(ip<<8);
+        }
+        else
+        {
+            s = Sample{0, 0};
+        }
+    }
 };
 
 
