@@ -1,8 +1,8 @@
-<h1>UDP sink plugin</h1>
+<h1>UDP Source plugin</h1>
 
 <h2>Introduction</h2>
 
-By "sink" one should understand a sink of samples for the outside of SDRangel application. An external application establishes an UDP connection to the plugin at the given address and port and samples are directed to it. In fact it can also come from SDRangel itself using the UDP source plugin
+By "source" one should understand a source of samples that feed the baseband of the transmitting device. An external application establishes an UDP connection to the plugin at the given address and port and samples are directed to it. In fact it can also come from SDRangel itself using the UDP source plugin
 
 The UDP block size or UDP payload size is optimized for 512 bytes but other sizes are acceptable.
 
@@ -10,7 +10,7 @@ This plugin is available for Linux and Mac O/S only.
 
 <h2>Interface</h2>
 
-![UDP Sink plugin GUI](../../../doc/img/UDPsink_plugin.png)
+![UDP Source plugin GUI](../../../doc/img/UDPsource_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 

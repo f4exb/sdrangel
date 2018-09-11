@@ -1,8 +1,8 @@
-<h1>UDP source plugin</h1>
+<h1>UDP sink plugin</h1>
 
 <h2>Introduction</h2>
 
-By "source" one should understand a source of samples for the outside of SDRangel application. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
+By "sink" one should understand a sink for samples coming from the device baseband. An UDP connection is established from the plugin to the given address and port and samples are directed to it.
 
 The UDP block size or UDP payload size is fixed at 512 bytes.
 
@@ -12,7 +12,7 @@ This plugin is available for Linux and Mac O/S only.
 
 <h2>Interface</h2>
 
-![UDP Source plugin GUI](../../../doc/img/UDPsrc_plugin.png)
+![UDP Sink plugin GUI](../../../doc/img/UDPsink_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
@@ -68,7 +68,7 @@ This is the maximum expected FM deviation in Hz for NFM demodulated samples. The
 
 <h3>9: AGC and audio feedback control</h3>
 
-![UDP Source plugin GUI AGC](../../../doc/img/UDPsrc_plugin_agc.png)
+![UDP Sink plugin GUI AGC](../../../doc/img/UDPsink_plugin_agc.png)
 
 <h4>9.1: Toggle AGC</h4>
 
@@ -106,7 +106,7 @@ This gain is applied to the samples just before they are sent via UDP. The gain 
 
 <h3>13: Squelch</h3>
 
-![UDP Source plugin GUI Squelch](../../../doc/img/UDPsrc_plugin_sq.png)
+![UDP Sink plugin GUI Squelch](../../../doc/img/UDPsink_plugin_sq.png)
 
 <h4>13.1: Squelch indicator</h4>
 
