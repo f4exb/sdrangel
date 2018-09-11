@@ -1,7 +1,7 @@
 project(udpsrc)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(PLUGIN_PREFIX "../../../plugins/channelrx/udpsrc")
+set(PLUGIN_PREFIX "../../../plugins/channelrx/udpsink")
 
 set(udpsrc_SOURCES
 	${PLUGIN_PREFIX}/udpsink.cpp
