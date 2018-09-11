@@ -1872,8 +1872,8 @@ definitions:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
         $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodSettings"
-      UDPSinkSettings:
-        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
+      UDPSourceSettings:
+        $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceSettings"
       UDPSrcSettings:
         $ref: "/doc/swagger/include/UDPSrc.yaml#/UDPSrcSettings"
       WFMDemodSettings:
@@ -1911,8 +1911,8 @@ definitions:
         $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceReport"
       SSBModReport:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
-      UDPSinkReport:
-        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
+      UDPSourceReport:
+        $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceReport"
       UDPSrcReport:
         $ref: "/doc/swagger/include/UDPSrc.yaml#/UDPSrcReport"
       WFMDemodReport:

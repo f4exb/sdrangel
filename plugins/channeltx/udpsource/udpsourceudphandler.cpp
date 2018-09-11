@@ -54,7 +54,7 @@ UDPSourceUDPHandler::~UDPSourceUDPHandler()
 
 void UDPSourceUDPHandler::start()
 {
-    qDebug("UDPSinkUDPHandler::start");
+    qDebug("UDPSourceUDPHandler::start");
 
     if (!m_dataSocket)
     {
@@ -66,13 +66,13 @@ void UDPSourceUDPHandler::start()
 
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
         {
-            qDebug("UDPSinkUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+            qDebug("UDPSourceUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
             connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); // , Qt::QueuedConnection gets stuck since Qt 5.8.0
             m_dataConnected = true;
         }
         else
         {
-            qWarning("UDPSinkUDPHandler::start: cannot bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+            qWarning("UDPSourceUDPHandler::start: cannot bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
             m_dataConnected = false;
         }
     }
@@ -80,7 +80,7 @@ void UDPSourceUDPHandler::start()
 
 void UDPSourceUDPHandler::stop()
 {
-    qDebug("UDPSinkUDPHandler::stop");
+    qDebug("UDPSourceUDPHandler::stop");
 
     if (m_dataConnected)
     {
@@ -104,7 +104,7 @@ void UDPSourceUDPHandler::dataReadyRead()
 
         if (bytesRead < 0)
         {
-            qWarning("UDPSinkUDPHandler::dataReadyRead: UDP read error");
+            qWarning("UDPSourceUDPHandler::dataReadyRead: UDP read error");
         }
         else
         {
@@ -199,7 +199,7 @@ void UDPSourceUDPHandler::advanceReadPointer(int nbBytes)
             m_rwDelta = m_writeFrameIndex; // raw R/W delta estimate
             int nbUDPFrames2 = m_nbUDPFrames/2;
             float d = (m_rwDelta - nbUDPFrames2)/(float) m_nbUDPFrames;
-            //qDebug("UDPSinkUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
+            //qDebug("UDPSourceUDPHandler::advanceReadPointer: w: %02d d: %f", m_writeIndex, d);
 
             if ((d < -0.45) || (d > 0.45))
             {
@@ -231,12 +231,12 @@ void UDPSourceUDPHandler::configureUDPLink(const QString& address, quint16 port)
 
 void UDPSourceUDPHandler::applyUDPLink(const QString& address, quint16 port)
 {
-    qDebug("UDPSinkUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
+    qDebug("UDPSourceUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
     bool addressOK = m_dataAddress.setAddress(address);
 
     if (!addressOK)
     {
-        qWarning("UDPSinkUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+        qWarning("UDPSourceUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
         m_dataAddress = QHostAddress::LocalHost;
     }
 
@@ -257,7 +257,7 @@ void UDPSourceUDPHandler::resetReadIndex()
 void UDPSourceUDPHandler::resizeBuffer(float sampleRate)
 {
     int halfNbFrames = std::max((sampleRate / 375.0), (m_minNbUDPFrames / 2.0));
-    qDebug("UDPSinkUDPHandler::resizeBuffer: nb_frames: %d", 2*halfNbFrames);
+    qDebug("UDPSourceUDPHandler::resizeBuffer: nb_frames: %d", 2*halfNbFrames);
 
     if (2*halfNbFrames > m_nbAllocatedUDPFrames)
     {

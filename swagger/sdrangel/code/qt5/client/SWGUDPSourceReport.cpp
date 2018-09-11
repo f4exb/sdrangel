@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGUDPSinkReport.h"
+#include "SWGUDPSourceReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGUDPSinkReport::SWGUDPSinkReport(QString* json) {
+SWGUDPSourceReport::SWGUDPSourceReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGUDPSinkReport::SWGUDPSinkReport() {
+SWGUDPSourceReport::SWGUDPSourceReport() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
     input_power_db = 0.0f;
@@ -40,12 +40,12 @@ SWGUDPSinkReport::SWGUDPSinkReport() {
     m_channel_sample_rate_isSet = false;
 }
 
-SWGUDPSinkReport::~SWGUDPSinkReport() {
+SWGUDPSourceReport::~SWGUDPSourceReport() {
     this->cleanup();
 }
 
 void
-SWGUDPSinkReport::init() {
+SWGUDPSourceReport::init() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
     input_power_db = 0.0f;
@@ -59,7 +59,7 @@ SWGUDPSinkReport::init() {
 }
 
 void
-SWGUDPSinkReport::cleanup() {
+SWGUDPSourceReport::cleanup() {
 
 
 
@@ -67,8 +67,8 @@ SWGUDPSinkReport::cleanup() {
 
 }
 
-SWGUDPSinkReport*
-SWGUDPSinkReport::fromJson(QString &json) {
+SWGUDPSourceReport*
+SWGUDPSourceReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -77,7 +77,7 @@ SWGUDPSinkReport::fromJson(QString &json) {
 }
 
 void
-SWGUDPSinkReport::fromJsonObject(QJsonObject &pJson) {
+SWGUDPSourceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&input_power_db, pJson["inputPowerDB"], "float", "");
@@ -91,7 +91,7 @@ SWGUDPSinkReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGUDPSinkReport::asJson ()
+SWGUDPSourceReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -102,7 +102,7 @@ SWGUDPSinkReport::asJson ()
 }
 
 QJsonObject*
-SWGUDPSinkReport::asJsonObject() {
+SWGUDPSourceReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_channel_power_db_isSet){
         obj->insert("channelPowerDB", QJsonValue(channel_power_db));
@@ -124,58 +124,58 @@ SWGUDPSinkReport::asJsonObject() {
 }
 
 float
-SWGUDPSinkReport::getChannelPowerDb() {
+SWGUDPSourceReport::getChannelPowerDb() {
     return channel_power_db;
 }
 void
-SWGUDPSinkReport::setChannelPowerDb(float channel_power_db) {
+SWGUDPSourceReport::setChannelPowerDb(float channel_power_db) {
     this->channel_power_db = channel_power_db;
     this->m_channel_power_db_isSet = true;
 }
 
 float
-SWGUDPSinkReport::getInputPowerDb() {
+SWGUDPSourceReport::getInputPowerDb() {
     return input_power_db;
 }
 void
-SWGUDPSinkReport::setInputPowerDb(float input_power_db) {
+SWGUDPSourceReport::setInputPowerDb(float input_power_db) {
     this->input_power_db = input_power_db;
     this->m_input_power_db_isSet = true;
 }
 
 qint32
-SWGUDPSinkReport::getSquelch() {
+SWGUDPSourceReport::getSquelch() {
     return squelch;
 }
 void
-SWGUDPSinkReport::setSquelch(qint32 squelch) {
+SWGUDPSourceReport::setSquelch(qint32 squelch) {
     this->squelch = squelch;
     this->m_squelch_isSet = true;
 }
 
 qint32
-SWGUDPSinkReport::getBufferGauge() {
+SWGUDPSourceReport::getBufferGauge() {
     return buffer_gauge;
 }
 void
-SWGUDPSinkReport::setBufferGauge(qint32 buffer_gauge) {
+SWGUDPSourceReport::setBufferGauge(qint32 buffer_gauge) {
     this->buffer_gauge = buffer_gauge;
     this->m_buffer_gauge_isSet = true;
 }
 
 qint32
-SWGUDPSinkReport::getChannelSampleRate() {
+SWGUDPSourceReport::getChannelSampleRate() {
     return channel_sample_rate;
 }
 void
-SWGUDPSinkReport::setChannelSampleRate(qint32 channel_sample_rate) {
+SWGUDPSourceReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->channel_sample_rate = channel_sample_rate;
     this->m_channel_sample_rate_isSet = true;
 }
 
 
 bool
-SWGUDPSinkReport::isSet(){
+SWGUDPSourceReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}

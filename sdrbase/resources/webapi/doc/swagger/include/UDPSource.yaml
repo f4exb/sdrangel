@@ -1,5 +1,5 @@
-UDPSinkSettings:
-  description: UDPSink
+UDPSourceSettings:
+  description: UDPSource
   properties:
     sampleFormat:
       type: integer
@@ -50,8 +50,8 @@ UDPSinkSettings:
     title:
       type: string
 
-UDPSinkReport:
-  description: UDPSink
+UDPSourceReport:
+  description: UDPSource
   properties:
     channelPowerDB:
       description: power transmitted in channel (dB)

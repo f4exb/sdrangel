@@ -18,7 +18,7 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGUDPSinkReport.h"
+#include "SWGUDPSourceReport.h"
 
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
@@ -601,8 +601,8 @@ int UDPSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
-    response.getUdpSinkSettings()->init();
+    response.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+    response.getUdpSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -617,63 +617,63 @@ int UDPSource::webapiSettingsPutPatch(
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("sampleFormat")) {
-        settings.m_sampleFormat = (UDPSourceSettings::SampleFormat) response.getUdpSinkSettings()->getSampleFormat();
+        settings.m_sampleFormat = (UDPSourceSettings::SampleFormat) response.getUdpSourceSettings()->getSampleFormat();
     }
     if (channelSettingsKeys.contains("inputSampleRate")) {
-        settings.m_inputSampleRate = response.getUdpSinkSettings()->getInputSampleRate();
+        settings.m_inputSampleRate = response.getUdpSourceSettings()->getInputSampleRate();
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset"))
     {
-        settings.m_inputFrequencyOffset = response.getUdpSinkSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getUdpSourceSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getUdpSinkSettings()->getRfBandwidth();
+        settings.m_rfBandwidth = response.getUdpSourceSettings()->getRfBandwidth();
     }
     if (channelSettingsKeys.contains("lowCutoff")) {
-        settings.m_lowCutoff = response.getUdpSinkSettings()->getLowCutoff();
+        settings.m_lowCutoff = response.getUdpSourceSettings()->getLowCutoff();
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
-        settings.m_fmDeviation = response.getUdpSinkSettings()->getFmDeviation();
+        settings.m_fmDeviation = response.getUdpSourceSettings()->getFmDeviation();
     }
     if (channelSettingsKeys.contains("amModFactor")) {
-        settings.m_amModFactor = response.getUdpSinkSettings()->getAmModFactor();
+        settings.m_amModFactor = response.getUdpSourceSettings()->getAmModFactor();
     }
     if (channelSettingsKeys.contains("channelMute")) {
-        settings.m_channelMute = response.getUdpSinkSettings()->getChannelMute() != 0;
+        settings.m_channelMute = response.getUdpSourceSettings()->getChannelMute() != 0;
     }
     if (channelSettingsKeys.contains("gainIn")) {
-        settings.m_gainIn = response.getUdpSinkSettings()->getGainIn();
+        settings.m_gainIn = response.getUdpSourceSettings()->getGainIn();
     }
     if (channelSettingsKeys.contains("gainOut")) {
-        settings.m_gainOut = response.getUdpSinkSettings()->getGainOut();
+        settings.m_gainOut = response.getUdpSourceSettings()->getGainOut();
     }
     if (channelSettingsKeys.contains("squelch")) {
-        settings.m_squelch = response.getUdpSinkSettings()->getSquelch();
+        settings.m_squelch = response.getUdpSourceSettings()->getSquelch();
     }
     if (channelSettingsKeys.contains("squelchGate")) {
-        settings.m_squelchGate = response.getUdpSinkSettings()->getSquelchGate();
+        settings.m_squelchGate = response.getUdpSourceSettings()->getSquelchGate();
     }
     if (channelSettingsKeys.contains("squelchEnabled")) {
-        settings.m_squelchEnabled = response.getUdpSinkSettings()->getSquelchEnabled() != 0;
+        settings.m_squelchEnabled = response.getUdpSourceSettings()->getSquelchEnabled() != 0;
     }
     if (channelSettingsKeys.contains("autoRWBalance")) {
-        settings.m_autoRWBalance = response.getUdpSinkSettings()->getAutoRwBalance() != 0;
+        settings.m_autoRWBalance = response.getUdpSourceSettings()->getAutoRwBalance() != 0;
     }
     if (channelSettingsKeys.contains("stereoInput")) {
-        settings.m_stereoInput = response.getUdpSinkSettings()->getStereoInput() != 0;
+        settings.m_stereoInput = response.getUdpSourceSettings()->getStereoInput() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getUdpSinkSettings()->getRgbColor();
+        settings.m_rgbColor = response.getUdpSourceSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getUdpSinkSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getUdpSourceSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getUdpSinkSettings()->getUdpPort();
+        settings.m_udpPort = response.getUdpSourceSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getUdpSinkSettings()->getTitle();
+        settings.m_title = *response.getUdpSourceSettings()->getTitle();
     }
 
     if (frequencyOffsetChanged)
@@ -702,51 +702,51 @@ int UDPSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
-    response.setUdpSinkReport(new SWGSDRangel::SWGUDPSinkReport());
-    response.getUdpSinkReport()->init();
+    response.setUdpSourceReport(new SWGSDRangel::SWGUDPSourceReport());
+    response.getUdpSourceReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void UDPSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSourceSettings& settings)
 {
-    response.getUdpSinkSettings()->setSampleFormat((int) settings.m_sampleFormat);
-    response.getUdpSinkSettings()->setInputSampleRate(settings.m_inputSampleRate);
-    response.getUdpSinkSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getUdpSinkSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getUdpSinkSettings()->setLowCutoff(settings.m_lowCutoff);
-    response.getUdpSinkSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getUdpSinkSettings()->setAmModFactor(settings.m_amModFactor);
-    response.getUdpSinkSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
-    response.getUdpSinkSettings()->setGainIn(settings.m_gainIn);
-    response.getUdpSinkSettings()->setGainOut(settings.m_gainOut);
-    response.getUdpSinkSettings()->setSquelch(settings.m_squelch);
-    response.getUdpSinkSettings()->setSquelchGate(settings.m_squelchGate);
-    response.getUdpSinkSettings()->setSquelchEnabled(settings.m_squelchEnabled ? 1 : 0);
-    response.getUdpSinkSettings()->setAutoRwBalance(settings.m_autoRWBalance ? 1 : 0);
-    response.getUdpSinkSettings()->setStereoInput(settings.m_stereoInput ? 1 : 0);
-    response.getUdpSinkSettings()->setRgbColor(settings.m_rgbColor);
+    response.getUdpSourceSettings()->setSampleFormat((int) settings.m_sampleFormat);
+    response.getUdpSourceSettings()->setInputSampleRate(settings.m_inputSampleRate);
+    response.getUdpSourceSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getUdpSourceSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getUdpSourceSettings()->setLowCutoff(settings.m_lowCutoff);
+    response.getUdpSourceSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getUdpSourceSettings()->setAmModFactor(settings.m_amModFactor);
+    response.getUdpSourceSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getUdpSourceSettings()->setGainIn(settings.m_gainIn);
+    response.getUdpSourceSettings()->setGainOut(settings.m_gainOut);
+    response.getUdpSourceSettings()->setSquelch(settings.m_squelch);
+    response.getUdpSourceSettings()->setSquelchGate(settings.m_squelchGate);
+    response.getUdpSourceSettings()->setSquelchEnabled(settings.m_squelchEnabled ? 1 : 0);
+    response.getUdpSourceSettings()->setAutoRwBalance(settings.m_autoRWBalance ? 1 : 0);
+    response.getUdpSourceSettings()->setStereoInput(settings.m_stereoInput ? 1 : 0);
+    response.getUdpSourceSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getUdpSinkSettings()->getUdpAddress()) {
-        *response.getUdpSinkSettings()->getUdpAddress() = settings.m_udpAddress;
+    if (response.getUdpSourceSettings()->getUdpAddress()) {
+        *response.getUdpSourceSettings()->getUdpAddress() = settings.m_udpAddress;
     } else {
-        response.getUdpSinkSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+        response.getUdpSourceSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
 
-    response.getUdpSinkSettings()->setUdpPort(settings.m_udpPort);
+    response.getUdpSourceSettings()->setUdpPort(settings.m_udpPort);
 
-    if (response.getUdpSinkSettings()->getTitle()) {
-        *response.getUdpSinkSettings()->getTitle() = settings.m_title;
+    if (response.getUdpSourceSettings()->getTitle()) {
+        *response.getUdpSourceSettings()->getTitle() = settings.m_title;
     } else {
-        response.getUdpSinkSettings()->setTitle(new QString(settings.m_title));
+        response.getUdpSourceSettings()->setTitle(new QString(settings.m_title));
     }
 }
 
 void UDPSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    response.getUdpSinkReport()->setInputPowerDb(CalcDb::dbPower(getInMagSq()));
-    response.getUdpSinkReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getUdpSinkReport()->setSquelch(m_squelchOpen ? 1 : 0);
-    response.getUdpSinkReport()->setBufferGauge(getBufferGauge());
-    response.getUdpSinkReport()->setChannelSampleRate(m_outputSampleRate);
+    response.getUdpSourceReport()->setInputPowerDb(CalcDb::dbPower(getInMagSq()));
+    response.getUdpSourceReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getUdpSourceReport()->setSquelch(m_squelchOpen ? 1 : 0);
+    response.getUdpSourceReport()->setBufferGauge(getBufferGauge());
+    response.getUdpSourceReport()->setChannelSampleRate(m_outputSampleRate);
 }

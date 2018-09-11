@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGUDPSinkReport.h
+ * SWGUDPSourceReport.h
  *
- * UDPSink
+ * UDPSource
  */
 
-#ifndef SWGUDPSinkReport_H_
-#define SWGUDPSinkReport_H_
+#ifndef SWGUDPSourceReport_H_
+#define SWGUDPSourceReport_H_
 
 #include <QJsonObject>
 
@@ -28,18 +28,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGUDPSinkReport: public SWGObject {
+class SWG_API SWGUDPSourceReport: public SWGObject {
 public:
-    SWGUDPSinkReport();
-    SWGUDPSinkReport(QString* json);
-    virtual ~SWGUDPSinkReport();
+    SWGUDPSourceReport();
+    SWGUDPSourceReport(QString* json);
+    virtual ~SWGUDPSourceReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGUDPSinkReport* fromJson(QString &jsonString) override;
+    virtual SWGUDPSourceReport* fromJson(QString &jsonString) override;
 
     float getChannelPowerDb();
     void setChannelPowerDb(float channel_power_db);
@@ -79,4 +79,4 @@ private:
 
 }
 
-#endif /* SWGUDPSinkReport_H_ */
+#endif /* SWGUDPSourceReport_H_ */

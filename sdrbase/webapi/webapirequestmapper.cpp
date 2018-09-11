@@ -2212,10 +2212,10 @@ bool WebAPIRequestMapper::validateChannelSettings(
     {
         if (channelSettings.getTx() != 0)
         {
-            QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
-            channelSettingsKeys = udpSinkSettingsJsonObject.keys();
-            channelSettings.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
-            channelSettings.getUdpSinkSettings()->fromJsonObject(udpSinkSettingsJsonObject);
+            QJsonObject udpSourceSettingsJsonObject = jsonObject["UDPSourceSettings"].toObject();
+            channelSettingsKeys = udpSourceSettingsJsonObject.keys();
+            channelSettings.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+            channelSettings.getUdpSourceSettings()->fromJsonObject(udpSourceSettingsJsonObject);
             return true;
         }
         else {
@@ -2415,7 +2415,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDaemonSourceSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
-    channelSettings.setUdpSinkSettings(0);
+    channelSettings.setUdpSourceSettings(0);
     channelSettings.setUdpSrcSettings(0);
     channelSettings.setWfmDemodSettings(0);
     channelSettings.setWfmModSettings(0);
@@ -2435,7 +2435,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDaemonSourceReport(0);
     channelReport.setSsbDemodReport(0);
     channelReport.setSsbModReport(0);
-    channelReport.setUdpSinkReport(0);
+    channelReport.setUdpSourceReport(0);
     channelReport.setUdpSrcReport(0);
     channelReport.setWfmDemodReport(0);
     channelReport.setWfmModReport(0);

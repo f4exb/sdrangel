@@ -227,19 +227,19 @@ def setupChannel(options):
         settings["SSBModSettings"]["toneFrequency"] = 600
         settings["SSBModSettings"]["bandwidth"] = 1000
         settings["SSBModSettings"]["lowCut"] = 300
-    elif options.channel_id == "UDPSink":
-        settings["UDPSinkSettings"]["title"] = "Test UDP Sink"
-        settings["UDPSinkSettings"]["inputFrequencyOffset"] = options.channel_freq
-        settings["UDPSinkSettings"]["rfBandwidth"] = 12500
-        settings["UDPSinkSettings"]["fmDeviation"] = 6000
-        settings["UDPSinkSettings"]["autoRWBalance"] = 1
-        settings["UDPSinkSettings"]["stereoInput"] = 0
-        settings["UDPSinkSettings"]["udpAddress"] = "127.0.0.1"
-        settings["UDPSinkSettings"]["udpPort"] = 9998
-        settings["UDPSinkSettings"]["inputSampleRate"] = 48000
-        settings["UDPSinkSettings"]["sampleFormat"] = 1  # FormatNFM
-        settings["UDPSinkSettings"]["gainIn"] = 2.5
-        settings["UDPSinkSettings"]["gainOut"] = 2.8
+    elif options.channel_id == "UDPSource":
+        settings["UDPSourceSettings"]["title"] = "Test UDP Source"
+        settings["UDPSourceSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["UDPSourceSettings"]["rfBandwidth"] = 12500
+        settings["UDPSourceSettings"]["fmDeviation"] = 6000
+        settings["UDPSourceSettings"]["autoRWBalance"] = 1
+        settings["UDPSourceSettings"]["stereoInput"] = 0
+        settings["UDPSourceSettings"]["udpAddress"] = "127.0.0.1"
+        settings["UDPSourceSettings"]["udpPort"] = 9998
+        settings["UDPSourceSettings"]["inputSampleRate"] = 48000
+        settings["UDPSourceSettings"]["sampleFormat"] = 1  # FormatNFM
+        settings["UDPSourceSettings"]["gainIn"] = 2.5
+        settings["UDPSourceSettings"]["gainOut"] = 2.8
     elif options.channel_id == "WFMMod":
         settings["WFMModSettings"]["title"] = "Test WFM"
         settings["WFMModSettings"]["inputFrequencyOffset"] = options.channel_freq

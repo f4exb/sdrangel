@@ -1422,8 +1422,8 @@ margin-bottom: 20px;
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
     },
-    "UDPSinkReport" : {
-      "$ref" : "#/definitions/UDPSinkReport"
+    "UDPSourceReport" : {
+      "$ref" : "#/definitions/UDPSourceReport"
     },
     "UDPSrcReport" : {
       "$ref" : "#/definitions/UDPSrcReport"
@@ -1482,8 +1482,8 @@ margin-bottom: 20px;
     "SSBDemodSettings" : {
       "$ref" : "#/definitions/SSBDemodSettings"
     },
-    "UDPSinkSettings" : {
-      "$ref" : "#/definitions/UDPSinkSettings"
+    "UDPSourceSettings" : {
+      "$ref" : "#/definitions/UDPSourceSettings"
     },
     "UDPSrcSettings" : {
       "$ref" : "#/definitions/UDPSrcSettings"
@@ -3713,7 +3713,7 @@ margin-bottom: 20px;
   },
   "description" : "TestSource"
 };
-            defs.UDPSinkReport = {
+            defs.UDPSourceReport = {
   "properties" : {
     "channelPowerDB" : {
       "type" : "number",
@@ -3737,9 +3737,9 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "UDPSink"
+  "description" : "UDPSource"
 };
-            defs.UDPSinkSettings = {
+            defs.UDPSourceSettings = {
   "properties" : {
     "sampleFormat" : {
       "type" : "integer"
@@ -3809,7 +3809,7 @@ margin-bottom: 20px;
       "type" : "string"
     }
   },
-  "description" : "UDPSink"
+  "description" : "UDPSource"
 };
             defs.UDPSrcReport = {
   "properties" : {
@@ -23066,7 +23066,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-11T14:47:33.212+02:00
+              Generated 2018-09-11T22:44:27.082+02:00
             </div>
           </div>
       </div>

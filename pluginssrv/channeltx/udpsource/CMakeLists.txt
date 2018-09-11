@@ -1,7 +1,7 @@
 project(udpsource)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(PLUGIN_PREFIX "../../../plugins/channeltx/udpsink")
+set(PLUGIN_PREFIX "../../../plugins/channeltx/udpsource")
 
 set(udpsource_SOURCES
 	${PLUGIN_PREFIX}/udpsource.cpp

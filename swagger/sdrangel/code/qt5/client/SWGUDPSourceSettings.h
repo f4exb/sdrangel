@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGUDPSinkSettings.h
+ * SWGUDPSourceSettings.h
  *
- * UDPSink
+ * UDPSource
  */
 
-#ifndef SWGUDPSinkSettings_H_
-#define SWGUDPSinkSettings_H_
+#ifndef SWGUDPSourceSettings_H_
+#define SWGUDPSourceSettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGUDPSinkSettings: public SWGObject {
+class SWG_API SWGUDPSourceSettings: public SWGObject {
 public:
-    SWGUDPSinkSettings();
-    SWGUDPSinkSettings(QString* json);
-    virtual ~SWGUDPSinkSettings();
+    SWGUDPSourceSettings();
+    SWGUDPSourceSettings(QString* json);
+    virtual ~SWGUDPSourceSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGUDPSinkSettings* fromJson(QString &jsonString) override;
+    virtual SWGUDPSourceSettings* fromJson(QString &jsonString) override;
 
     qint32 getSampleFormat();
     void setSampleFormat(qint32 sample_format);
@@ -164,4 +164,4 @@ private:
 
 }
 
-#endif /* SWGUDPSinkSettings_H_ */
+#endif /* SWGUDPSourceSettings_H_ */

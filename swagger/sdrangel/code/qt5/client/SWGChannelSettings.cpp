@@ -54,8 +54,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = nullptr;
     m_ssb_demod_settings_isSet = false;
-    udp_sink_settings = nullptr;
-    m_udp_sink_settings_isSet = false;
+    udp_source_settings = nullptr;
+    m_udp_source_settings_isSet = false;
     udp_src_settings = nullptr;
     m_udp_src_settings_isSet = false;
     wfm_demod_settings = nullptr;
@@ -96,8 +96,8 @@ SWGChannelSettings::init() {
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = new SWGSSBDemodSettings();
     m_ssb_demod_settings_isSet = false;
-    udp_sink_settings = new SWGUDPSinkSettings();
-    m_udp_sink_settings_isSet = false;
+    udp_source_settings = new SWGUDPSourceSettings();
+    m_udp_source_settings_isSet = false;
     udp_src_settings = new SWGUDPSrcSettings();
     m_udp_src_settings_isSet = false;
     wfm_demod_settings = new SWGWFMDemodSettings();
@@ -145,8 +145,8 @@ SWGChannelSettings::cleanup() {
     if(ssb_demod_settings != nullptr) { 
         delete ssb_demod_settings;
     }
-    if(udp_sink_settings != nullptr) { 
-        delete udp_sink_settings;
+    if(udp_source_settings != nullptr) { 
+        delete udp_source_settings;
     }
     if(udp_src_settings != nullptr) { 
         delete udp_src_settings;
@@ -196,7 +196,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ssb_demod_settings, pJson["SSBDemodSettings"], "SWGSSBDemodSettings", "SWGSSBDemodSettings");
     
-    ::SWGSDRangel::setValue(&udp_sink_settings, pJson["UDPSinkSettings"], "SWGUDPSinkSettings", "SWGUDPSinkSettings");
+    ::SWGSDRangel::setValue(&udp_source_settings, pJson["UDPSourceSettings"], "SWGUDPSourceSettings", "SWGUDPSourceSettings");
     
     ::SWGSDRangel::setValue(&udp_src_settings, pJson["UDPSrcSettings"], "SWGUDPSrcSettings", "SWGUDPSrcSettings");
     
@@ -259,8 +259,8 @@ SWGChannelSettings::asJsonObject() {
     if((ssb_demod_settings != nullptr) && (ssb_demod_settings->isSet())){
         toJsonValue(QString("SSBDemodSettings"), ssb_demod_settings, obj, QString("SWGSSBDemodSettings"));
     }
-    if((udp_sink_settings != nullptr) && (udp_sink_settings->isSet())){
-        toJsonValue(QString("UDPSinkSettings"), udp_sink_settings, obj, QString("SWGUDPSinkSettings"));
+    if((udp_source_settings != nullptr) && (udp_source_settings->isSet())){
+        toJsonValue(QString("UDPSourceSettings"), udp_source_settings, obj, QString("SWGUDPSourceSettings"));
     }
     if((udp_src_settings != nullptr) && (udp_src_settings->isSet())){
         toJsonValue(QString("UDPSrcSettings"), udp_src_settings, obj, QString("SWGUDPSrcSettings"));
@@ -405,14 +405,14 @@ SWGChannelSettings::setSsbDemodSettings(SWGSSBDemodSettings* ssb_demod_settings)
     this->m_ssb_demod_settings_isSet = true;
 }
 
-SWGUDPSinkSettings*
-SWGChannelSettings::getUdpSinkSettings() {
-    return udp_sink_settings;
+SWGUDPSourceSettings*
+SWGChannelSettings::getUdpSourceSettings() {
+    return udp_source_settings;
 }
 void
-SWGChannelSettings::setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings) {
-    this->udp_sink_settings = udp_sink_settings;
-    this->m_udp_sink_settings_isSet = true;
+SWGChannelSettings::setUdpSourceSettings(SWGUDPSourceSettings* udp_source_settings) {
+    this->udp_source_settings = udp_source_settings;
+    this->m_udp_source_settings_isSet = true;
 }
 
 SWGUDPSrcSettings*
@@ -463,7 +463,7 @@ SWGChannelSettings::isSet(){
         if(daemon_source_settings != nullptr && daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_demod_settings != nullptr && ssb_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(udp_sink_settings != nullptr && udp_sink_settings->isSet()){ isObjectUpdated = true; break;}
+        if(udp_source_settings != nullptr && udp_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(udp_src_settings != nullptr && udp_src_settings->isSet()){ isObjectUpdated = true; break;}
         if(wfm_demod_settings != nullptr && wfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(wfm_mod_settings != nullptr && wfm_mod_settings->isSet()){ isObjectUpdated = true; break;}

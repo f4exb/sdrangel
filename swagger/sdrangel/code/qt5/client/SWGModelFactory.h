@@ -105,8 +105,8 @@
 #include "SWGSamplingDevice.h"
 #include "SWGSuccessResponse.h"
 #include "SWGTestSourceSettings.h"
-#include "SWGUDPSinkReport.h"
-#include "SWGUDPSinkSettings.h"
+#include "SWGUDPSourceReport.h"
+#include "SWGUDPSourceSettings.h"
 #include "SWGUDPSrcReport.h"
 #include "SWGUDPSrcSettings.h"
 #include "SWGWFMDemodReport.h"
@@ -390,11 +390,11 @@ namespace SWGSDRangel {
     if(QString("SWGTestSourceSettings").compare(type) == 0) {
       return new SWGTestSourceSettings();
     }
-    if(QString("SWGUDPSinkReport").compare(type) == 0) {
-      return new SWGUDPSinkReport();
+    if(QString("SWGUDPSourceReport").compare(type) == 0) {
+      return new SWGUDPSourceReport();
     }
-    if(QString("SWGUDPSinkSettings").compare(type) == 0) {
-      return new SWGUDPSinkSettings();
+    if(QString("SWGUDPSourceSettings").compare(type) == 0) {
+      return new SWGUDPSourceSettings();
     }
     if(QString("SWGUDPSrcReport").compare(type) == 0) {
       return new SWGUDPSrcReport();

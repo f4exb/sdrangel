@@ -30,7 +30,7 @@
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>        
         <file>webapi/doc/swagger/include/Structs.yaml</file>
         <file>webapi/doc/swagger/include/TestSource.yaml</file>
-        <file>webapi/doc/swagger/include/UDPSink.yaml</file>
+        <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSrc.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
