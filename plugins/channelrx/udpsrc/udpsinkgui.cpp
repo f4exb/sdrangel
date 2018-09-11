@@ -264,7 +264,7 @@ void UDPSinkGUI::displaySettings()
     ui->squelch->setValue(m_settings.m_squelchdB);
     ui->squelchText->setText(tr("%1").arg(ui->squelch->value()*1.0, 0, 'f', 0));
 
-    qDebug("UDPSrcGUI::deserialize: m_squelchGate: %d", m_settings.m_squelchGate);
+    qDebug("UDPSinkGUI::deserialize: m_squelchGate: %d", m_settings.m_squelchGate);
     ui->squelchGate->setValue(m_settings.m_squelchGate);
     ui->squelchGateText->setText(tr("%1").arg(m_settings.m_squelchGate*10.0, 0, 'f', 0));
 

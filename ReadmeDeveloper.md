@@ -62,8 +62,7 @@ At present the following plugins are available:
   - `NFMDemodXxx` classes in `plugins/channelrx/demodnfm`: Narrowband FM demodulator with audio output.
   - `SSBDemodXxx` classes in `plugins/channelrx/demodssb`: SSB/DSB/CW demodulator with audio output.
   - `WFMDemodXxx` classes in `plugins/channelrx/demodwfm`: Wideband FM demodulator with audio output. This is a basic demodulator.
-  - `TCPSrcXxx` classes in `plugins/channelrx/tcpsrc`: Sends channel I/Q samples via TCP
-  - `UDPSrcXxx` classes in `plugins/channelrx/udpsrc`: Sends channel I/Q or FM demodulated samples via UDP
+  - `UDPSinkXxx` classes in `plugins/channelrx/udpsink`: Sends channel I/Q or FM demodulated samples via UDP
 
 <h3>Channel transmitter (Tx) plugins</h3>
 
@@ -104,11 +103,11 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxanalyzergui.h/cpp` : Analyzer GUI
         - `xxxanalyzerplugin.h/cpp` : Analyzer plugin manager
         - `xxxanalyzer.pro` : Qt .pro file for Windows/Android build
-      - `xxxsrc` : Interface to the outside (e.g xxx = udp):
-        - `xxxsrc.h/cpp` : Interface core
-        - `xxxsrcgui.h/cpp` : Interface GUI
-        - `xxxsrcplugin/h/cpp` : Interface plugin manager
-        - `xxxsrc.pro` : Qt .pro file for Windows/Android build
+      - `xxxsink` : Interface to the outside (e.g xxx = udp):
+        - `xxxsink.h/cpp` : Interface core
+        - `xxxsinkgui.h/cpp` : Interface GUI
+        - `xxxsinkplugin/h/cpp` : Interface plugin manager
+        - `xxxsink.pro` : Qt .pro file for Windows/Android build
 
   - Transmitter functions (Tx):
     - `samplesink`: Device managers:
@@ -130,11 +129,11 @@ The `plugins` subdirectory contains the associated plugins used to manage device
         - `xxxgeneratorgui.h/cpp` : Generator GUI
         - `xxxgeneratorplugin.h/cpp` : Generator plugin manager
         - `xxxgenerator.pro` : Qt .pro file for Windows/Android build
-      - `xxxsink` : Interface to the outside (e.g xxx = udp):
-        - `xxxsink.h/cpp` : Interface core
-        - `xxxsinkgui.h/cpp` : Interface GUI
-        - `xxxsinklugin/h/cpp` : Interface plugin manager
-        - `xxxsink.pro` : Qt .pro file for Windows/Android build
+      - `xxxsource` : Interface to the outside (e.g xxx = udp):
+        - `xxxsource.h/cpp` : Interface core
+        - `xxxsourcegui.h/cpp` : Interface GUI
+        - `xxxsourceplugin/h/cpp` : Interface plugin manager
+        - `xxxsource.pro` : Qt .pro file for Windows/Android build
         
 <h2>Device interface and GUI lifecycle</h2>
 

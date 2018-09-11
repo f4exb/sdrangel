@@ -1,5 +1,5 @@
-UDPSrcSettings:
-  description: UDPSrc
+UDPSinkSettings:
+  description: UDPSink
   properties:
     outputSampleRate:
       type: number
@@ -56,7 +56,7 @@ UDPSrcSettings:
     title:
       type: string
       
-UDPSrcReport:
+UDPSinkReport:
   description: UDPSink
   properties:
     outputPowerDB:

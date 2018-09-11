@@ -305,13 +305,13 @@ def setupChannel(deviceset_url, options):
         settings["DSDDemodSettings"]["enableCosineFiltering"] = 1
         settings["DSDDemodSettings"]["pllLock"] = 1
         settings["DSDDemodSettings"]["title"] = "Channel %d" % i
-    elif options.channel_id == "UDPSrc":
-        settings["UDPSrcSettings"]["inputFrequencyOffset"] = options.channel_freq
-        settings["UDPSrcSettings"]["rfBandwidth"] = options.rf_bw
-        settings["UDPSrcSettings"]["volume"] = options.volume
-        settings["UDPSrcSettings"]["squelchDB"] = options.squelch_db
-        settings["UDPSrcSettings"]["channelMute"] = 0
-        settings["UDPSrcSettings"]["title"] = "Channel %d" % i
+    elif options.channel_id == "UDPSink":
+        settings["UDPSinkSettings"]["inputFrequencyOffset"] = options.channel_freq
+        settings["UDPSinkSettings"]["rfBandwidth"] = options.rf_bw
+        settings["UDPSinkSettings"]["volume"] = options.volume
+        settings["UDPSinkSettings"]["squelchDB"] = options.squelch_db
+        settings["UDPSinkSettings"]["channelMute"] = 0
+        settings["UDPSinkSettings"]["title"] = "Channel %d" % i
     elif options.channel_id == "DaemonSink":
         settings["DaemonSinkSettings"]["title"] = "Channel %d" % i
         if options.daemon_address:

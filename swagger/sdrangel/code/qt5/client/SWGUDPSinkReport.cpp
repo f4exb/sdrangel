@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGUDPSrcReport.h"
+#include "SWGUDPSinkReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGUDPSrcReport::SWGUDPSrcReport(QString* json) {
+SWGUDPSinkReport::SWGUDPSinkReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGUDPSrcReport::SWGUDPSrcReport() {
+SWGUDPSinkReport::SWGUDPSinkReport() {
     output_power_db = 0.0f;
     m_output_power_db_isSet = false;
     channel_power_db = 0.0f;
@@ -38,12 +38,12 @@ SWGUDPSrcReport::SWGUDPSrcReport() {
     m_input_sample_rate_isSet = false;
 }
 
-SWGUDPSrcReport::~SWGUDPSrcReport() {
+SWGUDPSinkReport::~SWGUDPSinkReport() {
     this->cleanup();
 }
 
 void
-SWGUDPSrcReport::init() {
+SWGUDPSinkReport::init() {
     output_power_db = 0.0f;
     m_output_power_db_isSet = false;
     channel_power_db = 0.0f;
@@ -55,15 +55,15 @@ SWGUDPSrcReport::init() {
 }
 
 void
-SWGUDPSrcReport::cleanup() {
+SWGUDPSinkReport::cleanup() {
 
 
 
 
 }
 
-SWGUDPSrcReport*
-SWGUDPSrcReport::fromJson(QString &json) {
+SWGUDPSinkReport*
+SWGUDPSinkReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -72,7 +72,7 @@ SWGUDPSrcReport::fromJson(QString &json) {
 }
 
 void
-SWGUDPSrcReport::fromJsonObject(QJsonObject &pJson) {
+SWGUDPSinkReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&output_power_db, pJson["outputPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
@@ -84,7 +84,7 @@ SWGUDPSrcReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGUDPSrcReport::asJson ()
+SWGUDPSinkReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -95,7 +95,7 @@ SWGUDPSrcReport::asJson ()
 }
 
 QJsonObject*
-SWGUDPSrcReport::asJsonObject() {
+SWGUDPSinkReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_output_power_db_isSet){
         obj->insert("outputPowerDB", QJsonValue(output_power_db));
@@ -114,48 +114,48 @@ SWGUDPSrcReport::asJsonObject() {
 }
 
 float
-SWGUDPSrcReport::getOutputPowerDb() {
+SWGUDPSinkReport::getOutputPowerDb() {
     return output_power_db;
 }
 void
-SWGUDPSrcReport::setOutputPowerDb(float output_power_db) {
+SWGUDPSinkReport::setOutputPowerDb(float output_power_db) {
     this->output_power_db = output_power_db;
     this->m_output_power_db_isSet = true;
 }
 
 float
-SWGUDPSrcReport::getChannelPowerDb() {
+SWGUDPSinkReport::getChannelPowerDb() {
     return channel_power_db;
 }
 void
-SWGUDPSrcReport::setChannelPowerDb(float channel_power_db) {
+SWGUDPSinkReport::setChannelPowerDb(float channel_power_db) {
     this->channel_power_db = channel_power_db;
     this->m_channel_power_db_isSet = true;
 }
 
 qint32
-SWGUDPSrcReport::getSquelch() {
+SWGUDPSinkReport::getSquelch() {
     return squelch;
 }
 void
-SWGUDPSrcReport::setSquelch(qint32 squelch) {
+SWGUDPSinkReport::setSquelch(qint32 squelch) {
     this->squelch = squelch;
     this->m_squelch_isSet = true;
 }
 
 qint32
-SWGUDPSrcReport::getInputSampleRate() {
+SWGUDPSinkReport::getInputSampleRate() {
     return input_sample_rate;
 }
 void
-SWGUDPSrcReport::setInputSampleRate(qint32 input_sample_rate) {
+SWGUDPSinkReport::setInputSampleRate(qint32 input_sample_rate) {
     this->input_sample_rate = input_sample_rate;
     this->m_input_sample_rate_isSet = true;
 }
 
 
 bool
-SWGUDPSrcReport::isSet(){
+SWGUDPSinkReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_output_power_db_isSet){ isObjectUpdated = true; break;}

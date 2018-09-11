@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGUDPSrcSettings.h"
+#include "SWGUDPSinkSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGUDPSrcSettings::SWGUDPSrcSettings(QString* json) {
+SWGUDPSinkSettings::SWGUDPSinkSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGUDPSrcSettings::SWGUDPSrcSettings() {
+SWGUDPSinkSettings::SWGUDPSinkSettings() {
     output_sample_rate = 0.0f;
     m_output_sample_rate_isSet = false;
     sample_format = 0;
@@ -68,12 +68,12 @@ SWGUDPSrcSettings::SWGUDPSrcSettings() {
     m_title_isSet = false;
 }
 
-SWGUDPSrcSettings::~SWGUDPSrcSettings() {
+SWGUDPSinkSettings::~SWGUDPSinkSettings() {
     this->cleanup();
 }
 
 void
-SWGUDPSrcSettings::init() {
+SWGUDPSinkSettings::init() {
     output_sample_rate = 0.0f;
     m_output_sample_rate_isSet = false;
     sample_format = 0;
@@ -115,7 +115,7 @@ SWGUDPSrcSettings::init() {
 }
 
 void
-SWGUDPSrcSettings::cleanup() {
+SWGUDPSinkSettings::cleanup() {
 
 
 
@@ -141,8 +141,8 @@ SWGUDPSrcSettings::cleanup() {
     }
 }
 
-SWGUDPSrcSettings*
-SWGUDPSrcSettings::fromJson(QString &json) {
+SWGUDPSinkSettings*
+SWGUDPSinkSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -151,7 +151,7 @@ SWGUDPSrcSettings::fromJson(QString &json) {
 }
 
 void
-SWGUDPSrcSettings::fromJsonObject(QJsonObject &pJson) {
+SWGUDPSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&output_sample_rate, pJson["outputSampleRate"], "float", "");
     
     ::SWGSDRangel::setValue(&sample_format, pJson["sampleFormat"], "qint32", "");
@@ -193,7 +193,7 @@ SWGUDPSrcSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGUDPSrcSettings::asJson ()
+SWGUDPSinkSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -204,7 +204,7 @@ SWGUDPSrcSettings::asJson ()
 }
 
 QJsonObject*
-SWGUDPSrcSettings::asJsonObject() {
+SWGUDPSinkSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_output_sample_rate_isSet){
         obj->insert("outputSampleRate", QJsonValue(output_sample_rate));
@@ -268,198 +268,198 @@ SWGUDPSrcSettings::asJsonObject() {
 }
 
 float
-SWGUDPSrcSettings::getOutputSampleRate() {
+SWGUDPSinkSettings::getOutputSampleRate() {
     return output_sample_rate;
 }
 void
-SWGUDPSrcSettings::setOutputSampleRate(float output_sample_rate) {
+SWGUDPSinkSettings::setOutputSampleRate(float output_sample_rate) {
     this->output_sample_rate = output_sample_rate;
     this->m_output_sample_rate_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getSampleFormat() {
+SWGUDPSinkSettings::getSampleFormat() {
     return sample_format;
 }
 void
-SWGUDPSrcSettings::setSampleFormat(qint32 sample_format) {
+SWGUDPSinkSettings::setSampleFormat(qint32 sample_format) {
     this->sample_format = sample_format;
     this->m_sample_format_isSet = true;
 }
 
 qint64
-SWGUDPSrcSettings::getInputFrequencyOffset() {
+SWGUDPSinkSettings::getInputFrequencyOffset() {
     return input_frequency_offset;
 }
 void
-SWGUDPSrcSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
+SWGUDPSinkSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->input_frequency_offset = input_frequency_offset;
     this->m_input_frequency_offset_isSet = true;
 }
 
 float
-SWGUDPSrcSettings::getRfBandwidth() {
+SWGUDPSinkSettings::getRfBandwidth() {
     return rf_bandwidth;
 }
 void
-SWGUDPSrcSettings::setRfBandwidth(float rf_bandwidth) {
+SWGUDPSinkSettings::setRfBandwidth(float rf_bandwidth) {
     this->rf_bandwidth = rf_bandwidth;
     this->m_rf_bandwidth_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getFmDeviation() {
+SWGUDPSinkSettings::getFmDeviation() {
     return fm_deviation;
 }
 void
-SWGUDPSrcSettings::setFmDeviation(qint32 fm_deviation) {
+SWGUDPSinkSettings::setFmDeviation(qint32 fm_deviation) {
     this->fm_deviation = fm_deviation;
     this->m_fm_deviation_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getChannelMute() {
+SWGUDPSinkSettings::getChannelMute() {
     return channel_mute;
 }
 void
-SWGUDPSrcSettings::setChannelMute(qint32 channel_mute) {
+SWGUDPSinkSettings::setChannelMute(qint32 channel_mute) {
     this->channel_mute = channel_mute;
     this->m_channel_mute_isSet = true;
 }
 
 float
-SWGUDPSrcSettings::getGain() {
+SWGUDPSinkSettings::getGain() {
     return gain;
 }
 void
-SWGUDPSrcSettings::setGain(float gain) {
+SWGUDPSinkSettings::setGain(float gain) {
     this->gain = gain;
     this->m_gain_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getSquelchDb() {
+SWGUDPSinkSettings::getSquelchDb() {
     return squelch_db;
 }
 void
-SWGUDPSrcSettings::setSquelchDb(qint32 squelch_db) {
+SWGUDPSinkSettings::setSquelchDb(qint32 squelch_db) {
     this->squelch_db = squelch_db;
     this->m_squelch_db_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getSquelchGate() {
+SWGUDPSinkSettings::getSquelchGate() {
     return squelch_gate;
 }
 void
-SWGUDPSrcSettings::setSquelchGate(qint32 squelch_gate) {
+SWGUDPSinkSettings::setSquelchGate(qint32 squelch_gate) {
     this->squelch_gate = squelch_gate;
     this->m_squelch_gate_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getSquelchEnabled() {
+SWGUDPSinkSettings::getSquelchEnabled() {
     return squelch_enabled;
 }
 void
-SWGUDPSrcSettings::setSquelchEnabled(qint32 squelch_enabled) {
+SWGUDPSinkSettings::setSquelchEnabled(qint32 squelch_enabled) {
     this->squelch_enabled = squelch_enabled;
     this->m_squelch_enabled_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getAgc() {
+SWGUDPSinkSettings::getAgc() {
     return agc;
 }
 void
-SWGUDPSrcSettings::setAgc(qint32 agc) {
+SWGUDPSinkSettings::setAgc(qint32 agc) {
     this->agc = agc;
     this->m_agc_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getAudioActive() {
+SWGUDPSinkSettings::getAudioActive() {
     return audio_active;
 }
 void
-SWGUDPSrcSettings::setAudioActive(qint32 audio_active) {
+SWGUDPSinkSettings::setAudioActive(qint32 audio_active) {
     this->audio_active = audio_active;
     this->m_audio_active_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getAudioStereo() {
+SWGUDPSinkSettings::getAudioStereo() {
     return audio_stereo;
 }
 void
-SWGUDPSrcSettings::setAudioStereo(qint32 audio_stereo) {
+SWGUDPSinkSettings::setAudioStereo(qint32 audio_stereo) {
     this->audio_stereo = audio_stereo;
     this->m_audio_stereo_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getVolume() {
+SWGUDPSinkSettings::getVolume() {
     return volume;
 }
 void
-SWGUDPSrcSettings::setVolume(qint32 volume) {
+SWGUDPSinkSettings::setVolume(qint32 volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
 }
 
 QString*
-SWGUDPSrcSettings::getUdpAddress() {
+SWGUDPSinkSettings::getUdpAddress() {
     return udp_address;
 }
 void
-SWGUDPSrcSettings::setUdpAddress(QString* udp_address) {
+SWGUDPSinkSettings::setUdpAddress(QString* udp_address) {
     this->udp_address = udp_address;
     this->m_udp_address_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getUdpPort() {
+SWGUDPSinkSettings::getUdpPort() {
     return udp_port;
 }
 void
-SWGUDPSrcSettings::setUdpPort(qint32 udp_port) {
+SWGUDPSinkSettings::setUdpPort(qint32 udp_port) {
     this->udp_port = udp_port;
     this->m_udp_port_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getAudioPort() {
+SWGUDPSinkSettings::getAudioPort() {
     return audio_port;
 }
 void
-SWGUDPSrcSettings::setAudioPort(qint32 audio_port) {
+SWGUDPSinkSettings::setAudioPort(qint32 audio_port) {
     this->audio_port = audio_port;
     this->m_audio_port_isSet = true;
 }
 
 qint32
-SWGUDPSrcSettings::getRgbColor() {
+SWGUDPSinkSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGUDPSrcSettings::setRgbColor(qint32 rgb_color) {
+SWGUDPSinkSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 QString*
-SWGUDPSrcSettings::getTitle() {
+SWGUDPSinkSettings::getTitle() {
     return title;
 }
 void
-SWGUDPSrcSettings::setTitle(QString* title) {
+SWGUDPSinkSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 
 bool
-SWGUDPSrcSettings::isSet(){
+SWGUDPSinkSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_output_sample_rate_isSet){ isObjectUpdated = true; break;}
