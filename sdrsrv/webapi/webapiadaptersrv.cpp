@@ -28,7 +28,6 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGLoggingInfo.h"
 #include "SWGAudioDevices.h"
-#include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGPresetImport.h"

@@ -42,7 +42,6 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
-#include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
