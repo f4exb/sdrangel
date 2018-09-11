@@ -1,22 +1,22 @@
-project(udpsrc)
+project(udpsink)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(udpsrc_SOURCES
+set(udpsink_SOURCES
 	udpsink.cpp
 	udpsinkgui.cpp
 	udpsinkplugin.cpp
 	udpsinksettings.cpp
 )
 
-set(udpsrc_HEADERS
+set(udpsink_HEADERS
 	udpsink.h
 	udpsinkgui.h
 	udpsinkplugin.h
 	udpsinksettings.h
 )
 
-set(udpsrc_FORMS
+set(udpsink_FORMS
 	udpsinkgui.ui
 )
 
@@ -31,20 +31,20 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-qt5_wrap_ui(udpsrc_FORMS_HEADERS ${udpsrc_FORMS})
+qt5_wrap_ui(udpsink_FORMS_HEADERS ${udpsink_FORMS})
 
-add_library(demodudpsrc SHARED
-	${udpsrc_SOURCES}
-	${udpsrc_HEADERS_MOC}
-	${udpsrc_FORMS_HEADERS}
+add_library(udpsink SHARED
+	${udpsink_SOURCES}
+	${udpsink_HEADERS_MOC}
+	${udpsink_FORMS_HEADERS}
 )
 
-target_link_libraries(demodudpsrc
+target_link_libraries(udpsink
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
 )
 
-target_link_libraries(demodudpsrc Qt5::Core Qt5::Widgets Qt5::Network)
+target_link_libraries(udpsink Qt5::Core Qt5::Widgets Qt5::Network)
 
-install(TARGETS demodudpsrc DESTINATION lib/plugins/channelrx)
+install(TARGETS udpsink DESTINATION lib/plugins/channelrx)
