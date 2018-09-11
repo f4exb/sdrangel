@@ -33,7 +33,6 @@
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/udpsink.h"
 #include "util/doublebufferfifo.h"
 
 #include "dsddemodsettings.h"

@@ -62,9 +62,9 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	m_udpBuffer16 = new UDPSink<Sample16>(this, udpBlockSize, m_settings.m_udpPort);
-	m_udpBufferMono16 = new UDPSink<int16_t>(this, udpBlockSize, m_settings.m_udpPort);
-    m_udpBuffer24 = new UDPSink<Sample24>(this, udpBlockSize, m_settings.m_udpPort);
+	m_udpBuffer16 = new UDPSinkUtil<Sample16>(this, udpBlockSize, m_settings.m_udpPort);
+	m_udpBufferMono16 = new UDPSinkUtil<int16_t>(this, udpBlockSize, m_settings.m_udpPort);
+    m_udpBuffer24 = new UDPSinkUtil<Sample24>(this, udpBlockSize, m_settings.m_udpPort);
 	m_audioSocket = new QUdpSocket(this);
 	m_udpAudioBuf = new char[m_udpAudioPayloadSize];
 

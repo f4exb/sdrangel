@@ -26,10 +26,10 @@
 #include <cassert>
 
 template<typename T>
-class UDPSink
+class UDPSinkUtil
 {
 public:
-	UDPSink(QObject *parent, unsigned int udpSize) :
+	UDPSinkUtil(QObject *parent, unsigned int udpSize) :
 		m_udpSize(udpSize),
 		m_udpSamples(udpSize/sizeof(T)),
 		m_address(QHostAddress::LocalHost),
@@ -41,7 +41,7 @@ public:
 		m_socket = new QUdpSocket(parent);
 	}
 
-    UDPSink(QObject *parent, unsigned int udpSize, unsigned int port) :
+    UDPSinkUtil(QObject *parent, unsigned int udpSize, unsigned int port) :
         m_udpSize(udpSize),
         m_udpSamples(udpSize/sizeof(T)),
         m_address(QHostAddress::LocalHost),
@@ -53,7 +53,7 @@ public:
         m_socket = new QUdpSocket(parent);
     }
 
-	UDPSink (QObject *parent, unsigned int udpSize, QHostAddress& address, unsigned int port) :
+	UDPSinkUtil (QObject *parent, unsigned int udpSize, QHostAddress& address, unsigned int port) :
 		m_udpSize(udpSize),
         m_udpSamples(udpSize/sizeof(T)),
 		m_address(address),
@@ -65,7 +65,7 @@ public:
 		m_socket = new QUdpSocket(parent);
 	}
 
-	~UDPSink()
+	~UDPSinkUtil()
 	{
 		delete[] m_sampleBuffer;
 		delete m_socket;

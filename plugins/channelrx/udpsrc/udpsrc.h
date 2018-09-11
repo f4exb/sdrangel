@@ -30,7 +30,7 @@
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
-#include "util/udpsink.h"
+#include "util/udpsinkutil.h"
 #include "util/message.h"
 #include "audio/audiofifo.h"
 
@@ -197,9 +197,9 @@ protected:
 	fftfilt* UDPFilter;
 
 	SampleVector m_sampleBuffer;
-	UDPSink<Sample16> *m_udpBuffer16;
-	UDPSink<int16_t> *m_udpBufferMono16;
-    UDPSink<Sample24> *m_udpBuffer24;
+	UDPSinkUtil<Sample16> *m_udpBuffer16;
+	UDPSinkUtil<int16_t> *m_udpBufferMono16;
+    UDPSinkUtil<Sample24> *m_udpBuffer24;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
