@@ -30,18 +30,18 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 
-#include "udpsrc.h"
+#include "udpsink.h"
 
-const Real UDPSrc::m_agcTarget = 16384.0f;
+const Real UDPSink::m_agcTarget = 16384.0f;
 
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureUDPSrc, Message)
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSrc::MsgUDPSrcSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSrc, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSrcSpectrum, Message)
 
-const QString UDPSrc::m_channelIdURI = "sdrangel.channel.udpsrc";
-const QString UDPSrc::m_channelId = "UDPSrc";
+const QString UDPSink::m_channelIdURI = "sdrangel.channel.udpsrc";
+const QString UDPSink::m_channelId = "UDPSrc";
 
-UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
+UDPSink::UDPSink(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
@@ -112,7 +112,7 @@ UDPSrc::UDPSrc(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addChannelAPI(this);
 }
 
-UDPSrc::~UDPSrc()
+UDPSink::~UDPSink()
 {
 	delete m_audioSocket;
 	delete m_udpBuffer24;
@@ -127,13 +127,13 @@ UDPSrc::~UDPSrc()
     delete UDPFilter;
 }
 
-void UDPSrc::setSpectrum(MessageQueue* messageQueue, bool enabled)
+void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
 	Message* cmd = MsgUDPSrcSpectrum::create(enabled);
 	messageQueue->push(cmd);
 }
 
-void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
+void UDPSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	Complex ci;
 	fftfilt::cmplx* sideband;
@@ -153,10 +153,10 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 		    double agcFactor = 1.0;
 
             if ((m_settings.m_agc) &&
-                (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFM) &&
-                (m_settings.m_sampleFormat != UDPSrcSettings::FormatNFMMono) &&
-                (m_settings.m_sampleFormat != UDPSrcSettings::FormatIQ16) &&
-                (m_settings.m_sampleFormat != UDPSrcSettings::FormatIQ24))
+                (m_settings.m_sampleFormat != UDPSinkSettings::FormatNFM) &&
+                (m_settings.m_sampleFormat != UDPSinkSettings::FormatNFMMono) &&
+                (m_settings.m_sampleFormat != UDPSinkSettings::FormatIQ16) &&
+                (m_settings.m_sampleFormat != UDPSinkSettings::FormatIQ24))
             {
                 agcFactor = m_agc.feedAndGetValue(ci);
                 inMagSq = m_agc.getMagSq();
@@ -176,7 +176,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 
 			calculateSquelch(m_inMagsq);
 
-			if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSB) // binaural LSB
+			if (m_settings.m_sampleFormat == UDPSinkSettings::FormatLSB) // binaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -192,7 +192,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			if (m_settings.m_sampleFormat == UDPSrcSettings::FormatUSB) // binaural USB
+			if (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSB) // binaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -208,19 +208,19 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFM)
+			else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatNFM)
 			{
                 Real discri = m_squelchOpen ? m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
 				udpWriteNorm(discri, discri);
 				m_outMovingAverage.feed(discri*discri);
 			}
-			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatNFMMono)
+			else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatNFMMono)
 			{
 			    Real discri = m_squelchOpen ? m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_gain : 0;
 				udpWriteNormMono(discri);
 				m_outMovingAverage.feed(discri*discri);
 			}
-			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) // Monaural LSB
+			else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatLSBMono) // Monaural LSB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, false);
@@ -235,7 +235,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono) // Monaural USB
+			else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSBMono) // Monaural USB
 			{
 			    ci *= agcFactor;
 				int n_out = UDPFilter->runSSB(ci, &sideband, true);
@@ -250,14 +250,14 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 					}
 				}
 			}
-			else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMMono)
+			else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatAMMono)
 			{
 			    Real amplitude = m_squelchOpen ? sqrt(inMagSq) * agcFactor * m_settings.m_gain : 0;
 				FixReal demod = (FixReal) amplitude;
                 udpWriteMono(demod);
 				m_outMovingAverage.feed((amplitude/SDR_RX_SCALEF)*(amplitude/SDR_RX_SCALEF));
 			}
-            else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMNoDCMono)
+            else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatAMNoDCMono)
             {
                 if (m_squelchOpen)
                 {
@@ -274,7 +274,7 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
                     m_outMovingAverage.feed(0);
                 }
             }
-            else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatAMBPFMono)
+            else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatAMBPFMono)
             {
                 if (m_squelchOpen)
                 {
@@ -320,17 +320,17 @@ void UDPSrc::feed(const SampleVector::const_iterator& begin, const SampleVector:
 	m_settingsMutex.unlock();
 }
 
-void UDPSrc::start()
+void UDPSink::start()
 {
 	m_phaseDiscri.reset();
 	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
-void UDPSrc::stop()
+void UDPSink::stop()
 {
 }
 
-bool UDPSrc::handleMessage(const Message& cmd)
+bool UDPSink::handleMessage(const Message& cmd)
 {
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
@@ -392,7 +392,7 @@ bool UDPSrc::handleMessage(const Message& cmd)
 	}
 }
 
-void UDPSrc::audioReadyRead()
+void UDPSink::audioReadyRead()
 {
 	while (m_audioSocket->hasPendingDatagrams())
 	{
@@ -460,7 +460,7 @@ void UDPSrc::audioReadyRead()
 	//qDebug("UDPSrc::audioReadyRead: done");
 }
 
-void UDPSrc::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
+void UDPSink::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "UDPSrc::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
@@ -484,7 +484,7 @@ void UDPSrc::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset,
     m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
-void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
+void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
 {
     qDebug() << "UDPSrc::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
@@ -514,10 +514,10 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
         m_interpolator.create(16, m_inputSampleRate, settings.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_inputSampleRate / settings.m_outputSampleRate;
 
-        if ((settings.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
+        if ((settings.m_sampleFormat == UDPSinkSettings::FormatLSB) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatLSBMono) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatUSB) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatUSBMono))
         {
             m_squelchGate = settings.m_outputSampleRate * 0.05;
         }
@@ -555,10 +555,10 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
     {
-        if ((settings.m_sampleFormat == UDPSrcSettings::FormatLSB) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatLSBMono) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatUSB) ||
-            (settings.m_sampleFormat == UDPSrcSettings::FormatUSBMono))
+        if ((settings.m_sampleFormat == UDPSinkSettings::FormatLSB) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatLSBMono) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatUSB) ||
+            (settings.m_sampleFormat == UDPSinkSettings::FormatUSBMono))
         {
             m_squelchGate = settings.m_outputSampleRate * 0.05;
         }
@@ -620,12 +620,12 @@ void UDPSrc::applySettings(const UDPSrcSettings& settings, bool force)
     m_settings = settings;
 }
 
-QByteArray UDPSrc::serialize() const
+QByteArray UDPSink::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool UDPSrc::deserialize(const QByteArray& data)
+bool UDPSink::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
@@ -642,7 +642,7 @@ bool UDPSrc::deserialize(const QByteArray& data)
     }
 }
 
-int UDPSrc::webapiSettingsGet(
+int UDPSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -652,20 +652,20 @@ int UDPSrc::webapiSettingsGet(
     return 200;
 }
 
-int UDPSrc::webapiSettingsPutPatch(
+int UDPSink::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    UDPSrcSettings settings = m_settings;
+    UDPSinkSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("outputSampleRate")) {
         settings.m_outputSampleRate = response.getUdpSrcSettings()->getOutputSampleRate();
     }
     if (channelSettingsKeys.contains("sampleFormat")) {
-        settings.m_sampleFormat = (UDPSrcSettings::SampleFormat) response.getUdpSrcSettings()->getSampleFormat();
+        settings.m_sampleFormat = (UDPSinkSettings::SampleFormat) response.getUdpSrcSettings()->getSampleFormat();
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset"))
     {
@@ -723,7 +723,7 @@ int UDPSrc::webapiSettingsPutPatch(
 
     if (frequencyOffsetChanged)
     {
-        UDPSrc::MsgConfigureChannelizer *msgChan = UDPSrc::MsgConfigureChannelizer::create(
+        UDPSink::MsgConfigureChannelizer *msgChan = UDPSink::MsgConfigureChannelizer::create(
                 (int) settings.m_outputSampleRate,
                 (int) settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(msgChan);
@@ -744,7 +744,7 @@ int UDPSrc::webapiSettingsPutPatch(
     return 200;
 }
 
-int UDPSrc::webapiReportGet(
+int UDPSink::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -754,7 +754,7 @@ int UDPSrc::webapiReportGet(
     return 200;
 }
 
-void UDPSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSrcSettings& settings)
+void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings)
 {
     response.getUdpSrcSettings()->setOutputSampleRate(settings.m_outputSampleRate);
     response.getUdpSrcSettings()->setSampleFormat((int) settings.m_sampleFormat);
@@ -788,7 +788,7 @@ void UDPSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 }
 
-void UDPSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getUdpSrcReport()->setChannelPowerDb(CalcDb::dbPower(getInMagSq()));
     response.getUdpSrcReport()->setOutputPowerDb(CalcDb::dbPower(getMagSq()));

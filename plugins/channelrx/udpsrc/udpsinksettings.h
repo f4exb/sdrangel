@@ -23,7 +23,7 @@
 
 class Serializable;
 
-struct UDPSrcSettings
+struct UDPSinkSettings
 {
     enum SampleFormat {
         FormatIQ16,
@@ -65,7 +65,7 @@ struct UDPSrcSettings
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
 
-    UDPSrcSettings();
+    UDPSinkSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }

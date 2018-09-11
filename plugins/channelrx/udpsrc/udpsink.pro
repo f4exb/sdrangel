@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = udpsrc
+TARGET = udpsink
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -26,17 +26,17 @@ INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += udpsrc.cpp\
-    udpsrcgui.cpp\
-    udpsrcplugin.cpp\
-    udpsrcsettings.cpp
+SOURCES += udpsink.cpp\
+    udpsinkgui.cpp\
+    udpsinkplugin.cpp\
+    udpsinksettings.cpp
 
-HEADERS += udpsrc.h\
-    udpsrcgui.h\
-    udpsrcplugin.h\
-    udpsrcsettings.h
+HEADERS += udpsink.h\
+    udpsinkgui.h\
+    udpsinkplugin.h\
+    udpsinksettings.h
 
-FORMS += udpsrcgui.ui
+FORMS += udpsinkgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

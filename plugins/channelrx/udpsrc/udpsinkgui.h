@@ -25,23 +25,23 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 
-#include "udpsrc.h"
-#include "udpsrcsettings.h"
+#include "udpsink.h"
+#include "udpsinksettings.h"
 
 class PluginAPI;
 class DeviceUISet;
-class UDPSrc;
+class UDPSink;
 class SpectrumVis;
 
 namespace Ui {
-	class UDPSrcGUI;
+	class UDPSinkGUI;
 }
 
-class UDPSrcGUI : public RollupWidget, public PluginInstanceGUI {
+class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	static UDPSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+	static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -60,11 +60,11 @@ public slots:
     void channelMarkerHighlightedByCursor();
 
 private:
-	Ui::UDPSrcGUI* ui;
+	Ui::UDPSinkGUI* ui;
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
-	UDPSrc* m_udpSrc;
-	UDPSrcSettings m_settings;
+	UDPSink* m_udpSink;
+	UDPSinkSettings m_settings;
 	ChannelMarker m_channelMarker;
 	MovingAverage<double> m_channelPowerAvg;
     MovingAverage<double> m_inPowerAvg;
@@ -78,15 +78,15 @@ private:
 	// RF path
 	SpectrumVis* m_spectrumVis;
 
-	explicit UDPSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
-	virtual ~UDPSrcGUI();
+	explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+	virtual ~UDPSinkGUI();
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void applySettingsImmediate(bool force = false);
 	void displaySettings();
 	void setSampleFormat(int index);
-	void setSampleFormatIndex(const UDPSrcSettings::SampleFormat& sampleFormat);
+	void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

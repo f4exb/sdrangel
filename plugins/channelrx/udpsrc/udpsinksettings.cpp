@@ -19,16 +19,16 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "udpsrcsettings.h"
+#include "udpsinksettings.h"
 
-UDPSrcSettings::UDPSrcSettings() :
+UDPSinkSettings::UDPSinkSettings() :
     m_channelMarker(0),
     m_spectrumGUI(0)
 {
     resetToDefaults();
 }
 
-void UDPSrcSettings::resetToDefaults()
+void UDPSinkSettings::resetToDefaults()
 {
     m_outputSampleRate = 48000;
     m_sampleFormat = FormatIQ16;
@@ -51,7 +51,7 @@ void UDPSrcSettings::resetToDefaults()
     m_title = "UDP Sample Source";
 }
 
-QByteArray UDPSrcSettings::serialize() const
+QByteArray UDPSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(2, m_inputFrequencyOffset);
@@ -85,7 +85,7 @@ QByteArray UDPSrcSettings::serialize() const
 
 }
 
-bool UDPSrcSettings::deserialize(const QByteArray& data)
+bool UDPSinkSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

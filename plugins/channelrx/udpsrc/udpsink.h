@@ -34,14 +34,14 @@
 #include "util/message.h"
 #include "audio/audiofifo.h"
 
-#include "udpsrcsettings.h"
+#include "udpsinksettings.h"
 
 class QUdpSocket;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class UDPSrc : public BasebandSampleSink, public ChannelSinkAPI {
+class UDPSink : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
 
 public:
@@ -49,19 +49,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const UDPSrcSettings& getSettings() const { return m_settings; }
+        const UDPSinkSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSrc* create(const UDPSrcSettings& settings, bool force)
+        static MsgConfigureUDPSrc* create(const UDPSinkSettings& settings, bool force)
         {
             return new MsgConfigureUDPSrc(settings, force);
         }
 
     private:
-        UDPSrcSettings m_settings;
+        UDPSinkSettings m_settings;
         bool m_force;
 
-        MsgConfigureUDPSrc(const UDPSrcSettings& settings, bool force) :
+        MsgConfigureUDPSrc(const UDPSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -92,8 +92,8 @@ public:
         { }
     };
 
-	UDPSrc(DeviceSourceAPI *deviceAPI);
-	virtual ~UDPSrc();
+	UDPSink(DeviceSourceAPI *deviceAPI);
+	virtual ~UDPSink();
 	virtual void destroy() { delete this; }
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
 
@@ -178,7 +178,7 @@ protected:
 
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
-    UDPSrcSettings m_settings;
+    UDPSinkSettings m_settings;
 
 	QUdpSocket *m_audioSocket;
 
@@ -230,9 +230,9 @@ protected:
 	QMutex m_settingsMutex;
 
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = true);
-    void applySettings(const UDPSrcSettings& settings, bool force = false);
+    void applySettings(const UDPSinkSettings& settings, bool force = false);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSrcSettings& settings);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
     inline void calculateSquelch(double value)
@@ -297,9 +297,9 @@ protected:
     {
         if (SDR_RX_SAMP_SZ == 16)
         {
-            if (m_settings.m_sampleFormat == UDPSrcSettings::FormatIQ16) {
+            if (m_settings.m_sampleFormat == UDPSinkSettings::FormatIQ16) {
                 m_udpBuffer16->write(Sample16(real, imag));
-            } else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatIQ24) {
+            } else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatIQ24) {
                 m_udpBuffer24->write(Sample24(real<<8, imag<<8));
             } else {
                 m_udpBuffer16->write(Sample16(real, imag));
@@ -307,9 +307,9 @@ protected:
         }
         else if (SDR_RX_SAMP_SZ == 24)
         {
-            if (m_settings.m_sampleFormat == UDPSrcSettings::FormatIQ16) {
+            if (m_settings.m_sampleFormat == UDPSinkSettings::FormatIQ16) {
                 m_udpBuffer16->write(Sample16(real>>8, imag>>8));
-            } else if (m_settings.m_sampleFormat == UDPSrcSettings::FormatIQ24) {
+            } else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatIQ24) {
                 m_udpBuffer24->write(Sample24(real, imag));
             } else {
                 m_udpBuffer16->write(Sample16(real>>8, imag>>8));

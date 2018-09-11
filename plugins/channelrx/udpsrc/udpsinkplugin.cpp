@@ -15,65 +15,64 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "udpsrcplugin.h"
-
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "udpsrcgui.h"
+#include "udpsinkgui.h"
 #endif
-#include "udpsrc.h"
+#include "udpsink.h"
+#include "udpsinkplugin.h"
 
-const PluginDescriptor UDPSrcPlugin::m_pluginDescriptor = {
-	QString("UDP Channel Source"),
-	QString("4.0.7"),
+const PluginDescriptor UDPSinkPlugin::m_pluginDescriptor = {
+	QString("UDP Channel Sink"),
+	QString("4.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-UDPSrcPlugin::UDPSrcPlugin(QObject* parent) :
+UDPSinkPlugin::UDPSinkPlugin(QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& UDPSrcPlugin::getPluginDescriptor() const
+const PluginDescriptor& UDPSinkPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void UDPSrcPlugin::initPlugin(PluginAPI* pluginAPI)
+void UDPSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
 	// register TCP Channel Source
-	m_pluginAPI->registerRxChannel(UDPSrc::m_channelIdURI, UDPSrc::m_channelId, this);
+	m_pluginAPI->registerRxChannel(UDPSink::m_channelIdURI, UDPSink::m_channelId, this);
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* UDPSrcPlugin::createRxChannelGUI(
+PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet __attribute__((unused)),
         BasebandSampleSink *rxChannel __attribute__((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* UDPSrcPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	return UDPSrcGUI::create(m_pluginAPI, deviceUISet, rxChannel);
+	return UDPSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* UDPSrcPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* UDPSinkPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    return new UDPSrc(deviceAPI);
+    return new UDPSink(deviceAPI);
 }
 
-ChannelSinkAPI* UDPSrcPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* UDPSinkPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
-    return new UDPSrc(deviceAPI);
+    return new UDPSink(deviceAPI);
 }
 

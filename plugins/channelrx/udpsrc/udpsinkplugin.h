@@ -24,13 +24,13 @@
 class DeviceUISet;
 class BasebandSampleSink;
 
-class UDPSrcPlugin : public QObject, PluginInterface {
+class UDPSinkPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID "sdrangel.demod.udpsrc")
 
 public:
-	explicit UDPSrcPlugin(QObject* parent = 0);
+	explicit UDPSinkPlugin(QObject* parent = 0);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);

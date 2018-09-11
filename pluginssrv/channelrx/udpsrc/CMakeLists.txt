@@ -4,15 +4,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(PLUGIN_PREFIX "../../../plugins/channelrx/udpsrc")
 
 set(udpsrc_SOURCES
-	${PLUGIN_PREFIX}/udpsrc.cpp
-	${PLUGIN_PREFIX}/udpsrcplugin.cpp
-	${PLUGIN_PREFIX}/udpsrcsettings.cpp
+	${PLUGIN_PREFIX}/udpsink.cpp
+	${PLUGIN_PREFIX}/udpsinkplugin.cpp
+	${PLUGIN_PREFIX}/udpsinksettings.cpp
 )
 
 set(udpsrc_HEADERS
-	${PLUGIN_PREFIX}/udpsrc.h
-	${PLUGIN_PREFIX}/udpsrcplugin.h
-	${PLUGIN_PREFIX}/udpsrcsettings.h
+	${PLUGIN_PREFIX}/udpsink.h
+	${PLUGIN_PREFIX}/udpsinkplugin.h
+	${PLUGIN_PREFIX}/udpsinksettings.h
 )
 
 include_directories(

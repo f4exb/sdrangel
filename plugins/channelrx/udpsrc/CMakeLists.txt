@@ -3,21 +3,21 @@ project(udpsrc)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(udpsrc_SOURCES
-	udpsrc.cpp
-	udpsrcgui.cpp
-	udpsrcplugin.cpp
-	udpsrcsettings.cpp
+	udpsink.cpp
+	udpsinkgui.cpp
+	udpsinkplugin.cpp
+	udpsinksettings.cpp
 )
 
 set(udpsrc_HEADERS
-	udpsrc.h
-	udpsrcgui.h
-	udpsrcplugin.h
-	udpsrcsettings.h
+	udpsink.h
+	udpsinkgui.h
+	udpsinkplugin.h
+	udpsinksettings.h
 )
 
 set(udpsrc_FORMS
-	udpsrcgui.ui
+	udpsinkgui.ui
 )
 
 include_directories(
