@@ -9,9 +9,12 @@ set(sdrbase_SOURCES
     audio/audiooutput.cpp
     audio/audioinput.cpp
     audio/audionetsink.cpp
-    
+
     channel/channelsinkapi.cpp
     channel/channelsourceapi.cpp
+    channel/sdrdaemondataqueue.cpp
+    channel/sdrdaemondatareadqueue.cpp
+
     commands/command.cpp
 
     dsp/afsquelch.cpp
@@ -22,7 +25,7 @@ set(sdrbase_SOURCES
     dsp/ctcssdetector.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
-    dsp/decimatorsif.cpp    
+    dsp/decimatorsif.cpp
     dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/dspcommands.cpp
@@ -78,15 +81,15 @@ set(sdrbase_SOURCES
     util/simpleserializer.cpp
     #util/spinlock.cpp
     util/uid.cpp
-    
-    plugin/plugininterface.cpp    
+
+    plugin/plugininterface.cpp
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp
-    
+
     webapi/webapiadapterinterface.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
-    
+
     mainparser.cpp
 )
 
@@ -100,6 +103,10 @@ set(sdrbase_HEADERS
 
     channel/channelsinkapi.h
     channel/channelsourceapi.h
+    channel/sdrdaemondataqueue.h
+    channel/sdrdaemondatareadqueue.h
+    channel/sdrdaemondatablock.h
+
     commands/command.h
 
     dsp/afsquelch.h
@@ -197,11 +204,11 @@ set(sdrbase_HEADERS
     util/simpleserializer.h
     #util/spinlock.h
     util/uid.h
-    
+
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
     webapi/webapiserver
-    
+
     mainparser.h
 )
 

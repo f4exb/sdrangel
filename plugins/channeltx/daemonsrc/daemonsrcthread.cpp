@@ -21,7 +21,6 @@
 
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
-#include "channel/sdrdaemonchannelsourcethread.h"
 
 #include "daemonsrcthread.h"
 

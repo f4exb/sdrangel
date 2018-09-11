@@ -13,7 +13,7 @@ set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -222,7 +222,6 @@ endif()
 add_subdirectory(sdrbase)
 add_subdirectory(sdrgui)
 add_subdirectory(sdrsrv)
-add_subdirectory(sdrdaemon)
 add_subdirectory(sdrbench)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
@@ -328,31 +327,6 @@ target_compile_features(sdrangelbench PRIVATE cxx_generalized_initializers) # cm
 target_link_libraries(sdrangelbench Qt5::Multimedia)
 
 ##############################################################################
-# SDRdaemon application
-
-set(sdrdaemonsrv_SOURCES
-    appdaemon/main.cpp
-)
-
-add_executable(sdrdaemonsrv
-    ${sdrdaemonsrv_SOURCES}
-)
-
-target_include_directories(sdrdaemonsrv
-    PUBLIC ${CMAKE_SOURCE_DIR}/sdrdaemon
-)
-
-target_link_libraries(sdrdaemonsrv
-    sdrdaemon
-    sdrbase
-    logging
-    ${QT_LIBRARIES}
-)
-
-target_compile_features(sdrdaemonsrv PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
-target_link_libraries(sdrdaemonsrv Qt5::Multimedia)
-
-##############################################################################
 
 if (BUILD_DEBIAN)
     add_subdirectory(cm256cc)
@@ -385,7 +359,6 @@ endif(LIBUSB_FOUND AND UNIX)
 install(TARGETS sdrangel DESTINATION bin)
 install(TARGETS sdrangelsrv DESTINATION bin)
 install(TARGETS sdrangelbench DESTINATION bin)
-install(TARGETS sdrdaemonsrv DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
 #install files and directories

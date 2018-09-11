@@ -20,9 +20,8 @@ set(daemonsink_HEADERS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_SOURCE_DIR}/sdrdaemon
 	${CM256CC_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client		
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 #include(${QT_USE_FILE})
@@ -39,7 +38,6 @@ target_link_libraries(daemonsinksrv
 	${QT_LIBRARIES}
 	${CM256CC_LIBRARIES}
 	sdrbase
-	sdrdaemon
 	swagger
 )
 

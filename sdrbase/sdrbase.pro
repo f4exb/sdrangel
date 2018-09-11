@@ -57,6 +57,8 @@ SOURCES += audio/audiodevicemanager.cpp\
         audio/audionetsink.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
+        channel/sdrdaemondataqueue.cpp\
+        channel/sdrdaemondatareadqueue.cpp\
         commands/command.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
@@ -117,7 +119,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         util/simpleserializer.cpp\
         util/uid.cpp\
         plugin/plugininterface.cpp\
-        plugin/pluginapi.cpp\        
+        plugin/pluginapi.cpp\
         plugin/pluginmanager.cpp\
         webapi/webapiadapterinterface.cpp\
         webapi/webapirequestmapper.cpp\
@@ -131,8 +133,11 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audioinput.h\
         audio/audionetsink.h\
         channel/channelsinkapi.h\
-        channel/channelsourceapi.h\ 
-        commands/command.h\       
+        channel/channelsourceapi.h\
+        channel/sdrdaemondataqueue.h\
+        channel/sdrdaemondatareadqueue.h\
+        channel/sdrdaemondatablock.h\
+        commands/command.h\
         device/devicesourceapi.h\
         device/devicesinkapi.h\
         device/deviceenumerator.h\
@@ -195,9 +200,9 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/plugininstancegui.h\
-        plugin/plugininterface.h\   
-        plugin/pluginapi.h\   
-        plugin/pluginmanager.h\   
+        plugin/plugininterface.h\
+        plugin/pluginapi.h\
+        plugin/pluginmanager.h\
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\
