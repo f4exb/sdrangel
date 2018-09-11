@@ -29,7 +29,7 @@ class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
 class QUdpSocket;
 
-class DaemonSrcThread : public QThread {
+class DaemonSourceThread : public QThread {
     Q_OBJECT
 public:
     class MsgStartStop : public Message {
@@ -74,8 +74,8 @@ public:
         }
     };
 
-    DaemonSrcThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
-    ~DaemonSrcThread();
+    DaemonSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
+    ~DaemonSourceThread();
 
     void startStop(bool start);
     void dataBind(const QString& address, uint16_t port);

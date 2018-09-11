@@ -22,12 +22,12 @@
 #include "settings/serializable.h"
 #include "daemonsrcsettings.h"
 
-DaemonSrcSettings::DaemonSrcSettings()
+DaemonSourceSettings::DaemonSourceSettings()
 {
     resetToDefaults();
 }
 
-void DaemonSrcSettings::resetToDefaults()
+void DaemonSourceSettings::resetToDefaults()
 {
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
@@ -35,7 +35,7 @@ void DaemonSrcSettings::resetToDefaults()
     m_title = "Daemon source";
 }
 
-QByteArray DaemonSrcSettings::serialize() const
+QByteArray DaemonSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeString(1, m_dataAddress);
@@ -46,7 +46,7 @@ QByteArray DaemonSrcSettings::serialize() const
     return s.final();
 }
 
-bool DaemonSrcSettings::deserialize(const QByteArray& data)
+bool DaemonSourceSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

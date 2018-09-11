@@ -23,48 +23,48 @@
 #include "ui_daemonsrcgui.h"
 #include "daemonsrcgui.h"
 
-DaemonSrcGUI* DaemonSrcGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
+DaemonSourceGUI* DaemonSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    DaemonSrcGUI* gui = new DaemonSrcGUI(pluginAPI, deviceUISet, channelTx);
+    DaemonSourceGUI* gui = new DaemonSourceGUI(pluginAPI, deviceUISet, channelTx);
     return gui;
 }
 
-void DaemonSrcGUI::destroy()
+void DaemonSourceGUI::destroy()
 {
     delete this;
 }
 
-void DaemonSrcGUI::setName(const QString& name)
+void DaemonSourceGUI::setName(const QString& name)
 {
     setObjectName(name);
 }
 
-QString DaemonSrcGUI::getName() const
+QString DaemonSourceGUI::getName() const
 {
     return objectName();
 }
 
-qint64 DaemonSrcGUI::getCenterFrequency() const {
+qint64 DaemonSourceGUI::getCenterFrequency() const {
     return 0;
 }
 
-void DaemonSrcGUI::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void DaemonSourceGUI::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
 {
 }
 
-void DaemonSrcGUI::resetToDefaults()
+void DaemonSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray DaemonSrcGUI::serialize() const
+QByteArray DaemonSourceGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSrcGUI::deserialize(const QByteArray& data)
+bool DaemonSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -76,26 +76,26 @@ bool DaemonSrcGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DaemonSrcGUI::handleMessage(const Message& message)
+bool DaemonSourceGUI::handleMessage(const Message& message)
 {
-    if (DaemonSrc::MsgSampleRateNotification::match(message))
+    if (DaemonSource::MsgSampleRateNotification::match(message))
     {
-        DaemonSrc::MsgSampleRateNotification& notif = (DaemonSrc::MsgSampleRateNotification&) message;
+        DaemonSource::MsgSampleRateNotification& notif = (DaemonSource::MsgSampleRateNotification&) message;
         m_channelMarker.setBandwidth(notif.getSampleRate());
         return true;
     }
-    else if (DaemonSrc::MsgConfigureDaemonSrc::match(message))
+    else if (DaemonSource::MsgConfigureDaemonSource::match(message))
     {
-        const DaemonSrc::MsgConfigureDaemonSrc& cfg = (DaemonSrc::MsgConfigureDaemonSrc&) message;
+        const DaemonSource::MsgConfigureDaemonSource& cfg = (DaemonSource::MsgConfigureDaemonSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (DaemonSrc::MsgReportStreamData::match(message))
+    else if (DaemonSource::MsgReportStreamData::match(message))
     {
-        const DaemonSrc::MsgReportStreamData& report = (DaemonSrc::MsgReportStreamData&) message;
+        const DaemonSource::MsgReportStreamData& report = (DaemonSource::MsgReportStreamData&) message;
         ui->sampleRate->setText(QString("%1").arg(report.get_sampleRate()));
         QString nominalNbBlocksText = QString("%1/%2")
                 .arg(report.get_nbOriginalBlocks() + report.get_nbFECBlocks())
@@ -152,9 +152,9 @@ bool DaemonSrcGUI::handleMessage(const Message& message)
     }
 }
 
-DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx __attribute__((unused)), QWidget* parent) :
+DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx __attribute__((unused)), QWidget* parent) :
         RollupWidget(parent),
-        ui(new Ui::DaemonSrcGUI),
+        ui(new Ui::DaemonSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_countUnrecoverable(0),
@@ -171,7 +171,7 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_daemonSrc = (DaemonSrc*) channelTx;
+    m_daemonSrc = (DaemonSource*) channelTx;
     m_daemonSrc->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -185,7 +185,7 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerTxChannelInstance(DaemonSrc::m_channelIdURI, this);
+    m_deviceUISet->registerTxChannelInstance(DaemonSource::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -198,30 +198,30 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     applySettings(true);
 }
 
-DaemonSrcGUI::~DaemonSrcGUI()
+DaemonSourceGUI::~DaemonSourceGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
     delete m_daemonSrc;
     delete ui;
 }
 
-void DaemonSrcGUI::blockApplySettings(bool block)
+void DaemonSourceGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void DaemonSrcGUI::applySettings(bool force)
+void DaemonSourceGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        DaemonSrc::MsgConfigureDaemonSrc* message = DaemonSrc::MsgConfigureDaemonSrc::create(m_settings, force);
+        DaemonSource::MsgConfigureDaemonSource* message = DaemonSource::MsgConfigureDaemonSource::create(m_settings, force);
         m_daemonSrc->getInputMessageQueue()->push(message);
     }
 }
 
-void DaemonSrcGUI::displaySettings()
+void DaemonSourceGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -239,17 +239,17 @@ void DaemonSrcGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void DaemonSrcGUI::leaveEvent(QEvent*)
+void DaemonSourceGUI::leaveEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(false);
 }
 
-void DaemonSrcGUI::enterEvent(QEvent*)
+void DaemonSourceGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
 }
 
-void DaemonSrcGUI::handleSourceMessages()
+void DaemonSourceGUI::handleSourceMessages()
 {
     Message* message;
 
@@ -262,11 +262,11 @@ void DaemonSrcGUI::handleSourceMessages()
     }
 }
 
-void DaemonSrcGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void DaemonSourceGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
 
-void DaemonSrcGUI::onMenuDialogCalled(const QPoint &p)
+void DaemonSourceGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
     dialog.move(p);
@@ -281,13 +281,13 @@ void DaemonSrcGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
-void DaemonSrcGUI::on_dataAddress_returnPressed()
+void DaemonSourceGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
     applySettings();
 }
 
-void DaemonSrcGUI::on_dataPort_returnPressed()
+void DaemonSourceGUI::on_dataPort_returnPressed()
 {
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
@@ -304,7 +304,7 @@ void DaemonSrcGUI::on_dataPort_returnPressed()
     applySettings();
 }
 
-void DaemonSrcGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
 
@@ -319,7 +319,7 @@ void DaemonSrcGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused
     applySettings();
 }
 
-void DaemonSrcGUI::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+void DaemonSourceGUI::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
 {
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
@@ -328,7 +328,7 @@ void DaemonSrcGUI::on_eventCountsReset_clicked(bool checked __attribute__((unuse
     displayEventTimer();
 }
 
-void DaemonSrcGUI::displayEventCounts()
+void DaemonSourceGUI::displayEventCounts()
 {
     QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
     ui->eventUnrecText->setText(nstr);
@@ -336,7 +336,7 @@ void DaemonSrcGUI::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
-void DaemonSrcGUI::displayEventStatus(int recoverableCount, int unrecoverableCount)
+void DaemonSourceGUI::displayEventStatus(int recoverableCount, int unrecoverableCount)
 {
 
     if (unrecoverableCount == 0)
@@ -353,7 +353,7 @@ void DaemonSrcGUI::displayEventStatus(int recoverableCount, int unrecoverableCou
     }
 }
 
-void DaemonSrcGUI::displayEventTimer()
+void DaemonSourceGUI::displayEventTimer()
 {
     int elapsedTimeMillis = m_time.elapsed();
     QTime recordLength(0, 0, 0, 0);
@@ -362,11 +362,11 @@ void DaemonSrcGUI::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void DaemonSrcGUI::tick()
+void DaemonSourceGUI::tick()
 {
     if (++m_tickCount == 20) // once per second
     {
-        DaemonSrc::MsgQueryStreamData *msg = DaemonSrc::MsgQueryStreamData::create();
+        DaemonSource::MsgQueryStreamData *msg = DaemonSource::MsgQueryStreamData::create();
         m_daemonSrc->getInputMessageQueue()->push(msg);
 
         displayEventTimer();
@@ -375,6 +375,6 @@ void DaemonSrcGUI::tick()
     }
 }
 
-void DaemonSrcGUI::channelMarkerChangedByCursor()
+void DaemonSourceGUI::channelMarkerChangedByCursor()
 {
 }

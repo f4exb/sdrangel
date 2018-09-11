@@ -2159,7 +2159,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "DaemonSrc")
+    else if (*channelType == "DaemonSource")
     {
         if (channelSettings.getTx() != 0)
         {

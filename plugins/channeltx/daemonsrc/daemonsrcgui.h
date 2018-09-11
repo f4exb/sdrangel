@@ -29,17 +29,17 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSource;
-class DaemonSrc;
+class DaemonSource;
 
 namespace Ui {
-    class DaemonSrcGUI;
+    class DaemonSourceGUI;
 }
 
-class DaemonSrcGUI : public RollupWidget, public PluginInstanceGUI {
+class DaemonSourceGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static DaemonSrcGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
+    static DaemonSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -57,14 +57,14 @@ public slots:
     void channelMarkerChangedByCursor();
 
 private:
-    Ui::DaemonSrcGUI* ui;
+    Ui::DaemonSourceGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
-    DaemonSrcSettings m_settings;
+    DaemonSourceSettings m_settings;
     bool m_doApplySettings;
 
-    DaemonSrc* m_daemonSrc;
+    DaemonSource* m_daemonSrc;
     MessageQueue m_inputMessageQueue;
 
     uint32_t m_countUnrecoverable;
@@ -77,8 +77,8 @@ private:
     QTime m_time;
     uint32_t m_tickCount;
 
-    explicit DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
-    virtual ~DaemonSrcGUI();
+    explicit DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
+    virtual ~DaemonSourceGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);

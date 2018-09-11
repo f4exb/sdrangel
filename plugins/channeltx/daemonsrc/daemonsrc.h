@@ -33,30 +33,30 @@
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class DeviceSinkAPI;
-class DaemonSrcThread;
+class DaemonSourceThread;
 class SDRDaemonDataBlock;
 
-class DaemonSrc : public BasebandSampleSource, public ChannelSourceAPI {
+class DaemonSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    class MsgConfigureDaemonSrc : public Message {
+    class MsgConfigureDaemonSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const DaemonSrcSettings& getSettings() const { return m_settings; }
+        const DaemonSourceSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDaemonSrc* create(const DaemonSrcSettings& settings, bool force)
+        static MsgConfigureDaemonSource* create(const DaemonSourceSettings& settings, bool force)
         {
-            return new MsgConfigureDaemonSrc(settings, force);
+            return new MsgConfigureDaemonSource(settings, force);
         }
 
     private:
-        DaemonSrcSettings m_settings;
+        DaemonSourceSettings m_settings;
         bool m_force;
 
-        MsgConfigureDaemonSrc(const DaemonSrcSettings& settings, bool force) :
+        MsgConfigureDaemonSource(const DaemonSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -176,8 +176,8 @@ public:
         { }
     };
 
-    DaemonSrc(DeviceSinkAPI *deviceAPI);
-    ~DaemonSrc();
+    DaemonSource(DeviceSinkAPI *deviceAPI);
+    ~DaemonSource();
 
     virtual void destroy() { delete this; }
 
@@ -218,12 +218,12 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
     SDRDaemonDataQueue m_dataQueue;
-    DaemonSrcThread *m_sourceThread;
+    DaemonSourceThread *m_sourceThread;
     CM256 m_cm256;
     CM256 *m_cm256p;
     bool m_running;
 
-    DaemonSrcSettings m_settings;
+    DaemonSourceSettings m_settings;
 
     CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
     SDRDaemonMetaDataFEC m_currentMeta;
@@ -233,11 +233,11 @@ private:
     uint32_t m_nbCorrectableErrors;   //!< count of correctable errors in number of blocks
     uint32_t m_nbUncorrectableErrors; //!< count of uncorrectable errors in number of blocks
 
-    void applySettings(const DaemonSrcSettings& settings, bool force = false);
+    void applySettings(const DaemonSourceSettings& settings, bool force = false);
     void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSrcSettings& settings);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
 private slots:

@@ -23,7 +23,7 @@
 #include "daemonsrc.h"
 #include "daemonsrcplugin.h"
 
-const PluginDescriptor DaemonSrcPlugin::m_pluginDescriptor = {
+const PluginDescriptor DaemonSourcePlugin::m_pluginDescriptor = {
     QString("Daemon channel source"),
     QString("4.1.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
@@ -32,47 +32,47 @@ const PluginDescriptor DaemonSrcPlugin::m_pluginDescriptor = {
     QString("https://github.com/f4exb/sdrangel")
 };
 
-DaemonSrcPlugin::DaemonSrcPlugin(QObject* parent) :
+DaemonSourcePlugin::DaemonSourcePlugin(QObject* parent) :
     QObject(parent),
     m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& DaemonSrcPlugin::getPluginDescriptor() const
+const PluginDescriptor& DaemonSourcePlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void DaemonSrcPlugin::initPlugin(PluginAPI* pluginAPI)
+void DaemonSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 {
     m_pluginAPI = pluginAPI;
 
     // register source
-    m_pluginAPI->registerTxChannel(DaemonSrc::m_channelIdURI, DaemonSrc::m_channelId, this);
+    m_pluginAPI->registerTxChannel(DaemonSource::m_channelIdURI, DaemonSource::m_channelId, this);
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* DaemonSrcPlugin::createTxChannelGUI(
+PluginInstanceGUI* DaemonSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet __attribute__((unused)),
         BasebandSampleSource *txChannel __attribute__((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* DaemonSrcPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* DaemonSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-    return DaemonSrcGUI::create(m_pluginAPI, deviceUISet, txChannel);
+    return DaemonSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
 
-BasebandSampleSource* DaemonSrcPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* DaemonSourcePlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    return new DaemonSrc(deviceAPI);
+    return new DaemonSource(deviceAPI);
 }
 
-ChannelSourceAPI* DaemonSrcPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* DaemonSourcePlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
 {
-    return new DaemonSrc(deviceAPI);
+    return new DaemonSource(deviceAPI);
 }
 
 

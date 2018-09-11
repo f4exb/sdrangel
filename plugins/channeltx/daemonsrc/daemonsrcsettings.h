@@ -22,7 +22,7 @@
 
 class Serializable;
 
-struct DaemonSrcSettings
+struct DaemonSourceSettings
 {
     QString  m_dataAddress; //!< Listening (local) data address
     uint16_t m_dataPort;    //!< Listening data port
@@ -31,7 +31,7 @@ struct DaemonSrcSettings
 
     Serializable *m_channelMarker;
 
-    DaemonSrcSettings();
+    DaemonSourceSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;

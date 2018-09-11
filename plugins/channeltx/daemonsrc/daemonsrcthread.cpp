@@ -24,10 +24,10 @@
 
 #include "daemonsrcthread.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSrcThread::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSrcThread::MsgDataBind, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgDataBind, Message)
 
-DaemonSrcThread::DaemonSrcThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
+DaemonSourceThread::DaemonSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
@@ -38,26 +38,26 @@ DaemonSrcThread::DaemonSrcThread(SDRDaemonDataQueue *dataQueue, QObject* parent)
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-DaemonSrcThread::~DaemonSrcThread()
+DaemonSourceThread::~DaemonSourceThread()
 {
-    qDebug("DaemonSrcThread::~DaemonSrcThread");
+    qDebug("DaemonSourceThread::~DaemonSourceThread");
 }
 
-void DaemonSrcThread::startStop(bool start)
+void DaemonSourceThread::startStop(bool start)
 {
     MsgStartStop *msg = MsgStartStop::create(start);
     m_inputMessageQueue.push(msg);
 }
 
-void DaemonSrcThread::dataBind(const QString& address, uint16_t port)
+void DaemonSourceThread::dataBind(const QString& address, uint16_t port)
 {
     MsgDataBind *msg = MsgDataBind::create(address, port);
     m_inputMessageQueue.push(msg);
 }
 
-void DaemonSrcThread::startWork()
+void DaemonSourceThread::startWork()
 {
-    qDebug("DaemonSrcThread::startWork");
+    qDebug("DaemonSourceThread::startWork");
     m_startWaitMutex.lock();
     m_socket = new QUdpSocket(this);
     start();
@@ -66,18 +66,18 @@ void DaemonSrcThread::startWork()
     m_startWaitMutex.unlock();
 }
 
-void DaemonSrcThread::stopWork()
+void DaemonSourceThread::stopWork()
 {
-    qDebug("DaemonSrcThread::stopWork");
+    qDebug("DaemonSourceThread::stopWork");
     delete m_socket;
     m_socket = 0;
     m_running = false;
     wait();
 }
 
-void DaemonSrcThread::run()
+void DaemonSourceThread::run()
 {
-    qDebug("DaemonSrcThread::run: begin");
+    qDebug("DaemonSourceThread::run: begin");
     m_running = true;
     m_startWaiter.wakeAll();
 
@@ -87,11 +87,11 @@ void DaemonSrcThread::run()
     }
 
     m_running = false;
-    qDebug("DaemonSrcThread::run: end");
+    qDebug("DaemonSourceThread::run: end");
 }
 
 
-void DaemonSrcThread::handleInputMessages()
+void DaemonSourceThread::handleInputMessages()
 {
     Message* message;
 
@@ -100,7 +100,7 @@ void DaemonSrcThread::handleInputMessages()
         if (MsgStartStop::match(*message))
         {
             MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("DaemonSrcThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+            qDebug("DaemonSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
 
             if (notif->getStartStop()) {
                 startWork();
@@ -113,7 +113,7 @@ void DaemonSrcThread::handleInputMessages()
         else if (MsgDataBind::match(*message))
         {
             MsgDataBind* notif = (MsgDataBind*) message;
-            qDebug("DaemonSrcThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
+            qDebug("DaemonSourceThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
 
             if (m_socket)
             {
@@ -125,7 +125,7 @@ void DaemonSrcThread::handleInputMessages()
     }
 }
 
-void DaemonSrcThread::readPendingDatagrams()
+void DaemonSourceThread::readPendingDatagrams()
 {
     SDRDaemonSuperBlock superBlock;
     qint64 size;
@@ -158,7 +158,7 @@ void DaemonSrcThread::readPendingDatagrams()
 
                 if (superBlock.m_header.m_frameIndex != frameIndex)
                 {
-                    //qDebug("DaemonSrcThread::readPendingDatagrams: push frame %u", frameIndex);
+                    //qDebug("DaemonSourceThread::readPendingDatagrams: push frame %u", frameIndex);
                     m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
                     m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
                     m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
@@ -181,7 +181,7 @@ void DaemonSrcThread::readPendingDatagrams()
         }
         else
         {
-            qWarning("DaemonSrcThread::readPendingDatagrams: wrong super block size not processing");
+            qWarning("DaemonSourceThread::readPendingDatagrams: wrong super block size not processing");
         }
     }
 }

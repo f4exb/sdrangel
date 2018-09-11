@@ -33,15 +33,15 @@
 #include "daemonsrcthread.h"
 #include "daemonsrc.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgSampleRateNotification, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgConfigureDaemonSrc, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgQueryStreamData, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSrc::MsgReportStreamData, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSource::MsgSampleRateNotification, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSource::MsgConfigureDaemonSource, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSource::MsgQueryStreamData, Message)
+MESSAGE_CLASS_DEFINITION(DaemonSource::MsgReportStreamData, Message)
 
-const QString DaemonSrc::m_channelIdURI = "sdrangel.channeltx.daemonsrc";
-const QString DaemonSrc::m_channelId ="DaemonSrc";
+const QString DaemonSource::m_channelIdURI = "sdrangel.channeltx.daemonsrc";
+const QString DaemonSource::m_channelId ="DaemonSource";
 
-DaemonSrc::DaemonSrc(DeviceSinkAPI *deviceAPI) :
+DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_sourceThread(0),
@@ -62,7 +62,7 @@ DaemonSrc::DaemonSrc(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addChannelAPI(this);
 }
 
-DaemonSrc::~DaemonSrc()
+DaemonSource::~DaemonSource()
 {
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
@@ -70,32 +70,32 @@ DaemonSrc::~DaemonSrc()
     delete m_channelizer;
 }
 
-void DaemonSrc::pull(Sample& sample)
+void DaemonSource::pull(Sample& sample)
 {
     m_dataReadQueue.readSample(sample);
 }
 
-void DaemonSrc::pullAudio(int nbSamples __attribute__((unused)))
+void DaemonSource::pullAudio(int nbSamples __attribute__((unused)))
 {
 }
 
-void DaemonSrc::start()
+void DaemonSource::start()
 {
-    qDebug("DaemonSrc::start");
+    qDebug("DaemonSource::start");
 
     if (m_running) {
         stop();
     }
 
-    m_sourceThread = new DaemonSrcThread(&m_dataQueue);
+    m_sourceThread = new DaemonSourceThread(&m_dataQueue);
     m_sourceThread->startStop(true);
     m_sourceThread->dataBind(m_settings.m_dataAddress, m_settings.m_dataPort);
     m_running = true;
 }
 
-void DaemonSrc::stop()
+void DaemonSource::stop()
 {
-    qDebug("DaemonSrc::stop");
+    qDebug("DaemonSource::stop");
 
     if (m_sourceThread != 0)
     {
@@ -107,22 +107,22 @@ void DaemonSrc::stop()
     m_running = false;
 }
 
-void DaemonSrc::setDataLink(const QString& dataAddress, uint16_t dataPort)
+void DaemonSource::setDataLink(const QString& dataAddress, uint16_t dataPort)
 {
-    DaemonSrcSettings settings = m_settings;
+    DaemonSourceSettings settings = m_settings;
     settings.m_dataAddress = dataAddress;
     settings.m_dataPort = dataPort;
 
-    MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(settings, false);
+    MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(settings, false);
     m_inputMessageQueue.push(msg);
 }
 
-bool DaemonSrc::handleMessage(const Message& cmd)
+bool DaemonSource::handleMessage(const Message& cmd)
 {
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-        qDebug() << "DaemonSrc::handleMessage: MsgChannelizerNotification:"
+        qDebug() << "DaemonSource::handleMessage: MsgChannelizerNotification:"
                 << " basebandSampleRate: " << notif.getBasebandSampleRate()
                 << " outputSampleRate: " << notif.getSampleRate()
                 << " inputFrequencyOffset: " << notif.getFrequencyOffset();
@@ -135,10 +135,10 @@ bool DaemonSrc::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureDaemonSrc::match(cmd))
+    else if (MsgConfigureDaemonSource::match(cmd))
     {
-        MsgConfigureDaemonSrc& cfg = (MsgConfigureDaemonSrc&) cmd;
-        qDebug() << "MsgConfigureDaemonSrc::handleMessage: MsgConfigureDaemonSrc";
+        MsgConfigureDaemonSource& cfg = (MsgConfigureDaemonSource&) cmd;
+        qDebug() << "MsgConfigureDaemonSource::handleMessage: MsgConfigureDaemonSource";
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
@@ -170,31 +170,31 @@ bool DaemonSrc::handleMessage(const Message& cmd)
     return false;
 }
 
-QByteArray DaemonSrc::serialize() const
+QByteArray DaemonSource::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSrc::deserialize(const QByteArray& data __attribute__((unused)))
+bool DaemonSource::deserialize(const QByteArray& data __attribute__((unused)))
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(m_settings, true);
+        MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(m_settings, true);
+        MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void DaemonSrc::applySettings(const DaemonSrcSettings& settings, bool force)
+void DaemonSource::applySettings(const DaemonSourceSettings& settings, bool force)
 {
-    qDebug() << "DaemonSrc::applySettings:"
+    qDebug() << "DaemonSource::applySettings:"
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
             << " force: " << force;
@@ -216,11 +216,11 @@ void DaemonSrc::applySettings(const DaemonSrcSettings& settings, bool force)
     m_settings = settings;
 }
 
-void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unused)))
+void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unused)))
 {
     if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
     {
-        qWarning("DaemonSrc::handleDataBlock: incomplete data block: not processing");
+        qWarning("DaemonSource::handleDataBlock: incomplete data block: not processing");
     }
     else
     {
@@ -242,12 +242,12 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             }
         }
 
-        //qDebug("DaemonSrc::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
+        //qDebug("DaemonSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
 
         // Need to use the CM256 recovery
         if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
         {
-            qDebug("DaemonSrc::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
+            qDebug("DaemonSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
             paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
             paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
@@ -267,7 +267,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
 
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qWarning() << "DaemonSrc::handleDataBlock: decode CM256 error:"
+                qWarning() << "DaemonSource::handleDataBlock: decode CM256 error:"
                         << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
                         << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
             }
@@ -298,7 +298,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             {
                 if (!(m_currentMeta == *metaData))
                 {
-                    printMeta("DaemonSrc::handleDataBlock", metaData);
+                    printMeta("DaemonSource::handleDataBlock", metaData);
 
                     if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
                     {
@@ -311,7 +311,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
             }
             else
             {
-                qWarning() << "DaemonSrc::handleDataBlock: recovered meta: invalid CRC32";
+                qWarning() << "DaemonSource::handleDataBlock: recovered meta: invalid CRC32";
             }
         }
 
@@ -319,7 +319,7 @@ void DaemonSrc::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unu
     }
 }
 
-void DaemonSrc::handleData()
+void DaemonSource::handleData()
 {
     SDRDaemonDataBlock* dataBlock;
 
@@ -328,7 +328,7 @@ void DaemonSrc::handleData()
     }
 }
 
-void DaemonSrc::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
+void DaemonSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
 {
     qDebug().noquote() << header << ": "
             << "|" << metaData->m_centerFrequency
@@ -342,16 +342,16 @@ void DaemonSrc::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
             << "|";
 }
 
-uint32_t DaemonSrc::calculateDataReadQueueSize(int sampleRate)
+uint32_t DaemonSource::calculateDataReadQueueSize(int sampleRate)
 {
     // scale for 20 blocks at 48 kS/s. Take next even number.
     uint32_t maxSize = sampleRate / 2400;
     maxSize = (maxSize % 2 == 0) ? maxSize : maxSize + 1;
-    qDebug("DaemonSrc::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
+    qDebug("DaemonSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
     return maxSize;
 }
 
-int DaemonSrc::webapiSettingsGet(
+int DaemonSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -361,13 +361,13 @@ int DaemonSrc::webapiSettingsGet(
     return 200;
 }
 
-int DaemonSrc::webapiSettingsPutPatch(
+int DaemonSource::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
-    DaemonSrcSettings settings = m_settings;
+    DaemonSourceSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getDaemonSourceSettings()->getDataAddress();
@@ -389,13 +389,13 @@ int DaemonSrc::webapiSettingsPutPatch(
         settings.m_title = *response.getDaemonSourceSettings()->getTitle();
     }
 
-    MsgConfigureDaemonSrc *msg = MsgConfigureDaemonSrc::create(settings, force);
+    MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("DaemonSrc::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    qDebug("DaemonSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDaemonSrc *msgToGUI = MsgConfigureDaemonSrc::create(settings, force);
+        MsgConfigureDaemonSource *msgToGUI = MsgConfigureDaemonSource::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -404,7 +404,7 @@ int DaemonSrc::webapiSettingsPutPatch(
     return 200;
 }
 
-int DaemonSrc::webapiReportGet(
+int DaemonSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -414,7 +414,7 @@ int DaemonSrc::webapiReportGet(
     return 200;
 }
 
-void DaemonSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSrcSettings& settings)
+void DaemonSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSourceSettings& settings)
 {
     if (response.getDaemonSourceSettings()->getDataAddress()) {
         *response.getDaemonSourceSettings()->getDataAddress() = settings.m_dataAddress;
@@ -432,7 +432,7 @@ void DaemonSrc::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     }
 }
 
-void DaemonSrc::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void DaemonSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     struct timeval tv;
     gettimeofday(&tv, 0);
