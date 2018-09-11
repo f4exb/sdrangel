@@ -1,8 +1,8 @@
-project(daemonsrc)
+project(daemonsource)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(daemonsrc_SOURCES
+set(daemonsource_SOURCES
 	daemonsource.cpp
 	daemonsourcethread.cpp
 	daemonsourcegui.cpp
@@ -10,7 +10,7 @@ set(daemonsrc_SOURCES
 	daemonsourcesettings.cpp
 )
 
-set(daemonsrc_HEADERS
+set(daemonsource_HEADERS
 	daemonsource.h
 	daemonsourcethread.h
 	daemonsourcegui.h
@@ -18,7 +18,7 @@ set(daemonsrc_HEADERS
 	daemonsourcesettings.h
 )
 
-set(daemonsrc_FORMS
+set(daemonsource_FORMS
 	daemonsourcegui.ui
 )
 
@@ -34,15 +34,15 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-qt5_wrap_ui(daemonsrc_FORMS_HEADERS ${daemonsrc_FORMS})
+qt5_wrap_ui(daemonsource_FORMS_HEADERS ${daemonsource_FORMS})
 
-add_library(daemonsrc SHARED
-	${daemonsrc_SOURCES}
-	${daemonsrc_HEADERS_MOC}
-	${daemonsrc_FORMS_HEADERS}
+add_library(daemonsource SHARED
+	${daemonsource_SOURCES}
+	${daemonsource_HEADERS_MOC}
+	${daemonsource_FORMS_HEADERS}
 )
 
-target_link_libraries(daemonsrc
+target_link_libraries(daemonsource
 	${QT_LIBRARIES}
 	${CM256CC_LIBRARIES}
 	sdrbase
@@ -50,6 +50,6 @@ target_link_libraries(daemonsrc
 	swagger
 )
 
-target_link_libraries(daemonsrc Qt5::Core Qt5::Widgets Qt5::Network)
+target_link_libraries(daemonsource Qt5::Core Qt5::Widgets Qt5::Network)
 
-install(TARGETS daemonsrc DESTINATION lib/plugins/channeltx)
+install(TARGETS daemonsource DESTINATION lib/plugins/channeltx)

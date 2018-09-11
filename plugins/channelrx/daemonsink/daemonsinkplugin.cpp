@@ -25,7 +25,7 @@
 #include "daemonsink.h"
 
 const PluginDescriptor DaemonSinkPlugin::m_pluginDescriptor = {
-    QString("Daemon Channel Sink"),
+    QString("Daemon channel Sink"),
     QString("4.1.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
