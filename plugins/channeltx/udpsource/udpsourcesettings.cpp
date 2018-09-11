@@ -49,7 +49,7 @@ void UDPSourceSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
     m_rgbColor = QColor(225, 25, 99).rgb();
-    m_title = "UDP Sample Sink";
+    m_title = "UDP Sample Source";
 }
 
 QByteArray UDPSourceSettings::serialize() const

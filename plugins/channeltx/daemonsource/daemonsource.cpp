@@ -38,7 +38,7 @@ MESSAGE_CLASS_DEFINITION(DaemonSource::MsgConfigureDaemonSource, Message)
 MESSAGE_CLASS_DEFINITION(DaemonSource::MsgQueryStreamData, Message)
 MESSAGE_CLASS_DEFINITION(DaemonSource::MsgReportStreamData, Message)
 
-const QString DaemonSource::m_channelIdURI = "sdrangel.channeltx.daemonsrc";
+const QString DaemonSource::m_channelIdURI = "sdrangel.channeltx.daemonsource";
 const QString DaemonSource::m_channelId ="DaemonSource";
 
 DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :

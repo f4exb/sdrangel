@@ -48,7 +48,7 @@ void UDPSinkSettings::resetToDefaults()
     m_udpPort = 9998;
     m_audioPort = 9997;
     m_rgbColor = QColor(225, 25, 99).rgb();
-    m_title = "UDP Sample Source";
+    m_title = "UDP Sample Sink";
 }
 
 QByteArray UDPSinkSettings::serialize() const
