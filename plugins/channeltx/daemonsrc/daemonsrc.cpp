@@ -52,14 +52,14 @@ DaemonSrc::DaemonSrc(DeviceSinkAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
+    connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
+    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
+    m_currentMeta.init();
+
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
-    m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
-    m_currentMeta.init();
 }
 
 DaemonSrc::~DaemonSrc()

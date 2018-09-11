@@ -169,9 +169,12 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_daemonSrc = (DaemonSrc*) channelTx;
     m_daemonSrc->setMessageQueueToGUI(getInputMessageQueue());
+
+    connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
@@ -186,8 +189,8 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
+    connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_time.start();
 
@@ -198,6 +201,7 @@ DaemonSrcGUI::DaemonSrcGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 DaemonSrcGUI::~DaemonSrcGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
+    delete m_daemonSrc;
     delete ui;
 }
 
@@ -369,4 +373,8 @@ void DaemonSrcGUI::tick()
 
         m_tickCount = 0;
     }
+}
+
+void DaemonSrcGUI::channelMarkerChangedByCursor()
+{
 }

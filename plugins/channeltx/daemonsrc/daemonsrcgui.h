@@ -53,6 +53,9 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
+public slots:
+    void channelMarkerChangedByCursor();
+
 private:
     Ui::DaemonSrcGUI* ui;
     PluginAPI* m_pluginAPI;
