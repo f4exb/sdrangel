@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>UDPSinkGUI</class>
- <widget class="RollupWidget" name="UDPSinkGUI">
+ <class>UDPSourceGUI</class>
+ <widget class="RollupWidget" name="UDPSourceGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,13 +29,13 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>UDP Sample Sink</string>
+   <string>UDP Source Sink</string>
   </property>
   <property name="toolTipDuration">
    <number>-1</number>
   </property>
   <property name="statusTip">
-   <string>UDP Sample Sink</string>
+   <string>UDP Source Sink</string>
   </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">

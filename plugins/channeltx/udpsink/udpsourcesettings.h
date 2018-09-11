@@ -14,16 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKSETTINGS_H_
-#define PLUGINS_CHANNELTX_UDPSINK_UDPSINKSETTINGS_H_
+#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCESETTINGS_H_
+#define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCESETTINGS_H_
 
 #include <QByteArray>
 #include <QString>
 #include <stdint.h>
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
-struct UDPSinkSettings
+struct UDPSourceSettings
 {
     enum SampleFormat {
         FormatSnLE,
@@ -59,7 +61,7 @@ struct UDPSinkSettings
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
 
-    UDPSinkSettings();
+    UDPSourceSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
@@ -70,4 +72,4 @@ struct UDPSinkSettings
 
 
 
-#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKSETTINGS_H_ */
+#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSOURCESETTINGS_H_ */

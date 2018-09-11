@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
-#define PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_
+#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEGUI_H_
+#define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEGUI_H_
 
 #include <plugin/plugininstancegui.h>
 #include <QObject>
@@ -25,8 +25,8 @@
 #include "util/messagequeue.h"
 #include "util/movingaverage.h"
 
-#include "udpsink.h"
-#include "udpsinksettings.h"
+#include "udpsource.h"
+#include "udpsourcesettings.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -34,14 +34,14 @@ class BasebandSampleSource;
 class SpectrumVis;
 
 namespace Ui {
-    class UDPSinkGUI;
+    class UDPSourceGUI;
 }
 
-class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class UDPSourceGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static UDPSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
+    static UDPSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -58,30 +58,30 @@ public slots:
     void channelMarkerChangedByCursor();
 
 private:
-    Ui::UDPSinkGUI* ui;
+    Ui::UDPSourceGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     SpectrumVis* m_spectrumVis;
-    UDPSink* m_udpSink;
+    UDPSource* m_udpSource;
     MovingAverageUtil<double, double, 4> m_channelPowerAvg;
     MovingAverageUtil<double, double, 4> m_inPowerAvg;
     uint32_t m_tickCount;
     ChannelMarker m_channelMarker;
 
     // settings
-    UDPSinkSettings m_settings;
+    UDPSourceSettings m_settings;
     bool m_rfBandwidthChanged;
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
 
-    explicit UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = NULL);
-    virtual ~UDPSinkGUI();
+    explicit UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = NULL);
+    virtual ~UDPSourceGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
     void setSampleFormat(int index);
-    void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
+    void setSampleFormatIndex(const UDPSourceSettings::SampleFormat& sampleFormat);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -110,4 +110,4 @@ private slots:
     void tick();
 };
 
-#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKGUI_H_ */
+#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEGUI_H_ */

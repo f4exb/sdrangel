@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_UDPSINKPLUGIN_H
-#define INCLUDE_UDPSINKPLUGIN_H
+#include "udpsourcemsg.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+MESSAGE_CLASS_DEFINITION(UDPSourceMessages::MsgSampleRateCorrection, Message)
 
-class DeviceUISet;
-class BasebandSampleSource;
-
-class UDPSinkPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.channeltx.udpsink")
-
-public:
-	explicit UDPSinkPlugin(QObject* parent = 0);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel);
-	virtual BasebandSampleSource* createTxChannelBS(DeviceSinkAPI *deviceAPI);
-	virtual ChannelSourceAPI* createTxChannelCS(DeviceSinkAPI *deviceAPI);
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_UDPSINKPLUGIN_H

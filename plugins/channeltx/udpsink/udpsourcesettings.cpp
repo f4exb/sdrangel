@@ -14,21 +14,22 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "udpsourcesettings.h"
+
 #include <QColor>
 
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "udpsinksettings.h"
 
-UDPSinkSettings::UDPSinkSettings() :
+UDPSourceSettings::UDPSourceSettings() :
     m_channelMarker(0),
     m_spectrumGUI(0)
 {
     resetToDefaults();
 }
 
-void UDPSinkSettings::resetToDefaults()
+void UDPSourceSettings::resetToDefaults()
 {
     m_sampleFormat = FormatSnLE;
     m_inputSampleRate = 48000;
@@ -51,7 +52,7 @@ void UDPSinkSettings::resetToDefaults()
     m_title = "UDP Sample Sink";
 }
 
-QByteArray UDPSinkSettings::serialize() const
+QByteArray UDPSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(2, m_inputFrequencyOffset);
@@ -82,7 +83,7 @@ QByteArray UDPSinkSettings::serialize() const
     return s.final();
 }
 
-bool UDPSinkSettings::deserialize(const QByteArray& data)
+bool UDPSourceSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

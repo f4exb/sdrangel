@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINK_H_
-#define PLUGINS_CHANNELTX_UDPSINK_UDPSINK_H_
+#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCE_H_
+#define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCE_H_
 
 #include <QObject>
 
@@ -28,14 +28,14 @@
 #include "dsp/fftfilt.h"
 #include "util/message.h"
 
-#include "udpsinkudphandler.h"
-#include "udpsinksettings.h"
+#include "udpsourcesettings.h"
+#include "udpsourceudphandler.h"
 
 class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
-class UDPSink : public BasebandSampleSource, public ChannelSourceAPI {
+class UDPSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
@@ -43,19 +43,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const UDPSinkSettings& getSettings() const { return m_settings; }
+        const UDPSourceSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSink* create(const UDPSinkSettings& settings, bool force)
+        static MsgConfigureUDPSink* create(const UDPSourceSettings& settings, bool force)
         {
             return new MsgConfigureUDPSink(settings, force);
         }
 
     private:
-        UDPSinkSettings m_settings;
+        UDPSourceSettings m_settings;
         bool m_force;
 
-        MsgConfigureUDPSink(const UDPSinkSettings& settings, bool force) :
+        MsgConfigureUDPSink(const UDPSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -86,8 +86,8 @@ public:
         { }
     };
 
-    UDPSink(DeviceSinkAPI *deviceAPI);
-    virtual ~UDPSink();
+    UDPSource(DeviceSinkAPI *deviceAPI);
+    virtual ~UDPSource();
     virtual void destroy() { delete this; }
 
     void setSpectrumSink(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
@@ -183,7 +183,7 @@ private:
     int m_basebandSampleRate;
     Real m_outputSampleRate;
     int m_inputFrequencyOffset;
-    UDPSinkSettings m_settings;
+    UDPSourceSettings m_settings;
 
     Real m_squelch;
 
@@ -206,7 +206,7 @@ private:
     MovingAverage<double> m_movingAverage;
     MovingAverage<double> m_inMovingAverage;
 
-    UDPSinkUDPHandler m_udpHandler;
+    UDPSourceUDPHandler m_udpHandler;
     Real m_actualInputSampleRate; //!< sample rate with UDP buffer skew compensation
     double m_sampleRateSum;
     int m_sampleRateAvgCounter;
@@ -232,12 +232,12 @@ private:
     static const int m_ssbFftLen = 1024;
 
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
-    void applySettings(const UDPSinkSettings& settings, bool force = false);
+    void applySettings(const UDPSourceSettings& settings, bool force = false);
     void modulateSample();
     void calculateLevel(Real sample);
     void calculateLevel(Complex sample);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
     inline void calculateSquelch(double value)
@@ -318,4 +318,4 @@ private:
 
 
 
-#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINK_H_ */
+#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSOURCE_H_ */

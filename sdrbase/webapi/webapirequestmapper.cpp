@@ -2208,7 +2208,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "UDPSink")
+    else if (*channelType == "UDPSource")
     {
         if (channelSettings.getTx() != 0)
         {

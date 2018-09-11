@@ -14,7 +14,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "udpsinkmsg.h"
+#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEMSG_H_
+#define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEMSG_H_
 
-MESSAGE_CLASS_DEFINITION(UDPSinkMessages::MsgSampleRateCorrection, Message)
+#include "util/message.h"
 
+/**
+ * Message(s) used to communicate back from UDPSinkUDPHandler to UDPSource
+ */
+class UDPSourceMessages
+{
+public:
+    class MsgSampleRateCorrection : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getCorrectionFactor() const { return m_correctionFactor; }
+        float getRawDeltaRatio() const { return m_rawDeltaRatio; }
+
+        static MsgSampleRateCorrection* create(float correctionFactor, float rawDeltaRatio)
+        {
+            return new MsgSampleRateCorrection(correctionFactor, rawDeltaRatio);
+        }
+
+    private:
+        float m_correctionFactor;
+        float m_rawDeltaRatio;
+
+        MsgSampleRateCorrection(float correctionFactor, float rawDeltaRatio) :
+            Message(),
+            m_correctionFactor(correctionFactor),
+            m_rawDeltaRatio(rawDeltaRatio)
+        { }
+    };
+};
+
+
+#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEMSG_H_ */

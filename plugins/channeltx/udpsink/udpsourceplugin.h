@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,40 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKMSG_H_
-#define PLUGINS_CHANNELTX_UDPSINK_UDPSINKMSG_H_
+#ifndef INCLUDE_UDPSINKPLUGIN_H
+#define INCLUDE_UDPSINKPLUGIN_H
 
-#include "util/message.h"
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-/**
- * Message(s) used to communicate back from UDPSinkUDPHandler to UDPSink
- */
-class UDPSinkMessages
-{
+class DeviceUISet;
+class BasebandSampleSource;
+
+class UDPSourcePlugin : public QObject, PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID "sdrangel.channeltx.udpsink")
+
 public:
-    class MsgSampleRateCorrection : public Message {
-        MESSAGE_CLASS_DECLARATION
+	explicit UDPSourcePlugin(QObject* parent = 0);
 
-    public:
-        float getCorrectionFactor() const { return m_correctionFactor; }
-        float getRawDeltaRatio() const { return m_rawDeltaRatio; }
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
 
-        static MsgSampleRateCorrection* create(float correctionFactor, float rawDeltaRatio)
-        {
-            return new MsgSampleRateCorrection(correctionFactor, rawDeltaRatio);
-        }
+	virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel);
+	virtual BasebandSampleSource* createTxChannelBS(DeviceSinkAPI *deviceAPI);
+	virtual ChannelSourceAPI* createTxChannelCS(DeviceSinkAPI *deviceAPI);
 
-    private:
-        float m_correctionFactor;
-        float m_rawDeltaRatio;
+private:
+	static const PluginDescriptor m_pluginDescriptor;
 
-        MsgSampleRateCorrection(float correctionFactor, float rawDeltaRatio) :
-            Message(),
-            m_correctionFactor(correctionFactor),
-            m_rawDeltaRatio(rawDeltaRatio)
-        { }
-    };
+	PluginAPI* m_pluginAPI;
 };
 
-
-#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKMSG_H_ */
+#endif // INCLUDE_UDPSINKPLUGIN_H

@@ -26,18 +26,18 @@
 #include "dsp/dspcommands.h"
 #include "util/db.h"
 
-#include "udpsinkmsg.h"
-#include "udpsink.h"
+#include "udpsource.h"
+#include "udpsourcemsg.h"
 
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSink, Message)
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgResetReadIndex, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureUDPSink, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgUDPSinkSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgResetReadIndex, Message)
 
-const QString UDPSink::m_channelIdURI = "sdrangel.channeltx.udpsink";
-const QString UDPSink::m_channelId = "UDPSink";
+const QString UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
+const QString UDPSource::m_channelId = "UDPSource";
 
-UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
+UDPSource::UDPSource(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
@@ -80,7 +80,7 @@ UDPSink::UDPSink(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI->addChannelAPI(this);
 }
 
-UDPSink::~UDPSink()
+UDPSource::~UDPSource()
 {
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
@@ -90,18 +90,18 @@ UDPSink::~UDPSink()
     delete[] m_SSBFilterBuffer;
 }
 
-void UDPSink::start()
+void UDPSource::start()
 {
     m_udpHandler.start();
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
 }
 
-void UDPSink::stop()
+void UDPSource::stop()
 {
     m_udpHandler.stop();
 }
 
-void UDPSink::pull(Sample& sample)
+void UDPSource::pull(Sample& sample)
 {
     if (m_settings.m_channelMute)
     {
@@ -147,9 +147,9 @@ void UDPSink::pull(Sample& sample)
     sample.m_imag = (FixReal) ci.imag();
 }
 
-void UDPSink::modulateSample()
+void UDPSource::modulateSample()
 {
-    if (m_settings.m_sampleFormat == UDPSinkSettings::FormatSnLE) // Linear I/Q transponding
+    if (m_settings.m_sampleFormat == UDPSourceSettings::FormatSnLE) // Linear I/Q transponding
     {
         Sample s;
 
@@ -173,7 +173,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatNFM)
+    else if (m_settings.m_sampleFormat == UDPSourceSettings::FormatNFM)
     {
         qint16 t;
         readMonoSample(t);
@@ -196,7 +196,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if (m_settings.m_sampleFormat == UDPSinkSettings::FormatAM)
+    else if (m_settings.m_sampleFormat == UDPSourceSettings::FormatAM)
     {
         qint16 t;
         readMonoSample(t);
@@ -217,7 +217,7 @@ void UDPSink::modulateSample()
             m_modSample.imag(0.0f);
         }
     }
-    else if ((m_settings.m_sampleFormat == UDPSinkSettings::FormatLSB) || (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSB))
+    else if ((m_settings.m_sampleFormat == UDPSourceSettings::FormatLSB) || (m_settings.m_sampleFormat == UDPSourceSettings::FormatUSB))
     {
         qint16 t;
         Complex c, ci;
@@ -235,7 +235,7 @@ void UDPSink::modulateSample()
             ci.real((t / SDR_TX_SCALEF) * m_settings.m_gainOut);
             ci.imag(0.0f);
 
-            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_settings.m_sampleFormat == UDPSinkSettings::FormatUSB));
+            n_out = m_SSBFilter->runSSB(ci, &filtered, (m_settings.m_sampleFormat == UDPSourceSettings::FormatUSB));
 
             if (n_out > 0)
             {
@@ -279,7 +279,7 @@ void UDPSink::modulateSample()
     }
 }
 
-void UDPSink::calculateLevel(Real sample)
+void UDPSource::calculateLevel(Real sample)
 {
     if (m_levelCalcCount < m_levelNbSamples)
     {
@@ -298,7 +298,7 @@ void UDPSink::calculateLevel(Real sample)
     }
 }
 
-void UDPSink::calculateLevel(Complex sample)
+void UDPSource::calculateLevel(Complex sample)
 {
     Real t = std::abs(sample);
 
@@ -318,12 +318,12 @@ void UDPSink::calculateLevel(Complex sample)
     }
 }
 
-bool UDPSink::handleMessage(const Message& cmd)
+bool UDPSource::handleMessage(const Message& cmd)
 {
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-        qDebug() << "UDPSink::handleMessage: MsgChannelizerNotification";
+        qDebug() << "UDPSource::handleMessage: MsgChannelizerNotification";
 
         applyChannelSettings(notif.getBasebandSampleRate(), notif.getSampleRate(), notif.getFrequencyOffset());
 
@@ -332,7 +332,7 @@ bool UDPSink::handleMessage(const Message& cmd)
     else if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "UDPSink::handleMessage: MsgConfigureChannelizer:"
+        qDebug() << "UDPSource::handleMessage: MsgConfigureChannelizer:"
                 << " sampleRate: " << cfg.getSampleRate()
                 << " centerFrequency: " << cfg.getCenterFrequency();
 
@@ -345,15 +345,15 @@ bool UDPSink::handleMessage(const Message& cmd)
     else if (MsgConfigureUDPSink::match(cmd))
     {
         MsgConfigureUDPSink& cfg = (MsgConfigureUDPSink&) cmd;
-        qDebug() << "UDPSink::handleMessage: MsgConfigureUDPSink";
+        qDebug() << "UDPSource::handleMessage: MsgConfigureUDPSink";
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
-    else if (UDPSinkMessages::MsgSampleRateCorrection::match(cmd))
+    else if (UDPSourceMessages::MsgSampleRateCorrection::match(cmd))
     {
-        UDPSinkMessages::MsgSampleRateCorrection& cfg = (UDPSinkMessages::MsgSampleRateCorrection&) cmd;
+        UDPSourceMessages::MsgSampleRateCorrection& cfg = (UDPSourceMessages::MsgSampleRateCorrection&) cmd;
         Real newSampleRate = m_actualInputSampleRate + cfg.getCorrectionFactor() * m_actualInputSampleRate;
 
         // exclude values too way out nominal sample rate (20%)
@@ -378,7 +378,7 @@ bool UDPSink::handleMessage(const Message& cmd)
             if (m_sampleRateAvgCounter == m_sampleRateAverageItems)
             {
                 float avgRate = m_sampleRateSum / m_sampleRateAverageItems;
-                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f: avg rate: %.0f",
+                qDebug("UDPSource::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f: avg rate: %.0f",
                         cfg.getCorrectionFactor(),
                         m_actualInputSampleRate,
                         avgRate);
@@ -388,7 +388,7 @@ bool UDPSink::handleMessage(const Message& cmd)
             }
 //            else
 //            {
-//                qDebug("UDPSink::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f",
+//                qDebug("UDPSource::handleMessage: MsgSampleRateCorrection: corr: %+.6f new rate: %.0f",
 //                        cfg.getCorrectionFactor(),
 //                        m_actualInputSampleRate);
 //            }
@@ -407,7 +407,7 @@ bool UDPSink::handleMessage(const Message& cmd)
     {
         MsgUDPSinkSpectrum& spc = (MsgUDPSinkSpectrum&) cmd;
         m_spectrumEnabled = spc.getEnabled();
-        qDebug() << "UDPSink::handleMessage: MsgUDPSinkSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+        qDebug() << "UDPSource::handleMessage: MsgUDPSinkSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
         return true;
     }
@@ -417,7 +417,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         m_udpHandler.resetReadIndex();
         m_settingsMutex.unlock();
 
-        qDebug() << "UDPSink::handleMessage: MsgResetReadIndex";
+        qDebug() << "UDPSource::handleMessage: MsgResetReadIndex";
 
         return true;
     }
@@ -438,21 +438,21 @@ bool UDPSink::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSink::setSpectrum(bool enabled)
+void UDPSource::setSpectrum(bool enabled)
 {
     Message* cmd = MsgUDPSinkSpectrum::create(enabled);
     getInputMessageQueue()->push(cmd);
 }
 
-void UDPSink::resetReadIndex()
+void UDPSource::resetReadIndex()
 {
     Message* cmd = MsgResetReadIndex::create();
     getInputMessageQueue()->push(cmd);
 }
 
-void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
+void UDPSource::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
 {
-    qDebug() << "UDPSink::applyChannelSettings:"
+    qDebug() << "UDPSource::applyChannelSettings:"
             << " basebandSampleRate: " << basebandSampleRate
             << " outputSampleRate: " << outputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
@@ -480,9 +480,9 @@ void UDPSink::applyChannelSettings(int basebandSampleRate, int outputSampleRate,
     m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
-void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
+void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
 {
-    qDebug() << "UDPSink::applySettings:"
+    qDebug() << "UDPSource::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_sampleFormat: " << settings.m_sampleFormat
             << " m_inputSampleRate: " << settings.m_inputSampleRate
@@ -575,12 +575,12 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
     m_settings = settings;
 }
 
-QByteArray UDPSink::serialize() const
+QByteArray UDPSource::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool UDPSink::deserialize(const QByteArray& data)
+bool UDPSource::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
@@ -597,7 +597,7 @@ bool UDPSink::deserialize(const QByteArray& data)
     }
 }
 
-int UDPSink::webapiSettingsGet(
+int UDPSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -607,17 +607,17 @@ int UDPSink::webapiSettingsGet(
     return 200;
 }
 
-int UDPSink::webapiSettingsPutPatch(
+int UDPSource::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    UDPSinkSettings settings = m_settings;
+    UDPSourceSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
     if (channelSettingsKeys.contains("sampleFormat")) {
-        settings.m_sampleFormat = (UDPSinkSettings::SampleFormat) response.getUdpSinkSettings()->getSampleFormat();
+        settings.m_sampleFormat = (UDPSourceSettings::SampleFormat) response.getUdpSinkSettings()->getSampleFormat();
     }
     if (channelSettingsKeys.contains("inputSampleRate")) {
         settings.m_inputSampleRate = response.getUdpSinkSettings()->getInputSampleRate();
@@ -678,7 +678,7 @@ int UDPSink::webapiSettingsPutPatch(
 
     if (frequencyOffsetChanged)
     {
-        UDPSink::MsgConfigureChannelizer *msgChan = UDPSink::MsgConfigureChannelizer::create(
+        UDPSource::MsgConfigureChannelizer *msgChan = UDPSource::MsgConfigureChannelizer::create(
                 settings.m_inputSampleRate,
                 settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(msgChan);
@@ -698,7 +698,7 @@ int UDPSink::webapiSettingsPutPatch(
     return 200;
 }
 
-int UDPSink::webapiReportGet(
+int UDPSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -708,7 +708,7 @@ int UDPSink::webapiReportGet(
     return 200;
 }
 
-void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings)
+void UDPSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSourceSettings& settings)
 {
     response.getUdpSinkSettings()->setSampleFormat((int) settings.m_sampleFormat);
     response.getUdpSinkSettings()->setInputSampleRate(settings.m_inputSampleRate);
@@ -742,7 +742,7 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     }
 }
 
-void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void UDPSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getUdpSinkReport()->setInputPowerDb(CalcDb::dbPower(getInMagSq()));
     response.getUdpSinkReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));

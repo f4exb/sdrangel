@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSINKUDPHANDLER_H_
-#define PLUGINS_CHANNELTX_UDPSINK_UDPSINKUDPHANDLER_H_
+#ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEUDPHANDLER_H_
+#define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEUDPHANDLER_H_
 
 #include <QObject>
 #include <QUdpSocket>
@@ -27,12 +27,12 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class UDPSinkUDPHandler : public QObject
+class UDPSourceUDPHandler : public QObject
 {
     Q_OBJECT
 public:
-    UDPSinkUDPHandler();
-    virtual ~UDPSinkUDPHandler();
+    UDPSourceUDPHandler();
+    virtual ~UDPSourceUDPHandler();
 
     void start();
     void stop();
@@ -120,4 +120,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSINKUDPHANDLER_H_ */
+#endif /* PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEUDPHANDLER_H_ */

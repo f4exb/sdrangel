@@ -14,16 +14,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "udpsourceudphandler.h"
+
 #include <QDebug>
 #include <stdint.h>
 #include <algorithm>
 
-#include "udpsinkmsg.h"
-#include "udpsinkudphandler.h"
+#include "udpsourcemsg.h"
 
-MESSAGE_CLASS_DEFINITION(UDPSinkUDPHandler::MsgUDPAddressAndPort, Message)
+MESSAGE_CLASS_DEFINITION(UDPSourceUDPHandler::MsgUDPAddressAndPort, Message)
 
-UDPSinkUDPHandler::UDPSinkUDPHandler() :
+UDPSourceUDPHandler::UDPSourceUDPHandler() :
     m_dataSocket(0),
     m_dataAddress(QHostAddress::LocalHost),
     m_remoteAddress(QHostAddress::LocalHost),
@@ -46,12 +47,12 @@ UDPSinkUDPHandler::UDPSinkUDPHandler() :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()));
 }
 
-UDPSinkUDPHandler::~UDPSinkUDPHandler()
+UDPSourceUDPHandler::~UDPSourceUDPHandler()
 {
     delete[] m_udpBuf;
 }
 
-void UDPSinkUDPHandler::start()
+void UDPSourceUDPHandler::start()
 {
     qDebug("UDPSinkUDPHandler::start");
 
@@ -77,7 +78,7 @@ void UDPSinkUDPHandler::start()
     }
 }
 
-void UDPSinkUDPHandler::stop()
+void UDPSourceUDPHandler::stop()
 {
     qDebug("UDPSinkUDPHandler::stop");
 
@@ -94,7 +95,7 @@ void UDPSinkUDPHandler::stop()
     }
 }
 
-void UDPSinkUDPHandler::dataReadyRead()
+void UDPSourceUDPHandler::dataReadyRead()
 {
     while (m_dataSocket->hasPendingDatagrams() && m_dataConnected)
     {
@@ -127,7 +128,7 @@ void UDPSinkUDPHandler::dataReadyRead()
     }
 }
 
-void UDPSinkUDPHandler::moveData(char *blk)
+void UDPSourceUDPHandler::moveData(char *blk)
 {
     memcpy(m_udpBuf[m_writeFrameIndex], blk, m_udpBlockSize);
 
@@ -138,7 +139,7 @@ void UDPSinkUDPHandler::moveData(char *blk)
     }
 }
 
-void UDPSinkUDPHandler::readSample(qint16 &t)
+void UDPSourceUDPHandler::readSample(qint16 &t)
 {
     if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
     {
@@ -151,7 +152,7 @@ void UDPSinkUDPHandler::readSample(qint16 &t)
     }
 }
 
-void UDPSinkUDPHandler::readSample(AudioSample &a)
+void UDPSourceUDPHandler::readSample(AudioSample &a)
 {
     if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
     {
@@ -165,7 +166,7 @@ void UDPSinkUDPHandler::readSample(AudioSample &a)
     }
 }
 
-void UDPSinkUDPHandler::readSample(Sample &s)
+void UDPSourceUDPHandler::readSample(Sample &s)
 {
     if (m_readFrameIndex == m_writeFrameIndex) // block until more writes
     {
@@ -179,7 +180,7 @@ void UDPSinkUDPHandler::readSample(Sample &s)
     }
 }
 
-void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
+void UDPSourceUDPHandler::advanceReadPointer(int nbBytes)
 {
     if (m_readIndex < m_udpBlockSize - 2*nbBytes)
     {
@@ -209,7 +210,7 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
                 float dd = d - m_d; // derivative
                 float c = (d / 15.0) + (dd / 20.0); // damping and scaling
                 c = c < -0.05 ? -0.05 : c > 0.05 ? 0.05 : c; // limit
-                UDPSinkMessages::MsgSampleRateCorrection *msg = UDPSinkMessages::MsgSampleRateCorrection::create(c, d);
+                UDPSourceMessages::MsgSampleRateCorrection *msg = UDPSourceMessages::MsgSampleRateCorrection::create(c, d);
 
                 if (m_autoRWBalance && m_feedbackMessageQueue) {
                     m_feedbackMessageQueue->push(msg);
@@ -222,13 +223,13 @@ void UDPSinkUDPHandler::advanceReadPointer(int nbBytes)
     }
 }
 
-void UDPSinkUDPHandler::configureUDPLink(const QString& address, quint16 port)
+void UDPSourceUDPHandler::configureUDPLink(const QString& address, quint16 port)
 {
     Message* msg = MsgUDPAddressAndPort::create(address, port);
     m_inputMessageQueue.push(msg);
 }
 
-void UDPSinkUDPHandler::applyUDPLink(const QString& address, quint16 port)
+void UDPSourceUDPHandler::applyUDPLink(const QString& address, quint16 port)
 {
     qDebug("UDPSinkUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
     bool addressOK = m_dataAddress.setAddress(address);
@@ -245,7 +246,7 @@ void UDPSinkUDPHandler::applyUDPLink(const QString& address, quint16 port)
     start();
 }
 
-void UDPSinkUDPHandler::resetReadIndex()
+void UDPSourceUDPHandler::resetReadIndex()
 {
     m_readFrameIndex = (m_writeFrameIndex + (m_nbUDPFrames/2)) % m_nbUDPFrames;
     m_rwDelta = m_nbUDPFrames/2;
@@ -253,7 +254,7 @@ void UDPSinkUDPHandler::resetReadIndex()
     m_d = 0.0f;
 }
 
-void UDPSinkUDPHandler::resizeBuffer(float sampleRate)
+void UDPSourceUDPHandler::resizeBuffer(float sampleRate)
 {
     int halfNbFrames = std::max((sampleRate / 375.0), (m_minNbUDPFrames / 2.0));
     qDebug("UDPSinkUDPHandler::resizeBuffer: nb_frames: %d", 2*halfNbFrames);
@@ -271,7 +272,7 @@ void UDPSinkUDPHandler::resizeBuffer(float sampleRate)
     resetReadIndex();
 }
 
-void UDPSinkUDPHandler::handleMessages()
+void UDPSourceUDPHandler::handleMessages()
 {
     Message* message;
 
@@ -284,11 +285,11 @@ void UDPSinkUDPHandler::handleMessages()
     }
 }
 
-bool UDPSinkUDPHandler::handleMessage(const Message& cmd)
+bool UDPSourceUDPHandler::handleMessage(const Message& cmd)
 {
-    if (UDPSinkUDPHandler::MsgUDPAddressAndPort::match(cmd))
+    if (UDPSourceUDPHandler::MsgUDPAddressAndPort::match(cmd))
     {
-        UDPSinkUDPHandler::MsgUDPAddressAndPort& notif = (UDPSinkUDPHandler::MsgUDPAddressAndPort&) cmd;
+        UDPSourceUDPHandler::MsgUDPAddressAndPort& notif = (UDPSourceUDPHandler::MsgUDPAddressAndPort&) cmd;
         applyUDPLink(notif.getAddress(), notif.getPort());
         return true;
     }
