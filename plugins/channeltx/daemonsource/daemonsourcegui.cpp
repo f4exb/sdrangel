@@ -19,9 +19,9 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
-#include "daemonsrc.h"
-#include "ui_daemonsrcgui.h"
-#include "daemonsrcgui.h"
+#include "daemonsource.h"
+#include "ui_daemonsourcegui.h"
+#include "daemonsourcegui.h"
 
 DaemonSourceGUI* DaemonSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {

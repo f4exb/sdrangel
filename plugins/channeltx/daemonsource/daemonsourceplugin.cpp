@@ -18,10 +18,10 @@
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "daemonsrcgui.h"
+#include "daemonsourcegui.h"
 #endif
-#include "daemonsrc.h"
-#include "daemonsrcplugin.h"
+#include "daemonsource.h"
+#include "daemonsourceplugin.h"
 
 const PluginDescriptor DaemonSourcePlugin::m_pluginDescriptor = {
     QString("Daemon channel source"),

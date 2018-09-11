@@ -8,7 +8,7 @@ add_subdirectory(udpsink)
 
 find_package(CM256cc)
 if(CM256CC_FOUND)
-    add_subdirectory(daemonsrc)
+    add_subdirectory(daemonsource)
 endif()
 
 find_package(OpenCV)

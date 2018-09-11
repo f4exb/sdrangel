@@ -14,13 +14,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "daemonsrcsettings.h"
-
 #include <QColor>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "daemonsrcsettings.h"
+#include "daemonsourcesettings.h"
 
 DaemonSourceSettings::DaemonSourceSettings()
 {

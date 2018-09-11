@@ -30,8 +30,8 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 
-#include "daemonsrcthread.h"
-#include "daemonsrc.h"
+#include "daemonsourcethread.h"
+#include "daemonsource.h"
 
 MESSAGE_CLASS_DEFINITION(DaemonSource::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(DaemonSource::MsgConfigureDaemonSource, Message)

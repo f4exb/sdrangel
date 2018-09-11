@@ -25,7 +25,7 @@
 #include "channel/channelsourceapi.h"
 #include "util/message.h"
 
-#include "daemonsrcsettings.h"
+#include "daemonsourcesettings.h"
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 #include "channel/sdrdaemondatareadqueue.h"

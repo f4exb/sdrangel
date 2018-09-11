@@ -22,7 +22,7 @@
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 
-#include "daemonsrcthread.h"
+#include "daemonsourcethread.h"
 
 MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgDataBind, Message)

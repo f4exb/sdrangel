@@ -3,23 +3,23 @@ project(daemonsrc)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(daemonsrc_SOURCES
-	daemonsrc.cpp
-	daemonsrcthread.cpp
-	daemonsrcgui.cpp
-	daemonsrcplugin.cpp
-	daemonsrcsettings.cpp
+	daemonsource.cpp
+	daemonsourcethread.cpp
+	daemonsourcegui.cpp
+	daemonsourceplugin.cpp
+	daemonsourcesettings.cpp
 )
 
 set(daemonsrc_HEADERS
-	daemonsrc.h
-	daemonsrcthread.h
-	daemonsrcgui.h
-	daemonsrcplugin.h
-	daemonsrcsettings.h
+	daemonsource.h
+	daemonsourcethread.h
+	daemonsourcegui.h
+	daemonsourceplugin.h
+	daemonsourcesettings.h
 )
 
 set(daemonsrc_FORMS
-	daemonsrcgui.ui
+	daemonsourcegui.ui
 )
 
 include_directories(

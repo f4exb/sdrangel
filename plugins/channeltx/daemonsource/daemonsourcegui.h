@@ -24,7 +24,7 @@
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
 
-#include "daemonsrcsettings.h"
+#include "daemonsourcesettings.h"
 
 class PluginAPI;
 class DeviceUISet;

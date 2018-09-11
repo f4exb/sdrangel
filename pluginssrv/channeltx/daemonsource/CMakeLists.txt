@@ -1,20 +1,20 @@
 project(daemonsrc)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(PLUGIN_PREFIX "../../../plugins/channeltx/daemonsrc")
+set(PLUGIN_PREFIX "../../../plugins/channeltx/daemonsource")
 
 set(daemonsrc_SOURCES
-	${PLUGIN_PREFIX}/daemonsrc.cpp
-	${PLUGIN_PREFIX}/daemonsrcthread.cpp
-	${PLUGIN_PREFIX}/daemonsrcplugin.cpp
-	${PLUGIN_PREFIX}/daemonsrcsettings.cpp
+	${PLUGIN_PREFIX}/daemonsource.cpp
+	${PLUGIN_PREFIX}/daemonsourcethread.cpp
+	${PLUGIN_PREFIX}/daemonsourceplugin.cpp
+	${PLUGIN_PREFIX}/daemonsourcesettings.cpp
 )
 
 set(daemonsrc_HEADERS
-	${PLUGIN_PREFIX}/daemonsrc.h
-	${PLUGIN_PREFIX}/daemonsrcthread.h
-	${PLUGIN_PREFIX}/daemonsrcplugin.h
-	${PLUGIN_PREFIX}/daemonsrcsettings.h
+	${PLUGIN_PREFIX}/daemonsource.h
+	${PLUGIN_PREFIX}/daemonsourcethread.h
+	${PLUGIN_PREFIX}/daemonsourceplugin.h
+	${PLUGIN_PREFIX}/daemonsourcesettings.h
 )
 
 include_directories(
