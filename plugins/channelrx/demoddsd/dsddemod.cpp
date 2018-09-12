@@ -296,7 +296,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 	        if (nbAudioSamples > 0)
 	        {
 	            if (!m_settings.m_audioMute) {
-	                m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+	                m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples);
 	            }
 
 	            m_dsdDecoder.resetAudio1();
@@ -311,7 +311,7 @@ void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
             if (nbAudioSamples > 0)
             {
                 if (!m_settings.m_audioMute) {
-                    m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples, 10);
+                    m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples);
                 }
 
                 m_dsdDecoder.resetAudio2();

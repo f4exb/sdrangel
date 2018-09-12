@@ -181,7 +181,7 @@ qint64 AudioInput::writeData(const char *data, qint64 len)
 
 	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
-		(*it)->write(reinterpret_cast<const quint8*>(data), len/4, 10);
+		(*it)->write(reinterpret_cast<const quint8*>(data), len/4);
 	}
 
 	return len;

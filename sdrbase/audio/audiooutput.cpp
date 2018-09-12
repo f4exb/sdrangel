@@ -241,7 +241,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
 		// use outputBuffer as temp - yes, one memcpy could be saved
-		unsigned int samples = (*it)->read((quint8*) data, samplesPerBuffer, 1);
+		unsigned int samples = (*it)->read((quint8*) data, samplesPerBuffer);
 		const qint16* src = (const qint16*) data;
 		std::vector<qint32>::iterator dst = m_mixBuffer.begin();
 

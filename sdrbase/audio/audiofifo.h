@@ -34,8 +34,8 @@ public:
 
 	bool setSize(uint32_t numSamples);
 
-	uint32_t write(const quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
-	uint32_t read(quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
+	uint32_t write(const quint8* data, uint32_t numSamples);
+	uint32_t read(quint8* data, uint32_t numSamples);
 
 	uint32_t drain(uint32_t numSamples);
 	void clear();
@@ -57,11 +57,6 @@ private:
 	uint32_t m_fill;
 	uint32_t m_head;
 	uint32_t m_tail;
-
-	QMutex m_writeWaitLock;
-	QMutex m_readWaitLock;
-	QWaitCondition m_writeWaitCondition;
-	QWaitCondition m_readWaitCondition;
 
 	bool create(uint32_t numSamples);
 };

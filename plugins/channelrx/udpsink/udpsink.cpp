@@ -414,7 +414,7 @@ void UDPSink::audioReadyRead()
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
 					{
-						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 						if (res != m_audioBufferFill)
 						{
@@ -436,7 +436,7 @@ void UDPSink::audioReadyRead()
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
 					{
-						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+						uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 						if (res != m_audioBufferFill)
 						{
@@ -448,7 +448,7 @@ void UDPSink::audioReadyRead()
 				}
 			}
 
-			if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 0) != m_audioBufferFill)
+			if (m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill) != m_audioBufferFill)
 			{
 				qDebug("UDPSink::audioReadyRead: lost samples");
 			}

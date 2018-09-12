@@ -246,7 +246,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 				if (m_audioBufferFill >= m_audioBuffer.size())
 				{
-					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+					uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 					if(res != m_audioBufferFill) {
 						qDebug("BFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
@@ -262,7 +262,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	if (m_audioBufferFill > 0)
 	{
-		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 1);
+		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 		if (res != m_audioBufferFill) {
 			qDebug("BFMDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);

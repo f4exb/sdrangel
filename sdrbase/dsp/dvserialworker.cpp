@@ -118,7 +118,7 @@ void DVSerialWorker::handleInputMessages()
 
     if (audioFifo)
     {
-        uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+        uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
         if (res != m_audioBufferFill)
         {

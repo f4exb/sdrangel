@@ -253,7 +253,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 			if (m_audioBufferFill >= m_audioBuffer.size())
 			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 				if (res != m_audioBufferFill)
 				{
@@ -265,7 +265,7 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		}
 	}
 
-	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
+	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
 	if (res != m_audioBufferFill)
 	{
