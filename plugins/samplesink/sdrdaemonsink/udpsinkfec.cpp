@@ -29,8 +29,6 @@ MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgConfigureRemoteAddress, Message)
 
 UDPSinkFEC::UDPSinkFEC() :
     m_sampleRate(48000),
-    m_sampleBytes(SDR_TX_SAMP_SZ <= 16 ? 2 : 4),
-    m_sampleBits(SDR_TX_SAMP_SZ),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
     m_txDelayRatio(0.0),
@@ -40,8 +38,8 @@ UDPSinkFEC::UDPSinkFEC() :
     m_frameCount(0),
     m_sampleIndex(0)
 {
-    memset((char *) m_txBlocks, 0, 4*256*sizeof(SuperBlock));
-    memset((char *) &m_superBlock, 0, sizeof(SuperBlock));
+    memset((char *) m_txBlocks, 0, 4*256*sizeof(SDRDaemonSuperBlock));
+    memset((char *) &m_superBlock, 0, sizeof(SDRDaemonSuperBlock));
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];
@@ -74,7 +72,7 @@ void UDPSinkFEC::setTxDelay(float txDelayRatio)
     // divided by sample rate gives the frame process time
     // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
     m_txDelayRatio = txDelayRatio;
-    int samplesPerBlock = bytesPerBlock / (m_sampleBytes*2);
+    int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
     double delay = ((127*samplesPerBlock*txDelayRatio) / m_sampleRate)/(128 + m_nbBlocksFEC);
     m_txDelay = delay * 1e6;
     qDebug() << "UDPSinkFEC::setTxDelay: txDelay: " << txDelayRatio << " m_txDelay: " << m_txDelay << " us";
@@ -113,14 +111,14 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
         if (m_txBlockIndex == 0) // Tx block index 0 is a block with only meta data
         {
             struct timeval tv;
-            MetaDataFEC metaData;
+            SDRDaemonMetaDataFEC metaData;
 
             gettimeofday(&tv, 0);
 
             metaData.m_centerFrequency = 0; // frequency not set by stream
             metaData.m_sampleRate = m_sampleRate;
-            metaData.m_sampleBytes = m_sampleBytes & 0xF;
-            metaData.m_sampleBits = m_sampleBits;
+            metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            metaData.m_sampleBits = SDR_RX_SAMP_SZ;
             metaData.m_nbOriginalBlocks = m_nbOriginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
             metaData.m_tv_sec = tv.tv_sec;
@@ -133,9 +131,11 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
             memset((char *) &m_superBlock, 0, sizeof(m_superBlock));
 
-            m_superBlock.header.frameIndex = m_frameCount;
-            m_superBlock.header.blockIndex = m_txBlockIndex;
-            memcpy((char *) &m_superBlock.protectedBlock, (const char *) &metaData, sizeof(MetaDataFEC));
+            m_superBlock.m_header.m_frameIndex = m_frameCount;
+            m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
+            m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {
@@ -157,74 +157,28 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_txBlockIndex = 1; // next Tx block with data
         }
 
-        int samplesPerBlock = bytesPerBlock / (m_sampleBytes*2);
+        int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
 
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            if (sizeof(Sample) == m_sampleBytes*2) // can do direct copy if sample sizes are equal
-            {
-                memcpy((char *) &m_superBlock.protectedBlock.m_buf[m_sampleIndex*m_sampleBytes*2],
-                        (const char *) &(*it),
-                        inRemainingSamples * sizeof(Sample));
-            }
-            else if ((sizeof(Sample) == 8) && (m_sampleBytes == 2)) // modulators produce 16 bit samples
-            {
-                for (int is = 0; is < inRemainingSamples; is++)
-                {
-                    int16_t *rp = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
-                    int16_t *ip = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+2]);
-                    *rp = (it+is)->m_real & 0xFFFF;
-                    *ip = (it+is)->m_imag & 0xFFFF;
-                }
-            }
-            else if ((sizeof(Sample) == 4) && (m_sampleBytes == 4)) // use 16 bit samples for Tx
-            {
-                for (int is = 0; is < inRemainingSamples; is++)
-                {
-                    int32_t *rp = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
-                    int32_t *ip = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+4]);
-                    *rp = (it+is)->m_real;
-                    *ip = (it+is)->m_imag;
-                }
-            }
-
+            memcpy((char *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+                    (const char *) &(*it),
+                    inRemainingSamples * sizeof(Sample));
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            if (sizeof(Sample) == m_sampleBytes*2) // can do direct copy if sample sizes are equal
-            {
-                memcpy((char *) &m_superBlock.protectedBlock.m_buf[m_sampleIndex*m_sampleBytes*2],
-                        (const char *) &(*it),
-                        (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
-            }
-            else if ((sizeof(Sample) == 8) && (m_sampleBytes == 2)) // modulators produce 16 bit samples
-            {
-                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++)
-                {
-                    int16_t *rp = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
-                    int16_t *ip = (int16_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+2]);
-                    *rp = (it+is)->m_real & 0xFFFF;
-                    *ip = (it+is)->m_imag & 0xFFFF;
-                }
-            }
-            else if ((sizeof(Sample) == 4) && (m_sampleBytes == 4)) // use 16 bit samples for Tx
-            {
-                for (int is = 0; is < samplesPerBlock - m_sampleIndex; is++)
-                {
-                    int32_t *rp = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2]);
-                    int32_t *ip = (int32_t*) &(m_superBlock.protectedBlock.m_buf[(m_sampleIndex+is)*m_sampleBytes*2+4]);
-                    *rp = (it+is)->m_real;
-                    *ip = (it+is)->m_imag;
-                }
-            }
-
+            memcpy((char *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+                    (const char *) &(*it),
+                    (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 
-            m_superBlock.header.frameIndex = m_frameCount;
-            m_superBlock.header.blockIndex = m_txBlockIndex;
+            m_superBlock.m_header.m_frameIndex = m_frameCount;
+            m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
+            m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
             m_txBlocks[m_txBlocksIndex][m_txBlockIndex] =  m_superBlock;
 
             if (m_txBlockIndex == m_nbOriginalBlocks - 1) // frame complete
@@ -263,7 +217,7 @@ UDPSinkFECWorker::~UDPSinkFECWorker()
     m_inputMessageQueue.clear();
 }
 
-void UDPSinkFECWorker::pushTxFrame(UDPSinkFEC::SuperBlock *txBlocks,
+void UDPSinkFECWorker::pushTxFrame(SDRDaemonSuperBlock *txBlocks,
     uint32_t nbBlocksFEC,
     uint32_t txDelay,
     uint16_t frameIndex)
@@ -320,11 +274,11 @@ void UDPSinkFECWorker::handleInputMessages()
     }
 }
 
-void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay)
+void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay)
 {
     CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
     CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
-    UDPSinkFEC::ProtectedBlock fecBlocks[256];   //!< FEC data
+    SDRDaemonProtectedBlock fecBlocks[256];   //!< FEC data
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
@@ -339,7 +293,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
     }
     else
     {
-        cm256Params.BlockBytes = sizeof(UDPSinkFEC::ProtectedBlock);
+        cm256Params.BlockBytes = sizeof(SDRDaemonProtectedBlock);
         cm256Params.OriginalCount = UDPSinkFEC::m_nbOriginalBlocks;
         cm256Params.RecoveryCount = nbBlocksFEC;
 
@@ -348,13 +302,15 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; ++i)
         {
             if (i >= cm256Params.OriginalCount) {
-                memset((char *) &txBlockx[i].protectedBlock, 0, sizeof(UDPSinkFEC::ProtectedBlock));
+                memset((char *) &txBlockx[i].m_protectedBlock, 0, sizeof(SDRDaemonProtectedBlock));
             }
 
-            txBlockx[i].header.frameIndex = frameIndex;
-            txBlockx[i].header.blockIndex = i;
-            descriptorBlocks[i].Block = (void *) &(txBlockx[i].protectedBlock);
-            descriptorBlocks[i].Index = txBlockx[i].header.blockIndex;
+            txBlockx[i].m_header.m_frameIndex = frameIndex;
+            txBlockx[i].m_header.m_blockIndex = i;
+            txBlockx[i].m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            txBlockx[i].m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            descriptorBlocks[i].Block = (void *) &(txBlockx[i].m_protectedBlock);
+            descriptorBlocks[i].Index = txBlockx[i].m_header.m_blockIndex;
         }
 
         // Encode FEC blocks
@@ -367,7 +323,7 @@ void UDPSinkFECWorker::encodeAndTransmit(UDPSinkFEC::SuperBlock *txBlockx, uint1
         // Merge FEC with data to transmit
         for (int i = 0; i < cm256Params.RecoveryCount; i++)
         {
-            txBlockx[i + cm256Params.OriginalCount].protectedBlock = fecBlocks[i];
+            txBlockx[i + cm256Params.OriginalCount].m_protectedBlock = fecBlocks[i];
         }
 
         // Transmit all blocks

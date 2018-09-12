@@ -52,7 +52,6 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
         m_dataBlock(0),
         m_centerFrequency(0),
         m_sampleRate(48000),
-        m_sampleBytes(SDR_RX_SAMP_SZ <= 16 ? 2 : 4),
         m_nbBlocksFEC(0),
         m_txDelay(35),
         m_dataAddress("127.0.0.1"),
@@ -115,7 +114,7 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
 
             metaData.m_centerFrequency = m_centerFrequency;
             metaData.m_sampleRate = m_sampleRate;
-            metaData.m_sampleBytes = m_sampleBytes & 0xF;
+            metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;
             metaData.m_nbOriginalBlocks = SDRDaemonNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
@@ -133,6 +132,8 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
+            superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
             memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
@@ -154,7 +155,7 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         } // block zero
 
         // handle different sample sizes...
-        int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
+        int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
             memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
@@ -173,6 +174,8 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
 
             m_superBlock.m_header.m_frameIndex = m_frameCount;
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
+            m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
             m_dataBlock->m_superBlocks[m_txBlockIndex] = m_superBlock;
 
             if (m_txBlockIndex == SDRDaemonNbOrginalBlocks - 1) // frame complete

@@ -132,6 +132,8 @@ void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 
             txBlockx[i].m_header.m_frameIndex = frameIndex;
             txBlockx[i].m_header.m_blockIndex = i;
+            txBlockx[i].m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
+            txBlockx[i].m_header.m_sampleBits = SDR_RX_SAMP_SZ;
             descriptorBlocks[i].Block = (void *) &(txBlockx[i].m_protectedBlock);
             descriptorBlocks[i].Index = txBlockx[i].m_header.m_blockIndex;
         }

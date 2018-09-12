@@ -38,7 +38,7 @@ struct SDRDaemonMetaDataFEC
 {
     uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
     uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-    uint8_t  m_sampleBytes;       //!<  9 4 LSB: number of bytes per sample (2 or 3)
+    uint8_t  m_sampleBytes;       //!<  9 4 LSB: number of bytes per sample (2 or 4)
     uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample (deprecated)
     uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
     uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
@@ -69,13 +69,17 @@ struct SDRDaemonHeader
 {
     uint16_t m_frameIndex;
     uint8_t  m_blockIndex;
+    uint8_t  m_sampleBytes; //!<  number of bytes per sample (2 or 4) for this block
+    uint8_t  m_sampleBits;  //!<  number of bits per sample
     uint8_t  m_filler;
-    uint32_t m_filler2;
+    uint16_t m_filler2;
 
     void init()
     {
         m_frameIndex = 0;
         m_blockIndex = 0;
+        m_sampleBytes = 2;
+        m_sampleBits = 16;
         m_filler = 0;
         m_filler2 = 0;
     }

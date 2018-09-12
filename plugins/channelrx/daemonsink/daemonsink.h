@@ -144,7 +144,6 @@ private:
 
     uint64_t m_centerFrequency;
     uint32_t m_sampleRate;
-    uint8_t m_sampleBytes;
     int m_nbBlocksFEC;
     int m_txDelay;
     QString m_dataAddress;

@@ -38,6 +38,7 @@
 
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
+#include "channel/sdrdaemondatablock.h"
 #include "udpsinkfec.h"
 #include "sdrdaemonsinkgui.h"
 
@@ -215,7 +216,7 @@ void SDRdaemonSinkGui::updateSampleRate()
 
 void SDRdaemonSinkGui::updateTxDelayTooltip()
 {
-    int samplesPerBlock = UDPSinkFEC::bytesPerBlock / (SDR_TX_SAMP_SZ <= 16 ? 4 : 8);
+    int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
     double delay = ((127*samplesPerBlock*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
 }
