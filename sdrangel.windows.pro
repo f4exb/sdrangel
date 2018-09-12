@@ -54,12 +54,12 @@ SUBDIRS += plugins/channelrx/demodlora
 SUBDIRS += plugins/channelrx/demodnfm
 SUBDIRS += plugins/channelrx/demodssb
 SUBDIRS += plugins/channelrx/demodwfm
-SUBDIRS += plugins/channelrx/udpsrc
+SUBDIRS += plugins/channelrx/udpsource
 SUBDIRS += plugins/channeltx/modam
 SUBDIRS += plugins/channeltx/modnfm
 SUBDIRS += plugins/channeltx/modssb
 SUBDIRS += plugins/channeltx/modwfm
-SUBDIRS += plugins/channeltx/udpsink
+SUBDIRS += plugins/channeltx/udpsource
 
 # Main app must be last
 SUBDIRS += app
