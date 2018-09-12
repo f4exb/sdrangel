@@ -39,23 +39,23 @@ class UDPSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    class MsgConfigureUDPSink : public Message {
+    class MsgConfigureUDPSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         const UDPSourceSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSink* create(const UDPSourceSettings& settings, bool force)
+        static MsgConfigureUDPSource* create(const UDPSourceSettings& settings, bool force)
         {
-            return new MsgConfigureUDPSink(settings, force);
+            return new MsgConfigureUDPSource(settings, force);
         }
 
     private:
         UDPSourceSettings m_settings;
         bool m_force;
 
-        MsgConfigureUDPSink(const UDPSourceSettings& settings, bool force) :
+        MsgConfigureUDPSource(const UDPSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -139,21 +139,21 @@ signals:
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
 private:
-    class MsgUDPSinkSpectrum : public Message {
+    class MsgUDPSourceSpectrum : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         bool getEnabled() const { return m_enabled; }
 
-        static MsgUDPSinkSpectrum* create(bool enabled)
+        static MsgUDPSourceSpectrum* create(bool enabled)
         {
-            return new MsgUDPSinkSpectrum(enabled);
+            return new MsgUDPSourceSpectrum(enabled);
         }
 
     private:
         bool m_enabled;
 
-        MsgUDPSinkSpectrum(bool enabled) :
+        MsgUDPSourceSpectrum(bool enabled) :
             Message(),
             m_enabled(enabled)
         { }

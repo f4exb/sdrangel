@@ -45,23 +45,23 @@ class UDPSink : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
 
 public:
-    class MsgConfigureUDPSrc : public Message {
+    class MsgConfigureUDPSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         const UDPSinkSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSrc* create(const UDPSinkSettings& settings, bool force)
+        static MsgConfigureUDPSource* create(const UDPSinkSettings& settings, bool force)
         {
-            return new MsgConfigureUDPSrc(settings, force);
+            return new MsgConfigureUDPSource(settings, force);
         }
 
     private:
         UDPSinkSettings m_settings;
         bool m_force;
 
-        MsgConfigureUDPSrc(const UDPSinkSettings& settings, bool force) :
+        MsgConfigureUDPSource(const UDPSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -136,21 +136,21 @@ public slots:
     void audioReadyRead();
 
 protected:
-	class MsgUDPSrcSpectrum : public Message {
+	class MsgUDPSinkSpectrum : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool getEnabled() const { return m_enabled; }
 
-		static MsgUDPSrcSpectrum* create(bool enabled)
+		static MsgUDPSinkSpectrum* create(bool enabled)
 		{
-			return new MsgUDPSrcSpectrum(enabled);
+			return new MsgUDPSinkSpectrum(enabled);
 		}
 
 	private:
 		bool m_enabled;
 
-		MsgUDPSrcSpectrum(bool enabled) :
+		MsgUDPSinkSpectrum(bool enabled) :
 			Message(),
 			m_enabled(enabled)
 		{ }

@@ -34,9 +34,9 @@
 
 const Real UDPSink::m_agcTarget = 16384.0f;
 
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSrc, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSource, Message)
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSrcSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 
 const QString UDPSink::m_channelIdURI = "sdrangel.channel.udpsink";
 const QString UDPSink::m_channelId = "UDPSink";
@@ -129,7 +129,7 @@ UDPSink::~UDPSink()
 
 void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
-	Message* cmd = MsgUDPSrcSpectrum::create(enabled);
+	Message* cmd = MsgUDPSinkSpectrum::create(enabled);
 	messageQueue->push(cmd);
 }
 
@@ -356,22 +356,22 @@ bool UDPSink::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureUDPSrc::match(cmd))
+    else if (MsgConfigureUDPSource::match(cmd))
     {
-        MsgConfigureUDPSrc& cfg = (MsgConfigureUDPSrc&) cmd;
-        qDebug("UDPSink::handleMessage: MsgConfigureUDPSrc");
+        MsgConfigureUDPSource& cfg = (MsgConfigureUDPSource&) cmd;
+        qDebug("UDPSink::handleMessage: MsgConfigureUDPSource");
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
     }
-	else if (MsgUDPSrcSpectrum::match(cmd))
+	else if (MsgUDPSinkSpectrum::match(cmd))
 	{
-		MsgUDPSrcSpectrum& spc = (MsgUDPSrcSpectrum&) cmd;
+		MsgUDPSinkSpectrum& spc = (MsgUDPSinkSpectrum&) cmd;
 
 		m_spectrumEnabled = spc.getEnabled();
 
-		qDebug() << "UDPSink::handleMessage: MsgUDPSrcSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+		qDebug() << "UDPSink::handleMessage: MsgUDPSinkSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
 		return true;
 	}
@@ -629,14 +629,14 @@ bool UDPSink::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -729,13 +729,13 @@ int UDPSink::webapiSettingsPutPatch(
         m_inputMessageQueue.push(msgChan);
     }
 
-    MsgConfigureUDPSrc *msg = MsgConfigureUDPSrc::create(settings, force);
+    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("getUdpSinkSettings::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSrc *msgToGUI = MsgConfigureUDPSrc::create(settings, force);
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

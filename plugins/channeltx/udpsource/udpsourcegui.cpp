@@ -86,9 +86,9 @@ bool UDPSourceGUI::deserialize(const QByteArray& data)
 
 bool UDPSourceGUI::handleMessage(const Message& message)
 {
-    if (UDPSource::MsgConfigureUDPSink::match(message))
+    if (UDPSource::MsgConfigureUDPSource::match(message))
     {
-        const UDPSource::MsgConfigureUDPSink& cfg = (UDPSource::MsgConfigureUDPSink&) message;
+        const UDPSource::MsgConfigureUDPSource& cfg = (UDPSource::MsgConfigureUDPSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -199,7 +199,7 @@ void UDPSourceGUI::applySettings(bool force)
                 m_settings.m_inputFrequencyOffset);
         m_udpSource->getInputMessageQueue()->push(msgChan);
 
-        UDPSource::MsgConfigureUDPSink* message = UDPSource::MsgConfigureUDPSink::create( m_settings, force);
+        UDPSource::MsgConfigureUDPSource* message = UDPSource::MsgConfigureUDPSource::create( m_settings, force);
         m_udpSource->getInputMessageQueue()->push(message);
 
         ui->applyBtn->setEnabled(false);

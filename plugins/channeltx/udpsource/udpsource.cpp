@@ -29,9 +29,9 @@
 #include "udpsource.h"
 #include "udpsourcemsg.h"
 
-MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureUDPSink, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureUDPSource, Message)
 MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(UDPSource::MsgUDPSinkSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(UDPSource::MsgUDPSourceSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSource::MsgResetReadIndex, Message)
 
 const QString UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
@@ -342,10 +342,10 @@ bool UDPSource::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureUDPSink::match(cmd))
+    else if (MsgConfigureUDPSource::match(cmd))
     {
-        MsgConfigureUDPSink& cfg = (MsgConfigureUDPSink&) cmd;
-        qDebug() << "UDPSource::handleMessage: MsgConfigureUDPSink";
+        MsgConfigureUDPSource& cfg = (MsgConfigureUDPSource&) cmd;
+        qDebug() << "UDPSource::handleMessage: MsgConfigureUDPSource";
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
@@ -403,11 +403,11 @@ bool UDPSource::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgUDPSinkSpectrum::match(cmd))
+    else if (MsgUDPSourceSpectrum::match(cmd))
     {
-        MsgUDPSinkSpectrum& spc = (MsgUDPSinkSpectrum&) cmd;
+        MsgUDPSourceSpectrum& spc = (MsgUDPSourceSpectrum&) cmd;
         m_spectrumEnabled = spc.getEnabled();
-        qDebug() << "UDPSource::handleMessage: MsgUDPSinkSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
+        qDebug() << "UDPSource::handleMessage: MsgUDPSourceSpectrum: m_spectrumEnabled: " << m_spectrumEnabled;
 
         return true;
     }
@@ -440,7 +440,7 @@ bool UDPSource::handleMessage(const Message& cmd)
 
 void UDPSource::setSpectrum(bool enabled)
 {
-    Message* cmd = MsgUDPSinkSpectrum::create(enabled);
+    Message* cmd = MsgUDPSourceSpectrum::create(enabled);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -584,14 +584,14 @@ bool UDPSource::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -684,12 +684,12 @@ int UDPSource::webapiSettingsPutPatch(
         m_inputMessageQueue.push(msgChan);
     }
 
-    MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(settings, force);
+    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(settings, force);
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

@@ -90,9 +90,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
 
 bool UDPSinkGUI::handleMessage(const Message& message )
 {
-    if (UDPSink::MsgConfigureUDPSrc::match(message))
+    if (UDPSink::MsgConfigureUDPSource::match(message))
     {
-        const UDPSink::MsgConfigureUDPSrc& cfg = (UDPSink::MsgConfigureUDPSrc&) message;
+        const UDPSink::MsgConfigureUDPSource& cfg = (UDPSink::MsgConfigureUDPSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -391,7 +391,7 @@ void UDPSinkGUI::applySettingsImmediate(bool force)
 {
 	if (m_doApplySettings)
 	{
-        UDPSink::MsgConfigureUDPSrc* message = UDPSink::MsgConfigureUDPSrc::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSource* message = UDPSink::MsgConfigureUDPSource::create( m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 	}
 }
@@ -404,7 +404,7 @@ void UDPSinkGUI::applySettings(bool force)
                 m_settings.m_outputSampleRate, m_channelMarker.getCenterFrequency());
         m_udpSink->getInputMessageQueue()->push(channelConfigMsg);
 
-        UDPSink::MsgConfigureUDPSrc* message = UDPSink::MsgConfigureUDPSrc::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSource* message = UDPSink::MsgConfigureUDPSource::create( m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 
 		ui->applyBtn->setEnabled(false);
