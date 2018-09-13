@@ -24,9 +24,9 @@ In this column there are two indicators:
     - Copy audio to UDP: unchecked (false)
     - UDP copy channel mode: mono left channel (Left)
     - Use RTP protocol: unchecked (false)
-    
+
 A unset indicator is marked with an underscore character: `_`
-    
+
 <h3>1.2 Device name</h3>
 
 This is the device name defined in the system. In Linux when you define virtual devices (null sinks) with Pulseaudio this is the name you have given when defining the device.
@@ -41,7 +41,7 @@ The device currently selected is marked in the selection color (orange). The par
 
 <h3>1.5 Sample rate</h3>
 
-This is the device sample rate in samples per second (S/s). 
+This is the device sample rate in samples per second (S/s).
 
 <h3>1.6 Reset values to defaults</h3>
 
@@ -62,10 +62,10 @@ Use this button to activate or de-activate the copy of the audio stream to UDP s
 <h3>1.10 UDP copy channel mode</h3>
 
   - `Left`: UDP stream is mono (1 channel) and the left audio channel is copied
-  - `Right`: UDP stream is mono (1 channel) and the right audio channel is copied 
+  - `Right`: UDP stream is mono (1 channel) and the right audio channel is copied
   - `Mixed`: UDP stream is mono (1 channel) and the mix of left and right audio channels is copied
   - `Stereo`:  UDP stream is stereo (2 channels) and audio channels are copied to their UDP channel counterparts respectively
-  
+
 <h3>1.11 Use RTP protocol over UDP</h3>
 
 Check this box to activate the RTP protocol over UDP. RTP parameters are as follows:
@@ -75,12 +75,12 @@ Check this box to activate the RTP protocol over UDP. RTP parameters are as foll
   - Sample format: 16 bit integer signed (S16LE)
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
-  
+
 You may read the RTP stream using a SDP file (extension `.sdp`) that can be read with any program supporting SDP files (VLC, MX player, ffmpeg, ...). For a mono 48000 S/s stream at address `192.168.0.34:9998` the contents of the file would be as follows:
 
 ```
 c=IN IP4 192.168.0.34
-m=audio 9998 RTP/AVP 96 
+m=audio 9998 RTP/AVP 96
 a=rtpmap:96 L16/48000/1
 ```
 
@@ -90,15 +90,15 @@ a=rtpmap:96 L16/48000/1
 
 Use this button to keep only the visible devices in the devices registrations. The devices registrations with custom parameters are kept in the preferences using the device names. This button makes some tidying up when devices are permanently removed.
 
-<h3>1.14 Unregister device</h3>
+<h3>1.13 Unregister device</h3>
 
 Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` indicator in the list.
 
-<h3>1.15 OK button</h3>
+<h3>1.14 OK button</h3>
 
 Use this button to confirm your changes and close dialog. Note that you can change parameters of only one device at a time.
 
-<h3>1.16 Cancel button</h3>
+<h3>1.15 Cancel button</h3>
 
 Use this button to dismiss your changes and close dialog.
 
@@ -119,9 +119,9 @@ In this column there are two indicators:
   - `D`: the device is unregistered so if you associate an input stream to it it will be registered with default values. Default values are:
     - Sample rate: 48000 S/s
     - Volume: 0.15
-    
+
 A unset indicator is marked with an underscore character: `_`
-    
+
 <h3>2.2 Device name</h3>
 
 This is the device name defined in the system. In Linux when you define virtual devices (null sinks) with Pulseaudio an input device is automatically created with the `.monitor` extension.
@@ -136,7 +136,7 @@ The device currently selected is marked in the selection color (orange). The par
 
 <h3>2.5 Sample rate</h3>
 
-This is the device sample rate in samples per second (S/s). 
+This is the device sample rate in samples per second (S/s).
 
 <h3>2.6 Input volume</h3>
 
@@ -177,9 +177,9 @@ In this column there are two indicators:
 
   - `S`: for system default device. This is the device that is defined as system default. You may configure it directly or via the ` System default device` entry. <br/>&#9758; Note that (at least in Linux) you may affect different parameters to one or the other.
   - `D`: the device is unregistered so if you associate an input stream to it it will be registered with default values. Default values depend on the input or output nature and are listed in the 2.1 and 1.1 sections respectively.
-    
+
 A unset indicator is marked with an underscore character: `_`
-    
+
 <h3>3.2 Device name</h3>
 
 This is the device name defined in the system.
@@ -209,5 +209,5 @@ Use this button to confirm your selection and close dialog.
 Use this button to dismiss your selection and close dialog.
 
 
- 
+
 
