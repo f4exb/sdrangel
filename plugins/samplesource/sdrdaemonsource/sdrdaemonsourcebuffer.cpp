@@ -50,8 +50,8 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
 	m_tvOut_sec = 0;
 	m_tvOut_usec = 0;
 	m_readNbBytes = 1;
-    m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
-    m_paramsCM256.OriginalCount = m_nbOriginalBlocks;  // never changes
+    m_paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
+    m_paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
 
     if (!m_cm256.isInitialized()) {
         m_cm256_OK = false;
@@ -81,7 +81,7 @@ void SDRdaemonSourceBuffer::initDecodeAllSlots()
         m_decoderSlots[i].m_decoded = false;
         m_decoderSlots[i].m_metaRetrieved = false;
         resetOriginalBlocks(i);
-        memset((void *) m_decoderSlots[i].m_recoveryBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
+        memset((void *) m_decoderSlots[i].m_recoveryBlocks, 0, SDRDaemonNbOrginalBlocks * sizeof(SDRDaemonProtectedBlock));
     }
 }
 
@@ -118,7 +118,7 @@ void SDRdaemonSourceBuffer::initDecodeSlot(int slotIndex)
     m_decoderSlots[slotIndex].m_metaRetrieved = false;
 
     resetOriginalBlocks(slotIndex);
-    memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
+    memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 0, SDRDaemonNbOrginalBlocks * sizeof(SDRDaemonProtectedBlock));
 }
 
 void SDRdaemonSourceBuffer::initReadIndex()
@@ -189,8 +189,8 @@ void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
 
 void SDRdaemonSourceBuffer::writeData(char *array)
 {
-    SuperBlock *superBlock = (SuperBlock *) array;
-    int frameIndex = superBlock->header.frameIndex;
+    SDRDaemonSuperBlock *superBlock = (SDRDaemonSuperBlock *) array;
+    int frameIndex = superBlock->m_header.m_frameIndex;
     int decoderIndex = frameIndex % nbDecoderSlots;
 
     // frame break
@@ -213,9 +213,9 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
     // Block processing
 
-    if (m_decoderSlots[decoderIndex].m_blockCount < m_nbOriginalBlocks) // not enough blocks to decode -> store data
+    if (m_decoderSlots[decoderIndex].m_blockCount < SDRDaemonNbOrginalBlocks) // not enough blocks to decode -> store data
     {
-        int blockIndex = superBlock->header.blockIndex;
+        int blockIndex = superBlock->m_header.m_blockIndex;
         int blockCount = m_decoderSlots[decoderIndex].m_blockCount;
         int recoveryCount = m_decoderSlots[decoderIndex].m_recoveryCount;
         m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Index = blockIndex;
@@ -225,14 +225,14 @@ void SDRdaemonSourceBuffer::writeData(char *array)
             m_decoderSlots[decoderIndex].m_metaRetrieved = true;
         }
 
-        if (blockIndex < m_nbOriginalBlocks) // original data
+        if (blockIndex < SDRDaemonNbOrginalBlocks) // original data
         {
-            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) storeOriginalBlock(decoderIndex, blockIndex, superBlock->protectedBlock);
+            m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) storeOriginalBlock(decoderIndex, blockIndex, superBlock->m_protectedBlock);
             m_decoderSlots[decoderIndex].m_originalCount++;
         }
         else // recovery data
         {
-            m_decoderSlots[decoderIndex].m_recoveryBlocks[recoveryCount] = superBlock->protectedBlock;
+            m_decoderSlots[decoderIndex].m_recoveryBlocks[recoveryCount] = superBlock->m_protectedBlock;
             m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[blockCount].Block = (void *) &m_decoderSlots[decoderIndex].m_recoveryBlocks[recoveryCount];
             m_decoderSlots[decoderIndex].m_recoveryCount++;
         }
@@ -240,14 +240,14 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
     m_decoderSlots[decoderIndex].m_blockCount++;
 
-    if (m_decoderSlots[decoderIndex].m_blockCount == m_nbOriginalBlocks) // ready to decode
+    if (m_decoderSlots[decoderIndex].m_blockCount == SDRDaemonNbOrginalBlocks) // ready to decode
     {
         m_decoderSlots[decoderIndex].m_decoded = true;
 
         if (m_cm256_OK && (m_decoderSlots[decoderIndex].m_recoveryCount > 0)) // recovery data used => need to decode FEC
         {
-            m_paramsCM256.BlockBytes = sizeof(ProtectedBlock); // never changes
-            m_paramsCM256.OriginalCount = m_nbOriginalBlocks;  // never changes
+            m_paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
+            m_paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
 
             if (m_decoderSlots[decoderIndex].m_metaRetrieved) {
                 m_paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks;
@@ -269,13 +269,13 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
                 for (int ir = 0; ir < m_decoderSlots[decoderIndex].m_recoveryCount; ir++) // restore missing blocks
                 {
-                    int recoveryIndex = m_nbOriginalBlocks - m_decoderSlots[decoderIndex].m_recoveryCount + ir;
+                    int recoveryIndex = SDRDaemonNbOrginalBlocks - m_decoderSlots[decoderIndex].m_recoveryCount + ir;
                     int blockIndex = m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[recoveryIndex].Index;
-                    ProtectedBlock *recoveredBlock = (ProtectedBlock *) m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[recoveryIndex].Block;
+                    SDRDaemonProtectedBlock *recoveredBlock = (SDRDaemonProtectedBlock *) m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks[recoveryIndex].Block;
 
                     if (blockIndex == 0) // first block with meta
                     {
-                        MetaDataFEC *metaData = (MetaDataFEC *) recoveredBlock;
+                        SDRDaemonMetaDataFEC *metaData = (SDRDaemonMetaDataFEC *) recoveredBlock;
 
                         boost::crc_32_type crc32;
                         crc32.process_bytes(metaData, 20);
@@ -300,7 +300,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
         if (m_decoderSlots[decoderIndex].m_metaRetrieved) // block zero with its meta data has been received
         {
-            MetaDataFEC *metaData = getMetaData(decoderIndex);
+            SDRDaemonMetaDataFEC *metaData = getMetaData(decoderIndex);
 
             if (!(*metaData == m_currentMeta))
             {
@@ -435,7 +435,7 @@ uint8_t *SDRdaemonSourceBuffer::readData(int32_t length)
     }
 }
 
-void SDRdaemonSourceBuffer::printMeta(const QString& header, MetaDataFEC *metaData)
+void SDRdaemonSourceBuffer::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
 {
 	qDebug() << header << ": "
             << "|" << metaData->m_centerFrequency

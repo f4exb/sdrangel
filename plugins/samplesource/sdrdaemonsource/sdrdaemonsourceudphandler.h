@@ -43,7 +43,7 @@ public:
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
-    int getNbOriginalBlocks() const { return SDRdaemonSourceBuffer::m_nbOriginalBlocks; }
+    int getNbOriginalBlocks() const { return SDRDaemonNbOrginalBlocks; }
     bool isStreaming() const { return m_masterTimerConnected; }
     int getSampleRate() const { return m_samplerate; }
     int getCenterFrequency() const { return m_centerFrequency * 1000; }

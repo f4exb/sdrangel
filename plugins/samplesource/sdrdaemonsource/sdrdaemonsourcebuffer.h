@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include "cm256.h"
 #include "util/movingaverage.h"
+#include "channel/sdrdaemondatablock.h"
 
 
 #define SDRDAEMONSOURCE_UDPSIZE 512               // UDP payload size
@@ -31,54 +32,6 @@
 class SDRdaemonSourceBuffer
 {
 public:
-#pragma pack(push, 1)
-    struct MetaDataFEC
-    {
-        uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
-        uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-        uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample
-        uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample
-        uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
-        uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
-        uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
-        uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
-        uint32_t m_crc32;             //!< 24 CRC32 of the above
-
-        bool operator==(const MetaDataFEC& rhs)
-        {
-            return (memcmp((const char *) this, (const char *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
-        }
-
-        void init()
-        {
-            memset((char *) this, 0, sizeof(MetaDataFEC));
-            m_sampleBits = 16; // assume 16 bits samples to start with
-            m_sampleBytes = 2;
-        }
-    };
-
-    struct Header
-    {
-        uint16_t frameIndex;
-        uint8_t  blockIndex;
-        uint8_t  filler;
-        uint32_t filler2;
-    };
-
-    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDAEMONSOURCE_NBORIGINALBLOCKS - 1) * (SDRDAEMONSOURCE_UDPSIZE - sizeof(Header));
-
-    struct ProtectedBlock
-    {
-        uint8_t buf[SDRDAEMONSOURCE_UDPSIZE - sizeof(Header)];
-    };
-
-    struct SuperBlock
-    {
-        Header         header;
-        ProtectedBlock protectedBlock;
-    };
-#pragma pack(pop)
-
 	SDRdaemonSourceBuffer();
 	~SDRdaemonSourceBuffer();
 
@@ -88,7 +41,7 @@ public:
 	uint8_t *readData(int32_t length);            //!< Read data from buffer
 
 	// meta data
-	const MetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
+	const SDRDaemonMetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
 
 	// samples timestamp
 	uint32_t getTVOutSec() const { return m_tvOut_sec; }
@@ -152,8 +105,7 @@ public:
         }
     }
 
-    static const int m_udpPayloadSize = SDRDAEMONSOURCE_UDPSIZE;
-    static const int m_nbOriginalBlocks = SDRDAEMONSOURCE_NBORIGINALBLOCKS;
+    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDaemonNbOrginalBlocks - 1) * SDRDaemonNbBytesPerBlock;
 
 private:
     static const int nbDecoderSlots = SDRDAEMONSOURCE_NBDECODERSLOTS;
@@ -161,24 +113,24 @@ private:
 #pragma pack(push, 1)
     struct BufferFrame
     {
-        ProtectedBlock  m_blocks[m_nbOriginalBlocks - 1];
+        SDRDaemonProtectedBlock  m_blocks[SDRDaemonNbOrginalBlocks - 1];
     };
 #pragma pack(pop)
 
     struct DecoderSlot
     {
-        ProtectedBlock       m_blockZero;                                 //!< First block of a frame. Has meta data.
-        ProtectedBlock       m_originalBlocks[m_nbOriginalBlocks];        //!< Original blocks retrieved directly or by later FEC
-        ProtectedBlock       m_recoveryBlocks[m_nbOriginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
-        CM256::cm256_block   m_cm256DescriptorBlocks[m_nbOriginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
-        int                  m_blockCount;         //!< number of blocks received for this frame
-        int                  m_originalCount;      //!< number of original blocks received
-        int                  m_recoveryCount;      //!< number of recovery blocks received
-        bool                 m_decoded;            //!< true if decoded
-        bool                 m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
+        SDRDaemonProtectedBlock m_blockZero;                                       //!< First block of a frame. Has meta data.
+        SDRDaemonProtectedBlock m_originalBlocks[SDRDaemonNbOrginalBlocks];        //!< Original blocks retrieved directly or by later FEC
+        SDRDaemonProtectedBlock m_recoveryBlocks[SDRDaemonNbOrginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
+        CM256::cm256_block      m_cm256DescriptorBlocks[SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
+        int                     m_blockCount;         //!< number of blocks received for this frame
+        int                     m_originalCount;      //!< number of original blocks received
+        int                     m_recoveryCount;      //!< number of recovery blocks received
+        bool                    m_decoded;            //!< true if decoded
+        bool                    m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
     };
 
-    MetaDataFEC          m_currentMeta;          //!< Stored current meta data
+    SDRDaemonMetaDataFEC m_currentMeta;          //!< Stored current meta data
     CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
@@ -213,7 +165,7 @@ private:
     CM256    m_cm256;         //!< CM256 library
     bool     m_cm256_OK;      //!< CM256 library initialized OK
 
-    inline ProtectedBlock* storeOriginalBlock(int slotIndex, int blockIndex, const ProtectedBlock& protectedBlock)
+    inline SDRDaemonProtectedBlock* storeOriginalBlock(int slotIndex, int blockIndex, const SDRDaemonProtectedBlock& protectedBlock)
     {
         if (blockIndex == 0) {
             // m_decoderSlots[slotIndex].m_originalBlocks[0] = protectedBlock;
@@ -228,7 +180,7 @@ private:
         }
     }
 
-    inline ProtectedBlock& getOriginalBlock(int slotIndex, int blockIndex)
+    inline SDRDaemonProtectedBlock& getOriginalBlock(int slotIndex, int blockIndex)
     {
         if (blockIndex == 0) {
             // return m_decoderSlots[slotIndex].m_originalBlocks[0];
@@ -239,17 +191,17 @@ private:
         }
     }
 
-    inline MetaDataFEC *getMetaData(int slotIndex)
+    inline SDRDaemonMetaDataFEC *getMetaData(int slotIndex)
     {
         // return (MetaDataFEC *) &m_decoderSlots[slotIndex].m_originalBlocks[0];
-        return (MetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
+        return (SDRDaemonMetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
     }
 
     inline void resetOriginalBlocks(int slotIndex)
     {
         // memset((void *) m_decoderSlots[slotIndex].m_originalBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
-        memset((void *) &m_decoderSlots[slotIndex].m_blockZero, 0, sizeof(ProtectedBlock));
-        memset((void *) m_frames[slotIndex].m_blocks, 0, (m_nbOriginalBlocks - 1) * sizeof(ProtectedBlock));
+        memset((void *) &m_decoderSlots[slotIndex].m_blockZero, 0, sizeof(SDRDaemonProtectedBlock));
+        memset((void *) m_frames[slotIndex].m_blocks, 0, (SDRDaemonNbOrginalBlocks - 1) * sizeof(SDRDaemonProtectedBlock));
     }
 
     void initDecodeAllSlots();
@@ -258,7 +210,7 @@ private:
     void checkSlotData(int slotIndex);
     void initDecodeSlot(int slotIndex);
 
-    static void printMeta(const QString& header, MetaDataFEC *metaData);
+    static void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
 };
 
 
