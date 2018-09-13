@@ -46,7 +46,6 @@ DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_sourceThread(0),
     m_running(false),
-    m_dataReadQueue(SDR_TX_SAMP_SZ <= 16 ? 4 : 8),
     m_nbCorrectableErrors(0),
     m_nbUncorrectableErrors(0)
 {
@@ -72,7 +71,7 @@ DaemonSource::~DaemonSource()
 
 void DaemonSource::pull(Sample& sample)
 {
-    m_dataReadQueue.readSample(sample);
+    m_dataReadQueue.readSample(sample, true); // true is scale for Tx
 }
 
 void DaemonSource::pullAudio(int nbSamples __attribute__((unused)))

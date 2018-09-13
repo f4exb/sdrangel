@@ -25,12 +25,12 @@
 
 const uint32_t SDRDaemonDataReadQueue::MinimumMaxSize = 10;
 
-SDRDaemonDataReadQueue::SDRDaemonDataReadQueue(uint32_t sampleSize) :
-        m_sampleSize(sampleSize),
+SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_dataBlock(0),
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
         m_sampleIndex(0),
+        m_sampleCount(0),
         m_full(false)
 {}
 
@@ -86,7 +86,7 @@ void SDRDaemonDataReadQueue::setSize(uint32_t size)
     }
 }
 
-void SDRDaemonDataReadQueue::readSample(Sample& s)
+void SDRDaemonDataReadQueue::readSample(Sample& s, bool scaleForTx)
 {
     // depletion/repletion state
     if (m_dataBlock == 0)
@@ -96,7 +96,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
             qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", length());
             m_blockIndex = 1;
             m_dataBlock = m_dataReadQueue.takeFirst();
-            convertDataToSample(s, m_blockIndex, m_sampleIndex);
+            convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
             m_sampleIndex++;
             m_sampleCount++;
         }
@@ -108,11 +108,12 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
         return;
     }
 
-    uint32_t samplesPerBlock = SDRDaemonNbBytesPerBlock / m_sampleSize;
+    int sampleSize = m_dataBlock->m_superBlocks[m_blockIndex].m_header.m_sampleBytes * 2;
+    uint32_t samplesPerBlock = SDRDaemonNbBytesPerBlock / sampleSize;
 
     if (m_sampleIndex < samplesPerBlock)
     {
-        convertDataToSample(s, m_blockIndex, m_sampleIndex);
+        convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
         m_sampleIndex++;
         m_sampleCount++;
     }
@@ -123,7 +124,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
 
         if (m_blockIndex < SDRDaemonNbOrginalBlocks)
         {
-            convertDataToSample(s, m_blockIndex, m_sampleIndex);
+            convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
             m_sampleIndex++;
             m_sampleCount++;
         }
@@ -144,7 +145,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s)
                 //qDebug("SDRDaemonDataReadQueue::readSample: pop new block: queue size: %u", length());
                 m_blockIndex = 1;
                 m_dataBlock = m_dataReadQueue.takeFirst();
-                convertDataToSample(s, m_blockIndex, m_sampleIndex);
+                convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
                 m_sampleIndex++;
                 m_sampleCount++;
             }
