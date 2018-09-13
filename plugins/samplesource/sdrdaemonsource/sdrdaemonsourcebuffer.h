@@ -37,7 +37,6 @@ public:
 
 	// R/W operations
 	void writeData(char *array); //!< Write data into buffer.
-    void writeData0(char *array, uint32_t length); //!< Write data into buffer.
 	uint8_t *readData(int32_t length);            //!< Read data from buffer
 
 	// meta data

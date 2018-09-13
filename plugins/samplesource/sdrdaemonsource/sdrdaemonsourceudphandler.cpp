@@ -195,7 +195,7 @@ void SDRdaemonSourceUDPHandler::processData()
         change = true;
     }
 
-    if (change && (m_samplerate != 0) && (m_centerFrequency != 0))
+    if (change && (m_samplerate != 0))
     {
         qDebug("SDRdaemonSourceUDPHandler::processData: m_samplerate: %u m_centerFrequency: %u kHz", m_samplerate, m_centerFrequency);
 
