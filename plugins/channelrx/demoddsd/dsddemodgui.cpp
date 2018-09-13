@@ -432,6 +432,7 @@ void DSDDemodGUI::displaySettings()
     ui->tdmaStereoSplit->setChecked(m_settings.m_tdmaStereo);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->symbolPLLLock->setChecked(m_settings.m_pllLock);
+    ui->highPassFilter->setChecked(m_settings.m_highPassFilter);
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
 
