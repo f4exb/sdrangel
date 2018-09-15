@@ -16,19 +16,21 @@ The main motivations are:
   - Rx channels:
     - AM demodulator
     - BFM (Broadcast FM) demodulator
+    - Daemon sink
     - DSD (Digital Vouice) demodulator
     - NFM (Narrowband FM) demodulator
     - SSB demodulator
     - WFM (Wideband FM) demodulator
-    - UDP source
+    - UDP sink
 
   - Tx channels:
     - AM modulator
     - ATV modulator
+    - Daemon source
     - NFM (Narrowband FM) modulator
     - SSB modulator
     - WFM (Wideband FM) modulator
-    - UDP sink
+    - UDP source
     
   - Sample sources:
     - Airspy

@@ -8,6 +8,8 @@ Forward Error Correction with a Cauchy MDS block erasure codec is used to preven
 
 Please note that there is no provision for handling out of sync UDP blocks. It is assumed that frames and block numbers always increase with possible blocks missing. Such out of sync situation has never been encountered in practice.
 
+The distant SDRangel instance that sends the data stream is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
+
 <h2>Build</h2>
 
 The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
@@ -41,7 +43,7 @@ Stream I/Q sample rate in kS/s
 
 <h3>2: Auto correction options and stream status</h3>
 
-![SDR Daemon source input AC and stream1 GUI](../../../doc/img/SDRdaemonSource_plugin_02.png)
+![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_02.png)
 
 <h4>2.1: Auto correction options</h4>
 
@@ -76,19 +78,21 @@ There are two gauges separated by a dot in the center. Ideally these gauges shou
   
 The system tries to compensate read / write unbalance however at start or when a large stream disruption has occurred a delay of a few tens of seconds is necessary before read / write reaches equilibrium.
 
-<h3>4: Forward Error Correction setting and status</h3>
+<h3>4: Data stream status</h3>
 
-![SDR Daemon source input FEC GUI](../../../doc/img/SDRdaemonSource_plugin_04.png)
+![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_04.png)
 
-<h4>4.1: Desired number of FEC blocks per frame</h4>
+<h4>4.1: Sample size</h4>
 
-This is the number of FEC blocks per frame set by the user. A frame consists of 128 data blocks (1 meta data block followed by 127 I/Q data blocks) and a variable number of FEC blocks used to protect the UDP transmission with a Cauchy MDS block erasure correction.
-
-Using the Cauchy MDS block erasure correction ensures that if at least the number of data blocks (128) is received per complete frame then all lost blocks in any position can be restored. For example if 8 FEC blocks are used then 136 blocks are transmitted per frame. If only 130 blocks (128 or greater) are received then data can be recovered. If only 127 blocks (or less) are received then none of the lost blocks can be recovered.
+This is the size in bits of a I or Q sample sent in the stream by the distant server. 
 
 <h4>4.2: Total number of frames and number of FEC blocks</h4>
 
 This is the total number of frames and number of FEC blocks separated by a slash '/' as sent in the meta data block thus acknowledged by the distant server. When you set the number of FEC blocks with (4.1) the effect may not be immediate and this information can be used to monitor when it gets effectively set in the distant server.
+
+A frame consists of 128 data blocks (1 meta data block followed by 127 I/Q data blocks) and a variable number of FEC blocks used to protect the UDP transmission with a Cauchy MDS block erasure correction.
+
+Using the Cauchy MDS block erasure correction ensures that if at least the number of data blocks (128) is received per complete frame then all lost blocks in any position can be restored. For example if 8 FEC blocks are used then 136 blocks are transmitted per frame. If only 130 blocks (128 or greater) are received then data can be recovered. If only 127 blocks (or less) are received then none of the lost blocks can be recovered.
 
 <h4>4.3: Stream status</h4>
 
@@ -124,68 +128,46 @@ This counter counts the unrecoverable error conditions found (i.e. 4.4 between 1
 
 This HH:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
 
-<h3>5: Network parameters</h3>
+<h3>5: Distant server API address and port</h3>
 
-![SDR Daemon status3 GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
+![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
 
-<h4>5.1: Local interface IP address</h4>
+<h4>5.1: API connection indicator</h4>
 
-Address of the network interface on the local (your) machine to which the SDRdaemon Rx server sends samples to.
+The "API" label is lit in green when the connection is successful
 
-<h4>5.2: Local data port</h4>
+<h4>5.2: API IP address</h4>
 
-UDP port on the local (your) machine to which the SDRdaemon Rx server sends samples to.
+IP address of the distant SDRangel instance REST API
 
-<h4>5.3 Distant configuration port</h4>
+<h4>5.3: API port</h4>
 
-TCP port on the distant machine hosting the SDRdaemon Rx instance to send control messages to. The IP address of the host where the SDRdaemon instance runs is guessed from the address sending the data blocks hence the distant address does not need to be specified.
+Port of the distant SDRangel instance REST API
 
 <h4>5.4: Validation button</h4>
 
-When the return key is hit within the address (5.1), data port (5.2) or configuration port (5.3) boxes the changes are effective immediately. You can also use this button to set again these values.
+When the return key is hit within the address (5.2) or port (5.3) the changes are effective immediately. You can also use this button to set again these values. Clicking on this button will send a request to the API to get the distant SDRangel instance information that is displayed in the API message box (8) 
 
-<h3>6: Desired center frequency</h3>
+<h3>6: Local data address and port</h3>
 
-This is the center frequency sent to the distant device. This becomes reflected in the main frequency dial (1.1) only when it gets acknowledged by the distant server and this frequency is sent back in the frames meta data.
+![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_06.png)
 
-Use the wheels to adjust the frequency. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 0 Hz and the maximum value is 9.9 GHz. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+<h4>6.1: Data IP address</h4>
 
-<h3>7: Delay between UDP blocks transmission</h3>
+IP address of the local network interface the distant SDRangel instance sends the data to
 
-This sets the minimum delay between transmission of an UDP block (send datagram) and the next. This allows throttling of the UDP transmission that is otherwise uncontrolled and causes network congestion.
+<h4>6.2: Data port</h4>
 
-The value is a percentage of the nominal time it takes to process a block of samples corresponding to one UDP block (512 bytes). This is calculated as follows:
+Local port the distant SDRangel instance sends the data to
 
-  - Sample rate on the network: _SR_
-  - Delay percentage: _d_
-  - Number of FEC blocks: _F_
-  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 8 bytes header (1 sample for 24 bit and 2 samples for 16 bit) thus there are 126 (16 bit) or 63 (24 bit) samples remaining effectively.
-  
-Formula (16 bit): ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)   
-Formula (24 bit): ((127 &#x2715; 63 &#x2715; _d_) / _SR_) / (128 + _F_) thus half the above  
+<h4>6.3: Validation button</h4>
 
-<h3>8: Desired distant device sample rate</h3>
+When the return key is hit within the address (5.2) or port (5.3) the changes are effective immediately. You can also use this button to set again these values. 
 
-This is the device sample rate sent to the distant device. It will be divided in the distant server by the decimation factor set with (9) to give the actual sample rate over the network. This becomes effective and displayed in (1.4) only when it gets acknowledged by the distant server and this sample rate is sent back in the frames meta data.
+<h3>7: Status message</h3>
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 32 kS/s and the maximum value is 9.9 MS/s. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+The API status is displayed in this box. It shows "API OK" when the connection is successful and reply is OK
 
-<h3>9: Desired distant decimation factor</h3>
+<h3>8: API information</h3>
 
-This is the decimation factor to be set in the distant server downsampler. The hardware device sample rate is divided by this factor before the I/Q blocks are sent over the network. The actual network sample rate becomes effective and displayed in (1.4) only when it gets acknowledged by the distant server and this sample rate is sent back in the frames meta data.
-
-<h3>10: Center frequency position</h3>
-
-The center frequency in the passband will be set either:
-
-  - below the local oscillator (NCO) or infradyne. Actually -1/4th the bandwidth.
-  - above the local oscillator (NCO) or supradyne. Actually +1/4th the bandwidth.
-  - centered on the local oscillator or zero IF.
-  
-<h4>11: Other parameters hardware specific</h4>
-
-These are the parameters that are specific to the hardware attached to the distant SDRdaemon instance. You have to know which device is attached to send the proper parameters. Please refer to the SDRdaemon documentation or its line help to get information on these parameters. 
-
-<h4>12: Send data to the distant SDRdaemon Rx instance</h4>
-
-When any of the parameters change they get immediately transmitted to the distant server over the TCP link. You can however use this button to send again the complete configuration. This is handy if for some reason you are unsure of the parameters set in the distant server.
+This is the information returned by the API and is the distance SDRangel instance information if transaction is successful
