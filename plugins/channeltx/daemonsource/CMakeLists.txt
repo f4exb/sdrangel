@@ -2,6 +2,15 @@ project(daemonsource)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+if (HAS_SSSE3)
+    message(STATUS "DaemonSource: use SSSE3 SIMD" )
+elseif (HAS_NEON)
+    message(STATUS "DaemonSource: use Neon SIMD" )
+else()
+    message(STATUS "DaemonSource: Unsupported architecture")
+    return()
+endif()
+
 set(daemonsource_SOURCES
 	daemonsource.cpp
 	daemonsourcethread.cpp

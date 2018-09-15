@@ -2,6 +2,15 @@ project(daemonsink)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+if (HAS_SSSE3)
+    message(STATUS "DaemonSink: use SSSE3 SIMD" )
+elseif (HAS_NEON)
+    message(STATUS "DaemonSink: use Neon SIMD" )
+else()
+    message(STATUS "DaemonSink: Unsupported architecture")
+    return()
+endif()
+
 set(daemonsink_SOURCES
 	daemonsink.cpp
 	daemonsinkgui.cpp
