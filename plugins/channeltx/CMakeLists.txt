@@ -15,3 +15,8 @@ find_package(OpenCV)
 if (OpenCV_FOUND)
     add_subdirectory(modatv)
 endif()
+
+if (BUILD_DEBIAN)
+    add_subdirectory(daemonsource)
+endif (BUILD_DEBIAN)
+

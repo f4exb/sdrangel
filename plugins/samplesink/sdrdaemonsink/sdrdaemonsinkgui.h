@@ -137,7 +137,6 @@ private:
 
 private slots:
     void handleInputMessages();
-    void on_centerFrequency_changed(quint64 value);
     void on_sampleRate_changed(quint64 value);
     void on_txDelay_valueChanged(int value);
     void on_nbFECBlocks_valueChanged(int value);
