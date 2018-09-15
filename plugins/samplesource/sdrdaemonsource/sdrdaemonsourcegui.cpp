@@ -320,6 +320,10 @@ void SDRdaemonSourceGui::on_apiApplyButton_clicked(bool checked __attribute__((u
     }
 
     sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
 }
 
 void SDRdaemonSourceGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
