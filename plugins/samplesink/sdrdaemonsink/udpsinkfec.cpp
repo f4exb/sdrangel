@@ -100,7 +100,6 @@ void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)
 
 void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunkSize)
 {
-    //qDebug("UDPSinkFEC::write(: %u samples", sampleChunkSize);
     const SampleVector::iterator end = begin + sampleChunkSize;
     SampleVector::iterator it = begin;
 
@@ -186,10 +185,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                 int nbBlocksFEC = m_nbBlocksFEC;
                 int txDelay = m_txDelay;
 
-                //qDebug("UDPSinkFEC::write: push frame to worker: %u", m_frameCount);
                 m_udpWorker->pushTxFrame(m_txBlocks[m_txBlocksIndex], nbBlocksFEC, txDelay, m_frameCount);
-                //m_txThread = new std::thread(transmitUDP, this, m_txBlocks[m_txBlocksIndex], m_frameCount, nbBlocksFEC, txDelay, m_cm256Valid);
-                //transmitUDP(this, m_txBlocks[m_txBlocksIndex], m_frameCount, m_nbBlocksFEC, m_txDelay, m_cm256Valid);
 
                 m_txBlocksIndex = (m_txBlocksIndex + 1) % 4;
                 m_txBlockIndex = 0;
@@ -282,8 +278,6 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
-//        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame without FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
-
         for (unsigned int i = 0; i < UDPSinkFEC::m_nbOriginalBlocks; i++)
         {
             m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
@@ -328,8 +322,6 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
 
         // Transmit all blocks
 
-//        qDebug("UDPSinkFECWorker::encodeAndTransmit: transmit frame with FEC to %s:%d", m_remoteAddress.toStdString().c_str(), m_remotePort);
-
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
         {
 #ifdef SDRDAEMON_PUNCTURE
@@ -337,22 +329,8 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
                 continue;
             }
 #endif
-//            std::cerr << "UDPSinkFEC::transmitUDP:"
-//                  << " i: " << i
-//                  << " frameIndex: " << (int) m_txBlocks[i].header.frameIndex
-//                  << " blockIndex: " << (int) m_txBlocks[i].header.blockIndex
-//                  << " i.q:";
-//
-//            for (int j = 0; j < 10; j++)
-//            {
-//                std::cerr << " " << (int) m_txBlocks[i].protectedBlock.m_samples[j].m_real
-//                        << "." << (int) m_txBlocks[i].protectedBlock.m_samples[j].m_imag;
-//            }
-//
-//            std::cerr << std::endl;
 
             m_socket.SendDataGram((const void *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
-            //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
             usleep(txDelay);
         }
     }

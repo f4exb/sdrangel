@@ -43,52 +43,6 @@ class UDPSinkFEC : public QObject
 public:
     static const uint32_t m_udpSize = 512;          //!< Size of UDP block in number of bytes
     static const uint32_t m_nbOriginalBlocks = 128; //!< Number of original blocks in a protected block sequence
-//#pragma pack(push, 1)
-//    struct MetaDataFEC
-//    {
-//        uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
-//        uint32_t m_sampleRate;        //!<  8 sample rate in Hz
-//        uint8_t  m_sampleBytes;       //!<  9 MSB(4): indicators, LSB(4) number of bytes per sample
-//        uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample
-//        uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
-//        uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
-//        uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
-//        uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
-//        uint32_t m_crc32;             //!< 24 CRC32 of the above
-//
-//        bool operator==(const MetaDataFEC& rhs)
-//        {
-//            return (memcmp((const char *) this, (const char *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
-//        }
-//
-//        void init()
-//        {
-//            memset((char *) this, 0, sizeof(MetaDataFEC));
-//            m_nbFECBlocks = -1;
-//        }
-//    };
-//
-//    struct Header
-//    {
-//        uint16_t frameIndex;
-//        uint8_t  blockIndex;
-//        uint8_t  filler;
-//        uint32_t filler2;
-//    };
-//
-//    static const int bytesPerBlock = m_udpSize - sizeof(Header);
-//
-//    struct ProtectedBlock
-//    {
-//        uint8_t m_buf[bytesPerBlock];
-//    };
-//
-//    struct SuperBlock
-//    {
-//        Header         header;
-//        ProtectedBlock protectedBlock;
-//    };
-//#pragma pack(pop)
 
     /**
      * Construct UDP sink

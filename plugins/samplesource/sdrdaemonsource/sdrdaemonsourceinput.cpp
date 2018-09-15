@@ -224,11 +224,8 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-//    if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
-//    {
-        m_SDRdaemonUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
-        m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
-//    }
+    m_SDRdaemonUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
+    m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
 
     mutexLocker.unlock();
     m_settings = settings;
