@@ -2,13 +2,15 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples over tbe network from a SDRdaemon receiver server using UDP connection. SDRdaemon refers to the SDRdaemon utility `sdrdaemonrx`found in [this](https://github.com/f4exb/sdrdaemon) Github repository.
+This input sample source plugin gets its samples over tbe network from a SDRangel instance's Daemon channel sink using UDP connection.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
 Please note that there is no provision for handling out of sync UDP blocks. It is assumed that frames and block numbers always increase with possible blocks missing. Such out of sync situation has never been encountered in practice.
 
 The distant SDRangel instance that sends the data stream is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
+
+A sample size conversion takes place if the stream sample size sent by the distant instance and the Rx sample size of the local instance do not match (i.e. 16 to 24 bits or 24 to 16 bits). Best performace is obtained when both instances use the same sample size.
 
 <h2>Build</h2>
 
