@@ -69,7 +69,6 @@ private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	bool m_running;
-	uint8_t m_sampleBytes;
 
     CM256 m_cm256;
     CM256 *m_cm256p;
