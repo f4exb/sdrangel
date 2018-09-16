@@ -16,6 +16,7 @@ copy httpserver\%1\httpserver.dll %2
 copy qrtplib\%1\qrtplib.dll %2
 copy swagger\%1\swagger.dll %2
 copy logging\%1\logging.dll %2
+copy cm256cc\%1\cm256cc.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
