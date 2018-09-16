@@ -38,7 +38,6 @@ mkdir %2\plugins\channeltx
 mkdir %2\plugins\samplesource
 mkdir %2\plugins\samplesink
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
-REM copy plugins\channelrx\chanalyzerng\%1\chanalyzerng.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodatv\%1\demodatv.dll %2\plugins\channelrx
 copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
@@ -47,14 +46,13 @@ copy plugins\channelrx\demodlora\%1\demodlora.dll %2\plugins\channelrx
 copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrx
 copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
-REM copy plugins\channelrx\tcpsrc\%1\tcpsrc.dll %2\plugins\channelrx
-REM copy plugins\channelrx\udpsrc\%1\udpsrc.dll %2\plugins\channelrx
+copy plugins\channelrx\udpsink\%1\udpsink.dll %2\plugins\channelrx
 copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
 REM copy plugins\channeltx\modatv\%1\modatv.dll %2\plugins\channeltx
 copy plugins\channeltx\modnfm\%1\modnfm.dll %2\plugins\channeltx
 copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
-REM copy plugins\channeltx\udpsink\%1\udpsink.dll %2\plugins\channeltx
+copy plugins\channeltx\udpsource\%1\udpsource.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\testsource\%1\inputtestsource.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
@@ -64,6 +62,7 @@ copy plugins\samplesource\airspyhf\%1\inputairspyhf.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
+copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink

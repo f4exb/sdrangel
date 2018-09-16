@@ -11,11 +11,12 @@ QT += core gui widgets multimedia network opengl
 
 TARGET = outputsdrdaemonsink
 
-CONFIG(MINGW32):LIBCM256CCSRC = "D:\softs\cm256cc"
-CONFIG(MINGW64):LIBCM256CCSRC = "D:\softs\cm256cc"
+CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
+CONFIG(MINGW64):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(macx):LIBCM256CCSRC = "../../../../deps/cm256cc"
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
@@ -33,8 +34,8 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
 SOURCES += sdrdaemonsinkthread.cpp\
