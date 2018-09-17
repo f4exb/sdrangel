@@ -16,7 +16,7 @@ copy httpserver\%1\httpserver.dll %2
 copy qrtplib\%1\qrtplib.dll %2
 copy swagger\%1\swagger.dll %2
 copy logging\%1\logging.dll %2
-copy cm256cc\%1\cm256cc.dll %2
+REM copy cm256cc\%1\cm256cc.dll %2
 copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
@@ -63,9 +63,10 @@ copy plugins\samplesource\airspyhf\%1\inputairspyhf.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
-copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
+REM copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
 copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
+REM copy plugins\samplesink\sdrdaemonsink\%1\outputsdrdaemonsink.dll %2\plugins\samplesink

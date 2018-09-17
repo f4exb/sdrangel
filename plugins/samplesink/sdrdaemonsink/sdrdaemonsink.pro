@@ -34,21 +34,25 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-CONFIG(MINGW32):INCLUDEPATH += "C:\boost_1_66_0"
-CONFIG(MINGW64):INCLUDEPATH += "C:\boost_1_66_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
 SOURCES += sdrdaemonsinkthread.cpp\
 sdrdaemonsinkgui.cpp\
 sdrdaemonsinkoutput.cpp\
 sdrdaemonsinksettings.cpp\
-sdrdaemonsinkplugin.cpp
+sdrdaemonsinkplugin.cpp\
+udpsinkfec.cpp\
+udpsinkfecworker.cpp
 
 HEADERS += sdrdaemonsinkthread.h\
 sdrdaemonsinkgui.h\
 sdrdaemonsinkoutput.h\
 sdrdaemonsinksettings.h\
-sdrdaemonsinkplugin.h
+sdrdaemonsinkplugin.h\
+udpsinkfec.h\
+udpsinkfecworker.h
 
 FORMS += sdrdaemonsinkgui.ui
 
