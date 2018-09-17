@@ -474,14 +474,15 @@ void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
 
 void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
 {
-    if (!m_sdrDaemonSinkThread) {
-        return;
-    }
-
     if (jsonObject.contains("DaemonSourceReport"))
     {
         QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
         m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
+
+        if (!m_sdrDaemonSinkThread) {
+            return;
+        }
+
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 10 : queueSize;
         int queueLength = report["queueLength"].toInt();

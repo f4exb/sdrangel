@@ -10,6 +10,8 @@ The distant SDRangel instance to which the data stream is sent is controlled via
 
 The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the distant Daemon source channel plugin to match the Rx sample size of the distant instance. Best performace is obtained when both instances use the same sample size. 
 
+It is present only in Linux binary releases.
+
 <h2>Build</h2>
 
 The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.

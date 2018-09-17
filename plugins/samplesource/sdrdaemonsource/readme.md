@@ -12,6 +12,8 @@ The distant SDRangel instance that sends the data stream is controlled via its R
 
 A sample size conversion takes place if the stream sample size sent by the distant instance and the Rx sample size of the local instance do not match (i.e. 16 to 24 bits or 24 to 16 bits). Best performace is obtained when both instances use the same sample size.
 
+It is present only in Linux binary releases.
+
 <h2>Build</h2>
 
 The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
