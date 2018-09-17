@@ -18,7 +18,7 @@ set(sdrdaemonsink_SOURCES
 	${PLUGIN_PREFIX}/sdrdaemonsinksettings.cpp
 	${PLUGIN_PREFIX}/sdrdaemonsinkthread.cpp
     ${PLUGIN_PREFIX}/udpsinkfec.cpp
-    ${PLUGIN_PREFIX}/UDPSocket.cpp
+    ${PLUGIN_PREFIX}/udpsinkfecworker.cpp
 )
 
 set(sdrdaemonsink_HEADERS
@@ -27,7 +27,7 @@ set(sdrdaemonsink_HEADERS
 	${PLUGIN_PREFIX}/sdrdaemonsinksettings.h
 	${PLUGIN_PREFIX}/sdrdaemonsinkthread.h
     ${PLUGIN_PREFIX}/udpsinkfec.h
-    ${PLUGIN_PREFIX}/UDPSocket.h
+    ${PLUGIN_PREFIX}/udpsinkfecworker.h
 )
 
 if (BUILD_DEBIAN)
