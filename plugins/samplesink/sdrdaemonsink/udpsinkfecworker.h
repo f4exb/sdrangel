@@ -20,6 +20,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QHostAddress>
 
 #include "cm256.h"
 
@@ -28,6 +29,8 @@
 #include "channel/sdrdaemondatablock.h"
 
 #include "UDPSocket.h"
+
+class QUdpSocket;
 
 class UDPSinkFECWorker : public QThread
 {
@@ -138,8 +141,10 @@ private:
     CM256 m_cm256;                       //!< CM256 library object
     bool m_cm256Valid;                   //!< true if CM256 library is initialized correctly
     UDPSocket    m_socket;
+    QUdpSocket   *m_udpSocket;
     QString      m_remoteAddress;
     uint16_t     m_remotePort;
+    QHostAddress m_remoteHostAddress;
 };
 
 #endif /* PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_ */

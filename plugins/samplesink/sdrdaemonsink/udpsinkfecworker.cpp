@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QUdpSocket>
+
 #include "udpsinkfecworker.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgUDPFECEncodeAndSend, Message)
@@ -25,7 +27,7 @@ UDPSinkFECWorker::UDPSinkFECWorker() :
         m_remotePort(9090)
 {
     m_cm256Valid = m_cm256.isInitialized();
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::DirectConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 UDPSinkFECWorker::~UDPSinkFECWorker()
@@ -42,6 +44,7 @@ void UDPSinkFECWorker::startWork()
 {
     qDebug("UDPSinkFECWorker::startWork");
     m_startWaitMutex.lock();
+    m_udpSocket = new QUdpSocket(this);
     start();
     while(!m_running)
         m_startWaiter.wait(&m_startWaitMutex, 100);
@@ -51,6 +54,8 @@ void UDPSinkFECWorker::startWork()
 void UDPSinkFECWorker::stopWork()
 {
     qDebug("UDPSinkFECWorker::stopWork");
+    delete m_udpSocket;
+    m_udpSocket = 0;
     m_running = false;
     wait();
 }
@@ -102,6 +107,7 @@ void UDPSinkFECWorker::handleInputMessages()
             MsgConfigureRemoteAddress *addressMsg = (MsgConfigureRemoteAddress *) message;
             m_remoteAddress = addressMsg->getAddress();
             m_remotePort = addressMsg->getPort();
+            m_remoteHostAddress.setAddress(addressMsg->getAddress());
         }
         else if (MsgStartStop::match(*message))
         {
@@ -129,8 +135,8 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
     {
         for (unsigned int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
         {
-            m_socket.SendDataGram((const void *) &txBlockx[i], (int) SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
-            //m_udpSocket->writeDatagram((const char *) &txBlockx[i], (int) UDPSinkFEC::m_udpSize, m_remoteAddress, m_remotePort);
+            //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
+            m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
             usleep(txDelay);
         }
     }
@@ -179,7 +185,8 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
             }
 #endif
 
-            m_socket.SendDataGram((const void *) &txBlockx[i], (int) SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
+            //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
+            m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
             usleep(txDelay);
         }
     }
