@@ -19,7 +19,6 @@ set(sdrdaemonsink_SOURCES
 	sdrdaemonsinkthread.cpp
     udpsinkfec.cpp
     udpsinkfecworker.cpp
-    UDPSocket.cpp
 )
 
 set(sdrdaemonsink_HEADERS
@@ -30,7 +29,6 @@ set(sdrdaemonsink_HEADERS
 	sdrdaemonsinkthread.h
     udpsinkfec.h
     udpsinkfecworker.h
-    UDPSocket.h
 )
 
 set(sdrdaemonsink_FORMS

@@ -28,8 +28,6 @@
 #include "util/message.h"
 #include "channel/sdrdaemondatablock.h"
 
-#include "UDPSocket.h"
-
 class QUdpSocket;
 
 class UDPSinkFECWorker : public QThread
@@ -140,7 +138,6 @@ private:
     bool m_running;
     CM256 m_cm256;                       //!< CM256 library object
     bool m_cm256Valid;                   //!< true if CM256 library is initialized correctly
-    UDPSocket    m_socket;
     QUdpSocket   *m_udpSocket;
     QString      m_remoteAddress;
     uint16_t     m_remotePort;

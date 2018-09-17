@@ -26,7 +26,7 @@ void SDRdaemonSinkSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
-    m_txDelay = 0.5;
+    m_txDelay = 0.35;
     m_nbFECBlocks = 0;
     m_apiAddress = "127.0.0.1";
     m_apiPort = 9091;

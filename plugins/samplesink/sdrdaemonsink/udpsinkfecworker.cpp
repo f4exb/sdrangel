@@ -24,6 +24,7 @@ MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgStartStop, Message)
 
 UDPSinkFECWorker::UDPSinkFECWorker() :
         m_running(false),
+        m_udpSocket(0),
         m_remotePort(9090)
 {
     m_cm256Valid = m_cm256.isInitialized();
@@ -133,11 +134,14 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
-        for (unsigned int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+        if (m_udpSocket)
         {
-            //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
-            m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
-            usleep(txDelay);
+            for (unsigned int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+            {
+                //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
+                m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
+                usleep(txDelay);
+            }
         }
     }
     else
@@ -176,18 +180,19 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
         }
 
         // Transmit all blocks
-
-        for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
+        if (m_udpSocket)
         {
-#ifdef SDRDAEMON_PUNCTURE
-            if (i == SDRDAEMON_PUNCTURE) {
-                continue;
-            }
-#endif
+            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
+            {
+    #ifdef SDRDAEMON_PUNCTURE
+                if (i == SDRDAEMON_PUNCTURE) {
+                    continue;
+                }
+    #endif
 
-            //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
-            m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
-            usleep(txDelay);
+                m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
+                usleep(txDelay);
+            }
         }
     }
 }
