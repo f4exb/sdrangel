@@ -34,33 +34,39 @@ UDPSinkFEC::UDPSinkFEC() :
     m_txBlockIndex(0),
     m_txBlocksIndex(0),
     m_frameCount(0),
-    m_sampleIndex(0)
+    m_sampleIndex(0),
+    m_udpWorker(0),
+    m_remoteAddress("127.0.0.1"),
+    m_remotePort(9090)
 {
     memset((char *) m_txBlocks, 0, 4*256*sizeof(SDRDaemonSuperBlock));
     memset((char *) &m_superBlock, 0, sizeof(SDRDaemonSuperBlock));
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];
-    m_udpThread = new QThread();
-    m_udpWorker = new UDPSinkFECWorker();
-
-    m_udpWorker->moveToThread(m_udpThread);
-
-    connect(m_udpThread, SIGNAL(started()), m_udpWorker, SLOT(process()));
-    connect(m_udpWorker, SIGNAL(finished()), m_udpThread, SLOT(quit()));
-
-    m_udpThread->start();
 }
 
 UDPSinkFEC::~UDPSinkFEC()
 {
-    m_udpWorker->stop();
-    m_udpThread->wait();
-
     delete[] m_buf;
     delete[] m_bufMeta;
-    delete m_udpWorker;
-    delete m_udpThread;
+}
+
+void UDPSinkFEC::start()
+{
+    m_udpWorker = new UDPSinkFECWorker();
+    m_udpWorker->setRemoteAddress(m_remoteAddress, m_remotePort);
+    m_udpWorker->startStop(true);
+}
+
+void UDPSinkFEC::stop()
+{
+    if (m_udpWorker)
+    {
+        m_udpWorker->startStop(false);
+        m_udpWorker->deleteLater();
+        m_udpWorker = 0;
+    }
 }
 
 void UDPSinkFEC::setTxDelay(float txDelayRatio)
@@ -93,7 +99,12 @@ void UDPSinkFEC::setSampleRate(uint32_t sampleRate)
 void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)
 {
     qDebug() << "UDPSinkFEC::setRemoteAddress: address: " << address << " port: " << port;
-    m_udpWorker->setRemoteAddress(address, port);
+    m_remoteAddress = address;
+    m_remotePort = port;
+
+    if (m_udpWorker) {
+        m_udpWorker->setRemoteAddress(m_remoteAddress, m_remotePort);
+    }
 }
 
 void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunkSize)
@@ -183,7 +194,9 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                 int nbBlocksFEC = m_nbBlocksFEC;
                 int txDelay = m_txDelay;
 
-                m_udpWorker->pushTxFrame(m_txBlocks[m_txBlocksIndex], nbBlocksFEC, txDelay, m_frameCount);
+                if (m_udpWorker) {
+                    m_udpWorker->pushTxFrame(m_txBlocks[m_txBlocksIndex], nbBlocksFEC, txDelay, m_frameCount);
+                }
 
                 m_txBlocksIndex = (m_txBlocksIndex + 1) % 4;
                 m_txBlockIndex = 0;

@@ -23,7 +23,6 @@
 #include <QObject>
 #include <QHostAddress>
 #include <QString>
-#include <QThread>
 
 #include "dsp/dsptypes.h"
 #include "util/CRC64.h"
@@ -45,6 +44,9 @@ public:
 
     /** Destroy UDP sink */
     ~UDPSinkFEC();
+
+    void start();
+    void stop();
 
     /**
      * Write IQ samples
@@ -95,8 +97,9 @@ private:
     uint16_t m_frameCount;                  //!< transmission frame count
     int m_sampleIndex;                      //!< Current sample index in protected block data
 
-    QThread *m_udpThread;
     UDPSinkFECWorker *m_udpWorker;
+    QString m_remoteAddress;
+    uint16_t m_remotePort;
 };
 
 #endif /* PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFEC_H_ */

@@ -48,6 +48,7 @@ SDRdaemonSinkThread::~SDRdaemonSinkThread()
 void SDRdaemonSinkThread::startWork()
 {
 	qDebug() << "SDRdaemonSinkThread::startWork: ";
+	m_udpSinkFEC.start();
     m_maxThrottlems = 0;
     m_startWaitMutex.lock();
     m_elapsedTimer.start();
@@ -62,6 +63,7 @@ void SDRdaemonSinkThread::stopWork()
 	qDebug() << "SDRdaemonSinkThread::stopWork";
 	m_running = false;
 	wait();
+	m_udpSinkFEC.stop();
 }
 
 void SDRdaemonSinkThread::setSamplerate(int samplerate)

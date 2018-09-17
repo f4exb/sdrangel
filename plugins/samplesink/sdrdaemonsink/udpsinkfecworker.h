@@ -17,7 +17,9 @@
 #ifndef PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_
 #define PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_
 
-#include <QObject>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include "cm256.h"
 
@@ -27,7 +29,7 @@
 
 #include "UDPSocket.h"
 
-class UDPSinkFECWorker : public QObject
+class UDPSinkFECWorker : public QThread
 {
     Q_OBJECT
 public:
@@ -89,31 +91,50 @@ public:
         {}
     };
 
+    class MsgStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStop* create(bool startStop) {
+            return new MsgStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     UDPSinkFECWorker();
     ~UDPSinkFECWorker();
+
+    void startStop(bool start);
 
     void pushTxFrame(SDRDaemonSuperBlock *txBlocks,
         uint32_t nbBlocksFEC,
         uint32_t txDelay,
         uint16_t frameIndex);
     void setRemoteAddress(const QString& address, uint16_t port);
-    void stop();
 
     MessageQueue m_inputMessageQueue;    //!< Queue for asynchronous inbound communication
-
-signals:
-    void finished();
-
-public slots:
-    void process();
 
 private slots:
     void handleInputMessages();
 
 private:
+    void startWork();
+    void stopWork();
+    void run();
     void encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay);
 
-    volatile bool m_running;
+    QMutex m_startWaitMutex;
+    QWaitCondition m_startWaiter;
+    bool m_running;
     CM256 m_cm256;                       //!< CM256 library object
     bool m_cm256Valid;                   //!< true if CM256 library is initialized correctly
     UDPSocket    m_socket;

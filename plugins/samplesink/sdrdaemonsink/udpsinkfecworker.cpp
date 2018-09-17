@@ -18,6 +18,7 @@
 
 MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgUDPFECEncodeAndSend, Message)
 MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgConfigureRemoteAddress, Message)
+MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgStartStop, Message)
 
 UDPSinkFECWorker::UDPSinkFECWorker() :
         m_running(false),
@@ -29,8 +30,45 @@ UDPSinkFECWorker::UDPSinkFECWorker() :
 
 UDPSinkFECWorker::~UDPSinkFECWorker()
 {
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_inputMessageQueue.clear();
+}
+
+void UDPSinkFECWorker::startStop(bool start)
+{
+    MsgStartStop *msg = MsgStartStop::create(start);
+    m_inputMessageQueue.push(msg);
+}
+
+void UDPSinkFECWorker::startWork()
+{
+    qDebug("UDPSinkFECWorker::startWork");
+    m_startWaitMutex.lock();
+    start();
+    while(!m_running)
+        m_startWaiter.wait(&m_startWaitMutex, 100);
+    m_startWaitMutex.unlock();
+}
+
+void UDPSinkFECWorker::stopWork()
+{
+    qDebug("UDPSinkFECWorker::stopWork");
+    m_running = false;
+    wait();
+}
+
+void UDPSinkFECWorker::run()
+{
+    m_running  = true;
+    m_startWaiter.wakeAll();
+
+    qDebug("UDPSinkFECWorker::process: started");
+
+    while (m_running)
+    {
+        sleep(1);
+    }
+    m_running = false;
+
+    qDebug("UDPSinkFECWorker::process: stopped");
 }
 
 void UDPSinkFECWorker::pushTxFrame(SDRDaemonSuperBlock *txBlocks,
@@ -45,26 +83,6 @@ void UDPSinkFECWorker::pushTxFrame(SDRDaemonSuperBlock *txBlocks,
 void UDPSinkFECWorker::setRemoteAddress(const QString& address, uint16_t port)
 {
     m_inputMessageQueue.push(MsgConfigureRemoteAddress::create(address, port));
-}
-
-void UDPSinkFECWorker::process()
-{
-    m_running  = true;
-
-    qDebug("UDPSinkFECWorker::process: started");
-
-    while (m_running)
-    {
-        usleep(250000);
-    }
-
-    qDebug("UDPSinkFECWorker::process: stopped");
-    emit finished();
-}
-
-void UDPSinkFECWorker::stop()
-{
-    m_running = false;
 }
 
 void UDPSinkFECWorker::handleInputMessages()
@@ -84,6 +102,17 @@ void UDPSinkFECWorker::handleInputMessages()
             MsgConfigureRemoteAddress *addressMsg = (MsgConfigureRemoteAddress *) message;
             m_remoteAddress = addressMsg->getAddress();
             m_remotePort = addressMsg->getPort();
+        }
+        else if (MsgStartStop::match(*message))
+        {
+            MsgStartStop* notif = (MsgStartStop*) message;
+            qDebug("DaemonSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+
+            if (notif->getStartStop()) {
+                startWork();
+            } else {
+                stopWork();
+            }
         }
 
         delete message;
