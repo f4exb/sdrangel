@@ -112,7 +112,7 @@ bool BladerfInput::openDevice()
     }
 
     // TODO: adjust USB transfer data according to sample rate
-    if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_RX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
+    if ((res = bladerf_sync_config(m_dev, BLADERF_RX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
         qCritical("BladerfInput::start: bladerf_sync_config with return code %d", res);
         return false;
@@ -136,7 +136,9 @@ bool BladerfInput::start()
 {
 //	QMutexLocker mutexLocker(&m_mutex);
 
-    if (!m_dev) {
+    if (!m_dev)
+    {
+        qDebug("BladerfInput::start: no device handle");
         return false;
     }
 

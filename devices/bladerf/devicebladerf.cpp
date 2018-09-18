@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QtGlobal>
+
 #include <cstdio>
 #include <cstring>
 #include "devicebladerf.h"
@@ -24,7 +26,7 @@ bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
 
     if ((*dev = open_bladerf_from_serial(serial)) == 0)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf: could not open BladeRF\n");
+        qCritical("DeviceBladeRF::open_bladerf: could not open BladeRF");
         return false;
     }
 
@@ -32,13 +34,13 @@ bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
 
     if (fpga_loaded < 0)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf: failed to check FPGA state: %s\n",
-                  bladerf_strerror(fpga_loaded));
+        qCritical("DeviceBladeRF::open_bladerf: failed to check FPGA state: %s",
+                bladerf_strerror(fpga_loaded));
         return false;
     }
     else if (fpga_loaded == 0)
     {
-        fprintf(stderr, "BladerfOutput::start: the device's FPGA is not loaded.\n");
+        qCritical("BladerfOutput::start: the device's FPGA is not loaded.");
         return false;
     }
 
@@ -69,12 +71,12 @@ struct bladerf *DeviceBladeRF::open_bladerf_from_serial(const char *serial)
 
     if (status == BLADERF_ERR_NODEV)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf_from_serial: No devices available with serial=%s\n", serial);
+        qCritical("DeviceBladeRF::open_bladerf_from_serial: No devices available with serial %s", serial);
         return 0;
     }
     else if (status != 0)
     {
-        fprintf(stderr, "DeviceBladeRF::open_bladerf_from_serial: Failed to open device with serial=%s (%s)\n",
+        qCritical("DeviceBladeRF::open_bladerf_from_serial: Failed to open device with serial %s (%s)",
                 serial, bladerf_strerror(status));
         return 0;
     }

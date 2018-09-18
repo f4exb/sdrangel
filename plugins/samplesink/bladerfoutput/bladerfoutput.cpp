@@ -103,7 +103,7 @@ bool BladerfOutput::openDevice()
     }
 
     // TODO: adjust USB transfer data according to sample rate
-    if ((res = bladerf_sync_config(m_dev, BLADERF_MODULE_TX, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
+    if ((res = bladerf_sync_config(m_dev, BLADERF_TX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
         qCritical("BladerfOutput::start: bladerf_sync_config with return code %d", res);
         return false;

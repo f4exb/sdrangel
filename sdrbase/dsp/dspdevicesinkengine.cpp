@@ -362,7 +362,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	if(!m_deviceSampleSink->start())
 	{
-		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample source");
+		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample sink");
 	}
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
