@@ -1,4 +1,4 @@
-BladeRFInputSettings:
+BladeRF1InputSettings:
   description: BladeRF
   properties:
     centerFrequency:
@@ -31,7 +31,7 @@ BladeRFInputSettings:
     fileRecordName:
       type: string      
       
-BladeRFOutputSettings:
+BladeRF1OutputSettings:
   description: BladeRF
   properties:
     centerFrequency:

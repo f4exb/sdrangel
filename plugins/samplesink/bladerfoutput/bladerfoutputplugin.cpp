@@ -29,7 +29,7 @@
 #endif
 
 const PluginDescriptor BladerfOutputPlugin::m_pluginDescriptor = {
-	QString("BladeRF Output"),
+	QString("BladeRF1 Output"),
 	QString("4.2.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -37,8 +37,8 @@ const PluginDescriptor BladerfOutputPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString BladerfOutputPlugin::m_hardwareID = "BladeRF";
-const QString BladerfOutputPlugin::m_deviceTypeID = BLADERFOUTPUT_DEVICE_TYPE_ID;
+const QString BladerfOutputPlugin::m_hardwareID = "BladeRF1";
+const QString BladerfOutputPlugin::m_deviceTypeID = BLADERF1OUTPUT_DEVICE_TYPE_ID;
 
 BladerfOutputPlugin::BladerfOutputPlugin(QObject* parent) :
 	QObject(parent)

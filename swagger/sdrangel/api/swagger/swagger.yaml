@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.1.0"
+  version: "4.2.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1763,10 +1763,10 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
       airspyHFSettings:
         $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
-      bladeRFInputSettings:
-        $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFInputSettings"
-      bladeRFOutputSettings:
-        $ref: "http://localhost:8081/api/swagger/include/BladeRF.yaml#/BladeRFOutputSettings"
+      bladeRF1InputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+      bladeRF1OutputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
       fcdProSettings:
         $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
       fcdProPlusSettings:

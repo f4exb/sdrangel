@@ -24,12 +24,12 @@ class PluginAPI;
 class DeviceSourceAPI;
 class DeviceUISet;
 
-#define BLADERF_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf"
+#define BLADERF1INPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf1input"
 
 class BlderfInputPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID BLADERF_DEVICE_TYPE_ID)
+	Q_PLUGIN_METADATA(IID BLADERF1INPUT_DEVICE_TYPE_ID)
 
 public:
 	explicit BlderfInputPlugin(QObject* parent = NULL);

@@ -1798,14 +1798,14 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("bladeRFInputSettings") && jsonObject["bladeRFInputSettings"].isObject())
         {
             QJsonObject bladeRFInputSettingsJsonObject = jsonObject["bladeRFInputSettings"].toObject();
             deviceSettingsKeys = bladeRFInputSettingsJsonObject.keys();
-            deviceSettings.setBladeRfInputSettings(new SWGSDRangel::SWGBladeRFInputSettings());
-            deviceSettings.getBladeRfInputSettings()->fromJsonObject(bladeRFInputSettingsJsonObject);
+            deviceSettings.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
+            deviceSettings.getBladeRf1InputSettings()->fromJsonObject(bladeRFInputSettingsJsonObject);
             return true;
         }
         else
@@ -1813,14 +1813,14 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() != 0))
     {
         if (jsonObject.contains("bladeRFOutputSettings") && jsonObject["bladeRFOutputSettings"].isObject())
         {
             QJsonObject bladeRFOutputSettingsJsonObject = jsonObject["bladeRFOutputSettings"].toObject();
             deviceSettingsKeys = bladeRFOutputSettingsJsonObject.keys();
-            deviceSettings.setBladeRfOutputSettings(new SWGSDRangel::SWGBladeRFOutputSettings());
-            deviceSettings.getBladeRfOutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
+            deviceSettings.setBladeRf1OutputSettings(new SWGSDRangel::SWGBladeRF1OutputSettings());
+            deviceSettings.getBladeRf1OutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
             return true;
         }
         else
@@ -2363,8 +2363,8 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setDeviceHwType(0);
     deviceSettings.setAirspySettings(0);
     deviceSettings.setAirspyHfSettings(0);
-    deviceSettings.setBladeRfInputSettings(0);
-    deviceSettings.setBladeRfOutputSettings(0);
+    deviceSettings.setBladeRf1InputSettings(0);
+    deviceSettings.setBladeRf1OutputSettings(0);
     deviceSettings.setFcdProPlusSettings(0);
     deviceSettings.setFcdProSettings(0);
     deviceSettings.setFileSourceSettings(0);

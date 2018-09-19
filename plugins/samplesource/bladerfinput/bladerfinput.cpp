@@ -611,32 +611,32 @@ int BladerfInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
-    response.setBladeRfInputSettings(new SWGSDRangel::SWGBladeRFInputSettings());
-    response.getBladeRfInputSettings()->init();
+    response.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
+    response.getBladeRf1InputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
 
 void BladerfInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFInputSettings& settings)
 {
-    response.getBladeRfInputSettings()->setCenterFrequency(settings.m_centerFrequency);
-    response.getBladeRfInputSettings()->setDevSampleRate(settings.m_devSampleRate);
-    response.getBladeRfInputSettings()->setLnaGain(settings.m_lnaGain);
-    response.getBladeRfInputSettings()->setVga1(settings.m_vga1);
-    response.getBladeRfInputSettings()->setVga2(settings.m_vga2);
-    response.getBladeRfInputSettings()->setBandwidth(settings.m_bandwidth);
-    response.getBladeRfInputSettings()->setLog2Decim(settings.m_log2Decim);
-    response.getBladeRfInputSettings()->setFcPos((int) settings.m_fcPos);
-    response.getBladeRfInputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
-    response.getBladeRfInputSettings()->setXb200Path((int) settings.m_xb200Path);
-    response.getBladeRfInputSettings()->setXb200Filter((int) settings.m_xb200Filter);
-    response.getBladeRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    response.getBladeRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getBladeRf1InputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getBladeRf1InputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getBladeRf1InputSettings()->setLnaGain(settings.m_lnaGain);
+    response.getBladeRf1InputSettings()->setVga1(settings.m_vga1);
+    response.getBladeRf1InputSettings()->setVga2(settings.m_vga2);
+    response.getBladeRf1InputSettings()->setBandwidth(settings.m_bandwidth);
+    response.getBladeRf1InputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getBladeRf1InputSettings()->setFcPos((int) settings.m_fcPos);
+    response.getBladeRf1InputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
+    response.getBladeRf1InputSettings()->setXb200Path((int) settings.m_xb200Path);
+    response.getBladeRf1InputSettings()->setXb200Filter((int) settings.m_xb200Filter);
+    response.getBladeRf1InputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getBladeRf1InputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
 
-    if (response.getBladeRfInputSettings()->getFileRecordName()) {
-        *response.getBladeRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    if (response.getBladeRf1InputSettings()->getFileRecordName()) {
+        *response.getBladeRf1InputSettings()->getFileRecordName() = settings.m_fileRecordName;
     } else {
-        response.getBladeRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+        response.getBladeRf1InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 }
 
@@ -649,46 +649,46 @@ int BladerfInput::webapiSettingsPutPatch(
     BladeRFInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
-        settings.m_centerFrequency = response.getBladeRfInputSettings()->getCenterFrequency();
+        settings.m_centerFrequency = response.getBladeRf1InputSettings()->getCenterFrequency();
     }
     if (deviceSettingsKeys.contains("devSampleRate")) {
-        settings.m_devSampleRate = response.getBladeRfInputSettings()->getDevSampleRate();
+        settings.m_devSampleRate = response.getBladeRf1InputSettings()->getDevSampleRate();
     }
     if (deviceSettingsKeys.contains("lnaGain")) {
-        settings.m_lnaGain = response.getBladeRfInputSettings()->getLnaGain();
+        settings.m_lnaGain = response.getBladeRf1InputSettings()->getLnaGain();
     }
     if (deviceSettingsKeys.contains("vga1")) {
-        settings.m_vga1 = response.getBladeRfInputSettings()->getVga1();
+        settings.m_vga1 = response.getBladeRf1InputSettings()->getVga1();
     }
     if (deviceSettingsKeys.contains("vga2")) {
-        settings.m_vga2 = response.getBladeRfInputSettings()->getVga2();
+        settings.m_vga2 = response.getBladeRf1InputSettings()->getVga2();
     }
     if (deviceSettingsKeys.contains("bandwidth")) {
-        settings.m_bandwidth = response.getBladeRfInputSettings()->getBandwidth();
+        settings.m_bandwidth = response.getBladeRf1InputSettings()->getBandwidth();
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
-        settings.m_log2Decim = response.getBladeRfInputSettings()->getLog2Decim();
+        settings.m_log2Decim = response.getBladeRf1InputSettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("fcPos")) {
-        settings.m_fcPos = static_cast<BladeRFInputSettings::fcPos_t>(response.getBladeRfInputSettings()->getFcPos());
+        settings.m_fcPos = static_cast<BladeRFInputSettings::fcPos_t>(response.getBladeRf1InputSettings()->getFcPos());
     }
     if (deviceSettingsKeys.contains("xb200")) {
-        settings.m_xb200 = response.getBladeRfInputSettings()->getXb200() == 0 ? 0 : 1;
+        settings.m_xb200 = response.getBladeRf1InputSettings()->getXb200() == 0 ? 0 : 1;
     }
     if (deviceSettingsKeys.contains("xb200Path")) {
-        settings.m_xb200Path = static_cast<bladerf_xb200_path>(response.getBladeRfInputSettings()->getXb200Path());
+        settings.m_xb200Path = static_cast<bladerf_xb200_path>(response.getBladeRf1InputSettings()->getXb200Path());
     }
     if (deviceSettingsKeys.contains("xb200Filter")) {
-        settings.m_xb200Filter = static_cast<bladerf_xb200_filter>(response.getBladeRfInputSettings()->getXb200Filter());
+        settings.m_xb200Filter = static_cast<bladerf_xb200_filter>(response.getBladeRf1InputSettings()->getXb200Filter());
     }
     if (deviceSettingsKeys.contains("dcBlock")) {
-        settings.m_dcBlock = response.getBladeRfInputSettings()->getDcBlock() != 0;
+        settings.m_dcBlock = response.getBladeRf1InputSettings()->getDcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("iqCorrection")) {
-        settings.m_iqCorrection = response.getBladeRfInputSettings()->getIqCorrection() != 0;
+        settings.m_iqCorrection = response.getBladeRf1InputSettings()->getIqCorrection() != 0;
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getBladeRfInputSettings()->getFileRecordName();
+        settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
     }
 
     MsgConfigureBladerf *msg = MsgConfigureBladerf::create(settings, force);

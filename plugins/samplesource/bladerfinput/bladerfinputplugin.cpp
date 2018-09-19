@@ -29,7 +29,7 @@
 #endif
 
 const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
-	QString("BladeRF Input"),
+	QString("BladeRF1 Input"),
 	QString("4.2.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -37,8 +37,8 @@ const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString BlderfInputPlugin::m_hardwareID = "BladeRF";
-const QString BlderfInputPlugin::m_deviceTypeID = BLADERF_DEVICE_TYPE_ID;
+const QString BlderfInputPlugin::m_hardwareID = "BladeRF1";
+const QString BlderfInputPlugin::m_deviceTypeID = BLADERF1INPUT_DEVICE_TYPE_ID;
 
 BlderfInputPlugin::BlderfInputPlugin(QObject* parent) :
 	QObject(parent)

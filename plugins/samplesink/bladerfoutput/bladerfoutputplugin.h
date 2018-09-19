@@ -22,12 +22,12 @@
 
 class PluginAPI;
 
-#define BLADERFOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerfoutput"
+#define BLADERF1OUTPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf1output"
 
 class BladerfOutputPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID BLADERFOUTPUT_DEVICE_TYPE_ID)
+	Q_PLUGIN_METADATA(IID BLADERF1OUTPUT_DEVICE_TYPE_ID)
 
 public:
 	explicit BladerfOutputPlugin(QObject* parent = NULL);
